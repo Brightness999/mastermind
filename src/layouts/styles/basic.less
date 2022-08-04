@@ -1,0 +1,78 @@
+.basic-layout {
+  overflow: hidden;
+  &.fixed-header {
+    > .ant-layout-header {
+      box-shadow: 0 3px 3px rgba(0, 0, 0, 0.05);
+      z-index: 3;
+    }
+  }
+
+  > .ant-layout.ant-layout-has-sider { min-height: ~'calc(100vh - 60px)'; }
+  /* Application layout & layout settings */
+  &.full-layout {
+    // Fix all elements, classic management interface style, ie fixed head, sidebar, breadcrumbs
+    &.fixed.ant-layout,
+    &.fixed .full-layout.ant-layout {
+      bottom: 0;
+      left: 0;
+      position: absolute !important;
+      right: 0;
+      top: 0;
+
+      .ant-layout-sider > .ant-layout-sider-children {
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+    }
+    // Fixed head only
+    &:not(.fixed)&.fixed-header {
+      > .ant-layout-header {
+        left: 0;
+        position: fixed;
+        right: 0;
+        z-index: 200;
+      }
+
+      > .ant-layout {
+        overflow: auto;
+        padding-top: 60px;
+      }
+
+      .ant-layout.ant-layout-has-sider > .ant-layout,
+      .ant-layout.ant-layout-has-sider > .ant-layout-content { overflow-x: visible; }
+    }
+    // Only fix the breadcrumbs, you must first fix the head before it can take effect.
+    &.fixed-breadcrumbs {
+      > .ant-layout-header {
+        box-shadow: none;
+        z-index: 2;
+      }
+
+      > .ant-layout > .ant-layout-content > .ant-layout {
+        // > .ant-layout-content { overflow: auto; }
+
+        > .ant-layout-header {
+          box-shadow: 0 1px 15px rgba(0, 0, 0, 0.04), 0 1px 6px rgba(0, 0, 0, 0.04);
+          z-index: 2;
+        }
+      }
+    }
+    // Hide breadcrumbs
+    &.hided-breadcrumbs .topbar-content { display: none; }
+
+    &.hided-breadcrumbs {
+      .router-page,
+      .router-page > .ant-layout { min-height: ~'calc(100vh - 62px)'; }
+    }
+
+    .router-page,
+    .router-page > .ant-layout { 
+      min-height: ~'calc(100vh - 110px)';
+      overflow-y: scroll;
+      .ant-layout {
+        padding: 2rem 2rem;
+        background-color: #f8f8f8;
+      }
+    }
+  }
+}

@@ -1,0 +1,104 @@
+@import '../../../assets/styles/variables.less';
+// Right skin setting panel
+.skin-toolbox {
+  position: fixed;
+  right: 0;
+  top: 157px;
+  transition: right 0.3s;
+  user-select: none;
+  width: 230px;
+  z-index: 2;
+
+  &.skin-toolbox-close { right: -230px; }
+
+  .panel {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    border-top: 0;
+    margin-bottom: 20px;
+    position: relative;
+
+    .panel-head {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      font-size: 14px;
+      height: 39px;
+      line-height: 35px;
+      margin-right: 30px;
+      padding: 0 5px;
+      position: relative;
+      right: 44px;
+      width: 274px;
+
+      .panel-icon {
+        color: @primary-color;
+        font-size: 22px;
+        padding-left: 6px;
+        padding-right: 20px;
+
+        i {
+          transform: rotate(0deg);
+          transition: all 0.8s;
+        }
+      }
+
+      &:hover .panel-icon i { transform: rotate(-360deg); }
+
+      .panel-title {
+        color: #666;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 42px;
+        padding-left: 56px;
+      }
+    }
+
+    .panel-body {
+      font-size: 13px;
+
+      .ant-tabs-small .ant-tabs-tab { margin: 0; }
+
+      .ant-tabs-tabpane {
+        padding: 0 20px 20px;
+
+        .ant-checkbox-wrapper,
+        .ant-radio-wrapper {
+          display: block;
+          height: 30px;
+          line-height: 30px;
+        }
+
+        .ant-checkbox-wrapper { margin-left: 0; }
+
+        h4 {
+          color: #333;
+          font-size: 15px;
+          margin-bottom: 10px;
+        }
+
+        .ant-tag {
+          text-align: center;
+          width: 166px;
+        }
+      }
+    }
+
+    .panel-footer {
+      border-top: 1px solid #eee;
+      padding: 15px;
+
+      a {
+        background-color: @primary-color;
+        color: #fff;
+        display: block;
+        font-size: 13px;
+        padding: 9px 12px;
+        text-align: center;
+
+        &:hover { background-color: @primary-5; }
+      }
+    }
+  }
+}

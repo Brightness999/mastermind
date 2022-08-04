@@ -1,0 +1,76 @@
+@import '../../assets/styles/variables.less';
+
+.la-notification {
+  color: #fff;
+  font-size: 12px;
+  position: fixed;
+  right: 12px;
+  top: 12px;
+  z-index: 1009;
+  width: 300px;
+
+  .content {
+    background-color: transparent;
+    border-radius: 3px;
+    color: inherit;
+    font-size: 14px;
+    left: 0;
+    line-height: 150%;
+    opacity: 0;
+    padding: 15px 15px 15px 55px;
+    position: absolute;
+    right: 0;
+    text-decoration: none;
+    text-shadow: 0 0 3px rgba(1, 1, 1, 0.3);
+    transition: all 0.6s;
+    visibility: hidden;
+    box-shadow: 0 0 12px #999999;
+
+
+    .main-icon {
+      position: absolute;
+      top: 11px;
+      left: 11px;
+
+      svg {
+        width: 30px;
+        height: 30px;
+      }
+    }
+  }
+  &.active .content.warn {background-color: @warning-color;}
+  &.active .content.error {background-color: @error-color; }
+  &.active .content.default {background-color: @primary-color;}
+  &.active .content.success {background-color: @success-color;}
+  &.active .content.dark {background-color: @gray;}
+
+  &.active .content {opacity: 1;
+    visibility: visible;}
+
+  &.active {
+    .close {
+      cursor: pointer;
+      display: inline-block;
+      height: 14px;
+      overflow: hidden;
+      position: absolute;
+      right: 14px;
+      top: 12px;
+      width: 14px;
+
+      &::before,
+      &::after {
+        background: #fff;
+        content: '';
+        height: 1px;
+        left: 0;
+        margin-top: -1px;
+        position: absolute;
+        top: 50%;
+        width: 100%;
+      }
+      &::before { transform: rotate(45deg); }
+      &::after { transform: rotate(-45deg); }
+    }
+  }
+}

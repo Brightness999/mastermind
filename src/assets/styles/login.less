@@ -1,0 +1,124 @@
+@import '../../assets/styles/variables.less';
+.border-bottom {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.row-form {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  justify-items: center;
+  justify-self: center;
+  // flex-direction: column;
+  margin: auto;
+
+  &.row-login {
+    height: 100vh;
+  }
+}
+
+.col-form {
+  width: 400px;
+  background-color: @white;
+  padding: 30px 20px;
+  padding-bottom: 25px;
+  margin: 0 25px;
+  border-radius: 3px;
+  position: relative;
+
+  .div-form-title {
+    color: @black87;
+  }
+
+  .div-title {
+    padding: 1.5rem 0;
+
+    .signIn-text {
+      font-size: 22px;
+      font-weight: 600;
+      color: @bluelight550;
+      text-align: center;
+      margin-bottom: 0;
+      line-height: 1.2;
+    }
+  }
+
+  .ant-form-item {
+    margin-bottom: 1rem;
+
+    &-control-input {
+      min-height: unset;
+
+      &-content { height: 45px;}
+
+      .ant-input {
+        font-size: 16px;
+        color: @black87;
+        border-color: @gray250;
+        height: 100%;
+       
+        &::placeholder {
+          color: @black06;
+        }
+      }
+
+      .ant-input-affix-wrapper {
+        padding: 0;
+        font-size: 16px;
+        height: 45px;
+
+        .ant-input {
+          border: 0;
+          color: @black87;
+          padding: 0 0 0 11px;
+          border-color: @gray250;
+        }
+        .ant-input-suffix { margin-right: 11px;}
+      }
+    }
+    input:-internal-autofill-selected {
+      background-color: red!important;
+    }
+  }
+
+  .ant-form-item-with-help .ant-form-item-explain {
+    margin: 5px 0 10px 0;
+  }
+
+  .ant-form label {
+    font-size: 14px;
+    font-weight: 500;
+    color: @gray300;
+  }
+
+  .ant-checkbox {
+    .ant-checkbox-inner {
+      border: 1px solid @gray300;
+    }
+    &-checked .ant-checkbox-inner {
+      background-color: @warning-color;
+      border-color: @warning-color;
+    }
+  }
+
+  .form-btn {
+    margin-top: 25px;
+  }
+
+  .div-new-user {
+    padding-top: 1rem;
+    font-size: 14px;
+    text-decoration: underline;
+    a { 
+      margin-right: 10px;
+      color: @primary-color-dark;
+      &:hover { color: @primary-color}
+    }
+  }
+}
+
+.col-login { box-shadow: 0px 2px 7px 0px rgba(204, 204, 204, 0.6); }

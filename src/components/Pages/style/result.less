@@ -1,0 +1,82 @@
+.result-fragment {
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+
+  .center-block {
+    margin: 70px auto;
+    max-width: 625px;
+
+    .result-header {
+      .title {
+        font-size: 24px;
+        font-weight: 600;
+        line-height: 1.1;
+        margin-top: 19px;
+
+        i {
+          background: #eee;
+          border: 1px solid #ddd;
+          border-radius: 50%;
+          font-size: 32px;
+          margin-right: 9px;
+          padding: 6px;
+          position: relative;
+          text-align: center;
+          width: 46px;
+        }
+
+        &.success i { color: @success-color; }
+
+        &.error i { color: @error-color; }
+
+        &.warning i { color: @warning-color; }
+
+        &.info i { color: @info-color; }
+      }
+
+      .extra {
+        color: #aaa;
+        padding-right: 10px;
+        text-align: right;
+      }
+
+      .description { margin-top: 10px; }
+    }
+
+    .result-body {
+      background-color: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 4px;
+      color: #999;
+      font-size: 15px;
+      line-height: 1.8;
+      margin: 20px 0;
+      padding: 25px;
+      position: relative;
+
+      .action-btns {
+        margin-top: 20px;
+        text-align: right;
+
+        > button,
+        > .ant-btn { margin-left: 8px; }
+      }
+    }
+
+    .result-footer {
+      color: #999;
+      font-size: 13px;
+      text-align: center;
+
+      a {
+        color: @link-color;
+        font-weight: 600;
+      }
+
+      a:hover { color: @primary-5; }
+    }
+  }
+}

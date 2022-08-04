@@ -1,0 +1,35 @@
+import React from 'react';
+import intl from 'react-intl-universal';
+
+import DataTable from '{{linkImport}}../../../components/DataTable';
+import Icon from '{{linkImport}}../../../components/Icon';
+import Button from '{{linkImport}}../../../components/Button';
+import messages from '../messages';
+
+export default (self) => [
+  {
+    title: intl.formatMessage(messages.operating),
+    name: 'deptName',
+    tableItem: {},
+    searchItem: {
+      group: 'abc'
+    },
+    formItem: {}
+  },
+  {
+    title: intl.formatMessage(messages.operating),
+    tableItem: {
+      width: 180,
+      render: (text, record) => (
+        <DataTable.Oper>
+          <Button tooltip="Modify" onClick={() => self.onUpdate(record)}>
+            <Icon type="edit" />
+          </Button>
+          <Button tooltip="Delete" onClick={() => self.onDelete(record)}>
+            <Icon type="trash" />
+          </Button>
+        </DataTable.Oper>
+      )
+    }
+  }
+];

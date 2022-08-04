@@ -1,0 +1,26 @@
+@import '../../../assets/styles/variables.less';
+// mask
+.basic-mask {
+  background: rgba(0, 0, 0, 0.6);
+  bottom: 0;
+  display: none;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 9998;
+
+  .basic-mask-close {
+    color: #bdbdbd;
+    cursor: pointer;
+    font-size: 3rem;
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    transition: color 0.3s;
+
+    &:hover { color: #ddd; }
+
+    &:active { color: #bdbdbd; }
+  }
+}

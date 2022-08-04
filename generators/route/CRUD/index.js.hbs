@@ -1,0 +1,10 @@
+import { dynamicWrapper, createRoute } from '{{linkImport}}../../utils/core';
+import { routerLinks } from "{{linkImport}}../constant";
+
+const routesConfig = app => ({
+  path: routerLinks['{{ properCase name }}'],
+  title: '{{ title }}',
+  component: dynamicWrapper(app, [import('./model')], () => import('./components'))
+});
+
+export default app => createRoute(app, routesConfig);
