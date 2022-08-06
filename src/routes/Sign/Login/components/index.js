@@ -36,14 +36,12 @@ export default class extends React.Component {
                       </div>
                       <div>
                       <Form 
-                        name="basic"
-                        initialValues={{ remember: true }}
-                    
+                        name="login"
                         onFinish={onFinish}
                         onFinishFailed={onFinishFailed}
                       >
                           <Form.Item
-                            name="username"
+                            name="email_username"
                             rules={[{ required: true, message: intl.formatMessage(messages.usernameMessage) }]}
                           >
                               <Input placeholder={intl.formatMessage(messages.emailOrUsername)}/>

@@ -48,6 +48,7 @@
     "react-document-title": "^2.0.3",
     "react-dom": "^17.0.1",
     "react-fast-compare": "^2.0.4",
+    "react-icons": "^4.4.0",
     "react-intl-universal": "^2.1.4",
     "reqwest": "^2.0.5"
   },

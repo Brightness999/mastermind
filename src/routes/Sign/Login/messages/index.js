@@ -33,4 +33,8 @@ export default {
     id: `${scope}.passwordMessage`,
     defaultMessage: 'Please enter your password.',
   },
+  pleaseEnter: {
+    id: `${scope}.pleaseEnter`,
+    defaultMessage: 'Please enter your',
+  },
 };
