@@ -91,7 +91,7 @@ export default ({
     defaultMessage: 'Tell us about yourself',
   },
   contactInformation: {
-    id: `${scope}.contactInfo`,
+    id: `${scope}.contactInformation`,
     defaultMessage: 'Contact information',
   },
   familyName: {
@@ -244,7 +244,7 @@ export default ({
   },
   to: {
     id: `${scope}.to`,
-    defaultMessage: '',
+    defaultMessage: 'to',
   },
   addTimeRange: {
     id: `${scope}.addTimeRange`,
@@ -258,10 +258,246 @@ export default ({
     id: `${scope}.progessInfo`,
     defaultMessage: 'Progess info',
   },
-  // : {
-  //   id: `${scope}.`,
-  //   defaultMessage: '',
-  // },
+  selectType: {
+    id: `${scope}.selectType`,
+    defaultMessage: 'Select account type',
+  },
+  back: {
+    id: `${scope}.back`,
+    defaultMessage: 'back',
+  },
+  reviewInfo: {
+    id: `${scope}.reviewInfo`,
+    defaultMessage: 'Review info',
+  },
+  reviewAccountInfo: {
+    id: `${scope}.reviewAccountInfo`,
+    defaultMessage: 'Review account information',
+  },
+  usernameEmail: {
+    id: `${scope}.usernameEmail`,
+    defaultMessage: 'Username & email',
+  },
+  parentsInfo: {
+    id: `${scope}.parentsInfo`,
+    defaultMessage: 'Parents info',
+  },
+  servicesRequested: {
+    id: `${scope}.servicesRequested`,
+    defaultMessage: 'Services requested',
+  },
+  legalName: {
+    id: `${scope}.legalName`,
+    defaultMessage: 'Legal name',
+  },
+  referredAs: {
+    id: `${scope}.referredAs`,
+    defaultMessage: 'Referred to as (optional)',
+  },
+  serviceAddress: {
+    id: `${scope}.serviceAddress`,
+    defaultMessage: 'Service address',
+  },
+  billingAddress: {
+    id: `${scope}.billingAddress`,
+    defaultMessage: 'Billing address',
+  },
+  cityConnections: {
+    id: `${scope}.cityConnections`,
+    defaultMessage: 'City connections',
+  },
+  licenseNumber: {
+    id: `${scope}.licenseNumber`,
+    defaultMessage: 'License number (optional)',
+  },
+  agency: {
+    id: `${scope}.agency`,
+    defaultMessage: 'Agency (optional)',
+  },
+  contactNumber: {
+    id: `${scope}.contactNumber`,
+    defaultMessage: 'Contact number',
+  },
+  type: {
+    id: `${scope}.type`,
+    defaultMessage: 'Type',
+  },
+  addNumber: {
+    id: `${scope}.addNumber`,
+    defaultMessage: 'Add number',
+  },
+  contactEmail: {
+    id: `${scope}.contactEmail`,
+    defaultMessage: 'Contact email',
+  },
+  addEmail: {
+    id: `${scope}.addEmail`,
+    defaultMessage: 'Add email',
+  },
+  professionalExperience: {
+    id: `${scope}.professionalExperience`,
+    defaultMessage: 'Professional experience',
+  },
+  profileInfo: {
+    id: `${scope}.profileInfo`,
+    defaultMessage: 'Profile Info',
+  },
+  servicesInfo: {
+    id: `${scope}.servicesInfo`,
+    defaultMessage: 'Services Info',
+  },
+  skillsets: {
+    id: `${scope}.skillsets`,
+    defaultMessage: 'Skillsets',
+  },
+  yearsExperience: {
+    id: `${scope}.yearsExperience`,
+    defaultMessage: 'Years experience',
+  },
+  serviceableSchools: {
+    id: `${scope}.serviceableSchools`,
+    defaultMessage: 'Serviceable schools',
+  },
+  academicLevel: {
+    id: `${scope}.academicLevel`,
+    defaultMessage: 'Academic level',
+  },
+  rate: {
+    id: `${scope}.rate`,
+    defaultMessage: 'Rate',
+  },
+  addLevel: {
+    id: `${scope}.addLevel`,
+    defaultMessage: 'Add level',
+  },
+  sameRateLevels: {
+    id: `${scope}.sameRateLevels`,
+    defaultMessage: 'Same rate for all levels',
+  },
+  separateEvaluation: {
+    id: `${scope}.separateEvaluation`,
+    defaultMessage: 'Separate evaluation rate',
+  },
+  homeVisits: {
+    id: `${scope}.homeVisits`,
+    defaultMessage: 'Home visits',
+  },
+  privateOffice: {
+    id: `${scope}.privateOffice`,
+    defaultMessage: 'Private office',
+  },
+  receiptsRequest: {
+    id: `${scope}.receiptsRequest`,
+    defaultMessage: 'Receipts provided for insurance upon request',
+  },
+  newClient: {
+    id: `${scope}.newClient`,
+    defaultMessage: 'New client screening',
+  },
+  screeningTime: {
+    id: `${scope}.screeningTime`,
+    defaultMessage: 'Screening time',
+  },
+  references: {
+    id: `${scope}.references`,
+    defaultMessage: 'References (optional)',
+  },
+  publicProfile: {
+    id: `${scope}.publicProfile`,
+    defaultMessage: 'Public profile',
+  },
+  autoSyncCalendar: {
+    id: `${scope}.autoSyncCalendar`,
+    defaultMessage: 'Auto sync calendar',
+  },
+  manualSchedule: {
+    id: `${scope}.manualSchedule`,
+    defaultMessage: 'Manual schedule',
+  },
+  location: {
+    id: `${scope}.location`,
+    defaultMessage: 'Location',
+  },
+  privateHMGHAgents: {
+    id: `${scope}.privateHMGHAgents`,
+    defaultMessage: 'Private for HMGH agents only',
+  },
+  addRange: {
+    id: `${scope}.addRange`,
+    defaultMessage: 'Add range',
+  },
+  cancellationWindow: {
+    id: `${scope}.cancellationWindow`,
+    defaultMessage: 'Cancellation window',
+  },
+  cancellationFee: {
+    id: `${scope}.cancellationFee`,
+    defaultMessage: 'Cancellation fee',
+  },
+  availabilityInfo: {
+    id: `${scope}.availabilityInfo`,
+    defaultMessage: 'Availability info',
+  },
+  servicesOffered: {
+    id: `${scope}.servicesOffered`,
+    defaultMessage: 'Services offered',
+  },
+  subsidyProgram: {
+    id: `${scope}.subsidyProgram`,
+    defaultMessage: 'Subsidy Program',
+  },
+  offeringVolunteer: {
+    id: `${scope}.offeringVolunteer`,
+    defaultMessage: 'I’m offering pro bono/volunteer sessions',
+  },
+  numberSessionsWeek: {
+    id: `${scope}.numberSessionsWeek`,
+    defaultMessage: 'Number of pro bono sessions per week',
+  },
+  provideSubsidizedCases: {
+    id: `${scope}.provideSubsidizedCases`,
+    defaultMessage: 'I’m willing to provide a reduced rate for subsidized cases',
+  },
+  reduced: {
+    id: `${scope}.reduced`,
+    defaultMessage: 'Reduced',
+  },
+  openPrivateSlots: {
+    id: `${scope}.openPrivateSlots`,
+    defaultMessage: 'I’m willing to open private slots for HMGH referrals',
+  },
+  selectDateTime: {
+    id: `${scope}.selectDateTime`,
+    defaultMessage: 'Select a Date & Time',
+  },
+  timesAvailable : {
+    id: `${scope}.timesAvailable`,
+    defaultMessage: 'times you\'re available',
+  },
+  level: {
+    id: `${scope}.level`,
+    defaultMessage: 'Level',
+  },
+  subsidy: {
+    id: `${scope}.subsidy`,
+    defaultMessage: 'Subsidy',
+  },
+  providerInfo: {
+    id: `${scope}.providerInfo`,
+    defaultMessage: 'Provider info',
+  },
+  ratesInfo: {
+    id: `${scope}.ratesInfo`,
+    defaultMessage: 'Rates info',
+  },
+  subsidyOptions: {
+    id: `${scope}.subsidyOptions`,
+    defaultMessage: 'Subsidy options',
+  },
+  confirm: {
+    id: `${scope}.confirm`,
+    defaultMessage: 'Confirm',
+  },
   // : {
   //   id: `${scope}.`,
   //   defaultMessage: '',

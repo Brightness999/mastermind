@@ -17,5 +17,12 @@ export default {
     id: `${scope}.determine`,
     defaultMessage: 'Determine',
   },
-
+  youAllSet: {
+    id: `${scope}.youAllSet`,
+    defaultMessage: 'You’re all set!',
+  },
+  home: {
+    id: `${scope}.home`,
+    defaultMessage: 'Home',
+  },
 };

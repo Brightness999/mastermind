@@ -1,36 +1,13 @@
-export const scope = 'routes.Dashboard';
+/*
+ * HomePage Messages
+ *
+ * This contains all the text for the HomePage component.
+ */
+export const scope = 'routes.dashboard';
 
-export default({
-  engineering: {
-    id: `${scope}.engineering`,
-    defaultMessage: 'Engineering road',
-  },
-  weChat: {
-    id: `${scope}.weChat`,
-    defaultMessage: 'WeChat',
-  },
-  dataPanel: {
-    id: `${scope}.dataPanel`,
-    defaultMessage: 'Data panel component',
-  },
-  salesDistribution: {
-    id: `${scope}.salesDistribution`,
-    defaultMessage: 'Sales distribution',
-  },
-  storeRanking: {
-    id: `${scope}.storeRanking`,
-    defaultMessage: 'Store sales ranking',
-  },
-  lineChart: {
-    id: `${scope}.lineChart`,
-    defaultMessage: 'Line chart',
-  },
-  pieChart: {
-    id: `${scope}.pieChart`,
-    defaultMessage: 'Pie chart',
-  },
-  histogram: {
-    id: `${scope}.histogram`,
-    defaultMessage: 'Histogram',
+export default ({
+  blankPage: {
+    id: `${scope}.blankPage`,
+    defaultMessage: 'Blank page',
   }
 });

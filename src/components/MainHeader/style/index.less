@@ -1,0 +1,63 @@
+@import '../../../assets/styles/variables.less';
+// Slidable layout component
+.component-mainheader {
+    padding: 10px 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    .div-account {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        .account-icon {
+            .ant-avatar {
+                background-color: @primary-color-dark;
+            }
+        }
+        .account-name {
+            margin-left: 20px;
+        }
+    }
+    .div-trans {
+        .trans-all {
+            margin: 0 3px;
+            &.ant-avatar {
+                font-size: 16px!important;
+                background-color: @primary-color-dark;
+            }
+        }
+        .trans-scroll {
+            width: 208px;
+            overflow-x: auto;
+            white-space: nowrap;
+            .trans-item {
+                margin: 0 3px;
+                &.ant-avatar {
+                    font-size: 14px!important;
+                    color: @primary-color-dark;
+                    background-color: @white;
+                    border: 1px solid @primary-color-dark;
+                }
+            }
+        }
+        
+        .trans-left,
+        .trans-right {
+            width: 35px;
+            height: 35px;
+            vertical-align: top;
+            color: @primary-color-dark;
+
+            &:hover,
+            &:focus,
+            &:active { color: @primary-color;}
+        }
+        .trans-new {
+            padding: 4px 5px;
+            margin: 0 3px;
+            border-radius: 4px;
+            background-color: @primary-color-dark;
+        }
+    }
+}

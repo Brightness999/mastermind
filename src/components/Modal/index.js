@@ -1,6 +1,4 @@
-import ModalForm from './ModalForm';
-import ModalTable from './ModalTable';
+import ModalCreateDone from './ModalCreateDone';
 export {
-  ModalForm,
-  ModalTable,
+  ModalCreateDone
 }

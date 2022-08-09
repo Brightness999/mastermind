@@ -9,13 +9,21 @@ import messagesLogin from '../../Login/messages';
 import './index.less';
 
 class CreateDefault extends Component {
-    onFinish = (values: any) => {
+    constructor(props){
+        super(props);
+        this.state = {
+        }
+    }
+    onFinish = (values) => {
         console.log('Success:', values);
-      };
+    };
     
-    onFinishFailed = (errorInfo: any) => {
+    onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
-      };
+    };
+    handleAccountTypeChange = (e) => { 
+       
+    }
     render() {
         return (
             <Row justify="center" className="row-form">
@@ -25,8 +33,6 @@ class CreateDefault extends Component {
                 </div>
                 <Form 
                     name="form_default"
-                    initialValues={{ remember: true }}
-                
                     onFinish={this.onFinish}
                     onFinishFailed={this.onFinishFailed}
                 >
@@ -68,8 +74,10 @@ class CreateDefault extends Component {
                     <p className='label-form'>{intl.formatMessage(messages.accountType)}</p>
                     <Form.Item
                         name="account_type"
+                        value={this.state.accountType}
+                        onChange={this.handleAccountTypeChange}
                     >
-                        <Select defaultValue='parent'>
+                        <Select placeholder={intl.formatMessage(messages.selectType)}>
                             <Select.Option value='parent'>{intl.formatMessage(messages.parent)}</Select.Option>
                             <Select.Option value='provider'>{intl.formatMessage(messages.provider)}</Select.Option>
                             <Select.Option value='school'>{intl.formatMessage(messages.school)}</Select.Option>

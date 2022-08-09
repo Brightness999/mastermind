@@ -2,19 +2,22 @@ import { createRoutes } from '../utils/core';
 import { routerLinks } from './constant';
 import BasicLayout from '../layouts/BasicLayout';
 import UserLayout from '../layouts/UserLayout';
-import ThemeLayout from '../layouts/ThemeLayout';
+import MainLayout from '../layouts/MainLayout';
 
 import NotFound from './Pages/404';
 import Page403 from './Pages/403';
 import Page500 from './Pages/500';
 
 
-import Dashboard from './Dashboard';
+// import Dashboard from './Dashboard2';
 import Blank from './Blank';
 import Login from './Sign/Login';
-import Register from './Register';
-import Home from './ThemeDemo/Home';
 import CreateAccount from './Sign/CreateAccount';
+import SubsidyRequest from './Sign/SubsidyRequest';
+import SubsidyReview from './Sign/SubsidyReview';
+import InfoSchool from './Sign/InfoSchool';
+import InfoAdmin from './Sign/InfoAdmin';
+import Dashboard from './Dashboard';
 
 const routesConfig = app => [
   
@@ -28,18 +31,19 @@ const routesConfig = app => [
   //     Page500(), 
   //     Dashboard(app), 
   //     Blank(app),
-  //     // 💬 generate admin to here
+      
   //   ]
   // },
-  // {
-  //   path: '/home',
-  //   title: 'System center',
-  //   component: ThemeLayout,
-  //   indexRoute: routerLinks['Home'],
-  //   childRoutes: [
-  //     Home(app),
-  //   ]
-  // },
+  {
+    path: '/account',
+    title: 'Dashboard',
+    component: MainLayout,
+    indexRoute: routerLinks['Dashboard'],
+    childRoutes: [
+      Dashboard(app),
+      // 💬 generate admin to here
+    ]
+  },
   {
     path: '/',
     title: 'Login',
@@ -47,8 +51,11 @@ const routesConfig = app => [
     component: UserLayout,
     childRoutes: [
       Login(app), 
-      Register(app), 
       CreateAccount(app),
+      SubsidyRequest(app),
+      InfoAdmin(app),
+      InfoSchool(app),
+      SubsidyReview(app),
       NotFound()]
   }
 ];
