@@ -1,0 +1,31 @@
+@import '../../assets/styles/variables.less';
+.main-layout {
+    &.ant-layout {
+        min-height: 100vh;
+        background-color: @primary-bg;
+        .ant-layout-header {
+          background: #fff;
+          height: auto;
+          line-height: 20px;
+          overflow: hidden;
+          padding: 0;
+          box-shadow: 0 2px 4px 0px @gray250;
+        }
+      
+        .ant-layout-content {
+          min-height: auto;
+          position: relative;
+          padding: 15px 20px;
+          height: 0;
+          overflow: auto;
+        }
+      
+        .ant-layout-footer {
+          background-color: @white;
+          padding: 20px;
+          text-align: center;
+          width: 100%;
+        }
+    }
+    
+}

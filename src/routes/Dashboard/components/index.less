@@ -1,4 +1,197 @@
 // Page style
 @import '../../../assets/styles/variables.less';
 .dashboard-page {
+    .div-content {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    .div-activity-feed {
+        width: 300px;
+        height: calc(100vh - 160px);
+        border-radius: 6px;
+        background-color: @white;
+        overflow: hidden;
+        .div-title-feed {
+            background-color: @primary-color;
+            padding: 10px 20px;
+        }
+        .div-list-feed {
+            height: 100%;
+            overflow: auto;
+            .item-feed {
+                padding: 10px;
+                &:not(:last-child) { border-bottom: 1px solid @gray250; }
+                &.done { background-color: @gray200; }
+                p {
+                    margin-bottom: 0;
+                    font-size: 12px;
+                }
+            }
+        }
+    }
+    
+    .div-calendar {
+        flex: 1;
+        margin: 0 20px;
+        background-color: @white;
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
+
+        .btn-appointment {
+            margin: auto 20px 20px auto;
+            text-align: right;
+            width: 120px; 
+            .ant-btn-primary {
+                font-size: 10px;
+                font-weight: 400;
+                border-radius: 2px;
+                height: auto;
+                padding: 2px 5px;
+                // background-color: @primary-color-dark;
+                span {
+                    white-space: normal;
+                    text-align: left;
+                    line-height: 14px;
+                }
+                svg {
+                    margin-right: 10px;
+                }
+            }
+            
+        }
+        
+    }
+
+    .div-multi-choice {
+        width: 300px;
+        border-radius: 6px;
+        .list-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            &:not(:last-child){
+                border-bottom: 1px solid @gray250;
+            }
+            &.padding-item {
+                padding: 5px 10px;
+            }
+            .ant-avatar { flex-shrink: 0; }
+            .div-service {
+                margin: 0 5px 0 10px;
+            }
+            .item-left {
+                padding: 5px 5px 5px 10px;
+                border-right: 1px solid @gray250;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                flex: 1;
+            }
+            .item-right {
+                padding: 5px 6px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        .ant-collapse {
+            background-color: transparent;
+            &-item {
+                background-color: @white;
+                margin-bottom: 6px;
+                border-radius: 6px;
+                box-shadow: 0 2px 4px 0 @gray250;
+
+                & > .ant-collapse-header .ant-collapse-header-text {
+                    font-weight: 500;
+                }
+                .ant-collapse-header {
+                    padding: 12px 40px 8px 16px;
+
+                    .ant-collapse-extra { margin-right: 6px;}
+                    .ant-collapse-expand-icon {
+                        color: @primary-color-dark;
+                        .ant-collapse-arrow {
+                            top: 12px;
+                            transform: unset;
+                        }
+                    }
+                }
+                .ant-collapse-content {
+                    max-height: 350px;
+                    overflow: auto;
+                    &-box {
+                        padding: 0;
+                    }
+                }
+                
+            }
+            .appointment-panel,
+            .evaluations-panel {
+                .ant-collapse-content {
+                    overflow: hidden;
+                    border-top: 0;
+                }
+            }
+        }
+        .ant-tabs {
+            &-small {
+                &  > .ant-tabs-nav .ant-tabs-tab {
+                    font-size: 12px;
+                }
+            }
+            .ant-tabs-nav-list {
+                width: 100%;
+                .ant-tabs-tab { 
+                    flex: 1;
+                    .ant-tabs-tab-btn { 
+                        text-align: center;
+                        width: 100%;
+                    }
+                }
+            }
+            &.ant-tabs-top > .ant-tabs-nav {
+                margin: 0;
+            }
+            &.ant-tabs-card.ant-tabs-top > .ant-tabs-nav {
+                .ant-tabs-tab + .ant-tabs-tab {
+                    margin-left: 0
+                }
+                .ant-tabs-tab { 
+                    padding: 4px 16px;
+                    background-color: @white;
+                    &:hover {
+                        background-color: @primary-color-dark;
+                        .ant-tabs-tab-btn { color: @white; }
+                    }
+                    &-active {
+                        background-color: @primary-color-dark;
+                        
+                        .ant-tabs-tab-btn { 
+                            color: @white;
+                            &:focus, 
+                            &:active, 
+                            &-remove:focus, 
+                            &-remove:active { color: @white; }
+                         }
+                    }
+                }
+               
+            }
+            &-tabpane {
+                overflow: auto;
+                max-height: 323px;
+            }
+        }
+    }
+    .btn-call {
+        text-align: right;
+        margin: 20px;
+        img {
+            height: 60px;
+            width: auto;
+        }
+    }
 }

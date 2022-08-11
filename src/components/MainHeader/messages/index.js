@@ -9,4 +9,8 @@ export default {
     id: `${scope}.new`,
     defaultMessage: 'new',
   },
+  search: {
+    id: `${scope}.search`,
+    defaultMessage: 'Search',
+  },
 };

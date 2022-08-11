@@ -81,6 +81,9 @@ body,
   font-weight: 400;
   font-size: 12px;
 }
+body {
+  overflow: hidden;
+}
 
 @media (min-width: 993px) {
   .height-full {
@@ -111,8 +114,10 @@ h1, h2, h3, h4, h5, h6 { font-weight: 500 !important; }
 .font-16 { font-size: 16px!important;}
 .font-15 { font-size: 15px!important;}
 .font-12 { font-size: 12px!important;}
+.font-11 { font-size: 11px!important;}
 .font-10 { font-size: 10px!important;}
 .font-09 { font-size: 9px!important;}
+.font-07 { font-size: 7px!important;}
 
 .font-500 { font-weight: 500!important;}
 .font-700 { font-weight: 700!important;}
@@ -242,6 +247,26 @@ h1, h2, h3, h4, h5, h6 { font-weight: 500 !important; }
   }
 }
 
+.ant-dropdown-menu {
+  background-color: transparent!important;
+  box-shadow: unset;
+  padding: 0;
+
+  .ant-dropdown-menu-item {
+    background-color: @gray700;
+    color: @white;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    font-size: 12px;    
+    text-align: center;
+    padding: 3px 12px;
+
+    &-active {
+      background-color: @gray900;
+    }
+  }
+} 
+
 .ant-select-arrow,
 .ant-cascader-picker-arrow,
 .ant-calendar-picker-clear,
@@ -321,28 +346,12 @@ ol {
 
 /* Rewrite antd default layout style */
 .ant-layout {
-  .ant-layout-header {
-    background: #fff;
-    height: auto;
-    line-height: 24px;
-    overflow: hidden;
-    padding: 0;
-  }
-
   .ant-layout-content {
     min-height: auto; // override antd min-height: 0;
     position: relative;
     // overflow: auto;
   }
-
-  .ant-layout-footer {
-  //   background-color: #fff;
-  //   padding: 10px;
-  //   text-align: center;
-    width: 100%;
-  }
 }
-
 // Layout in the routing page
 .page {
   &.ant-layout {
@@ -481,6 +490,9 @@ ol {
 .ml-10 {
   margin-left: 10px!important;
 }
+.ml-auto {
+  margin-left: auto!important;
+}
 .my-10 {
   margin-top: 10px!important;
   margin-bottom: 10px!important;
@@ -510,34 +522,8 @@ div.ant-typography,
 .ant-typography p {
   margin-bottom: 0;
 }
-.div-panel {
-  background-color: @white;
-  border-radius: .25rem;
-  margin-top: 1rem;
-  margin-bottom: 1.5rem;
-  &.col-big {
-    padding: 1.75rem;
-  }
-}
-.div-panel-col {
-  background-color: @white;
-  border-radius: .75rem;
-  box-shadow: 0 1px 15px rgba(0, 0, 0, 0.04), 0 1px 6px rgba(0, 0, 0, 0.04);
-  margin-bottom: 1.5rem;
-   &.col-big {
-    padding: 1.75rem;
-  }
-  .panel-title-big {
-    color: @gray800;
-    font-size: 18px;
-    font-weight: normal;
-    margin-bottom: 2rem;
-  }
-  .div-notifi {
-    border-top: 1px solid @gray100;
-    padding-top: 1rem;
-    margin-bottom: 1rem;
-  }
+.box-card {
+  box-shadow: 0 2px 4px 0px @gray250;
 }
 .div-pagination {
   padding-top: 1rem;
@@ -705,37 +691,7 @@ div.ant-typography,
     }
   }
 }
-.div-search {
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
 
-  .ant-input-affix-wrapper {
-    width: 37px;
-    border-radius: 10em;
-    -webkit-transition: width 0.4s ease-in-out;
-    transition: width 0.4s ease-in-out;
-    &-focused {
-      width: 15rem;
-      .ant-input:not(:first-child) {
-        padding-left: 10px;
-      }
-    }
-
-    &:hover,
-    &:focus {
-      border-color: #6dcff6!important;
-      box-shadow: 0 0 5px rgba(109, 207, 246, 0.5); 
-    }
-    .ant-input {
-      height: 25px;
-    }
-    .ant-input:not(:first-child) {
-      padding-left: 0;
-    }
-  }
-}
 .ant-btn-icon-only {
   width: 30px;
   height: 30px;

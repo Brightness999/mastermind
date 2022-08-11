@@ -9,5 +9,69 @@ export default ({
   blankPage: {
     id: `${scope}.blankPage`,
     defaultMessage: 'Blank page',
+  },
+  activityFeed: {
+    id: `${scope}.activityFeed`,
+    defaultMessage: 'Activity Feed',
+  },
+  today: {
+    id: `${scope}.today`,
+    defaultMessage: 'Today',
+  },
+  filterOptions: {
+    id: `${scope}.filterOptions`,
+    defaultMessage: 'Filter options',
+  },
+  month: {
+    id: `${scope}.month`,
+    defaultMessage: 'Month',
+  },
+  week: {
+    id: `${scope}.week`,
+    defaultMessage: 'Week',
+  },
+  makeAppointment: {
+    id: `${scope}.makeAppointment`,
+    defaultMessage: 'MAKE AN APPOINTMENT',
+  },
+  appointments: {
+    id: `${scope}.appointments`,
+    defaultMessage: 'Appointments',
+  },
+  referrals: {
+    id: `${scope}.referrals`,
+    defaultMessage: 'Referrals',
+  },
+  screenings: {
+    id: `${scope}.screenings`,
+    defaultMessage: 'Screenings',
+  },
+  evaluations: {
+    id: `${scope}.evaluations`,
+    defaultMessage: 'Evaluations',
+  },
+  flags: {
+    id: `${scope}.flags`,
+    defaultMessage: 'Flags',
+  },
+  subsidaries: {
+    id: `${scope}.subsidaries`,
+    defaultMessage: 'Subsidaries',
+  },
+  upcoming: {
+    id: `${scope}.upcoming`,
+    defaultMessage: 'Upcoming',
+  },
+  unprocessed: {
+    id: `${scope}.unprocessed`,
+    defaultMessage: 'Unprocessed',
+  },
+  past: {
+    id: `${scope}.past`,
+    defaultMessage: 'Past',
+  },
+  phoneCall: {
+    id: `${scope}.phoneCall`,
+    defaultMessage: 'Phone call',
   }
 });
