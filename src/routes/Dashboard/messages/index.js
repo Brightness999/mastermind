@@ -73,5 +73,37 @@ export default ({
   phoneCall: {
     id: `${scope}.phoneCall`,
     defaultMessage: 'Phone call',
+  },
+  session: {
+    id: `${scope}.session`,
+    defaultMessage: 'Session',
+  },
+  evaluation: {
+    id: `${scope}.evaluation`,
+    defaultMessage: 'Evaluation',
+  },
+  referral: {
+    id: `${scope}.referral`,
+    defaultMessage: 'Referral',
+  },
+  eventType: {
+    id: `${scope}.eventType`,
+    defaultMessage: 'Event type',
+  },
+  homeworkTutoring: {
+    id: `${scope}.homeworkTutoring`,
+    defaultMessage: 'Homework Tutoring',
+  },
+  startTypingProvider: {
+    id: `${scope}.startTypingProvider`,
+    defaultMessage: 'Start typing provider name',
+  },
+  startTypingLocation: {
+    id: `${scope}.startTypingLocation`,
+    defaultMessage: 'Start typing location',
+  },
+  apply: {
+    id: `${scope}.apply`,
+    defaultMessage: 'Apply',
   }
 });

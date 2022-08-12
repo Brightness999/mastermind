@@ -1,25 +1,49 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Collapse, Badge, Avatar, Tabs, Dropdown, Menu, Button } from 'antd';
+import { 
+  Collapse,
+  Badge,
+  Avatar,
+  Tabs,
+  Dropdown,
+  Menu,
+  Button,
+  Segmented,
+  Row,
+  Col,
+  Checkbox,
+  Select
+} from 'antd';
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
-import { BsXCircle, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
+import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
+import { MdFormatAlignLeft } from 'react-icons/md';
+import { BsFilter, BsXCircle, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
+import CSSAnimate from '../../../components/CSSAnimate';
 import intl from 'react-intl-universal';
 import FullCalendar from '@fullcalendar/react' // must go before plugins
 import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
 import timeGridPlugin from '@fullcalendar/timegrid' // a plugin!
 import messages from '../messages';
+import messagesCreateAccount from '../../Sign/CreateAccount/messages';
 import './index.less';
 const { Panel } = Collapse;
 const { TabPane} = Tabs;
 @connect()
 export default class extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+        isFilter: false,
+    }
+  }
+
+  onShowFilter = () => {
+    this.setState({ isFilter: !this.state.isFilter });
+  }
+
   render() {
-    const text = `
-      A dog is a type of domesticated animal.
-      Known for its loyalty and faithfulness,
-      it can be found as a welcome guest in many households across the world.
-    `;
+    const { isFilter } = this.state;
     const genExtraTime = () => (
       <BsClockHistory
         size={18}
@@ -39,19 +63,76 @@ export default class extends React.Component {
         items={[
           {
             key: '1',
-            label: (<a target="_blank" rel="noopener noreferrer" href="#">Session</a>),
+            label: (<a target="_blank" rel="noopener noreferrer" href="#">{intl.formatMessage(messages.session)}</a>),
           },
           {
             key: '2',
-            label: (<a target="_blank" rel="noopener noreferrer" href="#">Evaluation</a>),
+            label: (<a target="_blank" rel="noopener noreferrer" href="#">{intl.formatMessage(messages.evaluation)}</a>),
           },
           {
             key: '3',
-            label: (<a target="_blank" rel="noopener noreferrer" href="#">Referral</a>),
+            label: (<a target="_blank" rel="noopener noreferrer" href="#">{intl.formatMessage(messages.referral)}</a>),
           },
         ]}
       />
     );
+
+    const optionsEvent = [
+      {
+        label: intl.formatMessage(messages.appointments),
+        value: 'appointments',
+      },
+      {
+        label: intl.formatMessage(messages.evaluations),
+        value: 'evaluations',
+      },
+      {
+        label: intl.formatMessage(messages.screenings),
+        value: 'screenings',
+      },
+      {
+        label: intl.formatMessage(messages.referrals),
+        value: 'referrals',
+      },
+    ];
+    const optionsSkillset = [
+      {
+        label: 'Kriah Tutoring' + '(46)',
+        value: 'appointments',
+      },
+      {
+        label: intl.formatMessage(messages.evaluations),
+        value: 'evaluations',
+      },
+      {
+        label: intl.formatMessage(messages.screenings),
+        value: 'screenings',
+      },
+      {
+        label: intl.formatMessage(messages.referrals),
+        value: 'referrals',
+      },
+      {
+        label: intl.formatMessage(messages.homeworkTutoring),
+        value: 'home_work',
+      },
+      {
+        label: 'OT',
+        value: 'OT',
+      },
+      {
+        label: intl.formatMessage(messages.evaluations),
+        value: 'evaluations2',
+      },
+      {
+        label: intl.formatMessage(messages.screenings),
+        value: 'screenings2',
+      },
+      {
+        label: intl.formatMessage(messages.referrals),
+        value: 'referrals2',
+      },
+    ];
     return (
       <div className="full-layout page dashboard-page">
         <div className='div-content'>
@@ -79,12 +160,74 @@ export default class extends React.Component {
             </div>
           </section>
           <section className='div-calendar box-card'>
-            <FullCalendar
-              plugins={[ dayGridPlugin, timeGridPlugin ]}
-              initialView="dayGridMonth"
-              headerToolbar={false}
-              fixedWeekCount={false}
-            />
+            <div className='calendar-header'>
+              <div className='header-left flex flex-row' onClick={this.onShowFilter}>
+                <p className='font-16'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30}/> : <BsFilter size={30}/>}</p>
+              </div>
+              <div className='header-center flex flex-row'>
+                <div className='btn-prev'><BiChevronLeft size={18}/></div>
+                <p className='font-18'>July 2022</p>
+                <div className='btn-next'><BiChevronRight size={18}/></div>
+              </div>
+              <div className='header-right flex flex-row'>
+                <Button className='btn-type'>{intl.formatMessage(messages.month)}</Button>
+                <Segmented
+                  options={[
+                    {
+                      value: 'Grid',
+                      icon: <FaCalendarAlt size={18} />,
+                    },
+                    {
+                      value: 'List',
+                      icon: <MdFormatAlignLeft size={20}/>,
+                    },
+                  ]}
+                />
+              </div>
+            </div>
+            {isFilter && <div className='calendar-filter'>
+                <CSSAnimate className="animated-shorter" type={isFilter ? 'fadeIn' : 'fadeOut'}>
+                  <Row gutter={10}>
+                    <Col xs={12} sm={12} md={4}>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
+                      <Checkbox.Group options={optionsEvent} />
+                    </Col>
+                    <Col xs={12} sm={12} md={6} className='skillset-checkbox'>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
+                      <Checkbox.Group options={optionsSkillset} />
+                    </Col>
+                    <Col xs={12} sm={12} md={7} className='select-small'>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
+                      <Select placeholder={intl.formatMessage(messages.startTypingProvider)}>
+                        <Select.Option value='1'>Dr. Rabinowitz </Select.Option>
+                      </Select>
+                      <div className='div-chip'>
+                        {Array(3).fill(null).map((_, index) =><div key={index} className='chip'>Dr. Rabinowitz <BsX size={16} onClick={null}/></div>)}
+                      </div>
+                    </Col>
+                    <Col xs={12} sm={12} md={7} className='select-small'>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
+                      <Select placeholder={intl.formatMessage(messages.startTypingLocation)}>
+                        <Select.Option value='1'>Rabinowitz office</Select.Option>
+                      </Select>
+                      <div className='div-chip'>
+                        {Array(3).fill(null).map((_, index) =><div key={index} className='chip'>Rabinowitz office <BsX size={16} onClick={null}/></div>)}
+                      </div>
+                    </Col>
+                  </Row>
+                  <div className='text-right'>
+                    <Button size='small' type='primary'>{intl.formatMessage(messages.apply).toUpperCase()}(10)</Button>
+                  </div>
+                </CSSAnimate>
+              </div>}
+            <div className='calendar-content'>
+              <FullCalendar
+                plugins={[ dayGridPlugin, timeGridPlugin ]}
+                initialView="dayGridMonth"
+                headerToolbar={false}
+                fixedWeekCount={false}
+              />
+            </div>
             <div className='btn-appointment'>
               <Dropdown overlay={menu} placement="topRight">
                 <Button type='primary' block icon={<FaCalendarAlt size={19}/>}>{intl.formatMessage(messages.makeAppointment)}</Button>

@@ -183,6 +183,14 @@
   "routes.dashboard.unprocessed": "Unprocessed",
   "routes.dashboard.past": "Past",
   "routes.dashboard.phoneCall": "Phone call",
+  "routes.dashboard.session": "Session",
+  "routes.dashboard.evaluation": "Evaluation",
+  "routes.dashboard.referral": "Referral",
+  "routes.dashboard.eventType": "Event type",
+  "routes.dashboard.homeworkTutoring": "Homework Tutoring",
+  "routes.dashboard.startTypingProvider": "Start typing provider name",
+  "routes.dashboard.startTypingLocation": "Start typing location",
+  "routes.dashboard.apply": "Apply",
 
   "routes.Blank.blankPage": "Blank page",
   "routes.Crud.new": "New",
@@ -419,5 +427,6 @@
   "routes.infoschool.blankPage": "Blank page",
   "routes.infoadmin.blankPage": "Blank page",
   "routes.dashboard.blankPage": "Blank page",
-  "components.mainheader.test": "MainHeader"
+  "components.mainheader.test": "MainHeader",
+  "components.hmghcollapse.test": "HmghCollapse"
 }

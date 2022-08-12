@@ -2,8 +2,6 @@
 @import '~antd/dist/antd.less';
 @import './variables.less';
 @import './animate.css';
-@import "~slick-carousel/slick/slick.css"; 
-@import "~slick-carousel/slick/slick-theme.css";
 
 @font-face {
   font-family: 'Roboto';
@@ -153,6 +151,12 @@ h1, h2, h3, h4, h5, h6 { font-weight: 500 !important; }
     border-color: @primary-color;
   }
 }
+.ant-btn-sm {
+  height: 23px!important;
+  padding: 2px 7px;
+  font-size: 10px!important;
+  border-radius: 2px;
+}
 .ant-btn-text {
   svg {
     vertical-align: middle;
@@ -276,6 +280,50 @@ h1, h2, h3, h4, h5, h6 { font-weight: 500 !important; }
 
 .ant-select-selection--single .ant-select-selection__rendered { margin-right: 30px; }
 
+.ant-select {
+  font-size: 16px;
+  color: @black87;
+  .ant-select-selection-placeholder {
+    color: @black06;
+  }
+  &-single:not(.ant-select-customize-input) .ant-select-selector {
+    height: 40px;
+    border-color: @gray250;
+
+    .ant-select-selection-search-input {
+      height: 40px;
+    }
+  }
+  &-single .ant-select-selector .ant-select-selection-item {
+    line-height: 40px;
+  }
+  &:not(.ant-select-customize-input) .ant-select-selector {
+    min-height: 40px;
+    border: 1px solid @gray250
+  }
+}
+.select-small {
+  .ant-select {
+    font-size: 12px;
+    &-single:not(.ant-select-customize-input) .ant-select-selector {
+      height: 24px!important;
+      min-height: 24px!important;
+    }
+    &-single:not(.ant-select-customize-input) .ant-select-selector .ant-select-selection-search-input {
+      height: 24px!important;
+    }
+    &-single .ant-select-selector .ant-select-selection-placeholder {
+      line-height: 24px!important;
+    }
+    &-single .ant-select-selector .ant-select-selection-item {
+      line-height: 24px!important;
+    }
+    &.ant-select-item { font-size: 12px;}
+  }
+}
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  font-weight: 400;
+}
 .ant-pagination-item {
   &:focus,
   &:hover,
@@ -791,5 +839,25 @@ div.ant-typography,
   img {
       width: 100%;
       height: auto;
+  }
+}
+.div-chip {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 6px;
+
+  .chip {
+    cursor: pointer;
+    font-size: 8px;
+    line-height: 14px;
+    padding: 0 0 0 6px;
+    border: 1px solid @gray250;
+    border-radius: 12px;
+    margin: 4px 2px;
+
+    svg {
+      vertical-align: bottom;
+    }
   }
 }
