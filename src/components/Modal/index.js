@@ -1,4 +1,8 @@
 import ModalCreateDone from './ModalCreateDone';
+import ModalCancelAppointment from './ModalCancelAppointment';
+import ModalCurrentAppointment from './ModalCurrentAppointment';
 export {
-  ModalCreateDone
+  ModalCreateDone,
+  ModalCancelAppointment,
+  ModalCurrentAppointment
 }

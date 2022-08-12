@@ -132,10 +132,8 @@ h1, h2, h3, h4, h5, h6 { font-weight: 500 !important; }
 .ant-btn > .anticon { float: left; }
 .ant-btn-primary {
   color: @white;
-  font-weight: 500;
-  font-size: 15px;
-  line-height: 1.8;
-  height: 42px;
+  font-weight: 400;
+  font-size: 14px;
   background-color: @primary-color-dark;
   border-color: @primary-color-dark;
   box-shadow: none;
@@ -435,20 +433,6 @@ ol {
   }
 }
 
-.flex {
-  display: flex;
-  height: 100%;
-  position: relative;
-
-  &.justify-center {
-    justify-content: center;
-  }
-}
-
-.flex-column {
-  flex-direction: column;
-}
-
 .flex-auto {
   flex: auto;
   height: 100%;
@@ -488,6 +472,16 @@ ol {
 .fr {
   float: right;
 }
+.m-10 {
+  margin: 10px !important;
+}
+.mx-10 {
+  margin-left: 10px !important;
+  margin-right: 10px !important;
+}
+.mt-10 {
+  margin-top: 10px!important;
+}
 .mt-1 {
   margin-top: 1rem!important;
 }
@@ -502,6 +496,9 @@ ol {
 }
 .mr-10 {
   margin-right: 10px!important;
+}
+.ml-20 {
+  margin-left: 20px !important;
 }
 .mb-0 {
   margin-bottom: 0px!important;
@@ -545,7 +542,7 @@ ol {
   margin-top: 10px!important;
   margin-bottom: 10px!important;
 }
-
+.flex-1 { flex: 1;}
 .flex { display: flex; }
 .flex-row { flex-direction: row; }
 .flex-col { flex-direction: column; }
@@ -559,7 +556,8 @@ ol {
 .text-primary { color: @primary-color-dark; }
 .text-green500 { color: @green500; }
 .text-black06 { color: @black06; }
-
+.text-red { color: red; }
+.cursor { cursor: pointer;}
 .w-50 {
   width: 50%;
 }
@@ -859,5 +857,26 @@ div.ant-typography,
     svg {
       vertical-align: bottom;
     }
+  }
+}
+.provider-profile {
+  border-radius: 4px;
+  padding: 15px;
+  background-color: @white;
+  width: 100%;
+  z-index: 2;
+
+  p { margin-bottom: 5px;}
+  .count-2 {
+      column-count: 2;
+      column-gap: 0;
+  }
+  .profile-text {
+      border: 1px solid @gray250;
+      border-radius: 4px;
+      padding: 10px;
+      overflow: auto;
+      height: 150px;
+      margin-top: 10px;
   }
 }

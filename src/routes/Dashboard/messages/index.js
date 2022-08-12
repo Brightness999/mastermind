@@ -105,5 +105,17 @@ export default ({
   apply: {
     id: `${scope}.apply`,
     defaultMessage: 'Apply',
+  },
+  pending: {
+    id: `${scope}.pending`,
+    defaultMessage: 'Pending',
+  },
+  declined: {
+    id: `${scope}.declined`,
+    defaultMessage: 'Declined',
+  },
+  approved: {
+    id: `${scope}.approved`,
+    defaultMessage: 'Approved',
   }
 });

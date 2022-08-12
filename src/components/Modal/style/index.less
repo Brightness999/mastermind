@@ -83,13 +83,104 @@
   }
 }
 
-.modal-create-done {
+.modal-create-done,
+.modal-cancel {
   .div-content {
     max-width: 360px;
     margin: 30px auto;
 
     .ant-btn {
       margin-top: 30px;
+    }
+  }
+  .div-cancel-top {
+    max-width: 255px;
+    margin: auto;
+  }
+  .div-cancel-bottom {
+    max-width: 300px;
+    margin: auto;
+  }
+  .btn-footer {
+    width: 400px;
+    margin: 30px auto 0 auto;
+    .ant-btn {
+      width: 47%;
+      margin: 0 5px;
+    }
+    .ant-btn-primary {
+      color: #fff;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 1.5;
+      height: 38px;
+    }
+    .btn-warning {
+      border-color: red;
+      color: red;
+      &:focus,
+      &:after,
+      &:active {
+        border-color: @red200;
+        color: @red200;
+      }
+
+    }
+  }
+}
+.modal-current {
+  .header-current {
+    background-color: @primary-color-dark;
+    padding: 10px 15px;
+    color: @white;
+  }
+  .ant-modal-body {
+    padding: 0;
+  }
+  .ant-modal-footer {
+    text-align: right;
+    background: transparent;
+    border-top: 0;
+  }
+  .ant-btn-primary {
+    font-weight: 400;
+    font-size: 14px;
+    height: 38px;
+    line-height: 1.5;
+  }
+  p { margin-bottom: 5px;}
+  .new-appointment {
+    padding: 10px 15px;
+  }
+  .provider-profile {
+    border: 1px solid @gray250;
+    width: 100%;
+  }
+ 
+  .doctor-content {
+    border: 1px solid @gray250;
+    border-radius: 4px;
+    padding: 10px;
+    .ant-input-suffix {
+      color: @gray300;
+    }
+
+    .doctor-list {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+      overflow: auto;
+
+      .doctor-item {
+        margin-right: 10px;
+        cursor: pointer;
+
+        .ant-avatar-square {
+          border-radius: 10px;
+          margin-bottom: 3px;
+        }
+      }
     }
   }
 }

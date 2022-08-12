@@ -14,7 +14,7 @@ import {
     HomeOutlined
 } from '@ant-design/icons'
 import CSSAnimate from '../CSSAnimate';
-import Mask from '../Mask';
+// import Mask from '../Mask';
 import './style/index.less';
 import messages from './messages';
 
@@ -150,11 +150,11 @@ class TopBar extends Component {
                         </a>
                     )}
                 </header>
-                <Mask
+                {/* <Mask
                     visible={expand}
                     onClose={onCollapse}
                     getContainer={node => node.parentNode}
-                />
+                /> */}
             </div>
         );
     }

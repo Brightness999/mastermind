@@ -18,12 +18,15 @@ import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
 import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
 import { MdFormatAlignLeft } from 'react-icons/md';
-import { BsFilter, BsXCircle, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
+import { BsEnvelope, BsFilter, BsXCircle, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill, BsCheckCircleFill } from 'react-icons/bs';
+
 import CSSAnimate from '../../../components/CSSAnimate';
+import DrawerDetail from '../../../components/DrawerDetail';
 import intl from 'react-intl-universal';
 import FullCalendar from '@fullcalendar/react' // must go before plugins
 import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
 import timeGridPlugin from '@fullcalendar/timegrid' // a plugin!
+
 import messages from '../messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
 import './index.less';
@@ -35,6 +38,7 @@ export default class extends React.Component {
     super(props);
     this.state = {
         isFilter: false,
+        visibleDetail: false,
     }
   }
 
@@ -42,8 +46,16 @@ export default class extends React.Component {
     this.setState({ isFilter: !this.state.isFilter });
   }
 
+  onShowDrawerDetail = () => {
+    this.setState({ visibleDetail: true });
+  };
+
+  onCloseDrawerDetail = () => {
+    this.setState({ visibleDetail: false });
+  };
+
   render() {
-    const { isFilter } = this.state;
+    const { isFilter, visibleDetail } = this.state;
     const genExtraTime = () => (
       <BsClockHistory
         size={18}
@@ -251,7 +263,7 @@ export default class extends React.Component {
                       {new Array(10).fill(null).map((_, index) => 
                         <div key={index} className='list-item'>
                           <div className='item-left'>
-                            <Avatar size={24} icon={<FaUser size={12} />} />
+                            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail}/>
                             <div className='div-service'>
                               <p className='font-11 mb-0'>Service Type</p>
                               <p className='font-09 mb-0'>Provide Name</p>
@@ -270,13 +282,50 @@ export default class extends React.Component {
                       )}
                     </TabPane>
                     <TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
-                      <div className='list-item'>{intl.formatMessage(messages.unprocessed)}</div>
+                      {new Array(10).fill(null).map((_, index) => 
+                        <div key={index} className='list-item'>
+                          <div className='item-left'>
+                            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail}/>
+                            <div className='div-service'>
+                              <p className='font-11 mb-0'>Service Type</p>
+                              <p className='font-09 mb-0'>Provide Name</p>
+                            </div>
+                            <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
+                            <div className='ml-auto'>
+                              <p className='font-12 mb-0'>Time</p>
+                              <p className='font-12 font-700 mb-0'>Date</p>
+                            </div>
+                          </div>
+                          <div className='item-right'>
+                            <BsFillFlagFill size={15} onClick={() => {}}/>
+                            <BsCheckCircleFill className='text-green500' style={{marginTop: 4}} size={15} onClick={() => {}}/>
+                          </div>
+                        </div>
+                      )}
                     </TabPane>
                     <TabPane tab={intl.formatMessage(messages.past)} key="3">
-                      <div className='list-item'>{intl.formatMessage(messages.past)}</div>
+                      {new Array(10).fill(null).map((_, index) => 
+                        <div key={index} className='list-item'>
+                          <div className='item-left'>
+                            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail}/>
+                            <div className='div-service'>
+                              <p className='font-11 mb-0'>Service Type</p>
+                              <p className='font-09 mb-0'>Provide Name</p>
+                            </div>
+                            <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
+                            <div className='ml-auto'>
+                              <p className='font-12 mb-0'>Time</p>
+                              <p className='font-12 font-700 mb-0'>Date</p>
+                            </div>
+                          </div>
+                          <div className='item-right'>
+                            <BsEnvelope size={15} onClick={() => {}}/>
+                            <BsFillFlagFill style={{marginTop: 4}} size={15} onClick={() => {}}/>
+                          </div>
+                        </div>
+                      )}
                     </TabPane>
                   </Tabs>
-                  
                 </Panel>
                 <Panel header={intl.formatMessage(messages.referrals)} key="2">
                   {new Array(10).fill(null).map((_, index) => 
@@ -354,18 +403,70 @@ export default class extends React.Component {
                     </div>
                   )}
                 </Panel>
-                <Panel header={intl.formatMessage(messages.subsidaries)} key="6">
-                  {new Array(10).fill(null).map((_, index) => 
-                    <div key={index} className='list-item padding-item'>
-                      <Avatar size={24} icon={<FaUser size={12} />} />
-                      <div className='div-service'>
-                        <p className='font-11 mb-0'>Service Type</p>
-                        <p className='font-09 mb-0'>Provide Name</p>
-                      </div>
-                      <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p>
-                      <p className='font-12 ml-auto mb-0'>Status</p>
-                    </div>
-                  )}
+                <Panel 
+                  header={intl.formatMessage(messages.subsidaries)} 
+                  key="6" 
+                  className='subsidaries-panel'
+                  >
+                   <Tabs defaultActiveKey="1" type="card" size='small'>
+                    <TabPane tab={intl.formatMessage(messages.pending)} key="1">
+                      {new Array(10).fill(null).map((_, index) => 
+                        <div key={index} className='list-item'>
+                          <div className='item-left'>
+                            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail}/>
+                            <div className='div-service'>
+                              <p className='font-11 mb-0'>Service Type</p>
+                              <p className='font-09 mb-0'>Provide Name</p>
+                            </div>
+                            <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p>
+                            <p className='font-12 ml-auto mb-0'>Status</p>
+                          </div>
+                          <div className='item-right'>
+                            <GiBackwardTime size={19} onClick={() => {}}/>
+                            <BsXCircle style={{marginTop: 4}} size={15} onClick={() => {}}/>
+                          </div>
+                        </div>
+                      )}
+                    </TabPane>
+                    <TabPane tab={intl.formatMessage(messages.declined)} key="2">
+                      {new Array(10).fill(null).map((_, index) => 
+                        <div key={index} className='list-item'>
+                          <div className='item-left'>
+                            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail}/>
+                            <div className='div-service'>
+                              <p className='font-11 mb-0'>Service Type</p>
+                              <p className='font-09 mb-0'>Provide Name</p>
+                            </div>
+                            <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p>
+                            <p className='font-12 ml-auto mb-0'>Status</p>
+                          </div>
+                          <div className='item-right'>
+                            <BsFillFlagFill size={15} onClick={() => {}}/>
+                            <BsCheckCircleFill className='text-green500' style={{marginTop: 4}} size={15} onClick={() => {}}/>
+                          </div>
+                        </div>
+                      )}
+                    </TabPane>
+                    <TabPane tab={intl.formatMessage(messages.approved)} key="3">
+                      {new Array(10).fill(null).map((_, index) => 
+                        <div key={index} className='list-item'>
+                          <div className='item-left'>
+                            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail}/>
+                            <div className='div-service'>
+                              <p className='font-11 mb-0'>Service Type</p>
+                              <p className='font-09 mb-0'>Provide Name</p>
+                            </div>
+                            <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p>
+                            <p className='font-12 ml-auto mb-0'>Status</p>
+                          </div>
+                          <div className='item-right'>
+                            <BsEnvelope size={15} onClick={() => {}}/>
+                            <BsFillFlagFill style={{marginTop: 4}} size={15} onClick={() => {}}/>
+                          </div>
+                        </div>
+                      )}
+                    </TabPane>
+                  </Tabs>
                 </Panel>
             </Collapse>
           </section>
@@ -374,6 +475,10 @@ export default class extends React.Component {
         <div className='btn-call'>
           <img src='../images/call.png'/>
         </div>
+        <DrawerDetail 
+          visible={visibleDetail}
+          onClose={this.onCloseDrawerDetail}
+        />
       </div>
     );
   }

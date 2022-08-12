@@ -13,7 +13,6 @@ import SkinToolbox from '../components/SkinToolbox';
 import { LeftSideBar, RightSideBar } from '../components/SideBar';
 import TopBar from '../components/TopBar';
 import CSSAnimate from '../components/CSSAnimate';
-import FooterComponent from '../components/Footer';
 
 import { enquireIsMobile } from '../utils/enquireScreen';
 import './styles/basic.less';

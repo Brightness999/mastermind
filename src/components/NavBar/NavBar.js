@@ -18,7 +18,7 @@ import {
     BellFilled,
     LogoutOutlined
 } from '@ant-design/icons'
-import SearchBox from './SearchBox';
+// import SearchBox from './SearchBox';
 import messages from './messages';
 import {ReactComponent as IconLanguage} from '../../assets/images/languages.svg';
 import {appLocales} from '../../i18n';
@@ -159,7 +159,7 @@ class NavBar extends PureComponent {
                         </Popover>
                     </li>
                 </ul>
-                <SearchBox visible={openSearchBox} onClose={this.onCloseSearchBox}/>
+                {/* <SearchBox visible={openSearchBox} onClose={this.onCloseSearchBox}/> */}
             </header>
         );
     }
