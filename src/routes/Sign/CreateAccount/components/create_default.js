@@ -1,6 +1,6 @@
 import React,  {Component} from 'react';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { Row, Form, Button, Input, Select, Steps } from 'antd';
+import { Row, Form, Button, Input, Select } from 'antd';
 import { BsCheck, BsDot, } from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import messages from '../messages';

@@ -14,7 +14,7 @@ import './style/index.less';
 import '../../assets/styles/login.less';
 const { Paragraph } = Typography;
 
-class ModalCurrentAppointment extends React.Component {
+class ModalNewAppointment extends React.Component {
     state = {
         valueCalendar: moment(),
         selectedValue: moment(),
@@ -70,7 +70,7 @@ class ModalCurrentAppointment extends React.Component {
     );
 
     const modalProps = {
-      className: 'modal-current',
+      className: 'modal-new',
       title: "",
       visible: this.props.visible,
       onOk: this.props.onSubmit,
@@ -81,44 +81,15 @@ class ModalCurrentAppointment extends React.Component {
         <Button key="back" onClick={this.props.onCancel}>
           {intl.formatMessage(msgReview.goBack).toUpperCase()}
         </Button>,
-        (!this.state.isConfirm &&<Button key="submit" type="primary" onClick={this.onConfirm}>
-            {intl.formatMessage(msgDrawer.reschedule).toUpperCase()}
-        </Button>),
-        (this.state.isConfirm && <Popover 
-            placement="topRight" 
-            content={contentConfirm} 
-            className='popup-confirm'
-            trigger="hover" 
-            >
-            <Button key="submit" type="primary" onClick={this.props.onSubmit}>
-                {intl.formatMessage(msgCreateAccount.confirm).toUpperCase()}
-            </Button>
-        </Popover>)
+        <Button key="submit" type="primary" onClick={this.props.onSubmit}>
+            {intl.formatMessage(messages.scheduleScreening).toUpperCase()}
+        </Button>
+        
       ]
     };
-
     const { valueCalendar, selectedValue, isChoose, isSelectTime } = this.state;
     return(
         <Modal {...modalProps}>
-            <div className='header-current'>
-                <Row gutter="15" align="bottom">
-                    <Col xs={24} sm={24} md={8}>
-                        <p className='font-24 font-700'>{intl.formatMessage(messages.currentAppointment)}</p>
-                        <p className='font-16'>Dependent name</p>
-                        <p className='font-16'>Provider name</p>
-                    </Col>
-                    <Col xs={24} sm={24} md={8}>
-                        <p className='font-16'>{intl.formatMessage(msgCreateAccount.subsidy)}</p>
-                        <p className='font-16 font-700'>30 Minute {intl.formatMessage(msgDashboard.evaluation)}</p>
-                        <p className='font-16'>{intl.formatMessage(msgCreateAccount.location)}</p>
-                    </Col>
-                    <Col xs={24} sm={24} md={8}>
-                        <p></p>
-                        <p className='font-16'>{intl.formatMessage(msgCreateAccount.skillsets)}</p>
-                        <p className='font-16'>7/27/2022   7:30pm</p>
-                    </Col>
-                </Row>
-            </div>
             <div className='new-appointment'>
                 <p className='font-30'>{intl.formatMessage(messages.newAppointment)}</p>
                 <div className='flex flex-row items-center mb-10'>
@@ -247,4 +218,4 @@ class ModalCurrentAppointment extends React.Component {
     );
   }
 };
-export default ModalCurrentAppointment;
+export default ModalNewAppointment;

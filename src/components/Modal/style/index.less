@@ -128,7 +128,9 @@
     }
   }
 }
-.modal-current {
+
+.modal-current,
+.modal-new {
   .header-current {
     background-color: @primary-color-dark;
     padding: 10px 15px;
@@ -161,6 +163,7 @@
     border: 1px solid @gray250;
     border-radius: 4px;
     padding: 10px;
+    margin-bottom: 15px;
     .ant-input-suffix {
       color: @gray300;
     }
@@ -171,16 +174,90 @@
       flex-wrap: nowrap;
       white-space: nowrap;
       overflow: auto;
+      padding-top: 10px;
 
       .doctor-item {
         margin-right: 10px;
+        position: relative;
+        top: 0;
+        left: 0;
         cursor: pointer;
 
         .ant-avatar-square {
           border-radius: 10px;
           margin-bottom: 3px;
         }
+       
+      }
+      .selected-doctor {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        z-index: 3;
+        background-color: #1bd9ec;
+        color: #fff;
+        height: 15px;
+        width: 15px;
+        border-radius: 999px;
+        padding: 0 0 0 2px;
+        line-height: 18px;
+        overflow: visible;
       }
     }
+  }
+}
+
+.modal-subsidy-progress {
+  
+  p {
+    margin-bottom: 5px;
+  }
+  .ant-steps {
+    max-width: 450px!important;
+    .ant-steps-item-finish > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title,
+    .ant-steps-item-wait > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title {
+      display: block;
+    }
+  }
+  .parent-info,
+  .school-info {
+    border: 1px solid @gray250;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+
+    .ant-btn-sm {
+      height: 32px!important;
+      font-size: 15px!important;
+      font-weight: 400!important;
+      border-radius: 6px;
+      padding: 4px 16px!important;
+      line-height: 1.5;
+    }
+  }
+  .ant-btn-primary {
+    font-weight: 400;
+    font-size: 14px;
+    height: 38px;
+    line-height: 1.5;
+  }
+}
+
+.confirm-content {
+  background-color: white;
+  box-shadow: 0 0 6px 0 red;
+  padding: 10px;
+  border-radius: 4px;
+  .current-content,
+  .new-content {
+    background-color: @gray250;
+    padding: 10px;
+    p, span { margin-bottom: 5px!important;}
+  }
+}
+.ant-popover-placement-topRight {
+  .ant-popover-arrow { display: none;}
+  .ant-popover-inner-content {
+    padding: 0;
   }
 }

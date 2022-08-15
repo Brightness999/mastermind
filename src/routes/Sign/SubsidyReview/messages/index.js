@@ -6,10 +6,6 @@
 export const scope = 'routes.Subsidyreview';
 
 export default ({
-  blankPage: {
-    id: `${scope}.blankPage`,
-    defaultMessage: 'Blank page',
-  },
   reviewSubsidyRequest: {
     id: `${scope}.reviewSubsidyRequest`,
     defaultMessage: 'Review subsidy request info',
@@ -31,7 +27,7 @@ export default ({
     defaultMessage: 'Submit',
   },
   goBack: {
-    id: `${scope}.`,
+    id: `${scope}.goBack`,
     defaultMessage: 'go back',
   },
   // : {

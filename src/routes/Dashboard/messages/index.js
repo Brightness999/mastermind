@@ -117,5 +117,9 @@ export default ({
   approved: {
     id: `${scope}.approved`,
     defaultMessage: 'Approved',
+  },
+  appointmentScheduled: {
+    id: `${scope}.appointmentScheduled`,
+    defaultMessage: 'Appointment Scheduled',
   }
 });

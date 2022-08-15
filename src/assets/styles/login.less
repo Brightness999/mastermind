@@ -725,9 +725,17 @@
   border: 1px solid @primary-color;
   margin-bottom: 10px;
   text-align: center;
+  cursor: pointer;
   svg { 
     color: @green500; 
     vertical-align: middle;
+  }
+  &:hover {
+    box-shadow: 0 1px 4px 0 #91cffd;
+  }
+  &.active {
+    color: @white;
+    background-color: @primary-color;
   }
 }
 .icon-question {

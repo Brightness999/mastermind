@@ -12,16 +12,18 @@ import {
   Row,
   Col,
   Checkbox,
-  Select
+  Select,
+  message
 } from 'antd';
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
 import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsEnvelope, BsFilter, BsXCircle, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill, BsCheckCircleFill } from 'react-icons/bs';
-
+import { ModalNewAppointment, ModalSubsidyProgress } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
+import DrawerDetailPost from '../../../components/DrawerDetailPost';
 import intl from 'react-intl-universal';
 import FullCalendar from '@fullcalendar/react' // must go before plugins
 import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
@@ -39,6 +41,9 @@ export default class extends React.Component {
     this.state = {
         isFilter: false,
         visibleDetail: false,
+        visibleDetailPost: false,
+        visibleNewAppoint: false,
+        visibleSubsidy: false,
     }
   }
 
@@ -54,8 +59,38 @@ export default class extends React.Component {
     this.setState({ visibleDetail: false });
   };
 
+  onShowDrawerDetailPost = () => {
+    this.setState({ visibleDetailPost: true });
+  };
+
+  onCloseDrawerDetailPost = () => {
+    this.setState({ visibleDetailPost: false });
+  };
+
+  onShowModalNewAppoint = () => {
+    this.setState({ visibleNewAppoint: true });
+  };
+
+  onCloseModalNewAppoint = () => {
+    this.setState({ visibleNewAppoint: false });
+  };
+  onSubmitModalNewAppoint = () => {
+    this.setState({ visibleNewAppoint: false });
+    message.success({
+      content: intl.formatMessage(messages.appointmentScheduled),
+      className: 'popup-scheduled',
+    });
+  };
+  onShowModalSubsidy = () => {
+    this.setState({ visibleSubsidy: true });
+  };
+
+  onCloseModalSubsidy = () => {
+    this.setState({ visibleSubsidy: false });
+  };
+
   render() {
-    const { isFilter, visibleDetail } = this.state;
+    const { isFilter, visibleDetail, visibleDetailPost, visibleNewAppoint, visibleSubsidy } = this.state;
     const genExtraTime = () => (
       <BsClockHistory
         size={18}
@@ -75,7 +110,7 @@ export default class extends React.Component {
         items={[
           {
             key: '1',
-            label: (<a target="_blank" rel="noopener noreferrer" href="#">{intl.formatMessage(messages.session)}</a>),
+            label: (<a target="_blank" rel="noopener noreferrer" onClick={this.onShowModalNewAppoint}>{intl.formatMessage(messages.session)}</a>),
           },
           {
             key: '2',
@@ -145,8 +180,19 @@ export default class extends React.Component {
         value: 'referrals2',
       },
     ];
+    const modalNewAppointProps = {
+      visible: visibleNewAppoint,
+      onSubmit: this.onSubmitModalNewAppoint,
+      onCancel: this.onCloseModalNewAppoint,
+    };
+    const modalSubsidyProps = {
+      visible: visibleSubsidy,
+      onSubmit: this.onCloseModalSubsidy,
+      onCancel: this.onCloseModalSubsidy,
+    };
     return (
       <div className="full-layout page dashboard-page">
+        <div className='div-show-subsidy' onClick={this.onShowModalSubsidy}/>
         <div className='div-content'>
           <section className='div-activity-feed box-card'>
             <div className='div-title-feed text-center'>
@@ -242,7 +288,14 @@ export default class extends React.Component {
             </div>
             <div className='btn-appointment'>
               <Dropdown overlay={menu} placement="topRight">
-                <Button type='primary' block icon={<FaCalendarAlt size={19}/>}>{intl.formatMessage(messages.makeAppointment)}</Button>
+                <Button 
+                type='primary' 
+                block 
+                icon={<FaCalendarAlt size={19}/>}
+                onClick={this.onShowDrawerDetailPost}
+                >
+                  {intl.formatMessage(messages.makeAppointment)}
+                </Button>
               </Dropdown>
             </div>
           </section>
@@ -470,7 +523,6 @@ export default class extends React.Component {
                 </Panel>
             </Collapse>
           </section>
-          
         </div>
         <div className='btn-call'>
           <img src='../images/call.png'/>
@@ -479,6 +531,12 @@ export default class extends React.Component {
           visible={visibleDetail}
           onClose={this.onCloseDrawerDetail}
         />
+        <DrawerDetailPost 
+          visible={visibleDetailPost}
+          onClose={this.onCloseDrawerDetailPost}
+        />
+        <ModalNewAppointment {...modalNewAppointProps}/>
+        <ModalSubsidyProgress {...modalSubsidyProps}/>
       </div>
     );
   }
