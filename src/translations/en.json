@@ -192,6 +192,7 @@
   "routes.dashboard.declined": "Declined",
   "routes.dashboard.approved": "Approved",
   "routes.dashboard.appointmentScheduled": "Appointment Scheduled",
+  "routes.dashboard.recurring": "Recurring",
 
   "components.mainheader.new": "new",
   "components.mainheader.search": "Search",
@@ -237,6 +238,7 @@
   "components.Modal.subsidyDetails": "Subsidy details",
   "components.Modal.numberApprovedSessions": "Number of approved sessions",
   "components.Modal.totalRemaining": "Total remaining",
+  "components.Modal.appeal": "Appeal",
   
   "components.drawerdetail.appointmentDetails": "Appointment Details",
   "components.drawerdetail.what": "What",

@@ -120,6 +120,12 @@ h1, h2, h3, h4, h5, h6 { font-weight: 500 !important; }
 .font-500 { font-weight: 500!important;}
 .font-700 { font-weight: 700!important;}
 
+.font-30-sm { 
+  @media screen and (max-width: 576px) {
+    font-size: 26px!important;
+  }
+}
+
 .anticon {
   vertical-align: sub;
 
@@ -169,6 +175,11 @@ h1, h2, h3, h4, h5, h6 { font-weight: 500 !important; }
 .text-center { text-align: center; }
 .text-left { text-align: left; }
 .text-right { text-align: right; }
+.sm-text-left { 
+  @media screen and (max-width: 576px) {
+    text-align: left;
+  }
+ }
 .ant-menu {
   .ant-menu-item > a,
   .ant-menu-submenu-title span{
@@ -317,6 +328,26 @@ h1, h2, h3, h4, h5, h6 { font-weight: 500 !important; }
       line-height: 24px!important;
     }
     &.ant-select-item { font-size: 12px;}
+  }
+}
+
+.select-md {
+  .ant-select {
+    font-size: 14px;
+    &-single:not(.ant-select-customize-input) .ant-select-selector {
+      height: 32px!important;
+      min-height: 23px!important;
+    }
+    &-single:not(.ant-select-customize-input) .ant-select-selector .ant-select-selection-search-input {
+      height: 32px!important;
+    }
+    &-single .ant-select-selector .ant-select-selection-placeholder {
+      line-height: 32px!important;
+    }
+    &-single .ant-select-selector .ant-select-selection-item {
+      line-height: 32px!important;
+    }
+    &.ant-select-item { font-size: 14px;}
   }
 }
 .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
@@ -490,6 +521,9 @@ ol {
 }
 .mb-5 {
   margin-bottom: 5px!important;
+}
+.mr-3 {
+  margin-right: 3px!important;
 }
 .mr-5 {
   margin-right: 5px!important;
@@ -880,4 +914,55 @@ div.ant-typography,
 .count-2 {
   column-count: 2;
   column-gap: 0;
+}
+.calendar-content {
+  .fc {
+    a {
+      color: @black06;
+    }
+  }
+ 
+  .fc-daygrid-event {
+    font-size: 12px;
+    // font-weight: 100;
+    border-radius: 10px;
+  }
+  
+  .fc-event-main {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 2px 5px;
+  }
+  .fc-direction-ltr .fc-daygrid-event.fc-event-start {
+    margin-left: 0;
+  }
+  .fc-daygrid-dot-event {
+    padding: 2px 5px;
+    font-weight: 500;
+  }
+  .fc-event-selected, 
+  .fc-event:focus { box-shadow: unset;}
+  .fc-event-selected:after,
+  .fc-event:focus:after {
+    border-radius: 10px;
+  }
+  .fc-daygrid-event-harness {
+    & > a > .event-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    a {
+      color: @primary-color-dark;
+    }
+  }
+  
+  .fc-daygrid-day-bottom {
+    a {
+      color: @primary-color-dark;
+      font-weight: 500;
+    }
+  }
+  
 }

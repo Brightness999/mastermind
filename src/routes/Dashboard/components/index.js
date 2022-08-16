@@ -13,6 +13,7 @@ import {
   Col,
   Checkbox,
   Select,
+  Tooltip,
   message
 } from 'antd';
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
@@ -28,9 +29,15 @@ import intl from 'react-intl-universal';
 import FullCalendar from '@fullcalendar/react' // must go before plugins
 import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
 import timeGridPlugin from '@fullcalendar/timegrid' // a plugin!
+import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClick
+import listPlugin from '@fullcalendar/list';
 
+import "@fullcalendar/daygrid/main.css";
+import "@fullcalendar/timegrid/main.css";
+import events from "../../../utils/calendar/events";
 import messages from '../messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
+import EventDetail from './EventDetail';
 import './index.less';
 const { Panel } = Collapse;
 const { TabPane} = Tabs;
@@ -39,13 +46,24 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-        isFilter: false,
-        visibleDetail: false,
-        visibleDetailPost: false,
-        visibleNewAppoint: false,
-        visibleSubsidy: false,
+      isFilter: false,
+      visibleDetail: false,
+      visibleDetailPost: false,
+      visibleNewAppoint: false,
+      visibleSubsidy: false,
+      isEventDetail: false,
+
+      canDrop: true,
+      calendarWeekends: true,
+      calendarEvents: [
+        // initial event data
+        { title: "Event Now", start: new Date(), allDay: true }
+      ]
     }
   }
+
+  setCanDrop = () => {};
+  calendar = React.createRef();
 
   onShowFilter = () => {
     this.setState({ isFilter: !this.state.isFilter });
@@ -89,8 +107,65 @@ export default class extends React.Component {
     this.setState({ visibleSubsidy: false });
   };
 
+  handleDateClick = arg => {
+    // eslint-disable-next-line no-restricted-globals
+    if (confirm("Would you like to add an event to " + arg.dateStr + " ?")) {
+      this.setState({
+        // add new event data
+        calendarEvents: this.state.calendarEvents.concat({
+          // creates a new array
+          title: "New Event",
+          start: arg.date,
+          allDay: arg.allDay
+        })
+      });
+    }
+  };
+  
+  handleDateSelect = (selectInfo) => {
+    let calendarApi = selectInfo.view.calendar
+    let title = prompt('Please enter a new title for your event')
+
+    calendarApi.unselect() // clear date selection
+
+    if (title) {
+      calendarApi.addEvent({ // will render immediately. will call handleEventAdd
+        title,
+        start: selectInfo.startStr,
+        end: selectInfo.endStr,
+        allDay: selectInfo.allDay
+      }, true) // temporary=true, will get overwritten when reducer gives new events
+    }
+  }
+  handleEventClick = () => {
+    this.setState({isEventDetail: !this.state.isEventDetail });
+  }
+  handleEventAdd = (addInfo) => {
+    this.props.createEvent(addInfo.event.toPlainObject())
+      .catch(() => {
+        reportNetworkError()
+        addInfo.revert()
+      })
+  }
+
+  handleEventChange = (changeInfo) => {
+    this.props.updateEvent(changeInfo.event.toPlainObject())
+      .catch(() => {
+        reportNetworkError()
+        changeInfo.revert()
+      })
+  }
+
+  handleEventRemove = (removeInfo) => {
+    this.props.deleteEvent(removeInfo.event.id)
+      .catch(() => {
+        reportNetworkError()
+        removeInfo.revert()
+      })
+  }
+
   render() {
-    const { isFilter, visibleDetail, visibleDetailPost, visibleNewAppoint, visibleSubsidy } = this.state;
+    const { isFilter, visibleDetail, visibleDetailPost, visibleNewAppoint, visibleSubsidy, isEventDetail } = this.state;
     const genExtraTime = () => (
       <BsClockHistory
         size={18}
@@ -278,13 +353,60 @@ export default class extends React.Component {
                   </div>
                 </CSSAnimate>
               </div>}
-            <div className='calendar-content'>
+            {!isEventDetail && <><div className='calendar-content'>
               <FullCalendar
-                plugins={[ dayGridPlugin, timeGridPlugin ]}
-                initialView="dayGridMonth"
-                headerToolbar={false}
-                fixedWeekCount={false}
+                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                headerToolbar={{
+                  left: "today",
+                  center: "prev,title,next",
+                  right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
+                }}
+                
+                // dayHeaders={false}
+                // dayHeaderFormat={{ weekday: 'long', month: 'numeric', day: 'numeric', omitCommas: true }}
+                initialView='dayGridMonth'
+                eventColor= '#2d5cfa'
+                eventDisplay='block'
+                editable={true}
+                selectable={true}
+                selectMirror={true}
+                dayMaxEvents={true}
+                weekends={this.state.calendarWeekends}
+                datesSet={this.handleDates}
+                select={this.handleDateSelect}
+                // events={this.state.calendarEvents}
+                events={events}
+                eventContent={renderEventMonthContent}
+                eventClick={this.handleEventClick}
+                eventAdd={this.handleEventAdd}
+                eventChange={this.handleEventChange} // called for drag-n-drop/resize
+                eventRemove={this.handleEventRemove}
+                
+                // eventRender={ (info) => {
+                //   const tooltip = new Tooltip(info.el, {
+                //     title: info.event.extendedProps.description,
+                //     placement: 'top',
+                //     trigger: 'hover',
+                //     container: 'body'
+                //   });
+                // }}
+                // ref={this.calendarComponentRef}
+                // eventDrop={info => {
+                //   //<--- see from here
+                //   const { start, end } = info.oldEvent._instance.range;
+                //   console.log(start, end);
+                //   const {
+                //     start: newStart,
+                //     end: newEnd
+                //   } = info.event._instance.range;
+                //   console.log(newStart, newEnd);
+                //   if (new Date(start).getDate() === new Date(newStart).getDate()) {
+                //     info.revert();
+                //   }
+                // }}
+              
               />
+
             </div>
             <div className='btn-appointment'>
               <Dropdown overlay={menu} placement="topRight">
@@ -297,7 +419,8 @@ export default class extends React.Component {
                   {intl.formatMessage(messages.makeAppointment)}
                 </Button>
               </Dropdown>
-            </div>
+            </div></>}
+            {isEventDetail && <EventDetail backView={this.handleEventClick}/>}
           </section>
           <section className='div-multi-choice'>
             <Collapse 
@@ -540,4 +663,23 @@ export default class extends React.Component {
       </div>
     );
   }
+}
+function reportNetworkError() {
+  alert('This action could not be completed')
+}
+function renderEventMonthContent(eventInfo) {
+  return (
+    <>
+      <b className='mr-3'>{eventInfo.timeText}</b>
+      <span className='event-title'>{eventInfo.event.title}</span>
+    </>
+  )
+}
+function renderEventWeekContent(eventInfo) {
+  return (
+    <div style={{backgroundColor: 'red'}}>
+      <b className='mr-3'>{eventInfo.timeText}</b>
+      <p className='event-title'>{eventInfo.event.title}</p>
+    </div>
+  )
 }

@@ -121,5 +121,9 @@ export default ({
   appointmentScheduled: {
     id: `${scope}.appointmentScheduled`,
     defaultMessage: 'Appointment Scheduled',
-  }
+  },
+  recurring: {
+    id: `${scope}.recurring`,
+    defaultMessage: 'Recurring',
+  },
 });

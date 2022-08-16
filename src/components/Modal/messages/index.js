@@ -164,5 +164,9 @@ export default {
   totalRemaining: {
     id: `${scope}.totalRemaining`,
     defaultMessage: 'Total remaining',
+  },
+  appeal: {
+    id: `${scope}.appeal`,
+    defaultMessage: 'Appeal',
   }
 };
