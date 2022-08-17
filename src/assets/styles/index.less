@@ -580,6 +580,7 @@ ol {
 .flex { display: flex; }
 .flex-row { flex-direction: row; }
 .flex-col { flex-direction: column; }
+.items-start { align-items: flex-start!important;}
 .items-center { align-items: center;}
 .justify-between { justify-content: space-between;}
 .justify-center { justify-content: center;}
@@ -921,6 +922,11 @@ div.ant-typography,
       color: @black06;
     }
   }
+
+  .fc .fc-toolbar.fc-header-toolbar {
+    border-bottom: 1px solid @gray250;
+    padding-bottom: 10px;
+  }
  
   .fc-daygrid-event {
     font-size: 12px;
@@ -964,5 +970,56 @@ div.ant-typography,
       font-weight: 500;
     }
   }
-  
+  .fc .fc-toolbar-title {
+    font-size: 18px;
+    font-weight: 400;
+    color: @black;
+    margin: 0 15px;
+  }
+  .fc-toolbar-chunk {
+    & > div {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+  .fc .fc-prev-button.fc-button-primary,
+  .fc .fc-next-button.fc-button-primary {
+    font-size: 11px;
+    color: @primary-color-dark;
+    background-color: @blue05;
+    padding: 0;
+    border-radius: 999px;
+    &:not(:disabled):active, 
+    &:not(:disabled).fc-button-active,
+    &:not(:disabled):active:focus,
+    &:not(:disabled).fc-button-active:focus,
+    &:focus,
+    &:hover{
+      color: @primary-color-dark;
+      background-color: @blue05;
+      border-color: transparent;
+      box-shadow: unset;
+    }
+  }
+  .fc .fc-button-primary {
+    color: @black;
+    background-color: transparent;
+    border-color: transparent;
+    padding: 0 0.65em;
+
+    &:not(:disabled):active, 
+    &:not(:disabled).fc-button-active,
+    &:not(:disabled):active:focus,
+    &:not(:disabled).fc-button-active:focus,
+    &:focus,
+    &:hover{
+      color: @black;
+      background-color: transparent;
+      border-color: transparent;
+      box-shadow: unset!important;
+    }
+    p {margin-bottom: 0}
+    svg {vertical-align: bottom;}
+  }
 }

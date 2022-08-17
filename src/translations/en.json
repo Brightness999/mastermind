@@ -193,6 +193,16 @@
   "routes.dashboard.approved": "Approved",
   "routes.dashboard.appointmentScheduled": "Appointment Scheduled",
   "routes.dashboard.recurring": "Recurring",
+  "routes.dashboard.cancelEvent": "Cancel Event",
+
+  "routes.forgotpass.resetYourPassword": "Reset Your Password",
+  "routes.forgotpass.enterYourEmail": "Enter your user account's verified email address and we will new password to email.",
+  "routes.forgotpass.send": "Send",
+
+  "routes.resetpass.changeYourPassword": "Change Your Password",
+  "routes.resetpass.newPassword": "New password",
+  "routes.resetpass.confirmNewPass": "Confirm new password",
+  "routes.resetpass.submit": "Submit",
 
   "components.mainheader.new": "new",
   "components.mainheader.search": "Search",
@@ -343,5 +353,8 @@
   "components.layout.Closecurrent": "Close current",
   "components.layout.Closeother": "Close other",
   "components.layout.Closeall": "Close all",
-  "components.layout.operating": "Operating"
+  "components.layout.operating": "Operating",
+  "routes.forgotpass.blankPage": "Blank page",
+  "routes.forgotpass.blankPage": "Blank page",
+  "routes.resetpass.blankPage": "Blank page"
 }

@@ -10,10 +10,13 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgDrawer from '../../components/DrawerDetail/messages';
 import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import moment from 'moment';
+import 'moment/locale/en-au'; 
+
 import './style/index.less';
 import '../../assets/styles/login.less';
-const { Paragraph } = Typography;
 
+const { Paragraph } = Typography;
+moment.locale('en');
 class ModalNewAppointment extends React.Component {
     state = {
         valueCalendar: moment(),

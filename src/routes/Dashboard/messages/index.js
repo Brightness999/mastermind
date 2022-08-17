@@ -126,4 +126,8 @@ export default ({
     id: `${scope}.recurring`,
     defaultMessage: 'Recurring',
   },
+  cancelEvent: {
+    id: `${scope}.cancelEvent`,
+    defaultMessage: 'Cancel Event',
+  },
 });

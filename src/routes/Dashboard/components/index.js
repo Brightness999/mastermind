@@ -41,6 +41,7 @@ import EventDetail from './EventDetail';
 import './index.less';
 const { Panel } = Collapse;
 const { TabPane} = Tabs;
+
 @connect()
 export default class extends React.Component {
   constructor(props) {
@@ -52,6 +53,8 @@ export default class extends React.Component {
       visibleNewAppoint: false,
       visibleSubsidy: false,
       isEventDetail: false,
+      isMonth: 1,
+      isGridDayView: 'Grid',
 
       canDrop: true,
       calendarWeekends: true,
@@ -61,9 +64,7 @@ export default class extends React.Component {
       ]
     }
   }
-
-  setCanDrop = () => {};
-  calendar = React.createRef();
+  calendarRef = React.createRef();
 
   onShowFilter = () => {
     this.setState({ isFilter: !this.state.isFilter });
@@ -121,6 +122,22 @@ export default class extends React.Component {
       });
     }
   };
+
+  handleMonthToWeek = () => {
+    if(this.state.isMonth === 1) {
+      this.setState({isMonth: 0});
+    } else {
+      this.setState({isMonth: 1});
+    } 
+  }
+
+  handleChangeDayView = () => {
+    if(this.state.isGridDayView === 'Grid') {
+      this.setState({isGridDayView: 'List'});
+    } else {
+      this.setState({isGridDayView: 'Grid'});
+    } 
+  }
   
   handleDateSelect = (selectInfo) => {
     let calendarApi = selectInfo.view.calendar
@@ -165,7 +182,16 @@ export default class extends React.Component {
   }
 
   render() {
-    const { isFilter, visibleDetail, visibleDetailPost, visibleNewAppoint, visibleSubsidy, isEventDetail } = this.state;
+    const { 
+      isFilter,
+      visibleDetail,
+      visibleDetailPost,
+      visibleNewAppoint,
+      visibleSubsidy, 
+      isEventDetail,
+      isMonth,
+      isGridDayView
+     } = this.state;
     const genExtraTime = () => (
       <BsClockHistory
         size={18}
@@ -179,6 +205,31 @@ export default class extends React.Component {
           onClick={() => {}}
         />
       </Badge>
+    );
+    const btnMonthToWeek = (
+      <Button className='btn-type' onClick={this.handleMonthToWeek}>
+        {isMonth ? intl.formatMessage(messages.month) : intl.formatMessage(messages.week)}
+      </Button>
+    );
+    const btnChangeDayView = (
+      <Segmented
+        onChange={this.handleChangeDayView}
+        options={[
+          {
+            value: 'Grid',
+            icon: <FaCalendarAlt size={18} />,
+          },
+          {
+            value: 'List',
+            icon: <MdFormatAlignLeft size={20}/>,
+          },
+        ]}
+      />
+    );
+    const btnFilter = (
+      <div className='header-left flex flex-row' onClick={this.onShowFilter}>
+        <p className='font-15'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30}/> : <BsFilter size={25}/>}</p>
+      </div>
     );
     const menu = (
       <Menu
@@ -293,31 +344,6 @@ export default class extends React.Component {
             </div>
           </section>
           <section className='div-calendar box-card'>
-            <div className='calendar-header'>
-              <div className='header-left flex flex-row' onClick={this.onShowFilter}>
-                <p className='font-16'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30}/> : <BsFilter size={30}/>}</p>
-              </div>
-              <div className='header-center flex flex-row'>
-                <div className='btn-prev'><BiChevronLeft size={18}/></div>
-                <p className='font-18'>July 2022</p>
-                <div className='btn-next'><BiChevronRight size={18}/></div>
-              </div>
-              <div className='header-right flex flex-row'>
-                <Button className='btn-type'>{intl.formatMessage(messages.month)}</Button>
-                <Segmented
-                  options={[
-                    {
-                      value: 'Grid',
-                      icon: <FaCalendarAlt size={18} />,
-                    },
-                    {
-                      value: 'List',
-                      icon: <MdFormatAlignLeft size={20}/>,
-                    },
-                  ]}
-                />
-              </div>
-            </div>
             {isFilter && <div className='calendar-filter'>
                 <CSSAnimate className="animated-shorter" type={isFilter ? 'fadeIn' : 'fadeOut'}>
                   <Row gutter={10}>
@@ -356,14 +382,32 @@ export default class extends React.Component {
             {!isEventDetail && <><div className='calendar-content'>
               <FullCalendar
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                ref={this.calendarRef}
                 headerToolbar={{
-                  left: "today",
+                  left: "filterButton",
                   center: "prev,title,next",
-                  right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
+                  right: "monthToWeekButton,segmentView"
                 }}
                 
-                // dayHeaders={false}
-                // dayHeaderFormat={{ weekday: 'long', month: 'numeric', day: 'numeric', omitCommas: true }}
+                views= {{
+                  monthToWeekButton: {
+                    type: isMonth ? 'dayGridMonth' : 'timeGridWeek',
+                    buttonText: btnMonthToWeek,
+                    
+                  },
+                  segmentView: {
+                    type: isGridDayView === 'Grid' ? 'dayGridMonth' : 'listWeek',
+                    buttonText: btnChangeDayView,
+                  },
+                  week: {
+                    titleFormat: { month: 'numeric', day: 'numeric' }
+                  },
+                }}
+                customButtons={{
+                  filterButton: {
+                      text: btnFilter,
+                  },
+                }}
                 initialView='dayGridMonth'
                 eventColor= '#2d5cfa'
                 eventDisplay='block'
@@ -373,38 +417,15 @@ export default class extends React.Component {
                 dayMaxEvents={true}
                 weekends={this.state.calendarWeekends}
                 datesSet={this.handleDates}
-                select={this.handleDateSelect}
+                // select={this.handleDateSelect}
                 // events={this.state.calendarEvents}
                 events={events}
-                eventContent={renderEventMonthContent}
+                eventContent={renderEventContent}
                 eventClick={this.handleEventClick}
-                eventAdd={this.handleEventAdd}
-                eventChange={this.handleEventChange} // called for drag-n-drop/resize
+                // eventAdd={this.handleEventAdd}
+                // eventChange={this.handleEventChange} // called for drag-n-drop/resize
                 eventRemove={this.handleEventRemove}
-                
-                // eventRender={ (info) => {
-                //   const tooltip = new Tooltip(info.el, {
-                //     title: info.event.extendedProps.description,
-                //     placement: 'top',
-                //     trigger: 'hover',
-                //     container: 'body'
-                //   });
-                // }}
                 // ref={this.calendarComponentRef}
-                // eventDrop={info => {
-                //   //<--- see from here
-                //   const { start, end } = info.oldEvent._instance.range;
-                //   console.log(start, end);
-                //   const {
-                //     start: newStart,
-                //     end: newEnd
-                //   } = info.event._instance.range;
-                //   console.log(newStart, newEnd);
-                //   if (new Date(start).getDate() === new Date(newStart).getDate()) {
-                //     info.revert();
-                //   }
-                // }}
-              
               />
 
             </div>
@@ -667,19 +688,11 @@ export default class extends React.Component {
 function reportNetworkError() {
   alert('This action could not be completed')
 }
-function renderEventMonthContent(eventInfo) {
+function renderEventContent(eventInfo) {
   return (
     <>
       <b className='mr-3'>{eventInfo.timeText}</b>
       <span className='event-title'>{eventInfo.event.title}</span>
     </>
-  )
-}
-function renderEventWeekContent(eventInfo) {
-  return (
-    <div style={{backgroundColor: 'red'}}>
-      <b className='mr-3'>{eventInfo.timeText}</b>
-      <p className='event-title'>{eventInfo.event.title}</p>
-    </div>
   )
 }

@@ -5,8 +5,11 @@ import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
+import 'moment/locale/en-au'; 
 import intl from 'react-intl-universal';
 import messages from '../../messages';
+moment.locale('en');
+
 class SubsidyProgram extends Component {
     state = {
         valueCalendar: moment(),

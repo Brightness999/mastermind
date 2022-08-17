@@ -28,7 +28,7 @@ application.use({ onError: config.exception.global });
 request.config(config.request);
 
 // Using mock data
-// require('./__mocks__');
+require('./__mocks__');
 // -> Developer mock data
 // if (process.env.NODE_ENV === 'development') {
 //   require('./__mocks__');

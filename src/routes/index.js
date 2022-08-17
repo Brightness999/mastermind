@@ -1,6 +1,5 @@
 import { createRoutes } from '../utils/core';
 import { routerLinks } from './constant';
-import BasicLayout from '../layouts/BasicLayout';
 import UserLayout from '../layouts/UserLayout';
 import MainLayout from '../layouts/MainLayout';
 
@@ -8,8 +7,6 @@ import NotFound from './Pages/404';
 import Page403 from './Pages/403';
 import Page500 from './Pages/500';
 
-
-// import Dashboard from './Dashboard2';
 import Blank from './Blank';
 import Login from './Sign/Login';
 import CreateAccount from './Sign/CreateAccount';
@@ -18,6 +15,8 @@ import SubsidyReview from './Sign/SubsidyReview';
 import InfoSchool from './Sign/InfoSchool';
 import InfoAdmin from './Sign/InfoAdmin';
 import Dashboard from './Dashboard';
+import ForgotPass from './Sign/ForgotPass';
+import ResetPass from './Sign/ResetPass';
 
 const routesConfig = app => [
   
@@ -41,7 +40,6 @@ const routesConfig = app => [
     indexRoute: routerLinks['Dashboard'],
     childRoutes: [
       Dashboard(app),
-      // 💬 generate admin to here
     ]
   },
   {
@@ -53,9 +51,12 @@ const routesConfig = app => [
       Login(app), 
       CreateAccount(app),
       SubsidyRequest(app),
+      ForgotPass(app),
+      ResetPass(app),
       InfoAdmin(app),
       InfoSchool(app),
       SubsidyReview(app),
+      // 💬 generate admin to here
       NotFound()]
   }
 ];

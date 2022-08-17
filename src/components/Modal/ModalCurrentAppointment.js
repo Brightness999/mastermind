@@ -10,9 +10,12 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgDrawer from '../../components/DrawerDetail/messages';
 import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import moment from 'moment';
+import 'moment/locale/en-au'; 
+
 import './style/index.less';
 import '../../assets/styles/login.less';
 const { Paragraph } = Typography;
+moment.locale('en');
 
 class ModalCurrentAppointment extends React.Component {
     state = {
@@ -81,7 +84,7 @@ class ModalCurrentAppointment extends React.Component {
         <Button key="back" onClick={this.props.onCancel}>
           {intl.formatMessage(msgReview.goBack).toUpperCase()}
         </Button>,
-        (!this.state.isConfirm &&<Button key="submit" type="primary" onClick={this.onConfirm}>
+        (!this.state.isConfirm && <Button key="submit" type="primary" onClick={this.onConfirm}>
             {intl.formatMessage(msgDrawer.reschedule).toUpperCase()}
         </Button>),
         (this.state.isConfirm && <Popover 

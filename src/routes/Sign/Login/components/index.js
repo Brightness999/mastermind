@@ -17,10 +17,9 @@ import './index.less';
 export default class extends React.Component {
   
     render() {
-      const { locale } = this.props.global;
       const onFinish = (values: any) => {
         console.log('Success:', values);
-        // window.location.href="/administrator/dashboard"
+        window.location.href="/account/dashboard"
       };
     
       const onFinishFailed = (errorInfo: any) => {
@@ -70,7 +69,7 @@ export default class extends React.Component {
                     
                       <div className="div-new-user">
                         <Link to={routerLinks['CreateAccount']}>{intl.formatMessage(messages.createAccount)}</Link>
-                        <Link to='/'>{intl.formatMessage(messages.forgotPass)}</Link>
+                        <Link to={routerLinks['ForgotPass']}>{intl.formatMessage(messages.forgotPass)}</Link>
                       </div>
                   </div>
               </Row>
