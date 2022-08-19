@@ -35,7 +35,16 @@ export default class extends React.Component {
                     <p className='mt-1'>{intl.formatMessage(messages.enterYourEmail)}</p>
                     <Form.Item
                       name="email"
-                      rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' +  intl.formatMessage(msgCreate.email)}]}
+                      rules={[
+                        { 
+                          required: true, 
+                          message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' +  intl.formatMessage(msgCreate.email)
+                        },
+                        { 
+                          type: 'email',
+                          message: intl.formatMessage(msgLogin.emailNotValid)
+                        }
+                        ]}
                     >
                         <Input placeholder={intl.formatMessage(msgCreate.email)}/>
                     </Form.Item>

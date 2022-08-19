@@ -1,6 +1,8 @@
 import React from 'react';
 import { Button, Steps } from 'antd';
 import { BiChevronLeft } from 'react-icons/bi';
+import { ModalCreateDone } from '../../../../components/Modal';
+
 import intl from 'react-intl-universal';
 import messages from '../messages';
 import CreateDefault from './create_default';
@@ -14,8 +16,10 @@ import InfoServices from './Provider/info_services';
 import InfoAvailability from './Provider/info_availability';
 import SubsidyProgram from './Provider/subsidy_program';
 import InfoReview from './Provider/info_review';
-import { ModalCreateDone } from '../../../../components/Modal';
+import InfoSchool from './School/info_school';
+import InfoAdmin from './Admin/info_admin';
 import './index.less';
+import '../../../../assets/styles/login.less';
 const { Step } = Steps;
 
 export default class extends React.Component {
@@ -23,41 +27,128 @@ export default class extends React.Component {
     super(props);
     this.state = {
       currentStep: 0,
-      visibleCreateDone: false, 
+      accountType: intl.formatMessage(messages.parent),
+      visibleCreateDone: false,
     }
   }
 
+
+
   nextStep = () => {
-    this.setState({currentStep: this.state.currentStep + 1});
+    this.setState({ currentStep: this.state.currentStep + 1 });
     console.log("Step", this.state.currentStep)
   };
 
   prevStep = () => {
-    this.setState({currentStep: this.state.currentStep - 1});
+    this.setState({ currentStep: this.state.currentStep - 1 });
   };
-  
+
   handleContinue = () => {
     // if(this.state.currentStep <= 2) {
     //   this.nextStep();
     // } else {
     //   this.openModalCreateDone();
     // }
-    if(this.state.currentStep <= 4) {
+    if (this.state.currentStep <= 4) {
       this.nextStep();
-    } 
-    // else {
-    //   window.location.href="/login";
-    // }
+    }
   }
+
+  handleChange = (accountType) => {
+    switch (accountType) {
+      case intl.formatMessage(messages.parent):
+        return this.setState({accountType: intl.formatMessage(messages.parent)})
+      case intl.formatMessage(messages.provider):
+        return this.setState({accountType: intl.formatMessage(messages.provider)})
+      case intl.formatMessage(messages.school):
+        return this.setState({accountType: intl.formatMessage(messages.school)})
+      case intl.formatMessage(messages.admin):
+        return this.setState({accountType: intl.formatMessage(messages.admin)})
+    }
+  }
+
+  handleContinueDefault = (accountType) => {
+    if (this.state.currentStep === 0) {
+      this.setState({accountType: accountType});
+    }
+  }
+
+  getStepsComponent = (type) => {
+    switch (type) {
+      case intl.formatMessage(messages.parent):
+        return (
+          <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 450 }}>
+            <Step key='default' title={intl.formatMessage(messages.accountInfo)} icon={<p>1</p>} />
+            <Step key='info_parent' title={intl.formatMessage(messages.contactInfo)} icon={<p>2</p>} />
+            <Step key='info_child' title={intl.formatMessage(messages.dependentsInfo)} icon={<p>3</p>} />
+            <Step key='info_progress' title={intl.formatMessage(messages.progessInfo)} icon={<p>4</p>} />
+            <Step key='review_info' title={intl.formatMessage(messages.reviewInfo)} icon={<p>5</p>} />
+          </Steps>
+        )
+      case intl.formatMessage(messages.provider):
+        return (
+          <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 450 }}>
+            <Step key='default' title={intl.formatMessage(messages.accountInfo)} icon={<p>1</p>} />
+            <Step key='info_profile' title={intl.formatMessage(messages.profileInfo)} icon={<p>2</p>} />
+            <Step key='info_services' title={intl.formatMessage(messages.servicesInfo)} icon={<p>3</p>} />
+            <Step key='info_availability' title={intl.formatMessage(messages.availabilityInfo)} icon={<p>4</p>} />
+            <Step key='subsidy' title={intl.formatMessage(messages.subsidy)} icon={<p>5</p>} />
+            <Step key='info_review' title={intl.formatMessage(messages.reviewInfo)} icon={<p>6</p>} />
+          </Steps>
+        )
+    }
+  }
+
+  getStepContentComponent = (currentStep) => {
+    switch (currentStep) {
+      case 0:
+        return (<CreateDefault onContinue={this.handleContinue} onHandleChange={this.handleChange} />)
+      case 1:
+        switch (this.state.accountType) {
+          case intl.formatMessage(messages.parent):
+            return (<InfoParent onContinueParent={this.handleContinue} />)
+          case intl.formatMessage(messages.provider):
+            return (<InfoProfile onContinueProfile={this.handleContinue} />)
+          case intl.formatMessage(messages.school):
+            return (<InfoSchool />)
+          case intl.formatMessage(messages.admin):
+            return (<InfoAdmin />)
+        }
+      case 2:
+        switch (this.state.accountType) {
+          case intl.formatMessage(messages.parent):
+            return (<InfoChild onContinueChild={this.handleContinue} />)
+          case intl.formatMessage(messages.provider):
+            return (<InfoServices onContinueServices={this.handleContinue} />)
+        }
+      case 3:
+        switch (this.state.accountType) {
+          case intl.formatMessage(messages.parent):
+            return (<InfoProgress onContinueProgress={this.handleContinue} />)
+          case intl.formatMessage(messages.provider):
+            return (<InfoAvailability onContinueAvailability={this.handleContinue} />)
+        }
+      case 4:
+        switch (this.state.accountType) {
+          case intl.formatMessage(messages.parent):
+            return (<ReviewAccount onContinueReview={this.handleContinue} />)
+          case intl.formatMessage(messages.provider):
+            return (<SubsidyProgram onContinueProgram={this.handleContinue} />)
+        }
+      case 5:
+        return <InfoReview onContinueReview={this.handleContinue} />
+    }
+  }
+
   openModalCreateDone = () => {
     this.setState({ visibleCreateDone: true });
   }
   closeModalCreateDone = () => {
-      this.setState({ visibleCreateDone: false });
+    this.setState({ visibleCreateDone: false });
   }
 
   render() {
-    const { currentStep, visibleCreateDone } = this.state;
+    const { currentStep, visibleCreateDone, accountType } = this.state;
 
     const createDoneProps = {
       visible: visibleCreateDone,
@@ -66,63 +157,30 @@ export default class extends React.Component {
     };
     return (
       <div className="full-layout page createaccount-page">
-        
-          {currentStep === 0 && <div className="steps-content">
-            <CreateDefault onContinueDefault={this.handleContinue}/>
-          </div>}
-          {currentStep === 1 && <div className="steps-content">
-            {/* <InfoParent onContinueParent={this.handleContinue}/> */}
-            <InfoProfile onContinueProfile={this.handleContinue}/>
-          </div>}
-          {currentStep === 2 && <div className="steps-content">
-            {/* <InfoChild onContinueChild={this.handleContinue}/> */}
-            <InfoServices onContinueServices={this.handleContinue}/>
-          </div>}
-          {currentStep === 3 && <div className="steps-content">
-            {/* <InfoProgress onContinueProgress={this.handleContinue}/> */}
-            <InfoAvailability onContinueAvailability={this.handleContinue}/>
-          </div>}
-          {currentStep === 4 && <div className="steps-content">
-            {/* <ReviewAccount onContinueReview={this.handleContinue}/> */}
-            <SubsidyProgram onContinueProgram={this.handleContinue}/>
-          </div>}
-          {currentStep === 5 && <div className="steps-content">
-            <InfoReview onContinueReview={this.handleContinue}/>
-          </div>}
-          {/* <Steps current={currentStep} responsive={false} style={{maxWidth: 500}}
-              <Step key='default' title={intl.formatMessage(messages.accountInfo)} icon={<p>1</p>}/>
-              <Step key='info_parent' title={intl.formatMessage(messages.contactInfo)} icon={<p>2</p>}/>
-              <Step key='info_child' title={intl.formatMessage(messages.dependentsInfo)} icon={<p>3</p>}/>
-              <Step key='info_progress' title={intl.formatMessage(messages.progessInfo)} icon={<p>4</p>}/>
-              <Step key='review_info' title={intl.formatMessage(messages.reviewInfo)} icon={<p>5</p>}/>
-          </Steps> */}
-          <Steps current={currentStep} responsive={false} style={{maxWidth: 600}}>
-              <Step key='default' title={intl.formatMessage(messages.accountInfo)} icon={<p>1</p>}/>
-              <Step key='info_profile' title={intl.formatMessage(messages.profileInfo)} icon={<p>2</p>}/>
-              <Step key='info_services' title={intl.formatMessage(messages.servicesInfo)} icon={<p>3</p>}/>
-              <Step key='info_availability' title={intl.formatMessage(messages.availabilityInfo)} icon={<p>4</p>}/>
-              <Step key='subsidy' title={intl.formatMessage(messages.subsidy)} icon={<p>5</p>}/>
-              <Step key='info_review' title={intl.formatMessage(messages.reviewInfo)} icon={<p>6</p>}/>
-          </Steps>
-          <div className="steps-action">
-            
-            {/* {currentStep === steps.length - 1 && (
+        <div className='step-content'>
+          {this.getStepContentComponent(currentStep)}
+        </div>
+
+        {this.getStepsComponent(accountType)}
+        <div className="steps-action">
+
+          {/* {currentStep === steps.length - 1 && (
               <Button 
                 type="primary" 
                 onClick={() => message.success('Processing complete!')}>
                 Done
               </Button>
             )} */}
-            {currentStep > 0 && (
-              <Button
-                type="text"
-                className='back-btn'
-                onClick={() => this.prevStep()}
-              >
-                <BiChevronLeft size={25}/>{intl.formatMessage(messages.back)}
-              </Button>
-            )}
-            {/* {currentStep < steps.length - 1 && (
+          {currentStep > 0 && (
+            <Button
+              type="text"
+              className='back-btn'
+              onClick={() => this.prevStep()}
+            >
+              <BiChevronLeft size={25} />{intl.formatMessage(messages.back)}
+            </Button>
+          )}
+          {/* {currentStep < steps.length - 1 && (
               <Button 
                 type="text" 
                 className='next-btn'
@@ -130,8 +188,8 @@ export default class extends React.Component {
                 Next<BiChevronLeft size={25}/>
               </Button>
             )} */}
-          </div>
-          <ModalCreateDone {...createDoneProps}/>
+        </div>
+        <ModalCreateDone {...createDoneProps} />
       </div>
     );
   }

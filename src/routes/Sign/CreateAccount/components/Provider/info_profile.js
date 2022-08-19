@@ -1,12 +1,14 @@
 import React,  {Component} from 'react';
-import { Row, Col, Form, Button, Input, Select } from 'antd';
-import { BsPlusCircle } from 'react-icons/bs';
+import { Row, Col, Form, Button, Input, Select, Space } from 'antd';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 class InfoProfile extends Component {
     onFinish = (values) => {
         console.log('Success:', values);
+        this.props.onContinueProfile();
       };
     
     onFinishFailed = (errorInfo) => {
@@ -66,7 +68,7 @@ class InfoProfile extends Component {
                     >
                         <Input placeholder={intl.formatMessage(messages.agency)}/>
                     </Form.Item>
-                    
+
                     <Row gutter={14}>
                         <Col xs={16} sm={16} md={16}>
                             <Form.Item
@@ -78,7 +80,11 @@ class InfoProfile extends Component {
                             </Form.Item>
                         </Col>
                         <Col xs={8} sm={8} md={8}>
-                            <Form.Item name="type" className='bottom-0'>
+                            <Form.Item 
+                                name="type" 
+                                className='bottom-0'
+                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactEmail) }]}
+                            >
                                 <Select placeholder={intl.formatMessage(messages.type)}>
                                     <Select.Option value='t1'>type 1</Select.Option>
                                     <Select.Option value='t2'>type 2</Select.Option>
@@ -87,28 +93,73 @@ class InfoProfile extends Component {
                         </Col>
                     </Row>
 
-                    <div className='text-center'>
-                        <Button
-                            type="text" 
-                            className='add-number-btn mb-10'     
-                            icon={<BsPlusCircle size={17} className='mr-5'/>}                                
-                        >
-                            {intl.formatMessage(messages.addNumber)}
-                        </Button>
-                    </div>
+                    <Form.List name="phone_number">
+                        {(fields, { add, remove }) => (
+                        <>
+                            {fields.map(({ key, name, ...restField }) => (
+                            <Row gutter={14}>
+                                <Col xs={16} sm={16} md={16}>
+                                    <Form.Item
+                                        {...restField}
+                                        name={[name, 'contact_num']}
+                                        className='mt-10 bottom-0'
+                                        rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) }]}
+                                    >
+                                        <Input placeholder={intl.formatMessage(messages.contactNumber)}/>
+                                    </Form.Item>
+                                </Col>
+                                <Col xs={8} sm={8} md={8} className='item-remove'>
+                                    <Form.Item 
+                                        {...restField} 
+                                        name={[name, 'contact_type']} 
+                                        rules={[{ required: true,message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type)}]}
+                                        className='mt-10 bottom-0'
+                                    >
+                                        <Select placeholder={intl.formatMessage(messages.type)}>
+                                            <Select.Option value='t1'>type 1</Select.Option>
+                                            <Select.Option value='t2'>type type type 2</Select.Option>
+                                        </Select>
+                                    </Form.Item>
+                                    <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(name)} />
+                                </Col>
+                            </Row>
+                            ))}
+                            <Form.Item className='text-center mb-0'>
+                                <Button
+                                    type="text" 
+                                    className='add-number-btn mb-10'     
+                                    icon={<BsPlusCircle size={17} className='mr-5'/>} 
+                                    onClick={() => add()}                               
+                                >
+                                    {intl.formatMessage(messages.addNumber)}
+                                </Button>
+                            </Form.Item>
+                        </>
+                        )}
+                    </Form.List>
                     
                     <Row gutter={14}>
                         <Col xs={16} sm={16} md={16}>
                             <Form.Item
                                 name="contact_email"
                                 className='bottom-0'
-                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactEmail) }]}
+                                rules={[
+                                    { 
+                                        required: true, 
+                                        message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactEmail)
+                                    },
+                                    { type: 'email', message: intl.formatMessage(messagesLogin.emailNotValid) }
+                                ]}
                             >
                                 <Input placeholder={intl.formatMessage(messages.contactEmail)}/>
                             </Form.Item>
                         </Col>
                         <Col xs={8} sm={8} md={8}>
-                            <Form.Item name="type" className='bottom-0'>
+                            <Form.Item 
+                                name="type" 
+                                className='bottom-0'
+                                rules={[{ required: true,message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type)}]}
+                            >
                                 <Select placeholder={intl.formatMessage(messages.type)}>
                                     <Select.Option value='t1'>type 1</Select.Option>
                                     <Select.Option value='t2'>type 2</Select.Option>
@@ -116,15 +167,50 @@ class InfoProfile extends Component {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <div className='text-center'>
-                        <Button
-                            type="text" 
-                            className='add-email-btn mb-10'     
-                            icon={<BsPlusCircle size={17} className='mr-5'/>}                                
-                        >
-                            {intl.formatMessage(messages.addEmail)}
-                        </Button>
-                    </div>
+
+                    <Form.List name="email">
+                        {(fields, { add, remove }) => (
+                        <>
+                            {fields.map(({ key, name, ...restField }) => (
+                            <Row gutter={14}>
+                                <Col xs={16} sm={16} md={16}>
+                                    <Form.Item
+                                        {...restField}
+                                        name={[name, 'contact_email']}
+                                        className='mt-10 bottom-0'
+                                        rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactEmail) }]}
+                                    >
+                                        <Input placeholder={intl.formatMessage(messages.contactEmail)}/>
+                                    </Form.Item>
+                                </Col>
+                                <Col xs={8} sm={8} md={8} className='item-remove'>
+                                    <Form.Item 
+                                        {...restField} 
+                                        name={[name, 'contact_type']}  
+                                        rules={[{ required: true,message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type)}]}
+                                        className='mt-10 bottom-0'>
+                                        <Select placeholder={intl.formatMessage(messages.type)}>
+                                            <Select.Option value='t1'>type 1</Select.Option>
+                                            <Select.Option value='t2'>type 2</Select.Option>
+                                        </Select>
+                                    </Form.Item>
+                                    <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(name)} />
+                                </Col>
+                            </Row>
+                            ))}
+                            <Form.Item className='text-center mb-0'>
+                                <Button
+                                    type="text" 
+                                    className='add-number-btn mb-10'     
+                                    icon={<BsPlusCircle size={17} className='mr-5'/>} 
+                                    onClick={() => add()}                               
+                                >
+                                    {intl.formatMessage(messages.addEmail)}
+                                </Button>
+                            </Form.Item>
+                        </>
+                        )}
+                    </Form.List>
 
                     <Form.Item
                         name="professional_exp"
@@ -138,7 +224,7 @@ class InfoProfile extends Component {
                             block
                             type="primary"                                      
                             htmlType="submit"
-                            onClick={this.props.onContinueProfile}
+                            // onClick={this.props.onContinueProfile}
                         >
                             {intl.formatMessage(messages.continue).toUpperCase()}
                         </Button>

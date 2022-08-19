@@ -76,6 +76,10 @@
         &::placeholder {
           color: @black06;
         }
+        &:active,
+        &:focus {
+          border-color: #65aedb;
+        }
       }
       .ant-input-sm {
         font-size: 12px;
@@ -246,6 +250,15 @@
       margin-right: 10px;
       color: @primary-color-dark;
       &:hover { color: @primary-color}
+    }
+  }
+
+  .item-remove {
+    position: relative;
+    .icon-remove {
+      position: absolute;
+      top: 21px;
+      right: -16px;
     }
   }
 }
@@ -456,11 +469,7 @@
 
 .ant-steps {
   margin: auto;
-  padding-left: 60px;
-
-  @media screen and (max-width: 576px) {
-    padding-left: 30px;
-  }
+  padding-left: 30px;
 
   &.ant-steps-horizontal {
     &:not(.ant-steps-label-vertical) {
@@ -564,10 +573,7 @@
       }
     }
     .ant-steps-item-container { 
-      width: 90px;
-      @media screen and (max-width: 576px) {
-        width: 60px;
-      }
+      width: 60px;
     }
   }
 }

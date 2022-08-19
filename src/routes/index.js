@@ -12,8 +12,6 @@ import Login from './Sign/Login';
 import CreateAccount from './Sign/CreateAccount';
 import SubsidyRequest from './Sign/SubsidyRequest';
 import SubsidyReview from './Sign/SubsidyReview';
-import InfoSchool from './Sign/InfoSchool';
-import InfoAdmin from './Sign/InfoAdmin';
 import Dashboard from './Dashboard';
 import ForgotPass from './Sign/ForgotPass';
 import ResetPass from './Sign/ResetPass';
@@ -53,8 +51,6 @@ const routesConfig = app => [
       SubsidyRequest(app),
       ForgotPass(app),
       ResetPass(app),
-      InfoAdmin(app),
-      InfoSchool(app),
       SubsidyReview(app),
       // 💬 generate admin to here
       NotFound()]

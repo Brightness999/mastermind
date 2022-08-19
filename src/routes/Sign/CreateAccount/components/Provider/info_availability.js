@@ -5,7 +5,6 @@ import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
 
 class InfoAvailability extends Component {
     onFinish = (values) => {

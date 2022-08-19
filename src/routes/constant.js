@@ -3,8 +3,6 @@ export const routerLinks = {
   CreateAccount: '/createaccount',
   SubsidyRequest: '/subsidyrequest',
   SubsidyReview: '/subsidyreview',
-  InfoSchool: '/infoschool',
-  InfoAdmin: '/infoadmin',
   ForgotPass: '/forgotpass',
   ResetPass: '/resetpass',
 

@@ -10,17 +10,18 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgDrawer from '../../components/DrawerDetail/messages';
 import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import moment from 'moment';
-import 'moment/locale/en-au'; 
 
 import './style/index.less';
 import '../../assets/styles/login.less';
 const { Paragraph } = Typography;
+import 'moment/locale/en-au'; 
 moment.locale('en');
 
 class ModalCurrentAppointment extends React.Component {
     state = {
         valueCalendar: moment(),
         selectedValue: moment(),
+        currentMonth: moment().format('MMMM YYYY'),
         isChoose: 0,
         isConfirm: false,
         isPopupComfirm: false,
@@ -32,6 +33,14 @@ class ModalCurrentAppointment extends React.Component {
     }
     onPanelChange = (newValue) => {
         this.setState({valueCalendar: newValue});
+    }
+    nextMonth = () => {
+        this.setState({selectedValue: moment(this.state.selectedValue).add(1, 'month')});
+        this.setState({valueCalendar: moment(this.state.selectedValue).add(1, 'month')});
+    }
+    prevMonth = () => {
+        this.setState({selectedValue: moment(this.state.selectedValue).add(-1, 'month')});
+        this.setState({valueCalendar: moment(this.state.selectedValue).add(-1, 'month')});
     }
 
     onChooseDoctor = (index) => {
@@ -222,8 +231,18 @@ class ModalCurrentAppointment extends React.Component {
                                                             <p className='font-12 mb-0'>{selectedValue?.format('MMMM YYYY')}</p>
                                                         </Col>
                                                         <Col>
-                                                            <Button type='text' className='mr-10 left-btn' icon={<BiChevronLeft size={25}/>}/>
-                                                            <Button type='text' className='right-btn' icon={<BiChevronRight size={25}/>}/>
+                                                            <Button
+                                                                type='text' 
+                                                                className='mr-10 left-btn' 
+                                                                icon={<BiChevronLeft size={25}/>}
+                                                                onClick={this.prevMonth}
+                                                             />
+                                                            <Button 
+                                                                type='text' 
+                                                                className='right-btn' 
+                                                                icon={<BiChevronRight size={25}/>}
+                                                                onClick={this.nextMonth}
+                                                            />
                                                         </Col>
                                                     </Row>
                                                 </div>

@@ -37,4 +37,8 @@ export default {
     id: `${scope}.pleaseEnter`,
     defaultMessage: 'Please enter your',
   },
+  emailNotValid: {
+    id: `${scope}.emailNotValid`,
+    defaultMessage: 'Email is not a valid',
+  },
 };

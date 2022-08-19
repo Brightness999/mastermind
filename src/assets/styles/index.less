@@ -93,6 +93,19 @@ h1, h2, h3, h4, h5, h6 { font-weight: 500 !important; }
 
 .ant-input-affix-wrapper .ant-input:not(:first-child) { padding-left: 40px; }
 
+input:-webkit-autofill, 
+input:-webkit-autofill:hover,  
+input:-webkit-autofill:focus, 
+textarea:-webkit-autofill, 
+textarea:-webkit-autofill:hover, 
+textarea:-webkit-autofill:focus, 
+select:-webkit-autofill, 
+select:-webkit-autofill:hover, 
+select:-webkit-autofill:focus { 
+  -webkit-background-color: transparent;     
+  transition: background-color 5000s ease-in-out 0s; 
+}
+
 .height-60 {
   height: 60px;
 }
@@ -575,6 +588,9 @@ ol {
 .my-10 {
   margin-top: 10px!important;
   margin-bottom: 10px!important;
+}
+.relative {
+  position: relative;
 }
 .flex-1 { flex: 1;}
 .flex { display: flex; }

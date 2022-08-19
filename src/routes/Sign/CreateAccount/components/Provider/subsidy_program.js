@@ -5,15 +5,17 @@ import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import 'moment/locale/en-au'; 
 import intl from 'react-intl-universal';
 import messages from '../../messages';
+import 'moment/locale/en-au'; 
 moment.locale('en');
 
 class SubsidyProgram extends Component {
     state = {
         valueCalendar: moment(),
         selectedValue: moment(),
+        currentDate: new Date(),
+        currentMonth: moment().format('MMMM YYYY'),
     }
     onSelect = (newValue) => {
         this.setState({valueCalendar: newValue});
@@ -29,6 +31,14 @@ class SubsidyProgram extends Component {
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
+    nextMonth = () => {
+        this.setState({selectedValue: moment(this.state.selectedValue).add(1, 'month')});
+        this.setState({valueCalendar: moment(this.state.selectedValue).add(1, 'month')});
+    }
+    prevMonth = () => {
+        this.setState({selectedValue: moment(this.state.selectedValue).add(-1, 'month')});
+        this.setState({valueCalendar: moment(this.state.selectedValue).add(-1, 'month')});
+    }
     render() {
         const { valueCalendar, selectedValue } = this.state;
         return (
@@ -127,8 +137,18 @@ class SubsidyProgram extends Component {
                                                         <p className='font-16 mb-0'>{selectedValue?.format('MMMM YYYY')}</p>
                                                     </Col>
                                                     <Col>
-                                                        <Button type='text' className='mr-10 left-btn' icon={<BiChevronLeft size={25}/>}/>
-                                                        <Button type='text' className='right-btn' icon={<BiChevronRight size={25}/>}/>
+                                                        <Button 
+                                                        type='text' 
+                                                        className='mr-10 left-btn' 
+                                                        icon={<BiChevronLeft size={25}/>}
+                                                        onClick={this.prevMonth}
+                                                        />
+                                                        <Button
+                                                        type='text'
+                                                        className='right-btn' 
+                                                        icon={<BiChevronRight size={25}/>}
+                                                        onClick={this.nextMonth}
+                                                        />
                                                     </Col>
                                                 </Row>
                                             </div>
