@@ -122,6 +122,10 @@ export default ({
     id: `${scope}.phoneNumber`,
     defaultMessage: 'Phone number',
   },
+  phoneNumberValid: {
+    id: `${scope}.phoneNumberValid`,
+    defaultMessage: 'Phone number must be number',
+  },
   mother: {
     id: `${scope}.mother`,
     defaultMessage: 'Mother',
@@ -242,9 +246,17 @@ export default ({
     id: `${scope}.from`,
     defaultMessage: 'From',
   },
+  fromMess: {
+    id: `${scope}.fromMess`,
+    defaultMessage: 'Please enter From time',
+  },
   to: {
     id: `${scope}.to`,
     defaultMessage: 'to',
+  },
+  toMess: {
+    id: `${scope}.toMess`,
+    defaultMessage: 'Please enter To time',
   },
   addTimeRange: {
     id: `${scope}.addTimeRange`,
@@ -541,6 +553,10 @@ export default ({
   name: {
     id: `${scope}.name`,
     defaultMessage: 'Name',
+  },
+  availabilitySchedule: {
+    id: `${scope}.availabilitySchedule`,
+    defaultMessage: 'Availability schedule',
   }
   
 });

@@ -129,7 +129,7 @@
   .ant-picker { 
     height: 40px;
     width: 100%;
-    border: 1px solid @gray250;
+    // border: 1px solid @gray250;
    
     .ant-picker-input > input {
       color: @black87;
@@ -268,7 +268,23 @@
   box-shadow: 0px 2px 7px 0px rgba(204, 204, 204, 0.6);
 }
 
-.col-create-default,
+.col-create-default {
+  width: 400px;
+  margin-top: 50px;
+  .continue-btn {
+    margin-top: 100px;
+  }
+  .item-remove {
+    .ant-form-item {
+      width: calc(100% - 20px);
+    }
+    .icon-remove {
+      right: 2px;
+      top: 12px;
+    }
+  }
+}
+
 .col-admin {
   width: 400px;
   margin-top: 120px;
@@ -618,9 +634,10 @@
   }
 }
 
-.div-dependent-form:not(:last-child){
+.div-dependent-form:not(:nth-last-child(2)) {
   border-bottom: 1px solid @gray800!important; 
   margin-bottom: 15px;
+  
 }
 .div-availability {
   overflow: hidden;

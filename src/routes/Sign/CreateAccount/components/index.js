@@ -106,7 +106,7 @@ export default class extends React.Component {
       case 1:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<InfoParent onContinueParent={this.handleContinue} />)
+            return (<InfoParent onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoProfile onContinueProfile={this.handleContinue} />)
           case intl.formatMessage(messages.school):
@@ -117,14 +117,14 @@ export default class extends React.Component {
       case 2:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<InfoChild onContinueChild={this.handleContinue} />)
+            return (<InfoChild onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoServices onContinueServices={this.handleContinue} />)
         }
       case 3:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<InfoProgress onContinueProgress={this.handleContinue} />)
+            return (<InfoProgress onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoAvailability onContinueAvailability={this.handleContinue} />)
         }

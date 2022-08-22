@@ -1,6 +1,5 @@
 import React,  {Component} from 'react';
-import { Row, Col, Form, Button, Input, Select, Space } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Row, Col, Form, Button, Input, Select } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
