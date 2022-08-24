@@ -24,6 +24,7 @@
     "@fullcalendar/list": "^5.11.2",
     "@fullcalendar/react": "^5.11.2",
     "@fullcalendar/timegrid": "^5.11.2",
+    "@reduxjs/toolkit": "^1.8.4",
     "animate.css": "^3.7.2",
     "antd": "^4.6.6",
     "bluebird": "^3.7.2",
@@ -54,7 +55,9 @@
     "react-dom": "^17.0.1",
     "react-fast-compare": "^2.0.4",
     "react-icons": "^4.4.0",
-    "react-intl-universal": "^2.1.4"
+    "react-intl-universal": "^2.1.4",
+    "react-redux": "^8.0.2",
+    "redux": "^4.2.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.2",

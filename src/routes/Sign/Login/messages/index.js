@@ -33,6 +33,10 @@ export default {
     id: `${scope}.passwordMessage`,
     defaultMessage: 'Please enter your password.',
   },
+  passwordValidMessage: {
+    id: `${scope}.passwordValidMessage`,
+    defaultMessage: 'Your password is not valid',
+  },
   pleaseEnter: {
     id: `${scope}.pleaseEnter`,
     defaultMessage: 'Please enter your',

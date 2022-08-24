@@ -12,6 +12,8 @@ import 'moment/locale/vi';
 import { homepage } from '../package.json';
 import * as serviceWorker from './serviceWorker';
 import LanguageProvider from './components/LanguageProvider';
+import storeRedux from './redux/store';
+import { Provider } from 'react-redux';
 
 // -> initialization
 const application = dva({
@@ -42,9 +44,11 @@ application.model(require('./models/global').default);
 
 // -> Initialize route
 application.router(({ history, app }) => (
-  <LanguageProvider>
-    <Router history={history}>{createRoutes(app)}</Router>
-  </LanguageProvider>
+  <Provider store={storeRedux}>
+    <LanguageProvider>
+      <Router history={history}>{createRoutes(app)}</Router>
+    </LanguageProvider>
+  </Provider>
 ));
 
 // -> Start

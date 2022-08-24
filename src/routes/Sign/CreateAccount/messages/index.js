@@ -518,9 +518,13 @@ export default ({
     id: `${scope}.nameSchool`,
     defaultMessage: 'Name of school',
   },
+  communitiesServedNote: {
+    id: `${scope}.communitiesServedNote`,
+    defaultMessage: 'Communities served (select all that apply)',
+  },
   communitiesServed: {
     id: `${scope}.communitiesServed`,
-    defaultMessage: 'Communities served (select all that apply)',
+    defaultMessage: 'Communities served',
   },
   schoolAddress: {
     id: `${scope}.schoolAddress`,
@@ -557,6 +561,14 @@ export default ({
   availabilitySchedule: {
     id: `${scope}.availabilitySchedule`,
     defaultMessage: 'Availability schedule',
+  },
+  uploadMess: {
+    id: `${scope}.uploadMess`,
+    defaultMessage: 'Please upload file',
+  },
+  numberSessions: {
+    id: `${scope}.numberSessions`,
+    defaultMessage: 'Number sessions',
   }
   
 });

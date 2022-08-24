@@ -62,5 +62,23 @@ export default ({
   //   id: `${scope}.`,
   //   defaultMessage: '',
   // }
-  
+  dependent: {
+    id: `${scope}.dependent`,
+    defaultMessage: 'Dependent',
+  },
+
+  school: {
+    id: `${scope}.school`,
+    defaultMessage: 'School',
+  },
+
+  phoneNumberValid: {
+    id: `${scope}.phoneNumberValid`,
+    defaultMessage: 'Phone number is not valid',
+  },
+  emailNotValid: {
+    id: `${scope}.emailNotValid`,
+    defaultMessage: 'Email is not valid',
+  }
+
 });

@@ -9,53 +9,90 @@ import messagesCreateAccount from '../../CreateAccount/messages';
 import messagesLogin from '../../Login/messages';
 import './index.less';
 
+
 export default class extends React.Component {
+
   onFinish = (values) => {
     console.log('Success:', values);
   };
 
   onFinishFailed = (errorInfo) => {
-      console.log('Failed:', errorInfo);
+    console.log('Failed:', errorInfo);
   };
+
+  componentDidMount() {
+    let data = localStorage.getItem('subsidyRequest');
+    if (data) {
+      data = JSON.parse(data);
+      this.form.setFieldsValue({
+        ...data
+      })
+    }
+  }
+
+  onSubmit = async () => {
+    try {
+      const values = await this.form.validateFields();
+      localStorage.setItem('subsidyRequest', JSON.stringify(values));
+      this.props.history.push(routerLinks['SubsidyReview']);
+    } catch (error) {
+      console.log('error', error);
+    }
+  }
+
   render() {
-    
     return (
       <div className="full-layout page subsidyrequest-page">
         <Row justify="center" className="row-form">
           <div className='col-form col-subsidy'>
-          <div className='div-form-title mb-10'>
-            <Button
-              type="text"
-              className='back-btn'
-              onClick={() => window.history.back()}
-            >
-              <BiChevronLeft size={25}/>{intl.formatMessage(messagesCreateAccount.back)}
-            </Button>
-            <p className='font-24 text-center mb-0'>{intl.formatMessage(messagesCreateAccount.subsidyRequest)}</p>
-          </div>
-          <Form 
+            <div className='div-form-title mb-10'>
+              <Button
+                type="text"
+                className='back-btn'
+                onClick={() => window.history.back()}
+              >
+                <BiChevronLeft size={25} />{intl.formatMessage(messagesCreateAccount.back)}
+              </Button>
+              <p className='font-24 text-center mb-0'>{intl.formatMessage(messagesCreateAccount.subsidyRequest)}</p>
+            </div>
+            <Form
               name="form_subsidy_request"
               initialValues={{ remember: true }}
               onFinish={this.onFinish}
               onFinishFailed={this.onFinishFailed}
-          >
-              <Form.Item name="dependent">
-                  <Select placeholder={intl.formatMessage(messagesCreateAccount.dependent)}>
-                      <Select.Option value='d1'>Dependent 1</Select.Option>
-                      <Select.Option value='d2'>Dependent 2</Select.Option>
-                  </Select>
+              ref={ref => this.form = ref}
+            >
+              <Form.Item name="dependent"
+                rules=
+                {[{
+                  required: true,
+                  message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.dependent)
+                }]}
+              >
+                <Select placeholder={intl.formatMessage(messagesCreateAccount.dependent)}>
+                  <Select.Option value='d1'>Dependent 1</Select.Option>
+                  <Select.Option value='d2'>Dependent 2</Select.Option>
+                </Select>
               </Form.Item>
-              <Form.Item name="skill_request">
-                  <Select placeholder={intl.formatMessage(messages.skillsetRequested)}>
-                      <Select.Option value='s1'>Skill 1</Select.Option>
-                      <Select.Option value='s2'>Skill 2</Select.Option>
-                  </Select>
+              <Form.Item name="skill_request" rules=
+                {[{
+                  required: true,
+                  message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsetRequested)
+                }]}>
+                <Select placeholder={intl.formatMessage(messages.skillsetRequested)}>
+                  <Select.Option value='s1'>Skill 1</Select.Option>
+                  <Select.Option value='s2'>Skill 2</Select.Option>
+                </Select>
               </Form.Item>
-              <Form.Item name="school">
-                  <Select placeholder={intl.formatMessage(messagesCreateAccount.school)}>
-                      <Select.Option value='s1'>School 1</Select.Option>
-                      <Select.Option value='s2'>School 2</Select.Option>
-                  </Select>
+              <Form.Item name="school" rules=
+                {[{
+                  required: true,
+                  message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school)
+                }]}>
+                <Select placeholder={intl.formatMessage(messagesCreateAccount.school)}>
+                  <Select.Option value='s1'>School 1</Select.Option>
+                  <Select.Option value='s2'>School 2</Select.Option>
+                </Select>
               </Form.Item>
               <Row gutter={14}>
                 <Col xs={24} sm={24} md={12}>
@@ -66,10 +103,15 @@ export default class extends React.Component {
                 </Col>
                 <Col xs={24} sm={24} md={12}>
                   <Form.Item
-                    name="rav_email"
-                    rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.ravPhone) }]}
+                    name="rav_phone"
+                    rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.ravPhone) },
+                    {
+                      pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
+                      message: intl.formatMessage(messages.phoneNumberValid)
+                    },
+                    ]}
                   >
-                    <Input size="small" placeholder={intl.formatMessage(messages.ravPhone) + ' #'}/>
+                    <Input size="small" placeholder={intl.formatMessage(messages.ravPhone) + ' #'} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -80,66 +122,85 @@ export default class extends React.Component {
                     name="name_Rav"
                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.nameOfRav) }]}
                   >
-                    <Input size="small" placeholder={intl.formatMessage(messages.nameOfRav)}/>
+                    <Input size="small" placeholder={intl.formatMessage(messages.nameOfRav)} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={24} md={12}>
                   <Form.Item
                     name="rav_email"
-                    rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.ravEmail) }]}
+                    rules={[
+                      { required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.ravEmail) },
+                      {
+                        type: 'email',
+                        message: intl.formatMessage(messages.emailNotValid)
+                      }
+
+                    ]}
                   >
-                    <Input size="small" placeholder={intl.formatMessage(messages.ravEmail)}/>
+                    <Input size="small" placeholder={intl.formatMessage(messages.ravEmail)} />
                   </Form.Item>
                 </Col>
               </Row>
-              
+
               <Form.Item
-                  name="therapist_contact"
-                  rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.therapistContact) }]}
+                name="therapist_contact"
+                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.therapistContact) }]}
               >
-                  <Input placeholder={intl.formatMessage(messages.therapistContact)}/>
+                <Input placeholder={intl.formatMessage(messages.therapistContact)} />
               </Form.Item>
               <Row gutter={14}>
                 <Col xs={24} sm={24} md={12}>
                   <Form.Item
                     name="therapist_phone"
-                    rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.therapistPhone) }]}
+                    rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.therapistPhone) },
+                    {
+                      pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
+                      message: intl.formatMessage(messages.phoneNumberValid)
+                    },
+                    ]}
                   >
-                    <Input size="small" placeholder={intl.formatMessage(messages.therapistPhone)}/>
+                    <Input size="small" placeholder={intl.formatMessage(messages.therapistPhone)} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={24} md={12}>
                   <Form.Item
                     name="therapist_email"
-                    rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.therapistEmail) }]}
+                    rules={[
+                      { required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.therapistEmail) },
+                      {
+                        type: 'email',
+                        message: intl.formatMessage(messages.emailNotValid)
+                      }
+                    ]}
                   >
-                    <Input size="small" placeholder={intl.formatMessage(messages.therapistEmail)}/>
+                    <Input size="small" placeholder={intl.formatMessage(messages.therapistEmail)} />
                   </Form.Item>
                 </Col>
               </Row>
-              <Divider style={{marginTop: 0, marginBottom: 15, borderColor: '#d7d7d7'}}/>
+              <Divider style={{ marginTop: 0, marginBottom: 15, borderColor: '#d7d7d7' }} />
               <Form.Item
                 name="generate_notes"
                 rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.generalNotes) }]}
               >
-                <Input.TextArea rows={5} placeholder={intl.formatMessage(messages.generalNotes)}/>
+                <Input.TextArea rows={5} placeholder={intl.formatMessage(messages.generalNotes)} />
               </Form.Item>
               <Form.Item name="upload_document" className='input-download'>
                 <Input addonBefore={intl.formatMessage(messages.documents)} suffix={<a className='font-12 underline'>{intl.formatMessage(messages.upload)}</a>} />
               </Form.Item>
               <Form.Item className="form-btn continue-btn" >
-                <Link to={routerLinks['SubsidyReview']}>
-                  <Button
-                      block
-                      type="primary"                                      
-                      htmlType="submit"
-                      // onClick={this.props.onContinueParent}
-                  >
-                      {intl.formatMessage(messages.review).toUpperCase()}
-                  </Button>
-                </Link>
+                {/* <Link to={routerLinks['SubsidyReview']}> */}
+                <Button
+                  block
+                  type="primary"
+                  htmlType="submit"
+                  // onClick={this.props.onContinueParent}
+                  onClick={this.onSubmit}
+                >
+                  {intl.formatMessage(messages.review).toUpperCase()}
+                </Button>
+                {/* </Link> */}
               </Form.Item>
-          </Form>
+            </Form>
           </div>
         </Row>
       </div>

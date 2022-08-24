@@ -1,4 +1,4 @@
-import React,  {Component} from 'react';
+import React, { Component } from 'react';
 import { Row, Col, Form, Button, Input, Select, Checkbox, Segmented, TimePicker, Switch } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
@@ -6,6 +6,9 @@ import intl from 'react-intl-universal';
 import moment from 'moment';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import { setParent } from '../../../../../redux/features/registerSlice';
 
 class InfoProgress extends Component {
     constructor(props) {
@@ -17,19 +20,45 @@ class InfoProgress extends Component {
             isSameAllSchedule: true,
         }
     }
+
+
+    componentDidMount() {
+        console.log(this.state)
+        console.log(this.props.parentStep4);
+        if (this.props.parentStep4 && this.state.isSameAll !== this.props?.parentStep4?.isSameAll ||
+            this.props.parentStep4 && this.state.isSameAllSchedule !== this.props?.parentStep4?.isSameAllSchedule) {
+            this.setState({
+                isSameAll: this.props?.parentStep4?.isSameAll,
+                isSameAllSchedule: this.props?.parentStep4?.isSameAllSchedule,
+            })
+        }
+
+        const parent = this.props.parentStep4
+        this.form?.setFieldsValue({
+            ...parent
+        })
+    }
+
     onFinish = (values) => {
         console.log('Success:', values);
+        this.props.setParent({
+            step4: {
+                ...values,
+                isSameAll: this.state.isSameAll,
+                isSameAllSchedule: this.state.isSameAllSchedule,
+            }
+        });
         this.props.onContinue();
     };
-    
+
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
     onSameAllDependent = () => {
-        this.setState({isSameAll: !this.state.isSameAll});
+        this.setState({ isSameAll: !this.state.isSameAll });
     }
     onSameAllSchedule = () => {
-        this.setState({isSameAllSchedule: !this.state.isSameAllSchedule});
+        this.setState({ isSameAllSchedule: !this.state.isSameAllSchedule });
     }
     render() {
         const day_week = [
@@ -44,37 +73,42 @@ class InfoProgress extends Component {
         return (
             <Row justify="center" className="row-form">
                 <div className='col-form col-create-default'>
-                <div className='div-form-title'>
-                    <p className='font-30 text-center'>{intl.formatMessage(messages.academicInformation)}</p>
-                </div>
-                    <Form 
+                    <div className='div-form-title'>
+                        <p className='font-30 text-center'>{intl.formatMessage(messages.academicInformation)}</p>
+                    </div>
+                    <Form
                         name="form_default"
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
-                        initialValues={{ timeFromTo: this.state.formTime, timeLocation: this.state.fromLocation }}
+                        initialValues={{
+                            timeFromTo: this.state.formTime,
+                            timeLocation: this.props.parentStep4 || this.state.fromLocation
+                        }}
+
+                        ref={ref => this.form = ref}
                     >
                         <p className='font-16 mr-10 mb-5'>{intl.formatMessage(messages.dependent)} #1 First + Last Name </p>
                         <Form.Item
                             name="school"
-                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' +  intl.formatMessage(messages.school)}]}
+                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.school)}/>
+                            <Input placeholder={intl.formatMessage(messages.school)} />
                         </Form.Item>
                         <Form.Item
                             name="primary_teacher"
-                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' +  intl.formatMessage(messages.primaryTeacher)}]}
+                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.primaryTeacher)}/>
+                            <Input placeholder={intl.formatMessage(messages.primaryTeacher)} />
                         </Form.Item>
                         <Form.Item
                             name="current_grade"
-                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' +  intl.formatMessage(messages.currentGrade)}]}
+                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.currentGrade) }]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.currentGrade)}/>
+                            <Input placeholder={intl.formatMessage(messages.currentGrade)} />
                         </Form.Item>
                         <Form.Item
                             name="marital_status"
-                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' +  intl.formatMessage(messages.servicesRequired)}]}
+                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
                         >
                             <Select
                                 mode="multiple"
@@ -92,25 +126,25 @@ class InfoProgress extends Component {
 
                         <p className='font-24 mb-10 text-center'>{intl.formatMessage(messages.availability)}</p>
                         <div className='div-availability'>
-                            <Segmented options={day_week} block={true}/>
+                            <Segmented options={day_week} block={true} />
                             <div className='div-time'>
                                 <Form.List name="timeFromTo">
                                     {(fields, { add, remove }) => (
                                         <div>
                                             {fields.map((field) => (
-                                                <Row  key={field.key} gutter={14}>
+                                                <Row key={field.key} gutter={14}>
                                                     <Col xs={24} sm={24} md={12}>
-                                                        <Form.Item 
+                                                        <Form.Item
                                                             name={[field.name, "from_time"]}
-                                                            rules={[{ required: true, message: intl.formatMessage(messages.fromMess)}]}
+                                                            rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
                                                         >
                                                             <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
                                                         </Form.Item>
                                                     </Col>
-                                                    <Col xs={24} sm={24} md={12} className={field.key === 0 ? '' :'item-remove'}>
-                                                        <Form.Item 
+                                                    <Col xs={24} sm={24} md={12} className={field.key === 0 ? '' : 'item-remove'}>
+                                                        <Form.Item
                                                             name={[field.name, "to_time"]}
-                                                            rules={[{ required: true, message: intl.formatMessage(messages.toMess)}]}
+                                                            rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
                                                         >
                                                             <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
                                                         </Form.Item>
@@ -119,12 +153,12 @@ class InfoProgress extends Component {
                                                 </Row>
                                             ))}
                                             <div className='div-add-time' onClick={() => add(null)}>
-                                                <BsPlusCircle size={17} className='mr-5 text-primary'/>
+                                                <BsPlusCircle size={17} className='mr-5 text-primary' />
                                                 <a className='text-primary'>{intl.formatMessage(messages.addTimeRange)}</a>
                                             </div>
                                             <div className='text-right div-copy-week'>
                                                 <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
-                                                <QuestionCircleOutlined className='text-primary'/>
+                                                <QuestionCircleOutlined className='text-primary' />
                                             </div>
                                         </div>
                                     )}
@@ -132,7 +166,7 @@ class InfoProgress extends Component {
                             </div>
                         </div>
                         <div className='flex flex-row items-center'>
-                            <Switch size="small" checked={isSameAll} onChange={this.onSameAllDependent}/>
+                            <Switch size="small" checked={isSameAll} onChange={this.onSameAllDependent} />
                             <p className='ml-10 mb-0'>{intl.formatMessage(messages.sameAllDependents)}</p>
                         </div>
                         {/* List of Availability Schedule Start */}
@@ -142,7 +176,7 @@ class InfoProgress extends Component {
                             <div>
                                 <p className='mb-5'>Dependent #1 First + Last Name</p>
                                 <div className='div-availability'>
-                                    <Segmented options={day_week} block={true}/>
+                                    <Segmented options={day_week} block={true} />
                                     <div className='div-time'>
                                         <Form.List name="timeLocation">
                                             {(fields, { add, remove }) => (
@@ -151,26 +185,26 @@ class InfoProgress extends Component {
                                                         <div key={field.key}>
                                                             <Row gutter={14}>
                                                                 <Col xs={24} sm={24} md={12}>
-                                                                    <Form.Item 
+                                                                    <Form.Item
                                                                         name={[field.name, "from_time_1"]}
-                                                                        rules={[{ required: true, message: intl.formatMessage(messages.fromMess)}]}
+                                                                        rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
                                                                     >
                                                                         <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
                                                                     </Form.Item>
                                                                 </Col>
-                                                                <Col xs={24} sm={24} md={12} className={field.key === 0 ? '' :'item-remove'}>
-                                                                    <Form.Item 
+                                                                <Col xs={24} sm={24} md={12} className={field.key === 0 ? '' : 'item-remove'}>
+                                                                    <Form.Item
                                                                         name={[field.name, "to_time_1"]}
-                                                                        rules={[{ required: true, message: intl.formatMessage(messages.toMess)}]}
+                                                                        rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
                                                                     >
                                                                         <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
                                                                     </Form.Item>
                                                                     {field.key === 0 ? null : <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
                                                                 </Col>
                                                             </Row>
-                                                            <Form.Item 
+                                                            <Form.Item
                                                                 name={[field.name, "location_1"]}
-                                                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location)}]}
+                                                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
                                                             >
                                                                 <Input placeholder={intl.formatMessage(messages.location)} />
                                                             </Form.Item>
@@ -178,12 +212,12 @@ class InfoProgress extends Component {
                                                     ))}
                                                     <div className='flex flex-row justify-between'>
                                                         <div className='div-add-time' onClick={() => add(null)}>
-                                                            <BsPlusCircle size={17} className='mr-5 text-primary'/>
+                                                            <BsPlusCircle size={17} className='mr-5 text-primary' />
                                                             <a className='text-primary'>{intl.formatMessage(messages.addRange)}</a>
                                                         </div>
                                                         <div className='text-right div-copy-week'>
                                                             <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
-                                                            <QuestionCircleOutlined className='text-primary'/>
+                                                            <QuestionCircleOutlined className='text-primary' />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -192,18 +226,18 @@ class InfoProgress extends Component {
                                     </div>
                                 </div>
                                 <div className='flex flex-row items-center mb-2'>
-                                    <Switch size="small" checked={isSameAllSchedule} onChange={this.onSameAllSchedule}/>
+                                    <Switch size="small" checked={isSameAllSchedule} onChange={this.onSameAllSchedule} />
                                     <p className='ml-10 mb-0'>{intl.formatMessage(messages.sameAllDependents)}</p>
                                 </div>
                             </div>
                             {/* List of All Availability Schedule Start */}
                             {/* Show when the switch "isSameAllSchedule" - false */}
-                            {Array(2).fill(null).map((_, index) => 
+                            {Array(2).fill(null).map((_, index) =>
                                 <div key={index}>
                                     {!isSameAllSchedule && <>
                                         <p className='mb-5 mt-2'>Dependent #{index + 2} First + Last Name</p>
                                         <div className='div-availability'>
-                                            <Segmented options={day_week} block={true}/>
+                                            <Segmented options={day_week} block={true} />
                                             <div className='div-time'>
                                                 <Form.List name="timeLocation">
                                                     {(fields, { add, remove }) => (
@@ -212,26 +246,26 @@ class InfoProgress extends Component {
                                                                 <div key={field.key}>
                                                                     <Row gutter={14}>
                                                                         <Col xs={24} sm={24} md={12}>
-                                                                            <Form.Item 
+                                                                            <Form.Item
                                                                                 name={[field.name, `${"from_time" + index + 2}`]}
-                                                                                rules={[{ required: true, message: intl.formatMessage(messages.fromMess)}]}
+                                                                                rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
                                                                             >
                                                                                 <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
                                                                             </Form.Item>
                                                                         </Col>
-                                                                        <Col xs={24} sm={24} md={12} className={field.key === 0 ? '' :'item-remove'}>
-                                                                            <Form.Item 
+                                                                        <Col xs={24} sm={24} md={12} className={field.key === 0 ? '' : 'item-remove'}>
+                                                                            <Form.Item
                                                                                 name={[field.name, `${"to_time" + index + 2}`]}
-                                                                                rules={[{ required: true, message: intl.formatMessage(messages.toMess)}]}
+                                                                                rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
                                                                             >
                                                                                 <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
                                                                             </Form.Item>
                                                                             {field.key === 0 ? null : <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
                                                                         </Col>
                                                                     </Row>
-                                                                    <Form.Item 
+                                                                    <Form.Item
                                                                         name={[field.name, `${"location" + index + 2}`]}
-                                                                        rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location)}]}
+                                                                        rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
                                                                     >
                                                                         <Input placeholder={intl.formatMessage(messages.location)} />
                                                                     </Form.Item>
@@ -239,12 +273,12 @@ class InfoProgress extends Component {
                                                             ))}
                                                             <div className='flex flex-row justify-between'>
                                                                 <div className='div-add-time' onClick={() => add(null)}>
-                                                                    <BsPlusCircle size={17} className='mr-5 text-primary'/>
+                                                                    <BsPlusCircle size={17} className='mr-5 text-primary' />
                                                                     <a className='text-primary'>{intl.formatMessage(messages.addRange)}</a>
                                                                 </div>
                                                                 <div className='text-right div-copy-week'>
                                                                     <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
-                                                                    <QuestionCircleOutlined className='text-primary'/>
+                                                                    <QuestionCircleOutlined className='text-primary' />
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -260,17 +294,22 @@ class InfoProgress extends Component {
                         <Form.Item className="form-btn continue-btn" >
                             <Button
                                 block
-                                type="primary"                                      
+                                type="primary"
                                 htmlType="submit"
-                                
                             >
                                 {intl.formatMessage(messages.continue).toUpperCase()}
                             </Button>
                         </Form.Item>
                     </Form>
                 </div>
-            </Row>
+            </Row >
         );
     }
 }
-export default InfoProgress;
+
+const mapStateToProps = state => ({
+    parentStep4: state.register.parent.step4,
+    register: state.register,
+})
+
+export default compose(connect(mapStateToProps, { setParent }))(InfoProgress);

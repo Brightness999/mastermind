@@ -108,7 +108,7 @@ export default class extends React.Component {
           case intl.formatMessage(messages.parent):
             return (<InfoParent onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
-            return (<InfoProfile onContinueProfile={this.handleContinue} />)
+            return (<InfoProfile onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.school):
             return (<InfoSchool />)
           case intl.formatMessage(messages.admin):
@@ -119,24 +119,24 @@ export default class extends React.Component {
           case intl.formatMessage(messages.parent):
             return (<InfoChild onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
-            return (<InfoServices onContinueServices={this.handleContinue} />)
+            return (<InfoServices onContinue={this.handleContinue} />)
         }
       case 3:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
             return (<InfoProgress onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
-            return (<InfoAvailability onContinueAvailability={this.handleContinue} />)
+            return (<InfoAvailability onContinue={this.handleContinue} />)
         }
       case 4:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<ReviewAccount onContinueReview={this.handleContinue} />)
+            return (<ReviewAccount onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
-            return (<SubsidyProgram onContinueProgram={this.handleContinue} />)
+            return (<SubsidyProgram onContinue={this.handleContinue} />)
         }
       case 5:
-        return <InfoReview onContinueReview={this.handleContinue} />
+        return <InfoReview onContinue={this.handleContinue} />
     }
   }
 

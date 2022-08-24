@@ -7,7 +7,8 @@ import messagesReview from '../../../SubsidyReview/messages';
 class InfoReview extends Component {
     onFinish = (values) => {
         console.log('Success:', values);
-      };
+        this.props.onContinue();
+    };
     
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
@@ -125,7 +126,6 @@ class InfoReview extends Component {
                                 block
                                 type="primary"                                      
                                 htmlType="submit"
-                                onClick={this.props.onContinueReview}
                             >
                                 {intl.formatMessage(messages.confirm).toUpperCase()}
                             </Button>

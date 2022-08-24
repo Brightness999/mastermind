@@ -1,14 +1,39 @@
 import React, { Component } from 'react';
+
 import { Row, Form, Button, Input, Select } from 'antd';
 import intl from 'react-intl-universal';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
+import { setParent } from '../../../../../redux/features/registerSlice';
+
+
 class InfoParent extends Component {
+
+    componentDidMount() {
+        const parent = this.props.parentStep2
+        this.form?.setFieldsValue({
+            ...parent
+        })
+        // this.form.setFieldsValue({
+        //     address: "TDP3 Hương CHữ Hương Trà Thừa Thiên Huế",
+        //     family_name: "rewr",
+        //     father_email: "lctiendat@gmail.com",
+        //     father_name: "werwer",
+        //     father_phone: "+84766667020",
+        //     marital_status: "status1",
+        //     mother_email: "lctiendat@gmail.com",
+        //     mother_name: "werwerwe",
+        //     mother_phone: "+84766667020"
+        // })
+    }
+
     onFinish = (values) => {
         console.log('Success:', values);
+        this.props.setParent({ step2: values });
         this.props.onContinue();
     };
-
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
@@ -24,6 +49,7 @@ class InfoParent extends Component {
                         name="form_contact"
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
+                        ref={ref => this.form = ref}
                     >
                         <Form.Item
                             name="family_name"
@@ -38,23 +64,11 @@ class InfoParent extends Component {
                         </Form.Item>
                         <Form.Item
                             name="address"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.address)
-                                }
-                            ]}
+                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.address) }]}
                         >
                             <Input placeholder={intl.formatMessage(messages.address)} />
                         </Form.Item>
-                        <Form.Item
-                            name="marital_status"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.maritalStatus)
-                                }
-                            ]}
+                        <Form.Item name="marital_status" rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.maritalStatus) }]}
                         >
                             <Select placeholder={intl.formatMessage(messages.maritalStatus)}>
                                 <Select.Option value='status1'>Married</Select.Option>
@@ -63,7 +77,6 @@ class InfoParent extends Component {
                                 <Select.Option value='status4'>Divorced</Select.Option>
                             </Select>
                         </Form.Item>
-
                         <p className='font-16 mb-10'>{intl.formatMessage(messages.father)}</p>
                         <Form.Item
                             name="father_name"
@@ -84,7 +97,7 @@ class InfoParent extends Component {
                                     message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.phoneNumber)
                                 },
                                 {
-                                    pattern: '^([-]?[1-9][0-9]*|0)$',
+                                    pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
                                     message: intl.formatMessage(messages.phoneNumberValid)
                                 },
                             ]}
@@ -96,7 +109,7 @@ class InfoParent extends Component {
                             rules={[
                                 {
                                     required: true,
-                                    message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.fatherName)
+                                    message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.email)
                                 },
                                 {
                                     type: 'email',
@@ -112,7 +125,7 @@ class InfoParent extends Component {
                             rules={[
                                 {
                                     required: true,
-                                    message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.fatherName)
+                                    message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.motherName)
                                 }
                             ]}>
                             <Input placeholder={intl.formatMessage(messages.motherName)} />
@@ -125,7 +138,7 @@ class InfoParent extends Component {
                                     message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.phoneNumber)
                                 },
                                 {
-                                    pattern: '^([-]?[1-9][0-9]*|0)$',
+                                    pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
                                     message: intl.formatMessage(messages.phoneNumberValid)
                                 },
                             ]}
@@ -137,7 +150,7 @@ class InfoParent extends Component {
                             rules={[
                                 {
                                     required: true,
-                                    message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.fatherName)
+                                    message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.email)
                                 },
                                 {
                                     type: 'email',
@@ -163,4 +176,13 @@ class InfoParent extends Component {
         );
     }
 }
-export default InfoParent;
+
+const mapStateToProps = (state) => {
+    console.log('state in parent', state);
+    return {
+        parentStep2: state.register.parent.step2,
+        register: state.register,
+    };
+}
+
+export default compose(connect(mapStateToProps, { setParent }))(InfoParent);
