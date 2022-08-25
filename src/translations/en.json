@@ -39,7 +39,7 @@
   "routes.Createaccount.father": "Father",
   "routes.Createaccount.fatherName": "Father’s name",
   "routes.Createaccount.phoneNumber": "Phone number",
-  "routes.Createaccount.phoneNumberValid": "Phone number must be number",
+  "routes.Createaccount.phoneNumberValid": "Phone number is not a valid",
   "routes.Createaccount.mother": "Mother",
   "routes.Createaccount.motherName": "Mother’s name",
   "routes.Createaccount.contactInfo": "Contact info",

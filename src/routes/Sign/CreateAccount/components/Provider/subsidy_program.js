@@ -9,6 +9,10 @@ import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 
+import { connect } from 'react-redux'
+import { compose } from 'redux'
+import { setProvider } from '../../../../../redux/features/registerSlice';
+
 import 'moment/locale/en-au';
 moment.locale('en');
 
@@ -23,6 +27,17 @@ class SubsidyProgram extends Component {
             { level: "Level 1" },
         ],
     }
+
+
+    componentDidMount() {
+        const data = this.props.register.provider;
+        if (data) {
+            this.form?.setFieldsValue({
+                ...data?.step5
+            })
+        }
+    }
+
     onSelect = (newValue) => {
         this.setState({ valueCalendar: newValue });
         this.setState({ selectedValue: newValue });
@@ -32,6 +47,10 @@ class SubsidyProgram extends Component {
     }
     onFinish = (values) => {
         console.log('Success:', values);
+        this.props.setProvider({
+            step5: values
+        })
+
         this.props.onContinue();
     };
 
@@ -64,6 +83,7 @@ class SubsidyProgram extends Component {
                         initialValues={{
                             level: this.state.levels,
                         }}
+                        ref={(ref) => { this.form = ref }}
                     >
                         <div className='flex flex-row mb-10'>
                             <BsSquare size={11} />
@@ -228,4 +248,8 @@ class SubsidyProgram extends Component {
         );
     }
 }
-export default SubsidyProgram;
+
+const mapStateToProps = state => ({
+    register: state.register,
+})
+export default compose(connect(mapStateToProps, { setProvider }))(SubsidyProgram);

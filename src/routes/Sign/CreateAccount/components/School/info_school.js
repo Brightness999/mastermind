@@ -1,15 +1,20 @@
 import React from 'react';
 import { Row, Col, Form, Button, Input, Select, Segmented, TimePicker, } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
-
 import moment from 'moment';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 
+import PlacesAutocomplete, {
+    geocodeByAddress,
+    getLatLng,
+} from 'react-places-autocomplete';
+
 export default class extends React.Component {
     constructor(props) {
         super(props);
+
         this.state = {
             technical_contact: [
                 { technical: "Dependent 1" },
@@ -17,16 +22,53 @@ export default class extends React.Component {
             student_contact: [
                 { student: "Dependent 1" },
             ],
+            shool_detail: localStorage.getItem('school_detail') ? JSON.parse(localStorage.getItem('school_detail')) : '',
+            school_address:''
         }
     }
+
+
+    componentDidMount() {
+        let data = this.state.shool_detail;
+        if (data) {
+            this.form?.setFieldsValue({
+                ...data,
+                after_from_time: moment(data.after_from_time, 'HH:mm'),
+                after_to_time: moment(data.after_to_time, 'HH:mm'),
+                in_from_time: moment(data.in_from_time, 'HH:mm'),
+                in_to_time: moment(data.in_to_time, 'HH:mm'),
+            })
+        }
+    }
+
+
+
     onFinish = (values) => {
         console.log('Success:', values);
-        window.location.href = "/login";
+        localStorage.setItem('school_detail', JSON.stringify(values));
+        //window.location.href = "/login";
     };
 
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
+
+    handleChange = school_address => {
+        this.setState({ school_address });
+    };
+
+    handleSelect = school_address => {
+        console.log(school_address);
+        this.form.setFieldsValue({
+            school_address
+        })
+        // geocodeByAddress(address)
+        //     .then(results => getLatLng(results[0]))
+        //     .then(latLng => console.log('Success', latLng))
+        //     .catch(error => console.error('Error', error));
+    };
+
+
     render() {
         const day_week = [
             intl.formatMessage(messages.sunday),
@@ -44,9 +86,11 @@ export default class extends React.Component {
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
                         initialValues={{
-                            technical: this.state.technical_contact,
-                            student: this.state.student_contact,
+                            technical: this.state?.shool_detail?.technical || this.state.technical_contact,
+                            student: this.state?.shool_detail?.student || this.state.student_contact,
+                            school_address : 'Chicago, Illinois, Hoa Kỳ'
                         }}
+                        ref={(ref) => { this.form = ref }}
                     >
                         <Form.Item
                             name="name_school"
@@ -67,7 +111,49 @@ export default class extends React.Component {
                             name="school_address"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.schoolAddress) }]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.schoolAddress)} />
+                            {/* <Input placeholder={intl.formatMessage(messages.schoolAddress)} /> */}
+                            <PlacesAutocomplete
+                                value={this.state.address}
+                                onChange={this.handleChange}
+                                onSelect={this.handleSelect}
+                            >
+                                {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+                                    <div>
+                                        <Input {...getInputProps({
+                                            placeholder: intl.formatMessage(messages.schoolAddress),
+                                            className: 'location-search-input',
+                                        })} />
+                                        {/* <input
+                                            {...getInputProps({
+                                                placeholder: 'Search Places ...',
+                                                className: 'location-search-input',
+                                            })}
+                                        /> */}
+                                        <div className="autocomplete-dropdown-container">
+                                            {loading && <div>Loading...</div>}
+                                            {suggestions.map(suggestion => {
+                                                const className = suggestion.active
+                                                    ? 'suggestion-item--active'
+                                                    : 'suggestion-item';
+                                                // inline style for demonstration purpose
+                                                const style = suggestion.active
+                                                    ? { backgroundColor: '#fafafa', cursor: 'pointer' }
+                                                    : { backgroundColor: '#ffffff', cursor: 'pointer' };
+                                                return (
+                                                    <div
+                                                        {...getSuggestionItemProps(suggestion, {
+                                                            className,
+                                                            style,
+                                                        })}
+                                                    >
+                                                        <span>{suggestion.description}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </PlacesAutocomplete>
                         </Form.Item>
                         <Form.List name="technical">
                             {(fields, { add, remove }) => (

@@ -7,6 +7,12 @@ import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 import messagesRequest from '../../../SubsidyRequest/messages';
+
+
+import { connect } from 'react-redux'
+import { compose } from 'redux'
+import { setProvider } from '../../../../../redux/features/registerSlice';
+
 class InfoServices extends Component {
     constructor(props) {
         super(props);
@@ -14,12 +20,26 @@ class InfoServices extends Component {
             levels: [
                 { level: "Dependent 1" },
             ],
-            // fileList: [],
+            fileList: null,
             uploading: false,
         }
     }
+
+    componentDidMount() {
+        const data = this.props.register.provider;
+        console.log(data);
+        if (data) {
+            this.form?.setFieldsValue({
+                ...data?.step3
+            })
+        }
+    }
+
     onFinish = (values) => {
         console.log('Success:', values);
+        this.props.setProvider({
+            step3: values
+        });
         this.props.onContinue();
     };
 
@@ -27,27 +47,34 @@ class InfoServices extends Component {
         console.log('Failed:', errorInfo);
     };
 
+    onChange = (info) => {
+        if (info.file.status !== 'uploading') {
+            console.log(info.file, info.fileList);
+            this.setState({ fileList: info.fileList[0] });
+            this.form?.setFieldsValue({
+                upload_w_9: info.fileList[0].name
+            })
+        }
+        if (info.file.status === 'done') {
+            message.success(`${info.file.name} file uploaded successfully`);
+        } else if (info.file.status === 'error') {
+            message.error(`${info.file.name} file upload failed.`);
+        }
+    }
+
     render() {
-        // const { fileList } = this.state;
+        const { fileList } = this.state;
         const props = {
             name: 'file',
             action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+            listType: "picture",
             headers: {
-              authorization: 'authorization-text',
+                authorization: 'authorization-text',
             },
-          
-            // onChange(info) {
-            //   if (info.file.status !== 'uploading') {
-            //     console.log(info.file, info.fileList);
-            //   }
-          
-            //   if (info.file.status === 'done') {
-            //     message.success(`${info.file.name} file uploaded successfully`);
-            //   } else if (info.file.status === 'error') {
-            //     message.error(`${info.file.name} file upload failed.`);
-            //   }
-            // },
-          };
+            onChange: this.onChange,
+            maxCount: 1,
+            showUploadList: false,
+        };
         return (
             <Row justify="center" className="row-form">
                 <div className='col-form col-info-parent'>
@@ -60,7 +87,9 @@ class InfoServices extends Component {
                         onFinishFailed={this.onFinishFailed}
                         initialValues={{
                             level: this.state.levels,
+                            upload_w_9: this.state?.fileList?.name || ''
                         }}
+                        ref={ref => this.form = ref}
                     >
                         <Form.Item
                             name="skillsets"
@@ -159,7 +188,7 @@ class InfoServices extends Component {
                             )}
 
                         </Form.List>
-                    
+
                         <div className='text-center flex flex-row justify-between'>
                             <div className='flex flex-row items-center mb-10'>
                                 <Switch size="small" defaultChecked />
@@ -213,13 +242,13 @@ class InfoServices extends Component {
                             rules={[{ required: true, message: intl.formatMessage(messages.uploadMess) }]}
                         >
                             <Input
-                                defaultValue='file.form'
                                 addonBefore='W-9 Form'
                                 suffix={
                                     <Upload {...props}>
                                         <a className='font-12 underline'>{intl.formatMessage(messagesRequest.upload)}</a>
                                     </Upload>
                                 }
+                                readOnly
                             />
                         </Form.Item>
                         <Form.Item
@@ -241,7 +270,7 @@ class InfoServices extends Component {
                                 block
                                 type="primary"
                                 htmlType="submit"
-                                // onClick={this.props.onContinue}
+                            // onClick={this.props.onContinue}
                             >
                                 {intl.formatMessage(messages.continue).toUpperCase()}
                             </Button>
@@ -252,4 +281,8 @@ class InfoServices extends Component {
         );
     }
 }
-export default InfoServices;
+
+const mapStateToProps = state => ({
+    register: state.register,
+})
+export default compose(connect(mapStateToProps, { setProvider }))(InfoServices);

@@ -23,8 +23,9 @@ class InfoProgress extends Component {
 
 
     componentDidMount() {
-        console.log(this.state)
-        console.log(this.props.parentStep4);
+
+        const step3 = this.props.register.parent.step3;
+
         if (this.props.parentStep4 && this.state.isSameAll !== this.props?.parentStep4?.isSameAll ||
             this.props.parentStep4 && this.state.isSameAllSchedule !== this.props?.parentStep4?.isSameAllSchedule) {
             this.setState({
@@ -32,11 +33,23 @@ class InfoProgress extends Component {
                 isSameAllSchedule: this.props?.parentStep4?.isSameAllSchedule,
             })
         }
-
+        if (step3) {
+            console.log(1);
+            console.log(step3);
+            const { currentGrade, primaryTeacher, school, services } = step3[0];
+            this.form?.setFieldsValue({
+                currentGrade,
+                primaryTeacher,
+                school,
+                services,
+            })
+        }
         const parent = this.props.parentStep4
-        this.form?.setFieldsValue({
-            ...parent
-        })
+        if (parent) {
+            this.form?.setFieldsValue({
+                ...parent
+            })
+        }
     }
 
     onFinish = (values) => {
@@ -95,19 +108,19 @@ class InfoProgress extends Component {
                             <Input placeholder={intl.formatMessage(messages.school)} />
                         </Form.Item>
                         <Form.Item
-                            name="primary_teacher"
+                            name="primaryTeacher"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
                         >
                             <Input placeholder={intl.formatMessage(messages.primaryTeacher)} />
                         </Form.Item>
                         <Form.Item
-                            name="current_grade"
+                            name="currentGrade"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.currentGrade) }]}
                         >
                             <Input placeholder={intl.formatMessage(messages.currentGrade)} />
                         </Form.Item>
                         <Form.Item
-                            name="marital_status"
+                            name="services"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
                         >
                             <Select

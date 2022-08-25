@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    parent: {}
+    parent: {},
+    provider: {},
 };
 
 export const registerSlice = createSlice({
@@ -15,10 +16,18 @@ export const registerSlice = createSlice({
                     ...action.payload,
                 }
             }
+        },
+        setProvider: (state, action) => {
+            return {
+                provider: {
+                    ...state.provider,
+                    ...action.payload,
+                }
+            }
         }
     }
 });
 
-export const { setParent } = registerSlice.actions;
+export const { setParent, setProvider } = registerSlice.actions;
 
 export default registerSlice.reducer;

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { Row, Form, Button, Input, Select } from 'antd';
+import { Row, Form, Button, Input, Select, message } from 'antd';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { BsCheck, BsDot, BsX } from 'react-icons/bs';
@@ -8,8 +8,9 @@ import intl from 'react-intl-universal';
 import messages from '../messages';
 import messagesLogin from '../../Login/messages';
 import { setParent } from '../../../../redux/features/registerSlice';
-
+import { url } from '../../../../utils/api/baseUrl';
 import './index.less';
+import axios from 'axios';
 const notCheck = 0;
 const valid = 1;
 const invalid = -1;
@@ -34,30 +35,62 @@ class CreateDefault extends Component {
     componentDidMount() {
 
 
-        const { step1 } = this.props.register.parent;
-
-        // this.form?.setFieldsValue({
-        //     username: 'username',
-        //     email: 'email@gmail.com',
-        //     password: 'Tiendat11@',
-        //     account_type: intl.formatMessage(messages.parent),
-        // });
+        // let data = this.props.register.parent;
 
         this.form?.setFieldsValue({
-            username: step1?.username,
-            email: step1?.email,
-            password: step1?.password,
-            account_type: step1?.account_type,
+            username: 'username',
+            email: 'email@gmail.com',
+            password: 'Tiendat11@',
+            account_type: intl.formatMessage(messages.parent),
         });
+
+        // if (data) {
+        //     const { step1 } = data;
+        //     this.form?.setFieldsValue({
+        //         ...step1
+        //     });
+        // }
+    }
+
+    onSubmit = async () => {
+        try {
+            const values = await this.form.validateFields();
+            const { email, username } = values;
+            const emailExits = await axios.post(url + 'users/check_email_registered',
+                {
+                    "searchData": {
+                        email
+                    }
+                }
+            )
+            if (emailExits.data.data > 0)
+                return message.error('Email already exists');
+            const usernameExits = await axios.post(url + 'users/check_email_registered',
+                {
+                    "searchData": {
+                        username
+                    }
+                }
+            )
+            if (usernameExits.data.data > 0)
+                return message.error('Username already exists');
+            this.props.setParent({
+                step1: values,
+            })
+            return this.props.onContinue();
+        } catch (error) {
+            console.log(error);
+            message.error('Some thing went wrong');
+        }
     }
 
 
     onFinish = values => {
         console.log('Success:', values);
-        this.props.setParent({
-            step1: values,
-        })
-        this.props.onContinue();
+        // this.props.setParent({
+        //     step1: values,
+        // })
+        // this.props.onContinue();
     };
 
     onFinishFailed = errorInfo => {
@@ -252,7 +285,7 @@ class CreateDefault extends Component {
                         </Form.Item>
 
                         <Form.Item className="form-btn continue-btn">
-                            <Button block type="primary" htmlType="submit">
+                            <Button block type="primary" htmlType="submit" onClick={this.onSubmit}>
                                 {intl.formatMessage(messages.continue).toUpperCase()}
                             </Button>
                         </Form.Item>

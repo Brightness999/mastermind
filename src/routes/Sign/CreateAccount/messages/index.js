@@ -124,7 +124,7 @@ export default ({
   },
   phoneNumberValid: {
     id: `${scope}.phoneNumberValid`,
-    defaultMessage: 'Phone number must be number',
+    defaultMessage: 'Phone number is not a valid',
   },
   mother: {
     id: `${scope}.mother`,

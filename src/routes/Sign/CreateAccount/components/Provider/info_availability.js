@@ -7,6 +7,9 @@ import moment from 'moment';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 
+import { connect } from 'react-redux'
+import { compose } from 'redux'
+import { setProvider } from '../../../../../redux/features/registerSlice';
 
 class InfoAvailability extends Component {
     constructor(props) {
@@ -17,8 +20,22 @@ class InfoAvailability extends Component {
             ],
         }
     }
+
+    componentDidMount() {
+        let data = this.props.register.provider;
+        if (data) {
+            const { step4 } = data;
+            this.form?.setFieldsValue({
+                ...step4
+            })
+        }
+    }
+
     onFinish = (values) => {
         console.log('Success:', values);
+        this.props.setProvider({
+            step4: values
+        });
         this.props.onContinue();
     };
 
@@ -47,6 +64,7 @@ class InfoAvailability extends Component {
                         initialValues={{
                             range: this.state.ranges,
                         }}
+                        ref={ref => this.form = ref}
                     >
                         <p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.autoSyncCalendar)}</p>
                         <Row gutter={10}>
@@ -165,7 +183,7 @@ class InfoAvailability extends Component {
                                 block
                                 type="primary"
                                 htmlType="submit"
-                                // onClick={this.props.onContinue}
+                            // onClick={this.props.onContinue}
                             >
                                 {intl.formatMessage(messages.continue).toUpperCase()}
                             </Button>
@@ -176,4 +194,8 @@ class InfoAvailability extends Component {
         );
     }
 }
-export default InfoAvailability;
+
+const mapStateToProps = state => ({
+    register: state.register,
+})
+export default compose(connect(mapStateToProps, { setProvider }))(InfoAvailability);

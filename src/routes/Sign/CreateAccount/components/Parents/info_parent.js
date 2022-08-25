@@ -7,26 +7,47 @@ import { compose } from 'redux';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 import { setParent } from '../../../../../redux/features/registerSlice';
+import PlacesAutocomplete from 'react-places-autocomplete';
 
 
 class InfoParent extends Component {
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            address: '',
+            defaultProps: {
+                center: {
+                    lat: 10.99835602,
+                    lng: 77.01502627
+                },
+                zoom: 11
+            },
+            defaultLocation: {
+                lat: 10.99835602,
+                lng: 77.01502627
+            }
+        };
+    }
+
+
     componentDidMount() {
-        const parent = this.props.parentStep2
-        this.form?.setFieldsValue({
-            ...parent
-        })
-        // this.form.setFieldsValue({
-        //     address: "TDP3 Hương CHữ Hương Trà Thừa Thiên Huế",
-        //     family_name: "rewr",
-        //     father_email: "lctiendat@gmail.com",
-        //     father_name: "werwer",
-        //     father_phone: "+84766667020",
-        //     marital_status: "status1",
-        //     mother_email: "lctiendat@gmail.com",
-        //     mother_name: "werwerwe",
-        //     mother_phone: "+84766667020"
+        // const parent = this.props.parentStep2
+        // this.form?.setFieldsValue({
+        //     ...parent
         // })
+        this.form.setFieldsValue({
+            // address: "TDP3 Hương CHữ Hương Trà Thừa Thiên Huế",
+            "maritialType":'0',
+            // "address":"123 abc",
+            "familyName": "wong",
+            "fatherName":"su",
+            "fatherPhoneNumber":"0766667020",
+            "fatherEmail":"123@bcd.com",
+            "motherName":"fong",
+            "motherPhoneNumber":"0766667020",
+            "motherEmail":"321@dfg.com"
+        })
     }
 
     onFinish = (values) => {
@@ -37,6 +58,23 @@ class InfoParent extends Component {
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
+
+    handleChange = address => {
+        this.setState({ address });
+    };
+
+    handleSelect = address => {
+        console.log(address);
+        this.form.setFieldsValue({
+            address
+        })
+        // geocodeByAddress(address)
+        //     .then(results => getLatLng(results[0]))
+        //     .then(latLng => console.log('Success', latLng))
+        //     .catch(error => console.error('Error', error));
+    };
+
+
     render() {
         return (
             <Row justify="center" className="row-form">
@@ -50,9 +88,12 @@ class InfoParent extends Component {
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
                         ref={ref => this.form = ref}
+                        initialValues={{
+                            address : "Chicago, Illinois, Hoa Kỳ"
+                        }}
                     >
                         <Form.Item
-                            name="family_name"
+                            name="familyName"
                             rules={[
                                 {
                                     required: true,
@@ -66,20 +107,55 @@ class InfoParent extends Component {
                             name="address"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.address) }]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.address)} />
+                            <PlacesAutocomplete
+                                value={this.state.address}
+                                onChange={this.handleChange}
+                                onSelect={this.handleSelect}
+                            >
+                                {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+                                    <div>
+                                        <Input {...getInputProps({
+                                            placeholder: 'Search Places ...',
+                                            className: 'location-search-input',
+                                        })} />
+                                        <div className="autocomplete-dropdown-container">
+                                            {loading && <div>Loading...</div>}
+                                            {suggestions.map(suggestion => {
+                                                const className = suggestion.active
+                                                    ? 'suggestion-item--active'
+                                                    : 'suggestion-item';
+                                                // inline style for demonstration purpose
+                                                const style = suggestion.active
+                                                    ? { backgroundColor: '#fafafa', cursor: 'pointer' }
+                                                    : { backgroundColor: '#ffffff', cursor: 'pointer' };
+                                                return (
+                                                    <div
+                                                        {...getSuggestionItemProps(suggestion, {
+                                                            className,
+                                                            style,
+                                                        })}
+                                                    >
+                                                        <span>{suggestion.description}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </PlacesAutocomplete>
                         </Form.Item>
-                        <Form.Item name="marital_status" rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.maritalStatus) }]}
+                        <Form.Item name="maritialType" rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.maritalStatus) }]}
                         >
                             <Select placeholder={intl.formatMessage(messages.maritalStatus)}>
-                                <Select.Option value='status1'>Married</Select.Option>
-                                <Select.Option value='status2'>Widowed</Select.Option>
-                                <Select.Option value='status3'>Separated</Select.Option>
-                                <Select.Option value='status4'>Divorced</Select.Option>
+                                <Select.Option value='0'>Married</Select.Option>
+                                <Select.Option value='1'>Widowed</Select.Option>
+                                <Select.Option value='2'>Separated</Select.Option>
+                                <Select.Option value='3'>Divorced</Select.Option>
                             </Select>
                         </Form.Item>
                         <p className='font-16 mb-10'>{intl.formatMessage(messages.father)}</p>
                         <Form.Item
-                            name="father_name"
+                            name="fatherName"
                             rules={[
                                 {
                                     required: true,
@@ -90,7 +166,7 @@ class InfoParent extends Component {
                             <Input placeholder={intl.formatMessage(messages.fatherName)} />
                         </Form.Item>
                         <Form.Item
-                            name="father_phone"
+                            name="fatherPhoneNumber"
                             rules={[
                                 {
                                     required: true,
@@ -105,7 +181,7 @@ class InfoParent extends Component {
                             <Input placeholder={intl.formatMessage(messages.phoneNumber)} />
                         </Form.Item>
                         <Form.Item
-                            name="father_email"
+                            name="fatherEmail"
                             rules={[
                                 {
                                     required: true,
@@ -121,7 +197,7 @@ class InfoParent extends Component {
 
                         <p className='font-16 mb-10'>{intl.formatMessage(messages.mother)}</p>
                         <Form.Item
-                            name="mother_name"
+                            name="motherName"
                             rules={[
                                 {
                                     required: true,
@@ -131,7 +207,7 @@ class InfoParent extends Component {
                             <Input placeholder={intl.formatMessage(messages.motherName)} />
                         </Form.Item>
                         <Form.Item
-                            name="mother_phone"
+                            name="motherPhoneNumber"
                             rules={[
                                 {
                                     required: true,
@@ -146,7 +222,7 @@ class InfoParent extends Component {
                             <Input placeholder={intl.formatMessage(messages.phoneNumber)} />
                         </Form.Item>
                         <Form.Item
-                            name="mother_email"
+                            name="motherEmail"
                             rules={[
                                 {
                                     required: true,

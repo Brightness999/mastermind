@@ -18,10 +18,16 @@ class InfoChild extends Component {
         super(props);
         this.state = {
             formChild: [
-                { children: "Dependent 1" },
+                {
+                    children: "Dependent 1",
+                },
             ],
+            isTypeFull: false,
+            phoneFill: this.props.register.parent.step2.fatherPhoneNumber || '',
+            emailFill: this.props.register.parent.step2.fatherEmail || '',
         }
     }
+
 
     onChange = () => console.log('Date change!');
     onFinish = (values) => {
@@ -33,6 +39,34 @@ class InfoChild extends Component {
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
+
+    checkTypeFull = (changedValues, allValues) => {
+        // console.log(changedValues, allValues);
+        // const length = allValues.children.length;
+
+        // if (length === 1) {
+        //     let data = allValues.children[0];
+        //     data = Object.values(data);
+        //     data = data.filter(item => item !== "");
+        //     if (data && data.length === 9) {
+        //         this.setState({
+        //             isTypeFull: true,
+        //         })
+        //     }
+        //     else {
+        //         this.setState({
+        //             isTypeFull: false,
+        //         })
+        //     }
+        // }
+        // else {
+        //     // delete allValues.children[0];
+        //     let data = allValues.children;
+        //     data = Object.values(data);
+
+        // }
+
+    }
 
     render() {
 
@@ -51,6 +85,8 @@ class InfoChild extends Component {
                             children: this.props.parentStep3 || this.state.formChild,
                         }}
                         ref={ref => this.form = ref}
+                        onValuesChange={this.checkTypeFull}
+
                     >
                         <Form.List name="children">
                             {(fields, { add, remove }) => (
@@ -74,7 +110,7 @@ class InfoChild extends Component {
                                                 <Row gutter={14}>
                                                     <Col xs={24} sm={24} md={9}>
                                                         <Form.Item
-                                                            name={[field.name, "first_name"]}
+                                                            name={[field.name, "firstName"]}
                                                             rules={[
                                                                 {
                                                                     required: true,
@@ -87,7 +123,7 @@ class InfoChild extends Component {
                                                     </Col>
                                                     <Col xs={24} sm={24} md={9}>
                                                         <Form.Item
-                                                            name={[field.name, "last_name"]}
+                                                            name={[field.name, "lastName"]}
                                                             rules={[
                                                                 {
                                                                     required: true,
@@ -100,7 +136,7 @@ class InfoChild extends Component {
                                                     </Col>
                                                     <Col xs={24} sm={24} md={6}>
                                                         <Form.Item
-                                                            name={[field.name, "date_birth"]}
+                                                            name={[field.name, "birthday"]}
                                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.dateBirth) }]}
                                                         >
                                                             <DatePicker placeholder={intl.formatMessage(messages.dateBirth)} onChange={this.onChange} />
@@ -111,23 +147,24 @@ class InfoChild extends Component {
                                                 <Row gutter={14}>
                                                     <Col xs={24} sm={24} md={12}>
                                                         <Form.Item
-
-                                                            name={[name, "guardian_phone"]}
+                                                            name={[field.name, "guardianPhone"]}
                                                             className='float-label-item'
                                                             label={intl.formatMessage(messages.guardianPhone)}>
-                                                            <Input placeholder='{PARENTS} AUTOFILL' />
+                                                            <Input placeholder='{PARENTS} AUTOFILL' defaultValue={this.state.phoneFill} />
                                                         </Form.Item>
                                                     </Col>
                                                     <Col xs={24} sm={24} md={12}>
-                                                        <Form.Item className='float-label-item' name="guardian_email" label={intl.formatMessage(messages.guardianEmail)}>
-                                                            <Input placeholder='{PARENTS} AUTOFILL' />
+                                                        <Form.Item className='float-label-item'
+                                                            name={[field.name, "guardianEmail"]}
+                                                            label={intl.formatMessage(messages.guardianEmail)}>
+                                                            <Input placeholder='{PARENTS} AUTOFILL' defaultValue={this.state.emailFill} />
                                                         </Form.Item>
                                                     </Col>
                                                 </Row>
 
                                                 <Form.Item
 
-                                                    name={[field.name, "background_info"]}
+                                                    name={[field.name, "backgroundInfor"]}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.backgroundInformation) }]}
                                                 >
                                                     <Input.TextArea rows={4} placeholder={intl.formatMessage(messages.backgroundInformation)} />
@@ -143,7 +180,7 @@ class InfoChild extends Component {
                                                     <Col xs={24} sm={24} md={12}>
                                                         <Form.Item
 
-                                                            name={[field.name, "primary_teacher"]}
+                                                            name={[field.name, "primaryTeacher"]}
                                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
                                                         >
                                                             <Input placeholder={intl.formatMessage(messages.primaryTeacher)} />
@@ -152,7 +189,7 @@ class InfoChild extends Component {
                                                     <Col xs={24} sm={24} md={12}>
                                                         <Form.Item
 
-                                                            name={[field.name, "current_grade"]}
+                                                            name={[field.name, "currentGrade"]}
                                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.currentGrade) }]}
                                                         >
                                                             <Input placeholder={intl.formatMessage(messages.currentGrade)} />
@@ -161,7 +198,7 @@ class InfoChild extends Component {
                                                 </Row>
                                                 <div className='flex flex-row'>
                                                     <Form.Item
-                                                        name={[field.name, 'marital_status']}
+                                                        name={[field.name, 'services']}
                                                         rules={[
                                                             {
                                                                 required: true,
@@ -180,7 +217,9 @@ class InfoChild extends Component {
                                                         </Select>
                                                     </Form.Item>
                                                     <Link to={routerLinks['SubsidyRequest']}>
-                                                        <Button className='ml-10'>{intl.formatMessage(messages.subsidyRequest)}</Button>
+                                                        <Button className='ml-10' disabled={
+                                                            this.state.isTypeFull ? false : true
+                                                        }>{intl.formatMessage(messages.subsidyRequest)}</Button>
                                                     </Link>
                                                 </div>
                                             </div>
@@ -211,7 +250,7 @@ class InfoChild extends Component {
                         </Form.Item>
                     </Form>
                 </div>
-            </Row>
+            </Row >
         );
     }
 }

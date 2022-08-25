@@ -74,14 +74,14 @@ export default class extends React.Component {
                   <Select.Option value='d2'>Dependent 2</Select.Option>
                 </Select>
               </Form.Item>
-              <Form.Item name="skill_request" rules=
+              <Form.Item name="skillSet" rules=
                 {[{
                   required: true,
                   message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsetRequested)
                 }]}>
                 <Select placeholder={intl.formatMessage(messages.skillsetRequested)}>
-                  <Select.Option value='s1'>Skill 1</Select.Option>
-                  <Select.Option value='s2'>Skill 2</Select.Option>
+                  <Select.Option value='1'>Skill 1</Select.Option>
+                  <Select.Option value='2'>Skill 2</Select.Option>
                 </Select>
               </Form.Item>
               <Form.Item name="school" rules=
@@ -119,7 +119,7 @@ export default class extends React.Component {
               <Row gutter={14}>
                 <Col xs={24} sm={24} md={12}>
                   <Form.Item
-                    name="name_Rav"
+                    name="ravName"
                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.nameOfRav) }]}
                   >
                     <Input size="small" placeholder={intl.formatMessage(messages.nameOfRav)} />
@@ -127,7 +127,7 @@ export default class extends React.Component {
                 </Col>
                 <Col xs={24} sm={24} md={12}>
                   <Form.Item
-                    name="rav_email"
+                    name="ravEmail"
                     rules={[
                       { required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.ravEmail) },
                       {
@@ -143,7 +143,7 @@ export default class extends React.Component {
               </Row>
 
               <Form.Item
-                name="therapist_contact"
+                name="therapistContact"
                 rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.therapistContact) }]}
               >
                 <Input placeholder={intl.formatMessage(messages.therapistContact)} />
@@ -151,7 +151,7 @@ export default class extends React.Component {
               <Row gutter={14}>
                 <Col xs={24} sm={24} md={12}>
                   <Form.Item
-                    name="therapist_phone"
+                    name="therapistPhone"
                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.therapistPhone) },
                     {
                       pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
@@ -164,7 +164,7 @@ export default class extends React.Component {
                 </Col>
                 <Col xs={24} sm={24} md={12}>
                   <Form.Item
-                    name="therapist_email"
+                    name="therapistEmail"
                     rules={[
                       { required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.therapistEmail) },
                       {
@@ -179,13 +179,15 @@ export default class extends React.Component {
               </Row>
               <Divider style={{ marginTop: 0, marginBottom: 15, borderColor: '#d7d7d7' }} />
               <Form.Item
-                name="generate_notes"
+                name="note"
                 rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.generalNotes) }]}
               >
                 <Input.TextArea rows={5} placeholder={intl.formatMessage(messages.generalNotes)} />
               </Form.Item>
-              <Form.Item name="upload_document" className='input-download'>
-                <Input addonBefore={intl.formatMessage(messages.documents)} suffix={<a className='font-12 underline'>{intl.formatMessage(messages.upload)}</a>} />
+              <Form.Item name="documents" className='input-download'>
+                <Input addonBefore={intl.formatMessage(messages.documents)} suffix={<Upload {...props}>
+                                        <a className='font-12 underline'>{intl.formatMessage(messagesRequest.upload)}</a>
+                                    </Upload>} />
               </Form.Item>
               <Form.Item className="form-btn continue-btn" >
                 {/* <Link to={routerLinks['SubsidyReview']}> */}

@@ -6,10 +6,28 @@ import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 
 export default class extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      admin_details: localStorage.getItem('admin_details') ? JSON.parse(localStorage.getItem('admin_details')) : '',
+    };
+  }
+
+
+  componentDidMount() {
+    const data = this.state.admin_details;
+    if (data) {
+      this.form?.setFieldsValue({
+        ...data
+      }
+      )
+    }
+  }
 
   onFinish = (values) => {
     console.log('Success:', values);
-    window.location.href = "/login";
+    localStorage.setItem('admin_details', JSON.stringify(values));
+    this.window.location.href = "/login";
   };
 
   onFinishFailed = (errorInfo) => {
@@ -27,6 +45,7 @@ export default class extends React.Component {
             name="form_admin"
             onFinish={this.onFinish}
             onFinishFailed={this.onFinishFailed}
+            ref={ref => this.form = ref}
           >
             <Form.Item
               name="name"
@@ -42,7 +61,16 @@ export default class extends React.Component {
             </Form.Item>
             <Form.Item
               name="email"
-              rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.email) }]}
+              rules={[
+                {
+                    required: true,
+                    message: intl.formatMessage(messages.emailMessage)
+                },
+                {
+                    type: 'email',
+                    message: intl.formatMessage(messagesLogin.emailNotValid)
+                }
+              ]}
             >
               <Input placeholder={intl.formatMessage(messages.email)} />
             </Form.Item>
@@ -55,7 +83,12 @@ export default class extends React.Component {
                         <Form.Item
                           key={field.key}
                           name={[field.name, "contact_email"]}
-                          rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactEmail) }]}
+                          rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactEmail) },
+                            //  {
+                            //     type: 'email',
+                            //     message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesLogin.validEmail)
+                            //  }
+                        ]}
                         >
                           <Input placeholder={intl.formatMessage(messages.contactEmail)} />
                         </Form.Item>
@@ -85,7 +118,6 @@ export default class extends React.Component {
                 block
                 type="primary"
                 htmlType="submit"
-                onClick={() => window.location.href = "/login"}
               >
                 {intl.formatMessage(messages.confirm).toUpperCase()}
               </Button>
