@@ -116,7 +116,8 @@ class InfoChild extends Component {
             "primaryTeacher":"",
             "currentGrade":"",
             "services":[],
-            "hasIEP":1
+            "hasIEP":1,
+            "availabilitySchedule":[]
         };
         return obj;
     }
@@ -295,7 +296,7 @@ class InfoChild extends Component {
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
                                                 >
                                                     <Input onChange={v => {
-                                                        this.updateReduxValueFor1Depedent(index,"firstName" , v.target.value);
+                                                        this.updateReduxValueFor1Depedent(index,"school" , v.target.value);
                                                     }} 
                                                     placeholder={intl.formatMessage(messages.school)} />
                                                 </Form.Item>
@@ -307,7 +308,7 @@ class InfoChild extends Component {
                                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
                                                         >
                                                             <Input onChange={v => {
-                                                               this.updateReduxValueFor1Depedent(index,"firstName" , v.target.value);
+                                                               this.updateReduxValueFor1Depedent(index,"primaryTeacher" , v.target.value);
                                                             }} 
                                                             placeholder={intl.formatMessage(messages.primaryTeacher)} />
                                                         </Form.Item>
@@ -319,7 +320,7 @@ class InfoChild extends Component {
                                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.currentGrade) }]}
                                                         >
                                                             <Input onChange={v => {
-                                                                this.updateReduxValueFor1Depedent(index,"firstName" , v.target.value);
+                                                                this.updateReduxValueFor1Depedent(index,"currentGrade" , v.target.value);
                                                             }} 
                                                             placeholder={intl.formatMessage(messages.currentGrade)} />
                                                         </Form.Item>
@@ -343,7 +344,7 @@ class InfoChild extends Component {
                                                             
                                                             onChange={v => {
                                                                 console.log(v);
-                                                                // this.updateReduxValueFor1Depedent(index,"services" , v.target.value);
+                                                                this.updateReduxValueFor1Depedent(index,"services" , v);
                                                             }}
                                                         >
                                                             {this.state.listServices.map(service=>{
