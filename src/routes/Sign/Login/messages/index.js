@@ -45,4 +45,20 @@ export default {
     id: `${scope}.emailNotValid`,
     defaultMessage: 'Email is not a valid',
   },
+  userExist: {
+    id: `${scope}.userExist`,
+    defaultMessage: 'Username is in use',
+  },
+  emailExist: {
+    id: `${scope}.emailExist`,
+    emailExist: 'Email is in use',
+  },
+  loginSuccess: {
+    id: `${scope}.loginSuccess`,
+    defaultMessage: 'Login success',
+  },
+  loginFailed: {
+    id: `${scope}.loginFailed`,
+    defaultMessage: 'Login failed',
+  }
 };

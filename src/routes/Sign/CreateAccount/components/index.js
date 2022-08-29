@@ -99,10 +99,14 @@ export default class extends React.Component {
     }
   }
 
+  onOpenSubsidyStep(step){
+
+  }
+
   getStepContentComponent = (currentStep) => {
     switch (currentStep) {
       case 0:
-        return (<CreateDefault onContinue={this.handleContinue} onHandleChange={this.handleChange} />)
+        return (<CreateDefault onContinue={this.handleContinue} onHandleChangeRoleRegister={this.handleChange} />)
       case 1:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
@@ -117,7 +121,8 @@ export default class extends React.Component {
       case 2:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<InfoChild onContinue={this.handleContinue} />)
+
+            return (<InfoChild onOpenSubsidyStep={this.onOpenSubsidyStep} onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoServices onContinue={this.handleContinue} />)
         }

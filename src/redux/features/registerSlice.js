@@ -1,33 +1,26 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    parent: {},
-    provider: {},
+    registerData: {},
 };
 
 export const registerSlice = createSlice({
     name: 'register',
     initialState,
     reducers: {
-        setParent: (state, action) => {
+        
+        setRegisterData: (state , actions) => {
+            console.log('redux test ',state,actions);
             return {
-                parent: {
-                    ...state.parent,
-                    ...action.payload,
-                }
-            }
-        },
-        setProvider: (state, action) => {
-            return {
-                provider: {
-                    ...state.provider,
-                    ...action.payload,
+                registerData: {
+                    ...state.registerData,
+                    ...actions.payload,
                 }
             }
         }
     }
 });
 
-export const { setParent, setProvider } = registerSlice.actions;
+export const {  setRegisterData } = registerSlice.actions;
 
 export default registerSlice.reducer;

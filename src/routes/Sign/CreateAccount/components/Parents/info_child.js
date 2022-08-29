@@ -11,60 +11,152 @@ import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { setParent } from '../../../../../redux/features/registerSlice';
-
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import moment from 'moment';
+import { url } from '../../../../../utils/api/baseUrl';
+import axios from 'axios';
 class InfoChild extends Component {
     constructor(props) {
         super(props);
+        let input = {
+            firstName: '',
+            lastName: '',
+            birthday: '',
+            backgroundInfor: '',
+            primaryTeacher: '',
+            currentGrade: '',
+            school: '',
+            services: '',
+            visible: false
+        }
+
+        // let inforChildren = localStorage.getItem('inforChildren') ? JSON.parse(localStorage.getItem('inforChildren')).map(item => {
+        //     return {
+        //         ...item,
+        //         birthday: moment(item.birthday),
+        //     }
+        // }) : '';
+
+        
+
         this.state = {
             formChild: [
                 {
-                    children: "Dependent 1",
+                    firstName: '',
+                    lastName: '',
+                    birthday: '',
+                    backgroundInfor: '',
+                    primaryTeacher: '',
+                    currentGrade: '',
+                    school: '',
+                    services: [],
                 },
             ],
             isTypeFull: false,
-            phoneFill: this.props.register.parent.step2.fatherPhoneNumber || '',
-            emailFill: this.props.register.parent.step2.fatherEmail || '',
+            phoneFill: '',
+            emailFill: '',
+            inputs: [input],
+            listServices:[],
+            inforChildren:[{},{},{}],
+            parentInfo:{},
+            // inforChildren,
         }
     }
 
+    componentDidMount() {
 
-    onChange = () => console.log('Date change!');
+        const {registerData} = this.props.register;
+
+        this.setState({
+            parentInfo:registerData.parentInfo
+        })
+        
+
+        
+        var newChild =this.getDefaultChildObj(registerData.parentInfo);
+        var studentInfos = registerData.studentInfos||[newChild,newChild,newChild];
+        this.form.setFieldsValue({children:studentInfos});
+        if(!registerData.studentInfos){
+            this.props.setRegisterData({studentInfos:studentInfos});
+        }
+        this.loadServices();
+    }
+
+    loadServices(){
+        axios.post(url+ 'clients/get_default_value_for_client'
+            ).then(result=>{
+                console.log('get_default_value_for_client',result.data);
+                if(result.data.success){
+                    var data = result.data.data;
+                    this.setState({listServices:data.listServices})
+                }else{
+                    this.setState({
+                        checkEmailExist:false,
+                    });
+                    
+                }
+                
+            }).catch(err=>{
+                console.log(err);
+                this.setState({
+                    checkEmailExist:false,
+                });
+            })
+    }
+
+    getDefaultChildObj(parentInfo){
+        var obj={
+            "firstName":"",
+            "lastName":"",
+            "birthday":"",
+            "guardianPhone":parentInfo.fatherPhoneNumber || parentInfo.motherPhoneNumber,
+            "guardianEmail":parentInfo.fatherEmail || parentInfo.motherEmail,
+            "backgroundInfor":"",
+            "school":"",
+            "primaryTeacher":"",
+            "currentGrade":"",
+            "services":[],
+            "hasIEP":1
+        };
+        return obj;
+    }
+
+    onRemove1Depenent(index){
+        const {registerData} = this.props.register;
+        var studentInfos =[ ...registerData.studentInfos]
+        
+        studentInfos.splice(index , 1);
+        
+        this.props.setRegisterData({studentInfos:studentInfos});
+    }
+
+    updateReduxValueFor1Depedent(index , fieldName , value){
+        const {registerData} = this.props.register;
+        var studentInfos =[ ...registerData.studentInfos]
+        var selectedObj ={ ...studentInfos[index]};
+        selectedObj[fieldName ] = value;
+        studentInfos[index] = selectedObj;
+        this.props.setRegisterData({studentInfos:studentInfos});
+    }
+    
+
     onFinish = (values) => {
-        this.props.setParent({ step3: values.children });
-        console.log('Success:', values);
+        // this.props.setRegisterData({ step3: values.children });
+        // localStorage.setItem('inforChildren', JSON.stringify(values.children));
+        // console.log('Success:', values);
         this.props.onContinue();
     };
 
     onFinishFailed = (errorInfo) => {
-        console.log('Failed:', errorInfo);
+        // console.log('Failed:', errorInfo);
     };
 
-    checkTypeFull = (changedValues, allValues) => {
-        // console.log(changedValues, allValues);
-        // const length = allValues.children.length;
+    getValueInForm = (allValue, allValueChange) => {
+        // const { children } = allValueChange;
+        // localStorage.setItem('inforChildren', JSON.stringify(children));
+    }
 
-        // if (length === 1) {
-        //     let data = allValues.children[0];
-        //     data = Object.values(data);
-        //     data = data.filter(item => item !== "");
-        //     if (data && data.length === 9) {
-        //         this.setState({
-        //             isTypeFull: true,
-        //         })
-        //     }
-        //     else {
-        //         this.setState({
-        //             isTypeFull: false,
-        //         })
-        //     }
-        // }
-        // else {
-        //     // delete allValues.children[0];
-        //     let data = allValues.children;
-        //     data = Object.values(data);
-
-        // }
+    onValueChange(){
 
     }
 
@@ -81,30 +173,36 @@ class InfoChild extends Component {
                         name="form_contact"
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
-                        initialValues={{
-                            children: this.props.parentStep3 || this.state.formChild,
-                        }}
                         ref={ref => this.form = ref}
-                        onValuesChange={this.checkTypeFull}
+                        onValuesChange={this.getValueInForm}
 
                     >
                         <Form.List name="children">
                             {(fields, { add, remove }) => (
                                 <div>
-                                    {fields.map((field) => {
+                                    {fields.map((field, index) => {
+                                        const input = this.state.inputs[index]
                                         return (
                                             <div key={field.key} className='div-dependent-form'>
                                                 <div className='flex flex-row items-center justify-between mb-10'>
                                                     <div className='flex flex-row items-center'>
-                                                        <p className='font-16 mr-10 mb-0'>{intl.formatMessage(messages.dependent)}# {field.key + 1}</p>
-                                                        <Switch size="small" defaultChecked />
+                                                        <p className='font-16 mr-10 mb-0'>{intl.formatMessage(messages.dependent)}# {index + 1}</p>
+                                                        <Switch 
+                                                            onChange={v => {
+                                                                console.log('hasIEP',v)
+                                                                this.updateReduxValueFor1Depedent(index,"hasIEP" , v);
+                                                            }} 
+                                                            size="small" defaultChecked />
                                                         <p className='font-16 ml-10 mb-0'>{intl.formatMessage(messages.hasIEP)}</p>
                                                     </div>
                                                     {field.key === 0 ? null : <Button
                                                         type='text'
                                                         className='remove-btn'
                                                         icon={<TbTrash size={18} />}
-                                                        onClick={() => remove(field.name)}
+                                                        onClick={() =>{
+                                                            remove(field.name);
+                                                            this.onRemove1Depenent(index);
+                                                        }}
                                                     >{intl.formatMessage(messages.remove)}</Button>}
                                                 </div>
                                                 <Row gutter={14}>
@@ -118,7 +216,10 @@ class InfoChild extends Component {
                                                                 }
                                                             ]}
                                                         >
-                                                            <Input placeholder={intl.formatMessage(messages.firstName)} />
+                                                            <Input onChange={v => {
+                                                                this.updateReduxValueFor1Depedent(index,"firstName" , v.target.value);
+                                                            }} 
+                                                            placeholder={intl.formatMessage(messages.firstName)} />
                                                         </Form.Item>
                                                     </Col>
                                                     <Col xs={24} sm={24} md={9}>
@@ -131,7 +232,10 @@ class InfoChild extends Component {
                                                                 }
                                                             ]}
                                                         >
-                                                            <Input placeholder={intl.formatMessage(messages.lastName)} />
+                                                            <Input onChange={v => {
+                                                                this.updateReduxValueFor1Depedent(index,"lastName" , v.target.value);
+                                                                
+                                                            }} placeholder={intl.formatMessage(messages.lastName)} />
                                                         </Form.Item>
                                                     </Col>
                                                     <Col xs={24} sm={24} md={6}>
@@ -139,7 +243,10 @@ class InfoChild extends Component {
                                                             name={[field.name, "birthday"]}
                                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.dateBirth) }]}
                                                         >
-                                                            <DatePicker placeholder={intl.formatMessage(messages.dateBirth)} onChange={this.onChange} />
+                                                            <DatePicker format={"YYYY-MM-DD"} placeholder={intl.formatMessage(messages.dateBirth)} onChange={v => {
+                                                                console.log(v.valueOf());
+                                                                this.updateReduxValueFor1Depedent(index,"birthday" ,v.valueOf());
+                                                            }} />
                                                         </Form.Item>
                                                     </Col>
                                                 </Row>
@@ -150,14 +257,23 @@ class InfoChild extends Component {
                                                             name={[field.name, "guardianPhone"]}
                                                             className='float-label-item'
                                                             label={intl.formatMessage(messages.guardianPhone)}>
-                                                            <Input placeholder='{PARENTS} AUTOFILL' defaultValue={this.state.phoneFill} />
+                                                            <Input 
+                                                            onChange={v => {
+                                                                this.updateReduxValueFor1Depedent(index,"guardianPhone" , v.target.value);
+                                                            }} 
+                                                            placeholder='{PARENTS} AUTOFILL'   />
                                                         </Form.Item>
                                                     </Col>
                                                     <Col xs={24} sm={24} md={12}>
                                                         <Form.Item className='float-label-item'
                                                             name={[field.name, "guardianEmail"]}
                                                             label={intl.formatMessage(messages.guardianEmail)}>
-                                                            <Input placeholder='{PARENTS} AUTOFILL' defaultValue={this.state.emailFill} />
+                                                            <Input 
+                                                            onChange={v => {
+                                                                this.updateReduxValueFor1Depedent(index,"guardianEmail" , v.target.value);
+                                                            }} 
+                                                            placeholder='{PARENTS} AUTOFILL'
+                                                               />
                                                         </Form.Item>
                                                     </Col>
                                                 </Row>
@@ -167,14 +283,21 @@ class InfoChild extends Component {
                                                     name={[field.name, "backgroundInfor"]}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.backgroundInformation) }]}
                                                 >
-                                                    <Input.TextArea rows={4} placeholder={intl.formatMessage(messages.backgroundInformation)} />
+                                                    <Input.TextArea onChange={v => {
+                                                        this.updateReduxValueFor1Depedent(index,"backgroundInfor" , v.target.value);
+                                                    }} 
+                                                    rows={4} 
+                                                    placeholder={intl.formatMessage(messages.backgroundInformation)} />
                                                 </Form.Item>
                                                 <Form.Item
 
                                                     name={[field.name, "school"]}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
                                                 >
-                                                    <Input placeholder={intl.formatMessage(messages.school)} />
+                                                    <Input onChange={v => {
+                                                        this.updateReduxValueFor1Depedent(index,"firstName" , v.target.value);
+                                                    }} 
+                                                    placeholder={intl.formatMessage(messages.school)} />
                                                 </Form.Item>
                                                 <Row gutter={14}>
                                                     <Col xs={24} sm={24} md={12}>
@@ -183,7 +306,10 @@ class InfoChild extends Component {
                                                             name={[field.name, "primaryTeacher"]}
                                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
                                                         >
-                                                            <Input placeholder={intl.formatMessage(messages.primaryTeacher)} />
+                                                            <Input onChange={v => {
+                                                               this.updateReduxValueFor1Depedent(index,"firstName" , v.target.value);
+                                                            }} 
+                                                            placeholder={intl.formatMessage(messages.primaryTeacher)} />
                                                         </Form.Item>
                                                     </Col>
                                                     <Col xs={24} sm={24} md={12}>
@@ -192,7 +318,10 @@ class InfoChild extends Component {
                                                             name={[field.name, "currentGrade"]}
                                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.currentGrade) }]}
                                                         >
-                                                            <Input placeholder={intl.formatMessage(messages.currentGrade)} />
+                                                            <Input onChange={v => {
+                                                                this.updateReduxValueFor1Depedent(index,"firstName" , v.target.value);
+                                                            }} 
+                                                            placeholder={intl.formatMessage(messages.currentGrade)} />
                                                         </Form.Item>
                                                     </Col>
                                                 </Row>
@@ -211,14 +340,22 @@ class InfoChild extends Component {
                                                             showArrow
                                                             placeholder={intl.formatMessage(messages.servicesRequired)}
                                                             optionLabelProp="label"
+                                                            
+                                                            onChange={v => {
+                                                                console.log(v);
+                                                                // this.updateReduxValueFor1Depedent(index,"services" , v.target.value);
+                                                            }}
                                                         >
-                                                            <Select.Option value='Services required 1'>Services required 1</Select.Option>
-                                                            <Select.Option value='Services required 2'>Services required 2</Select.Option>
+                                                            {this.state.listServices.map(service=>{
+                                                                return (<Select.Option label={service.name} value={service._id}>{service.name}</Select.Option>)
+                                                            })}
+                                                            
+                                                            
                                                         </Select>
                                                     </Form.Item>
                                                     <Link to={routerLinks['SubsidyRequest']}>
                                                         <Button className='ml-10' disabled={
-                                                            this.state.isTypeFull ? false : true
+                                                            !input?.visible
                                                         }>{intl.formatMessage(messages.subsidyRequest)}</Button>
                                                     </Link>
                                                 </div>
@@ -230,7 +367,13 @@ class InfoChild extends Component {
                                             type="text"
                                             className='add-dependent-btn'
                                             icon={<BsPlusCircle size={17} className='mr-5' />}
-                                            onClick={() => add(null)}
+                                            onClick={() => {
+                                                let allState = this.state;
+                                                allState.inputs.push({ name: '', visible: false })
+                                                this.setState(allState, () => {
+                                                    add(null)
+                                                })
+                                            }}
                                         >
                                             {intl.formatMessage(messages.addDependent)}
                                         </Button>
@@ -258,9 +401,8 @@ class InfoChild extends Component {
 const mapStateToProps = state => {
     console.log('state', state);
     return ({
-        parentStep3: state.register.parent.step3,
         register: state.register,
     })
 }
 
-export default compose(connect(mapStateToProps, { setParent }))(InfoChild);
+export default compose(connect(mapStateToProps, { setRegisterData  }))(InfoChild);

@@ -1,12 +1,12 @@
 import React from 'react';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
-import { Row, Form, Button, Input,message } from 'antd';
+import { Row, Form, Button, Input, message } from 'antd';
 import { routerLinks } from "../../../constant";
 import intl from 'react-intl-universal';
 import messages from '../messages';
 import { url } from '../../../../utils/api/baseUrl';
-
+import axios from 'axios';
 import './index.less';
 
 // @connect(({ login, loading, global }) => ({
@@ -24,10 +24,20 @@ export default class extends React.Component {
   onSubmit = async () => {
     try {
       const values = await this.form.validateFields();
-      const response = ''
-
+      const response = await axios.post(url + 'users/login', values);
+      console.log(response);
+      const { success, data } = response.data;
+      if (success) {
+        message.success(intl.formatMessage(messages.loginSuccess));
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setTimeout(() => {
+          this.props.history.push(routerLinks['Dashboard']);
+        }, 2000)
+      }
     } catch (error) {
-
+      console.log(error);
+      message.error(error?.response?.data?.data ?? error.message);
     }
   }
 

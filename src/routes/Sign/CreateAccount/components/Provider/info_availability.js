@@ -9,7 +9,7 @@ import messagesLogin from '../../../Login/messages';
 
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { setProvider } from '../../../../../redux/features/registerSlice';
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
 
 class InfoAvailability extends Component {
     constructor(props) {
@@ -33,7 +33,7 @@ class InfoAvailability extends Component {
 
     onFinish = (values) => {
         console.log('Success:', values);
-        this.props.setProvider({
+        this.props.setRegisterData({
             step4: values
         });
         this.props.onContinue();
@@ -198,4 +198,4 @@ class InfoAvailability extends Component {
 const mapStateToProps = state => ({
     register: state.register,
 })
-export default compose(connect(mapStateToProps, { setProvider }))(InfoAvailability);
+export default compose(connect(mapStateToProps, { setRegisterData }))(InfoAvailability);

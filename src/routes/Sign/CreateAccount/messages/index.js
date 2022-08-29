@@ -569,6 +569,10 @@ export default ({
   numberSessions: {
     id: `${scope}.numberSessions`,
     defaultMessage: 'Number sessions',
+  },
+  uploadSuccess: {
+    id: `${scope}.uploadSuccess`,
+    defaultMessage: 'Upload success',
   }
   
 });

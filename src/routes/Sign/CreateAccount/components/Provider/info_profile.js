@@ -6,7 +6,7 @@ import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { setProvider } from '../../../../../redux/features/registerSlice';
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
 
 
@@ -38,7 +38,7 @@ class InfoProfile extends Component {
 
     onFinish = (values) => {
         console.log('Success:', values);
-        this.props.setProvider({
+        this.props.setRegisterData({
             step2: values,
         });
         this.props.onContinue();
@@ -327,4 +327,4 @@ class InfoProfile extends Component {
 const mapStateToProps = state => ({
     register: state.register,
 })
-export default compose(connect(mapStateToProps, { setProvider }))(InfoProfile);
+export default compose(connect(mapStateToProps, { setRegisterData }))(InfoProfile);

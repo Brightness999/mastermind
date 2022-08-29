@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
-import { setParent } from '../../../../../redux/features/registerSlice';
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
 
 
@@ -32,47 +32,92 @@ class InfoParent extends Component {
 
 
     componentDidMount() {
-        // const parent = this.props.parentStep2
-        // this.form?.setFieldsValue({
-        //     ...parent
-        // })
-        this.form.setFieldsValue({
-            // address: "TDP3 Hương CHữ Hương Trà Thừa Thiên Huế",
-            "maritialType":'0',
-            // "address":"123 abc",
+        
+        const {registerData} = this.props.register;
+        
+        if(!registerData.parentInfo){
+            this.props.setRegisterData({parentInfo:this.getDefaultObj() });
+        }
+        var parentInfo = registerData.parentInfo||this.getDefaultObj();
+        this.form.setFieldsValue(parentInfo);
+    }
+
+    getDefaultObj=()=>{
+        return {
+            "maritialType": '0',
+            "address":"",
             "familyName": "wong",
-            "fatherName":"su",
-            "fatherPhoneNumber":"0766667020",
-            "fatherEmail":"123@bcd.com",
-            "motherName":"fong",
-            "motherPhoneNumber":"0766667020",
-            "motherEmail":"321@dfg.com"
-        })
+            "fatherName": "su",
+            "fatherPhoneNumber": "0766667020",
+            "fatherEmail": "123@bcd.com",
+            "motherName": "fong",
+            "motherPhoneNumber": "0766667020",
+            "motherEmail": "321@dfg.com"
+        };
+        // return {
+        //     "maritialType": '0',
+        //     "address":"",
+        //     "familyName": "",
+        //     "fatherName": "",
+        //     "fatherPhoneNumber": "",
+        //     "fatherEmail": "",
+        //     "motherName": "",
+        //     "motherPhoneNumber": "",
+        //     "motherEmail": ""
+        // };
+    }
+
+    getDefaultValueInitForm=(key)=>{
+        var obj = this.getDefaultObj();
+        return obj[key];
+        
+    }
+
+    setValueToReduxRegisterData = (fieldName , value)=>{
+        const {registerData} = this.props.register;
+        var parentInfo = registerData.parentInfo;
+        
+        var obj = {};
+        obj[fieldName] = value;
+        this.props.setRegisterData({parentInfo:{...parentInfo,...obj}});
+    }
+
+    defaultOnValueChange = (event , fieldName)=>{
+        
+        var value = event.target.value;
+        console.log(fieldName , value);
+        this.setValueToReduxRegisterData(fieldName, value);
     }
 
     onFinish = (values) => {
         console.log('Success:', values);
-        this.props.setParent({ step2: values });
+        this.props.setRegisterData({parentInfo:values });
+        // localStorage.setItem('inforParent', JSON.stringify(values));
         this.props.onContinue();
     };
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
 
-    handleChange = address => {
-        this.setState({ address });
+    handleChangeAddress = address => {
+        console.log('address',address);
+        this.setState({address: address });
+        this.setValueToReduxRegisterData('address', address);
     };
 
-    handleSelect = address => {
-        console.log(address);
+    handleSelectAddress = address => {
+        console.log('address',address);
         this.form.setFieldsValue({
-            address
+            address:address
         })
+        this.setValueToReduxRegisterData('address', address);
         // geocodeByAddress(address)
         //     .then(results => getLatLng(results[0]))
         //     .then(latLng => console.log('Success', latLng))
         //     .catch(error => console.error('Error', error));
     };
+
+    
 
 
     render() {
@@ -88,9 +133,7 @@ class InfoParent extends Component {
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
                         ref={ref => this.form = ref}
-                        initialValues={{
-                            address : "Chicago, Illinois, Hoa Kỳ"
-                        }}
+                        
                     >
                         <Form.Item
                             name="familyName"
@@ -101,7 +144,10 @@ class InfoParent extends Component {
                                 }
                             ]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.familyName)} />
+                            <Input 
+                            onChange={v=>this.defaultOnValueChange(v, "familyName")}
+                            placeholder={intl.formatMessage(messages.familyName)} 
+                            />
                         </Form.Item>
                         <Form.Item
                             name="address"
@@ -109,8 +155,8 @@ class InfoParent extends Component {
                         >
                             <PlacesAutocomplete
                                 value={this.state.address}
-                                onChange={this.handleChange}
-                                onSelect={this.handleSelect}
+                                onChange={this.handleChangeAddress}
+                                onSelect={this.handleSelectAddress}
                             >
                                 {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
                                     <div>
@@ -146,7 +192,9 @@ class InfoParent extends Component {
                         </Form.Item>
                         <Form.Item name="maritialType" rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.maritalStatus) }]}
                         >
-                            <Select placeholder={intl.formatMessage(messages.maritalStatus)}>
+                            <Select 
+                            onChange={v=>this.defaultOnValueChange(v, "maritialType")}
+                            placeholder={intl.formatMessage(messages.maritalStatus)}>
                                 <Select.Option value='0'>Married</Select.Option>
                                 <Select.Option value='1'>Widowed</Select.Option>
                                 <Select.Option value='2'>Separated</Select.Option>
@@ -163,7 +211,9 @@ class InfoParent extends Component {
                                 }
                             ]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.fatherName)} />
+                            <Input 
+                            onChange={v=>this.defaultOnValueChange(v, "fatherName")}
+                            placeholder={intl.formatMessage(messages.fatherName)} />
                         </Form.Item>
                         <Form.Item
                             name="fatherPhoneNumber"
@@ -178,7 +228,9 @@ class InfoParent extends Component {
                                 },
                             ]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.phoneNumber)} />
+                            <Input 
+                            onChange={v=>this.defaultOnValueChange(v,"fatherPhoneNumber" )}
+                            placeholder={intl.formatMessage(messages.phoneNumber)} />
                         </Form.Item>
                         <Form.Item
                             name="fatherEmail"
@@ -192,7 +244,9 @@ class InfoParent extends Component {
                                     message: intl.formatMessage(messagesLogin.emailNotValid)
                                 }
                             ]}>
-                            <Input placeholder={intl.formatMessage(messages.email)} />
+                            <Input 
+                            onChange={v=>this.defaultOnValueChange(v, "fatherEmail")}
+                            placeholder={intl.formatMessage(messages.email)} />
                         </Form.Item>
 
                         <p className='font-16 mb-10'>{intl.formatMessage(messages.mother)}</p>
@@ -204,7 +258,9 @@ class InfoParent extends Component {
                                     message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.motherName)
                                 }
                             ]}>
-                            <Input placeholder={intl.formatMessage(messages.motherName)} />
+                            <Input 
+                            onChange={v=>this.defaultOnValueChange(v, "motherName")}
+                            placeholder={intl.formatMessage(messages.motherName)} />
                         </Form.Item>
                         <Form.Item
                             name="motherPhoneNumber"
@@ -219,7 +275,9 @@ class InfoParent extends Component {
                                 },
                             ]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.phoneNumber)} />
+                            <Input 
+                            onChange={v=>this.defaultOnValueChange(v, "motherPhoneNumber")}
+                            placeholder={intl.formatMessage(messages.phoneNumber)} />
                         </Form.Item>
                         <Form.Item
                             name="motherEmail"
@@ -234,7 +292,9 @@ class InfoParent extends Component {
                                 }
                             ]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.email)} />
+                            <Input 
+                            onChange={v=>this.defaultOnValueChange(v, "motherEmail")}
+                            placeholder={intl.formatMessage(messages.email)} />
                         </Form.Item>
 
                         <Form.Item className="form-btn continue-btn" >
@@ -256,9 +316,8 @@ class InfoParent extends Component {
 const mapStateToProps = (state) => {
     console.log('state in parent', state);
     return {
-        parentStep2: state.register.parent.step2,
         register: state.register,
     };
 }
 
-export default compose(connect(mapStateToProps, { setParent }))(InfoParent);
+export default compose(connect(mapStateToProps, { setRegisterData }))(InfoParent);

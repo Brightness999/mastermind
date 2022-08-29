@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Form, Button, Input, Select, Switch, Divider } from 'antd';
+import { Row, Col, Form, Button, Input, Select, Switch, Divider, Upload, message } from 'antd';
 import { BiChevronLeft } from 'react-icons/bi';
 import { Link } from 'dva/router';
 import { routerLinks } from '../../../constant';
@@ -7,10 +7,22 @@ import intl from 'react-intl-universal';
 import messages from '../messages';
 import messagesCreateAccount from '../../CreateAccount/messages';
 import messagesLogin from '../../Login/messages';
+import messagesRequest from '../messages'
 import './index.less';
 
 
 export default class extends React.Component {
+
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      fileList: [],
+      uploading: false,
+      listDenpendent: localStorage.getItem('inforChildren') ? JSON.parse(localStorage.getItem('inforChildren')) : [],
+    }
+  }
+
 
   onFinish = (values) => {
     console.log('Success:', values);
@@ -21,6 +33,7 @@ export default class extends React.Component {
   };
 
   componentDidMount() {
+
     let data = localStorage.getItem('subsidyRequest');
     if (data) {
       data = JSON.parse(data);
@@ -33,6 +46,9 @@ export default class extends React.Component {
   onSubmit = async () => {
     try {
       const values = await this.form.validateFields();
+      values.documents = this.state.fileList.map(file => {
+        return file.name
+      });
       localStorage.setItem('subsidyRequest', JSON.stringify(values));
       this.props.history.push(routerLinks['SubsidyReview']);
     } catch (error) {
@@ -40,7 +56,36 @@ export default class extends React.Component {
     }
   }
 
+  onChangeUpload = (info) => {
+    if (info.file.status !== 'uploading') {
+      console.log(info.file, info.fileList);
+      this.setState(prevState => ({
+        fileList: [...prevState.fileList, info.file],
+      }));
+      this.form?.setFieldsValue({
+        documents: info.fileList[0].name
+      })
+    }
+    if (info.file.status === 'done') {
+      message.success(`${info.file.name} file uploaded successfully`);
+    } else if (info.file.status === 'error') {
+      message.error(`${info.file.name} file upload failed.`);
+    }
+  }
+
   render() {
+
+    const props = {
+      name: 'file',
+      action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+      headers: {
+        authorization: 'authorization-text',
+      },
+      onChange: this.onChangeUpload,
+      // maxCount: 1,
+      // showUploadList: false 
+    };
+
     return (
       <div className="full-layout page subsidyrequest-page">
         <Row justify="center" className="row-form">
@@ -70,8 +115,11 @@ export default class extends React.Component {
                 }]}
               >
                 <Select placeholder={intl.formatMessage(messagesCreateAccount.dependent)}>
-                  <Select.Option value='d1'>Dependent 1</Select.Option>
-                  <Select.Option value='d2'>Dependent 2</Select.Option>
+                  {this.state.listDenpendent.map((item, index) => {
+                    return (
+                      <Select.Option key={index} value={++index}>Dependent {index}</Select.Option>
+                    )
+                  })}
                 </Select>
               </Form.Item>
               <Form.Item name="skillSet" rules=
@@ -103,7 +151,7 @@ export default class extends React.Component {
                 </Col>
                 <Col xs={24} sm={24} md={12}>
                   <Form.Item
-                    name="rav_phone"
+                    name="ravPhone"
                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.ravPhone) },
                     {
                       pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
@@ -143,10 +191,10 @@ export default class extends React.Component {
               </Row>
 
               <Form.Item
-                name="therapistContact"
-                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.therapistContact) }]}
+                name="requestContactRav"
+                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.requestContactRav) }]}
               >
-                <Input placeholder={intl.formatMessage(messages.therapistContact)} />
+                <Input placeholder={intl.formatMessage(messages.requestContactRav)} />
               </Form.Item>
               <Row gutter={14}>
                 <Col xs={24} sm={24} md={12}>
@@ -184,10 +232,27 @@ export default class extends React.Component {
               >
                 <Input.TextArea rows={5} placeholder={intl.formatMessage(messages.generalNotes)} />
               </Form.Item>
-              <Form.Item name="documents" className='input-download'>
-                <Input addonBefore={intl.formatMessage(messages.documents)} suffix={<Upload {...props}>
-                                        <a className='font-12 underline'>{intl.formatMessage(messagesRequest.upload)}</a>
-                                    </Upload>} />
+              {/* <Form.Item name="documents" className='input-download'
+                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.upload) }]}
+              >
+                <Input autoSize={{ minRows: 1 }} addonBefore={intl.formatMessage(messages.documents)} suffix={
+                  <Upload {...props}>
+                    <a className='font-12 underline'>{intl.formatMessage(messagesRequest.upload)}</a>
+                  </Upload>} />
+              </Form.Item> */}
+              <Form.Item name="documents" className='input-download'
+                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.upload) }]}
+              >
+                <div className='input-download flex flex-row justify-between'>
+                  <div className='div-document'>
+                    <p>Document</p>
+                  </div>
+                  <div className='div-upload flex-1'>
+                    <Upload {...props}>
+                      <a className='font-12 underline'>{intl.formatMessage(messagesRequest.upload)}</a>
+                    </Upload>
+                  </div>
+                </div>
               </Form.Item>
               <Form.Item className="form-btn continue-btn" >
                 {/* <Link to={routerLinks['SubsidyReview']}> */}

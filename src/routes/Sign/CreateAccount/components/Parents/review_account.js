@@ -12,18 +12,21 @@ class ReviewAccount extends Component {
 
     constructor(props) {
         super(props);
+
+
+
+        console.log(this.props);
+
         this.state = {
-            step1: props?.register.parent.step1,
-            step2: props?.register.parent.step2,
-            step3: props?.register.parent.step3,
-            step4: props?.register.parent.step4,
+            step1: JSON.parse(localStorage.getItem('createDefault')) || {},
+            step2: JSON.parse(localStorage.getItem('inforParent')) || {},
+            step3: JSON.parse(localStorage.getItem('inforChildren')) || [],
+            step4: JSON.parse(localStorage.getItem('inforProgress')) || {},
         }
     }
 
     componentDidMount() {
-        console.log(url);
-        console.log(this.props);
-        console.log(moment(this.state.step4.timeFromTo[0].from_time).format('HH:mm'));
+        console.log(this.state.step3)
     }
 
     onFinish = (values) => {
@@ -34,7 +37,6 @@ class ReviewAccount extends Component {
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
-
 
     onSubmit = async () => {
 
@@ -54,22 +56,8 @@ class ReviewAccount extends Component {
             motherPhoneNumber
         } = step2;
 
-        const {
-            backgroundInfor,
-            birthday,
-            children,
-            currentGrade,
-            firstName,
-            guardianEmail,
-            guardianPhone,
-            lastName,
-            primaryTeacher,
-            school,
-            services
-        } = step3[0];
-
         try {
-            const data = {
+            const data1 = {
                 username,
                 password,
                 email,
@@ -86,79 +74,25 @@ class ReviewAccount extends Component {
                     motherName,
                     motherPhoneNumber
                 },
-                studentInfos: [
-                    {
-                        firstName,
-                        lastName,
-                        birthday: moment(birthday).format('YYYY-MM-DD'),
-                        guardianPhone,
-                        guardianEmail,
-                        backgroundInfor,
-                        school,
-                        primaryTeacher,
-                        currentGrade,
-                        services,
-                        "hasIEP": 1,
-                        "subsidyRequest": {
-                            "skillSet": 1,
-                            "school": "school",
-                            "requestContactRav": 1,
-                            "ravPhone": "333333",
-                            "ravName": "ravName",
-                            "ravEmail": "ravEmail@rav.com",
-                            "therapistContact": "123 123",
-                            "therapistPhone": "4444444",
-                            "note": "123123 123123",
-                            "documents": ["temp/1661196727220.xlsx"]
-                        },
-                        availabilitySchedule: [
-                            {
-                                "dayInWeek": 1,
-                                "openHour": 7,
-                                "openMin": 0,
-                                "closeHour": 18,
-                                "closeMin": 0
-                            },
-                            // {
-                            //     "dayInWeek": 2,
-                            //     "openHour": 7,
-                            //     "openMin": 0,
-                            //     "closeHour": 18,
-                            //     "closeMin": 0
-                            // },
-                            // {
-                            //     "dayInWeek": 3,
-                            //     "openHour": 7,
-                            //     "openMin": 0,
-                            //     "closeHour": 18,
-                            //     "closeMin": 0
-                            // },
-                            // {
-                            //     "dayInWeek": 4,
-                            //     "openHour": 7,
-                            //     "openMin": 0,
-                            //     "closeHour": 18,
-                            //     "closeMin": 0
-                            // }
-                        ]
+                studentInfos: this.state.step3.map(item => {
+                    return {
+                        ...item,
+                        birthday: moment(item.birthday).format('YYYY-MM-DD'),
                     }
-                ]
+                })
+
             }
 
-            const response = await axios.post(url + 'users/signup', data);
-            const { success } = response.data;
+            const response = await axios.post(url + 'users/signup', data1);
+            const { success, data } = response.data;
             if (success) {
                 message.success('Create Successfully');
                 setTimeout(() => {
                     window.location.href = '/login';
                 }, 2000)
             }
-            else {
-                message.error('Some thing error');
-            }
         } catch (error) {
-            console.log(error);
-            message.error('Some thing error');
+            message.error(error?.response?.data?.data ?? error.message);
         }
     }
 
@@ -192,35 +126,36 @@ class ReviewAccount extends Component {
                             {/* <p>City State Zip : </p> */}
                             <p>City State Zip : {this.state.step2.family_name}</p>
                         </div>
-                        <div>
-                            <p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.dependentsInfo)}</p>
-                            <p className='font-14 font-700 mb-10'>Dependent #1 First + Last Name + DOB</p>
-                            <p>School : {this.state.step4.school}</p>
-                            <div className='review-item'>
-                                <p>Teacher : {this.state.step4.primaryTeacher} </p>
-                                <p>Grade : {this.state.step4.currentGrade}</p>
-                            </div>
-                            <div className='review-item'>
-                                <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.servicesRequested)}</p>
-                                <p>Has an IEP</p>
-                            </div>
-                            <div className='review-item-3'>
-                                {this.state.step4.services.map((item, index) => { return <p key={index}>{item}</p> })}
-                                {/* <p>Service#1</p>
+                        {this.state.step3.map((item, index) => {
+                            return (
+                                <div>
+                                    <p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.dependentsInfo)}</p>
+                                    <p className='font-14 font-700 mb-10'>Dependent #{++index} {item.firstName} {item.lastName} + DOB</p>
+                                    <p>School : {item.school}</p>
+                                    <div className='review-item'>
+                                        <p>Teacher : {item.primaryTeacher} </p>
+                                        <p>Grade : {item.currentGrade}</p>
+                                    </div>
+                                    <div className='review-item'>
+                                        <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.servicesRequested)}</p>
+                                        <p>Has an IEP</p>
+                                    </div>
+                                    <div className='review-item-3'>
+                                        {item.services.map((item, index) => { return <p key={index}>{item}</p> })}
+                                        {/* <p>Service#1</p>
                                 <p>Service#2</p>
                                 <p>Service#3</p> */}
-                            </div>
-                        </div>
-                        <div>
-                            <p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.availability)}</p>
-                            <div className='review-item-flex'>
-                                <div className='item-flex'>
-                                    <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.sunday)}</p>
-                                    <p>AM#1.1 - AM#1.2</p>
-                                    <p>AM#1.1 - AM#1.2</p>
-                                    <p>AM#1.1 - AM#1.2</p>
-                                </div>
-                                {/* <div className='item-flex'>
+                                    </div>
+                                    <div>
+                                        <p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.availability)}</p>
+                                        <div className='review-item-flex'>
+                                            <div className='item-flex'>
+                                                <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.sunday)}</p>
+                                                <p>AM#1.1 - AM#1.2</p>
+                                                <p>AM#1.1 - AM#1.2</p>
+                                                <p>AM#1.1 - AM#1.2</p>
+                                            </div>
+                                            {/* <div className='item-flex'>
                                     <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.wednesday)}</p>
                                     <p>AM#1.1 - AM#1.2</p>
                                     <p>AM#1.1 - AM#1.2</p>
@@ -229,8 +164,14 @@ class ReviewAccount extends Component {
                                     <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.thursday)}</p>
                                     <p>AM#1.1 - AM#1.2</p>
                                 </div> */}
-                            </div>
-                        </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            )
+
+                        })}
+
 
                         <div className="form-btn continue-btn" >
                             <Button

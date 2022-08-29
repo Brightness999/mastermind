@@ -11,7 +11,9 @@ import messagesRequest from '../../../SubsidyRequest/messages';
 
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { setProvider } from '../../../../../redux/features/registerSlice';
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import { url } from '../../../../../utils/api/baseUrl';
+import axios from 'axios';
 
 class InfoServices extends Component {
     constructor(props) {
@@ -37,7 +39,7 @@ class InfoServices extends Component {
 
     onFinish = (values) => {
         console.log('Success:', values);
-        this.props.setProvider({
+        this.props.setRegisterData({
             step3: values
         });
         this.props.onContinue();
@@ -47,19 +49,44 @@ class InfoServices extends Component {
         console.log('Failed:', errorInfo);
     };
 
-    onChange = (info) => {
+    onChange = async (info) => {
         if (info.file.status !== 'uploading') {
-            console.log(info.file, info.fileList);
-            this.setState({ fileList: info.fileList[0] });
-            this.form?.setFieldsValue({
-                upload_w_9: info.fileList[0].name
-            })
+
+            // this.setState({ fileList: info.file });
+            // this.form?.setFieldsValue({
+            //     upload_w_9: info.file.name
+            // })
+
+            try {
+                const formData = new FormData();
+                formData.append('file', info.file.originFileObj);
+                const response = await axios.post(url + 'providers/upload_temp_w9_form', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                const { success, data } = response.data;
+                if (success) {
+                    this.setState({
+                        fileList: data,
+                        uploading: false,
+                    });
+                    this.form?.setFieldsValue({
+                        upload_w_9: data
+                    })
+                    message.success(intl.formatMessage(messages.uploadSuccess));
+                }
+                console.log(response);
+            } catch (error) {
+                console.log(error);
+                message.error(error?.response?.data?.data ?? error.message);
+            }
         }
-        if (info.file.status === 'done') {
-            message.success(`${info.file.name} file uploaded successfully`);
-        } else if (info.file.status === 'error') {
-            message.error(`${info.file.name} file upload failed.`);
-        }
+        // if (info.file.status === 'done') {
+        //     message.success(`${info.file.name} file uploaded successfully`);
+        // } else if (info.file.status === 'error') {
+        //     message.error(`${info.file.name} file upload failed.`);
+        // }
     }
 
     render() {
@@ -285,4 +312,4 @@ class InfoServices extends Component {
 const mapStateToProps = state => ({
     register: state.register,
 })
-export default compose(connect(mapStateToProps, { setProvider }))(InfoServices);
+export default compose(connect(mapStateToProps, { setRegisterData }))(InfoServices);

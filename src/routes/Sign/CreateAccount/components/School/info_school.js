@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Form, Button, Input, Select, Segmented, TimePicker, } from 'antd';
+import { Row, Col, Form, Button, Input, Select, Segmented, TimePicker, message } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import moment from 'moment';
 import intl from 'react-intl-universal';
@@ -8,45 +8,148 @@ import messagesLogin from '../../../Login/messages';
 
 import PlacesAutocomplete, {
     geocodeByAddress,
+    geocodeByPlaceId,
     getLatLng,
 } from 'react-places-autocomplete';
+import axios from 'axios';
+
+import { url } from '../../../../../utils/api/baseUrl';
 
 export default class extends React.Component {
     constructor(props) {
         super(props);
 
+        console.log(props);
+
         this.state = {
             technical_contact: [
-                { technical: "Dependent 1" },
+                {}
             ],
             student_contact: [
-                { student: "Dependent 1" },
+                {}
             ],
             shool_detail: localStorage.getItem('school_detail') ? JSON.parse(localStorage.getItem('school_detail')) : '',
-            school_address:''
+            school_address: ''
         }
     }
 
-
-    componentDidMount() {
-        let data = this.state.shool_detail;
-        if (data) {
-            this.form?.setFieldsValue({
-                ...data,
-                after_from_time: moment(data.after_from_time, 'HH:mm'),
-                after_to_time: moment(data.after_to_time, 'HH:mm'),
-                in_from_time: moment(data.in_from_time, 'HH:mm'),
-                in_to_time: moment(data.in_to_time, 'HH:mm'),
-            })
-        }
+    convertDate = (date, type) => {
+        return moment(date).format(type === 'h' ? 'HH' : 'mm');
     }
 
 
 
-    onFinish = (values) => {
+    onFinish = async (values) => {
         console.log('Success:', values);
-        localStorage.setItem('school_detail', JSON.stringify(values));
+        //localStorage.setItem('school_detail', JSON.stringify(values));
         //window.location.href = "/login";
+        const { username, password, email } = JSON.parse(localStorage.getItem('createDefault'));
+        const {
+            after_from_time,
+            after_to_time,
+            communityServed,
+            in_from_time,
+            in_to_time,
+            school_address,
+            student: studentContactRef,
+            technical: techContactRef,
+            valueForContact
+        } = values;
+        try {
+
+            // const data = {
+            //     "username": "chi",
+            //     "password": "chi123@@I",
+            //     "email": "chi@gmail.com",
+            //     "role": 60,
+            //     "name": "chi_1",
+            //     "communityServed": "6302788ceeebce6fb875cbcb",
+            //     "valueForContact": "123 abc def",
+            //     "sessionsInSchool": [
+            //         {
+            //             "dayInWeek": 1,
+            //             "openHour": 7,
+            //             "openMin": 0,
+            //             "closeHour": 18,
+            //             "closeMin": 0
+            //         },
+            //         {
+            //             "dayInWeek": 2,
+            //             "openHour": 7,
+            //             "openMin": 0,
+            //             "closeHour": 18,
+            //             "closeMin": 0
+            //         },
+            //         {
+            //             "dayInWeek": 3,
+            //             "openHour": 7,
+            //             "openMin": 0,
+            //             "closeHour": 18,
+            //             "closeMin": 0
+            //         },
+            //         {
+            //             "dayInWeek": 4,
+            //             "openHour": 7,
+            //             "openMin": 0,
+            //             "closeHour": 18,
+            //             "closeMin": 0
+            //         }
+            //     ],
+            //     "sessionsAfterSchool": [
+            //         {
+            //             "dayInWeek": 0,
+            //             "openHour": 7,
+            //             "openMin": 0,
+            //             "closeHour": 18,
+            //             "closeMin": 0
+            //         }
+            //     ],
+            //     "techContactRef": ["1234", "123456"],
+            //     "studentContactRef": ["12399", "12355"]
+            // }
+
+
+            const data = {
+                username,
+                password,
+                email,
+                role: "60",
+                name: "chi_1",
+                communityServed : "6302788ceeebce6fb875cbcb",
+                valueForContact,
+                sessionsInSchool: [
+                    {
+                        "dayInWeek": 1,
+                        "openHour": this.convertDate(in_from_time, 'h'),
+                        "openMin": this.convertDate(in_from_time, 'm'),
+                        "closeHour": this.convertDate(in_to_time, 'h'),
+                        "closeMin": this.convertDate(in_to_time, 'm'),
+                    }
+                ],
+                sessionsAfterSchool: [
+                    {
+                        "dayInWeek": 0,
+                        "openHour": this.convertDate(after_from_time, 'h'),
+                        "openMin": this.convertDate(after_from_time, 'm'),
+                        "closeHour": this.convertDate(after_to_time, 'h'),
+                        "closeMin": this.convertDate(after_to_time, 'm'),
+                    }
+                ],
+                techContactRef: [1,2],
+                studentContactRef: [1,2],
+            }
+
+            const response = await axios.post(url + 'users/signup', data);
+
+            const { success } = response.data;
+            if (success) {
+                message.success('Create Successfully');
+            }
+        }
+        catch (error) {
+            message.error(error?.response?.data?.data ?? error.message);
+        }
+
     };
 
     onFinishFailed = (errorInfo) => {
@@ -58,14 +161,13 @@ export default class extends React.Component {
     };
 
     handleSelect = school_address => {
-        console.log(school_address);
         this.form.setFieldsValue({
             school_address
         })
-        // geocodeByAddress(address)
-        //     .then(results => getLatLng(results[0]))
+        // geocodeByAddress(school_address)
+        //     .then(results => geocodeByPlaceId(results[0].place_id))
         //     .then(latLng => console.log('Success', latLng))
-        //     .catch(error => console.error('Error', error));
+        // .catch(error => console.error('Error', error));
     };
 
 
@@ -88,18 +190,18 @@ export default class extends React.Component {
                         initialValues={{
                             technical: this.state?.shool_detail?.technical || this.state.technical_contact,
                             student: this.state?.shool_detail?.student || this.state.student_contact,
-                            school_address : 'Chicago, Illinois, Hoa Kỳ'
+                            school_address: 'Chicago, Illinois, Hoa Kỳ'
                         }}
                         ref={(ref) => { this.form = ref }}
                     >
                         <Form.Item
-                            name="name_school"
+                            name="valueForContact"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.nameSchool) }]}
                         >
                             <Input placeholder={intl.formatMessage(messages.nameSchool)} />
                         </Form.Item>
                         <Form.Item
-                            name="communicate_served"
+                            name="communityServed"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.communitiesServed) }]}
                         >
                             <Select placeholder={intl.formatMessage(messages.communitiesServedNote)}>
@@ -162,7 +264,7 @@ export default class extends React.Component {
                                         return (
                                             <div key={field.key} className={field.key !== 0 && 'item-remove'}>
                                                 <Form.Item
-                                                    name={[field.name, "technical_contact"]}
+                                                    name={[field.name, "techContactRef"]}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.technicalReferralContact) }]}
                                                 >
                                                     <Input placeholder={intl.formatMessage(messages.technicalReferralContact)} />
@@ -195,7 +297,7 @@ export default class extends React.Component {
                                         return (
                                             <div key={field.key} className={field.key !== 0 && 'item-remove'}>
                                                 <Form.Item
-                                                    name={[field.name, "student_contact"]}
+                                                    name={[field.name, "studentContactRef"]}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.studentReferralContact) }]}
                                                 >
                                                     <Input placeholder={intl.formatMessage(messages.studentReferralContact)} />

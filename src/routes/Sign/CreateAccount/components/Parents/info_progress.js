@@ -8,7 +8,7 @@ import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { setParent } from '../../../../../redux/features/registerSlice';
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
 
 class InfoProgress extends Component {
     constructor(props) {
@@ -21,46 +21,9 @@ class InfoProgress extends Component {
         }
     }
 
-
-    componentDidMount() {
-
-        const step3 = this.props.register.parent.step3;
-
-        if (this.props.parentStep4 && this.state.isSameAll !== this.props?.parentStep4?.isSameAll ||
-            this.props.parentStep4 && this.state.isSameAllSchedule !== this.props?.parentStep4?.isSameAllSchedule) {
-            this.setState({
-                isSameAll: this.props?.parentStep4?.isSameAll,
-                isSameAllSchedule: this.props?.parentStep4?.isSameAllSchedule,
-            })
-        }
-        if (step3) {
-            console.log(1);
-            console.log(step3);
-            const { currentGrade, primaryTeacher, school, services } = step3[0];
-            this.form?.setFieldsValue({
-                currentGrade,
-                primaryTeacher,
-                school,
-                services,
-            })
-        }
-        const parent = this.props.parentStep4
-        if (parent) {
-            this.form?.setFieldsValue({
-                ...parent
-            })
-        }
-    }
-
     onFinish = (values) => {
-        console.log('Success:', values);
-        this.props.setParent({
-            step4: {
-                ...values,
-                isSameAll: this.state.isSameAll,
-                isSameAllSchedule: this.state.isSameAllSchedule,
-            }
-        });
+        
+
         this.props.onContinue();
     };
 
@@ -83,6 +46,8 @@ class InfoProgress extends Component {
             intl.formatMessage(messages.friday),
         ]
         const { isSameAll, isSameAllSchedule } = this.state;
+        const step3 = JSON.parse(localStorage.getItem('inforChildren'));
+        console.log(step3);
         return (
             <Row justify="center" className="row-form">
                 <div className='col-form col-create-default'>
@@ -93,174 +58,64 @@ class InfoProgress extends Component {
                         name="form_default"
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
-                        initialValues={{
-                            timeFromTo: this.state.formTime,
-                            timeLocation: this.props.parentStep4 || this.state.fromLocation
-                        }}
-
+                        
                         ref={ref => this.form = ref}
                     >
-                        <p className='font-16 mr-10 mb-5'>{intl.formatMessage(messages.dependent)} #1 First + Last Name </p>
-                        <Form.Item
-                            name="school"
-                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
-                        >
-                            <Input placeholder={intl.formatMessage(messages.school)} />
-                        </Form.Item>
-                        <Form.Item
-                            name="primaryTeacher"
-                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
-                        >
-                            <Input placeholder={intl.formatMessage(messages.primaryTeacher)} />
-                        </Form.Item>
-                        <Form.Item
-                            name="currentGrade"
-                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.currentGrade) }]}
-                        >
-                            <Input placeholder={intl.formatMessage(messages.currentGrade)} />
-                        </Form.Item>
-                        <Form.Item
-                            name="services"
-                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
-                        >
-                            <Select
-                                mode="multiple"
-                                showArrow
-                                placeholder={intl.formatMessage(messages.servicesRequired)}
-                                optionLabelProp="label"
-                            >
-                                <Select.Option value='Services required 1'>Services required 1</Select.Option>
-                                <Select.Option value='Services required 2'>Services required 2</Select.Option>
-                            </Select>
-                        </Form.Item>
-                        <Form.Item>
-                            <Checkbox checked={true}>{intl.formatMessage(messages.doHaveIEP)}</Checkbox>
-                        </Form.Item>
+                        <Form.List name="listAcademic">
+                            {(fields, _) => (
+                                <>
+                                    {fields.map((field) => (
+                                        <div key={field.key} className='academic-item'>
+                                            <p className='font-16 mr-10 mb-5'>{intl.formatMessage(messages.dependent)} #{field.key + 1} {field.firstName} {field.lastName} </p>
+                                            <Form.Item
+                                                name={[field.name, "school"]}
+                                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
+                                            >
+                                                <Input placeholder={intl.formatMessage(messages.school)} />
+                                            </Form.Item>
+                                            <Form.Item
+                                                name={[field.name, "primaryTeacher"]}
+                                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
+                                            >
+                                                <Input placeholder={intl.formatMessage(messages.primaryTeacher)} />
+                                            </Form.Item>
+                                            <Form.Item
+                                                name={[field.name, "currentGrade"]}
+                                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.currentGrade) }]}
+                                            >
+                                                <Input placeholder={intl.formatMessage(messages.currentGrade)} />
+                                            </Form.Item>
+                                            <Form.Item
+                                                name={[field.name, "services"]}
+                                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
+                                            >
+                                                <Select
+                                                    mode="multiple"
+                                                    showArrow
+                                                    placeholder={intl.formatMessage(messages.servicesRequired)}
+                                                    optionLabelProp="label"
 
-                        <p className='font-24 mb-10 text-center'>{intl.formatMessage(messages.availability)}</p>
-                        <div className='div-availability'>
-                            <Segmented options={day_week} block={true} />
-                            <div className='div-time'>
-                                <Form.List name="timeFromTo">
-                                    {(fields, { add, remove }) => (
-                                        <div>
-                                            {fields.map((field) => (
-                                                <Row key={field.key} gutter={14}>
-                                                    <Col xs={24} sm={24} md={12}>
-                                                        <Form.Item
-                                                            name={[field.name, "from_time"]}
-                                                            rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
-                                                        >
-                                                            <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
-                                                        </Form.Item>
-                                                    </Col>
-                                                    <Col xs={24} sm={24} md={12} className={field.key === 0 ? '' : 'item-remove'}>
-                                                        <Form.Item
-                                                            name={[field.name, "to_time"]}
-                                                            rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
-                                                        >
-                                                            <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
-                                                        </Form.Item>
-                                                        {field.key === 0 ? null : <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
-                                                    </Col>
-                                                </Row>
-                                            ))}
-                                            <div className='div-add-time' onClick={() => add(null)}>
-                                                <BsPlusCircle size={17} className='mr-5 text-primary' />
-                                                <a className='text-primary'>{intl.formatMessage(messages.addTimeRange)}</a>
-                                            </div>
-                                            <div className='text-right div-copy-week'>
-                                                <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
-                                                <QuestionCircleOutlined className='text-primary' />
-                                            </div>
-                                        </div>
-                                    )}
-                                </Form.List>
-                            </div>
-                        </div>
-                        <div className='flex flex-row items-center'>
-                            <Switch size="small" checked={isSameAll} onChange={this.onSameAllDependent} />
-                            <p className='ml-10 mb-0'>{intl.formatMessage(messages.sameAllDependents)}</p>
-                        </div>
-                        {/* List of Availability Schedule Start */}
-                        {/* Show when the switch "isSameAll" - false */}
-                        {!isSameAll && <>
-                            <p className='font-24 text-center mt-2'>{intl.formatMessage(messages.availabilitySchedule)}</p>
-                            <div>
-                                <p className='mb-5'>Dependent #1 First + Last Name</p>
-                                <div className='div-availability'>
-                                    <Segmented options={day_week} block={true} />
-                                    <div className='div-time'>
-                                        <Form.List name="timeLocation">
-                                            {(fields, { add, remove }) => (
-                                                <div>
-                                                    {fields.map((field) => (
-                                                        <div key={field.key}>
-                                                            <Row gutter={14}>
-                                                                <Col xs={24} sm={24} md={12}>
-                                                                    <Form.Item
-                                                                        name={[field.name, "from_time_1"]}
-                                                                        rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
-                                                                    >
-                                                                        <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
-                                                                    </Form.Item>
-                                                                </Col>
-                                                                <Col xs={24} sm={24} md={12} className={field.key === 0 ? '' : 'item-remove'}>
-                                                                    <Form.Item
-                                                                        name={[field.name, "to_time_1"]}
-                                                                        rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
-                                                                    >
-                                                                        <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
-                                                                    </Form.Item>
-                                                                    {field.key === 0 ? null : <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
-                                                                </Col>
-                                                            </Row>
-                                                            <Form.Item
-                                                                name={[field.name, "location_1"]}
-                                                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
-                                                            >
-                                                                <Input placeholder={intl.formatMessage(messages.location)} />
-                                                            </Form.Item>
-                                                        </div>
-                                                    ))}
-                                                    <div className='flex flex-row justify-between'>
-                                                        <div className='div-add-time' onClick={() => add(null)}>
-                                                            <BsPlusCircle size={17} className='mr-5 text-primary' />
-                                                            <a className='text-primary'>{intl.formatMessage(messages.addRange)}</a>
-                                                        </div>
-                                                        <div className='text-right div-copy-week'>
-                                                            <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
-                                                            <QuestionCircleOutlined className='text-primary' />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </Form.List>
-                                    </div>
-                                </div>
-                                <div className='flex flex-row items-center mb-2'>
-                                    <Switch size="small" checked={isSameAllSchedule} onChange={this.onSameAllSchedule} />
-                                    <p className='ml-10 mb-0'>{intl.formatMessage(messages.sameAllDependents)}</p>
-                                </div>
-                            </div>
-                            {/* List of All Availability Schedule Start */}
-                            {/* Show when the switch "isSameAllSchedule" - false */}
-                            {Array(2).fill(null).map((_, index) =>
-                                <div key={index}>
-                                    {!isSameAllSchedule && <>
-                                        <p className='mb-5 mt-2'>Dependent #{index + 2} First + Last Name</p>
-                                        <div className='div-availability'>
-                                            <Segmented options={day_week} block={true} />
-                                            <div className='div-time'>
-                                                <Form.List name="timeLocation">
-                                                    {(fields, { add, remove }) => (
-                                                        <div>
-                                                            {fields.map((field) => (
-                                                                <div key={field.key}>
-                                                                    <Row gutter={14}>
+                                                >
+                                                    <Select.Option value='Services required 1'>Services required 1</Select.Option>
+                                                    <Select.Option value='Services required 2'>Services required 2</Select.Option>
+                                                </Select>
+                                            </Form.Item>
+                                            <Form.Item>
+                                                <Checkbox checked={true}>{intl.formatMessage(messages.doHaveIEP)}</Checkbox>
+                                            </Form.Item>
+
+                                            <p className='font-24 mb-10 text-center'>{intl.formatMessage(messages.availability)}</p>
+                                            <div className='div-availability'>
+                                                <Segmented options={day_week} block={true} />
+                                                <div className='div-time'>
+                                                    <Form.List name="timeFromTo">
+                                                        {(fields, { add, remove }) => (
+                                                            <div>
+                                                                {fields.map((field) => (
+                                                                    <Row key={field.key} gutter={14}>
                                                                         <Col xs={24} sm={24} md={12}>
                                                                             <Form.Item
-                                                                                name={[field.name, `${"from_time" + index + 2}`]}
+                                                                                name={[field.name, "from_time"]}
                                                                                 rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
                                                                             >
                                                                                 <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
@@ -268,7 +123,7 @@ class InfoProgress extends Component {
                                                                         </Col>
                                                                         <Col xs={24} sm={24} md={12} className={field.key === 0 ? '' : 'item-remove'}>
                                                                             <Form.Item
-                                                                                name={[field.name, `${"to_time" + index + 2}`]}
+                                                                                name={[field.name, "to_time"]}
                                                                                 rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
                                                                             >
                                                                                 <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
@@ -276,33 +131,150 @@ class InfoProgress extends Component {
                                                                             {field.key === 0 ? null : <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
                                                                         </Col>
                                                                     </Row>
-                                                                    <Form.Item
-                                                                        name={[field.name, `${"location" + index + 2}`]}
-                                                                        rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
-                                                                    >
-                                                                        <Input placeholder={intl.formatMessage(messages.location)} />
-                                                                    </Form.Item>
-                                                                </div>
-                                                            ))}
-                                                            <div className='flex flex-row justify-between'>
+                                                                ))}
                                                                 <div className='div-add-time' onClick={() => add(null)}>
                                                                     <BsPlusCircle size={17} className='mr-5 text-primary' />
-                                                                    <a className='text-primary'>{intl.formatMessage(messages.addRange)}</a>
+                                                                    <a className='text-primary'>{intl.formatMessage(messages.addTimeRange)}</a>
                                                                 </div>
                                                                 <div className='text-right div-copy-week'>
                                                                     <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
                                                                     <QuestionCircleOutlined className='text-primary' />
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    )}
-                                                </Form.List>
+                                                        )}
+                                                    </Form.List>
+                                                </div>
                                             </div>
+                                            <div className='flex flex-row items-center'>
+                                                <Switch size="small" checked={isSameAll} onChange={this.onSameAllDependent} />
+                                                <p className='ml-10 mb-0'>{intl.formatMessage(messages.sameAllDependents)}</p>
+                                            </div>
+                                            {/* List of Availability Schedule Start */}
+                                            {/* Show when the switch "isSameAll" - false */}
+                                            {!isSameAll && <>
+                                                <p className='font-24 text-center mt-2'>{intl.formatMessage(messages.availabilitySchedule)}</p>
+                                                <div>
+                                                    <p className='mb-5'>{intl.formatMessage(messages.dependent)} #{index + 1} {item.firstName} {item.lastName}</p>
+                                                    <div className='div-availability'>
+                                                        <Segmented options={day_week} block={true} />
+                                                        <div className='div-time'>
+                                                            <Form.List name="timeLocation">
+                                                                {(fields, { add, remove }) => (
+                                                                    <div>
+                                                                        {fields.map((field) => (
+                                                                            <div key={field.key}>
+                                                                                <Row gutter={14}>
+                                                                                    <Col xs={24} sm={24} md={12}>
+                                                                                        <Form.Item
+                                                                                            name={[field.name, "from_time_1"]}
+                                                                                            rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
+                                                                                        >
+                                                                                            <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
+                                                                                        </Form.Item>
+                                                                                    </Col>
+                                                                                    <Col xs={24} sm={24} md={12} className={field.key === 0 ? '' : 'item-remove'}>
+                                                                                        <Form.Item
+                                                                                            name={[field.name, "to_time_1"]}
+                                                                                            rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
+                                                                                        >
+                                                                                            <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
+                                                                                        </Form.Item>
+                                                                                        {field.key === 0 ? null : <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
+                                                                                    </Col>
+                                                                                </Row>
+                                                                                <Form.Item
+                                                                                    name={[field.name, "location_1"]}
+                                                                                    rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
+                                                                                >
+                                                                                    <Input placeholder={intl.formatMessage(messages.location)} />
+                                                                                </Form.Item>
+                                                                            </div>
+                                                                        ))}
+                                                                        <div className='flex flex-row justify-between'>
+                                                                            <div className='div-add-time' onClick={() => add(null)}>
+                                                                                <BsPlusCircle size={17} className='mr-5 text-primary' />
+                                                                                <a className='text-primary'>{intl.formatMessage(messages.addRange)}</a>
+                                                                            </div>
+                                                                            <div className='text-right div-copy-week'>
+                                                                                <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
+                                                                                <QuestionCircleOutlined className='text-primary' />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </Form.List>
+                                                        </div>
+                                                    </div>
+                                                    <div className='flex flex-row items-center mb-2'>
+                                                        <Switch size="small" checked={isSameAllSchedule} onChange={this.onSameAllSchedule} />
+                                                        <p className='ml-10 mb-0'>{intl.formatMessage(messages.sameAllDependents)}</p>
+                                                    </div>
+                                                </div>
+                                                {/* List of All Availability Schedule Start */}
+                                                {/* Show when the switch "isSameAllSchedule" - false */}
+                                                {Array(2).fill(null).map((_, index) =>
+                                                    <div key={index}>
+                                                        {!isSameAllSchedule && <>
+                                                            <p className='mb-5 mt-2'>Dependent #{index + 2} First + Last Name</p>
+                                                            <div className='div-availability'>
+                                                                <Segmented options={day_week} block={true} />
+                                                                <div className='div-time'>
+                                                                    <Form.List name="timeLocation">
+                                                                        {(fields, { add, remove }) => (
+                                                                            <div>
+                                                                                {fields.map((field) => (
+                                                                                    <div key={field.key}>
+                                                                                        <Row gutter={14}>
+                                                                                            <Col xs={24} sm={24} md={12}>
+                                                                                                <Form.Item
+                                                                                                    name={[field.name, `${"from_time" + index + 2}`]}
+                                                                                                    rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
+                                                                                                >
+                                                                                                    <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
+                                                                                                </Form.Item>
+                                                                                            </Col>
+                                                                                            <Col xs={24} sm={24} md={12} className={field.key === 0 ? '' : 'item-remove'}>
+                                                                                                <Form.Item
+                                                                                                    name={[field.name, `${"to_time" + index + 2}`]}
+                                                                                                    rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
+                                                                                                >
+                                                                                                    <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
+                                                                                                </Form.Item>
+                                                                                                {field.key === 0 ? null : <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
+                                                                                            </Col>
+                                                                                        </Row>
+                                                                                        <Form.Item
+                                                                                            name={[field.name, `${"location" + index + 2}`]}
+                                                                                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
+                                                                                        >
+                                                                                            <Input placeholder={intl.formatMessage(messages.location)} />
+                                                                                        </Form.Item>
+                                                                                    </div>
+                                                                                ))}
+                                                                                <div className='flex flex-row justify-between'>
+                                                                                    <div className='div-add-time' onClick={() => add(null)}>
+                                                                                        <BsPlusCircle size={17} className='mr-5 text-primary' />
+                                                                                        <a className='text-primary'>{intl.formatMessage(messages.addRange)}</a>
+                                                                                    </div>
+                                                                                    <div className='text-right div-copy-week'>
+                                                                                        <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
+                                                                                        <QuestionCircleOutlined className='text-primary' />
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                    </Form.List>
+                                                                </div>
+                                                            </div>
+                                                        </>}
+                                                    </div>)}
+                                                {/* List of All Availability Schedule End */}
+                                            </>}
                                         </div>
-                                    </>}
-                                </div>)}
-                            {/* List of All Availability Schedule End */}
-                        </>}
+                                    ))}
+                                </>
+                            )}
+                        </Form.List>
                         {/* List of Availability Schedule End */}
                         <Form.Item className="form-btn continue-btn" >
                             <Button
@@ -313,6 +285,7 @@ class InfoProgress extends Component {
                                 {intl.formatMessage(messages.continue).toUpperCase()}
                             </Button>
                         </Form.Item>
+
                     </Form>
                 </div>
             </Row >
@@ -321,8 +294,7 @@ class InfoProgress extends Component {
 }
 
 const mapStateToProps = state => ({
-    parentStep4: state.register.parent.step4,
     register: state.register,
 })
 
-export default compose(connect(mapStateToProps, { setParent }))(InfoProgress);
+export default compose(connect(mapStateToProps, { setRegisterData }))(InfoProgress);

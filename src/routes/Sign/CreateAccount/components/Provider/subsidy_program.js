@@ -11,7 +11,7 @@ import messagesLogin from '../../../Login/messages';
 
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { setProvider } from '../../../../../redux/features/registerSlice';
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
 
 import 'moment/locale/en-au';
 moment.locale('en');
@@ -47,7 +47,7 @@ class SubsidyProgram extends Component {
     }
     onFinish = (values) => {
         console.log('Success:', values);
-        this.props.setProvider({
+        this.props.setRegisterData({
             step5: values
         })
 
@@ -252,4 +252,4 @@ class SubsidyProgram extends Component {
 const mapStateToProps = state => ({
     register: state.register,
 })
-export default compose(connect(mapStateToProps, { setProvider }))(SubsidyProgram);
+export default compose(connect(mapStateToProps, { setRegisterData }))(SubsidyProgram);
