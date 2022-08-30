@@ -9,6 +9,7 @@ import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import shortid from 'shortid';
 
 class InfoProgress extends Component {
     constructor(props) {
@@ -37,11 +38,12 @@ class InfoProgress extends Component {
         }
         this.setState({studentInfos:studentInfos});
     }
+    
 
     onFinish = (values) => {
         
 
-        this.props.onContinue();
+        // this.props.onContinue();
     };
 
     onFinishFailed = (errorInfo) => {
@@ -56,17 +58,52 @@ class InfoProgress extends Component {
 
     onSubmit = async () => {
         var isPassed = false;
-        for(var i = 0 ; i < this.state.studentInfos.length;i++){
+        
+        // for(var i = 0 ; i < this.state.studentInfos.length;i++){
+        //     for(var j = 0 ; j <this.state.studentInfos[i].availabilitySchedule.length ; j++){
+        //         this.state.studentInfos[i].availabilitySchedule[j]
+        //         if(){
 
-        }
+        //         }
+        //     }
+        // }
 
         // add to redux
+        const {registerData} = this.props.register;
+        var studentInfos =[ ...registerData.studentInfos]
+        
+        for(var i = 0 ; i < this.state.studentInfos.length;i++){
+            console.log('submitting ', i,'availabilitySchedule',this.state.studentInfos[i].availabilitySchedule.length , this.state.studentInfos[i].availabilitySchedule );
+            var selectedObj ={ ...studentInfos[i]};
+            selectedObj['availabilitySchedule' ] = this.state.studentInfos[i].availabilitySchedule;
+            studentInfos[i] = selectedObj;
+        }
+        this.props.setRegisterData({studentInfos:studentInfos});
 
+        // continue
         return this.props.onContinue();
+    }
+
+    logForAvailbitiyArr = ()=>{
+        console.log('submitting' , this.form.getFieldsValue());
+        for(var i = 0 ; i < this.state.studentInfos.length;i++){
+            console.log('submitting ', i,'availabilitySchedule',this.state.studentInfos[i].availabilitySchedule.length , this.state.studentInfos[i].availabilitySchedule );
+        }
+    }
+
+    updateReduxValueFor1Depedent(index , fieldName , value){
+        const {registerData} = this.props.register;
+        var studentInfos =[ ...registerData.studentInfos]
+        var selectedObj ={ ...studentInfos[index]};
+        selectedObj[fieldName ] = value;
+        studentInfos[index] = selectedObj;
+        console.log('update redux student',index ,selectedObj , fieldName , value);
+        this.props.setRegisterData({studentInfos:studentInfos});
     }
 
     defaultTimeRangeItem = (dayInWeek)=>{
         return {
+            "uid":shortid.generate()+''+Date.now(),
             "dayInWeek":dayInWeek,
             "openHour":7,
             "openMin":0,
@@ -89,7 +126,7 @@ class InfoProgress extends Component {
         }else{
             this.setState({
                 studentInfos: this.state.studentInfos.map((student, stdIndex) => {
-                    if(stdIndex = index ){
+                    if(stdIndex == index ){
                         return {...student ,availabilitySchedule:arr}
                     }
         
@@ -188,7 +225,7 @@ class InfoProgress extends Component {
                 hasErrorOnTimeClose:false,
             })
         }
-        console.log(this.state.studentInfos[index].availabilitySchedule)
+        this.logForAvailbitiyArr();
     }
 
     valueChangeForCloseHour(index, indexOnAvailabilitySchedule,v){
@@ -231,8 +268,10 @@ class InfoProgress extends Component {
             })
         }
         
-        console.log(this.state.studentInfos[index].availabilitySchedule)
+        this.logForAvailbitiyArr();
     }
+
+
 
     render() {
         const day_week = [
@@ -256,7 +295,7 @@ class InfoProgress extends Component {
                     </div> */}
                     <Form
                         name="form_default"
-                        onFinish={this.onFinish}
+                        // onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
                         
                         ref={ref => this.form = ref}
@@ -325,9 +364,9 @@ class InfoProgress extends Component {
                                                             return (
                                                                 <Row key={indexOnAvailabilitySchedule} gutter={14}>
                                                                     <Col xs={24} sm={24} md={12}>
-                                                                        <Form.Item name={[field.name, "from_time"]} >
+                                                                        <Form.Item name={[field.name, "open_time",scheduleItem.uid] } >
                                                                             <TimePicker 
-                                                                            name='timer1'
+                                                                            name={`timer_1${scheduleItem.uid}`}
                                                                             use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)}
                                                                             value={this.valueForAvailabilityScheduleOpenHour(index, indexOnAvailabilitySchedule)}
                                                                             
@@ -339,9 +378,9 @@ class InfoProgress extends Component {
                                                                         </Form.Item>
                                                                     </Col>
                                                                     <Col xs={24} sm={24} md={12} className={indexOnAvailabilitySchedule === 0 ? '' : 'item-remove'}>
-                                                                        <Form.Item name={[field.name, "to_time"]}>
+                                                                        <Form.Item name={[field.name, "close_time",scheduleItem.uid]}>
                                                                             <TimePicker 
-                                                                            name='timer2'
+                                                                            name={`timer_1${scheduleItem.uid}`}
                                                                             onChange={v=>{
                                                                                 console.log('timer 2 changed ', v);
                                                                                 this.valueChangeForCloseHour(index,indexOnAvailabilitySchedule,v);

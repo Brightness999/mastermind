@@ -23,7 +23,9 @@ class ReviewAccount extends Component {
             registerData:{
                 parentInfo:{},
                 studentInfos:[],
-            }
+            },
+            listServices:[],
+            SkillSet:[],
         }
     }
 
@@ -33,6 +35,32 @@ class ReviewAccount extends Component {
         this.setState({
             registerData:registerData
         })
+        this.loadDataFromServer();
+    }
+
+    loadDataFromServer(){
+        axios.post(url+ 'clients/get_default_value_for_client'
+            ).then(result=>{
+                console.log('get_default_value_for_client',result.data);
+                if(result.data.success){
+                    var data = result.data.data;
+                    this.setState({SkillSet:data.SkillSet,listServices:data.listServices })
+                }
+            }).catch(err=>{
+                console.log(err);
+                this.setState({
+                    checkEmailExist:false,
+                });
+            })
+    }
+
+    getServicesName(id){
+        for(var i = 0 ; i < this.state.listServices.length;i++){
+            if(this.state.listServices[i]._id == id){
+                return this.state.listServices[i].name;
+            }
+        }
+        return '';
     }
 
     onFinish = (values) => {
@@ -50,9 +78,11 @@ class ReviewAccount extends Component {
         const { success, data } = response.data;
         if (success) {
             message.success('Create Successfully');
-            setTimeout(() => {
-                window.location.href = '/login';
-            }, 2000)
+            // setTimeout(() => {
+            //     window.location.href = '/login';
+            // }, 2000)
+        }else{
+            message.error(error?.response?.data?.data ?? error.message);
         }
         return;
         const { step1, step2, step3, step4 } = this.state;
@@ -111,7 +141,38 @@ class ReviewAccount extends Component {
         }
     }
 
+    checkHaveSchedule(dayInWeek, studentInfo){
+        for(var i = 0 ; i < studentInfo.availabilitySchedule.length;i++){
+            if(studentInfo.availabilitySchedule[i].dayInWeek == dayInWeek){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    getScheduleInDay(dayInWeek, studentInfo){
+        var arr=[];
+        for(var i = 0 ; i < studentInfo.availabilitySchedule.length;i++){
+            if(studentInfo.availabilitySchedule[i].dayInWeek == dayInWeek){
+                arr.push(studentInfo.availabilitySchedule[i])
+            }
+        }
+        return arr;
+    }
+
+    displayHourMin(value){
+        return value>9?value:('0'+value)
+    }
+
     render() {
+        const day_week = [
+            intl.formatMessage(messages.sunday),
+            intl.formatMessage(messages.monday),
+            intl.formatMessage(messages.tuesday),
+            intl.formatMessage(messages.wednesday),
+            intl.formatMessage(messages.thursday),
+            intl.formatMessage(messages.friday),
+        ]
         return (
             <Row justify="center" className="row-form">
                 <Row justify="center" className="row-form">
@@ -145,7 +206,7 @@ class ReviewAccount extends Component {
                             return (
                                 <div>
                                     <p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.dependentsInfo)}</p>
-                                    <p className='font-14 font-700 mb-10'>Dependent #{++index} {item.firstName} {item.lastName} + DOB</p>
+                                    <p className='font-14 font-700 mb-10'>Dependent #{++index} {item.firstName} {item.lastName} - {item.birthday}</p>
                                     <p>School : {item.school}</p>
                                     <div className='review-item'>
                                         <p>Teacher : {item.primaryTeacher} </p>
@@ -156,7 +217,7 @@ class ReviewAccount extends Component {
                                         <p>Has an IEP</p>
                                     </div>
                                     <div className='review-item-3'>
-                                        {item.services.map((service, index) => { return <p key={index}>{service}</p> })}
+                                        {item.services.map((service, serviceIndex) => { return <p key={serviceIndex}>{this.getServicesName(service)}</p> })}
                                         {/* <p>Service#1</p>
                                 <p>Service#2</p>
                                 <p>Service#3</p> */}
@@ -164,12 +225,23 @@ class ReviewAccount extends Component {
                                     <div>
                                         <p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.availability)}</p>
                                         <div className='review-item-flex'>
-                                            <div className='item-flex'>
-                                                <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.sunday)}</p>
-                                                <p>AM#1.1 - AM#1.2</p>
-                                                <p>AM#1.1 - AM#1.2</p>
-                                                <p>AM#1.1 - AM#1.2</p>
-                                            </div>
+                                            
+                                            {day_week.map((dayInWeek,dayInWeekIndex)=>{
+                                                if(this.checkHaveSchedule(dayInWeekIndex, item )){
+                                                    return (
+                                                        <div className='item-flex'>
+                                                        <p className='font-14 font-700 mb-10'>{day_week[dayInWeekIndex]}</p>
+                                                        {this.getScheduleInDay(dayInWeekIndex, item).map((schedule ) => {
+                                                            return (
+                                                                <p>{this.displayHourMin(schedule.openHour)}:{this.displayHourMin(schedule.openMin)} - {this.displayHourMin(schedule.closeHour)}:{this.displayHourMin(schedule.closeMin)}</p>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                    );
+                                                }
+                                            })}
+                                            
+                                            
                                             {/* <div className='item-flex'>
                                     <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.wednesday)}</p>
                                     <p>AM#1.1 - AM#1.2</p>

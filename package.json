@@ -63,7 +63,8 @@
     "react-intl-universal": "^2.1.4",
     "react-places-autocomplete": "^7.3.0",
     "react-redux": "^8.0.2",
-    "redux": "^4.2.0"
+    "redux": "^4.2.0",
+    "shortid": "^2.2.16"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.2",
