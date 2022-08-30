@@ -364,5 +364,6 @@
   "components.layout.operating": "Operating",
   "routes.forgotpass.blankPage": "Blank page",
   "routes.forgotpass.blankPage": "Blank page",
-  "routes.resetpass.blankPage": "Blank page"
+  "routes.resetpass.blankPage": "Blank page",
+  "routes.admin.blankPage": "Blank page"
 }

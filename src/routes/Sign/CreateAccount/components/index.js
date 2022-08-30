@@ -18,6 +18,9 @@ import SubsidyProgram from './Provider/subsidy_program';
 import InfoReview from './Provider/info_review';
 import InfoSchool from './School/info_school';
 import InfoAdmin from './Admin/info_admin';
+import SubsidyRequest from '../../SubsidyRequest/components';
+import SubsidyReview from '../../SubsidyReview/components';
+
 import './index.less';
 import '../../../../assets/styles/login.less';
 const { Step } = Steps;
@@ -27,6 +30,8 @@ export default class extends React.Component {
     super(props);
     this.state = {
       currentStep: 0,
+      subsidyStep:-1,
+      selectedDependent:-1,
       accountType: intl.formatMessage(messages.parent),
       visibleCreateDone: false,
     }
@@ -99,8 +104,22 @@ export default class extends React.Component {
     }
   }
 
-  onOpenSubsidyStep(step){
+  onOpenSubsidyStep = (step , selectedDependent)=>{
+    console.log('step',step , selectedDependent);
+    this.setState({
+      subsidyStep:step,
+      selectedDependent:selectedDependent
+    })
+  }
 
+  changeSelectedDependent = (selectedDependent)=>{
+    this.setState({
+      selectedDependent:selectedDependent
+    })
+  }
+
+  getSelectedDependent = ()=>{
+    return this.state.selectedDependent
   }
 
   getStepContentComponent = (currentStep) => {
@@ -121,8 +140,14 @@ export default class extends React.Component {
       case 2:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-
-            return (<InfoChild onOpenSubsidyStep={this.onOpenSubsidyStep} onContinue={this.handleContinue} />)
+            if(this.state.subsidyStep == 1){
+              return (<SubsidyRequest selectedDependent={this.state.selectedDependent} changeSelectedDependent={this.changeSelectedDependent}  onOpenSubsidyStep={this.onOpenSubsidyStep} onContinue={this.handleContinue} />)
+            }else if(this.state.subsidyStep == 2){
+              return (<SubsidyReview selectedDependent={this.state.selectedDependent} changeSelectedDependent={this.changeSelectedDependent}  onOpenSubsidyStep={this.onOpenSubsidyStep} onContinue={this.handleContinue} />)
+            }else{
+              return (<InfoChild onOpenSubsidyStep={this.onOpenSubsidyStep} changeSelectedDependent={this.changeSelectedDependent} onContinue={this.handleContinue} />)
+            }
+            
           case intl.formatMessage(messages.provider):
             return (<InfoServices onContinue={this.handleContinue} />)
         }

@@ -60,5 +60,9 @@ export default {
   loginFailed: {
     id: `${scope}.loginFailed`,
     defaultMessage: 'Login failed',
-  }
+  },
+  contactNumber: {
+    id: `${scope}.contactNumber`,
+    defaultMessage: 'Contact number',
+  },
 };

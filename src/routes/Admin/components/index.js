@@ -33,14 +33,12 @@ import listPlugin from '@fullcalendar/list';
 import "@fullcalendar/daygrid/main.css";
 import "@fullcalendar/timegrid/main.css";
 import events from "../../../utils/calendar/events";
-import messages from '../messages';
-import messagesCreateAccount from '../../Sign/CreateAccount/messages';
+import msgDashboard from '../../Dashboard/messages';
+import msgCreateAccount from '../../Sign/CreateAccount/messages';
 import EventDetail from './EventDetail';
 import './index.less';
 const { Panel } = Collapse;
 const { TabPane} = Tabs;
-
-
 export default class extends React.Component {
   constructor(props) {
     super(props);
@@ -94,7 +92,7 @@ export default class extends React.Component {
   onSubmitModalNewAppoint = () => {
     this.setState({ visibleNewAppoint: false });
     message.success({
-      content: intl.formatMessage(messages.appointmentScheduled),
+      content: intl.formatMessage(msgDashboard.appointmentScheduled),
       className: 'popup-scheduled',
     });
   };
@@ -206,7 +204,7 @@ export default class extends React.Component {
     );
     const btnMonthToWeek = (
       <Button className='btn-type' onClick={this.handleMonthToWeek}>
-        {isMonth ? intl.formatMessage(messages.month) : intl.formatMessage(messages.week)}
+        {isMonth ? intl.formatMessage(msgDashboard.month) : intl.formatMessage(msgDashboard.week)}
       </Button>
     );
     const btnChangeDayView = (
@@ -226,7 +224,7 @@ export default class extends React.Component {
     );
     const btnFilter = (
       <div className='header-left flex flex-row' onClick={this.onShowFilter}>
-        <p className='font-15'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30}/> : <BsFilter size={25}/>}</p>
+        <p className='font-15'>{intl.formatMessage(msgDashboard.filterOptions)} {isFilter ? <BsX size={30}/> : <BsFilter size={25}/>}</p>
       </div>
     );
     const menu = (
@@ -234,15 +232,15 @@ export default class extends React.Component {
         items={[
           {
             key: '1',
-            label: (<a target="_blank" rel="noopener noreferrer" onClick={this.onShowModalNewAppoint}>{intl.formatMessage(messages.session)}</a>),
+            label: (<a target="_blank" rel="noopener noreferrer" onClick={this.onShowModalNewAppoint}>{intl.formatMessage(msgDashboard.session)}</a>),
           },
           {
             key: '2',
-            label: (<a target="_blank" rel="noopener noreferrer" href="#">{intl.formatMessage(messages.evaluation)}</a>),
+            label: (<a target="_blank" rel="noopener noreferrer" href="#">{intl.formatMessage(msgDashboard.evaluation)}</a>),
           },
           {
             key: '3',
-            label: (<a target="_blank" rel="noopener noreferrer" href="#">{intl.formatMessage(messages.referral)}</a>),
+            label: (<a target="_blank" rel="noopener noreferrer" href="#">{intl.formatMessage(msgDashboard.referral)}</a>),
           },
         ]}
       />
@@ -250,19 +248,19 @@ export default class extends React.Component {
 
     const optionsEvent = [
       {
-        label: intl.formatMessage(messages.appointments),
+        label: intl.formatMessage(msgDashboard.appointments),
         value: 'appointments',
       },
       {
-        label: intl.formatMessage(messages.evaluations),
+        label: intl.formatMessage(msgDashboard.evaluations),
         value: 'evaluations',
       },
       {
-        label: intl.formatMessage(messages.screenings),
+        label: intl.formatMessage(msgDashboard.screenings),
         value: 'screenings',
       },
       {
-        label: intl.formatMessage(messages.referrals),
+        label: intl.formatMessage(msgDashboard.referrals),
         value: 'referrals',
       },
     ];
@@ -272,19 +270,19 @@ export default class extends React.Component {
         value: 'appointments',
       },
       {
-        label: intl.formatMessage(messages.evaluations),
+        label: intl.formatMessage(msgDashboard.evaluations),
         value: 'evaluations',
       },
       {
-        label: intl.formatMessage(messages.screenings),
+        label: intl.formatMessage(msgDashboard.screenings),
         value: 'screenings',
       },
       {
-        label: intl.formatMessage(messages.referrals),
+        label: intl.formatMessage(msgDashboard.referrals),
         value: 'referrals',
       },
       {
-        label: intl.formatMessage(messages.homeworkTutoring),
+        label: intl.formatMessage(msgDashboard.homeworkTutoring),
         value: 'home_work',
       },
       {
@@ -292,15 +290,15 @@ export default class extends React.Component {
         value: 'OT',
       },
       {
-        label: intl.formatMessage(messages.evaluations),
+        label: intl.formatMessage(msgDashboard.evaluations),
         value: 'evaluations2',
       },
       {
-        label: intl.formatMessage(messages.screenings),
+        label: intl.formatMessage(msgDashboard.screenings),
         value: 'screenings2',
       },
       {
-        label: intl.formatMessage(messages.referrals),
+        label: intl.formatMessage(msgDashboard.referrals),
         value: 'referrals2',
       },
     ];
@@ -315,12 +313,12 @@ export default class extends React.Component {
       onCancel: this.onCloseModalSubsidy,
     };
     return (
-      <div className="full-layout page dashboard-page">
-        <div className='div-show-subsidy' onClick={this.onShowModalSubsidy}/>
+      <div className="full-layout page admin-page">
+         <div className='div-show-subsidy' onClick={this.onShowModalSubsidy}/>
         <div className='div-content'>
           <section className='div-activity-feed box-card'>
             <div className='div-title-feed text-center'>
-              <p className='font-16 text-white mb-0'>{intl.formatMessage(messages.activityFeed)}</p>
+              <p className='font-16 text-white mb-0'>{intl.formatMessage(msgDashboard.activityFeed)}</p>
             </div>
             <div className='div-list-feed'>
               {new Array(10).fill(null).map((_, index) => <div key={index} className='item-feed'>
@@ -329,7 +327,7 @@ export default class extends React.Component {
                 <p>provider-name</p>
                 <p>location</p>
                 <p>date/time</p>
-                <p className='font-700 text-primary text-right' style={{marginTop: '-10px'}}>{intl.formatMessage(messages.today)}</p>
+                <p className='font-700 text-primary text-right' style={{marginTop: '-10px'}}>{intl.formatMessage(msgDashboard.today)}</p>
               </div>)}
               <div className='item-feed done'>
                 <p className='font-700'>Dependent #1 Name</p>
@@ -337,7 +335,7 @@ export default class extends React.Component {
                 <p>provider-name</p>
                 <p>location</p>
                 <p>date/time</p>
-                <p className='font-700 text-primary text-right' style={{marginTop: '-10px'}}>{intl.formatMessage(messages.today)}</p>
+                <p className='font-700 text-primary text-right' style={{marginTop: '-10px'}}>{intl.formatMessage(msgDashboard.today)}</p>
               </div>
             </div>
           </section>
@@ -346,16 +344,16 @@ export default class extends React.Component {
                 <CSSAnimate className="animated-shorter" type={isFilter ? 'fadeIn' : 'fadeOut'}>
                   <Row gutter={10}>
                     <Col xs={12} sm={12} md={4}>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgDashboard.eventType)}</p>
                       <Checkbox.Group options={optionsEvent} />
                     </Col>
                     <Col xs={12} sm={12} md={6} className='skillset-checkbox'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.skillsets)}</p>
                       <Checkbox.Group options={optionsSkillset} />
                     </Col>
                     <Col xs={12} sm={12} md={7} className='select-small'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
-                      <Select placeholder={intl.formatMessage(messages.startTypingProvider)}>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.provider)}</p>
+                      <Select placeholder={intl.formatMessage(msgDashboard.startTypingProvider)}>
                         <Select.Option value='1'>Dr. Rabinowitz </Select.Option>
                       </Select>
                       <div className='div-chip'>
@@ -363,8 +361,8 @@ export default class extends React.Component {
                       </div>
                     </Col>
                     <Col xs={12} sm={12} md={7} className='select-small'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
-                      <Select placeholder={intl.formatMessage(messages.startTypingLocation)}>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.location)}</p>
+                      <Select placeholder={intl.formatMessage(msgDashboard.startTypingLocation)}>
                         <Select.Option value='1'>Rabinowitz office</Select.Option>
                       </Select>
                       <div className='div-chip'>
@@ -373,7 +371,7 @@ export default class extends React.Component {
                     </Col>
                   </Row>
                   <div className='text-right'>
-                    <Button size='small' type='primary'>{intl.formatMessage(messages.apply).toUpperCase()}(10)</Button>
+                    <Button size='small' type='primary'>{intl.formatMessage(msgDashboard.apply).toUpperCase()}(10)</Button>
                   </div>
                 </CSSAnimate>
               </div>}
@@ -435,7 +433,7 @@ export default class extends React.Component {
                 icon={<FaCalendarAlt size={19}/>}
                 onClick={this.onShowDrawerDetailPost}
                 >
-                  {intl.formatMessage(messages.makeAppointment)}
+                  {intl.formatMessage(msgDashboard.makeAppointment)}
                 </Button>
               </Dropdown>
             </div></>}
@@ -449,12 +447,12 @@ export default class extends React.Component {
               >
                 <Panel 
                   key="1" 
-                  header={intl.formatMessage(messages.appointments)} 
+                  header={intl.formatMessage(msgDashboard.appointments)} 
                   extra={genExtraTime()}
                   className='appointment-panel'
                   >
                   <Tabs defaultActiveKey="1" type="card" size='small'>
-                    <TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                    <TabPane tab={intl.formatMessage(msgDashboard.upcoming)} key="1">
                       {new Array(10).fill(null).map((_, index) => 
                         <div key={index} className='list-item'>
                           <div className='item-left'>
@@ -476,7 +474,7 @@ export default class extends React.Component {
                         </div>
                       )}
                     </TabPane>
-                    <TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
+                    <TabPane tab={intl.formatMessage(msgDashboard.unprocessed)} key="2">
                       {new Array(10).fill(null).map((_, index) => 
                         <div key={index} className='list-item'>
                           <div className='item-left'>
@@ -498,7 +496,7 @@ export default class extends React.Component {
                         </div>
                       )}
                     </TabPane>
-                    <TabPane tab={intl.formatMessage(messages.past)} key="3">
+                    <TabPane tab={intl.formatMessage(msgDashboard.past)} key="3">
                       {new Array(10).fill(null).map((_, index) => 
                         <div key={index} className='list-item'>
                           <div className='item-left'>
@@ -522,7 +520,7 @@ export default class extends React.Component {
                     </TabPane>
                   </Tabs>
                 </Panel>
-                <Panel header={intl.formatMessage(messages.referrals)} key="2">
+                <Panel header={intl.formatMessage(msgDashboard.referrals)} key="2">
                   {new Array(10).fill(null).map((_, index) => 
                     <div key={index} className='list-item padding-item'>
                       <Avatar size={24} icon={<FaUser size={12} />} />
@@ -531,7 +529,7 @@ export default class extends React.Component {
                         <p className='font-09 mb-0'>Referrer Name</p>
                       </div>
                       <div className='text-center ml-auto mr-5'>
-                        <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                        <p className='font-11 mb-0'>{intl.formatMessage(msgDashboard.phoneCall)}</p>
                         <p className='font-11 mb-0'>Phone number</p>
                       </div>
                       <div className='ml-auto'>
@@ -540,7 +538,7 @@ export default class extends React.Component {
                       </div>
                     </div>)}
                 </Panel>
-                <Panel header={intl.formatMessage(messages.screenings)} key="3">
+                <Panel header={intl.formatMessage(msgDashboard.screenings)} key="3">
                   {new Array(10).fill(null).map((_, index) => 
                     <div key={index} className='list-item padding-item'>
                       <Avatar size={24} icon={<FaUser size={12} />} />
@@ -549,7 +547,7 @@ export default class extends React.Component {
                         <p className='font-09 mb-0'>Provider Name</p>
                       </div>
                       <div className='text-center ml-auto mr-5'>
-                        <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                        <p className='font-11 mb-0'>{intl.formatMessage(msgDashboard.phoneCall)}</p>
                         <p className='font-11 mb-0'>Phone number</p>
                       </div>
                       <div className='ml-auto'>
@@ -560,11 +558,11 @@ export default class extends React.Component {
                 </Panel>
                 <Panel 
                   key="4"
-                  header={intl.formatMessage(messages.evaluations)} 
+                  header={intl.formatMessage(msgDashboard.evaluations)} 
                   className='evaluations-panel'
                 >
                   <Tabs defaultActiveKey="1" type="card" size='small'>
-                    <TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                    <TabPane tab={intl.formatMessage(msgDashboard.upcoming)} key="1">
                       {new Array(10).fill(null).map((_, index) => 
                         <div key={index} className='list-item padding-item'>
                           <Avatar size={24} icon={<FaUser size={12} />} />
@@ -580,12 +578,12 @@ export default class extends React.Component {
                         </div>
                       )}
                     </TabPane>
-                    <TabPane tab={intl.formatMessage(messages.past)} key="2">
-                      <div className='list-item padding-item'>{intl.formatMessage(messages.past)}</div>
+                    <TabPane tab={intl.formatMessage(msgDashboard.past)} key="2">
+                      <div className='list-item padding-item'>{intl.formatMessage(msgDashboard.past)}</div>
                     </TabPane>
                   </Tabs>
                 </Panel>
-                <Panel header={intl.formatMessage(messages.flags)} key="5" extra={genExtraFlag()}>
+                <Panel header={intl.formatMessage(msgDashboard.flags)} key="5" extra={genExtraFlag()}>
                   {new Array(10).fill(null).map((_, index) => 
                     <div key={index} className='list-item padding-item'>
                       <Avatar size={24} icon={<FaUser size={12} />} />
@@ -599,12 +597,12 @@ export default class extends React.Component {
                   )}
                 </Panel>
                 <Panel 
-                  header={intl.formatMessage(messages.subsidaries)} 
+                  header={intl.formatMessage(msgDashboard.subsidaries)} 
                   key="6" 
                   className='subsidaries-panel'
                   >
                    <Tabs defaultActiveKey="1" type="card" size='small'>
-                    <TabPane tab={intl.formatMessage(messages.pending)} key="1">
+                    <TabPane tab={intl.formatMessage(msgDashboard.pending)} key="1">
                       {new Array(10).fill(null).map((_, index) => 
                         <div key={index} className='list-item'>
                           <div className='item-left'>
@@ -623,7 +621,7 @@ export default class extends React.Component {
                         </div>
                       )}
                     </TabPane>
-                    <TabPane tab={intl.formatMessage(messages.declined)} key="2">
+                    <TabPane tab={intl.formatMessage(msgDashboard.declined)} key="2">
                       {new Array(10).fill(null).map((_, index) => 
                         <div key={index} className='list-item'>
                           <div className='item-left'>
@@ -642,7 +640,7 @@ export default class extends React.Component {
                         </div>
                       )}
                     </TabPane>
-                    <TabPane tab={intl.formatMessage(messages.approved)} key="3">
+                    <TabPane tab={intl.formatMessage(msgDashboard.approved)} key="3">
                       {new Array(10).fill(null).map((_, index) => 
                         <div key={index} className='list-item'>
                           <div className='item-left'>

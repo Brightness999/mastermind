@@ -34,6 +34,10 @@ export default ({
     id: `${scope}.requestContactRav`,
     defaultMessage: 'Request contact (optional)',
   },
+  therapistContact: {
+    id: `${scope}.therapistContact`,
+    defaultMessage: 'Therapist contact (optional)',
+  },
   therapistPhone: {
     id: `${scope}.therapistPhone`,
     defaultMessage: 'Therapist Phone',

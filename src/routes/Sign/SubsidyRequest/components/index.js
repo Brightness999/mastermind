@@ -10,8 +10,13 @@ import messagesLogin from '../../Login/messages';
 import messagesRequest from '../messages'
 import './index.less';
 
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import { setRegisterData } from '../../../../redux/features/registerSlice';
+import { url } from '../../../../utils/api/baseUrl';
+import axios from 'axios';
 
-export default class extends React.Component {
+class SubsidyRequest extends React.Component {
 
 
   constructor(props) {
@@ -19,7 +24,12 @@ export default class extends React.Component {
     this.state = {
       fileList: [],
       uploading: false,
-      listDenpendent: localStorage.getItem('inforChildren') ? JSON.parse(localStorage.getItem('inforChildren')) : [],
+      SkillSet:[],
+      studentInfos:{},
+      dependents:[],
+      documentUploaded:[],
+      isRequestRav:true,
+      // listDenpendent: localStorage.getItem('inforChildren') ? JSON.parse(localStorage.getItem('inforChildren')) : [],
     }
   }
 
@@ -33,51 +43,168 @@ export default class extends React.Component {
   };
 
   componentDidMount() {
-
-    let data = localStorage.getItem('subsidyRequest');
-    if (data) {
-      data = JSON.parse(data);
-      this.form.setFieldsValue({
-        ...data
-      })
+    const {registerData} = this.props.register;
+    // console.log('subsidy ', typeof this.props.selectedDependent , this.props,this.props.register, registerData );
+    var arrDependent = [];
+    for(var i = 0 ; i < registerData.studentInfos.length ; i++){
+      if(registerData.studentInfos[i].firstName.length > 0 || registerData.studentInfos[i].lastName.length > 0){
+        arrDependent.push(registerData.studentInfos[i]);
+      }
     }
+    this.setState({studentInfos: registerData.studentInfos, dependents: arrDependent})
+    this.form.setFieldsValue({dependent:this.props.selectedDependent});
+    
+    this.loadDataForDependent(this.props.selectedDependent)
+    this.loadDataFromServer();
+  }
+
+  loadDataForDependent(index){
+    const {registerData} = this.props.register;
+    if(!!registerData.studentInfos[index].subsidyRequest){
+      this.form.setFieldsValue(registerData.studentInfos[index].subsidyRequest);
+    }else{
+      this.form.setFieldsValue(this.getDefaultObj());
+    }
+  }
+
+ 
+
+
+
+  getDefaultObj(){
+    return {
+      "skillSet":0,
+      "school":"",
+      "requestContactRav":1,
+      "ravPhone":"",
+      "ravName":"",
+      "ravEmail":"",
+      "therapistContact":"",
+      "therapistPhone":"",
+      "therapistEmail":"",
+      "note":"",
+      "documents":[],
+      "documentUploaded":[],
+    }
+  }
+
+
+
+  updateReduxValueFor1Depedent(index , fieldName , value){
+    const {registerData} = this.props.register;
+    var studentInfos =[ ...registerData.studentInfos]
+    var selectedObj ={ ...studentInfos[index]};
+    selectedObj[fieldName ] = value;
+    studentInfos[index] = selectedObj;
+    console.log(selectedObj , fieldName , value);
+    this.props.setRegisterData({studentInfos:studentInfos});
+  }
+
+  uploadFileToServer = async (file)=>{
+    // Create an object of formData
+    const formData = new FormData();
+    
+    // Update the formData object
+    formData.append(
+      "myFile",
+      file,
+      file.name
+    );
+  
+    // Details of the uploaded file
+    console.log(this.state.selectedFile);
+  
+    // Request made to the backend api
+    // Send formData object
+    var postResult = await axios.post(url+"clients/upload_document", formData);
+
+  }
+
+  loadDataFromServer(){
+    axios.post(url+ 'clients/get_default_value_for_client'
+        ).then(result=>{
+            console.log('get_default_value_for_client',result.data);
+            if(result.data.success){
+                var data = result.data.data;
+                this.setState({SkillSet:data.SkillSet})
+            }else{
+                this.setState({
+                    checkEmailExist:false,
+                });
+                
+            }
+            
+        }).catch(err=>{
+            console.log(err);
+            this.setState({
+                checkEmailExist:false,
+            });
+        })
+  }
+
+  onChangeDependent(v){
+    
+    this.props.changeSelectedDependent(v);
+    this.loadDataForDependent(v);
   }
 
   onSubmit = async () => {
     try {
       const values = await this.form.validateFields();
-      values.documents = this.state.fileList.map(file => {
-        return file.name
+      values.documents = this.state.fileList;
+      values.documentUploaded = this.state.fileList.map(file => {
+        return file.response.data;
       });
-      localStorage.setItem('subsidyRequest', JSON.stringify(values));
-      this.props.history.push(routerLinks['SubsidyReview']);
+      values.requestContactRav = this.state.isRequestRav;
+      this.updateReduxValueFor1Depedent( this.props.selectedDependent ,'subsidyRequest', values )
+      this.props.onOpenSubsidyStep(2, this.props.selectedDependent);
     } catch (error) {
       console.log('error', error);
     }
   }
 
   onChangeUpload = (info) => {
+    
     if (info.file.status !== 'uploading') {
       console.log(info.file, info.fileList);
       this.setState(prevState => ({
         fileList: [...prevState.fileList, info.file],
       }));
-      this.form?.setFieldsValue({
-        documents: info.fileList[0].name
-      })
+      // this.form?.setFieldsValue({
+      //   documents: info.fileList[0].name
+      // })
     }
     if (info.file.status === 'done') {
+      console.log('done',info.file.response);
       message.success(`${info.file.name} file uploaded successfully`);
+      this.setState({documentUploaded:this.state.documentUploaded.push(info.file.response.data)});
     } else if (info.file.status === 'error') {
       message.error(`${info.file.name} file upload failed.`);
+      this.setState(prevState => ({
+        fileList: [...prevState.fileList, info.file],
+      }));
     }
+  }
+
+  onRemoveFile = (info) =>{
+    this.setState({
+      fileList: this.state.fileList.filter((file, i) =>{
+        console.log('on remove file ',info.file.name ,file.name)
+        return info.file.name !== file.file.name
+      } )
+    });
+  }
+
+  backToPrev(){
+    console.log('back to prev');
+    this.props.onOpenSubsidyStep(-1,-1);
   }
 
   render() {
 
     const props = {
       name: 'file',
-      action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+      action: url+"clients/upload_document",
       headers: {
         authorization: 'authorization-text',
       },
@@ -94,7 +221,11 @@ export default class extends React.Component {
               <Button
                 type="text"
                 className='back-btn'
-                onClick={() => window.history.back()}
+                onClick={() =>{
+                  console.log('da click');
+                  this.backToPrev();
+                }
+                }
               >
                 <BiChevronLeft size={25} />{intl.formatMessage(messagesCreateAccount.back)}
               </Button>
@@ -114,10 +245,14 @@ export default class extends React.Component {
                   message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.dependent)
                 }]}
               >
-                <Select placeholder={intl.formatMessage(messagesCreateAccount.dependent)}>
-                  {this.state.listDenpendent.map((item, index) => {
+                <Select placeholder={intl.formatMessage(messagesCreateAccount.dependent)}
+                  onChange={v=>{
+                    this.onChangeDependent(v);
+                  }}
+                >
+                  {this.state.dependents.map((item, index) => {
                     return (
-                      <Select.Option key={index} value={++index}>Dependent {index}</Select.Option>
+                      <Select.Option key={index} value={index}>{item.firstName} {item.lastName} </Select.Option>
                     )
                   })}
                 </Select>
@@ -128,8 +263,9 @@ export default class extends React.Component {
                   message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsetRequested)
                 }]}>
                 <Select placeholder={intl.formatMessage(messages.skillsetRequested)}>
-                  <Select.Option value='1'>Skill 1</Select.Option>
-                  <Select.Option value='2'>Skill 2</Select.Option>
+                  {this.state.SkillSet.map((skill,index)=>{
+                    return (<Select.Option value={index}>{skill}</Select.Option>)
+                  })}
                 </Select>
               </Form.Item>
               <Form.Item name="school" rules=
@@ -137,26 +273,34 @@ export default class extends React.Component {
                   required: true,
                   message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school)
                 }]}>
-                <Select placeholder={intl.formatMessage(messagesCreateAccount.school)}>
+                  <Input onChange={v => {
+                      
+                  }} 
+                  placeholder={intl.formatMessage(messagesCreateAccount.school)} />
+                {/* <Select placeholder={intl.formatMessage(messagesCreateAccount.school)}>
                   <Select.Option value='s1'>School 1</Select.Option>
                   <Select.Option value='s2'>School 2</Select.Option>
-                </Select>
+                </Select> */}
               </Form.Item>
               <Row gutter={14}>
                 <Col xs={24} sm={24} md={12}>
                   <div className='flex flex-row items-center pb-10'>
-                    <Switch size="small" defaultChecked />
+                    <Switch size="small" value={this.state.isRequestRav} onChange={v=>this.setState({isRequestRav:v})} defaultChecked/>
                     <p className='font-10 ml-10 mb-0'>{intl.formatMessage(messages.requestRav)}</p>
                   </div>
                 </Col>
                 <Col xs={24} sm={24} md={12}>
                   <Form.Item
                     name="ravPhone"
-                    rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.ravPhone) },
-                    {
-                      pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
-                      message: intl.formatMessage(messages.phoneNumberValid)
-                    },
+                    rules={[
+                      {
+                        required: true, 
+                        message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesLogin.contactNumber)
+                      },
+                      {
+                          pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
+                          message: intl.formatMessage(messages.phoneNumberValid)
+                      },
                     ]}
                   >
                     <Input size="small" placeholder={intl.formatMessage(messages.ravPhone) + ' #'} />
@@ -191,10 +335,9 @@ export default class extends React.Component {
               </Row>
 
               <Form.Item
-                name="requestContactRav"
-                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.requestContactRav) }]}
+                name="therapistContact"
               >
-                <Input placeholder={intl.formatMessage(messages.requestContactRav)} />
+                <Input placeholder={intl.formatMessage(messages.therapistContact)} />
               </Form.Item>
               <Row gutter={14}>
                 <Col xs={24} sm={24} md={12}>
@@ -248,7 +391,7 @@ export default class extends React.Component {
                     <p>Document</p>
                   </div>
                   <div className='div-upload flex-1'>
-                    <Upload {...props}>
+                    <Upload {...props} onRemove={this.onRemoveFile} >
                       <a className='font-12 underline'>{intl.formatMessage(messagesRequest.upload)}</a>
                     </Upload>
                   </div>
@@ -274,3 +417,11 @@ export default class extends React.Component {
     );
   }
 }
+const mapStateToProps = state => {
+  console.log('state', state);
+  return ({
+      register: state.register,
+  })
+}
+
+export default compose(connect(mapStateToProps, { setRegisterData  }))(SubsidyRequest);

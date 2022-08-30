@@ -19,7 +19,8 @@ class InfoProgress extends Component {
             isSameAll: true,
             isSameAllSchedule: true,
             studentInfos:[],
-            currentDaySelecting:[]
+            currentDaySelecting:[],
+            hasErrorOnTimeClose:false,
         }
     }
 
@@ -51,6 +52,17 @@ class InfoProgress extends Component {
     }
     onSameAllSchedule = () => {
         this.setState({ isSameAllSchedule: !this.state.isSameAllSchedule });
+    }
+
+    onSubmit = async () => {
+        var isPassed = false;
+        for(var i = 0 ; i < this.state.studentInfos.length;i++){
+
+        }
+
+        // add to redux
+
+        return this.props.onContinue();
     }
 
     defaultTimeRangeItem = (dayInWeek)=>{
@@ -165,6 +177,17 @@ class InfoProgress extends Component {
             // newStu[index].availabilitySchedule = arr;
             
         }
+        var momentOpen = moment( `${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openMin}:00`, 'HH:mm:ss' )
+        var momentClose = moment( `${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeMin}:00`, 'HH:mm:ss' )
+        if(momentClose.isBefore(momentOpen)){
+            this.setState({
+                hasErrorOnTimeClose:true,
+            })
+        }else{
+            this.setState({
+                hasErrorOnTimeClose:false,
+            })
+        }
         console.log(this.state.studentInfos[index].availabilitySchedule)
     }
 
@@ -196,6 +219,18 @@ class InfoProgress extends Component {
             // newStu[index].availabilitySchedule = arr;
             
         }
+        var momentOpen = moment( `${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openMin}:00`, 'HH:mm:ss' )
+        var momentClose = moment( `${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeMin}:00`, 'HH:mm:ss' )
+        if(momentClose.isBefore(momentOpen)){
+            this.setState({
+                hasErrorOnTimeClose:true,
+            })
+        }else{
+            this.setState({
+                hasErrorOnTimeClose:false,
+            })
+        }
+        
         console.log(this.state.studentInfos[index].availabilitySchedule)
     }
 
@@ -285,77 +320,65 @@ class InfoProgress extends Component {
                                                 }}
                                                 />
                                                 <div className='div-time'>
-                                                    <Form.List name="timeFromTo">
-                                                        {(fields, { add, remove }) => (
-                                                            <div>
-                                                                {this.state.studentInfos[index].availabilitySchedule.map((scheduleItem , indexOnAvailabilitySchedule) =>{
-                                                                    if(scheduleItem.dayInWeek == this.state.currentDaySelecting[index]){
-                                                                        return (
-                                                                            <Row key={field.key} gutter={14}>
-                                                                                <Col xs={24} sm={24} md={12}>
-                                                                                    <Form.Item
-                                                                                        name={[field.name, "from_time"]}
-                                                                                        
-                                                                                    >
-                                                                                        <TimePicker 
-                                                                                        name='timer1'
-                                                                                        use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)}
-                                                                                        value={this.valueForAvailabilityScheduleOpenHour(index, indexOnAvailabilitySchedule)}
-                                                                                        
-                                                                                        onChange={v=>{
-                                                                                            console.log('timer open changed ', v);
-                                                                                            this.valueChangeForOpenHour(index ,indexOnAvailabilitySchedule, v);
-                                                                                        }}
-                                                                                        />
-                                                                                    </Form.Item>
-                                                                                </Col>
-                                                                                <Col xs={24} sm={24} md={12} className={field.key === 0 ? '' : 'item-remove'}>
-                                                                                    <Form.Item
-                                                                                        name={[field.name, "to_time"]}
-                                                                                        
-                                                                                    >
-                                                                                        <TimePicker 
-                                                                                        name='timer2'
-                                                                                        onChange={v=>{
-                                                                                            console.log('timer 2 changed ', v);
-                                                                                            this.valueChangeForCloseHour(index,indexOnAvailabilitySchedule,v);
-                                                                                        }}
-                                                                                        value={this.valueForAvailabilityScheduleCloseHour(index, indexOnAvailabilitySchedule)}
-                                                                                        use12Hours 
-                                                                                        format="h:mm a" 
-                                                                                        placeholder={intl.formatMessage(messages.to)} 
-                                                                                        />
-                                                                                    </Form.Item>
-                                                                                    {field.key === 0 ? null : <BsDashCircle size={16} className='text-red icon-remove' onClick={() => {
-                                                                                        // if(this.state.isSameAll){
-                                                                                        //     remove(field.name)
-                                                                                        // }else{
-                                                                                        //     remove(field.id)
-                                                                                        // }
-                                                                                    }} />}
-                                                                                </Col>
-                                                                            </Row>
-                                                                        )
-                                                                    }
+                                                    {this.state.studentInfos[index].availabilitySchedule.map((scheduleItem , indexOnAvailabilitySchedule) =>{
+                                                        if(scheduleItem.dayInWeek == this.state.currentDaySelecting[index]){
+                                                            return (
+                                                                <Row key={indexOnAvailabilitySchedule} gutter={14}>
+                                                                    <Col xs={24} sm={24} md={12}>
+                                                                        <Form.Item name={[field.name, "from_time"]} >
+                                                                            <TimePicker 
+                                                                            name='timer1'
+                                                                            use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)}
+                                                                            value={this.valueForAvailabilityScheduleOpenHour(index, indexOnAvailabilitySchedule)}
+                                                                            
+                                                                            onChange={v=>{
+                                                                                console.log('timer open changed ', v);
+                                                                                this.valueChangeForOpenHour(index ,indexOnAvailabilitySchedule, v);
+                                                                            }}
+                                                                            />
+                                                                        </Form.Item>
+                                                                    </Col>
+                                                                    <Col xs={24} sm={24} md={12} className={indexOnAvailabilitySchedule === 0 ? '' : 'item-remove'}>
+                                                                        <Form.Item name={[field.name, "to_time"]}>
+                                                                            <TimePicker 
+                                                                            name='timer2'
+                                                                            onChange={v=>{
+                                                                                console.log('timer 2 changed ', v);
+                                                                                this.valueChangeForCloseHour(index,indexOnAvailabilitySchedule,v);
+                                                                            }}
+                                                                            value={this.valueForAvailabilityScheduleCloseHour(index, indexOnAvailabilitySchedule)}
+                                                                            use12Hours 
+                                                                            format="h:mm a" 
+                                                                            placeholder={intl.formatMessage(messages.to)} 
+                                                                            />
+                                                                        </Form.Item>
+                                                                        {indexOnAvailabilitySchedule === 0 ? null : <BsDashCircle size={16} className='text-red icon-remove' onClick={() => {
+                                                                            // if(this.state.isSameAll){
+                                                                            //     remove(field.name)
+                                                                            // }else{
+                                                                            //     remove(field.id)
+                                                                            // }
+                                                                        }} />}
+                                                                    </Col>
+                                                                </Row>
+                                                            )
+                                                        }
 
-                                                                } 
-                                                                )}
-                                                                <div className='div-add-time' onClick={() => {
-                                                                    // add(null);
-                                                                    this.addNewTimeRange(index , this.state.currentDaySelecting[index]);
-                                                                }}>
-                                                                    <BsPlusCircle size={17} className='mr-5 text-primary' />
-                                                                    <a className='text-primary'>{intl.formatMessage(messages.addTimeRange)}</a>
-                                                                </div>
-                                                                <div className='text-right div-copy-week'  onClick={() => {
-                                                                    this.copyToFullWeek(index , this.state.currentDaySelecting[index]);
-                                                                }}>
-                                                                    <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
-                                                                    <QuestionCircleOutlined className='text-primary' />
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </Form.List>
+                                                    } 
+                                                    )}
+                                                    <div className='div-add-time' onClick={() => {
+                                                        // add(null);
+                                                        this.addNewTimeRange(index , this.state.currentDaySelecting[index]);
+                                                    }}>
+                                                        <BsPlusCircle size={17} className='mr-5 text-primary' />
+                                                        <a className='text-primary'>{intl.formatMessage(messages.addTimeRange)}</a>
+                                                    </div>
+                                                    <div className='text-right div-copy-week'  onClick={() => {
+                                                        this.copyToFullWeek(index , this.state.currentDaySelecting[index]);
+                                                    }}>
+                                                        <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
+                                                        <QuestionCircleOutlined className='text-primary' />
+                                                    </div>
                                                 </div>
                                             </div>
                                             {index == 0 && this.state.studentInfos.length>1&&<div className='flex flex-row items-center'>
@@ -377,6 +400,7 @@ class InfoProgress extends Component {
                                 block
                                 type="primary"
                                 htmlType="submit"
+                                onClick={this.onSubmit}
                             >
                                 {intl.formatMessage(messages.continue).toUpperCase()}
                             </Button>

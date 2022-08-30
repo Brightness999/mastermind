@@ -1,35 +1,78 @@
 import React from 'react';
-import { connect } from 'dva';
 import { Row, Divider, Button } from 'antd';
 import { BiChevronLeft } from 'react-icons/bi';
 import intl from 'react-intl-universal';
 import messages from '../messages';
 import messagesRequest from '../../SubsidyRequest/messages';
 import './index.less';
-import { routerLinks } from '../../../constant';
 
-export default class extends React.Component {
+
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import { setRegisterData } from '../../../../redux/features/registerSlice';
+import { url } from '../../../../utils/api/baseUrl';
+import axios from 'axios';
+
+class SubsidyReview extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      data: JSON.parse(localStorage.getItem('subsidyRequest')) || {},
-      inforChildren: JSON.parse(localStorage.getItem('inforChildren')) || [],
+      data:  {},
+      inforChildren:  [],
+      SkillSet:[],
+      childname:''
     }
   }
 
   componentDidMount() {
-    console.log(this.state.data);
+    const {registerData} = this.props.register;
+
+    this.setState({
+      childname:registerData.studentInfos [this.props.selectedDependent].firstName+' '+registerData.studentInfos [this.props.selectedDependent].lastName,
+      data:registerData.studentInfos [this.props.selectedDependent].subsidyRequest
+    })
+    this.loadDataFromServer()
+  }
+
+  loadDataFromServer(){
+    axios.post(url+ 'clients/get_default_value_for_client'
+        ).then(result=>{
+            console.log('get_default_value_for_client',result.data);
+            if(result.data.success){
+                var data = result.data.data;
+                this.setState({SkillSet:data.SkillSet})
+            }else{
+                this.setState({
+                    checkEmailExist:false,
+                });
+                
+            }
+            
+        }).catch(err=>{
+            console.log(err);
+            this.setState({
+                checkEmailExist:false,
+            });
+        })
   }
 
 
+
   onSubmit = () => {
-    const { data } = this.state;
-    const { dependent, ...subsidyRequest } = data
-    const inforChildren = this.state.inforChildren;
-    inforChildren[dependent - 1].subsidyRequest = subsidyRequest;
-    localStorage.setItem('inforChildren', JSON.stringify(inforChildren));
-    this.props.history.push(routerLinks['CreateAccount']);
+    // const { data } = this.state;
+    // const { dependent, ...subsidyRequest } = data
+    // const inforChildren = this.state.inforChildren;
+    // inforChildren[dependent - 1].subsidyRequest = subsidyRequest;
+    // localStorage.setItem('inforChildren', JSON.stringify(inforChildren));
+    // this.props.history.push(routerLinks['CreateAccount']);
+
+    this.props.onOpenSubsidyStep(-1,-1);
+
+  }
+
+  backToPrev = () =>{
+    this.props.onOpenSubsidyStep(1,this.props.selectedDependent);
   }
 
   render() {
@@ -57,9 +100,9 @@ export default class extends React.Component {
             <div>
               <p className='font-20 font-700 mb-10'>{intl.formatMessage(messages.dependentInfo)}</p>
               <div className='review-item'>
-                <p>Dependent : {dependent}</p>
+                <p>Dependent : {this.state.childname}</p>
                 <p>School : {school}</p>
-                <p>Skillset(s) : {skillSet}</p>
+                <p>Skillset(s) : {this.state.SkillSet.length>0?this.state.SkillSet[skillSet]:''}</p>
               </div>
             </div>
             <Divider style={{ marginTop: 15, marginBottom: 15, borderColor: '#d7d7d7' }} />
@@ -85,8 +128,8 @@ export default class extends React.Component {
             <div>
               <p className='font-20 font-700 mb-10'>{intl.formatMessage(messagesRequest.documents)}</p>
               <div className='review-item'>
-                <p>{documents.map((item, index) => {
-                  return <p>Document #{++index} {item}</p>
+                <p>{!!documents&&documents.length > 0 &&documents.map((item, index) => {
+                  return <p>Document #{++index} {item.name}</p>
                 })}</p>
                 {/* <p>Document #2 title</p>
                 <p>Document #3 title</p>
@@ -94,7 +137,7 @@ export default class extends React.Component {
               </div>
             </div>
             <div className='div-review-btn'>
-              <Button block onClick={() => window.history.back()}>{intl.formatMessage(messages.goBack).toUpperCase()}</Button>
+              <Button block onClick={() => this.backToPrev() }>{intl.formatMessage(messages.goBack).toUpperCase()}</Button>
               <Button type='primary' onClick={this.onSubmit} block>{intl.formatMessage(messages.submit).toUpperCase()}</Button>
             </div>
           </div>
@@ -103,3 +146,11 @@ export default class extends React.Component {
     );
   }
 }
+const mapStateToProps = state => {
+  console.log('state', state);
+  return ({
+      register: state.register,
+  })
+}
+
+export default compose(connect(mapStateToProps, { setRegisterData  }))(SubsidyReview);

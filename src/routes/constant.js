@@ -7,6 +7,7 @@ export const routerLinks = {
   ResetPass: '/resetpass',
 
   Dashboard: '/account/dashboard',
+  Admin: '/account/admin',
   Pages403: '/widget/403',
   Pages404: '/widget/404',
   Pages500: '/widget/500',

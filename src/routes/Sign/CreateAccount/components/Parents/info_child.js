@@ -18,17 +18,7 @@ import axios from 'axios';
 class InfoChild extends Component {
     constructor(props) {
         super(props);
-        let input = {
-            firstName: '',
-            lastName: '',
-            birthday: '',
-            backgroundInfor: '',
-            primaryTeacher: '',
-            currentGrade: '',
-            school: '',
-            services: '',
-            visible: false
-        }
+        
 
         // let inforChildren = localStorage.getItem('inforChildren') ? JSON.parse(localStorage.getItem('inforChildren')).map(item => {
         //     return {
@@ -55,7 +45,6 @@ class InfoChild extends Component {
             isTypeFull: false,
             phoneFill: '',
             emailFill: '',
-            inputs: [input],
             listServices:[],
             inforChildren:[{},{},{}],
             parentInfo:{},
@@ -137,9 +126,17 @@ class InfoChild extends Component {
         var selectedObj ={ ...studentInfos[index]};
         selectedObj[fieldName ] = value;
         studentInfos[index] = selectedObj;
+        console.log(selectedObj , fieldName , value);
         this.props.setRegisterData({studentInfos:studentInfos});
     }
     
+    getBirthday = (index)=>{
+        if(!!this.props.register.studentInfos&&this.props.register.studentInfos[index]!=undefined&&!!this.props.register.studentInfos[index].birthday_moment){
+            console.log('da load birthday ',this.props.register.studentInfos[index].birthday_moment)
+            return this.props.register.studentInfos[index].birthday_moment;
+        }
+        return moment();
+    }
 
     onFinish = (values) => {
         // this.props.setRegisterData({ step3: values.children });
@@ -159,6 +156,41 @@ class InfoChild extends Component {
 
     onValueChange(){
 
+    }
+
+    openSubsidy(){
+
+    }
+
+    checkFillinAllFieldForSubsidy(index){
+        const {registerData} = this.props.register;
+        const studentInfo =registerData.studentInfos[index];
+        var isAlreadyFillIn = !!studentInfo && studentInfo.firstName.length > 0
+        &&studentInfo.lastName.length > 0
+        &&(''+studentInfo.birthday).length > 0
+        &&studentInfo.guardianPhone.length > 0
+        &&studentInfo.guardianEmail.length > 0
+        &&studentInfo.backgroundInfor.length > 0
+        &&studentInfo.school.length > 0
+        &&studentInfo.primaryTeacher.length > 0
+        &&studentInfo.currentGrade.length > 0
+        &&studentInfo.services.length > 0;
+        console.log('vaid for index ',index ,
+        !!studentInfo ,
+         studentInfo.firstName.length > 0
+        ,studentInfo.lastName.length > 0
+        ,studentInfo.birthday,studentInfo.birthday.length
+        ,studentInfo.birthday.length > 0
+        ,studentInfo.guardianPhone.length > 0
+        ,studentInfo.guardianEmail.length > 0
+        ,studentInfo.backgroundInfor.length > 0
+        ,studentInfo.school.length > 0
+        ,studentInfo.primaryTeacher.length > 0
+        ,studentInfo.currentGrade.length > 0
+        ,studentInfo.services.length > 0,
+        "fill in "+ isAlreadyFillIn
+        )
+        return isAlreadyFillIn;
     }
 
     render() {
@@ -182,7 +214,6 @@ class InfoChild extends Component {
                             {(fields, { add, remove }) => (
                                 <div>
                                     {fields.map((field, index) => {
-                                        const input = this.state.inputs[index]
                                         return (
                                             <div key={field.key} className='div-dependent-form'>
                                                 <div className='flex flex-row items-center justify-between mb-10'>
@@ -241,11 +272,14 @@ class InfoChild extends Component {
                                                     </Col>
                                                     <Col xs={24} sm={24} md={6}>
                                                         <Form.Item
-                                                            name={[field.name, "birthday"]}
+                                                            name={[field.name, "birthday_moment"]}
                                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.dateBirth) }]}
                                                         >
-                                                            <DatePicker format={"YYYY-MM-DD"} placeholder={intl.formatMessage(messages.dateBirth)} onChange={v => {
+                                                            <DatePicker format={"YYYY-MM-DD"} placeholder={intl.formatMessage(messages.dateBirth)} 
+                                                            selected={this.getBirthday(index)}
+                                                            onChange={v => {
                                                                 console.log(v.valueOf());
+                                                                this.updateReduxValueFor1Depedent(index,"birthday_moment" ,v.format('YYYY-MM-DD'));
                                                                 this.updateReduxValueFor1Depedent(index,"birthday" ,v.valueOf());
                                                             }} />
                                                         </Form.Item>
@@ -354,11 +388,13 @@ class InfoChild extends Component {
                                                             
                                                         </Select>
                                                     </Form.Item>
-                                                    <Link to={routerLinks['SubsidyRequest']}>
-                                                        <Button className='ml-10' disabled={
-                                                            !input?.visible
-                                                        }>{intl.formatMessage(messages.subsidyRequest)}</Button>
-                                                    </Link>
+                                                    <Button className='ml-10' disabled={
+                                                            !this.checkFillinAllFieldForSubsidy(index)
+                                                    }
+                                                    onClick={v=>{
+                                                        this.props.onOpenSubsidyStep(1 , index);
+                                                    }}
+                                                    >{intl.formatMessage(messages.subsidyRequest)}</Button>
                                                 </div>
                                             </div>
                                         )

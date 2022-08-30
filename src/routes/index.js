@@ -15,7 +15,7 @@ import SubsidyReview from './Sign/SubsidyReview';
 import Dashboard from './Dashboard';
 import ForgotPass from './Sign/ForgotPass';
 import ResetPass from './Sign/ResetPass';
-
+import Admin from './Admin';
 const routesConfig = app => [
   
   // {
@@ -38,6 +38,7 @@ const routesConfig = app => [
     indexRoute: routerLinks['Dashboard'],
     childRoutes: [
       Dashboard(app),
+      Admin(app),
     ]
   },
   {
