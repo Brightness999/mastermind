@@ -20,15 +20,6 @@ class InfoChild extends Component {
         super(props);
         
 
-        // let inforChildren = localStorage.getItem('inforChildren') ? JSON.parse(localStorage.getItem('inforChildren')).map(item => {
-        //     return {
-        //         ...item,
-        //         birthday: moment(item.birthday),
-        //     }
-        // }) : '';
-
-        
-
         this.state = {
             formChild: [
                 {
@@ -60,14 +51,36 @@ class InfoChild extends Component {
             parentInfo:registerData.parentInfo
         })
         
+        try{
+            console.log('birthday' , studentInfos[0].birthday, studentInfos[0].birthday_moment, typeof studentInfos[0].birthday_moment );
+        }catch(e){
 
+        }
         
         var newChild =this.getDefaultChildObj(registerData.parentInfo);
-        var studentInfos = registerData.studentInfos||[newChild,newChild,newChild];
-        this.form.setFieldsValue({children:studentInfos});
+        var studentInfos = !!registerData.studentInfos? JSON.parse(JSON.stringify(registerData.studentInfos)) : [newChild,newChild,newChild];
+        
+        
         if(!registerData.studentInfos){
+            
+            // for(var i = 0 ; i < registerData.studentInfos.length ; i++){
+            //     if()
+            // }
             this.props.setRegisterData({studentInfos:studentInfos});
         }
+
+        
+        for(var i = 0 ; i < studentInfos.length ; i++){
+            if((studentInfos[i].birthday+'').length >0){
+                studentInfos[i].birthday_moment =  moment(studentInfos[i].birthday);
+                // var obj = {};
+                // obj[(i+'birthday_moment')] = moment(studentInfos[i].birthday);
+                // console.log(this.form.get)
+                // this.form.setFieldValue(obj);
+            }
+        }
+        this.form.setFieldsValue({children:studentInfos});
+        
         this.loadServices();
     }
 
@@ -278,8 +291,8 @@ class InfoChild extends Component {
                                                             <DatePicker format={"YYYY-MM-DD"} placeholder={intl.formatMessage(messages.dateBirth)} 
                                                             selected={this.getBirthday(index)}
                                                             onChange={v => {
-                                                                console.log(v.valueOf());
-                                                                this.updateReduxValueFor1Depedent(index,"birthday_moment" ,v.format('YYYY-MM-DD'));
+                                                                console.log(v.valueOf() , typeof v);
+                                                                // this.updateReduxValueFor1Depedent(index,"birthday_moment" ,v.clone() );
                                                                 this.updateReduxValueFor1Depedent(index,"birthday" ,v.valueOf());
                                                             }} />
                                                         </Form.Item>

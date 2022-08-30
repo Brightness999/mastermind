@@ -18,7 +18,6 @@ class InfoProgress extends Component {
             formTime: [{ timeFromTo: "Time 1" }],
             fromLocation: [{ timeLocation: "Location 1" }],
             isSameAll: true,
-            isSameAllSchedule: true,
             studentInfos:[],
             currentDaySelecting:[],
             hasErrorOnTimeClose:false,
@@ -28,7 +27,7 @@ class InfoProgress extends Component {
     componentDidMount(){
         const {registerData} = this.props.register;
         var studentInfos = registerData.studentInfos
-        this.form.setFieldsValue({children:studentInfos});
+        this.form?.setFieldsValue({children:studentInfos});
         if(this.state.currentDaySelecting.length == 0){
             var arr = []
             for(var i = 0 ; i < studentInfos.length ; i++){
@@ -50,12 +49,10 @@ class InfoProgress extends Component {
         console.log('Failed:', errorInfo);
     };
     onSameAllDependent = () => {
+        console.log('set same all');
         this.setState({ isSameAll: !this.state.isSameAll });
     }
-    onSameAllSchedule = () => {
-        this.setState({ isSameAllSchedule: !this.state.isSameAllSchedule });
-    }
-
+    
     onSubmit = async () => {
         var isPassed = false;
         
@@ -85,7 +82,7 @@ class InfoProgress extends Component {
     }
 
     logForAvailbitiyArr = ()=>{
-        console.log('submitting' , this.form.getFieldsValue());
+        // console.log('submitting' , this.form.getFieldsValue());
         for(var i = 0 ; i < this.state.studentInfos.length;i++){
             console.log('submitting ', i,'availabilitySchedule',this.state.studentInfos[i].availabilitySchedule.length , this.state.studentInfos[i].availabilitySchedule );
         }
@@ -104,6 +101,7 @@ class InfoProgress extends Component {
     defaultTimeRangeItem = (dayInWeek)=>{
         return {
             "uid":shortid.generate()+''+Date.now(),
+
             "dayInWeek":dayInWeek,
             "openHour":7,
             "openMin":0,
@@ -150,7 +148,45 @@ class InfoProgress extends Component {
     }
 
     copyToFullWeek = (index , dayInWeek)=>{
+        const {studentInfos} = this.state;
+        var newStu = [...studentInfos];
+        var arr = [];
 
+        // get all field in selected day
+        var arrForCopy = [];
+        for(var i = 0 ; i< newStu[index].availabilitySchedule.length; i++){
+            if(newStu[index].availabilitySchedule[i].dayInWeek == dayInWeek){
+                arrForCopy.push(newStu[index].availabilitySchedule[i]);
+            }
+        }
+
+        for(var i = 0;i< 6;i++){
+            for(var j = 0; j< arrForCopy.length ; j++){
+                var item = {...arrForCopy[j]};
+                item.dayInWeek = i;
+                arr.push(item);
+            }
+            
+        }
+        if(this.state.isSameAll){
+            this.setState({
+                studentInfos: this.state.studentInfos.map((student, stdIndex) => {
+                    return {...student ,availabilitySchedule:[...arr]}
+                })
+            });
+        }else{
+            this.setState({
+                studentInfos: this.state.studentInfos.map((student, stdIndex) => {
+                    if(stdIndex == index ){
+                        return {...student ,availabilitySchedule:arr}
+                    }
+        
+                    return student;
+                })
+            });
+            // newStu[index].availabilitySchedule = arr;
+            
+        }
     }
 
     onChangeSelectingDay = (index , newDay) =>{
@@ -271,7 +307,102 @@ class InfoProgress extends Component {
         this.logForAvailbitiyArr();
     }
 
+    renderItem(field , index){
+        const day_week = [
+            intl.formatMessage(messages.sunday),
+            intl.formatMessage(messages.monday),
+            intl.formatMessage(messages.tuesday),
+            intl.formatMessage(messages.wednesday),
+            intl.formatMessage(messages.thursday),
+            intl.formatMessage(messages.friday),
+        ]
+        const optionsSegments = day_week.map((day,index)=>{
+            return { label: day, value: index };
+        });
+        const { isSameAll } = this.state;
+        return (
+            <div key={`div${index}`} className='academic-item'>
+                
+                
 
+                <p className='font-24 mb-10 text-center'>{intl.formatMessage(messages.availability)}</p>
+                <p className='font-16 mr-10 mb-5'>{intl.formatMessage(messages.dependent)} #{index+ 1} {this.state.studentInfos[index].firstName} {this.state.studentInfos[index].lastName} </p>
+                <div className='div-availability'>
+                    <Segmented options={optionsSegments} block={true} 
+                    value={this.state.currentDaySelecting[index]} 
+                    onChange={v=>{
+                        console.log('day change ',v,index);
+                        // var  newDay = day_week.indexOf(v);
+                        this.onChangeSelectingDay(index, v);
+                    }}
+                    />
+                    <div className='div-time'>
+                        {this.state.studentInfos[index].availabilitySchedule.map((scheduleItem , indexOnAvailabilitySchedule) =>{
+                            if(scheduleItem.dayInWeek == this.state.currentDaySelecting[index]){
+                                return (
+                                    <Row key={indexOnAvailabilitySchedule} gutter={14}>
+                                        <Col xs={24} sm={24} md={12}>
+                                            <TimePicker 
+                                                name={`timer_1${scheduleItem.uid}_${indexOnAvailabilitySchedule}`}
+                                                use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)}
+                                                value={this.valueForAvailabilityScheduleOpenHour(index, indexOnAvailabilitySchedule)}
+                                                
+                                                onChange={v=>{
+                                                    console.log('timer open changed ', v);
+                                                    this.valueChangeForOpenHour(index ,indexOnAvailabilitySchedule, v);
+                                                }}
+                                            />
+                                        </Col>
+                                        <Col xs={24} sm={24} md={12} className={indexOnAvailabilitySchedule === 0 ? '' : 'item-remove'}>
+                                            <TimePicker 
+                                                name={`timer_1${scheduleItem.uid}_${indexOnAvailabilitySchedule}`}
+                                                onChange={v=>{
+                                                    console.log('timer 2 changed ', v);
+                                                    this.valueChangeForCloseHour(index,indexOnAvailabilitySchedule,v);
+                                                }}
+                                                value={this.valueForAvailabilityScheduleCloseHour(index, indexOnAvailabilitySchedule)}
+                                                use12Hours 
+                                                format="h:mm a" 
+                                                placeholder={intl.formatMessage(messages.to)} 
+                                                />
+                                            {indexOnAvailabilitySchedule === 0 ? null : <BsDashCircle size={16} className='text-red icon-remove' onClick={() => {
+                                                // if(this.state.isSameAll){
+                                                //     remove(field.name)
+                                                // }else{
+                                                //     remove(field.id)
+                                                // }
+                                            }} />}
+                                        </Col>
+                                    </Row>
+                                )
+                            }
+
+                        } 
+                        )}
+                        <div className='div-add-time' onClick={() => {
+                            // add(null);
+                            this.addNewTimeRange(index , this.state.currentDaySelecting[index]);
+                        }}>
+                            <BsPlusCircle size={17} className='mr-5 text-primary' />
+                            <a className='text-primary'>{intl.formatMessage(messages.addTimeRange)}</a>
+                        </div>
+                        <div className='text-right div-copy-week'  onClick={() => {
+                            this.copyToFullWeek(index , this.state.currentDaySelecting[index]);
+                        }}>
+                            <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
+                            <QuestionCircleOutlined className='text-primary' />
+                        </div>
+                    </div>
+                </div>
+                {index == 0 && this.state.studentInfos.length>1&&<div className='flex flex-row items-center'>
+                    <Switch size="small" checked={isSameAll} onChange={this.onSameAllDependent} />
+                    <p className='ml-10 mb-0'>{intl.formatMessage(messages.sameAllDependents)}</p>
+                </div>}
+                
+               
+            </div>
+        );
+    }
 
     render() {
         const day_week = [
@@ -285,8 +416,39 @@ class InfoProgress extends Component {
         const optionsSegments = day_week.map((day,index)=>{
             return { label: day, value: index };
         });
-        const { isSameAll, isSameAllSchedule } = this.state;
-        
+        const { isSameAll } = this.state;
+        // state version
+        return (
+            <Row justify="center" className="row-form">
+                <div className='col-form col-create-default'>
+                    {/* <div className='div-form-title'>
+                        <p className='font-30 text-center'>{intl.formatMessage(messages.academicInformation)}</p>
+                    </div> */}
+                    <div
+                        
+                    >
+                        {this.state.studentInfos.map((user,index)=>{
+                            return this.renderItem( user , index);
+                        })}
+                        
+                        {/* List of Availability Schedule End */}
+                        <div className="form-btn continue-btn" >
+                            <Button
+                                block
+                                type="primary"
+                                htmlType="submit"
+                                onClick={this.onSubmit}
+                            >
+                                {intl.formatMessage(messages.continue).toUpperCase()}
+                            </Button>
+                        </div>
+
+                    </div>
+                </div>
+            </Row >
+        );
+
+        // form version
         return (
             <Row justify="center" className="row-form">
                 <div className='col-form col-create-default'>
@@ -307,45 +469,7 @@ class InfoProgress extends Component {
                                     return (
                                         <div key={field.key} className='academic-item'>
                                             
-                                            {/* <Form.Item
-                                                name={[field.name, "school"]}
-                                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
-                                            >
-                                                <Input 
-
-                                                placeholder={intl.formatMessage(messages.school)} 
-                                                />
-                                            </Form.Item>
-                                            <Form.Item
-                                                name={[field.name, "primaryTeacher"]}
-                                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
-                                            >
-                                                <Input placeholder={intl.formatMessage(messages.primaryTeacher)} />
-                                            </Form.Item>
-                                            <Form.Item
-                                                name={[field.name, "currentGrade"]}
-                                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.currentGrade) }]}
-                                            >
-                                                <Input placeholder={intl.formatMessage(messages.currentGrade)} />
-                                            </Form.Item>
-                                            <Form.Item
-                                                name={[field.name, "services"]}
-                                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
-                                            >
-                                                <Select
-                                                    mode="multiple"
-                                                    showArrow
-                                                    placeholder={intl.formatMessage(messages.servicesRequired)}
-                                                    optionLabelProp="label"
-
-                                                >
-                                                    <Select.Option value='Services required 1'>Services required 1</Select.Option>
-                                                    <Select.Option value='Services required 2'>Services required 2</Select.Option>
-                                                </Select>
-                                            </Form.Item>
-                                            <Form.Item>
-                                                <Checkbox checked={true}>{intl.formatMessage(messages.doHaveIEP)}</Checkbox>
-                                            </Form.Item> */}
+                                            
 
                                             <p className='font-24 mb-10 text-center'>{intl.formatMessage(messages.availability)}</p>
                                             <p className='font-16 mr-10 mb-5'>{intl.formatMessage(messages.dependent)} #{field.key + 1} {this.state.studentInfos[index].firstName} {this.state.studentInfos[index].lastName} </p>

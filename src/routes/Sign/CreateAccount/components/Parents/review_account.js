@@ -73,72 +73,24 @@ class ReviewAccount extends Component {
     };
 
     onSubmit = async () => {
+        
         const {registerData} = this.props.register;
-        const response = await axios.post(url + 'users/signup', registerData);
+        const customData = JSON.parse(JSON.stringify(registerData));
+        for(var i = 0 ; i < customData.studentInfos.length;i++){
+            if(!!customData.studentInfos[i].subsidyRequest && customData.studentInfos[i].subsidyRequest.documentUploaded.length > 0){
+                customData.studentInfos[i].subsidyRequest.documents = customData.studentInfos[i].subsidyRequest.documentUploaded;
+            }
+        }
+        const response = await axios.post(url + 'users/signup', customData);
         const { success, data } = response.data;
         if (success) {
-            message.success('Create Successfully');
-            // setTimeout(() => {
-            //     window.location.href = '/login';
-            // }, 2000)
+            // this.props.onFinishRegister();
+            this.props.onContinue(true);
+            localStorage.setItem('token', data.token);
         }else{
             message.error(error?.response?.data?.data ?? error.message);
         }
         return;
-        const { step1, step2, step3, step4 } = this.state;
-        const { email,
-            password,
-            username, } = step1;
-        const {
-            address,
-            familyName,
-            fatherEmail,
-            fatherName,
-            fatherPhoneNumber,
-            maritialType,
-            motherEmail,
-            motherName,
-            motherPhoneNumber
-        } = step2;
-
-        try {
-            const data1 = {
-                username,
-                password,
-                email,
-                role: 3,
-                "name": "chi_1",
-                "parentInfo": {
-                    address,
-                    familyName,
-                    fatherEmail,
-                    fatherName,
-                    fatherPhoneNumber,
-                    maritialType,
-                    motherEmail,
-                    motherName,
-                    motherPhoneNumber
-                },
-                studentInfos: this.state.step3.map(item => {
-                    return {
-                        ...item,
-                        birthday: moment(item.birthday).format('YYYY-MM-DD'),
-                    }
-                })
-
-            }
-
-            const response = await axios.post(url + 'users/signup', data1);
-            const { success, data } = response.data;
-            if (success) {
-                message.success('Create Successfully');
-                setTimeout(() => {
-                    window.location.href = '/login';
-                }, 2000)
-            }
-        } catch (error) {
-            message.error(error?.response?.data?.data ?? error.message);
-        }
     }
 
     checkHaveSchedule(dayInWeek, studentInfo){

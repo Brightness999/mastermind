@@ -20,7 +20,7 @@ import InfoSchool from './School/info_school';
 import InfoAdmin from './Admin/info_admin';
 import SubsidyRequest from '../../SubsidyRequest/components';
 import SubsidyReview from '../../SubsidyReview/components';
-
+import { routerLinks } from "../../../constant";
 import './index.less';
 import '../../../../assets/styles/login.less';
 const { Step } = Steps;
@@ -48,12 +48,16 @@ export default class extends React.Component {
     this.setState({ currentStep: this.state.currentStep - 1 });
   };
 
-  handleContinue = () => {
+  handleContinue = (isFinished = false) => {
     // if(this.state.currentStep <= 2) {
     //   this.nextStep();
     // } else {
     //   this.openModalCreateDone();
     // }
+    if(isFinished){
+      this.openModalCreateDone();
+      return;
+    }
     if (this.state.currentStep <= 4) {
       this.nextStep();
     }
@@ -122,14 +126,26 @@ export default class extends React.Component {
     return this.state.selectedDependent
   }
 
+  openModalCreateDone = () => {
+    this.setState({ visibleCreateDone: true });
+  }
+  closeModalCreateDone = () => {
+    this.setState({ visibleCreateDone: false });
+
+    
+    this.props.history.push(routerLinks['Dashboard']);
+          
+  }
+
   getStepContentComponent = (currentStep) => {
     switch (currentStep) {
       case 0:
         return (<CreateDefault onContinue={this.handleContinue} onHandleChangeRoleRegister={this.handleChange} />)
       case 1:
+        
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<InfoParent onContinue={this.handleContinue} />)
+            return (<InfoParent onFinishRegister={this.openModalCreateDone} onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoProfile onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.school):
@@ -166,16 +182,11 @@ export default class extends React.Component {
             return (<SubsidyProgram onContinue={this.handleContinue} />)
         }
       case 5:
-        return <InfoReview onContinue={this.handleContinue} />
+        return (<InfoReview onContinue={this.handleContinue} onFinishRegister={this.openModalCreateDone} />)
     }
   }
 
-  openModalCreateDone = () => {
-    this.setState({ visibleCreateDone: true });
-  }
-  closeModalCreateDone = () => {
-    this.setState({ visibleCreateDone: false });
-  }
+  
 
   render() {
     const { currentStep, visibleCreateDone, accountType } = this.state;

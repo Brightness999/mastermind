@@ -30,10 +30,7 @@ export default class extends React.Component {
       if (success) {
         message.success(intl.formatMessage(messages.loginSuccess));
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setTimeout(() => {
-          this.props.history.push(routerLinks['Dashboard']);
-        }, 2000)
+        this.props.history.push(routerLinks['Dashboard']);
       }
     } catch (error) {
       console.log(error);

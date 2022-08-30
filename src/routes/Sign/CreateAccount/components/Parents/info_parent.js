@@ -93,6 +93,7 @@ class InfoParent extends Component {
         console.log('Success:', values);
         this.props.setRegisterData({parentInfo:values });
         // localStorage.setItem('inforParent', JSON.stringify(values));
+        
         this.props.onContinue();
     };
     onFinishFailed = (errorInfo) => {
