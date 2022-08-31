@@ -6,8 +6,18 @@ import { Badge, Avatar, Button, Input } from 'antd';
 import intl from "react-intl-universal";
 import messages from './messages';
 import './style/index.less';
+import { checkPermission } from '../../utils/auth/checkPermission';
 const scrollElement = React.createRef();
 class MainHeader extends Component {
+
+  constructor(props) {
+    super(props);
+
+  }
+
+  componentDidMount() {
+    
+  }
 
   scrollTrans = (scrollOffset) => {
     scrollElement.current.scrollLeft += scrollOffset;
@@ -18,26 +28,26 @@ class MainHeader extends Component {
         <div className='div-account'>
           <div className='account-icon'>
             <Badge size="small" count={6}>
-              <Avatar icon={<FaUserAlt size={17} className='text-white'/>} />
+              <Avatar icon={<FaUserAlt size={17} className='text-white' />} />
             </Badge>
           </div>
           <div className='account-name'>
-              <p className='mb-0'>Account Name Here</p>
-              <p className='font-10 mb-0'>Subname Here</p>
+            <p className='mb-0'>Account Name Here</p>
+            <p className='font-10 mb-0'>Subname Here</p>
           </div>
         </div>
         <div className='div-search'>
           <BsSearch size={18} />
-          <Input placeholder={`${intl.formatMessage(messages.search)}...`}/>
+          <Input placeholder={`${intl.formatMessage(messages.search)}...`} />
         </div>
         <div className='div-trans flex flex-row'>
           <Avatar size={36} className='trans-all'>All</Avatar>
-          <Button 
-            type='text' 
-            className='trans-left'icon={<BiChevronLeft size={35}/>}
+          <Button
+            type='text'
+            className='trans-left' icon={<BiChevronLeft size={35} />}
             onClick={() => this.scrollTrans(-40)}
           />
-          <div className='trans-scroll' ref = {scrollElement}>
+          <div className='trans-scroll' ref={scrollElement}>
             <Avatar size={36} className='trans-item'>CMR</Avatar>
             <Avatar size={36} className='trans-item'>CR</Avatar>
             <Avatar size={36} className='trans-item'>MZR</Avatar>
@@ -49,8 +59,8 @@ class MainHeader extends Component {
             <Avatar size={36} className='trans-item'>KR</Avatar>
           </div>
           <Button
-            type='text' 
-            className='trans-right'icon={<BiChevronRight size={35}/>}
+            type='text'
+            className='trans-right' icon={<BiChevronRight size={35} />}
             onClick={() => this.scrollTrans(40)}
           />
           <div className='trans-new'>

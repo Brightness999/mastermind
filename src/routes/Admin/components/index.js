@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import { 
+import {
   Collapse,
   Badge,
   Avatar,
@@ -36,9 +36,10 @@ import events from "../../../utils/calendar/events";
 import msgDashboard from '../../Dashboard/messages';
 import msgCreateAccount from '../../Sign/CreateAccount/messages';
 import EventDetail from './EventDetail';
+import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 const { Panel } = Collapse;
-const { TabPane} = Tabs;
+const { TabPane } = Tabs;
 export default class extends React.Component {
   constructor(props) {
     super(props);
@@ -57,7 +58,7 @@ export default class extends React.Component {
       calendarEvents: [
         // initial event data
         { title: "Event Now", start: new Date(), allDay: true }
-      ]
+      ],
     }
   }
   calendarRef = React.createRef();
@@ -120,21 +121,21 @@ export default class extends React.Component {
   };
 
   handleMonthToWeek = () => {
-    if(this.state.isMonth === 1) {
-      this.setState({isMonth: 0});
+    if (this.state.isMonth === 1) {
+      this.setState({ isMonth: 0 });
     } else {
-      this.setState({isMonth: 1});
-    } 
+      this.setState({ isMonth: 1 });
+    }
   }
 
   handleChangeDayView = () => {
-    if(this.state.isGridDayView === 'Grid') {
-      this.setState({isGridDayView: 'List'});
+    if (this.state.isGridDayView === 'Grid') {
+      this.setState({ isGridDayView: 'List' });
     } else {
-      this.setState({isGridDayView: 'Grid'});
-    } 
+      this.setState({ isGridDayView: 'Grid' });
+    }
   }
-  
+
   handleDateSelect = (selectInfo) => {
     let calendarApi = selectInfo.view.calendar
     let title = prompt('Please enter a new title for your event')
@@ -151,7 +152,7 @@ export default class extends React.Component {
     }
   }
   handleEventClick = () => {
-    this.setState({isEventDetail: !this.state.isEventDetail });
+    this.setState({ isEventDetail: !this.state.isEventDetail });
   }
   handleEventAdd = (addInfo) => {
     this.props.createEvent(addInfo.event.toPlainObject())
@@ -178,27 +179,27 @@ export default class extends React.Component {
   }
 
   render() {
-    const { 
+    const {
       isFilter,
       visibleDetail,
       visibleDetailPost,
       visibleNewAppoint,
-      visibleSubsidy, 
+      visibleSubsidy,
       isEventDetail,
       isMonth,
       isGridDayView
-     } = this.state;
+    } = this.state;
     const genExtraTime = () => (
       <BsClockHistory
         size={18}
-        onClick={() => {}}
+        onClick={() => { }}
       />
     );
     const genExtraFlag = () => (
       <Badge size="small" count={2}>
         <BsFillFlagFill
           size={18}
-          onClick={() => {}}
+          onClick={() => { }}
         />
       </Badge>
     );
@@ -217,14 +218,14 @@ export default class extends React.Component {
           },
           {
             value: 'List',
-            icon: <MdFormatAlignLeft size={20}/>,
+            icon: <MdFormatAlignLeft size={20} />,
           },
         ]}
       />
     );
     const btnFilter = (
       <div className='header-left flex flex-row' onClick={this.onShowFilter}>
-        <p className='font-15'>{intl.formatMessage(msgDashboard.filterOptions)} {isFilter ? <BsX size={30}/> : <BsFilter size={25}/>}</p>
+        <p className='font-15'>{intl.formatMessage(msgDashboard.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
       </div>
     );
     const menu = (
@@ -314,7 +315,7 @@ export default class extends React.Component {
     };
     return (
       <div className="full-layout page admin-page">
-         <div className='div-show-subsidy' onClick={this.onShowModalSubsidy}/>
+        <div className='div-show-subsidy' onClick={this.onShowModalSubsidy} />
         <div className='div-content'>
           <section className='div-activity-feed box-card'>
             <div className='div-title-feed text-center'>
@@ -327,7 +328,7 @@ export default class extends React.Component {
                 <p>provider-name</p>
                 <p>location</p>
                 <p>date/time</p>
-                <p className='font-700 text-primary text-right' style={{marginTop: '-10px'}}>{intl.formatMessage(msgDashboard.today)}</p>
+                <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{intl.formatMessage(msgDashboard.today)}</p>
               </div>)}
               <div className='item-feed done'>
                 <p className='font-700'>Dependent #1 Name</p>
@@ -335,46 +336,46 @@ export default class extends React.Component {
                 <p>provider-name</p>
                 <p>location</p>
                 <p>date/time</p>
-                <p className='font-700 text-primary text-right' style={{marginTop: '-10px'}}>{intl.formatMessage(msgDashboard.today)}</p>
+                <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{intl.formatMessage(msgDashboard.today)}</p>
               </div>
             </div>
           </section>
           <section className='div-calendar box-card'>
             {isFilter && <div className='calendar-filter'>
-                <CSSAnimate className="animated-shorter" type={isFilter ? 'fadeIn' : 'fadeOut'}>
-                  <Row gutter={10}>
-                    <Col xs={12} sm={12} md={4}>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgDashboard.eventType)}</p>
-                      <Checkbox.Group options={optionsEvent} />
-                    </Col>
-                    <Col xs={12} sm={12} md={6} className='skillset-checkbox'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.skillsets)}</p>
-                      <Checkbox.Group options={optionsSkillset} />
-                    </Col>
-                    <Col xs={12} sm={12} md={7} className='select-small'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.provider)}</p>
-                      <Select placeholder={intl.formatMessage(msgDashboard.startTypingProvider)}>
-                        <Select.Option value='1'>Dr. Rabinowitz </Select.Option>
-                      </Select>
-                      <div className='div-chip'>
-                        {Array(3).fill(null).map((_, index) =><div key={index} className='chip'>Dr. Rabinowitz <BsX size={16} onClick={null}/></div>)}
-                      </div>
-                    </Col>
-                    <Col xs={12} sm={12} md={7} className='select-small'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.location)}</p>
-                      <Select placeholder={intl.formatMessage(msgDashboard.startTypingLocation)}>
-                        <Select.Option value='1'>Rabinowitz office</Select.Option>
-                      </Select>
-                      <div className='div-chip'>
-                        {Array(3).fill(null).map((_, index) =><div key={index} className='chip'>Rabinowitz office <BsX size={16} onClick={null}/></div>)}
-                      </div>
-                    </Col>
-                  </Row>
-                  <div className='text-right'>
-                    <Button size='small' type='primary'>{intl.formatMessage(msgDashboard.apply).toUpperCase()}(10)</Button>
-                  </div>
-                </CSSAnimate>
-              </div>}
+              <CSSAnimate className="animated-shorter" type={isFilter ? 'fadeIn' : 'fadeOut'}>
+                <Row gutter={10}>
+                  <Col xs={12} sm={12} md={4}>
+                    <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgDashboard.eventType)}</p>
+                    <Checkbox.Group options={optionsEvent} />
+                  </Col>
+                  <Col xs={12} sm={12} md={6} className='skillset-checkbox'>
+                    <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.skillsets)}</p>
+                    <Checkbox.Group options={optionsSkillset} />
+                  </Col>
+                  <Col xs={12} sm={12} md={7} className='select-small'>
+                    <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.provider)}</p>
+                    <Select placeholder={intl.formatMessage(msgDashboard.startTypingProvider)}>
+                      <Select.Option value='1'>Dr. Rabinowitz </Select.Option>
+                    </Select>
+                    <div className='div-chip'>
+                      {Array(3).fill(null).map((_, index) => <div key={index} className='chip'>Dr. Rabinowitz <BsX size={16} onClick={null} /></div>)}
+                    </div>
+                  </Col>
+                  <Col xs={12} sm={12} md={7} className='select-small'>
+                    <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.location)}</p>
+                    <Select placeholder={intl.formatMessage(msgDashboard.startTypingLocation)}>
+                      <Select.Option value='1'>Rabinowitz office</Select.Option>
+                    </Select>
+                    <div className='div-chip'>
+                      {Array(3).fill(null).map((_, index) => <div key={index} className='chip'>Rabinowitz office <BsX size={16} onClick={null} /></div>)}
+                    </div>
+                  </Col>
+                </Row>
+                <div className='text-right'>
+                  <Button size='small' type='primary'>{intl.formatMessage(msgDashboard.apply).toUpperCase()}(10)</Button>
+                </div>
+              </CSSAnimate>
+            </div>}
             {!isEventDetail && <><div className='calendar-content'>
               <FullCalendar
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
@@ -384,12 +385,12 @@ export default class extends React.Component {
                   center: "prev,title,next",
                   right: "monthToWeekButton,segmentView"
                 }}
-                
-                views= {{
+
+                views={{
                   monthToWeekButton: {
                     type: isMonth ? 'dayGridMonth' : 'timeGridWeek',
                     buttonText: btnMonthToWeek,
-                    
+
                   },
                   segmentView: {
                     type: isGridDayView === 'Grid' ? 'dayGridMonth' : 'listWeek',
@@ -401,11 +402,11 @@ export default class extends React.Component {
                 }}
                 customButtons={{
                   filterButton: {
-                      text: btnFilter,
+                    text: btnFilter,
                   },
                 }}
                 initialView='dayGridMonth'
-                eventColor= '#2d5cfa'
+                eventColor='#2d5cfa'
                 eventDisplay='block'
                 editable={true}
                 selectable={true}
@@ -421,151 +422,42 @@ export default class extends React.Component {
                 // eventAdd={this.handleEventAdd}
                 // eventChange={this.handleEventChange} // called for drag-n-drop/resize
                 eventRemove={this.handleEventRemove}
-                // ref={this.calendarComponentRef}
+              // ref={this.calendarComponentRef}
               />
 
             </div>
-            <div className='btn-appointment'>
-              <Dropdown overlay={menu} placement="topRight">
-                <Button 
-                type='primary' 
-                block 
-                icon={<FaCalendarAlt size={19}/>}
-                onClick={this.onShowDrawerDetailPost}
-                >
-                  {intl.formatMessage(msgDashboard.makeAppointment)}
-                </Button>
-              </Dropdown>
-            </div></>}
-            {isEventDetail && <EventDetail backView={this.handleEventClick}/>}
+              <div className='btn-appointment'>
+                <Dropdown overlay={menu} placement="topRight">
+                  <Button
+                    type='primary'
+                    block
+                    icon={<FaCalendarAlt size={19} />}
+                    onClick={this.onShowDrawerDetailPost}
+                  >
+                    {intl.formatMessage(msgDashboard.makeAppointment)}
+                  </Button>
+                </Dropdown>
+              </div></>}
+            {isEventDetail && <EventDetail backView={this.handleEventClick} />}
           </section>
           <section className='div-multi-choice'>
-            <Collapse 
+            <Collapse
               defaultActiveKey={['1']}
-              expandIcon={({ isActive }) => isActive ?<BsFillDashSquareFill size={18}/> : <BsFillPlusSquareFill  size={18}/>}
+              expandIcon={({ isActive }) => isActive ? <BsFillDashSquareFill size={18} /> : <BsFillPlusSquareFill size={18} />}
               expandIconPosition={'end'}
+            >
+              <Panel
+                key="1"
+                header={intl.formatMessage(msgDashboard.appointments)}
+                extra={genExtraTime()}
+                className='appointment-panel'
               >
-                <Panel 
-                  key="1" 
-                  header={intl.formatMessage(msgDashboard.appointments)} 
-                  extra={genExtraTime()}
-                  className='appointment-panel'
-                  >
-                  <Tabs defaultActiveKey="1" type="card" size='small'>
-                    <TabPane tab={intl.formatMessage(msgDashboard.upcoming)} key="1">
-                      {new Array(10).fill(null).map((_, index) => 
-                        <div key={index} className='list-item'>
-                          <div className='item-left'>
-                            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail}/>
-                            <div className='div-service'>
-                              <p className='font-11 mb-0'>Service Type</p>
-                              <p className='font-09 mb-0'>Provide Name</p>
-                            </div>
-                            <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
-                            <div className='ml-auto'>
-                              <p className='font-12 mb-0'>Time</p>
-                              <p className='font-12 font-700 mb-0'>Date</p>
-                            </div>
-                          </div>
-                          <div className='item-right'>
-                            <GiBackwardTime size={19} onClick={() => {}}/>
-                            <BsXCircle style={{marginTop: 4}} size={15} onClick={() => {}}/>
-                          </div>
-                        </div>
-                      )}
-                    </TabPane>
-                    <TabPane tab={intl.formatMessage(msgDashboard.unprocessed)} key="2">
-                      {new Array(10).fill(null).map((_, index) => 
-                        <div key={index} className='list-item'>
-                          <div className='item-left'>
-                            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail}/>
-                            <div className='div-service'>
-                              <p className='font-11 mb-0'>Service Type</p>
-                              <p className='font-09 mb-0'>Provide Name</p>
-                            </div>
-                            <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
-                            <div className='ml-auto'>
-                              <p className='font-12 mb-0'>Time</p>
-                              <p className='font-12 font-700 mb-0'>Date</p>
-                            </div>
-                          </div>
-                          <div className='item-right'>
-                            <BsFillFlagFill size={15} onClick={() => {}}/>
-                            <BsCheckCircleFill className='text-green500' style={{marginTop: 4}} size={15} onClick={() => {}}/>
-                          </div>
-                        </div>
-                      )}
-                    </TabPane>
-                    <TabPane tab={intl.formatMessage(msgDashboard.past)} key="3">
-                      {new Array(10).fill(null).map((_, index) => 
-                        <div key={index} className='list-item'>
-                          <div className='item-left'>
-                            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail}/>
-                            <div className='div-service'>
-                              <p className='font-11 mb-0'>Service Type</p>
-                              <p className='font-09 mb-0'>Provide Name</p>
-                            </div>
-                            <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
-                            <div className='ml-auto'>
-                              <p className='font-12 mb-0'>Time</p>
-                              <p className='font-12 font-700 mb-0'>Date</p>
-                            </div>
-                          </div>
-                          <div className='item-right'>
-                            <BsEnvelope size={15} onClick={() => {}}/>
-                            <BsFillFlagFill style={{marginTop: 4}} size={15} onClick={() => {}}/>
-                          </div>
-                        </div>
-                      )}
-                    </TabPane>
-                  </Tabs>
-                </Panel>
-                <Panel header={intl.formatMessage(msgDashboard.referrals)} key="2">
-                  {new Array(10).fill(null).map((_, index) => 
-                    <div key={index} className='list-item padding-item'>
-                      <Avatar size={24} icon={<FaUser size={12} />} />
-                      <div className='div-service'>
-                        <p className='font-11 mb-0'>Service Type</p>
-                        <p className='font-09 mb-0'>Referrer Name</p>
-                      </div>
-                      <div className='text-center ml-auto mr-5'>
-                        <p className='font-11 mb-0'>{intl.formatMessage(msgDashboard.phoneCall)}</p>
-                        <p className='font-11 mb-0'>Phone number</p>
-                      </div>
-                      <div className='ml-auto'>
-                        <p className='font-12 mb-0'>Time</p>
-                        <p className='font-12 font-700 mb-0'>Date</p>
-                      </div>
-                    </div>)}
-                </Panel>
-                <Panel header={intl.formatMessage(msgDashboard.screenings)} key="3">
-                  {new Array(10).fill(null).map((_, index) => 
-                    <div key={index} className='list-item padding-item'>
-                      <Avatar size={24} icon={<FaUser size={12} />} />
-                      <div className='div-service'>
-                        <p className='font-11 mb-0'>Service Type</p>
-                        <p className='font-09 mb-0'>Provider Name</p>
-                      </div>
-                      <div className='text-center ml-auto mr-5'>
-                        <p className='font-11 mb-0'>{intl.formatMessage(msgDashboard.phoneCall)}</p>
-                        <p className='font-11 mb-0'>Phone number</p>
-                      </div>
-                      <div className='ml-auto'>
-                        <p className='font-12 mb-0'>Time</p>
-                        <p className='font-12 font-700 mb-0'>Date</p>
-                      </div>
-                    </div>)}
-                </Panel>
-                <Panel 
-                  key="4"
-                  header={intl.formatMessage(msgDashboard.evaluations)} 
-                  className='evaluations-panel'
-                >
-                  <Tabs defaultActiveKey="1" type="card" size='small'>
-                    <TabPane tab={intl.formatMessage(msgDashboard.upcoming)} key="1">
-                      {new Array(10).fill(null).map((_, index) => 
-                        <div key={index} className='list-item padding-item'>
-                          <Avatar size={24} icon={<FaUser size={12} />} />
+                <Tabs defaultActiveKey="1" type="card" size='small'>
+                  <TabPane tab={intl.formatMessage(msgDashboard.upcoming)} key="1">
+                    {new Array(10).fill(null).map((_, index) =>
+                      <div key={index} className='list-item'>
+                        <div className='item-left'>
+                          <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
                           <div className='div-service'>
                             <p className='font-11 mb-0'>Service Type</p>
                             <p className='font-09 mb-0'>Provide Name</p>
@@ -576,107 +468,216 @@ export default class extends React.Component {
                             <p className='font-12 font-700 mb-0'>Date</p>
                           </div>
                         </div>
-                      )}
-                    </TabPane>
-                    <TabPane tab={intl.formatMessage(msgDashboard.past)} key="2">
-                      <div className='list-item padding-item'>{intl.formatMessage(msgDashboard.past)}</div>
-                    </TabPane>
-                  </Tabs>
-                </Panel>
-                <Panel header={intl.formatMessage(msgDashboard.flags)} key="5" extra={genExtraFlag()}>
-                  {new Array(10).fill(null).map((_, index) => 
-                    <div key={index} className='list-item padding-item'>
-                      <Avatar size={24} icon={<FaUser size={12} />} />
-                      <div className='div-service'>
-                        <p className='font-11 mb-0'>Service Type</p>
-                        <p className='font-09 mb-0'>Provide Name</p>
+                        <div className='item-right'>
+                          <GiBackwardTime size={19} onClick={() => { }} />
+                          <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+                        </div>
                       </div>
-                      <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
-                      <p className='font-12 ml-auto mb-0'>Pay Flag</p>
+                    )}
+                  </TabPane>
+                  <TabPane tab={intl.formatMessage(msgDashboard.unprocessed)} key="2">
+                    {new Array(10).fill(null).map((_, index) =>
+                      <div key={index} className='list-item'>
+                        <div className='item-left'>
+                          <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
+                          <div className='div-service'>
+                            <p className='font-11 mb-0'>Service Type</p>
+                            <p className='font-09 mb-0'>Provide Name</p>
+                          </div>
+                          <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
+                          <div className='ml-auto'>
+                            <p className='font-12 mb-0'>Time</p>
+                            <p className='font-12 font-700 mb-0'>Date</p>
+                          </div>
+                        </div>
+                        <div className='item-right'>
+                          <BsFillFlagFill size={15} onClick={() => { }} />
+                          <BsCheckCircleFill className='text-green500' style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+                        </div>
+                      </div>
+                    )}
+                  </TabPane>
+                  <TabPane tab={intl.formatMessage(msgDashboard.past)} key="3">
+                    {new Array(10).fill(null).map((_, index) =>
+                      <div key={index} className='list-item'>
+                        <div className='item-left'>
+                          <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
+                          <div className='div-service'>
+                            <p className='font-11 mb-0'>Service Type</p>
+                            <p className='font-09 mb-0'>Provide Name</p>
+                          </div>
+                          <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
+                          <div className='ml-auto'>
+                            <p className='font-12 mb-0'>Time</p>
+                            <p className='font-12 font-700 mb-0'>Date</p>
+                          </div>
+                        </div>
+                        <div className='item-right'>
+                          <BsEnvelope size={15} onClick={() => { }} />
+                          <BsFillFlagFill style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+                        </div>
+                      </div>
+                    )}
+                  </TabPane>
+                </Tabs>
+              </Panel>
+              <Panel header={intl.formatMessage(msgDashboard.referrals)} key="2">
+                {new Array(10).fill(null).map((_, index) =>
+                  <div key={index} className='list-item padding-item'>
+                    <Avatar size={24} icon={<FaUser size={12} />} />
+                    <div className='div-service'>
+                      <p className='font-11 mb-0'>Service Type</p>
+                      <p className='font-09 mb-0'>Referrer Name</p>
                     </div>
-                  )}
-                </Panel>
-                <Panel 
-                  header={intl.formatMessage(msgDashboard.subsidaries)} 
-                  key="6" 
-                  className='subsidaries-panel'
-                  >
-                   <Tabs defaultActiveKey="1" type="card" size='small'>
-                    <TabPane tab={intl.formatMessage(msgDashboard.pending)} key="1">
-                      {new Array(10).fill(null).map((_, index) => 
-                        <div key={index} className='list-item'>
-                          <div className='item-left'>
-                            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail}/>
-                            <div className='div-service'>
-                              <p className='font-11 mb-0'>Service Type</p>
-                              <p className='font-09 mb-0'>Provide Name</p>
-                            </div>
-                            <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p>
-                            <p className='font-12 ml-auto mb-0'>Status</p>
-                          </div>
-                          <div className='item-right'>
-                            <GiBackwardTime size={19} onClick={() => {}}/>
-                            <BsXCircle style={{marginTop: 4}} size={15} onClick={() => {}}/>
-                          </div>
+                    <div className='text-center ml-auto mr-5'>
+                      <p className='font-11 mb-0'>{intl.formatMessage(msgDashboard.phoneCall)}</p>
+                      <p className='font-11 mb-0'>Phone number</p>
+                    </div>
+                    <div className='ml-auto'>
+                      <p className='font-12 mb-0'>Time</p>
+                      <p className='font-12 font-700 mb-0'>Date</p>
+                    </div>
+                  </div>)}
+              </Panel>
+              <Panel header={intl.formatMessage(msgDashboard.screenings)} key="3">
+                {new Array(10).fill(null).map((_, index) =>
+                  <div key={index} className='list-item padding-item'>
+                    <Avatar size={24} icon={<FaUser size={12} />} />
+                    <div className='div-service'>
+                      <p className='font-11 mb-0'>Service Type</p>
+                      <p className='font-09 mb-0'>Provider Name</p>
+                    </div>
+                    <div className='text-center ml-auto mr-5'>
+                      <p className='font-11 mb-0'>{intl.formatMessage(msgDashboard.phoneCall)}</p>
+                      <p className='font-11 mb-0'>Phone number</p>
+                    </div>
+                    <div className='ml-auto'>
+                      <p className='font-12 mb-0'>Time</p>
+                      <p className='font-12 font-700 mb-0'>Date</p>
+                    </div>
+                  </div>)}
+              </Panel>
+              <Panel
+                key="4"
+                header={intl.formatMessage(msgDashboard.evaluations)}
+                className='evaluations-panel'
+              >
+                <Tabs defaultActiveKey="1" type="card" size='small'>
+                  <TabPane tab={intl.formatMessage(msgDashboard.upcoming)} key="1">
+                    {new Array(10).fill(null).map((_, index) =>
+                      <div key={index} className='list-item padding-item'>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service'>
+                          <p className='font-11 mb-0'>Service Type</p>
+                          <p className='font-09 mb-0'>Provide Name</p>
                         </div>
-                      )}
-                    </TabPane>
-                    <TabPane tab={intl.formatMessage(msgDashboard.declined)} key="2">
-                      {new Array(10).fill(null).map((_, index) => 
-                        <div key={index} className='list-item'>
-                          <div className='item-left'>
-                            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail}/>
-                            <div className='div-service'>
-                              <p className='font-11 mb-0'>Service Type</p>
-                              <p className='font-09 mb-0'>Provide Name</p>
-                            </div>
-                            <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p>
-                            <p className='font-12 ml-auto mb-0'>Status</p>
-                          </div>
-                          <div className='item-right'>
-                            <BsFillFlagFill size={15} onClick={() => {}}/>
-                            <BsCheckCircleFill className='text-green500' style={{marginTop: 4}} size={15} onClick={() => {}}/>
-                          </div>
+                        <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
+                        <div className='ml-auto'>
+                          <p className='font-12 mb-0'>Time</p>
+                          <p className='font-12 font-700 mb-0'>Date</p>
                         </div>
-                      )}
-                    </TabPane>
-                    <TabPane tab={intl.formatMessage(msgDashboard.approved)} key="3">
-                      {new Array(10).fill(null).map((_, index) => 
-                        <div key={index} className='list-item'>
-                          <div className='item-left'>
-                            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail}/>
-                            <div className='div-service'>
-                              <p className='font-11 mb-0'>Service Type</p>
-                              <p className='font-09 mb-0'>Provide Name</p>
-                            </div>
-                            <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p>
-                            <p className='font-12 ml-auto mb-0'>Status</p>
+                      </div>
+                    )}
+                  </TabPane>
+                  <TabPane tab={intl.formatMessage(msgDashboard.past)} key="2">
+                    <div className='list-item padding-item'>{intl.formatMessage(msgDashboard.past)}</div>
+                  </TabPane>
+                </Tabs>
+              </Panel>
+              <Panel header={intl.formatMessage(msgDashboard.flags)} key="5" extra={genExtraFlag()}>
+                {new Array(10).fill(null).map((_, index) =>
+                  <div key={index} className='list-item padding-item'>
+                    <Avatar size={24} icon={<FaUser size={12} />} />
+                    <div className='div-service'>
+                      <p className='font-11 mb-0'>Service Type</p>
+                      <p className='font-09 mb-0'>Provide Name</p>
+                    </div>
+                    <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
+                    <p className='font-12 ml-auto mb-0'>Pay Flag</p>
+                  </div>
+                )}
+              </Panel>
+              <Panel
+                header={intl.formatMessage(msgDashboard.subsidaries)}
+                key="6"
+                className='subsidaries-panel'
+              >
+                <Tabs defaultActiveKey="1" type="card" size='small'>
+                  <TabPane tab={intl.formatMessage(msgDashboard.pending)} key="1">
+                    {new Array(10).fill(null).map((_, index) =>
+                      <div key={index} className='list-item'>
+                        <div className='item-left'>
+                          <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
+                          <div className='div-service'>
+                            <p className='font-11 mb-0'>Service Type</p>
+                            <p className='font-09 mb-0'>Provide Name</p>
                           </div>
-                          <div className='item-right'>
-                            <BsEnvelope size={15} onClick={() => {}}/>
-                            <BsFillFlagFill style={{marginTop: 4}} size={15} onClick={() => {}}/>
-                          </div>
+                          <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p>
+                          <p className='font-12 ml-auto mb-0'>Status</p>
                         </div>
-                      )}
-                    </TabPane>
-                  </Tabs>
-                </Panel>
+                        <div className='item-right'>
+                          <GiBackwardTime size={19} onClick={() => { }} />
+                          <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+                        </div>
+                      </div>
+                    )}
+                  </TabPane>
+                  <TabPane tab={intl.formatMessage(msgDashboard.declined)} key="2">
+                    {new Array(10).fill(null).map((_, index) =>
+                      <div key={index} className='list-item'>
+                        <div className='item-left'>
+                          <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
+                          <div className='div-service'>
+                            <p className='font-11 mb-0'>Service Type</p>
+                            <p className='font-09 mb-0'>Provide Name</p>
+                          </div>
+                          <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p>
+                          <p className='font-12 ml-auto mb-0'>Status</p>
+                        </div>
+                        <div className='item-right'>
+                          <BsFillFlagFill size={15} onClick={() => { }} />
+                          <BsCheckCircleFill className='text-green500' style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+                        </div>
+                      </div>
+                    )}
+                  </TabPane>
+                  <TabPane tab={intl.formatMessage(msgDashboard.approved)} key="3">
+                    {new Array(10).fill(null).map((_, index) =>
+                      <div key={index} className='list-item'>
+                        <div className='item-left'>
+                          <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
+                          <div className='div-service'>
+                            <p className='font-11 mb-0'>Service Type</p>
+                            <p className='font-09 mb-0'>Provide Name</p>
+                          </div>
+                          <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p>
+                          <p className='font-12 ml-auto mb-0'>Status</p>
+                        </div>
+                        <div className='item-right'>
+                          <BsEnvelope size={15} onClick={() => { }} />
+                          <BsFillFlagFill style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+                        </div>
+                      </div>
+                    )}
+                  </TabPane>
+                </Tabs>
+              </Panel>
             </Collapse>
           </section>
         </div>
         <div className='btn-call'>
-          <img src='../images/call.png'/>
+          <img src='../images/call.png' />
         </div>
-        <DrawerDetail 
+        <DrawerDetail
           visible={visibleDetail}
           onClose={this.onCloseDrawerDetail}
         />
-        <DrawerDetailPost 
+        <DrawerDetailPost
           visible={visibleDetailPost}
           onClose={this.onCloseDrawerDetailPost}
         />
-        <ModalNewAppointment {...modalNewAppointProps}/>
-        <ModalSubsidyProgress {...modalSubsidyProps}/>
+        <ModalNewAppointment {...modalNewAppointProps} />
+        <ModalSubsidyProgress {...modalSubsidyProps} />
       </div>
     );
   }

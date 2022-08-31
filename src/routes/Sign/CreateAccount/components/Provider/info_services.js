@@ -22,26 +22,49 @@ class InfoServices extends Component {
             levels: [
                 { level: "Dependent 1" },
             ],
-            fileList: null,
+            fileList: [],
             uploading: false,
+            documentUploaded: []
         }
     }
 
     componentDidMount() {
-        const data = this.props.register.provider;
-        console.log(data);
-        if (data) {
-            this.form?.setFieldsValue({
-                ...data?.step3
-            })
+        const { registerData } = this.props.register;
+
+        console.log(registerData);
+
+        if (!registerData.serviceInfor) {
+            this.props.setRegisterData({ serviceInfor: this.getDefaultObj() });
+        }
+        var serviceInfor = registerData.serviceInfor || this.getDefaultObj();
+        this.form.setFieldsValue(serviceInfor);
+    }
+
+    getDefaultObj = () => {
+        return {
+            SSN: "undefined",
+            level: [{
+                academicLevel: "l1",
+                rate_large: "r2",
+            }],
+            public_profile: "undefined",
+            rate_small: "r2",
+            references: "undefined",
+            screeningTime: "AM",
+            serviceableSchool: "s1",
+            skillSet: "s1",
+            upload_w_9: "wedfefewf",
+            yearExp: 12,
         }
     }
 
     onFinish = (values) => {
         console.log('Success:', values);
         this.props.setRegisterData({
-            step3: values
-        });
+            serviceInfor: values,
+            documentUploaded: this.state.documentUploaded
+        })
+
         this.props.onContinue();
     };
 
@@ -49,56 +72,62 @@ class InfoServices extends Component {
         console.log('Failed:', errorInfo);
     };
 
-    onChange = async (info) => {
+    onUploadChange = async (info) => {
+
         if (info.file.status !== 'uploading') {
-
-            // this.setState({ fileList: info.file });
-            // this.form?.setFieldsValue({
-            //     upload_w_9: info.file.name
-            // })
-
-            try {
-                const formData = new FormData();
-                formData.append('file', info.file.originFileObj);
-                const response = await axios.post(url + 'providers/upload_temp_w9_form', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-                const { success, data } = response.data;
-                if (success) {
-                    this.setState({
-                        fileList: data,
-                        uploading: false,
-                    });
-                    this.form?.setFieldsValue({
-                        upload_w_9: data
-                    })
-                    message.success(intl.formatMessage(messages.uploadSuccess));
-                }
-                console.log(response);
-            } catch (error) {
-                console.log(error);
-                message.error(error?.response?.data?.data ?? error.message);
-            }
+            console.log(info.file, info.fileList);
+            this.setState(prevState => ({
+                fileList: [...prevState.fileList, info.file],
+            }));
         }
-        // if (info.file.status === 'done') {
-        //     message.success(`${info.file.name} file uploaded successfully`);
-        // } else if (info.file.status === 'error') {
-        //     message.error(`${info.file.name} file upload failed.`);
-        // }
+        if (info.file.status === 'done') {
+            console.log('done', info.file.response);
+            message.success(`${info.file.name} file uploaded successfully`);
+            console.log(info.file.response.data);
+            this.form?.setFieldsValue({
+                upload_w_9: info.file.name
+            })
+            this.props.setRegisterData({
+                upload_w_9: info.file.name
+            })
+            this.setState(prevState => ({ documentUploaded: [...prevState.documentUploaded, info.file.response.data] }));
+        } else if (info.file.status === 'error') {
+            message.error(`${info.file.name} file upload failed.`);
+            this.setState(prevState => ({
+                fileList: [...prevState.fileList, info.file],
+            }));
+        }
+    }
+
+    setValueToReduxRegisterData = (fieldName, value) => {
+        const { registerData } = this.props.register;
+        var serviceInfor = registerData.serviceInfor;
+        var obj = {};
+        obj[fieldName] = value;
+        console.log(obj);
+        this.props.setRegisterData({ serviceInfor: { ...serviceInfor, ...obj } });
+    }
+
+    defaultOnValueChange = (event, fieldName) => {
+        var value = event.target.value;
+        console.log(fieldName, value);
+        this.setValueToReduxRegisterData(fieldName, value);
+    }
+
+    handleSelectChange = (value, fieldName) => {
+        console.log(fieldName, value);
+        this.setValueToReduxRegisterData(fieldName, value);
     }
 
     render() {
         const { fileList } = this.state;
         const props = {
             name: 'file',
-            action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-            listType: "picture",
+            action: url + 'providers/upload_temp_w9_form',
             headers: {
                 authorization: 'authorization-text',
             },
-            onChange: this.onChange,
+            onChange: this.onUploadChange,
             maxCount: 1,
             showUploadList: false,
         };
@@ -119,11 +148,11 @@ class InfoServices extends Component {
                         ref={ref => this.form = ref}
                     >
                         <Form.Item
-                            name="skillsets"
+                            name="skillSet"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
 
                         >
-                            <Select placeholder={intl.formatMessage(messages.skillsets)}>
+                            <Select placeholder={intl.formatMessage(messages.skillsets)} onChange={v => this.handleSelectChange(v, 'skillSet')}>
                                 <Select.Option value='s1'>skill 1</Select.Option>
                                 <Select.Option value='s2'>skill 2</Select.Option>
                             </Select>
@@ -131,26 +160,26 @@ class InfoServices extends Component {
                         <Row gutter={14}>
                             <Col xs={24} sm={24} md={12}>
                                 <Form.Item
-                                    name="year_exp"
+                                    name="yearExp"
                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.yearsExperience) }]}
                                 >
-                                    <Input placeholder={intl.formatMessage(messages.yearsExperience)} />
+                                    <Input onChange={v => this.defaultOnValueChange(v, 'yearExp')} placeholder={intl.formatMessage(messages.yearsExperience)} />
                                 </Form.Item>
                             </Col>
                             <Col xs={24} sm={24} md={12}>
                                 <Form.Item
-                                    name="ssn"
+                                    name="SSN"
                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + 'SSN' }]}
                                 >
-                                    <Input placeholder='SSN' suffix={<QuestionCircleOutlined className='text-primary icon-suffix' />} />
+                                    <Input onChange={v => this.defaultOnValueChange(v, 'SSN')} placeholder='SSN' suffix={<QuestionCircleOutlined className='text-primary icon-suffix' />} />
                                 </Form.Item>
                             </Col>
                         </Row>
                         <Form.Item
-                            name="serviceable_schools"
+                            name="serviceableSchool"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.serviceableSchools) }]}
                         >
-                            <Select placeholder={intl.formatMessage(messages.serviceableSchools)}>
+                            <Select placeholder={intl.formatMessage(messages.serviceableSchools)} onChange={v => this.handleSelectChange(v, 'serviceableSchool')}>
                                 <Select.Option value='s1'>serviceable 1</Select.Option>
                                 <Select.Option value='s2'>serviceable 2</Select.Option>
                             </Select>
@@ -164,7 +193,7 @@ class InfoServices extends Component {
                                             <Row gutter={14} key={field.key}>
                                                 <Col xs={16} sm={16} md={16}>
                                                     <Form.Item
-                                                        name={[field.name, "academic_level"]}
+                                                        name={[field.name, "academicLevel"]}
                                                         rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.academicLevel) }]}
                                                         className='bottom-0'
                                                         style={{ marginTop: field.key === 0 ? 0 : 14 }}
@@ -253,13 +282,13 @@ class InfoServices extends Component {
                             </div>
                             <Form.Item
                                 size='small'
-                                name="screening_time"
+                                name="screeningTime"
                                 className='select-small'
                                 rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.screeningTime) }]}
                             >
                                 <Select placeholder={intl.formatMessage(messages.screeningTime)}>
-                                    <Select.Option value='t1'>1 minute</Select.Option>
-                                    <Select.Option value='t2'>2 minutes</Select.Option>
+                                    <Select.Option value='AM'>PM</Select.Option>
+                                    <Select.Option value='PM'>AM</Select.Option>
                                 </Select>
                             </Form.Item>
                         </div>

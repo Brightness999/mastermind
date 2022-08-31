@@ -68,6 +68,29 @@ class SubsidyProgram extends Component {
     onSelectTime = (index) => {
         this.setState({ isSelectTime: index })
     }
+
+    setValueToReduxRegisterData = (fieldName, value) => {
+        const { registerData } = this.props.register;
+        var subsidyProgram = registerData.subsidyProgram;
+        var obj = {};
+        obj[fieldName] = value;
+        console.log(obj);
+        this.props.setRegisterData({ subsidyProgram: { ...subsidyProgram, ...obj } });
+    }
+
+    defaultOnValueChange = (event, fieldName) => {
+        var value = event.target.value;
+        console.log(fieldName, value);
+        this.setValueToReduxRegisterData(fieldName, value);
+    }
+
+    handleSelectChange = (value, fieldName) => {
+        console.log(fieldName, value);
+        this.setValueToReduxRegisterData(fieldName, value);
+    }
+
+
+
     render() {
         const { valueCalendar, selectedValue, isSelectTime } = this.state;
         return (
@@ -92,10 +115,10 @@ class SubsidyProgram extends Component {
                         <div className='flex flex-row justify-between px-20'>
                             <p className='mb-10'>{intl.formatMessage(messages.numberSessionsWeek)}</p>
                             <Form.Item
-                                name="number_sessions"
+                                name="numberSessions"
                                 className='select-small'
                             >
-                                <Select defaultValue="1">
+                                <Select onChange={v=>this.handleSelectChange(v,'numberSessions')}>
                                     <Select.Option value='0'>0</Select.Option>
                                     <Select.Option value='1'>1</Select.Option>
                                 </Select>

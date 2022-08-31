@@ -170,9 +170,6 @@ class SubsidyRequest extends React.Component {
       this.setState(prevState => ({
         fileList: [...prevState.fileList, info.file],
       }));
-      // this.form?.setFieldsValue({
-      //   documents: info.fileList[0].name
-      // })
     }
     if (info.file.status === 'done') {
       console.log('done',info.file.response);

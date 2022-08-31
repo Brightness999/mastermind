@@ -28,25 +28,73 @@ class InfoProfile extends Component {
 
 
     componentDidMount() {
-        const data = this.props.register.provider;
-        if (data) {
-            this.form?.setFieldsValue({
-                ...data?.step2
-            })
+        const { registerData } = this.props.register;
+
+        console.log(registerData);
+
+        if (!registerData.profileInfor) {
+            this.props.setRegisterData({ profileInfor: this.getDefaultObj() });
         }
+        var profileInfor = registerData.profileInfor || this.getDefaultObj();
+        this.form.setFieldsValue(profileInfor);
+    }
+
+    getDefaultObj = () => {
+        return {
+            agency: "sdfhkdshfkj",
+            billingAddress: "Chicago, Illinois, Hoa Kỳ",
+            cityConnection: "Chicago, Illinois, Hoa Kỳ",
+            licenseNumber: "Sdfsdf",
+            proExp: "undefined",
+            referredToAs: "undefined",
+            serviceAddress: "Chicago, Illinois, Hoa Kỳ",
+            email: [{
+                contact_email: "lctiendat@gmail.com",
+                contact_type: "t1"
+            }],
+
+            phone: [{
+                contact_num: "+84766667020", contact_type: "t1"
+            }],
+        };
     }
 
     onFinish = (values) => {
         console.log('Success:', values);
-        this.props.setRegisterData({
-            step2: values,
-        });
+    this.props.setRegisterData({ profileInfor: values });
         this.props.onContinue();
     };
 
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
+
+    setValueToReduxRegisterData = (fieldName, value) => {
+        const { registerData } = this.props.register;
+        var profileInfor = registerData.profileInfor;
+        var obj = {};
+        obj[fieldName] = value;
+        console.log(obj);
+        this.props.setRegisterData({ profileInfor: { ...profileInfor, ...obj } });
+    }
+
+    defaultOnValueChange = (event, fieldName) => {
+        var value = event.target.value;
+        console.log(fieldName, value);
+        this.setValueToReduxRegisterData(fieldName, value);
+    }
+
+    handelChange = (event, fieldName) => {
+        var value = event;
+        console.log(fieldName, value);
+        this.setValueToReduxRegisterData(fieldName, value);
+    }
+
+    handleSelect = (value, fieldName) => {
+        console.log(value, fieldName);
+        this.setValueToReduxRegisterData(fieldName, value);
+        this.form.setFieldsValue({ [fieldName]: value });
+    }
 
     render() {
         return (
@@ -59,34 +107,28 @@ class InfoProfile extends Component {
                         name="form_profile_provider"
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
-                        initialValues={{
-                            phone: this.state.phone_contact,
-                            email: this.state.email_contact,
-                            service_address: "Chicago, Illinois, Hoa Kỳ",
-                            billing_address: "Chicago, Illinois, Hoa Kỳ",
-                        }}
                         ref={ref => this.form = ref}
                     >
-                        <Form.Item
+                        {/* <Form.Item
                             name="legal_name"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.legalName) }]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.legalName)} />
-                        </Form.Item>
+                            <Input onChange={v=>this.defaultOnValueChange(v, "familyName")} placeholder={intl.formatMessage(messages.legalName)} />
+                        </Form.Item> */}
                         <Form.Item
-                            name="referred_as"
+                            name="referredToAs"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.referredAs) }]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.referredAs)} />
+                            <Input onChange={v => this.defaultOnValueChange(v, "referredToAs")} placeholder={intl.formatMessage(messages.referredAs)} />
                         </Form.Item>
                         <Form.Item
-                            name="service_address"
+                            name="serviceAddress"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.serviceAddress) }]}
                         >
                             <PlacesAutocomplete
                                 value={this.state.service_address}
-                                onChange={(e) => this.setState({ service_address: e })}
-                                onSelect={(e) => this.form?.setFieldsValue({ service_address: e })}
+                                onChange={(e) => this.handelChange(e, "serviceAddress")}
+                                onSelect={(e) => this.handleSelect(e, "serviceAddress")}
                             >
                                 {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
                                     <div>
@@ -121,13 +163,13 @@ class InfoProfile extends Component {
                             </PlacesAutocomplete>
                         </Form.Item>
                         <Form.Item
-                            name="billing_address"
+                            name="billingAddress"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.billingAddress) }]}
                         >
                             <PlacesAutocomplete
                                 value={this.state.billing_address}
-                                onChange={(e) => this.setState({ billing_address: e })}
-                                onSelect={(e) => this.form?.setFieldsValue({ billing_address: e })}
+                                onChange={(e) => this.handelChange(e, "billingAddress")}
+                                onSelect={(e) => this.handleSelect(e, "billingAddress")}
                             >
                                 {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
                                     <div>
@@ -166,26 +208,26 @@ class InfoProfile extends Component {
                             </Select> */}
                         </Form.Item>
                         <Form.Item
-                            name="city_connections"
+                            name="cityConnection"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cityConnections) }]}
 
                         >
-                            <Select placeholder={intl.formatMessage(messages.cityConnections)}>
+                            <Select onChange={v => this.defaultOnValueChange(v, "cityConnection")} placeholder={intl.formatMessage(messages.cityConnections)}>
                                 <Select.Option value='c1'>city 1</Select.Option>
                                 <Select.Option value='c2'>city 2</Select.Option>
                             </Select>
                         </Form.Item>
                         <Form.Item
-                            name="license_num"
+                            name="licenseNumber"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.licenseNumber) }]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.licenseNumber)} />
+                            <Input onChange={v => this.defaultOnValueChange(v, "licenseNumber")} placeholder={intl.formatMessage(messages.licenseNumber)} />
                         </Form.Item>
                         <Form.Item
                             name="agency"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.agency) }]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.agency)} />
+                            <Input onChange={v => this.defaultOnValueChange(v, "agency")} placeholder={intl.formatMessage(messages.agency)} />
                         </Form.Item>
                         <Form.List name="phone">
                             {(fields, { add, remove }) => (
@@ -199,7 +241,8 @@ class InfoProfile extends Component {
                                                     className='bottom-0'
                                                     style={{ marginTop: key === 0 ? 0 : 14 }}
                                                     rules={[
-                                                        { required: true, 
+                                                        {
+                                                            required: true,
                                                             message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber)
                                                         },
                                                         {
@@ -207,7 +250,7 @@ class InfoProfile extends Component {
                                                             message: intl.formatMessage(messages.phoneNumberValid)
                                                         },
                                                     ]}
-                                                    
+
                                                 >
                                                     <Input placeholder={intl.formatMessage(messages.contactNumber)} />
                                                 </Form.Item>
@@ -255,9 +298,9 @@ class InfoProfile extends Component {
                                                     className='bottom-0'
                                                     style={{ marginTop: key === 0 ? 0 : 14 }}
                                                     rules={[
-                                                        { 
-                                                            required: true, 
-                                                            message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactEmail) 
+                                                        {
+                                                            required: true,
+                                                            message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactEmail)
                                                         },
                                                         {
                                                             type: 'email',
@@ -301,10 +344,10 @@ class InfoProfile extends Component {
                         </Form.List>
 
                         <Form.Item
-                            name="professional_exp"
+                            name="proExp"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.professionalExperience) }]}
                         >
-                            <Input.TextArea rows={4} placeholder={intl.formatMessage(messages.professionalExperience)} />
+                            <Input.TextArea onChange={v => this.defaultOnValueChange(v, "proExp")} rows={4} placeholder={intl.formatMessage(messages.professionalExperience)} />
                         </Form.Item>
 
                         <Form.Item className="form-btn continue-btn" >

@@ -6,6 +6,8 @@ import { routerLinks } from "../../../constant";
 import intl from 'react-intl-universal';
 import messages from '../messages';
 import { url } from '../../../../utils/api/baseUrl';
+import { listRoleWithRouter } from '../../../../utils/auth/listRoleWithRouter';
+import { checkPermission } from '../../../../utils/auth/checkPermission';
 import axios from 'axios';
 import './index.less';
 
@@ -18,7 +20,10 @@ import './index.less';
 export default class extends React.Component {
 
   componentDidMount() {
-    console.log(url);
+    const path = checkPermission();
+    if (path) {
+      this.props.history.push(path);
+    }
   }
 
   onSubmit = async () => {

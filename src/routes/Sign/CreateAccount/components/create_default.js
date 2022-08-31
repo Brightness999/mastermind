@@ -34,47 +34,47 @@ class CreateDefault extends Component {
 
 
     componentDidMount() {
-        
-        const {registerData} = this.props.register;
+
+        const { registerData } = this.props.register;
         var defaultPassword = 'Aa123@333';
         this.form?.setFieldsValue({
-            username: registerData.username|| '',
-            email: registerData.email||'',
-            password: registerData.password||defaultPassword,
-            role:registerData.role||3,
-            account_type: registerData.account_type||intl.formatMessage(messages.parent),
+            username: registerData.username || 'lctiendat1',
+            email: registerData.email || 'lctiendat@gmail1.com',
+            password: registerData.password || defaultPassword,
+            role: registerData.role || 3,
+            account_type: registerData.account_type || intl.formatMessage(messages.parent),
         });
-        if(!registerData.role){
+        if (!registerData.role) {
             this.props.setRegisterData({
-                role:3,
-                account_type:intl.formatMessage(messages.parent),
-                password:defaultPassword
+                role: 3,
+                account_type: intl.formatMessage(messages.parent),
+                password: defaultPassword
             })
         }
     }
 
     onSubmit = async () => {
         try {
-            const values = await this.form.validateFields();
-            const { email, username } = values;
-            const emailExits = await axios.post(url + 'users/check_email_registered',
-                {
-                    "searchData": {
-                        email
-                    }
-                }
-            )
-            if (emailExits.data.data > 0)
-                return message.error('Email already exists');
-            const usernameExits = await axios.post(url + 'users/check_email_registered',
-                {
-                    "searchData": {
-                        username
-                    }
-                }
-            )
-            if (usernameExits.data.data > 0)
-                return message.error('Username already exists');
+            // const values = await this.form.validateFields();
+            // const { email, username } = values;
+            // const emailExits = await axios.post(url + 'users/check_email_registered',
+            //     {
+            //         "searchData": {
+            //             email
+            //         }
+            //     }
+            // )
+            // if (emailExits.data.data > 0)
+            //     return message.error('Email already exists');
+            // const usernameExits = await axios.post(url + 'users/check_email_registered',
+            //     {
+            //         "searchData": {
+            //             username
+            //         }
+            //     }
+            // )
+            // if (usernameExits.data.data > 0)
+            //     return message.error('Username already exists');
             // this.props.setRegisterData({
             //     step1: values,
             // })
@@ -82,7 +82,7 @@ class CreateDefault extends Component {
             return this.props.onContinue();
         } catch (error) {
             console.log(error);
-            
+
         }
     }
 
@@ -99,118 +99,118 @@ class CreateDefault extends Component {
         let input = this.state.input;
         input[event.target.name] = event.target.value;
         this.props.setRegisterData({
-            password:event.target.value
+            password: event.target.value
         })
         this.setState({
             input
         });
     };
-    
-    handleUsernameChange = event =>{
-        
-        if(!!this.timeoutCheckUsername){
+
+    handleUsernameChange = event => {
+
+        if (!!this.timeoutCheckUsername) {
             clearTimeout(this.timeoutCheckUsername);
             this.timeoutCheckUsername = null;
         }
         this.props.setRegisterData({
-            username:event.target.value
+            username: event.target.value
         })
-        if(event.target.value&&event.target.value.length==0){
+        if (event.target.value && event.target.value.length == 0) {
             return;
         }
-        this.timeoutCheckUsername = setTimeout( ()=>{
-            
+        this.timeoutCheckUsername = setTimeout(() => {
+
             axios.post(url + 'users/check_email_registered',
                 {
                     "searchData": {
-                        "username":event.target.value,
+                        "username": event.target.value,
                     }
                 }
-            ).then(result=>{
-                console.log('check uname',result.data);
-                if(result.data.data>0){
+            ).then(result => {
+                console.log('check uname', result.data);
+                if (result.data.data > 0) {
                     this.form.setFields([
                         {
                             name: 'username',
-                            errors: [intl.formatMessage(messagesLogin.userExist) ],
-                          },
+                            errors: [intl.formatMessage(messagesLogin.userExist)],
+                        },
                     ])
 
-                }else{
-                    
+                } else {
+
                 }
-                
-            }).catch(err=>{
+
+            }).catch(err => {
                 console.log(err);
             })
-            
-        } , 300);
+
+        }, 300);
     }
 
-    handleEmailChange = event =>{
-        if(!!this.timeoutCheckUsername){
+    handleEmailChange = event => {
+        if (!!this.timeoutCheckUsername) {
             clearTimeout(this.timeoutCheckUsername);
             this.timeoutCheckUsername = null;
         }
         this.props.setRegisterData({
-            email:event.target.value
+            email: event.target.value
         })
-        if(event.target.value&&event.target.value.length==0){
+        if (event.target.value && event.target.value.length == 0) {
             this.setState({
-                checkEmailExist:false,
+                checkEmailExist: false,
             });
             return;
         }
-       
+
         var error = this.form.getFieldError("email")
-        if(!!error && error.length >0){
-            console.log("email dang loi",error);
+        if (!!error && error.length > 0) {
+            console.log("email dang loi", error);
             return;
         }
-        this.timeoutCheckUsername = setTimeout( ()=>{
-            
+        this.timeoutCheckUsername = setTimeout(() => {
+
             axios.post(url + 'users/check_email_registered',
                 {
                     "searchData": {
-                        "email":event.target.value,
+                        "email": event.target.value,
                     }
                 }
-            ).then(result=>{
-                console.log('check email',result.data);
-                if(result.data.data>0){
+            ).then(result => {
+                console.log('check email', result.data);
+                if (result.data.data > 0) {
                     this.form.setFields([
                         {
                             name: 'email',
-                            errors: [intl.formatMessage(messagesLogin.emailExist) ],
-                          },
+                            errors: [intl.formatMessage(messagesLogin.emailExist)],
+                        },
                     ])
                     this.setState({
-                        checkEmailExist:true,
+                        checkEmailExist: true,
                     });
-                    
-                }else{
+
+                } else {
                     this.setState({
-                        checkEmailExist:false,
+                        checkEmailExist: false,
                     });
-                    
+
                 }
-                
-            }).catch(err=>{
+
+            }).catch(err => {
                 console.log(err);
                 this.setState({
-                    checkEmailExist:false,
+                    checkEmailExist: false,
                 });
             })
-            
-        } , 300);
+
+        }, 300);
     }
 
-    handleRoleChange = event=>{
+    handleRoleChange = event => {
         this.props.onHandleChangeRoleRegister(event);
-        
-        
+
+
         var role = 0;
-        switch(event.target.value){
+        switch (event) {
             case intl.formatMessage(messages.parent):
                 role = 3;
                 break;
@@ -222,8 +222,8 @@ class CreateDefault extends Component {
                 break;
         }
         this.props.setRegisterData({
-            role:role,
-            account_type:event.target.value
+            role: role,
+            account_type: event
         })
     }
 
@@ -338,13 +338,13 @@ class CreateDefault extends Component {
                             account_type: intl.formatMessage(messages.parent),
                         }}
                     >
-                        <Form.Item 
-                            name="username" 
+                        <Form.Item
+                            name="username"
                             rules={[{ required: true, message: intl.formatMessage(messages.userMessage) }]}
-                           
+
                         >
-                            <Input 
-                                placeholder={intl.formatMessage(messages.username)} 
+                            <Input
+                                placeholder={intl.formatMessage(messages.username)}
                                 onChange={this.handleUsernameChange}
                             />
                         </Form.Item>
@@ -361,7 +361,7 @@ class CreateDefault extends Component {
                                 }
                             ]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.email)} 
+                            <Input placeholder={intl.formatMessage(messages.email)}
                                 onChange={this.handleEmailChange}
                             />
                         </Form.Item>

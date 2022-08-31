@@ -54,17 +54,6 @@ class InfoParent extends Component {
             "motherPhoneNumber": "0766667020",
             "motherEmail": "321@dfg.com"
         };
-        // return {
-        //     "maritialType": '0',
-        //     "address":"",
-        //     "familyName": "",
-        //     "fatherName": "",
-        //     "fatherPhoneNumber": "",
-        //     "fatherEmail": "",
-        //     "motherName": "",
-        //     "motherPhoneNumber": "",
-        //     "motherEmail": ""
-        // };
     }
 
     getDefaultValueInitForm=(key)=>{
