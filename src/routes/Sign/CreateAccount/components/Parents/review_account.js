@@ -85,8 +85,9 @@ class ReviewAccount extends Component {
         const { success, data } = response.data;
         if (success) {
             // this.props.onFinishRegister();
-            this.props.onContinue(true);
             localStorage.setItem('token', data.token);
+            this.props.onContinue(true);
+            
         }else{
             message.error(error?.response?.data?.data ?? error.message);
         }

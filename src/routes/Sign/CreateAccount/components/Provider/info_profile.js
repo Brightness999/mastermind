@@ -9,6 +9,8 @@ import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
 
+import { url } from '../../../../../utils/api/baseUrl';
+import axios from 'axios';
 
 class InfoProfile extends Component {
     constructor(props) {
@@ -22,7 +24,13 @@ class InfoProfile extends Component {
             ],
             // infor_profile: 
             service_address: '',
-            billing_address: ''
+            billing_address: '',
+            EmailType:[],
+            ContactNumberType:[],
+
+            contactPhoneNumber:[],
+            contactEmail:[],
+            CityConnections:[],
         }
     }
 
@@ -31,30 +39,83 @@ class InfoProfile extends Component {
         const { registerData } = this.props.register;
 
         console.log(registerData);
+        this.getDataFromServer();
+        this.searchCityConnection('');
+        
+        var profileInfor = registerData.profileInfor || this.getDefaultObj();
+        this.form.setFieldsValue(profileInfor);
 
         if (!registerData.profileInfor) {
             this.props.setRegisterData({ profileInfor: this.getDefaultObj() });
         }
-        var profileInfor = registerData.profileInfor || this.getDefaultObj();
-        this.form.setFieldsValue(profileInfor);
+        
     }
+
+    getDataFromServer = () => {
+        axios.post(url + 'providers/get_default_values_for_provider'
+        ).then(result => {
+            console.log('get_default_value_for_client', result.data);
+            if (result.data.success) {
+                var data = result.data.data;
+                this.setState({ ContactNumberType: data.ContactNumberType , EmailType:data.EmailType, })
+            } else {
+                this.setState({
+                    checkEmailExist: false,
+                });
+
+            }
+
+        }).catch(err => {
+            console.log(err);
+            this.setState({
+                checkEmailExist: false,
+            });
+        })
+    }
+
+
+    searchCityConnection(value){
+        axios.post(url + 'providers/get_city_connections'
+        ).then(result => {
+            console.log('get_city_connections', result.data);
+            if (result.data.success) {
+                var data = result.data.data;
+                console.log('get_city_connections', data.docs);
+                this.setState({CityConnections: data.docs})
+            } else {
+                this.setState({
+                    CityConnections: [],
+                });
+
+            }
+
+        }).catch(err => {
+            console.log(err);
+            this.setState({
+                CityConnections: [],
+            });
+        })
+        
+    }
+
+
 
     getDefaultObj = () => {
         return {
-            agency: "sdfhkdshfkj",
-            billingAddress: "Chicago, Illinois, Hoa Kỳ",
-            cityConnection: "Chicago, Illinois, Hoa Kỳ",
-            licenseNumber: "Sdfsdf",
-            proExp: "undefined",
-            referredToAs: "undefined",
-            serviceAddress: "Chicago, Illinois, Hoa Kỳ",
-            email: [{
-                contact_email: "lctiendat@gmail.com",
-                contact_type: "t1"
+            agency: "",
+            billingAddress: "",
+            cityConnection: "",
+            licenseNumber: "",
+            proExp: "",
+            referredToAs: "",
+            serviceAddress: "",
+            contactEmail: [{
+                email: "",
+                type: 0
             }],
 
-            phone: [{
-                contact_num: "+84766667020", contact_type: "t1"
+            contactNumber: [{
+                phoneNumber: "", type: 0
             }],
         };
     }
@@ -84,6 +145,10 @@ class InfoProfile extends Component {
         this.setValueToReduxRegisterData(fieldName, value);
     }
 
+    onConnectionsChanged = (selected) =>{
+        console.log('connect changed',selected);
+    }
+
     handelChange = (event, fieldName) => {
         var value = event;
         console.log(fieldName, value);
@@ -97,6 +162,15 @@ class InfoProfile extends Component {
     }
 
     render() {
+        const children = [];
+
+        for (let i = 10; i < 36; i++) {
+        children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
+        }
+
+        const handleChange = (value) => {
+        console.log(`selected ${value}`);
+        };
         return (
             <Row justify="center" className="row-form">
                 <div className='col-form col-info-parent'>
@@ -212,9 +286,16 @@ class InfoProfile extends Component {
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cityConnections) }]}
 
                         >
-                            <Select onChange={v => this.defaultOnValueChange(v, "cityConnection")} placeholder={intl.formatMessage(messages.cityConnections)}>
-                                <Select.Option value='c1'>city 1</Select.Option>
-                                <Select.Option value='c2'>city 2</Select.Option>
+                            <Select 
+                                onChange={v => this.onConnectionsChanged(v, "cityConnection")} 
+                                placeholder={intl.formatMessage(messages.cityConnections)}
+                                showSearch
+                                optionFilterProp="children"
+                                filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                            >
+                                {this.state.CityConnections.map((value,index)=>{
+                                    return (<Select.Option value={value._id}>{value.name}</Select.Option>)
+                                })}
                             </Select>
                         </Form.Item>
                         <Form.Item
@@ -229,7 +310,7 @@ class InfoProfile extends Component {
                         >
                             <Input onChange={v => this.defaultOnValueChange(v, "agency")} placeholder={intl.formatMessage(messages.agency)} />
                         </Form.Item>
-                        <Form.List name="phone">
+                        <Form.List name="contactNumber">
                             {(fields, { add, remove }) => (
                                 <>
                                     {fields.map(({ key, name, ...restField }) => (
@@ -237,7 +318,7 @@ class InfoProfile extends Component {
                                             <Col xs={16} sm={16} md={16}>
                                                 <Form.Item
                                                     {...restField}
-                                                    name={[name, 'contact_num']}
+                                                    name={[name, 'contact', 'phoneNumber']}
                                                     className='bottom-0'
                                                     style={{ marginTop: key === 0 ? 0 : 14 }}
                                                     rules={[
@@ -258,14 +339,15 @@ class InfoProfile extends Component {
                                             <Col xs={8} sm={8} md={8} className='item-remove'>
                                                 <Form.Item
                                                     {...restField}
-                                                    name={[name, 'contact_type']}
+                                                    name={[name, 'contactphone','type']}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type) }]}
                                                     className='bottom-0'
                                                     style={{ marginTop: key === 0 ? 0 : 14 }}
                                                 >
                                                     <Select placeholder={intl.formatMessage(messages.type)}>
-                                                        <Select.Option value='t1'>type 1</Select.Option>
-                                                        <Select.Option value='t2'>type type type 2</Select.Option>
+                                                        {this.state.ContactNumberType.map((value,index)=>{
+                                                            return (<Select.Option value={index}>{value}</Select.Option>)
+                                                        })}
                                                     </Select>
                                                 </Form.Item>
                                                 {key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(name)} />}
@@ -286,7 +368,7 @@ class InfoProfile extends Component {
                             )}
                         </Form.List>
 
-                        <Form.List name="email">
+                        <Form.List name="contactEmail">
                             {(fields, { add, remove }) => (
                                 <>
                                     {fields.map(({ key, name, ...restField }) => (
@@ -294,7 +376,7 @@ class InfoProfile extends Component {
                                             <Col xs={16} sm={16} md={16}>
                                                 <Form.Item
                                                     {...restField}
-                                                    name={[name, 'contact_email']}
+                                                    name={[name, 'contact','email']}
                                                     className='bottom-0'
                                                     style={{ marginTop: key === 0 ? 0 : 14 }}
                                                     rules={[
@@ -315,14 +397,16 @@ class InfoProfile extends Component {
                                             <Col xs={8} sm={8} md={8} className='item-remove'>
                                                 <Form.Item
                                                     {...restField}
-                                                    name={[name, 'contact_type']}
+                                                    name={[name, 'contact_email','type']}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type) }]}
                                                     className='bottom-0'
                                                     style={{ marginTop: key === 0 ? 0 : 14 }}
                                                 >
+                                                    
                                                     <Select placeholder={intl.formatMessage(messages.type)}>
-                                                        <Select.Option value='t1'>type 1</Select.Option>
-                                                        <Select.Option value='t2'>type 2</Select.Option>
+                                                        {this.state.EmailType.map((value,index)=>{
+                                                            return (<Select.Option value={index}>{value}</Select.Option>)
+                                                        })}
                                                     </Select>
                                                 </Form.Item>
                                                 {key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(name)} />}

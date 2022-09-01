@@ -15,19 +15,17 @@ import axios from 'axios';
 
 import { url } from '../../../../../utils/api/baseUrl';
 import { getCommunitiServer } from '../../../../../utils/api/apiList'
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 
-export default class extends React.Component {
+class InfoSchool extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            technical_contact: [
-                {}
-            ],
-            student_contact: [
-                {}
-            ],
-            school_address: 'Chicago, Illinois, Hoa Kỳ',
+            
+            school_address: '',
             listCommunitiServer: [],
             dayIsSelected: 1,
             sessionsInSchool: [],
@@ -37,26 +35,153 @@ export default class extends React.Component {
 
     componentDidMount() {
         this.loadCommunitiServer()
+        const {registerData} = this.props.register;
+        console.log(registerData);
+        
+        if(!registerData.techContactRef || registerData.techContactRef.length ==0 ){
+            this.setReduxForSchool('techContactRef',['']);
+            this.form.setFieldsValue({techContactRef:[""]});
+            // this.form.setFieldValue({techContactRef:[{}]});
+        }
+
+        if(!registerData.studentContactRef || registerData.studentContactRef.length ==0 ){
+            this.setReduxForSchool('studentContactRef',['']);
+            this.form.setFieldsValue({studentContactRef:[""]});
+        }
+        console.log('set field value');
+        this.form.setFieldsValue(registerData);
+
+        if(!registerData.sessionsInSchool||registerData.sessionsInSchool.length == 0){
+            var defaultIn = this.defaultTimeRangeItem();
+            var defaultOut = this.defaultTimeRangeItem(false);
+            this.setState({
+                sessionsInSchool:[this.defaultTimeRangeItem(),this.defaultTimeRangeItem(),this.defaultTimeRangeItem()],
+                sessionsAfterSchool:[this.defaultTimeRangeItem(false),this.defaultTimeRangeItem(false),this.defaultTimeRangeItem(false)]
+            }, this.callbackAfterSetState)
+        }else{
+            console.log('redux for sessions ',registerData.sessionsInSchool);
+            console.log('redux for sessions ',registerData.sessionsAfterSchool);
+            this.setState({
+                sessionsInSchool:registerData.sessionsInSchool,
+                sessionsAfterSchool:registerData.sessionsAfterSchool
+            })
+        }
     }
+
+    defaultTimeRangeItem = (isInSchool = true)=>{
+        if(!isInSchool){
+            return {
+                "openHour":18,
+                "openMin":0,
+                "closeHour":22,
+                "closeMin":0
+            }
+        }
+        return {
+            "openHour":7,
+            "openMin":0,
+            "closeHour":18,
+            "closeMin":0
+        }
+    }
+
+
+    valueForAvailabilityScheduleForOpenHour =(array , index , fieldType = 'open' )=>{
+        var hourType = fieldType+'Hour';
+        var minType = fieldType+'Min';
+        if(array.length-1 < index){
+            return moment('00:00:00', 'HH:mm:ss')
+        }
+        console.log('open' , array[index])
+        return moment( `${array[index].openHour}:${array[index].openMin}:00`, 'HH:mm:ss' )
+
+    }
+
+    valueForAvailabilityScheduleForCloseHour =(array , index , fieldType = 'open' )=>{
+        var hourType = fieldType+'Hour';
+        var minType = fieldType+'Min';
+        if(array.length-1 < index){
+            return moment('00:00:00', 'HH:mm:ss')
+        }
+
+        return moment( `${array[index].closeHour}:${array[index].closeMin}:00`, 'HH:mm:ss' )
+
+    }
+   
 
     onFinish = async (values) => {
         console.log(this.state);
+        const {registerData} = this.props.register;
         console.log('Success:', values);
+        var newRegisterData = JSON.parse(JSON.stringify(registerData));
 
+        // update in school - after school
+        newRegisterData.sessionsInSchool = this.arrDayScheduleFormat( this.state.sessionsInSchool);
+        newRegisterData.sessionsAfterSchool = this.arrDayScheduleFormat(this.state.sessionsAfterSchool);
+
+        newRegisterData.techContactRef = registerData.techContactRef.map((item,index)=>{
+            return item.techContactRef;
+        })
+
+        newRegisterData.studentContactRef = registerData.studentContactRef.map((item,index)=>{
+            return item.studentContactRef;
+        })
+        newRegisterData.parentInfo = null;
+        newRegisterData.studentInfos = null;
+
+        console.log('register data' , newRegisterData)
+        // post to server
+        const response = await axios.post(url + 'users/signup', newRegisterData);
+        const { success, data } = response.data;
+        if (success) {
+            // this.props.onFinishRegister();
+            localStorage.setItem('token', data.token);
+            this.props.onContinue(true);
+            
+        }else{
+            message.error(error?.response?.data?.data ?? error.message);
+        }
     };
+
+    arrDayScheduleFormat = (arr)=>{
+        var newArr = [];
+        for(var i = 0 ; i <arr.length ; i++){
+            if(i == 1){
+                for(var z = 1 ; z < 5 ;z++){
+                    var newSche = {...arr[i]};
+                    newSche.dayInWeek = z;
+                    newArr.push(newSche);
+                }
+            }else{
+                var newSche = {...arr[i]};
+                newSche.dayInWeek = i==0?0:5;
+                newArr.push(newSche);
+            }
+        }
+        return newArr;
+    }
 
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
 
+    setReduxForSchool(fieldName , value){
+        var obj = {};
+        obj[fieldName] = value;
+        this.props.setRegisterData(obj);
+    }
+
     handleChange = school_address => {
-        this.setState({ school_address });
+        this.setReduxForSchool('valueForContact',school_address);
     };
 
     handleSelect = school_address => {
+        console.log(school_address);
+        this.setReduxForSchool('valueForContact',school_address);
         this.form.setFieldsValue({
-            school_address
+            valueForContact:school_address
         })
+        
     };
 
     loadCommunitiServer = () => {
@@ -65,7 +190,8 @@ export default class extends React.Component {
             console.log(response);
             if (success) {
                 this.setState({
-                    listCommunitiServer: data.docs
+                    listCommunitiServer: data.docs,
+
                 })
             }
             else {
@@ -92,60 +218,79 @@ export default class extends React.Component {
 
         switch (type) {
             case 'inOpen':
-                var items = { ...this.state.sessionsInSchool }
-                items[index] = {
-                    ...this.state?.sessionsInSchool[index],
-                    "dayInWeek": index,
-                    "openHour": hour,
-                    "openMin": minute,
-                }
+                
                 this.setState({
-                    sessionsInSchool: items
-                })
+                    sessionsInSchool: this.state.sessionsInSchool.map((session, sessIndex) => {
+                        if(sessIndex == index){
+                            return {...session ,openHour: hour, minute: minute}
+                        }
+                        return session;
+                    })
+                    
+                },
+                this.callbackAfterSetState)
                 break;
             case 'inClose':
-                var items = { ...this.state.sessionsInSchool }
-                items[index] = {
-                    ...this.state?.sessionsInSchool[index],
-                    "dayInWeek": index,
-                    "closeHour": hour,
-                    "closeMin": minute,
-                }
                 this.setState({
-                    sessionsInSchool: items
-                })
+                    sessionsInSchool: this.state.sessionsInSchool.map((session, sessIndex) => {
+                        if(sessIndex == index){
+                            return {...session ,"closeHour": hour,
+                            "closeMin": minute,}
+                        }
+                        return session;
+                    })
+                    
+                },
+                this.callbackAfterSetState)
                 break;
             case 'afterOpen':
-                var items = { ...this.state.sessionsAfterSchool }
-                items[index] = {
-                    ...this.state?.sessionsAfterSchool[index],
-                    "dayInWeek": index,
-                    "openHour": hour,
-                    "openMin": minute,
-                }
                 this.setState({
-                    sessionsAfterSchool: items
-                })
+                    sessionsAfterSchool: this.state.sessionsAfterSchool.map((session, sessIndex) => {
+                        if(sessIndex == index){
+                            return {...session ,"openHour": hour,
+                            "openMin": minute,}
+                        }
+                        return session;
+                    })
+                    
+                },
+                this.callbackAfterSetState)
                 break;
             case 'afterClose':
-                var items = { ...this.state.sessionsAfterSchool }
-                items[index] = {
-                    ...this.state?.sessionsAfterSchool[index],
-                    "dayInWeek": index,
-                    "closeHour": hour,
-                    "closeMin": minute,
-                }
                 this.setState({
-                    sessionsAfterSchool: items
-                })
+                    sessionsAfterSchool: this.state.sessionsAfterSchool.map((session, sessIndex) => {
+                        if(sessIndex == index){
+                            return {...session ,"closeHour": hour,
+                            "closeMin": minute,}
+                        }
+                        return session;
+                    })
+                    
+                },
+                this.callbackAfterSetState)
                 break;
             default:
                 break;
         }
+        
     }
 
+    callbackAfterSetState = ()=>{
+        this.setReduxForSchool('sessionsInSchool', this.state.sessionsInSchool);
+        this.setReduxForSchool('sessionsAfterSchool', this.state.sessionsAfterSchool);
+    }
 
+    onTechContactRefChange =()=>{
+        console.log('contact ref', this.form.getFieldsValue());
+        var contactRefs= this.form.getFieldValue('techContactRef');
+        this.setReduxForSchool('techContactRef',contactRefs);
+    }
 
+    onStudentContactRefChange = ()=>{
+        console.log('contact ref', this.form.getFieldsValue());
+        var contactRefs= this.form.getFieldValue('studentContactRef');
+        this.setReduxForSchool('studentContactRef',contactRefs);
+    }
 
     render() {
 
@@ -174,24 +319,30 @@ export default class extends React.Component {
                         name="form_school"
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
-                        initialValues={{
-                            technical: this.state.technical_contact,
-                            student: this.state.student_contact,
-                            school_address: this.state.school_address
-                        }}
+                        
                         ref={(ref) => { this.form = ref }}
                     >
                         <Form.Item
-                            name="valueForContact"
+                            name="name"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.nameSchool) }]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.nameSchool)} />
+                            <Input 
+                                onChange={event=>{
+                                    console.log('name',event.target.value)
+                                    this.setReduxForSchool('name',event.target.value)
+                                }}
+                            placeholder={intl.formatMessage(messages.nameSchool)} />
                         </Form.Item>
                         <Form.Item
                             name="communityServed"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.communitiesServed) }]}
                         >
-                            <Select placeholder={intl.formatMessage(messages.communitiesServedNote)}>
+                            <Select 
+                                onChange={event=>{
+                                    console.log('communityServed',event)
+                                    this.setReduxForSchool('communityServed',event)
+                                }}
+                                placeholder={intl.formatMessage(messages.communitiesServedNote)}>
                                 {this.state.listCommunitiServer?.map((item, index) => {
                                     return (
                                         <Select.Option key={index} value={item._id}>{item.name}</Select.Option>
@@ -200,7 +351,7 @@ export default class extends React.Component {
                             </Select>
                         </Form.Item>
                         <Form.Item
-                            name="school_address"
+                            name="valueForContact"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.schoolAddress) }]}
                         >
                             {/* <Input placeholder={intl.formatMessage(messages.schoolAddress)} /> */}
@@ -241,7 +392,7 @@ export default class extends React.Component {
                                 )}
                             </PlacesAutocomplete>
                         </Form.Item>
-                        <Form.List name="technical">
+                        <Form.List name="techContactRef">
                             {(fields, { add, remove }) => (
                                 <div>
                                     {fields.map((field) => {
@@ -251,9 +402,19 @@ export default class extends React.Component {
                                                     name={[field.name, "techContactRef"]}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.technicalReferralContact) }]}
                                                 >
-                                                    <Input placeholder={intl.formatMessage(messages.technicalReferralContact)} />
+                                                    <Input 
+                                                    onChange={event=>{
+                                                        console.log('techContactRef', field.key,event.target.value)
+                                                        this.onTechContactRefChange();
+                                                    }}
+                                                    placeholder={intl.formatMessage(messages.technicalReferralContact)} />
                                                 </Form.Item>
-                                                {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
+                                                {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => {
+                                                    
+                                                    remove(field.name)
+                                                    this.onTechContactRefChange();
+                                                }
+                                                    } />}
                                             </div>
                                         );
                                     }
@@ -263,7 +424,10 @@ export default class extends React.Component {
                                             type="text"
                                             className='add-number-btn mb-10'
                                             icon={<BsPlusCircle size={17} className='mr-5' />}
-                                            onClick={() => add(null)}
+                                            onClick={() => {
+                                                add('');
+                                                this.onTechContactRefChange();
+                                            }}
                                         >
                                             {intl.formatMessage(messages.addContact)}
                                         </Button>
@@ -274,7 +438,7 @@ export default class extends React.Component {
 
                         </Form.List>
 
-                        <Form.List name="student">
+                        <Form.List name="studentContactRef">
                             {(fields, { add, remove }) => (
                                 <div>
                                     {fields.map((field) => {
@@ -284,9 +448,17 @@ export default class extends React.Component {
                                                     name={[field.name, "studentContactRef"]}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.studentReferralContact) }]}
                                                 >
-                                                    <Input placeholder={intl.formatMessage(messages.studentReferralContact)} />
+                                                    <Input
+                                                    onChange={event=>{
+                                                        this.onStudentContactRefChange();
+                                                    }}
+                                                    placeholder={intl.formatMessage(messages.studentReferralContact)} />
                                                 </Form.Item>
-                                                {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
+                                                {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => {
+                                                    
+                                                    remove(field.name)
+                                                    this.onStudentContactRefChange();
+                                                    }} />}
                                             </div>
                                         );
                                     }
@@ -296,7 +468,10 @@ export default class extends React.Component {
                                             type="text"
                                             className='add-number-btn mb-10'
                                             icon={<BsPlusCircle size={17} className='mr-5' />}
-                                            onClick={() => add(null)}
+                                            onClick={() => {
+                                                add(null)
+                                                this.onStudentContactRefChange();
+                                            }}
                                         >
                                             {intl.formatMessage(messages.addContact)}
                                         </Button>
@@ -310,51 +485,37 @@ export default class extends React.Component {
                         <div className='div-availability'>
                             <Segmented options={day_week} block={true} onChange={this.onSelectDay} />
                             {day_week.map((item, index) => {
-                                index = ++index
+                                // index = ++index
                                 return (
                                     <div className='div-time' style={{
-                                        display: this.state.dayIsSelected === index ? 'block' : 'none'
+                                        display: this.state.dayIsSelected === (index+1) ? 'block' : 'none'
                                     }}>
                                         <p className='mb-10 font-700'>{intl.formatMessage(messages.inSchoolHours)}</p>
                                         <Row gutter={14}>
                                             <Col xs={24} sm={24} md={12}>
-                                                <Form.Item
-                                                    className='picker-small'
-                                                    name={[index, 'in_from_time']}
-                                                    rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
-                                                >
-                                                    <TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'inOpen')} use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
-                                                </Form.Item>
+                                            <TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'inOpen')} 
+                                            use12Hours format="h:mm a" 
+                                            placeholder={intl.formatMessage(messages.from)} 
+                                            value={this.valueForAvailabilityScheduleForOpenHour(this.state.sessionsInSchool , index, 'open')}
+                                            />
                                             </Col>
                                             <Col xs={24} sm={24} md={12}>
-                                                <Form.Item
-                                                    className='picker-small'
-                                                    name={[index, 'in_to_time']}
-                                                    rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
-                                                >
-                                                    <TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'inClose')} use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
-                                                </Form.Item>
+                                            <TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'inClose')} use12Hours 
+                                            value={this.valueForAvailabilityScheduleForCloseHour(this.state.sessionsInSchool , index, 'close')}
+                                            format="h:mm a" placeholder={intl.formatMessage(messages.to)} />
                                             </Col>
                                         </Row>
                                         <p className='mb-10 font-700'>{intl.formatMessage(messages.afterSchoolHours)}</p>
                                         <Row gutter={14}>
                                             <Col xs={24} sm={24} md={12}>
-                                                <Form.Item
-                                                    className='picker-small'
-                                                    name={[index, 'after_from_time']}
-                                                    rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
-                                                >
-                                                    <TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')} use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
-                                                </Form.Item>
+                                            <TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')} use12Hours 
+                                            value={this.valueForAvailabilityScheduleForOpenHour(this.state.sessionsAfterSchool , index, 'open')}
+                                            format="h:mm a" placeholder={intl.formatMessage(messages.from)} />
                                             </Col>
                                             <Col xs={24} sm={24} md={12}>
-                                                <Form.Item
-                                                    className='picker-small'
-                                                    name={[index, 'after_to_time']}
-                                                    rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
-                                                >
-                                                    <TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'afterClose')} use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
-                                                </Form.Item>
+                                            <TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'afterClose')} use12Hours 
+                                            value={this.valueForAvailabilityScheduleForCloseHour(this.state.sessionsAfterSchool , index, 'close')}
+                                            format="h:mm a" placeholder={intl.formatMessage(messages.to)} />
                                             </Col>
                                         </Row>
                                     </div>
@@ -367,6 +528,7 @@ export default class extends React.Component {
                                 block
                                 type="primary"
                                 htmlType="submit"
+                                
                             >
                                 {intl.formatMessage(messages.confirm).toUpperCase()}
                             </Button>
@@ -377,3 +539,13 @@ export default class extends React.Component {
         );
     }
 }
+
+const mapStateToProps = state => {
+    console.log('mapState prop school',state.register);
+    return {
+        register: state.register
+    }
+}
+
+
+export default compose(connect(mapStateToProps, { setRegisterData }))(InfoSchool);

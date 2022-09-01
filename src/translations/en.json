@@ -11,6 +11,8 @@
   "routes.Login.forgotPass": "Forgot password?",
   "routes.Login.pleaseEnter": "Please enter your",
   "routes.Login.emailNotValid": "Email is not a valid",
+  "routes.Login.emailExist": "Email is in use",
+  "routes.Login.userExist": "Username is in use",
 
   "routes.Createaccount.letCreateAccount": "Let’s get you started",
   "routes.Createaccount.username": "Username",
@@ -151,6 +153,8 @@
   "routes.Createaccount.uploadMess": "Please upload file",
   "routes.Createaccount.availabilitySchedule": "Availability schedule",
   "routes.Createaccount.numberSessions": "Number sessions",
+  
+  
 
   "routes.Subsidyrequest.skillsetRequested": "Skillset requested",
   "routes.Subsidyrequest.requestRav": "I request HMGH contact my Rav",

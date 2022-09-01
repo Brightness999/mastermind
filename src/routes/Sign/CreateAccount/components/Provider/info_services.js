@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select, Switch, message, Upload } from 'antd';
+import { Row, Col, Form, Button, Input, Select, Switch, message, Upload, AutoComplete } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 
@@ -24,7 +24,10 @@ class InfoServices extends Component {
             ],
             fileList: [],
             uploading: false,
-            documentUploaded: []
+            documentUploaded: [],
+            SkillSet:[],
+            AcademicLevel:[],
+
         }
     }
 
@@ -38,9 +41,52 @@ class InfoServices extends Component {
         }
         var serviceInfor = registerData.serviceInfor || this.getDefaultObj();
         this.form.setFieldsValue(serviceInfor);
+        this.getDataFromServer()
+    }
+
+    getDataFromServer = () => {
+        axios.post(url + 'providers/get_default_values_for_provider'
+        ).then(result => {
+            console.log('get_default_value_for_client', result.data);
+            if (result.data.success) {
+                var data = result.data.data;
+                this.setState({ 
+                    SkillSet:data.SkillSet,
+                    AcademicLevel:data.AcademicLevel,
+                })
+            } else {
+                this.setState({
+                    SkillSet:[],
+                    AcademicLevel:[],
+                });
+
+            }
+
+        }).catch(err => {
+            console.log(err);
+            this.setState({
+                SkillSet:[],
+                AcademicLevel:[],
+            });
+        })
     }
 
     getDefaultObj = () => {
+        return {
+            SSN: "",
+            level: [{
+                academicLevel: undefined,
+                rate_large: "",
+            }],
+            public_profile: "",
+            rate_small: "",
+            references: "",
+            screeningTime: 0,
+            serviceableSchool: "1",
+            skillSet: undefined,
+            upload_w_9: "",
+            yearExp: '',
+        }
         return {
             SSN: "undefined",
             level: [{
@@ -152,9 +198,12 @@ class InfoServices extends Component {
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
 
                         >
-                            <Select placeholder={intl.formatMessage(messages.skillsets)} onChange={v => this.handleSelectChange(v, 'skillSet')}>
-                                <Select.Option value='s1'>skill 1</Select.Option>
-                                <Select.Option value='s2'>skill 2</Select.Option>
+                            <Select 
+                                placeholder={intl.formatMessage(messages.skillsets)} 
+                                onChange={v => this.handleSelectChange(v, 'skillSet')}>
+                                {this.state.SkillSet.map((value, index)=>{
+                                    return (<Select.Option value={index}>{value}</Select.Option>)
+                                })}
                             </Select>
                         </Form.Item>
                         <Row gutter={14}>
@@ -178,11 +227,12 @@ class InfoServices extends Component {
                         <Form.Item
                             name="serviceableSchool"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.serviceableSchools) }]}
-                        >
-                            <Select placeholder={intl.formatMessage(messages.serviceableSchools)} onChange={v => this.handleSelectChange(v, 'serviceableSchool')}>
-                                <Select.Option value='s1'>serviceable 1</Select.Option>
-                                <Select.Option value='s2'>serviceable 2</Select.Option>
-                            </Select>
+                           >
+                            <AutoComplete
+                                placeholder={intl.formatMessage(messages.serviceableSchools)} 
+                                onChange={v => this.handleSelectChange(v, 'serviceableSchool')}
+                                options={[{ value: 'serviceable 1' }, { value: 'serviceable 2' }]}
+                            />
                         </Form.Item>
 
                         <Form.List name="level">
@@ -199,7 +249,10 @@ class InfoServices extends Component {
                                                         style={{ marginTop: field.key === 0 ? 0 : 14 }}
                                                     >
                                                         <Select placeholder={intl.formatMessage(messages.academicLevel)}>
-                                                            <Select.Option value='l1'>level 1</Select.Option>
+                                                            {this.state.AcademicLevel.map((level,index)=>{
+                                                                return (<Select.Option value={index}>{level}</Select.Option>)
+                                                            })}
+                                                            
                                                             <Select.Option value='l2'>level 2</Select.Option>
                                                         </Select>
                                                     </Form.Item>
@@ -211,10 +264,16 @@ class InfoServices extends Component {
                                                         className='bottom-0'
                                                         style={{ marginTop: field.key === 0 ? 0 : 14 }}
                                                     >
-                                                        <Select placeholder={intl.formatMessage(messages.rate)}>
+                                                        <Input 
+                                                            placeholder={intl.formatMessage(messages.rate)} 
+                                                            onChange={(envent=>{
+
+                                                            })}
+                                                         />
+                                                        {/* <Select placeholder={intl.formatMessage(messages.rate)}>
                                                             <Select.Option value='r1'>rate 1</Select.Option>
                                                             <Select.Option value='r2'>rate 2</Select.Option>
-                                                        </Select>
+                                                        </Select> */}
                                                     </Form.Item>
                                                     {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 

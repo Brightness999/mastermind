@@ -149,9 +149,9 @@ export default class extends React.Component {
           case intl.formatMessage(messages.provider):
             return (<InfoProfile onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.school):
-            return (<InfoSchool />)
+            return (<InfoSchool onContinue={this.handleContinue}/>)
           case intl.formatMessage(messages.admin):
-            return (<InfoAdmin />)
+            return (<InfoAdmin onContinue={this.handleContinue}/>)
         }
       case 2:
         switch (this.state.accountType) {

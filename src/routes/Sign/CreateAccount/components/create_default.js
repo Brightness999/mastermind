@@ -38,8 +38,8 @@ class CreateDefault extends Component {
         const { registerData } = this.props.register;
         var defaultPassword = 'Aa123@333';
         this.form?.setFieldsValue({
-            username: registerData.username || 'lctiendat1',
-            email: registerData.email || 'lctiendat@gmail1.com',
+            username: registerData.username || '',
+            email: registerData.email || '',
             password: registerData.password || defaultPassword,
             role: registerData.role || 3,
             account_type: registerData.account_type || intl.formatMessage(messages.parent),
@@ -55,30 +55,27 @@ class CreateDefault extends Component {
 
     onSubmit = async () => {
         try {
-            // const values = await this.form.validateFields();
-            // const { email, username } = values;
-            // const emailExits = await axios.post(url + 'users/check_email_registered',
-            //     {
-            //         "searchData": {
-            //             email
-            //         }
-            //     }
-            // )
-            // if (emailExits.data.data > 0)
-            //     return message.error('Email already exists');
-            // const usernameExits = await axios.post(url + 'users/check_email_registered',
-            //     {
-            //         "searchData": {
-            //             username
-            //         }
-            //     }
-            // )
-            // if (usernameExits.data.data > 0)
-            //     return message.error('Username already exists');
-            // this.props.setRegisterData({
-            //     step1: values,
-            // })
-            // localStorage.setItem('createDefault', JSON.stringify(values));
+            const values = await this.form.validateFields();
+            const { email, username } = values;
+            const emailExits = await axios.post(url + 'users/check_email_registered',
+                {
+                    "searchData": {
+                        email
+                    }
+                }
+            )
+            if (emailExits.data.data > 0)
+                return message.error('Email already exists');
+            const usernameExits = await axios.post(url + 'users/check_email_registered',
+                {
+                    "searchData": {
+                        username
+                    }
+                }
+            )
+            if (usernameExits.data.data > 0)
+                return message.error('Username already exists');
+            // this.props.setRegisterData(values)
             return this.props.onContinue();
         } catch (error) {
             console.log(error);
