@@ -147,6 +147,7 @@ export default class extends React.Component {
           case intl.formatMessage(messages.parent):
             return (<InfoParent onFinishRegister={this.openModalCreateDone} onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
+            // return (<InfoAvailability onContinue={this.handleContinue} />)
             return (<InfoProfile onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.school):
             return (<InfoSchool onContinue={this.handleContinue}/>)

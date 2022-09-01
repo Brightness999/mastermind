@@ -87,8 +87,7 @@ class InfoSchool extends React.Component {
 
 
     valueForAvailabilityScheduleForOpenHour =(array , index , fieldType = 'open' )=>{
-        var hourType = fieldType+'Hour';
-        var minType = fieldType+'Min';
+        
         if(array.length-1 < index){
             return moment('00:00:00', 'HH:mm:ss')
         }
@@ -98,8 +97,7 @@ class InfoSchool extends React.Component {
     }
 
     valueForAvailabilityScheduleForCloseHour =(array , index , fieldType = 'open' )=>{
-        var hourType = fieldType+'Hour';
-        var minType = fieldType+'Min';
+        
         if(array.length-1 < index){
             return moment('00:00:00', 'HH:mm:ss')
         }

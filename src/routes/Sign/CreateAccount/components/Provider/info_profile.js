@@ -104,7 +104,7 @@ class InfoProfile extends Component {
         return {
             agency: "",
             billingAddress: "",
-            cityConnection: "",
+            cityConnection: undefined,
             licenseNumber: "",
             proExp: "",
             referredToAs: "",

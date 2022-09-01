@@ -27,7 +27,8 @@ class InfoServices extends Component {
             documentUploaded: [],
             SkillSet:[],
             AcademicLevel:[],
-
+            ServiceableSchools:[],
+            ScreenTime:[],
         }
     }
 
@@ -53,11 +54,13 @@ class InfoServices extends Component {
                 this.setState({ 
                     SkillSet:data.SkillSet,
                     AcademicLevel:data.AcademicLevel,
+                    ScreenTime:data.SreenTime,
                 })
             } else {
                 this.setState({
                     SkillSet:[],
                     AcademicLevel:[],
+                    ScreenTime:[],
                 });
 
             }
@@ -67,6 +70,7 @@ class InfoServices extends Component {
             this.setState({
                 SkillSet:[],
                 AcademicLevel:[],
+                ScreenTime:[],
             });
         })
     }
@@ -81,8 +85,8 @@ class InfoServices extends Component {
             public_profile: "",
             rate_small: "",
             references: "",
-            screeningTime: 0,
-            serviceableSchool: "1",
+            screeningTime: undefined,
+            serviceableSchool: undefined,
             skillSet: undefined,
             upload_w_9: "",
             yearExp: '',
@@ -134,7 +138,8 @@ class InfoServices extends Component {
                 upload_w_9: info.file.name
             })
             this.props.setRegisterData({
-                upload_w_9: info.file.name
+                upload_w_9: info.file.name,
+                uploaded_path: info.file.response.data
             })
             this.setState(prevState => ({ documentUploaded: [...prevState.documentUploaded, info.file.response.data] }));
         } else if (info.file.status === 'error') {
@@ -163,6 +168,41 @@ class InfoServices extends Component {
     handleSelectChange = (value, fieldName) => {
         console.log(fieldName, value);
         this.setValueToReduxRegisterData(fieldName, value);
+
+        
+    }
+
+    handleChangeServiceable =(text)=>{
+        // filter with server
+        console.log(text);
+        this.setValueToReduxRegisterData('serviceableSchool', text);
+
+        this.searchServiceableSchool(text)
+    }
+
+    searchServiceableSchool = (text)=>{
+        axios.post(url + 'schools/get_school_infos' , {data:{"search":text}}
+        ).then(result => {
+            console.log('get_school_infos', result.data);
+            if (result.data.success) {
+                var data = result.data.data;
+                this.setState({ 
+                    ServiceableSchools: data.docs
+                })
+            } else {
+                this.setState({
+                    ServiceableSchools: [],
+                });
+
+            }
+
+        }).catch(err => {
+            console.log(err);
+            this.setState({
+                ServiceableSchools: [],
+            });
+        })
+        
     }
 
     render() {
@@ -230,8 +270,10 @@ class InfoServices extends Component {
                            >
                             <AutoComplete
                                 placeholder={intl.formatMessage(messages.serviceableSchools)} 
-                                onChange={v => this.handleSelectChange(v, 'serviceableSchool')}
-                                options={[{ value: 'serviceable 1' }, { value: 'serviceable 2' }]}
+                                onChange={v => this.handleChangeServiceable(v)}
+                                options={this.state.ServiceableSchools.map((value,index)=>{
+                                    return {key:index ,value: value.name}
+                                })}
                             />
                         </Form.Item>
 
@@ -311,13 +353,14 @@ class InfoServices extends Component {
                             </div>
                             <Form.Item
                                 name="rate_small"
-                                className='select-small'
+                                className='bottom-left-0'
                                 rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
                             >
-                                <Select placeholder={intl.formatMessage(messages.rate)}>
+                                <Input placeholder={intl.formatMessage(messages.rate)} />
+                                {/* <Select placeholder={intl.formatMessage(messages.rate)}>
                                     <Select.Option value='rate1'>rate 1</Select.Option>
                                     <Select.Option value='rate2'>rate 2</Select.Option>
-                                </Select>
+                                </Select> */}
                             </Form.Item>
                         </div>
                         <div className='text-center flex flex-row justify-between mb-10'>
@@ -346,8 +389,9 @@ class InfoServices extends Component {
                                 rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.screeningTime) }]}
                             >
                                 <Select placeholder={intl.formatMessage(messages.screeningTime)}>
-                                    <Select.Option value='AM'>PM</Select.Option>
-                                    <Select.Option value='PM'>AM</Select.Option>
+                                    {this.state.ScreenTime.map((value,index)=>{
+                                        return (<Select.Option value={index}>{value}</Select.Option>)
+                                    })}
                                 </Select>
                             </Form.Item>
                         </div>

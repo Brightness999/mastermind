@@ -10,47 +10,239 @@ import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import { url } from '../../../../../utils/api/baseUrl';
+import axios from 'axios';
+
+const day_week = [
+    intl.formatMessage(messages.sunday),
+    intl.formatMessage(messages.monday),
+    intl.formatMessage(messages.tuesday),
+    intl.formatMessage(messages.wednesday),
+    intl.formatMessage(messages.thursday),
+    intl.formatMessage(messages.friday),
+]
 
 class InfoAvailability extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            ranges: [
-                { range: "Range 1" },
-            ],
+            isPrivate: true,
+            CancellationWindow:[],
+            currentSelectedDay: day_week[0],
         }
     }
 
     componentDidMount() {
-        let data = this.props.register.provider;
-        if (data) {
-            const { step4 } = data;
+        let {registerData} = this.props.register;
+        console.log(registerData)
+        if (!!registerData.step4) {
             this.form?.setFieldsValue({
-                ...step4
+                ...registerData.step4
             })
+
+            this.setState({
+                isPrivate: registerData.isPrivate
+            })
+        }else{
+            day_week.map((day)=>{
+                this.form.setFieldValue(day, [''])
+            })
+            
+            
+            
+        }
+
+        this.getDataFromServer();
+    }
+
+    defaultTimeRangeItem = (dayInWeek)=>{
+        return {
+            "uid":shortid.generate()+''+Date.now(),
+            "location":undefined,
+            "dayInWeek":dayInWeek,
+            "openHour":7,
+            "openMin":0,
+            "closeHour":18,
+            "closeMin":0
         }
     }
+
+    getDataFromServer = () => {
+        axios.post(url + 'providers/get_default_values_for_provider'
+        ).then(result => {
+            console.log('get_default_value_for_client', result.data);
+            if (result.data.success) {
+                var data = result.data.data;
+                this.setState({ 
+                    CancellationWindow: data.CancellationWindow,
+                })
+            } else {
+                this.setState({
+                    CancellationWindow:[],
+                });
+
+            }
+
+        }).catch(err => {
+            console.log(err);
+            this.setState({
+                CancellationWindow:[],
+            });
+        })
+    }
+
 
     onFinish = (values) => {
         console.log('Success:', values);
         this.props.setRegisterData({
             step4: values
         });
-        this.props.onContinue();
+        // this.props.onContinue();
     };
 
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
+
+    onSelectDay = e => {
+        console.log("selected segment date")
+        if (e) {
+            console.log(e);
+            this.setState({
+                currentSelectedDay: e
+            })
+        }
+    }
+    onSelectTimeForSesssion = (index, value, type) =>{
+        const hour = value.hour()
+        const minute = value.minute()
+        console.log(this.form.getFieldsValue());
+    }
+
+    onChangeScheduleValue = (day,value)=>{
+        console.log('all values', this.form.getFieldsValue())
+        this.props.setRegisterData({
+            step4: this.form.getFieldsValue()
+        });
+    }
+
+    onLocationChange = (day,value)=>{
+        this.props.setRegisterData({
+            step4: this.form.getFieldsValue()
+        });
+    }
+
+    copyToFullWeek = (dayForCopy)=>{
+        var arrToCopy = this.form.getFieldValue(dayForCopy);
+        day_week.map((newDay)=>{
+            if(newDay!=dayForCopy){
+                this.form.setFieldValue(newDay,arrToCopy);
+            }
+        })
+    }
+
+    renderFormList(day , index){
+        return <Form.List name={day} initialValue={[{ sunday: "Range 1" },]}>
+            {(fields , { add, remove }) =>{
+                return (
+                    <div 
+                        key={day}  
+                        className='div-time' 
+                        // style={{
+                        //     display: this.state.currentSelectedDay === index ? 'block' : 'none'
+                        // }}
+                    >
+                    {fields.map((field ) => {
+                        return (
+                            <div key={field.key}>
+                                {day_week.map((day,index)=>{
+                                    <div key={[day,field.key]}  
+                                        
+                                    >
+                                        <Row gutter={14}>
+                                            <Col xs={24} sm={24} md={12}>
+                                                {/* <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} /> */}
+                                                <Form.Item
+                                                    name={[day,field.name , "from_time"]}
+                                                    rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
+                                                >
+                                                    <TimePicker 
+                                                    onChange={v => this.onSelectTimeForSesssion(day, v, 'inOpen')} 
+                                                    use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
+                                                </Form.Item>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
+                                                {/* <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} /> */}
+                                                <Form.Item
+                                                    name={[day,field.name,"to_time"]}
+
+                                                    rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
+
+                                                >
+                                                    <TimePicker 
+                                                    onChange={v => this.onSelectTimeForSesssion(index, v, 'inOpen')} 
+                                                    use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
+                                                </Form.Item>
+                                                {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
+                                            </Col>
+                                        </Row>
+                                        <Form.Item
+                                            name={[day ,field.name, "location"]}
+
+                                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
+
+                                        >
+                                            <Input 
+                                            onChange={v=>{this.onLocationChange(day)}}
+                                            placeholder={intl.formatMessage(messages.location)}/>
+                                            {/* <Select placeholder={intl.formatMessage(messages.location)}>
+                                                <Select.Option value='l1'>location 1</Select.Option>
+                                                <Select.Option value='l2'>location 2</Select.Option>
+                                            </Select> */}
+                                        </Form.Item>
+
+                                    </div>
+                                })}
+                            
+                            </div>
+                        );
+                    })}     
+                    <Row>
+                        <Col span={8}>
+                            <div className='flex flex-row items-center'>
+                                <Switch size="small" value={this.state.isPrivate} onChange={v=>{
+                                    console.log('switch changed',v)
+                                }} />
+                                <p className='font-09 ml-10 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
+                            </div>
+                        </Col>
+                        <Col span={8}>
+                            <div className='div-add-time justify-center'>
+                                <BsPlusCircle size={17} className='mr-5 text-primary' />
+                                <a className='text-primary' onClick={() =>{
+                                        add(null)
+                                        console.log('added')
+                                }}>{intl.formatMessage(messages.addRange)}</a>
+                            </div>
+                        </Col>
+                        <Col span={8}>
+                            <div className='text-right div-copy-week'>
+                                <a className='font-10 underline text-primary'Click={() =>{
+                                        this.copyToFullWeek(day)
+                                }} >{intl.formatMessage(messages.copyFullWeek)}</a>
+                                <QuestionCircleOutlined className='text-primary' />
+                            </div>
+                        </Col>
+                    </Row>       
+                    </div>
+                );
+            }}
+        </Form.List>
+
+    }
+
     render() {
-        const day_week = [
-            intl.formatMessage(messages.sunday),
-            intl.formatMessage(messages.monday),
-            intl.formatMessage(messages.tuesday),
-            intl.formatMessage(messages.wednesday),
-            intl.formatMessage(messages.thursday),
-            intl.formatMessage(messages.friday),
-        ]
+        
         return (
             <Row justify="center" className="row-form">
                 <div className='col-form col-availability'>
@@ -61,9 +253,7 @@ class InfoAvailability extends Component {
                         name="form_availability"
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
-                        initialValues={{
-                            range: this.state.ranges,
-                        }}
+                        
                         ref={ref => this.form = ref}
                     >
                         <p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.autoSyncCalendar)}</p>
@@ -84,20 +274,29 @@ class InfoAvailability extends Component {
 
                         <p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.manualSchedule)}</p>
                         <div className='div-availability'>
-                            <Segmented options={day_week} block={true} />
-                            <Form.List name="range">
+                            <Segmented options={day_week} block={true} onChange={this.onSelectDay}   />
+                            {day_week.map((day,index)=>{
+                                return <div id={day}
+                                style={{
+                                    display: this.state.currentSelectedDay === day ? 'block' : 'none'
+                                }}
+                                >
+                                <Form.List name={day}>
                                 {(fields, { add, remove }) => (
                                     <div className='div-time'>
-                                        {fields.map((field) => {
+                                        {fields.map((field,index) => {
                                             return (
-                                                <div key={field.key}>
+                                                <div key={field.key}
+                                                >
                                                     <Row gutter={14}>
                                                         <Col xs={24} sm={24} md={12}>
                                                             <Form.Item
                                                                 name={[field.name, "from_time"]}
                                                                 rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
                                                             >
-                                                                <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
+                                                                <TimePicker
+                                                                onChange={v => this.onChangeScheduleValue(day , v)} 
+                                                                use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
                                                             </Form.Item>
                                                         </Col>
                                                         <Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
@@ -107,7 +306,9 @@ class InfoAvailability extends Component {
                                                                 rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
 
                                                             >
-                                                                <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
+                                                                <TimePicker 
+                                                                onChange={v => this.onChangeScheduleValue(day , v)} 
+                                                                use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
                                                             </Form.Item>
                                                             {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
                                                         </Col>
@@ -118,10 +319,8 @@ class InfoAvailability extends Component {
                                                         rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
 
                                                     >
-                                                        <Select placeholder={intl.formatMessage(messages.location)}>
-                                                            <Select.Option value='l1'>location 1</Select.Option>
-                                                            <Select.Option value='l2'>location 2</Select.Option>
-                                                        </Select>
+                                                        <Input placeholder={intl.formatMessage(messages.location)}/>
+                                                        
                                                     </Form.Item>
 
                                                 </div>
@@ -131,7 +330,15 @@ class InfoAvailability extends Component {
                                         <Row>
                                             <Col span={8}>
                                                 <div className='flex flex-row items-center'>
-                                                    <Switch size="small" defaultChecked />
+                                                    <Switch size="small" 
+                                                    value={this.state.isPrivate}
+                                                    defaultChecked={this.state.isPrivate}
+                                                    onChange={v=>{console.log('switch changed',v)
+
+                                                        this.setState({isPrivate:v})
+                                                        this.props.setRegisterData({isPrivate:v})
+                                                    } }
+                                                    />
                                                     <p className='font-09 ml-10 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
                                                 </div>
                                             </Col>
@@ -143,7 +350,7 @@ class InfoAvailability extends Component {
                                             </Col>
                                             <Col span={8}>
                                                 <div className='text-right div-copy-week'>
-                                                    <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
+                                                    <a className='font-10 underline text-primary' onClick={()=>this.copyToFullWeek(day)}>{intl.formatMessage(messages.copyFullWeek)}</a>
                                                     <QuestionCircleOutlined className='text-primary' />
                                                 </div>
                                             </Col>
@@ -151,6 +358,11 @@ class InfoAvailability extends Component {
                                     </div>
                                 )}
                             </Form.List>
+                            </div>
+                            })}
+                            
+                            
+                            
                         </div>
                         <Row gutter={14} style={{ marginLeft: '-22px', marginRight: '-22px' }}>
                             <Col xs={24} sm={24} md={13}>
@@ -160,8 +372,9 @@ class InfoAvailability extends Component {
 
                                 >
                                     <Select placeholder={intl.formatMessage(messages.cancellationWindow)}>
-                                        <Select.Option value='d1'>date 1</Select.Option>
-                                        <Select.Option value='d2'>date 2</Select.Option>
+                                        {this.state.CancellationWindow.map((value,index)=>{
+                                            return (<Select.Option value={index}>{value}</Select.Option>)
+                                        })}
                                     </Select>
                                 </Form.Item>
                             </Col>
@@ -171,10 +384,11 @@ class InfoAvailability extends Component {
                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
 
                                 >
-                                    <Select placeholder={intl.formatMessage(messages.cancellationFee)}>
+                                    <Input placeholder={intl.formatMessage(messages.cancellationFee)}/>
+                                    {/* <Select placeholder={intl.formatMessage(messages.cancellationFee)}>
                                         <Select.Option value='st1'>st 1</Select.Option>
                                         <Select.Option value='st2'>st 2</Select.Option>
-                                    </Select>
+                                    </Select> */}
                                 </Form.Item>
                             </Col>
                         </Row>
