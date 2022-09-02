@@ -20,10 +20,10 @@ import './index.less';
 export default class extends React.Component {
 
   componentDidMount() {
-    const path = checkPermission();
-    if (path) {
-      this.props.history.push(path);
-    }
+    // const path = checkPermission();
+    // if (path) {
+    //   this.props.history.push(path);
+    // }
   }
 
   onSubmit = async () => {
@@ -33,9 +33,9 @@ export default class extends React.Component {
       console.log(response);
       const { success, data } = response.data;
       if (success) {
-        message.success(intl.formatMessage(messages.loginSuccess));
-        localStorage.setItem('token', data.token);
-        this.props.history.push(routerLinks['Dashboard']);
+        console.log('token',  this.props.history , this.props.test1);
+        this.props.history.push(routerLinks.Dashboard);
+        
       }
     } catch (error) {
       console.log(error);

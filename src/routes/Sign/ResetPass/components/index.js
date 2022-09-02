@@ -4,17 +4,128 @@ import intl from 'react-intl-universal';
 import messages from '../messages';
 import msgLogin from '../../Login/messages';
 import './index.less';
+import { url } from '../../../../utils/api/baseUrl';
+import axios from 'axios'
+const notCheck = 0;
+const valid = 1;
+const invalid = -1;
 
 export default class extends React.Component {
+
+  constructor(props){
+    super(props);
+    console.log(this.props);
+    const token = this.props.location.state.token;
+    this.state ={
+      token:token
+    }
+  }
+
+  onFinish = (values) => {
+    console.log('Success:', values);
+    this.sendRequestResetPassword();
+    return;
+    
+  };
+
+  onFinishFailed = (errorInfo) => {
+    console.log('Failed:', errorInfo);
+  };
+
+  sendRequestResetPassword = ()=>{
+    
+    var postData = {token: this.state.token,password: this.form.getFieldValue('new_pass')};
+    axios.post(url + 'users/change_password' , postData  , 
+        ).then(result => {
+            console.log('change_password', result.data);
+            if (result.data.success) {
+                var data = result.data.data;
+                this.props.history.push('/');
+            } else {
+              if(!!err.response.data){
+                this.form.setFields([
+                  {
+                    name: 'new_pass',
+                    errors: ['password invalid'],
+                  },
+                ]);
+              }
+
+            }
+
+        }).catch(err=>{
+          // console.log(err);
+          if(!!err.response.data){
+            this.form.setFields([
+              {
+                name: 'new_pass',
+                errors: ['password invalid'],
+              },
+            ]);
+          }
+        })
+  }
+
+  validatePassword(_, value) {
+    const uppercaseRegExp = /(?=.*?[A-Z])/;
+    const lowercaseRegExp = /(?=.*?[a-z])/;
+    const specialCharRegExp = /(?=.*?[#?!@$%^&*-])/;
+    const digitsRegExp = /(?=.*?[0-9])/;
+    const minLengthRegExp = /.{8,}/;
+    if (!value || value.length === 0) {
+        this.setState({
+            minimumCharacterStatus: notCheck,
+            upperCaseStatus: notCheck,
+            lowerCaseStatus: notCheck,
+            symbolStatus: notCheck,
+            numberStatus: notCheck,
+            commonStatus: notCheck,
+        });
+        return Promise.reject(intl.formatMessage(messagesLogin.passwordMessage));
+    }
+
+    if (!value || lowercaseRegExp.test(value)) {
+        this.setState({ lowerCaseStatus: valid });
+    } else {
+        this.setState({ lowerCaseStatus: invalid });
+        return Promise.reject('At least one lowercase');
+    }
+    if (!value || uppercaseRegExp.test(value)) {
+        this.setState({ upperCaseStatus: valid });
+    } else {
+        this.setState({ upperCaseStatus: invalid });
+        return Promise.reject('At least one uppercase');
+    }
+    if (!value || digitsRegExp.test(value)) {
+        this.setState({ numberStatus: valid });
+    } else {
+        this.setState({ numberStatus: invalid });
+        return Promise.reject('At least one number');
+    }
+    if (!value || specialCharRegExp.test(value)) {
+        this.setState({ symbolStatus: valid });
+    } else {
+        this.setState({ symbolStatus: invalid });
+        return Promise.reject('At least one symbol');
+    }
+    if (!value || minLengthRegExp.test(value)) {
+        this.setState({ minimumCharacterStatus: valid });
+    } else {
+        this.setState({ minimumCharacterStatus: invalid });
+        return Promise.reject('At least minumum 8 characters');
+    }
+    if (this.state.minimumCharacterStatus &&
+        this.state.lowerCaseStatus &&
+        this.state.upperCaseStatus &&
+        this.state.symbolStatus &&
+        this.state.numberStatus === valid
+    ) {
+        this.setState({ commonStatus: valid });
+    }
+    return Promise.resolve();
+  }
+
   render() {
-    const onFinish = (values: any) => {
-      console.log('Success:', values);
-      window.location.href="/login"
-    };
-  
-    const onFinishFailed = (errorInfo: any) => {
-      console.log('Failed:', errorInfo);
-    };
     return (
       <div className="full-layout page resetpass-page">
          <Row justify="center" className="row-form row-login">
@@ -24,19 +135,36 @@ export default class extends React.Component {
                 </div>
                 <div>
                 <Form 
+                  ref={ref => this.form = ref}
                   name="reset_pass"
-                  onFinish={onFinish}
-                  onFinishFailed={onFinishFailed}
+                  onFinish={this.onFinish}
+                  onFinishFailed={this.onFinishFailed}
                 >
                     <Form.Item
                       name="new_pass"
-                      rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' +  intl.formatMessage(messages.newPassword)}]}
+                      hasFeedback
+                      rules={[
+                        {
+                            validator: (_, value) => this.validatePassword(_, value),
+                        }
+                      ]}
                     >
                         <Input.Password placeholder={intl.formatMessage(messages.newPassword)}/>
                     </Form.Item>
                     <Form.Item
                       name="confirm_pass"
-                      rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' +  intl.formatMessage(messages.confirmNewPass)}]}
+                      hasFeedback
+                      rules={[
+                        { required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' +  intl.formatMessage(messages.confirmNewPass)},
+                        ({ getFieldValue }) => ({
+                          validator(rule, value) {
+                            if (!value || getFieldValue('new_pass') === value) {
+                              return Promise.resolve();
+                            }
+                            return Promise.reject('The two passwords that you entered do not match!');
+                          },
+                        }),
+                      ]}
                     >
                         <Input.Password placeholder={intl.formatMessage(messages.confirmNewPass)}/>
                     </Form.Item>

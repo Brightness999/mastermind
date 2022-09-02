@@ -12,7 +12,7 @@ export default ({
   },
   enterYourEmail: {
     id: `${scope}.enterYourEmail`,
-    defaultMessage: 'Enter your user account\'s verified email address and we will new password to email.',
+    defaultMessage: 'Enter your user account\'s verified email address and you will receive a new email with code for reset password .',
   },
   send: {
     id: `${scope}.send`,
