@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Steps } from 'antd';
+import { Button, Steps , Input } from 'antd';
 import { BiChevronLeft } from 'react-icons/bi';
 import { ModalCreateDone } from '../../../../components/Modal';
 
@@ -102,7 +102,7 @@ export default class extends React.Component {
             <Step key='info_services' title={intl.formatMessage(messages.servicesInfo)} icon={<p>3</p>} />
             <Step key='info_availability' title={intl.formatMessage(messages.availabilityInfo)} icon={<p>4</p>} />
             <Step key='subsidy' title={intl.formatMessage(messages.subsidy)} icon={<p>5</p>} />
-            <Step key='info_review' title={intl.formatMessage(messages.reviewInfo)} icon={<p>6</p>} />
+            {/* <Step key='info_review' title={intl.formatMessage(messages.reviewInfo)} icon={<p>6</p>} /> */}
           </Steps>
         )
     }
@@ -147,7 +147,9 @@ export default class extends React.Component {
           case intl.formatMessage(messages.parent):
             return (<InfoParent onFinishRegister={this.openModalCreateDone} onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
+            // return (<InfoServices onContinue={this.handleContinue} />)
             // return (<InfoAvailability onContinue={this.handleContinue} />)
+            // return (<SubsidyProgram onContinue={this.handleContinue} />)
             return (<InfoProfile onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.school):
             return (<InfoSchool onContinue={this.handleContinue}/>)

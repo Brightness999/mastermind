@@ -29,19 +29,34 @@ class InfoServices extends Component {
             AcademicLevel:[],
             ServiceableSchools:[],
             ScreenTime:[],
+            sameRateForAllLevel:true,
+
+            isSeparateEvaluationRate:true,
+            isHomeVisit:true,
+            privateOffice:true,
+            isReceiptsProvided:true,
+            isNewClientScreening:true,
+
         }
     }
 
     componentDidMount() {
         const { registerData } = this.props.register;
 
-        console.log(registerData);
+        console.log('old data',registerData.serviceInfor);
 
         if (!registerData.serviceInfor) {
             this.props.setRegisterData({ serviceInfor: this.getDefaultObj() });
         }
         var serviceInfor = registerData.serviceInfor || this.getDefaultObj();
         this.form.setFieldsValue(serviceInfor);
+        this.setState({
+            isSeparateEvaluationRate :serviceInfor.isSeparateEvaluationRate,
+            isHomeVisit: serviceInfor.isHomeVisit,
+            privateOffice: serviceInfor.privateOffice,
+            isReceiptsProvided: serviceInfor.isReceiptsProvided,
+            isNewClientScreening: serviceInfor.isNewClientScreening,
+        })
         this.getDataFromServer()
     }
 
@@ -78,18 +93,23 @@ class InfoServices extends Component {
     getDefaultObj = () => {
         return {
             SSN: "",
-            level: [{
-                academicLevel: undefined,
-                rate_large: "",
+            academicLevel: [{
+                level: undefined,
+                rate: "",
             }],
-            public_profile: "",
-            rate_small: "",
+            publicProfile: "",
+            separateEvaluationRate: "",
             references: "",
             screeningTime: undefined,
             serviceableSchool: undefined,
             skillSet: undefined,
             upload_w_9: "",
             yearExp: '',
+            isSeparateEvaluationRate:true,
+            isHomeVisit:true,
+            privateOffice:true,
+            isReceiptsProvided:true,
+            isNewClientScreening:true,
         }
         return {
             SSN: "undefined",
@@ -97,8 +117,8 @@ class InfoServices extends Component {
                 academicLevel: "l1",
                 rate_large: "r2",
             }],
-            public_profile: "undefined",
-            rate_small: "r2",
+            publicProfile: "undefined",
+            separateEvaluationRate: "",
             references: "undefined",
             screeningTime: "AM",
             serviceableSchool: "s1",
@@ -152,11 +172,11 @@ class InfoServices extends Component {
 
     setValueToReduxRegisterData = (fieldName, value) => {
         const { registerData } = this.props.register;
-        var serviceInfor = registerData.serviceInfor;
-        var obj = {};
-        obj[fieldName] = value;
-        console.log(obj);
-        this.props.setRegisterData({ serviceInfor: { ...serviceInfor, ...obj } });
+        var serviceInfor =JSON.parse(JSON.stringify(registerData.serviceInfor));
+        
+        serviceInfor[fieldName] = value;
+        console.log('new value',serviceInfor);
+        this.props.setRegisterData({ serviceInfor: serviceInfor });
     }
 
     defaultOnValueChange = (event, fieldName) => {
@@ -165,7 +185,7 @@ class InfoServices extends Component {
         this.setValueToReduxRegisterData(fieldName, value);
     }
 
-    handleSelectChange = (value, fieldName) => {
+    handleSelectChange = (fieldName,value ) => {
         console.log(fieldName, value);
         this.setValueToReduxRegisterData(fieldName, value);
 
@@ -227,10 +247,7 @@ class InfoServices extends Component {
                         name="form_services_offered"
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
-                        initialValues={{
-                            level: this.state.levels,
-                            upload_w_9: this.state?.fileList?.name || ''
-                        }}
+                        
                         ref={ref => this.form = ref}
                     >
                         <Form.Item
@@ -240,7 +257,7 @@ class InfoServices extends Component {
                         >
                             <Select 
                                 placeholder={intl.formatMessage(messages.skillsets)} 
-                                onChange={v => this.handleSelectChange(v, 'skillSet')}>
+                                onChange={v => this.handleSelectChange('skillSet',v )}>
                                 {this.state.SkillSet.map((value, index)=>{
                                     return (<Select.Option value={index}>{value}</Select.Option>)
                                 })}
@@ -277,7 +294,7 @@ class InfoServices extends Component {
                             />
                         </Form.Item>
 
-                        <Form.List name="level">
+                        <Form.List name="academicLevel">
                             {(fields, { add, remove }) => (
                                 <div>
                                     {fields.map((field) => {
@@ -285,31 +302,43 @@ class InfoServices extends Component {
                                             <Row gutter={14} key={field.key}>
                                                 <Col xs={16} sm={16} md={16}>
                                                     <Form.Item
-                                                        name={[field.name, "academicLevel"]}
+                                                        name={[field.name, "level"]}
                                                         rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.academicLevel) }]}
                                                         className='bottom-0'
                                                         style={{ marginTop: field.key === 0 ? 0 : 14 }}
                                                     >
-                                                        <Select placeholder={intl.formatMessage(messages.academicLevel)}>
+                                                        <Select
+                                                        onChange={(event=>{
+                                                            var arr = this.form.getFieldValue('academicLevel')
+                                                            this.setValueToReduxRegisterData('academicLevel',arr);
+                                                        })}
+                                                        placeholder={intl.formatMessage(messages.academicLevel)}>
                                                             {this.state.AcademicLevel.map((level,index)=>{
                                                                 return (<Select.Option value={index}>{level}</Select.Option>)
                                                             })}
                                                             
-                                                            <Select.Option value='l2'>level 2</Select.Option>
                                                         </Select>
                                                     </Form.Item>
                                                 </Col>
                                                 <Col xs={8} sm={8} md={8} className={field.key !== 0 && 'item-remove'}>
                                                     <Form.Item
-                                                        name={[field.name, "rate_large"]}
+                                                        name={[field.name, "rate"]}
                                                         rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
                                                         className='bottom-0'
                                                         style={{ marginTop: field.key === 0 ? 0 : 14 }}
                                                     >
                                                         <Input 
                                                             placeholder={intl.formatMessage(messages.rate)} 
-                                                            onChange={(envent=>{
-
+                                                            onChange={(event=>{
+                                                                console.log('values',this.form.getFieldsValue());
+                                                                var value = event.target.value;
+                                                                var arr = JSON.parse(JSON.stringify(this.form.getFieldValue('academicLevel')));
+                                                                for(var i = 0 ; i < arr.length ;i++){
+                                                                    if(arr[i]==undefined) arr[i]={};
+                                                                    arr[i].rate = value;
+                                                                }
+                                                                this.form.setFieldValue('academicLevel', arr);
+                                                                this.setValueToReduxRegisterData('academicLevel',arr);
                                                             })}
                                                          />
                                                         {/* <Select placeholder={intl.formatMessage(messages.rate)}>
@@ -336,7 +365,13 @@ class InfoServices extends Component {
                                         </Button>
 
                                         <div className='flex flex-row w-50'>
-                                            <Switch size="small" defaultChecked />
+                                            <Switch size="small" 
+                                            checked={this.state.sameRateForAllLevel}
+                                            onChange={v=>{
+                                                this.setState({sameRateForAllLevel: v})
+                                                this.handleSelectChange('sameRateForAllLevel', v)
+                                            }}
+                                            />
                                             <p className='ml-10 mb-0'>{intl.formatMessage(messages.sameRateLevels)}</p>
                                         </div>
                                     </div>
@@ -348,15 +383,26 @@ class InfoServices extends Component {
 
                         <div className='text-center flex flex-row justify-between'>
                             <div className='flex flex-row items-center mb-10'>
-                                <Switch size="small" defaultChecked />
+                                <Switch size="small" 
+                               
+                                checked={this.state.isSeparateEvaluationRate}
+                                onChange={v=>{
+                                    this.setState({isSeparateEvaluationRate: v})
+                                    this.handleSelectChange('isSeparateEvaluationRate', v)
+                                }} 
+                                />
                                 <p className='ml-10 mb-0'>{intl.formatMessage(messages.separateEvaluation)}</p>
                             </div>
                             <Form.Item
-                                name="rate_small"
-                                className='bottom-left-0'
+                                name="separateEvaluationRate"
+                                
                                 rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
                             >
-                                <Input placeholder={intl.formatMessage(messages.rate)} />
+                                <Input 
+                                onChange={v=>{
+                                    // this.setState({isSeparateEvaluationRate:!this.state.isSeparateEvaluationRate})
+                                }}
+                                placeholder={intl.formatMessage(messages.rate)} className='bottom-left-0' />
                                 {/* <Select placeholder={intl.formatMessage(messages.rate)}>
                                     <Select.Option value='rate1'>rate 1</Select.Option>
                                     <Select.Option value='rate2'>rate 2</Select.Option>
@@ -365,21 +411,45 @@ class InfoServices extends Component {
                         </div>
                         <div className='text-center flex flex-row justify-between mb-10'>
                             <div className='flex flex-row items-center w-50'>
-                                <Switch size="small" defaultChecked />
+                                <Switch size="small" 
+                                 checked={this.state.isHomeVisit}
+                                 onChange={v=>{
+                                     this.setState({isHomeVisit: v})
+                                     this.handleSelectChange('isHomeVisit', v)
+                                 }} 
+                                 />
                                 <p className='ml-10 mb-0'>{intl.formatMessage(messages.homeVisits)}</p>
                             </div>
                             <div className='flex flex-row items-center w-50'>
-                                <Switch size="small" defaultChecked />
+                                <Switch size="small" 
+                                checked={this.state.privateOffice}
+                                onChange={v=>{
+                                    this.setState({privateOffice: v})
+                                    this.handleSelectChange('privateOffice', v)
+                                }} 
+                                />
                                 <p className='ml-10 mb-0'>{intl.formatMessage(messages.privateOffice)}</p>
                             </div>
                         </div>
                         <div className='flex flex-row items-center mb-10'>
-                            <Switch size="small" defaultChecked />
+                            <Switch size="small" 
+                            checked={this.state.isReceiptsProvided}
+                            onChange={v=>{
+                                this.setState({isReceiptsProvided: v})
+                                this.handleSelectChange('isReceiptsProvided', v)
+                            }} 
+                            />
                             <p className='ml-10 mb-0'>{intl.formatMessage(messages.receiptsRequest)}</p>
                         </div>
                         <div className='text-center flex flex-row justify-between'>
                             <div className='flex flex-row items-center mb-10'>
-                                <Switch size="small" defaultChecked />
+                                <Switch size="small" 
+                                checked={this.state.isNewClientScreening}
+                                onChange={v=>{
+                                    this.setState({isNewClientScreening: v})
+                                    this.handleSelectChange('isNewClientScreening', v)
+                                }} 
+                                />
                                 <p className='ml-10 mb-0'>{intl.formatMessage(messages.newClient)}</p>
                             </div>
                             <Form.Item
@@ -388,7 +458,11 @@ class InfoServices extends Component {
                                 className='select-small'
                                 rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.screeningTime) }]}
                             >
-                                <Select placeholder={intl.formatMessage(messages.screeningTime)}>
+                                <Select 
+                                onChange={v=>{
+                                    this.handleSelectChange('screeningTime', v)
+                                }} 
+                                placeholder={intl.formatMessage(messages.screeningTime)}>
                                     {this.state.ScreenTime.map((value,index)=>{
                                         return (<Select.Option value={index}>{value}</Select.Option>)
                                     })}
@@ -414,13 +488,23 @@ class InfoServices extends Component {
                             name="references"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.references) }]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.references)} />
+                            <Input 
+                            onChange={(event=>{
+                                var value = event.target.value;
+                                this.setValueToReduxRegisterData('references',value);
+                            })}
+                            placeholder={intl.formatMessage(messages.references)} />
                         </Form.Item>
                         <Form.Item
-                            name="public_profile"
+                            name="publicProfile"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.publicProfile) }]}
                         >
-                            <Input.TextArea rows={4} placeholder={intl.formatMessage(messages.publicProfile)} />
+                            <Input.TextArea 
+                            onChange={(event=>{
+                                var value = event.target.value;
+                                this.setValueToReduxRegisterData('publicProfile',value);
+                            })}
+                            rows={4} placeholder={intl.formatMessage(messages.publicProfile)} />
                         </Form.Item>
 
 

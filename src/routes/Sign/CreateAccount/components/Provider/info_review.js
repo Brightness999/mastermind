@@ -3,11 +3,59 @@ import { Row, Col, Button} from 'antd';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesReview from '../../../SubsidyReview/messages';
+import { connect } from 'react-redux'
+import { compose } from 'redux'
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
+
+import { url } from '../../../../../utils/api/baseUrl';
+import axios from 'axios'
 
 class InfoReview extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            SkillSet:[],
+            AcademicLevel:[],
+            ServiceableSchools:[],
+            ScreenTime:[],
+            
+        }
+    }
+
+    componentDidMount() {
+        const {registerData} = this.props.register;
+        console.log(registerData);
+        var arrReduce = [];
+        for(var i=0;i<100;i++){
+            arrReduce.push( i);
+        }
+        var arrTime = [];
+        arrTime.push(moment('2018-01-19 9:30:00 AM','YYYY-MM-DD hh:mm:ss A'))
+        arrTime.push(moment('2018-01-19 10:00:00 AM','YYYY-MM-DD hh:mm:ss A'))
+        arrTime.push(moment('2018-01-19 10:30:00 AM','YYYY-MM-DD hh:mm:ss A'))
+        arrTime.push(moment('2018-01-19 11:00:00 AM','YYYY-MM-DD hh:mm:ss A'))
+
+        this.setState({ReduceList: arrReduce,TimeAvailableList: arrTime});
+        if (registerData.subsidy) {
+            this.form?.setFieldsValue(registerData.subsidy);
+            
+        }else{
+            this.form.setFieldsValue({level:[{}]})
+        }
+        this.setState({
+            isAcceptProBono: registerData.isAcceptProBono||false,
+            isAcceptReduceRate: registerData.isAcceptReduceRate||false,
+            isWillingOpenPrivate: registerData.isWillingOpenPrivate||false
+        })
+        this.getDataFromServer();
+    }
+
+
+
     onFinish = (values) => {
         console.log('Success:', values);
-        this.props.onContinue();
+        // this.props.onContinue(true);
     };
     
     onFinishFailed = (errorInfo) => {
@@ -136,4 +184,7 @@ class InfoReview extends Component {
         );
     }
 }
-export default InfoReview;
+const mapStateToProps = state => ({
+    register: state.register,
+})
+export default compose(connect(mapStateToProps, { setRegisterData }))(InfoReview);

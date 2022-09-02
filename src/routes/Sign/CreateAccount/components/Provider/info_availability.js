@@ -12,7 +12,7 @@ import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
-
+import PlacesAutocomplete from 'react-places-autocomplete';
 const day_week = [
     intl.formatMessage(messages.sunday),
     intl.formatMessage(messages.monday),
@@ -29,6 +29,7 @@ class InfoAvailability extends Component {
             isPrivate: true,
             CancellationWindow:[],
             currentSelectedDay: day_week[0],
+            service_address:''
         }
     }
 
@@ -97,7 +98,7 @@ class InfoAvailability extends Component {
         this.props.setRegisterData({
             step4: values
         });
-        // this.props.onContinue();
+        this.props.onContinue();
     };
 
     onFinishFailed = (errorInfo) => {
@@ -127,6 +128,18 @@ class InfoAvailability extends Component {
     }
 
     onLocationChange = (day,value)=>{
+        console.log(day,value);
+        this.props.setRegisterData({
+            step4: this.form.getFieldsValue()
+        });
+    }
+
+    onLocationSelected = (day, value , index)=>{
+        console.log(day,value , this.form.getFieldValue(day) ,index );
+        var arr = this.form.getFieldValue(day);
+        if(arr[index] == undefined) arr[index] = {};
+        arr[index].location = value;
+        this.form.setFieldValue(day , arr);
         this.props.setRegisterData({
             step4: this.form.getFieldsValue()
         });
@@ -192,9 +205,45 @@ class InfoAvailability extends Component {
                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
 
                                         >
+                                            {/* <PlacesAutocomplete
+                                                value={this.state.service_address}
+                                                onChange={(e) => this.onLocationChange(day ,e)}
+                                                onSelect={(e) => this.onLocationSelected(day,e)}
+                                            >
+                                                {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+                                                    <div>
+                                                        <Input {...getInputProps({
+                                                            placeholder: 'Service Address',
+                                                        })} />
+                                                        <div className="autocomplete-dropdown-container">
+                                                            {loading && <div>Loading...</div>}
+                                                            {suggestions.map(suggestion => {
+                                                                const className = suggestion.active
+                                                                    ? 'suggestion-item--active'
+                                                                    : 'suggestion-item';
+                                                                // inline style for demonstration purpose
+                                                                const style = suggestion.active
+                                                                    ? { backgroundColor: '#fafafa', cursor: 'pointer' }
+                                                                    : { backgroundColor: '#ffffff', cursor: 'pointer' };
+                                                                return (
+                                                                    <div
+                                                                        {...getSuggestionItemProps(suggestion, {
+                                                                            className,
+                                                                            style,
+                                                                        })}
+                                                                    >
+                                                                        <span>{suggestion.description}</span>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </PlacesAutocomplete> */}
                                             <Input 
-                                            onChange={v=>{this.onLocationChange(day)}}
+                                            onChange={v=>{this.onLocationChange(day , v)}}
                                             placeholder={intl.formatMessage(messages.location)}/>
+
                                             {/* <Select placeholder={intl.formatMessage(messages.location)}>
                                                 <Select.Option value='l1'>location 1</Select.Option>
                                                 <Select.Option value='l2'>location 2</Select.Option>
@@ -319,7 +368,42 @@ class InfoAvailability extends Component {
                                                         rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
 
                                                     >
-                                                        <Input placeholder={intl.formatMessage(messages.location)}/>
+                                                        <PlacesAutocomplete
+                                                            onChange={(e) => this.onLocationChange(day,e, "billingAddress")}
+                                                            onSelect={(e) => this.onLocationSelected(day, e, index)}
+                                                        >
+                                                            {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+                                                                <div>
+                                                                    <Input {...getInputProps({
+                                                                        placeholder: intl.formatMessage(messages.location) ,
+                                                                        className: 'location-search-input',
+                                                                    })} />
+                                                                    <div className="autocomplete-dropdown-container">
+                                                                        {loading && <div>Loading...</div>} 
+                                                                        {suggestions.map(suggestion => {
+                                                                            const className = suggestion.active
+                                                                                ? 'suggestion-item--active'
+                                                                                : 'suggestion-item';
+                                                                            // inline style for demonstration purpose
+                                                                            const style = suggestion.active
+                                                                                ? { backgroundColor: '#fafafa', cursor: 'pointer' }
+                                                                                : { backgroundColor: '#ffffff', cursor: 'pointer' };
+                                                                            return (
+                                                                                <div
+                                                                                    {...getSuggestionItemProps(suggestion, {
+                                                                                        className,
+                                                                                        style,
+                                                                                    })}
+                                                                                >
+                                                                                    <span>{suggestion.description}</span>
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </PlacesAutocomplete>
+                                                        {/* <Input placeholder={intl.formatMessage(messages.location)}/> */}
                                                         
                                                     </Form.Item>
 
@@ -331,8 +415,8 @@ class InfoAvailability extends Component {
                                             <Col span={8}>
                                                 <div className='flex flex-row items-center'>
                                                     <Switch size="small" 
-                                                    value={this.state.isPrivate}
-                                                    defaultChecked={this.state.isPrivate}
+                                                    
+                                                    checked={this.state.isPrivate}
                                                     onChange={v=>{console.log('switch changed',v)
 
                                                         this.setState({isPrivate:v})

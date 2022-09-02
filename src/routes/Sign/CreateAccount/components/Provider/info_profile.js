@@ -318,7 +318,7 @@ class InfoProfile extends Component {
                                             <Col xs={16} sm={16} md={16}>
                                                 <Form.Item
                                                     {...restField}
-                                                    name={[name, 'contact', 'phoneNumber']}
+                                                    name={[name, 'phoneNumber']}
                                                     className='bottom-0'
                                                     style={{ marginTop: key === 0 ? 0 : 14 }}
                                                     rules={[
@@ -339,7 +339,7 @@ class InfoProfile extends Component {
                                             <Col xs={8} sm={8} md={8} className='item-remove'>
                                                 <Form.Item
                                                     {...restField}
-                                                    name={[name, 'contactphone','type']}
+                                                    name={[name,'type']}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type) }]}
                                                     className='bottom-0'
                                                     style={{ marginTop: key === 0 ? 0 : 14 }}
@@ -376,7 +376,7 @@ class InfoProfile extends Component {
                                             <Col xs={16} sm={16} md={16}>
                                                 <Form.Item
                                                     {...restField}
-                                                    name={[name, 'contact','email']}
+                                                    name={[name, 'email']}
                                                     className='bottom-0'
                                                     style={{ marginTop: key === 0 ? 0 : 14 }}
                                                     rules={[
@@ -397,7 +397,7 @@ class InfoProfile extends Component {
                                             <Col xs={8} sm={8} md={8} className='item-remove'>
                                                 <Form.Item
                                                     {...restField}
-                                                    name={[name, 'contact_email','type']}
+                                                    name={[name, 'type']}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type) }]}
                                                     className='bottom-0'
                                                     style={{ marginTop: key === 0 ? 0 : 14 }}
