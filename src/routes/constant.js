@@ -1,5 +1,6 @@
 export const routerLinks = {
   Login: '/login',
+  ActiveAccount:'/active_account',
   CreateAccount: '/createaccount',
   SubsidyRequest: '/subsidyrequest',
   SubsidyReview: '/subsidyreview',

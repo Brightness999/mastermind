@@ -46,7 +46,7 @@ application.model(require('./models/global').default);
 application.router(({ history, app }) => (
   <Provider store={storeRedux}>
     <LanguageProvider>
-      <Router history={history} test1={'abc'} >{createRoutes(app)}</Router>
+      <Router history={history}  >{createRoutes(app)}</Router>
     </LanguageProvider>
   </Provider>
 ));

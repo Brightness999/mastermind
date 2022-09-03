@@ -16,6 +16,7 @@ import Dashboard from './Dashboard';
 import ForgotPass from './Sign/ForgotPass';
 import ResetPass from './Sign/ResetPass';
 import Admin from './Admin';
+import ActiveAccount from './Sign/Login/activeaccount'
 const routesConfig = app => [
   
   // {
@@ -54,7 +55,9 @@ const routesConfig = app => [
       ResetPass(app),
       SubsidyReview(app),
       // 💬 generate admin to here
-      NotFound()]
+      NotFound(),
+      ActiveAccount(app),
+    ]
   }
 ];
 

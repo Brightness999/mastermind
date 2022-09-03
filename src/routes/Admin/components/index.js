@@ -36,7 +36,6 @@ import events from "../../../utils/calendar/events";
 import msgDashboard from '../../Dashboard/messages';
 import msgCreateAccount from '../../Sign/CreateAccount/messages';
 import EventDetail from './EventDetail';
-import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 const { Panel } = Collapse;
 const { TabPane } = Tabs;

@@ -6,7 +6,6 @@ import { Badge, Avatar, Button, Input } from 'antd';
 import intl from "react-intl-universal";
 import messages from './messages';
 import './style/index.less';
-import { checkPermission } from '../../utils/auth/checkPermission';
 const scrollElement = React.createRef();
 class MainHeader extends Component {
 

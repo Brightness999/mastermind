@@ -10,6 +10,7 @@ import { listRoleWithRouter } from '../../../../utils/auth/listRoleWithRouter';
 import { checkPermission } from '../../../../utils/auth/checkPermission';
 import axios from 'axios';
 import './index.less';
+import {decode as base64_decode, encode as base64_encode} from 'base-64';
 
 // @connect(({ login, loading, global }) => ({
 //   global,
@@ -20,10 +21,52 @@ import './index.less';
 export default class extends React.Component {
 
   componentDidMount() {
-    // const path = checkPermission();
-    // if (path) {
-    //   this.props.history.push(path);
-    // }
+    
+    if(!!localStorage.getItem('token')&&localStorage.getItem('token').length >0){
+      checkPermission().then(path=>{
+        this.props.history.push(routerLinks.Dashboard);
+      })
+      return;
+    }
+    console.log('abc', this.props.location)
+    if(this.props.location.pathname.indexOf('/login/v') >=0){
+      var base64Code = this.props.location.pathname.substring(8);
+      var decodedString = base64_decode(base64Code);
+      console.log(base64Code,decodedString);
+      this.activeAccount(decodedString)
+    }else if(this.props.location.pathname.indexOf('/login/register_success') >=0){
+
+    }
+  }
+
+  activeAccount(decodedString){
+    axios.post(url + 'users/active_user', {token: decodedString}).then(result=>{
+      var data = result.data;
+      console.log(data);
+      if(data.success){
+        this.form.setFields([
+          {
+            name: 'loginresult',
+            warnings: ['Your email actived!'],
+          },
+        ]);
+      }else{
+        this.form.setFields([
+          {
+            name: 'loginresult',
+            errors: ['cannot find your email!'],
+          },
+        ]);
+      }
+    }).catch(err=>{
+      this.form.setFields([
+        {
+          name: 'loginresult',
+          errors: [error?.response?.data?.data??'cannot find your email!'],
+        },
+      ]);
+    });
+    
   }
 
   onSubmit = async () => {
@@ -34,12 +77,18 @@ export default class extends React.Component {
       const { success, data } = response.data;
       if (success) {
         console.log('token',  this.props.history , this.props.test1);
+        localStorage.setItem('token', data.token);
         this.props.history.push(routerLinks.Dashboard);
         
       }
     } catch (error) {
       console.log(error);
-      message.error(error?.response?.data?.data ?? error.message);
+      this.form.setFields([
+        {
+          name: 'loginresult',
+          errors: [error?.response?.data?.data??'cannot find your email!'],
+        },
+      ]);
     }
   }
 
@@ -78,7 +127,9 @@ export default class extends React.Component {
                 </Form.Item>
 
 
-                <Form.Item >
+                <Form.Item 
+                  name="loginresult"
+                >
                   <Button
                     block
                     type="primary"

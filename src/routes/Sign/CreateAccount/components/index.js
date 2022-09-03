@@ -133,7 +133,7 @@ export default class extends React.Component {
     this.setState({ visibleCreateDone: false });
 
     
-    this.props.history.push(routerLinks['Dashboard']);
+    this.props.history.push(routerLinks.Login+'/register_success');
           
   }
 
