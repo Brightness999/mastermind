@@ -36,6 +36,7 @@ import events from "../../../utils/calendar/events";
 import messages from '../messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
 import EventDetail from './EventDetail';
+import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 const { Panel } = Collapse;
 const { TabPane } = Tabs;
@@ -62,6 +63,18 @@ export default class extends React.Component {
       ]
     }
   }
+  componentDidMount(){
+    if(!!localStorage.getItem('token')&&localStorage.getItem('token').length >0){
+      checkPermission().then(path=>{
+        console.log(path);
+      }).catch(err=>{
+        this.props.history.push('/');
+      })
+    }else{
+      this.props.history.push('/');
+    }
+  }
+
   calendarRef = React.createRef();
 
   onShowFilter = () => {

@@ -223,7 +223,7 @@
   "components.Modal.new": "New",
   "components.Modal.cancel": "Cancel",
   "components.Modal.determine": "Determine",
-  "components.Modal.youAllSet": "You’re all set!",
+  "components.Modal.youAllSet": "You’re all set! Please activate your email",
   "components.Modal.home": "Home",
   "components.Modal.areYouSureCancel": "Are you sure you want to cancel your",
   "components.Modal.thisCannotUndone": "This cannot be undone & you may lose your slot & won't get it back",

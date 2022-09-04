@@ -21,7 +21,7 @@ export default class extends React.Component {
   onFinish = (values) => {
     // console.log('Success:', values);
     // window.location.href="/resetpass"
-    this.setState({isSent:true});return;
+    this.setState({isSent:true});
     this.sendRequestForgot()
   };
 
