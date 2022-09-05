@@ -1,8 +1,9 @@
 import React, { Component, useRef } from 'react';
-import { FaUserAlt } from 'react-icons/fa';
-import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
+import { Link } from 'dva/router';
+import { FaUserAlt, FaUserEdit } from 'react-icons/fa';
+import { BiChevronLeft, BiChevronRight, BiLogOutCircle, BiBell } from 'react-icons/bi';
 import { BsSearch } from 'react-icons/bs';
-import { Badge, Avatar, Button, Input } from 'antd';
+import { Badge, Avatar, Button, Input, Menu, Dropdown} from 'antd';
 import intl from "react-intl-universal";
 import messages from './messages';
 import './style/index.less';
@@ -21,14 +22,54 @@ class MainHeader extends Component {
   scrollTrans = (scrollOffset) => {
     scrollElement.current.scrollLeft += scrollOffset;
   }
+
+  logout = ()=>{
+    localStorage.removeItem('token');
+    // this.props.history.push('/');
+  }
   render() {
+    const menu = (
+      <Menu
+        items={[
+          {
+            key: '1',
+            icon: <FaUserEdit size={18} color='#495057'/>,
+            label: (
+              <a href='#' >
+                Change Infomation
+              </a>
+            ),
+          },
+          {
+            key: '2',
+            icon: <Badge size="small" count={6}><BiBell size={18} color='#495057'/></Badge>,
+            label: (
+              <a href='#'>
+                Notification
+              </a>
+            ),
+          },
+          {
+            key: '3',
+            icon: <BiLogOutCircle size={18} color='#495057'/>,
+            label: (
+              <Link to='/' onClick={this.logout}>
+                Log Out
+              </Link>
+            ),
+          },
+        ]}
+      />
+    );
     return (
       <div className='component-mainheader'>
         <div className='div-account'>
           <div className='account-icon'>
-            <Badge size="small" count={6}>
-              <Avatar icon={<FaUserAlt size={17} className='text-white' />} />
-            </Badge>
+            <Dropdown overlay={menu} placement="bottomLeft">
+              <Badge size="small" count={6}>
+                <Avatar icon={<FaUserAlt size={17} className='text-white'/>} />
+              </Badge>
+            </Dropdown>
           </div>
           <div className='account-name'>
             <p className='mb-0'>Account Name Here</p>

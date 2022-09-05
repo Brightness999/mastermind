@@ -22,13 +22,7 @@ export default class extends React.Component {
 
   componentDidMount() {
     
-    if(!!localStorage.getItem('token')&&localStorage.getItem('token').length >0){
-      checkPermission().then(path=>{
-        this.props.history.push(routerLinks.Dashboard);
-      })
-      return;
-    }
-    console.log('abc', this.props.location)
+    
     if(this.props.location.pathname.indexOf('/login/v') >=0){
       var base64Code = this.props.location.pathname.substring(8);
       var decodedString = base64_decode(base64Code);

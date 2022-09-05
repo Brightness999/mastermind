@@ -8,7 +8,7 @@ import '../assets/styles/index.less';
 import './styles/main.less';
 
 const { Content, Header, Footer } = Layout;
-
+import { checkPermission } from '../utils/auth/checkPermission';
 class MainLayout extends React.PureComponent {
 
   constructor(props) {
@@ -17,7 +17,17 @@ class MainLayout extends React.PureComponent {
   }
 
   componentDidMount() {
-    
+    console.log('day la did mount cua user layout')
+    if(!!localStorage.getItem('token')&&localStorage.getItem('token').length >0){
+      checkPermission().then(path=>{
+        
+      }).catch(er=>{
+        this.props.history.push('/');
+      })
+      
+    }else{
+      this.props.history.push('/');
+    }
   }
 
   render() {

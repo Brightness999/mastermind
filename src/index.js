@@ -14,7 +14,7 @@ import * as serviceWorker from './serviceWorker';
 import LanguageProvider from './components/LanguageProvider';
 import storeRedux from './redux/store';
 import { Provider } from 'react-redux';
-
+import { helper } from './utils/auth/helper';
 // -> initialization
 const application = dva({
   history: createBrowserHistory({
@@ -43,13 +43,15 @@ dynamic.setDefaultLoadingComponent(() => config.router.loading);
 application.model(require('./models/global').default);
 
 // -> Initialize route
-application.router(({ history, app }) => (
+application.router(({ history, app }) => {
+  helper.history = history;
+  return (
   <Provider store={storeRedux}>
     <LanguageProvider>
       <Router history={history}  >{createRoutes(app)}</Router>
     </LanguageProvider>
   </Provider>
-));
+)});
 
 // -> Start
 application.start('#root');

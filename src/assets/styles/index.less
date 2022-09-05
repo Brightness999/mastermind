@@ -273,25 +273,35 @@ select:-webkit-autofill:focus {
   }
 }
 
-.ant-dropdown-menu {
-  background-color: transparent!important;
-  box-shadow: unset;
-  padding: 0;
-
-  .ant-dropdown-menu-item {
-    background-color: @gray700;
-    color: @white;
-    margin-bottom: 5px;
-    border-radius: 4px;
-    font-size: 12px;    
-    text-align: center;
-    padding: 3px 12px;
-
-    &-active {
-      background-color: @gray900;
+.ant-dropdown-placement-topRight {
+  .ant-dropdown-menu {
+    background-color: transparent!important;
+    box-shadow: unset;
+    padding: 0;
+  
+    .ant-dropdown-menu-item {
+      background-color: @gray700;
+      color: @white;
+      margin-bottom: 5px;
+      border-radius: 4px;
+      font-size: 12px;    
+      text-align: center;
+      padding: 3px 12px;
+  
+      &-active {
+        background-color: @gray900;
+      }
     }
-  }
-} 
+  } 
+}
+
+.ant-dropdown-placement-bottomLeft {
+  .ant-dropdown-menu {
+    .ant-dropdown-menu-item {
+      padding: 10px 12px;
+    }
+  } 
+}
 
 .ant-select-arrow,
 .ant-cascader-picker-arrow,
