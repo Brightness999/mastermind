@@ -1,18 +1,17 @@
 import { configureStore , createSerializableStateInvariantMiddleware} from '@reduxjs/toolkit'
-import registerReducer from './features/registerSlice'
-import authReducer from './features/authSlice'
+import { persistStore } from 'redux-persist';
+import rootReducer from './reducer'
 
 const serializableMiddleware = createSerializableStateInvariantMiddleware({
     serializableCheck:false
   })
 
-export default configureStore({
-    reducer: {
-        register: registerReducer,
-        auth: authReducer,
-    },
+export const store = configureStore({
+    reducer: rootReducer,
     middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: false,
     }),
 })
+
+export const persistor = persistStore(store);

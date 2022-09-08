@@ -19,7 +19,7 @@ import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsEnvelope, BsFilter, BsXCircle, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill, BsCheckCircleFill } from 'react-icons/bs';
-import { ModalNewAppointment, ModalSubsidyProgress } from '../../../components/Modal';
+import { ModalNewAppointment,ModalNewAppointmentForParents, ModalSubsidyProgress } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
 import DrawerDetailPost from '../../../components/DrawerDetailPost';
@@ -42,9 +42,13 @@ const { Panel } = Collapse;
 const { TabPane } = Tabs;
 
 
+import { socketUrl , socketUrlJSFile } from '../../../utils/api/baseUrl';
+import request,{generateSearchStructure} from '../../../utils/api/request'
+
 export default class extends React.Component {
   constructor(props) {
     super(props);
+    this.socket = undefined;
     this.state = {
       isFilter: false,
       visibleDetail: false,
@@ -60,19 +64,142 @@ export default class extends React.Component {
       calendarEvents: [
         // initial event data
         { title: "Event Now", start: new Date(), allDay: true }
-      ]
+      ],
+      userRole:-1,
+      listDependents:[],
+      parentInfo:{},
+      providerInfo:{},
     }
   }
   componentDidMount(){
     if(!!localStorage.getItem('token')&&localStorage.getItem('token').length >0){
-      checkPermission().then(path=>{
-        console.log(path);
+      checkPermission().then(loginData=>{
+        console.log('login data',loginData);
+        this.setState({userRole:loginData.user.role  })
       }).catch(err=>{
         this.props.history.push('/');
       })
     }else{
       this.props.history.push('/');
     }
+
+    const script = document.createElement("script");
+    script.src = socketUrlJSFile;
+    script.async = true;
+    script.onload = () => this.scriptLoaded();
+    document.body.appendChild(script);
+
+
+    // get list appointments
+    this.getMyAppointments();
+  }
+
+  scriptLoaded = ()=>{
+    let opts = {
+      query: {
+        token: localStorage.getItem('token'),
+      },
+      withCredentials: true,
+      autoConnect: true,
+    };
+    this.socket = io(socketUrl , opts);
+    // const socket = socketio.connect(socketUrl , opts);
+    this.socket.on('connect_error', e => {
+      console.log('connect error ', e);
+    });
+
+    this.socket.on('connect', ()=>{
+      console.log('socket connect success');
+      // this.disconnect();
+      this.getSubprofile();
+      
+    });
+
+    this.socket.on('socket_result' , data=>{
+      console.log('socket result',data);
+      this.handleSocketResult(data);
+    })
+
+    this.socket.on('disconnect', e => {
+      console.log('socket disconnect', e);
+    });
+    
+  }
+
+  handleSocketResult(data){
+    switch(data.key){
+      case 'new_appoint_from_client':
+        this.setState({ visibleDetailPost: true , });
+        return;
+    }
+  }
+
+  getSubprofile = () =>{
+    switch(this.state.userRole){
+      case 3: // get parent info
+        this.getParentInfo();
+        this.loadDependent();
+        return;
+      case 30: // get provider info
+        this.loadMyProviderInfo();
+        return;
+      case 60:// get school info
+        return;
+    }
+  }
+
+  getParentInfo = ()=>{
+    request.post('clients/get_parent_profile').then(result=>{
+      var data = result.data;
+      console.log('get_parent_profile',data);
+  
+      this.setState({parentInfo:data})
+    })
+  }
+
+  loadDependent = () =>{
+    request.post('clients/get_child_profile').then(result=>{
+        var data = result.data;
+        console.log('get_child_profile',data);
+        for(var i = 0 ; i < data.length ; i++){
+          this.joinRoom(data[i]._id);
+        }
+        this.setState({listDependents:data})
+    })
+  }
+
+  loadMyProviderInfo = ()=>{
+    request.post('providers/get_my_provider_info').then(result=>{
+        var data = result.data;
+        console.log('get_my_provider_info',data);
+    
+        this.setState({providerInfo:data})
+        this.joinRoom(data._id);
+    })
+  }
+
+  joinRoom = (roomId)=>{
+    this.socket.emit('join_room',roomId);
+  }
+
+  modalAppointments(){
+    const modalNewAppointProps = {
+      visible: this.state.visibleNewAppoint,
+      onSubmit: this.onSubmitModalNewAppoint,
+      onCancel: this.onCloseModalNewAppoint,
+      listDependents: this.state.listDependents
+    };
+    return (<ModalNewAppointmentForParents {...modalNewAppointProps} />);
+    // <ModalNewAppointment {...modalNewAppointProps} />
+  }
+
+  modalSubsidy(){
+    const modalSubsidyProps = {
+      visible: visibleSubsidy,
+      onSubmit: this.onCloseModalSubsidy,
+      onCancel: this.onCloseModalSubsidy,
+    };
+    return (<ModalSubsidyProgress {...modalSubsidyProps} />)
   }
 
   calendarRef = React.createRef();
@@ -166,7 +293,8 @@ export default class extends React.Component {
     }
   }
   handleEventClick = () => {
-    this.setState({ isEventDetail: !this.state.isEventDetail });
+
+    // this.setState({ isEventDetail: !this.state.isEventDetail });
   }
   handleEventAdd = (addInfo) => {
     this.props.createEvent(addInfo.event.toPlainObject())
@@ -190,6 +318,20 @@ export default class extends React.Component {
         reportNetworkError()
         removeInfo.revert()
       })
+  }
+
+  getMyAppointments(){
+    var url  = 'clients/get_my_appointments';
+    if(this.state.userRole == 30){
+      url = 'providers/get_my_appointments'
+    }
+
+    request.post(url).then(result=>{
+      var data = result.data;
+      console.log('get_my_appointments',data);
+  
+    })
+
   }
 
   render() {
@@ -317,16 +459,8 @@ export default class extends React.Component {
         value: 'referrals2',
       },
     ];
-    const modalNewAppointProps = {
-      visible: visibleNewAppoint,
-      onSubmit: this.onSubmitModalNewAppoint,
-      onCancel: this.onCloseModalNewAppoint,
-    };
-    const modalSubsidyProps = {
-      visible: visibleSubsidy,
-      onSubmit: this.onCloseModalSubsidy,
-      onCancel: this.onCloseModalSubsidy,
-    };
+    
+    
     return (
       <div className="full-layout page dashboard-page">
         <div className='div-show-subsidy' onClick={this.onShowModalSubsidy} />
@@ -344,6 +478,8 @@ export default class extends React.Component {
                 <p>date/time</p>
                 <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{intl.formatMessage(messages.today)}</p>
               </div>)}
+
+
               <div className='item-feed done'>
                 <p className='font-700'>Dependent #1 Name</p>
                 <p>event-type</p>
@@ -446,7 +582,7 @@ export default class extends React.Component {
                     type='primary'
                     block
                     icon={<FaCalendarAlt size={19} />}
-                    onClick={this.onShowDrawerDetailPost}
+                    // onClick={this.onShowDrawerDetailPost}
                   >
                     {intl.formatMessage(messages.makeAppointment)}
                   </Button>
@@ -687,11 +823,14 @@ export default class extends React.Component {
           onClose={this.onCloseDrawerDetail}
         />
         <DrawerDetailPost
+          
           visible={visibleDetailPost}
           onClose={this.onCloseDrawerDetailPost}
         />
-        <ModalNewAppointment {...modalNewAppointProps} />
-        <ModalSubsidyProgress {...modalSubsidyProps} />
+
+        {this.modalAppointments()}
+        
+        
       </div>
     );
   }

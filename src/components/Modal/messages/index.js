@@ -67,7 +67,7 @@ export default {
   },
   popularDoctors: {
     id: `${scope}.popularDoctors`,
-    defaultMessage: 'Popular doctors',
+    defaultMessage: 'Popular provider',
   },
   searchDoctor: {
     id: `${scope}.searchDoctor`,

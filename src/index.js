@@ -12,9 +12,10 @@ import 'moment/locale/vi';
 import { homepage } from '../package.json';
 import * as serviceWorker from './serviceWorker';
 import LanguageProvider from './components/LanguageProvider';
-import storeRedux from './redux/store';
+import {persistor, store} from './redux/store';
 import { Provider } from 'react-redux';
 import { helper } from './utils/auth/helper';
+import {PersistGate} from 'redux-persist/integration/react';
 // -> initialization
 const application = dva({
   history: createBrowserHistory({
@@ -46,10 +47,12 @@ application.model(require('./models/global').default);
 application.router(({ history, app }) => {
   helper.history = history;
   return (
-  <Provider store={storeRedux}>
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
     <LanguageProvider>
       <Router history={history}  >{createRoutes(app)}</Router>
     </LanguageProvider>
+    </PersistGate>
   </Provider>
 )});
 

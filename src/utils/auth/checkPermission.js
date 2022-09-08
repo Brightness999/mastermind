@@ -12,8 +12,7 @@ export const checkPermission = () => {
         Authorization: 'Bearer ' + token
     };
     return axios.post(url+'users/check_login' , {},{headers:headers}).then(result=>{
-        console.log(result.data.data);
-        return result.data.data.user;
+        return result.data.data;
     })
     // if (user) {
     //     const { role } = user;

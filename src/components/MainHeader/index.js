@@ -7,16 +7,21 @@ import { Badge, Avatar, Button, Input, Menu, Dropdown} from 'antd';
 import intl from "react-intl-universal";
 import messages from './messages';
 import './style/index.less';
+import { routerLinks } from '../../routes/constant';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 const scrollElement = React.createRef();
 class MainHeader extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : '',
+    }
 
   }
 
   componentDidMount() {
-    
   }
 
   scrollTrans = (scrollOffset) => {
@@ -28,18 +33,21 @@ class MainHeader extends Component {
     // this.props.history.push('/');
   }
   render() {
+    console.log(this.props,'props')
+    const infoAuth  = this.props.authData ?? '';
+    const {user} = this.state;
     const menu = (
       <Menu
         items={[
-          {
-            key: '1',
-            icon: <FaUserEdit size={18} color='#495057'/>,
-            label: (
-              <a href='#' >
-                Change Infomation
-              </a>
-            ),
-          },
+          // {
+          //   key: '1',
+          //   icon: <FaUserEdit size={18} color='#495057'/>,
+          //   label: (
+          //     <Link to={routerLinks.Changeprofile}>
+          //       Change Infomation
+          //     </Link>
+          //   ),
+          // },
           {
             key: '2',
             icon: <Badge size="small" count={6}><BiBell size={18} color='#495057'/></Badge>,
@@ -72,8 +80,8 @@ class MainHeader extends Component {
             </Dropdown>
           </div>
           <div className='account-name'>
-            <p className='mb-0'>Account Name Here</p>
-            <p className='font-10 mb-0'>Subname Here</p>
+            <p className='mb-0'>{this.state.user.username}</p>
+            <p className='font-10 mb-0'>{ user.role == 3 ? infoAuth?.familyName : infoAuth?.name  }</p>
           </div>
         </div>
         <div className='div-search'>
@@ -111,5 +119,9 @@ class MainHeader extends Component {
     );
   }
 }
-
-export default MainHeader;
+const mapStateToProps = state => {
+  return {
+    authData: state.auth.authData
+  }
+}
+export default compose(connect(mapStateToProps))(MainHeader);

@@ -17,6 +17,7 @@ import ForgotPass from './Sign/ForgotPass';
 import ResetPass from './Sign/ResetPass';
 import Admin from './Admin';
 import ActiveAccount from './Sign/Login/activeaccount'
+import Changeprofile from './Profile/ChangeProfile';
 const routesConfig = app => [
   
   // {
@@ -40,6 +41,8 @@ const routesConfig = app => [
     childRoutes: [
       Dashboard(app),
       Admin(app),
+      Changeprofile(app),
+
     ]
   },
   {

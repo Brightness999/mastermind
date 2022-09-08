@@ -6,12 +6,11 @@ import { routerLinks } from "../../../constant";
 import intl from 'react-intl-universal';
 import messages from '../messages';
 import { url } from '../../../../utils/api/baseUrl';
-import { listRoleWithRouter } from '../../../../utils/auth/listRoleWithRouter';
-import { checkPermission } from '../../../../utils/auth/checkPermission';
 import axios from 'axios';
 import './index.less';
 import {decode as base64_decode, encode as base64_encode} from 'base-64';
-
+import { getInfoAuth } from '../../../../redux/features/authSlice';
+import {store} from '../../../../redux/store';
 // @connect(({ login, loading, global }) => ({
 //   global,
 //   login,
@@ -21,7 +20,6 @@ import {decode as base64_decode, encode as base64_encode} from 'base-64';
 export default class extends React.Component {
 
   componentDidMount() {
-    
     
     if(this.props.location.pathname.indexOf('/login/v') >=0){
       var base64Code = this.props.location.pathname.substring(8);
@@ -64,6 +62,7 @@ export default class extends React.Component {
   }
 
   onSubmit = async () => {
+
     try {
       const values = await this.form.validateFields();
       const response = await axios.post(url + 'users/login', values);
@@ -72,8 +71,9 @@ export default class extends React.Component {
       if (success) {
         console.log('token',  this.props.history , this.props.test1);
         localStorage.setItem('token', data.token);
-        this.props.history.push(routerLinks.Dashboard);
-        
+        localStorage.setItem('user', JSON.stringify(data.user));
+        store.dispatch(getInfoAuth(data.user.role,data.token));
+        data.user.role > 900 ? this.props.history.push(routerLinks.Admin) : this.props.history.push(routerLinks.Dashboard);
       }
     } catch (error) {
       console.log(error);

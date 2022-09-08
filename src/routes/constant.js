@@ -9,9 +9,10 @@ export const routerLinks = {
 
   Dashboard: '/account/dashboard',
   Admin: '/account/admin',
+  Changeprofile: '/account/changeprofile',
   Pages403: '/widget/403',
   Pages404: '/widget/404',
   Pages500: '/widget/500',
   Blank: '/widget/blank',
-  Home: '/home/home'
+  Home: '/home/home',
 };
