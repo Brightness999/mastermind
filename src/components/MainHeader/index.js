@@ -35,19 +35,20 @@ class MainHeader extends Component {
   render() {
     console.log(this.props,'props')
     const infoAuth  = this.props.authData ?? '';
+    const clientParent = this.props.authParent ?? '';
     const {user} = this.state;
     const menu = (
       <Menu
         items={[
-          // {
-          //   key: '1',
-          //   icon: <FaUserEdit size={18} color='#495057'/>,
-          //   label: (
-          //     <Link to={routerLinks.Changeprofile}>
-          //       Change Infomation
-          //     </Link>
-          //   ),
-          // },
+          {
+            key: '1',
+            icon: <FaUserEdit size={18} color='#495057'/>,
+            label: (
+              <Link to={routerLinks.Changeprofile}>
+                Change Infomation
+              </Link>
+            ),
+          },
           {
             key: '2',
             icon: <Badge size="small" count={6}><BiBell size={18} color='#495057'/></Badge>,
@@ -81,7 +82,7 @@ class MainHeader extends Component {
           </div>
           <div className='account-name'>
             <p className='mb-0'>{this.state.user.username}</p>
-            <p className='font-10 mb-0'>{ user.role == 3 ? infoAuth?.familyName : infoAuth?.name  }</p>
+            <p className='font-10 mb-0'>{ user.role == 3 ? clientParent?.familyName : infoAuth?.name  }</p>
           </div>
         </div>
         <div className='div-search'>
@@ -121,7 +122,9 @@ class MainHeader extends Component {
 }
 const mapStateToProps = state => {
   return {
-    authData: state.auth.authData
+    authData: state.auth.authData,
+    authParent: state.auth.authDataClientParent,
+    authChild : state.auth.authDataClientChild
   }
 }
 export default compose(connect(mapStateToProps))(MainHeader);

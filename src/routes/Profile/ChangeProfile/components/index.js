@@ -224,7 +224,7 @@ export default class extends React.Component {
           return <Info_availability />
         } else if (provider.info_services){
           return <Info_services />
-        } else if (provider.info_progress){
+        } else if (provider.subsidy_program){
           return <Subsidy_program />
         }
       default:

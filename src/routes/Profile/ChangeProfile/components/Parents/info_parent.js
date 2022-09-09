@@ -43,16 +43,17 @@ class InfoParent extends Component {
     }
 
     getDefaultObj=()=>{
+        const {authDataClientParent} = this.props.auth;
         return {
-            "maritialType": '0',
-            "address":"",
-            "familyName": "wong",
-            "fatherName": "su",
-            "fatherPhoneNumber": "0766667020",
-            "fatherEmail": "123@bcd.com",
-            "motherName": "fong",
-            "motherPhoneNumber": "0766667020",
-            "motherEmail": "321@dfg.com"
+            "maritialType": authDataClientParent.maritialType ?? '',
+            "address":authDataClientParent.address ?? '',
+            "familyName": authDataClientParent.familyName ?? '',
+            "fatherName": authDataClientParent.fatherName ?? '',
+            "fatherPhoneNumber": authDataClientParent.fatherPhoneNumber ?? '',
+            "fatherEmail": authDataClientParent.fatherEmail ?? '',
+            "motherName": authDataClientParent.motherName ?? '',
+            "motherPhoneNumber": authDataClientParent.motherPhoneNumber ?? '',
+            "motherEmail": authDataClientParent.motherEmail ?? ''
         };
     }
 
@@ -111,6 +112,7 @@ class InfoParent extends Component {
 
 
     render() {
+        console.log(this.props.auth.authData,' authDataauthDataauthData')
         return (
             <Row justify="center" className="row-form">
                 <div className='col-form col-info-parent'>
@@ -307,6 +309,7 @@ const mapStateToProps = (state) => {
     console.log('state in parent', state);
     return {
         register: state.register,
+        auth: state.auth
     };
 }
 

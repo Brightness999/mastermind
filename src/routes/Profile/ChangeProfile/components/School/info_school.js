@@ -36,22 +36,28 @@ class InfoSchool extends React.Component {
     componentDidMount() {
         this.loadCommunitiServer()
         const {registerData} = this.props.register;
+        const { authData } = this.props.auth
         console.log(registerData);
-        
-        if(!registerData.techContactRef || registerData.techContactRef.length ==0 ){
+        console.log(this.props.auth.authData,'authData')
+        if(!authData.techContactRef || authData.techContactRef.length ==0 ){
             this.setReduxForSchool('techContactRef',['']);
             this.form.setFieldsValue({techContactRef:[""]});
             // this.form.setFieldValue({techContactRef:[{}]});
         }
-
-        if(!registerData.studentContactRef || registerData.studentContactRef.length ==0 ){
+        if(authData.techContactRef || authData.techContactRef.length > 0 ){
+            // this.setReduxForSchool('techContactRef',['']);
+            console.log('voo dday')
+            this.form.setFieldsValue({techContactRef:'123213'});
+            // this.form.setFieldValue({techContactRef:[{}]});
+        }
+        if(!authData.studentContactRef || authData.studentContactRef.length ==0 ){
             this.setReduxForSchool('studentContactRef',['']);
             this.form.setFieldsValue({studentContactRef:[""]});
         }
         console.log('set field value');
-        this.form.setFieldsValue(registerData);
+        this.form.setFieldsValue(authData);
 
-        if(!registerData.sessionsInSchool||registerData.sessionsInSchool.length == 0){
+        if(!authData.sessionsInSchool||authData.sessionsInSchool.length == 0){
             var defaultIn = this.defaultTimeRangeItem();
             var defaultOut = this.defaultTimeRangeItem(false);
             this.setState({
@@ -59,11 +65,11 @@ class InfoSchool extends React.Component {
                 sessionsAfterSchool:[this.defaultTimeRangeItem(false),this.defaultTimeRangeItem(false),this.defaultTimeRangeItem(false)]
             }, this.callbackAfterSetState)
         }else{
-            console.log('redux for sessions ',registerData.sessionsInSchool);
-            console.log('redux for sessions ',registerData.sessionsAfterSchool);
+            console.log('redux for sessions ',authData.sessionsInSchool);
+            console.log('redux for sessions ',authData.sessionsAfterSchool);
             this.setState({
-                sessionsInSchool:registerData.sessionsInSchool,
-                sessionsAfterSchool:registerData.sessionsAfterSchool
+                sessionsInSchool:authData.sessionsInSchool,
+                sessionsAfterSchool:authData.sessionsAfterSchool
             })
         }
     }

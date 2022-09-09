@@ -6,7 +6,6 @@ const headers = {
 };
 export const checkRoleUser = (role, childRoutes) => {
     let newChildRoute = [];
-    console.log(getInfoSchool(),'getInfoSchool')
     switch (role) {
         case 999:
             newChildRoute = childRoutes.filter(item => item.key !== routerLinks.Dashboard); 
@@ -24,4 +23,3 @@ export const checkRoleUser = (role, childRoutes) => {
     }
     return newChildRoute
 }
-

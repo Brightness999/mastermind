@@ -36,14 +36,66 @@ class InfoProfile extends Component {
 
 
     componentDidMount() {
+        const { registerData } = this.props.register;
+        const { authData } = this.props;
+        console.log('authData',authData)
+        console.log(registerData);
+        this.getDataFromServer();
+        this.searchCityConnection('');
+        
+        var profileInfor = authData || this.getDefaultObj();
+        this.form.setFieldsValue(profileInfor);
+
+        // if (!authData) {
+        //     this.props.setRegisterData({ profileInfor: this.getDefaultObj() });
+        // }
         
     }
 
     getDataFromServer = () => {
+        axios.post(url + 'providers/get_default_values_for_provider'
+        ).then(result => {
+            console.log('get_default_value_for_client', result.data);
+            if (result.data.success) {
+                var data = result.data.data;
+                this.setState({ ContactNumberType: data.ContactNumberType , EmailType:data.EmailType, })
+            } else {
+                this.setState({
+                    checkEmailExist: false,
+                });
+
+            }
+
+        }).catch(err => {
+            console.log(err);
+            this.setState({
+                checkEmailExist: false,
+            });
+        })
     }
 
 
     searchCityConnection(value){
+        axios.post(url + 'providers/get_city_connections'
+        ).then(result => {
+            console.log('get_city_connections', result.data);
+            if (result.data.success) {
+                var data = result.data.data;
+                console.log('get_city_connections', data.docs);
+                this.setState({CityConnections: data.docs})
+            } else {
+                this.setState({
+                    CityConnections: [],
+                });
+
+            }
+
+        }).catch(err => {
+            console.log(err);
+            this.setState({
+                CityConnections: [],
+            });
+        })
         
     }
 
@@ -71,6 +123,8 @@ class InfoProfile extends Component {
 
     onFinish = (values) => {
         console.log('Success:', values);
+    this.props.setRegisterData({ profileInfor: values });
+        this.props.onContinue();
     };
 
     onFinishFailed = (errorInfo) => {
@@ -78,9 +132,18 @@ class InfoProfile extends Component {
     };
 
     setValueToReduxRegisterData = (fieldName, value) => {
+        const { registerData } = this.props.register;
+        var profileInfor = registerData.profileInfor;
+        var obj = {};
+        obj[fieldName] = value;
+        console.log(obj);
+        this.props.setRegisterData({ profileInfor: { ...profileInfor, ...obj } });
     }
 
     defaultOnValueChange = (event, fieldName) => {
+        var value = event.target.value;
+        console.log(fieldName, value);
+        this.setValueToReduxRegisterData(fieldName, value);
     }
 
     onConnectionsChanged = (selected) =>{
@@ -88,9 +151,15 @@ class InfoProfile extends Component {
     }
 
     handelChange = (event, fieldName) => {
+        var value = event;
+        console.log(fieldName, value);
+        this.setValueToReduxRegisterData(fieldName, value);
     }
 
     handleSelect = (value, fieldName) => {
+        console.log(value, fieldName);
+        this.setValueToReduxRegisterData(fieldName, value);
+        this.form.setFieldsValue({ [fieldName]: value });
     }
 
     render() {
@@ -385,5 +454,6 @@ class InfoProfile extends Component {
 
 const mapStateToProps = state => ({
     register: state.register,
+    authData: state.auth.authData
 })
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoProfile);

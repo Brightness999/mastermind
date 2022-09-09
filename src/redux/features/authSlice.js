@@ -4,6 +4,8 @@ import { helper } from '../../utils/auth/helper';
 import request,{generateSearchStructure} from '../../utils/api/request'
 const initialState = {
     authData: [],
+    authDataClientChild: [],
+    authDataClientParent: []
 };
 
 export const getInfoAuth = createAsyncThunk(
@@ -11,18 +13,20 @@ export const getInfoAuth = createAsyncThunk(
     async (role,token) => {
         try {
             let result = '';
+            let resultParent = {};
+            let resultChild = {};
             switch (role) {
                 case 60:
-                    result = await request.post(url+'schools/get_my_school_info' ,{}, token)
-                break;
+                    result = await request.post(url+'schools/get_my_school_info' ,{}, token);
+                return result.data;
                 case 30:
-                    result = await request.post(url+'providers/get_my_provider_info' ,{}, token)
-                break;
+                    result = await request.post(url+'providers/get_my_provider_info' ,{}, token);
+                return result.data;
                 case 3:
-                    result = await request.post(url+'clients/get_parent_profile' ,{}, token)
-                break;
+                    resultParent = await request.post(url+'clients/get_parent_profile' ,{}, token);
+                    resultChild = await request.post(url+'clients/get_child_profile' ,{}, token);
+                return {parent: resultParent.data, child: resultChild.data};
             }
-            return result.data;
         } catch (error) {
           console.log('error',error)
         }
@@ -38,13 +42,23 @@ export const authSlice = createSlice({
             console.log(state , state.history);
             localStorage.removeItem('token');
             state.authData = [];
+            state.authDataClientChild = [];
+            state.authDataClientParent = [];
             helper.history.push('/');
         }
 
     },
     extraReducers:{
         [getInfoAuth.fulfilled]: (state, action) => {
-            state.authData = action.payload;
+            const user = localStorage.getItem('user') && JSON.parse(localStorage.getItem('user'))
+            if(user.role == 3){
+                console.log(action.payload, 'action.payload')
+                state.authDataClientChild = action.payload.child;
+                state.authDataClientParent = action.payload.parent;
+            } else {
+                state.authData = action.payload;
+            }
+            
         },
     }
 });

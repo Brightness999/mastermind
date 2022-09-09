@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 const { Content } = Layout;
 import { checkPermission } from '../utils/auth/checkPermission';
 import { routerLinks } from "../routes/constant";
-@connect()
+// @connect()
 class UserLayout extends React.PureComponent {
 
   componentDidMount() {

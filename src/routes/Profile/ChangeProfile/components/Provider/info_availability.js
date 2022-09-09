@@ -34,7 +34,26 @@ class InfoAvailability extends Component {
     }
 
     componentDidMount() {
-       
+        let {registerData} = this.props.register;
+        console.log(registerData,'registerData')
+        if (!!registerData.step4) {
+            this.form?.setFieldsValue({
+                ...registerData.step4
+            })
+
+            this.setState({
+                isPrivate: registerData.isPrivate
+            })
+        }else{
+            day_week.map((day)=>{
+                this.form.setFieldValue(day, [''])
+            })
+            
+            
+            
+        }
+
+        this.getDataFromServer();
     }
 
     defaultTimeRangeItem = (dayInWeek)=>{

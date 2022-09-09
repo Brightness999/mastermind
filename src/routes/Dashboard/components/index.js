@@ -44,6 +44,7 @@ const { TabPane } = Tabs;
 
 import { socketUrl , socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request,{generateSearchStructure} from '../../../utils/api/request'
+import moment from 'moment';
 
 export default class extends React.Component {
   constructor(props) {
@@ -69,6 +70,7 @@ export default class extends React.Component {
       listDependents:[],
       parentInfo:{},
       providerInfo:{},
+      listAppoinmentsRecent:[],
     }
   }
   componentDidMount(){
@@ -329,9 +331,20 @@ export default class extends React.Component {
     request.post(url).then(result=>{
       var data = result.data;
       console.log('get_my_appointments',data);
-  
+      this.setState({listAppoinmentsRecent: data.docs});
     })
 
+  }
+
+  renderListAppoinmentsRecent = (appoinment , index)=>{
+      
+    return ( <div key={index} className={appoinment.status ==-1 || appoinment.status ==2?'item-feed done': 'item-feed'}>
+      <p className='font-700'>{appoinment.dependent.firstName} {appoinment.dependent.lastName}</p>
+      <p>{appoinment.provider.name}</p>
+      <p>{appoinment.location}</p>
+      <p>{moment(appoinment.date).format('hh:mm a')}</p>
+      <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{moment(appoinment.date).fromNow()}</p>
+    </div>);
   }
 
   render() {
@@ -461,6 +474,8 @@ export default class extends React.Component {
     ];
     
     
+    
+
     return (
       <div className="full-layout page dashboard-page">
         <div className='div-show-subsidy' onClick={this.onShowModalSubsidy} />
@@ -470,24 +485,10 @@ export default class extends React.Component {
               <p className='font-16 text-white mb-0'>{intl.formatMessage(messages.activityFeed)}</p>
             </div>
             <div className='div-list-feed'>
-              {new Array(10).fill(null).map((_, index) => <div key={index} className='item-feed'>
-                <p className='font-700'>Dependent #1 Name</p>
-                <p>event-type</p>
-                <p>provider-name</p>
-                <p>location</p>
-                <p>date/time</p>
-                <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{intl.formatMessage(messages.today)}</p>
-              </div>)}
+              {this.state.listAppoinmentsRecent.map((appoinment, index) => this.renderListAppoinmentsRecent(appoinment , index))}
 
 
-              <div className='item-feed done'>
-                <p className='font-700'>Dependent #1 Name</p>
-                <p>event-type</p>
-                <p>provider-name</p>
-                <p>location</p>
-                <p>date/time</p>
-                <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{intl.formatMessage(messages.today)}</p>
-              </div>
+             
             </div>
           </section>
           <section className='div-calendar box-card'>

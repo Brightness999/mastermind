@@ -55,6 +55,7 @@ class InfoChild extends Component {
     componentDidMount() {
 
         const { registerData } = this.props.register;
+        const { authDataClientChild } = this.props.auth;
 
         this.setState({
             parentInfo: registerData.parentInfo
@@ -67,8 +68,10 @@ class InfoChild extends Component {
         }
         
         var newChild =this.getDefaultChildObj(registerData.parentInfo);
-        var studentInfos = !!registerData.studentInfos? JSON.parse(JSON.stringify(registerData.studentInfos)) : [newChild,newChild,newChild];
+        // var studentInfos = !!registerData.studentInfos? JSON.parse(JSON.stringify(registerData.studentInfos)) : [newChild,newChild,newChild];
         
+        var studentInfos = !!authDataClientChild? JSON.parse(JSON.stringify(authDataClientChild)) : [newChild,newChild,newChild];
+        // console.log(studentInfos,'studentInfos')
         
         if(!registerData.studentInfos){
             
@@ -78,17 +81,11 @@ class InfoChild extends Component {
             this.props.setRegisterData({studentInfos:studentInfos});
         }
 
-        
-        for(var i = 0 ; i < studentInfos.length ; i++){
-            if((studentInfos[i].birthday+'').length >0){
-                studentInfos[i].birthday_moment =  moment(studentInfos[i].birthday);
-                // var obj = {};
-                // obj[(i+'birthday_moment')] = moment(studentInfos[i].birthday);
-                // console.log(this.form.get)
-                // this.form.setFieldValue(obj);
-            }
-        }
-        this.form.setFieldsValue({children:studentInfos});
+        const newStudentInfos = studentInfos.map(item => (
+            {...item,birthday_moment: moment(item.birthday,'YYYY/MM/DD')}
+        ))
+        console.log(newStudentInfos,'newStudentInfos')
+        this.form.setFieldsValue({children:newStudentInfos});
         
         this.loadServices();
     }
@@ -116,8 +113,9 @@ class InfoChild extends Component {
     }
 
     getDefaultChildObj(parentInfo) {
+        const { authDataClientChild } = this.props.auth;
         var obj = {
-            "firstName": "",
+            "firstName": '',
             "lastName": "",
             "birthday": "",
             "guardianPhone": "",
@@ -148,16 +146,17 @@ class InfoChild extends Component {
         var selectedObj = { ...studentInfos[index] };
         selectedObj[fieldName] = value;
         studentInfos[index] = selectedObj;
-        console.log(selectedObj, fieldName, value);
+        console.log(selectedObj, fieldName, value,'xzcnmzxncm,xznm,');
         this.props.setRegisterData({ studentInfos: studentInfos });
     }
 
     getBirthday = (index) => {
         console.log(index,'birtday index')
-        if (!!this.props.register.studentInfos && this.props.register.studentInfos[index] != undefined && !!this.props.register.studentInfos[index].birthday_moment) {
-            console.log('da load birthday ', this.props.register.studentInfos[index].birthday_moment)
+        const { authDataClientChild } = this.props.auth;
+        if (!!authDataClientChild && authDataClientChild[index] != undefined && !!authDataClientChild[index].birthday_moment) {
+            console.log('da load birthday ', authDataClientChild[index].birthday_moment)
         
-            return this.props.register.studentInfos[index].birthday_moment;
+            return authDataClientChild[index].birthday_moment;
         }
         return moment();
     }
@@ -218,6 +217,8 @@ class InfoChild extends Component {
     }
 
     render() {
+        console.log(this.props.auth.authDataClientChild, 'authDataClientChild')
+        console.log(moment().toDate().getTime(),'moment().toDate().getTime()')
         return (
             <Row justify="center" className="row-form">
                 <div className='col-form col-info-child'>
@@ -235,9 +236,11 @@ class InfoChild extends Component {
                     >
                         <Form.List name="children">
                            
-                            {(fields, { add, remove }) => (
+                            {
+                                (fields, { add, remove }) => (
                                 <div>
                                     {fields.map((field, index) => {
+                                        console.log(field,'fieldzxczx')
                                         return (
                                             <div key={field.key} className='div-dependent-form'>
                                                 <div className='flex flex-row items-center justify-between mb-10'>
@@ -463,6 +466,7 @@ const mapStateToProps = state => {
     console.log('state', state);
     return ({
         register: state.register,
+        auth: state.auth
     })
 }
 
