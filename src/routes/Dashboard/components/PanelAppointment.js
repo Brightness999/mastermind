@@ -31,7 +31,7 @@ class PanelAppointment extends React.Component {
         <Tabs defaultActiveKey="1" type="card" size='small'>
             <TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                 {
-                appointments.map((data,index) => {
+                !!appointments&&appointments.map((data,index) => {
                     if(data.status == 0){
                     let serviceType = ''
                     return (
@@ -63,7 +63,7 @@ class PanelAppointment extends React.Component {
                 }
             </TabPane>
             <TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
-            {appointments.map((data, index) => {
+            {!!appointments&&appointments.map((data, index) => {
                 if(data.status == 2){
                 let serviceType = ''
                 return (
@@ -95,7 +95,7 @@ class PanelAppointment extends React.Component {
             )}
             </TabPane>
             <TabPane tab={intl.formatMessage(messages.past)} key="3">
-            {appointments.map((data, index) =>{
+            {!!appointments&&appointments.map((data, index) =>{
                 if(data.status == 1 || data.status == -1){
                 let serviceType = ''
                 return (

@@ -94,13 +94,16 @@ export default class extends React.Component {
           }, 
           token: loginData.token
         }
-        // get list appointments
-        this.getMyAppointments();
-        store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth))
+        
+        
         // const newAppointments = 
         this.setState({
           calendarEvents: appointmentsMonth,
           userRole:loginData.user.role
+        },()=>{
+          // get list appointments
+          this.getMyAppointments();
+          store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth))
         })
         
       }).catch(err=>{
@@ -377,9 +380,14 @@ export default class extends React.Component {
     }
 
     request.post(url).then(result=>{
-      var data = result.data;
-      console.log(url,data, this.state.userRole);
-      this.setState({listAppoinmentsRecent: data.docs});
+      if(result.success){
+        var data = result.data;
+        console.log(url,data, this.state.userRole);
+        this.setState({listAppoinmentsRecent: data.docs});
+      }else{
+        this.setState({listAppoinmentsRecent: []});
+      }
+      
     })
 
   }
@@ -862,7 +870,7 @@ export default class extends React.Component {
         {this.modalAppointments()}
         
         
-        <ModalNewAppointment {...modalNewAppointProps}/>
+        
         <ModalSubsidyProgress {...modalSubsidyProps}/>
         <ModalReferralService {...modalReferralServiceProps}/>
       </div>
