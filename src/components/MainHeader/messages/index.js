@@ -9,4 +9,16 @@ export default {
     id: `${scope}.search`,
     defaultMessage: 'Search',
   },
+  editProfile: {
+    id: `${scope}.editProfile`,
+    defaultMessage: 'Edit Profile',
+  },
+  notification: {
+    id: `${scope}.notification`,
+    defaultMessage: 'Notification',
+  },
+  logOut: {
+    id: `${scope}.logOut`,
+    defaultMessage: 'Log Out',
+  },
 };

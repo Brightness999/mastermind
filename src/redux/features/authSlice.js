@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { helper } from '../../utils/auth/helper';
 import request,{generateSearchStructure} from '../../utils/api/request'
 const initialState = {
+    user: [],
     authData: [],
     authDataClientChild: [],
     authDataClientParent: []
@@ -34,17 +35,65 @@ export const getInfoAuth = createAsyncThunk(
     }
 )
 
+export const setInforClientChild = createAsyncThunk(
+    'auth/setInforClientChild',
+    async (data) => {
+        try {
+            const result = await request.post(url+'clients/update_child_profile' ,data.data, data.token);
+        } catch (error) {
+            console.log(error,'error')
+        }
+        return false
+    }
+)
+export const setInforClientParent = createAsyncThunk(
+    'auth/setInforClientParent',
+    async (data) => {
+        try {
+            await request.post(url+'clients/update_parent_profile' ,data.data, data.token);
+        } catch (error) {
+            console.log(error,'error')
+        }
+        return false
+    }
+)
+export const setInforProvider = createAsyncThunk(
+    'auth/setInforProvider',
+    async (data) => {
+        try {
+            await request.post(url+'providers/update_my_provider_profile' ,data.data, data.token);
+        // return false
+        } catch (error) {
+            console.log(error,'error')
+        }
+        return false
+    }
+)
 export const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
+        setUser (state, action) {
+            state.user = action.payload
+        },
+        changeInforClientChild (state, action) {
+            state.authDataClientChild = action.payload
+        },
+        changeInforClientChild (state, action) {
+            state.authDataClientChild = action.payload
+        },
+        changeInfor (state, action) {
+            state.authData = action.payload
+        },
         logout(state) {
             console.log(state , state.history);
             localStorage.removeItem('token');
-            state.authData = [];
-            state.authDataClientChild = [];
-            state.authDataClientParent = [];
             helper.history.push('/');
+            
+        },
+        removeUser () {
+            localStorage.removeItem('user'),
+            state.initialState = {...initialState}
         }
 
     },
@@ -52,7 +101,6 @@ export const authSlice = createSlice({
         [getInfoAuth.fulfilled]: (state, action) => {
             const user = localStorage.getItem('user') && JSON.parse(localStorage.getItem('user'))
             if(user.role == 3){
-                console.log(action.payload, 'action.payload')
                 state.authDataClientChild = action.payload.child;
                 state.authDataClientParent = action.payload.parent;
             } else {
@@ -63,6 +111,6 @@ export const authSlice = createSlice({
     }
 });
 
-export const { logout, setAuthData } = authSlice.actions;
+export const { logout, setAuthData, setUser, removeUser, changeInforClientChild, changeInforClientParent, changeInfor } = authSlice.actions;
 
 export default authSlice.reducer;

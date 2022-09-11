@@ -130,7 +130,8 @@
 }
 
 .modal-current,
-.modal-new {
+.modal-new,
+.modal-referral-service {
   .header-current {
     background-color: @primary-color-dark;
     padding: 10px 15px;
@@ -151,12 +152,56 @@
     line-height: 1.5;
   }
   p { margin-bottom: 5px;}
+  .hands-img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    margin-left: 10px;
+  }
   .new-appointment {
     padding: 10px 15px;
   }
   .provider-profile {
     border: 1px solid @gray250;
     width: 100%;
+  }
+
+  .ant-input-sm {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.87);
+    border-color: #d7d7d7;
+    height: 24px;
+  }
+  .btn-upload {
+    font-size: 12px!important;
+    svg {
+      vertical-align: top;
+      margin-left: 5px;
+    }
+  }
+
+  .upload-document {
+    overflow: hidden;
+    .ant-upload.ant-upload-select { 
+      float: left;
+      height: 100%;
+      display: flex;
+      align-items: center;
+
+      .ant-upload { display: inline-block;}
+    }
+    .ant-upload-list {
+      display: flex;
+      flex-direction: column;
+      padding-left: 10px;
+      &-item {
+        margin-top: 0;
+      }
+      &-item-name {
+        font-size: 12px;
+      }
+    }
+    .ant-upload-text-icon { display: none;}
   }
  
   .doctor-content {
@@ -204,6 +249,15 @@
         overflow: visible;
       }
     }
+  }
+}
+.modal-no-show,
+.modal-balance {
+  .ant-btn-primary {
+    font-weight: 400;
+    font-size: 14px;
+    height: 38px;
+    line-height: 1.5;
   }
 }
 

@@ -7,3 +7,4 @@ package-lock.json
 /build
 package-lock.json
 src\utils\api\baseUrl.js
+src/utils/api/baseUrl.js

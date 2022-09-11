@@ -11,11 +11,13 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
-
+import {setInforProvider, changeInfor} from '../../../../../redux/features/authSlice';
+import {store} from '../../../../../redux/store'
 class InfoProfile extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            dataForm: [],
             phone_contact: [
                 { phone: "Phone 1" },
             ],
@@ -38,12 +40,11 @@ class InfoProfile extends Component {
     componentDidMount() {
         const { registerData } = this.props.register;
         const { authData } = this.props;
-        console.log('authData',authData)
-        console.log(registerData);
+
         this.getDataFromServer();
         this.searchCityConnection('');
-        
-        var profileInfor = authData || this.getDefaultObj();
+        var profileInfor = this.getDefaultObj(authData);
+        this.setState({dataForm: authData})
         this.form.setFieldsValue(profileInfor);
 
         // if (!authData) {
@@ -101,30 +102,34 @@ class InfoProfile extends Component {
 
 
 
-    getDefaultObj = () => {
+    getDefaultObj = (data) => {
         return {
-            agency: "",
-            billingAddress: "",
+            agency: data.agency,
+            billingAddress: data.billingAddress,
             cityConnection: undefined,
-            licenseNumber: "",
-            proExp: "",
-            referredToAs: "",
-            serviceAddress: "",
-            contactEmail: [{
-                email: "",
-                type: 0
-            }],
-
-            contactNumber: [{
-                phoneNumber: "", type: 0
-            }],
+            licenseNumber: data.licenseNumber,
+            proExp: data.proExp,
+            referredToAs: data.referredToAs,
+            serviceAddress: data.serviceAddress,
+            contactEmail: data.contactEmail,
+            contactNumber: data.contactNumber
         };
     }
-
+    updateProfile = async() => {
+        const {dataForm} = this.state
+        const {authData} = this.props
+        const token = localStorage.getItem('token');
+        const values = await this.form.validateFields();
+        const valuesForm = {...values,id: authData.id}
+        try {
+            store.dispatch(setInforProvider({data: valuesForm, token: token}))
+            this.props.changeInfor(dataForm)
+        } catch (error) {
+            console.log(error,'error')
+        }
+    }
     onFinish = (values) => {
         console.log('Success:', values);
-    this.props.setRegisterData({ profileInfor: values });
-        this.props.onContinue();
     };
 
     onFinishFailed = (errorInfo) => {
@@ -141,9 +146,12 @@ class InfoProfile extends Component {
     }
 
     defaultOnValueChange = (event, fieldName) => {
+        const {dataForm} = this.state
         var value = event.target.value;
-        console.log(fieldName, value);
-        this.setValueToReduxRegisterData(fieldName, value);
+        const newData = {...dataForm}
+        newData[fieldName] = value
+        this.setState({dataForm: newData})
+        // this.setValueToReduxRegisterData(fieldName, value);
     }
 
     onConnectionsChanged = (selected) =>{
@@ -311,7 +319,7 @@ class InfoProfile extends Component {
                         >
                             <Input onChange={v => this.defaultOnValueChange(v, "agency")} placeholder={intl.formatMessage(messages.agency)} />
                         </Form.Item>
-                        <Form.List name="contactNumber">
+                        <Form.List name="contactNumber mb-10">
                             {(fields, { add, remove }) => (
                                 <>
                                     {fields.map(({ key, name, ...restField }) => (
@@ -355,21 +363,11 @@ class InfoProfile extends Component {
                                             </Col>
                                         </Row>
                                     ))}
-                                    <Form.Item className='text-center mb-0'>
-                                        <Button
-                                            type="text"
-                                            className='add-number-btn mb-10'
-                                            icon={<BsPlusCircle size={17} className='mr-5' />}
-                                            onClick={() => add()}
-                                        >
-                                            {intl.formatMessage(messages.addNumber)}
-                                        </Button>
-                                    </Form.Item>
                                 </>
                             )}
                         </Form.List>
 
-                        <Form.List name="contactEmail">
+                        <Form.List name="contactEmail mb-10">
                             {(fields, { add, remove }) => (
                                 <>
                                     {fields.map(({ key, name, ...restField }) => (
@@ -414,16 +412,6 @@ class InfoProfile extends Component {
                                             </Col>
                                         </Row>
                                     ))}
-                                    <Form.Item className='text-center mb-0'>
-                                        <Button
-                                            type="text"
-                                            className='add-number-btn mb-10'
-                                            icon={<BsPlusCircle size={17} className='mr-5' />}
-                                            onClick={() => add()}
-                                        >
-                                            {intl.formatMessage(messages.addEmail)}
-                                        </Button>
-                                    </Form.Item>
                                 </>
                             )}
                         </Form.List>
@@ -440,9 +428,9 @@ class InfoProfile extends Component {
                                 block
                                 type="primary"
                                 htmlType="submit"
-                            // onClick={this.props.onContinue}
+                                onClick={this.updateProfile}
                             >
-                                {intl.formatMessage(messages.continue).toUpperCase()}
+                                {intl.formatMessage(messages.update).toUpperCase()}
                             </Button>
                         </Form.Item>
                     </Form>
@@ -456,4 +444,4 @@ const mapStateToProps = state => ({
     register: state.register,
     authData: state.auth.authData
 })
-export default compose(connect(mapStateToProps, { setRegisterData }))(InfoProfile);
+export default compose(connect(mapStateToProps, { setRegisterData,changeInfor }))(InfoProfile);

@@ -19,7 +19,8 @@ import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsEnvelope, BsFilter, BsXCircle, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill, BsCheckCircleFill } from 'react-icons/bs';
-import { ModalNewAppointment,ModalNewAppointmentForParents, ModalSubsidyProgress } from '../../../components/Modal';
+import { ModalNewAppointment,ModalNewAppointmentForParents, ModalSubsidyProgress ,ModalReferralService} from '../../../components/Modal';
+
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
 import DrawerDetailPost from '../../../components/DrawerDetailPost';
@@ -46,6 +47,13 @@ import { socketUrl , socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request,{generateSearchStructure} from '../../../utils/api/request'
 import moment from 'moment';
 
+import {changeTime, getAppointmentsMonthData, removeAppoint} from '../../../redux/features/appointmentsSlice'
+import {store} from '../../../redux/store'
+
+
+import { routerLinks } from "../../constant";
+import PanelAppointment from './PanelAppointment';
+
 export default class extends React.Component {
   constructor(props) {
     super(props);
@@ -56,28 +64,45 @@ export default class extends React.Component {
       visibleDetailPost: false,
       visibleNewAppoint: false,
       visibleSubsidy: false,
+      visiblReferralService: false,
       isEventDetail: false,
+      idEvent:0,
       isMonth: 1,
       isGridDayView: 'Grid',
 
       canDrop: true,
       calendarWeekends: true,
-      calendarEvents: [
-        // initial event data
-        { title: "Event Now", start: new Date(), allDay: true }
-      ],
+      calendarEvents: store.getState().appointments.dataAppointmentsMonth ?? events,
       userRole:-1,
       listDependents:[],
       parentInfo:{},
       providerInfo:{},
       listAppoinmentsRecent:[],
+      listAppoinmentsFilter:[],
     }
   }
   componentDidMount(){
     if(!!localStorage.getItem('token')&&localStorage.getItem('token').length >0){
       checkPermission().then(loginData=>{
-        console.log('login data',loginData);
-        this.setState({userRole:loginData.user.role  })
+        loginData.user.role > 900 && this.props.history.push(routerLinks.Admin)
+        const appointmentsMonth = store.getState().appointments.dataAppointmentsMonth
+        const dataFetchAppointMonth = {
+          role: loginData.user.role, 
+          data: {
+            month: moment().month() + 1, 
+            year:  moment().year()
+          }, 
+          token: loginData.token
+        }
+        // get list appointments
+        this.getMyAppointments();
+        store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth))
+        // const newAppointments = 
+        this.setState({
+          calendarEvents: appointmentsMonth,
+          userRole:loginData.user.role
+        })
+        
       }).catch(err=>{
         this.props.history.push('/');
       })
@@ -90,11 +115,8 @@ export default class extends React.Component {
     script.async = true;
     script.onload = () => this.scriptLoaded();
     document.body.appendChild(script);
-
-
-    // get list appointments
-    this.getMyAppointments();
   }
+
 
   scriptLoaded = ()=>{
     let opts = {
@@ -248,6 +270,14 @@ export default class extends React.Component {
     this.setState({ visibleSubsidy: false });
   };
 
+  onShowModalReferral = () => {
+    this.setState({ visiblReferralService: true });
+  };
+
+  onCloseModalReferral = () => {
+    this.setState({ visiblReferralService: false });
+  };
+
   handleDateClick = arg => {
     // eslint-disable-next-line no-restricted-globals
     if (confirm("Would you like to add an event to " + arg.dateStr + " ?")) {
@@ -294,9 +324,20 @@ export default class extends React.Component {
       }, true) // temporary=true, will get overwritten when reducer gives new events
     }
   }
-  handleEventClick = () => {
-
-    // this.setState({ isEventDetail: !this.state.isEventDetail });
+  handleEventClick = (val) => {
+    if(val?.event){
+      const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : 0
+      this.setState({ 
+        isEventDetail: !this.state.isEventDetail,
+        idEvent: id
+      });
+    } else {
+      this.setState({ 
+        isEventDetail: !this.state.isEventDetail,
+        calendarEvents: val.data
+      });
+    }
+    
   }
   handleEventAdd = (addInfo) => {
     this.props.createEvent(addInfo.event.toPlainObject())
@@ -307,11 +348,17 @@ export default class extends React.Component {
   }
 
   handleEventChange = (changeInfo) => {
-    this.props.updateEvent(changeInfo.event.toPlainObject())
-      .catch(() => {
-        reportNetworkError()
-        changeInfo.revert()
-      })
+    const { calendarEvents } = this.state
+    const obj = changeInfo.event.toPlainObject();
+    const data = {
+      token: localStorage.getItem('token'),
+      role: this.state.userRole,
+      data: {
+        appointId: obj.extendedProps._id,
+        date: new Date(obj.start).getTime()
+      }
+    }
+    store.dispatch(changeTime(data))
   }
 
   handleEventRemove = (removeInfo) => {
@@ -320,17 +367,18 @@ export default class extends React.Component {
         reportNetworkError()
         removeInfo.revert()
       })
+    // store.dispatch(removeAppoint(data))
   }
 
   getMyAppointments(){
     var url  = 'clients/get_my_appointments';
-    if(this.state.userRole == 30){
+    if(this.state.userRole === 30){
       url = 'providers/get_my_appointments'
     }
 
     request.post(url).then(result=>{
       var data = result.data;
-      console.log('get_my_appointments',data);
+      console.log(url,data, this.state.userRole);
       this.setState({listAppoinmentsRecent: data.docs});
     })
 
@@ -347,31 +395,74 @@ export default class extends React.Component {
     </div>);
   }
 
+
+  genExtraTime = () => (
+    <BsClockHistory
+      size={18}
+      onClick={() => { }}
+    />
+  );
+  genExtraFlag = () => (
+    <Badge size="small" count={2}>
+      <BsFillFlagFill
+        size={18}
+        onClick={() => { }}
+      />
+    </Badge>
+  );
+  
+  renderPanelAppointmentForProvider = ()=>{
+    const appointments = store.getState().appointments.dataAppointments
+    if(this.state.userRole == 30)
+    return (<Panel
+      key="1"
+      header={intl.formatMessage(messages.appointments)}
+      extra={this.genExtraTime()}
+      className='appointment-panel'
+    >
+      <PanelAppointment 
+        appointments={appointments.docs}
+
+      />
+    </Panel>);
+  }
+  renderPanelAppointmentUpcoming = () => {
+    
+          
+    return (
+      <div key={1} className='list-item'>
+          <div className='item-left'>
+            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
+            <div className='div-service'>
+              <p className='font-11 mb-0'>Service Type</p>
+              <p className='font-09 mb-0'>Provide Name</p>
+            </div>
+            <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
+            <div className='ml-auto'>
+              <p className='font-12 mb-0'>Time</p>
+              <p className='font-12 font-700 mb-0'>Date</p>
+            </div>
+          </div>
+          <div className='item-right'>
+            <GiBackwardTime size={19} onClick={() => { }} />
+            <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+          </div>
+      </div>
+    )
+  }
   render() {
     const {
       isFilter,
       visibleDetail,
       visibleDetailPost,
       visibleNewAppoint,
-      visibleSubsidy,
+      visibleSubsidy, 
+      visiblReferralService,
       isEventDetail,
       isMonth,
       isGridDayView
     } = this.state;
-    const genExtraTime = () => (
-      <BsClockHistory
-        size={18}
-        onClick={() => { }}
-      />
-    );
-    const genExtraFlag = () => (
-      <Badge size="small" count={2}>
-        <BsFillFlagFill
-          size={18}
-          onClick={() => { }}
-        />
-      </Badge>
-    );
+    
     const btnMonthToWeek = (
       <Button className='btn-type' onClick={this.handleMonthToWeek}>
         {isMonth ? intl.formatMessage(messages.month) : intl.formatMessage(messages.week)}
@@ -397,6 +488,8 @@ export default class extends React.Component {
         <p className='font-15'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
       </div>
     );
+  
+
     const menu = (
       <Menu
         items={[
@@ -472,10 +565,21 @@ export default class extends React.Component {
         value: 'referrals2',
       },
     ];
-    
-    
-    
-
+    const modalNewAppointProps = {
+      visible: visibleNewAppoint,
+      onSubmit: this.onSubmitModalNewAppoint,
+      onCancel: this.onCloseModalNewAppoint,
+    };
+    const modalSubsidyProps = {
+      visible: visibleSubsidy,
+      onSubmit: this.onCloseModalSubsidy,
+      onCancel: this.onCloseModalSubsidy,
+    };
+    const modalReferralServiceProps = {
+      visible: visiblReferralService,
+      onSubmit: this.onCloseModalReferral,
+      onCancel: this.onCloseModalReferral,
+    };
     return (
       <div className="full-layout page dashboard-page">
         <div className='div-show-subsidy' onClick={this.onShowModalSubsidy} />
@@ -566,12 +670,12 @@ export default class extends React.Component {
                 weekends={this.state.calendarWeekends}
                 datesSet={this.handleDates}
                 // select={this.handleDateSelect}
-                // events={this.state.calendarEvents}
-                events={events}
+                events={this.state.calendarEvents}
+                // events={events}
                 eventContent={renderEventContent}
                 eventClick={this.handleEventClick}
                 // eventAdd={this.handleEventAdd}
-                // eventChange={this.handleEventChange} // called for drag-n-drop/resize
+                eventChange={this.handleEventChange} // called for drag-n-drop/resize
                 eventRemove={this.handleEventRemove}
               // ref={this.calendarComponentRef}
               />
@@ -589,7 +693,7 @@ export default class extends React.Component {
                   </Button>
                 </Dropdown>
               </div></>}
-            {isEventDetail && <EventDetail backView={this.handleEventClick} />}
+            {isEventDetail && <EventDetail backView={this.handleEventClick} id={this.state.idEvent} role={this.state.userRole} calendarEvents={this.state.calendarEvents}/>}
           </section>
           <section className='div-multi-choice'>
             <Collapse
@@ -597,81 +701,7 @@ export default class extends React.Component {
               expandIcon={({ isActive }) => isActive ? <BsFillDashSquareFill size={18} /> : <BsFillPlusSquareFill size={18} />}
               expandIconPosition={'end'}
             >
-              <Panel
-                key="1"
-                header={intl.formatMessage(messages.appointments)}
-                extra={genExtraTime()}
-                className='appointment-panel'
-              >
-                <Tabs defaultActiveKey="1" type="card" size='small'>
-                  <TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {new Array(10).fill(null).map((_, index) =>
-                      <div key={index} className='list-item'>
-                        <div className='item-left'>
-                          <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
-                          <div className='div-service'>
-                            <p className='font-11 mb-0'>Service Type</p>
-                            <p className='font-09 mb-0'>Provide Name</p>
-                          </div>
-                          <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
-                          <div className='ml-auto'>
-                            <p className='font-12 mb-0'>Time</p>
-                            <p className='font-12 font-700 mb-0'>Date</p>
-                          </div>
-                        </div>
-                        <div className='item-right'>
-                          <GiBackwardTime size={19} onClick={() => { }} />
-                          <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => { }} />
-                        </div>
-                      </div>
-                    )}
-                  </TabPane>
-                  <TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
-                    {new Array(10).fill(null).map((_, index) =>
-                      <div key={index} className='list-item'>
-                        <div className='item-left'>
-                          <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
-                          <div className='div-service'>
-                            <p className='font-11 mb-0'>Service Type</p>
-                            <p className='font-09 mb-0'>Provide Name</p>
-                          </div>
-                          <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
-                          <div className='ml-auto'>
-                            <p className='font-12 mb-0'>Time</p>
-                            <p className='font-12 font-700 mb-0'>Date</p>
-                          </div>
-                        </div>
-                        <div className='item-right'>
-                          <BsFillFlagFill size={15} onClick={() => { }} />
-                          <BsCheckCircleFill className='text-green500' style={{ marginTop: 4 }} size={15} onClick={() => { }} />
-                        </div>
-                      </div>
-                    )}
-                  </TabPane>
-                  <TabPane tab={intl.formatMessage(messages.past)} key="3">
-                    {new Array(10).fill(null).map((_, index) =>
-                      <div key={index} className='list-item'>
-                        <div className='item-left'>
-                          <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
-                          <div className='div-service'>
-                            <p className='font-11 mb-0'>Service Type</p>
-                            <p className='font-09 mb-0'>Provide Name</p>
-                          </div>
-                          <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
-                          <div className='ml-auto'>
-                            <p className='font-12 mb-0'>Time</p>
-                            <p className='font-12 font-700 mb-0'>Date</p>
-                          </div>
-                        </div>
-                        <div className='item-right'>
-                          <BsEnvelope size={15} onClick={() => { }} />
-                          <BsFillFlagFill style={{ marginTop: 4 }} size={15} onClick={() => { }} />
-                        </div>
-                      </div>
-                    )}
-                  </TabPane>
-                </Tabs>
-              </Panel>
+              {this.renderPanelAppointmentForProvider()}
               <Panel header={intl.formatMessage(messages.referrals)} key="2">
                 {new Array(10).fill(null).map((_, index) =>
                   <div key={index} className='list-item padding-item'>
@@ -735,7 +765,7 @@ export default class extends React.Component {
                   </TabPane>
                 </Tabs>
               </Panel>
-              <Panel header={intl.formatMessage(messages.flags)} key="5" extra={genExtraFlag()}>
+              <Panel header={intl.formatMessage(messages.flags)} key="5" extra={this.genExtraFlag()}>
                 {new Array(10).fill(null).map((_, index) =>
                   <div key={index} className='list-item padding-item'>
                     <Avatar size={24} icon={<FaUser size={12} />} />
@@ -832,6 +862,9 @@ export default class extends React.Component {
         {this.modalAppointments()}
         
         
+        <ModalNewAppointment {...modalNewAppointProps}/>
+        <ModalSubsidyProgress {...modalSubsidyProps}/>
+        <ModalReferralService {...modalReferralServiceProps}/>
       </div>
     );
   }

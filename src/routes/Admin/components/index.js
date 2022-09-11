@@ -37,6 +37,8 @@ import msgDashboard from '../../Dashboard/messages';
 import msgCreateAccount from '../../Sign/CreateAccount/messages';
 import EventDetail from './EventDetail';
 import './index.less';
+import { routerLinks } from '../../constant';
+import { checkPermission } from '../../../utils/auth/checkPermission';
 const { Panel } = Collapse;
 const { TabPane } = Tabs;
 export default class extends React.Component {
@@ -61,6 +63,20 @@ export default class extends React.Component {
     }
   }
   calendarRef = React.createRef();
+
+  componentDidMount(){
+    if(!!localStorage.getItem('token')&&localStorage.getItem('token').length >0){
+      checkPermission().then(loginData=>{
+        console.log('login data',loginData);
+        loginData.user.role < 900 && this.props.history.push(routerLinks.Dashboard)
+        this.setState({userRole:loginData.user.role  })
+      }).catch(err=>{
+        this.props.history.push('/');
+      })
+    }else{
+      this.props.history.push('/');
+    }
+  }
 
   onShowFilter = () => {
     this.setState({ isFilter: !this.state.isFilter });

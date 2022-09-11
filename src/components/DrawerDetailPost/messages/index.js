@@ -13,4 +13,12 @@ export default {
     id: `${scope}.flagDependent`,
     defaultMessage: 'Flag Dependent',
   },
+  pastDueBalance: {
+    id: `${scope}.pastDueBalance`,
+    defaultMessage: 'Past due balance',
+  },
+  noShow: {
+    id: `${scope}.noShow`,
+    defaultMessage: 'No show / cancellation',
+  },
 };

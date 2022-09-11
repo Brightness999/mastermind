@@ -510,6 +510,10 @@ export default ({
     id: `${scope}.confirm`,
     defaultMessage: 'Confirm',
   },
+  update: {
+    id: `${scope}.update`,
+    defaultMessage: 'Update',
+  },
   schoolDetails: {
     id: `${scope}.schoolDetails`,
     defaultMessage: 'School details',
@@ -573,6 +577,30 @@ export default ({
   uploadSuccess: {
     id: `${scope}.uploadSuccess`,
     defaultMessage: 'Upload success',
-  }
+  },
+  titleChangePassword: {
+    id: `${scope}.titleChangePassword`,
+    defaultMessage: 'Change Password',
+  },
+  passwordOld: {
+    id: `${scope}.passwordOld`,
+    defaultMessage: 'Old Password',
+  },
+  passwordConfirm: {
+    id: `${scope}.passwordConfirm`,
+    defaultMessage: 'Confirm password ',
+  },
+  password: {
+    id: `${scope}.password`,
+    defaultMessage: 'Password',
+  },
+  passwordValidMessage: {
+    id: `${scope}.passwordValidMessage`,
+    defaultMessage: 'Your password is not valid',
+  },
+  passwordMessage: {
+    id: `${scope}.passwordMessage`,
+    defaultMessage: 'Please enter your password.',
+  },
   
 });

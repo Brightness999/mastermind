@@ -28,8 +28,8 @@ class InfoSchool extends React.Component {
             school_address: '',
             listCommunitiServer: [],
             dayIsSelected: 1,
-            sessionsInSchool: this.props.auth.authData.sessionsInSchool,
-            sessionsAfterSchool: this.props.auth.authData.sessionsAfterSchool
+            sessionsInSchool: '',
+            sessionsAfterSchool: ''
         }
     }
 
@@ -37,24 +37,29 @@ class InfoSchool extends React.Component {
         this.loadCommunitiServer()
         const {registerData} = this.props.register;
         const { authData } = this.props.auth
+        
         console.log(registerData);
-        console.log(this.props.auth.authData,'authData')
         if(!authData.techContactRef || authData.techContactRef.length ==0 ){
             this.setReduxForSchool('techContactRef',['']);
             this.form.setFieldsValue({techContactRef:[""]});
             // this.form.setFieldValue({techContactRef:[{}]});
         }
-        if(authData.techContactRef || authData.techContactRef.length > 0 ){
-            // this.setReduxForSchool('techContactRef',['']);
-            console.log('voo dday')
-            this.form.setFieldsValue({techContactRef:'123213'});
-            // this.form.setFieldValue({techContactRef:[{}]});
-        }
+
         if(!authData.studentContactRef || authData.studentContactRef.length ==0 ){
             this.setReduxForSchool('studentContactRef',['']);
             this.form.setFieldsValue({studentContactRef:[""]});
         }
-        console.log('set field value');
+        if(authData.techContactRef || authData.techContactRef.length > 0){
+            authData.techContactRef.map((item,index) =>(
+                authData.techContactRef[index] = {techContactRef: item}
+            ))
+        }
+        if(authData.studentContactRef || authData.studentContactRef.length > 0){
+            authData.studentContactRef.map((item,index) =>(
+                authData.studentContactRef[index] = {studentContactRef: item}
+            ))
+        }
+        console.log('set field value', this.form);
         this.form.setFieldsValue(authData);
 
         if(!authData.sessionsInSchool||authData.sessionsInSchool.length == 0){
@@ -73,7 +78,7 @@ class InfoSchool extends React.Component {
             })
         }
     }
-
+    
     defaultTimeRangeItem = (isInSchool = true)=>{
         if(!isInSchool){
             return {
@@ -103,7 +108,7 @@ class InfoSchool extends React.Component {
     }
 
     valueForAvailabilityScheduleForCloseHour =(array , index , fieldType = 'open' )=>{
-        
+        console.log(array , index , fieldType = 'open' ,'array , index , fieldType')
         if(array.length-1 < index){
             return moment('00:00:00', 'HH:mm:ss')
         }
@@ -114,7 +119,10 @@ class InfoSchool extends React.Component {
    
 
     onFinish = async (values) => {
-        console.log(this.state);
+        
+        console.log(values,'valuesvaluesvalues');
+        console.log(this.props.auth.authData,'authData');
+        return false
         const {registerData} = this.props.register;
         console.log('Success:', values);
         var newRegisterData = JSON.parse(JSON.stringify(registerData));
@@ -287,6 +295,7 @@ class InfoSchool extends React.Component {
     onTechContactRefChange =()=>{
         console.log('contact ref', this.form.getFieldsValue());
         var contactRefs= this.form.getFieldValue('techContactRef');
+        console.log(contactRefs,'contactRefscontactRefs')
         this.setReduxForSchool('techContactRef',contactRefs);
     }
 
@@ -297,7 +306,7 @@ class InfoSchool extends React.Component {
     }
 
     render() {
-        console.log(this.state,'state')
+        console.log(this.props.auth.authData,'state')
         const day_week = [
             {
                 label: intl.formatMessage(messages.sunday),
@@ -408,7 +417,7 @@ class InfoSchool extends React.Component {
                                                 >
                                                     <Input 
                                                     onChange={event=>{
-                                                        console.log('techContactRef', field.key,event.target.value)
+                                                        console.log('techContactRef123', field.key,event.target.value)
                                                         this.onTechContactRefChange();
                                                     }}
                                                     placeholder={intl.formatMessage(messages.technicalReferralContact)} />
@@ -450,9 +459,11 @@ class InfoSchool extends React.Component {
                                             <div key={field.key} className={field.key !== 0 && 'item-remove'}>
                                                 <Form.Item
                                                     name={[field.name, "studentContactRef"]}
+                                                    value='12312321'
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.studentReferralContact) }]}
                                                 >
                                                     <Input
+                                                    value={'xzcmxzncm,nxz,mcnxz,mc'}
                                                     onChange={event=>{
                                                         this.onStudentContactRefChange();
                                                     }}
@@ -534,7 +545,7 @@ class InfoSchool extends React.Component {
                                 htmlType="submit"
                                 
                             >
-                                {intl.formatMessage(messages.confirm).toUpperCase()}
+                                {intl.formatMessage(messages.update).toUpperCase()}
                             </Button>
                         </Form.Item>
                     </Form>

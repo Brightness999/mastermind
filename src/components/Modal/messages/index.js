@@ -168,5 +168,53 @@ export default {
   appeal: {
     id: `${scope}.appeal`,
     defaultMessage: 'Appeal',
-  }
+  },
+  submitFlag: {
+    id: `${scope}.submitFlag`,
+    defaultMessage: 'Submit Flag',
+  },
+  noShowPenalty: {
+    id: `${scope}.noShowPenalty`,
+    defaultMessage: 'No show penalty',
+  },
+  penaltyAmount: {
+    id: `${scope}.penaltyAmount`,
+    defaultMessage: 'Penalty amount',
+  },
+  programPenalty: {
+    id: `${scope}.programPenalty`,
+    defaultMessage: 'Program penalty',
+  },
+  unpaidBalance: {
+    id: `${scope}.unpaidBalance`,
+    defaultMessage: 'Unpaid balance',
+  },
+  lateFreeAmount: {
+    id: `${scope}.lateFreeAmount`,
+    defaultMessage: 'Late free amount',
+  },
+  currentBalanceDue: {
+    id: `${scope}.currentBalanceDue`,
+    defaultMessage: 'Current balance due',
+  },
+  daysPastDue: {
+    id: `${scope}.daysPastDue`,
+    defaultMessage: 'Days past due',
+  },
+  scheduleConsultation: {
+    id: `${scope}.scheduleConsultation`,
+    defaultMessage: 'Schedule Consultation',
+  },
+  referralService: {
+    id: `${scope}.referralService`,
+    defaultMessage: 'HMGH Referral Service',
+  },
+  byPhone: {
+    id: `${scope}.byPhone`,
+    defaultMessage: 'By phone',
+  },
+  additionalDocuments: {
+    id: `${scope}.additionalDocuments`,
+    defaultMessage: 'Additional documents',
+  },
 };

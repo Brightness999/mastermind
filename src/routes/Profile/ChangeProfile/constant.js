@@ -29,14 +29,14 @@ export const MENU_PROVIDER = [
 
 export const MENU_PARENT = [
     {
-        key: 'Info_parent',
-        icon:'',
-        label:'Info Parent'
-    },
-    {
         key: 'Info_child',
         icon:'',
         label:'Info Child'
+    },
+    {
+        key: 'Info_parent',
+        icon:'',
+        label:'Info Parent'
     },
     {
         key: 'Info_progress',

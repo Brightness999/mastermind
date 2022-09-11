@@ -10,6 +10,7 @@ import './style/index.less';
 import { routerLinks } from '../../routes/constant';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { removeUser } from '../../redux/features/authSlice';
 const scrollElement = React.createRef();
 class MainHeader extends Component {
 
@@ -30,6 +31,7 @@ class MainHeader extends Component {
 
   logout = ()=>{
     localStorage.removeItem('token');
+    this.props.removeUser()
     // this.props.history.push('/');
   }
   render() {
@@ -45,7 +47,7 @@ class MainHeader extends Component {
             icon: <FaUserEdit size={18} color='#495057'/>,
             label: (
               <Link to={routerLinks.Changeprofile}>
-                Change Infomation
+                {intl.formatMessage(messages.editProfile)}
               </Link>
             ),
           },
@@ -63,7 +65,8 @@ class MainHeader extends Component {
             icon: <BiLogOutCircle size={18} color='#495057'/>,
             label: (
               <Link to='/' onClick={this.logout}>
-                Log Out
+                
+                {intl.formatMessage(messages.logOut)}
               </Link>
             ),
           },
@@ -127,4 +130,4 @@ const mapStateToProps = state => {
     authChild : state.auth.authDataClientChild
   }
 }
-export default compose(connect(mapStateToProps))(MainHeader);
+export default compose(connect(mapStateToProps, {removeUser}))(MainHeader);

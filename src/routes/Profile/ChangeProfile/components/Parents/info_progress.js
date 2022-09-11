@@ -25,17 +25,18 @@ class InfoProgress extends Component {
     }
 
     componentDidMount(){
-        // const {registerData} = this.props.register;
-        // var studentInfos = registerData.studentInfos
-        // this.form?.setFieldsValue({children:studentInfos});
-        // if(this.state.currentDaySelecting.length == 0){
-        //     var arr = []
-        //     for(var i = 0 ; i < studentInfos.length ; i++){
-        //         arr.push(0);
-        //     }
-        //     this.setState({currentDaySelecting:arr});
-        // }
-        // this.setState({studentInfos:studentInfos});
+        const {registerData} = this.props.register;
+        const { authDataClientChild } = this.props.auth
+        var studentInfos = authDataClientChild
+        this.form?.setFieldsValue({children:studentInfos});
+        if(this.state.currentDaySelecting.length == 0){
+            var arr = []
+            for(var i = 0 ; i < studentInfos.length ; i++){
+                arr.push(0);
+            }
+            this.setState({currentDaySelecting:arr});
+        }
+        this.setState({studentInfos:studentInfos});
     }
     
 
@@ -55,15 +56,6 @@ class InfoProgress extends Component {
     
     onSubmit = async () => {
         var isPassed = false;
-        
-        // for(var i = 0 ; i < this.state.studentInfos.length;i++){
-        //     for(var j = 0 ; j <this.state.studentInfos[i].availabilitySchedule.length ; j++){
-        //         this.state.studentInfos[i].availabilitySchedule[j]
-        //         if(){
-
-        //         }
-        //     }
-        // }
 
         // add to redux
         const {registerData} = this.props.register;
@@ -131,10 +123,7 @@ class InfoProgress extends Component {
                     return student;
                 })
             });
-            // newStu[index].availabilitySchedule = arr;
-            
         }
-        // this.setState({studentInfos:newStu})
     }
 
     
@@ -439,137 +428,11 @@ class InfoProgress extends Component {
                                 htmlType="submit"
                                 onClick={this.onSubmit}
                             >
-                                {intl.formatMessage(messages.continue).toUpperCase()}
+                                {intl.formatMessage(messages.update).toUpperCase()}
                             </Button>
                         </div>
 
                     </div>
-                </div>
-            </Row >
-        );
-
-        // form version
-        return (
-            <Row justify="center" className="row-form">
-                <div className='col-form col-create-default'>
-                    {/* <div className='div-form-title'>
-                        <p className='font-30 text-center'>{intl.formatMessage(messages.academicInformation)}</p>
-                    </div> */}
-                    <Form
-                        name="form_default"
-                        // onFinish={this.onFinish}
-                        onFinishFailed={this.onFinishFailed}
-                        
-                        ref={ref => this.form = ref}
-                    >
-                        <Form.List name="children">
-                            {(fields, _) => (
-                                <>
-                                    {fields.map((field , index) => {
-                                    return (
-                                        <div key={field.key} className='academic-item'>
-                                            
-                                            
-
-                                            <p className='font-24 mb-10 text-center'>{intl.formatMessage(messages.availability)}</p>
-                                            <p className='font-16 mr-10 mb-5'>{intl.formatMessage(messages.dependent)} #{field.key + 1} {this.state.studentInfos[index].firstName} {this.state.studentInfos[index].lastName} </p>
-                                            <div className='div-availability'>
-                                                <Segmented options={optionsSegments} block={true} 
-                                                value={this.state.currentDaySelecting[index]} 
-                                                onChange={v=>{
-                                                    console.log('day change ',v,index);
-                                                    // var  newDay = day_week.indexOf(v);
-                                                    this.onChangeSelectingDay(index, v);
-                                                }}
-                                                />
-                                                <div className='div-time'>
-                                                    {this.state.studentInfos[index].availabilitySchedule.map((scheduleItem , indexOnAvailabilitySchedule) =>{
-                                                        if(scheduleItem.dayInWeek == this.state.currentDaySelecting[index]){
-                                                            return (
-                                                                <Row key={indexOnAvailabilitySchedule} gutter={14}>
-                                                                    <Col xs={24} sm={24} md={12}>
-                                                                        <Form.Item name={[field.name, "open_time",scheduleItem.uid] } >
-                                                                            <TimePicker 
-                                                                            name={`timer_1${scheduleItem.uid}`}
-                                                                            use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)}
-                                                                            value={this.valueForAvailabilityScheduleOpenHour(index, indexOnAvailabilitySchedule)}
-                                                                            
-                                                                            onChange={v=>{
-                                                                                console.log('timer open changed ', v);
-                                                                                this.valueChangeForOpenHour(index ,indexOnAvailabilitySchedule, v);
-                                                                            }}
-                                                                            />
-                                                                        </Form.Item>
-                                                                    </Col>
-                                                                    <Col xs={24} sm={24} md={12} className={indexOnAvailabilitySchedule === 0 ? '' : 'item-remove'}>
-                                                                        <Form.Item name={[field.name, "close_time",scheduleItem.uid]}>
-                                                                            <TimePicker 
-                                                                            name={`timer_1${scheduleItem.uid}`}
-                                                                            onChange={v=>{
-                                                                                console.log('timer 2 changed ', v);
-                                                                                this.valueChangeForCloseHour(index,indexOnAvailabilitySchedule,v);
-                                                                            }}
-                                                                            value={this.valueForAvailabilityScheduleCloseHour(index, indexOnAvailabilitySchedule)}
-                                                                            use12Hours 
-                                                                            format="h:mm a" 
-                                                                            placeholder={intl.formatMessage(messages.to)} 
-                                                                            />
-                                                                        </Form.Item>
-                                                                        {indexOnAvailabilitySchedule === 0 ? null : <BsDashCircle size={16} className='text-red icon-remove' onClick={() => {
-                                                                            // if(this.state.isSameAll){
-                                                                            //     remove(field.name)
-                                                                            // }else{
-                                                                            //     remove(field.id)
-                                                                            // }
-                                                                        }} />}
-                                                                    </Col>
-                                                                </Row>
-                                                            )
-                                                        }
-
-                                                    } 
-                                                    )}
-                                                    <div className='div-add-time' onClick={() => {
-                                                        // add(null);
-                                                        this.addNewTimeRange(index , this.state.currentDaySelecting[index]);
-                                                    }}>
-                                                        <BsPlusCircle size={17} className='mr-5 text-primary' />
-                                                        <a className='text-primary'>{intl.formatMessage(messages.addTimeRange)}</a>
-                                                    </div>
-                                                    <div className='text-right div-copy-week'  onClick={() => {
-                                                        this.copyToFullWeek(index , this.state.currentDaySelecting[index]);
-                                                    }}>
-                                                        <a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
-                                                        <QuestionCircleOutlined className='text-primary' />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {index == 0 && this.state.studentInfos.length>1&&<div className='flex flex-row items-center'>
-                                                <Switch size="small" checked={isSameAll} onChange={this.onSameAllDependent} />
-                                                <p className='ml-10 mb-0'>{intl.formatMessage(messages.sameAllDependents)}</p>
-                                            </div>}
-                                            
-                                           
-                                        </div>
-                                    )}
-                                    )
-                                    }
-                                </>
-                            )}
-                        </Form.List>
-                        {/* List of Availability Schedule End */}
-                        <Form.Item className="form-btn continue-btn" >
-                            <Button
-                                block
-                                type="primary"
-                                htmlType="submit"
-                                onClick={this.onSubmit}
-                            >
-                                {intl.formatMessage(messages.continue).toUpperCase()}
-                            </Button>
-                        </Form.Item>
-
-                    </Form>
                 </div>
             </Row >
         );
@@ -578,6 +441,7 @@ class InfoProgress extends Component {
 
 const mapStateToProps = state => ({
     register: state.register,
+    auth: state.auth
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoProgress);

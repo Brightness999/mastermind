@@ -1,5 +1,4 @@
 import React from 'react';
-import { connect } from 'dva';
 import { 
   Avatar,
   Button,
@@ -13,7 +12,11 @@ import msgCreateAccount from '../../Sign/CreateAccount/messages';
 import msgDrawer from '../../../components/DrawerDetail/messages';
 import msgModal from '../../../components/Modal/messages';
 import './index.less';
-export default class EventDetail extends React.Component {
+import { store } from '../../../redux/store';
+import { removeAppoint, setAppointMonth } from '../../../redux/features/appointmentsSlice';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+class EventDetail extends React.Component {
   state = {
     isConfirm: false,
   };
@@ -21,7 +24,22 @@ export default class EventDetail extends React.Component {
   onRescheduleConfirm = () => {
     this.setState({isConfirm: !this.state.isConfirm});
   }
-
+  onCancelEvent = async() => {
+    const { role, id, calendarEvents } = this.props
+    const data = {
+      token: localStorage.getItem('token'),
+      role: role,
+      data: {
+        appointId: id,
+      }
+    }
+    const result = await store.dispatch(removeAppoint(data))
+    if(result.payload.success){
+      const newCalendarEvents = calendarEvents.filter((item,index) => item._id != result.payload.data._id)
+      this.props.setAppointMonth(newCalendarEvents)
+      return this.props.backView({data:newCalendarEvents})
+    }
+  }
   render() {
     const { isConfirm } = this.state;
    
@@ -66,7 +84,7 @@ export default class EventDetail extends React.Component {
           <Button type='primary' onClick={this.onRescheduleConfirm}>
             {intl.formatMessage(msgDrawer.reschedule).toUpperCase()}
           </Button>
-          <Button onClick={this.props.backView}>
+          <Button onClick={this.onCancelEvent}>
             {intl.formatMessage(messages.cancelEvent).toUpperCase()}
           </Button>
         </div>}
@@ -86,3 +104,9 @@ export default class EventDetail extends React.Component {
     );
   }
 }
+const mapStateToProps = state => {
+  return ({
+  })
+}
+
+export default compose(connect(mapStateToProps,{setAppointMonth}))(EventDetail);

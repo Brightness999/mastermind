@@ -15,20 +15,11 @@ import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import moment from 'moment';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
+import {setInforClientChild, changeInforClientChild} from '../../../../../redux/features/authSlice';
+import {store} from '../../../../../redux/store'
 class InfoChild extends Component {
     constructor(props) {
         super(props);
-
-
-        // let inforChildren = localStorage.getItem('inforChildren') ? JSON.parse(localStorage.getItem('inforChildren')).map(item => {
-        //     return {
-        //         ...item,
-        //         birthday: moment(item.birthday),
-        //     }
-        // }) : '';
-
-
-
         this.state = {
             formChild: [
                 {
@@ -42,49 +33,29 @@ class InfoChild extends Component {
                     services: [],
                 },
             ],
+            dataChange: [],
             isTypeFull: false,
             phoneFill: '',
             emailFill: '',
             listServices: [],
-            inforChildren: [{}, {}, {}],
-            parentInfo: {},
-            // inforChildren,
         }
     }
 
     componentDidMount() {
 
-        const { registerData } = this.props.register;
         const { authDataClientChild } = this.props.auth;
-
-        this.setState({
-            parentInfo: registerData.parentInfo
-        })
-        
-        try{
-            console.log('birthday' , studentInfos[0].birthday, studentInfos[0].birthday_moment, typeof studentInfos[0].birthday_moment );
-        }catch(e){
-
-        }
-        
-        var newChild =this.getDefaultChildObj(registerData.parentInfo);
-        // var studentInfos = !!registerData.studentInfos? JSON.parse(JSON.stringify(registerData.studentInfos)) : [newChild,newChild,newChild];
+console.log(authDataClientChild,'authDataClientChild')
+        var newChild =this.getDefaultChildObj(authDataClientChild);
         
         var studentInfos = !!authDataClientChild? JSON.parse(JSON.stringify(authDataClientChild)) : [newChild,newChild,newChild];
-        // console.log(studentInfos,'studentInfos')
         
-        if(!registerData.studentInfos){
-            
-            // for(var i = 0 ; i < registerData.studentInfos.length ; i++){
-            //     if()
-            // }
+        if(!authDataClientChild){
             this.props.setRegisterData({studentInfos:studentInfos});
         }
 
         const newStudentInfos = studentInfos.map(item => (
-            {...item,birthday_moment: moment(item.birthday,'YYYY/MM/DD')}
+            {...item,birthday_moment: moment(item.birthday,"YYYY/MM/DD")}
         ))
-        console.log(newStudentInfos,'newStudentInfos')
         this.form.setFieldsValue({children:newStudentInfos});
         
         this.loadServices();
@@ -113,7 +84,6 @@ class InfoChild extends Component {
     }
 
     getDefaultChildObj(parentInfo) {
-        const { authDataClientChild } = this.props.auth;
         var obj = {
             "firstName": '',
             "lastName": "",
@@ -131,30 +101,19 @@ class InfoChild extends Component {
         return obj;
     }
 
-    onRemove1Depenent(index) {
-        const { registerData } = this.props.register;
-        var studentInfos = [...registerData.studentInfos]
-
-        studentInfos.splice(index, 1);
-
-        this.props.setRegisterData({ studentInfos: studentInfos });
-    }
 
     updateReduxValueFor1Depedent(index, fieldName, value) {
-        const { registerData } = this.props.register;
-        var studentInfos = [...registerData.studentInfos]
+        const { authDataClientChild } = this.props.auth;
+        var studentInfos = [...authDataClientChild]
         var selectedObj = { ...studentInfos[index] };
         selectedObj[fieldName] = value;
         studentInfos[index] = selectedObj;
-        console.log(selectedObj, fieldName, value,'xzcnmzxncm,xznm,');
-        this.props.setRegisterData({ studentInfos: studentInfos });
+        // this.props.setRegisterData({ studentInfos: studentInfos });
     }
 
     getBirthday = (index) => {
-        console.log(index,'birtday index')
         const { authDataClientChild } = this.props.auth;
         if (!!authDataClientChild && authDataClientChild[index] != undefined && !!authDataClientChild[index].birthday_moment) {
-            console.log('da load birthday ', authDataClientChild[index].birthday_moment)
         
             return authDataClientChild[index].birthday_moment;
         }
@@ -162,63 +121,40 @@ class InfoChild extends Component {
     }
 
     onFinish = (values) => {
-        // this.props.setRegisterData({ step3: values.children });
-        // localStorage.setItem('inforChildren', JSON.stringify(values.children));
-        // console.log('Success:', values);
-        this.props.onContinue();
+
     };
+    updateProfile = async(index) => {
+        const token = localStorage.getItem('token');
+        const values = await this.form.validateFields();
+        const dataForm = values.children[index];
+        const dataChangeFrom = this.state.dataChange ?? [];
+        
+        try {
+            store.dispatch(setInforClientChild({data: dataForm, token: token}))
+            if(dataChangeFrom.length != 0){
+                this.props.changeInforClientChild(dataChangeFrom)
+            }
+        } catch (error) {
+            console.log(error,'error')
+        }
+        
+    }
 
     onFinishFailed = (errorInfo) => {
         // console.log('Failed:', errorInfo);
     };
 
     getValueInForm = (allValue, allValueChange) => {
-        // const { children } = allValueChange;
-        // localStorage.setItem('inforChildren', JSON.stringify(children));
+        console.log(allValue,'allValue')
+        console.log(allValueChange,'allValueChange')
+        this.setState({dataChange: allValueChange.children})
     }
 
     onValueChange() {
 
     }
 
-    openSubsidy() {
-
-    }
-
-    checkFillinAllFieldForSubsidy(index) {
-        const { registerData } = this.props.register;
-        const studentInfo = registerData.studentInfos[index];
-        var isAlreadyFillIn = !!studentInfo && studentInfo.firstName.length > 0
-            && studentInfo.lastName.length > 0
-            && ('' + studentInfo.birthday).length > 0
-            && studentInfo.guardianPhone.length > 0
-            && studentInfo.guardianEmail.length > 0
-            && studentInfo.backgroundInfor.length > 0
-            && studentInfo.school.length > 0
-            && studentInfo.primaryTeacher.length > 0
-            && studentInfo.currentGrade.length > 0
-            && studentInfo.services.length > 0;
-        console.log('vaid for index ', index,
-            !!studentInfo,
-            studentInfo.firstName.length > 0
-            , studentInfo.lastName.length > 0
-            , studentInfo.birthday, studentInfo.birthday.length
-            , studentInfo.birthday.length > 0
-            , studentInfo.guardianPhone.length > 0
-            , studentInfo.guardianEmail.length > 0
-            , studentInfo.backgroundInfor.length > 0
-            , studentInfo.school.length > 0
-            , studentInfo.primaryTeacher.length > 0
-            , studentInfo.currentGrade.length > 0
-            , studentInfo.services.length > 0,
-            "fill in " + isAlreadyFillIn
-        )
-        return isAlreadyFillIn;
-    }
-
     render() {
-        console.log(this.props.auth.authDataClientChild, 'authDataClientChild')
-        console.log(moment().toDate().getTime(),'moment().toDate().getTime()')
         return (
             <Row justify="center" className="row-form">
                 <div className='col-form col-info-child'>
@@ -232,7 +168,6 @@ class InfoChild extends Component {
                         onFinishFailed={this.onFinishFailed}
                         ref={ref => this.form = ref}
                         onValuesChange={this.getValueInForm}
-
                     >
                         <Form.List name="children">
                            
@@ -254,15 +189,6 @@ class InfoChild extends Component {
                                                             size="small" defaultChecked />
                                                         <p className='font-16 ml-10 mb-0'>{intl.formatMessage(messages.hasIEP)}</p>
                                                     </div>
-                                                    {field.key === 0 ? null : <Button
-                                                        type='text'
-                                                        className='remove-btn'
-                                                        icon={<TbTrash size={18} />}
-                                                        onClick={() => {
-                                                            remove(field.name);
-                                                            this.onRemove1Depenent(index);
-                                                        }}
-                                                    >{intl.formatMessage(messages.remove)}</Button>}
                                                 </div>
                                                 <Row gutter={14}>
                                                     <Col xs={24} sm={24} md={9}>
@@ -415,49 +341,30 @@ class InfoChild extends Component {
 
                                                         </Select>
                                                     </Form.Item>
-                                                    <Button className='ml-10' disabled={
-                                                        !this.checkFillinAllFieldForSubsidy(index)
-                                                    }
-                                                        onClick={v => {
-                                                            this.props.onOpenSubsidyStep(1, index);
-                                                        }}
-                                                    >{intl.formatMessage(messages.subsidyRequest)}</Button>
                                                 </div>
+                                                <Form.Item className="form-btn continue-btn" >
+                                                    <Button
+                                                        block
+                                                        type="primary"
+                                                        htmlType="submit"
+                                                        onClick={ () => this.updateProfile(index)}
+                                                    >
+                                                        {intl.formatMessage(messages.update).toUpperCase()}
+                                                    </Button>
+                                                </Form.Item>
                                             </div>
                                         )
                                     })}
                                     <Form.Item className='text-center'>
-                                        <Button
-                                            type="text"
-                                            className='add-dependent-btn'
-                                            icon={<BsPlusCircle size={17} className='mr-5' />}
-                                            onClick={() => {
-                                                let allState = this.state;
-                                                allState.inputs.push({ name: '', visible: false })
-                                                this.setState(allState, () => {
-                                                    add(null)
-                                                })
-                                            }}
-                                        >
-                                            {intl.formatMessage(messages.addDependent)}
-                                        </Button>
                                     </Form.Item>
                                 </div>
                             )}
                         </Form.List>
 
-                        <Form.Item className="form-btn continue-btn" >
-                            <Button
-                                block
-                                type="primary"
-                                htmlType="submit"
-                            >
-                                {intl.formatMessage(messages.continue).toUpperCase()}
-                            </Button>
-                        </Form.Item>
+                        
                     </Form>
                 </div>
-            </Row >
+            </Row>
         );
     }
 }
@@ -470,4 +377,4 @@ const mapStateToProps = state => {
     })
 }
 
-export default compose(connect(mapStateToProps, { setRegisterData }))(InfoChild);
+export default compose(connect(mapStateToProps, { setRegisterData, changeInforClientChild }))(InfoChild);

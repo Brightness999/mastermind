@@ -41,7 +41,22 @@ class InfoServices extends Component {
     }
 
     componentDidMount() {
-        
+        const { authData } = this.props.auth;
+
+        if (!authData) {
+            this.props.setRegisterData({ serviceInfor: this.getDefaultObj() });
+        }
+        const newAuthData = {...authData, upload_w_9: authData.W9FormPath }
+        var serviceInfor = newAuthData || this.getDefaultObj();
+        this.form.setFieldsValue(serviceInfor);
+        this.setState({
+            isSeparateEvaluationRate :serviceInfor.isSeparateEvaluationRate,
+            isHomeVisit: serviceInfor.isHomeVisit,
+            privateOffice: serviceInfor.privateOffice,
+            isReceiptsProvided: serviceInfor.isReceiptsProvided,
+            isNewClientScreening: serviceInfor.isNewClientScreening,
+        })
+        this.getDataFromServer()
     }
 
     getDataFromServer = () => {
@@ -95,25 +110,16 @@ class InfoServices extends Component {
             isReceiptsProvided:true,
             isNewClientScreening:true,
         }
-        return {
-            SSN: "undefined",
-            level: [{
-                academicLevel: "l1",
-                rate_large: "r2",
-            }],
-            publicProfile: "undefined",
-            separateEvaluationRate: "",
-            references: "undefined",
-            screeningTime: "AM",
-            serviceableSchool: "s1",
-            skillSet: "s1",
-            upload_w_9: "wedfefewf",
-            yearExp: 12,
-        }
     }
 
     onFinish = (values) => {
         console.log('Success:', values);
+        this.props.setRegisterData({
+            serviceInfor: values,
+            documentUploaded: this.state.documentUploaded
+        })
+
+        this.props.onContinue();
     };
 
     onFinishFailed = (errorInfo) => {
@@ -121,18 +127,61 @@ class InfoServices extends Component {
     };
 
     onUploadChange = async (info) => {
+
+        if (info.file.status !== 'uploading') {
+            console.log(info.file, info.fileList);
+            this.setState(prevState => ({
+                fileList: [...prevState.fileList, info.file],
+            }));
+        }
+        if (info.file.status === 'done') {
+            console.log('done', info.file.response);
+            message.success(`${info.file.name} file uploaded successfully`);
+            console.log(info.file.response.data);
+            this.form?.setFieldsValue({
+                upload_w_9: info.file.name
+            })
+            this.props.setRegisterData({
+                upload_w_9: info.file.name,
+                uploaded_path: info.file.response.data
+            })
+            this.setState(prevState => ({ documentUploaded: [...prevState.documentUploaded, info.file.response.data] }));
+        } else if (info.file.status === 'error') {
+            message.error(`${info.file.name} file upload failed.`);
+            this.setState(prevState => ({
+                fileList: [...prevState.fileList, info.file],
+            }));
+        }
     }
 
     setValueToReduxRegisterData = (fieldName, value) => {
+        const { registerData } = this.props.register;
+        var serviceInfor =JSON.parse(JSON.stringify(registerData.serviceInfor));
+        
+        serviceInfor[fieldName] = value;
+        console.log('new value',serviceInfor);
+        this.props.setRegisterData({ serviceInfor: serviceInfor });
     }
 
     defaultOnValueChange = (event, fieldName) => {
+        var value = event.target.value;
+        console.log(fieldName, value);
+        this.setValueToReduxRegisterData(fieldName, value);
     }
 
     handleSelectChange = (fieldName,value ) => {
+        console.log(fieldName, value);
+        this.setValueToReduxRegisterData(fieldName, value);
+
+        
     }
 
     handleChangeServiceable =(text)=>{
+        // filter with server
+        console.log(text);
+        this.setValueToReduxRegisterData('serviceableSchool', text);
+
+        this.searchServiceableSchool(text)
     }
 
     searchServiceableSchool = (text)=>{
@@ -450,7 +499,7 @@ class InfoServices extends Component {
                                 htmlType="submit"
                             // onClick={this.props.onContinue}
                             >
-                                {intl.formatMessage(messages.continue).toUpperCase()}
+                                {intl.formatMessage(messages.update).toUpperCase()}
                             </Button>
                         </Form.Item>
                     </Form>
@@ -462,5 +511,6 @@ class InfoServices extends Component {
 
 const mapStateToProps = state => ({
     register: state.register,
+    auth: state.auth
 })
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoServices);

@@ -1,22 +1,65 @@
 import './style/index.less';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Drawer, Button, Row, Col, Typography, Input } from 'antd';
-import { BsBell, BsFillFlagFill, BsCheckCircle } from 'react-icons/bs';
+import { Drawer, Button, Row, Col, Typography, Input, Menu, Dropdown } from 'antd';
+import { BsFillFlagFill, BsCheckCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
-import { FaFileContract } from 'react-icons/fa';
-import { ImPencil } from 'react-icons/im';
 import intl from "react-intl-universal";
 import messages from './messages';
 import msgDetail from '../DrawerDetail/messages';
+import { ModalNoShow, ModalBalance } from '../../components/Modal';
 const { Paragraph } = Typography;
 
 class DrawerDetailPost extends Component {
   state = {
+    visibleNoShow: false,
+    visibleBalance: false,
+  };
+
+  onShowModalNoShow = () => {
+    this.setState({ visibleNoShow: true });
+  };
+
+  onCloseModalNoShow = () => {
+    this.setState({ visibleNoShow: false });
+  };
+  onShowModalBalance = () => {
+    this.setState({ visibleBalance: true });
+  };
+
+  onCloseModalBalance = () => {
+    this.setState({ visibleBalance: false });
   };
  
   render() {
-    
+    const menu = (
+      <Menu
+        selectable
+        defaultSelectedKeys={['2']}
+        items={[
+          {
+            key: '1',
+            label: (<a target="_blank" rel={intl.formatMessage(messages.pastDueBalance)} onClick={this.onShowModalBalance}>{intl.formatMessage(messages.pastDueBalance)}</a>),
+          },
+          {
+            key: '2',
+            label: (<a target="_blank" rel={intl.formatMessage(messages.noShow)} onClick={this.onShowModalNoShow}>{intl.formatMessage(messages.noShow)}</a>),
+          }
+        ]}
+      />
+    );
+
+    const { visibleNoShow, visibleBalance } = this.state;
+    const modalNoShowProps = {
+      visible: visibleNoShow,
+      onSubmit: this.onCloseModalNoShow,
+      onCancel: this.onCloseModalNoShow,
+    };
+    const modalBalanceProps = {
+      visible: visibleBalance,
+      onSubmit: this.onCloseModalBalance,
+      onCancel: this.onCloseModalBalance,
+    };
     return (
       <Drawer
         title={intl.formatMessage(msgDetail.appointmentDetails)}
@@ -68,14 +111,18 @@ class DrawerDetailPost extends Component {
             </Button>
           </Col>
           <Col span={12}>
-            <Button 
-              type='primary' 
-              icon={<BsFillFlagFill size={15}/>} 
-              block>
-              {intl.formatMessage(messages.flagDependent)}
-            </Button>
+            <Dropdown overlay={menu} placement="bottomRight">
+              <Button 
+                type='primary' 
+                icon={<BsFillFlagFill size={15}/>} 
+                block>
+                {intl.formatMessage(messages.flagDependent)}
+              </Button>
+            </Dropdown>
           </Col>
         </Row>
+        <ModalNoShow {...modalNoShowProps}/>
+        <ModalBalance {...modalBalanceProps}/>
       </Drawer>
     );
   }

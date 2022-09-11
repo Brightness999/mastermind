@@ -28,34 +28,38 @@ class InfoAvailability extends Component {
         this.state = {
             isPrivate: true,
             CancellationWindow:[],
-            currentSelectedDay: day_week[0],
+            currentSelectedDay: day_week[4],
             service_address:''
         }
     }
 
     componentDidMount() {
         let {registerData} = this.props.register;
-        console.log(registerData,'registerData')
-        if (!!registerData.step4) {
-            this.form?.setFieldsValue({
-                ...registerData.step4
-            })
+        const { authData } = this.props.auth
+        console.log(day_week,'registerData')
+        console.log(registerData,'registerDatazxcxzcxz')
+        if (authData) {
+            
+        console.log(authData.manualSchedule,'manualSchedule1')
+            // this.form.setFieldsValue(this.getDefaultChildObj(authData))
 
             this.setState({
-                isPrivate: registerData.isPrivate
+                isPrivate: authData.isPrivate
             })
         }else{
+
             day_week.map((day)=>{
                 this.form.setFieldValue(day, [''])
             })
-            
-            
-            
         }
-
         this.getDataFromServer();
     }
-
+    getDefaultChildObj(parentInfo) {
+       
+       
+        // console.log(obj,'zxcnxzmcnm,zxncxz,m')
+        return obj;
+    }
     defaultTimeRangeItem = (dayInWeek)=>{
         return {
             "uid":shortid.generate()+''+Date.now(),
@@ -67,7 +71,7 @@ class InfoAvailability extends Component {
             "closeMin":0
         }
     }
-
+    
     getDataFromServer = () => {
         axios.post(url + 'providers/get_default_values_for_provider'
         ).then(result => {
@@ -94,14 +98,21 @@ class InfoAvailability extends Component {
 
 
     onFinish = (values) => {
+        console.log(values,'value');
+        return false
         console.log('Success:', values);
         this.props.setRegisterData({
             step4: values
         });
         this.props.onContinue();
     };
-
+    handleChange = (e) =>{
+        console.log(e.target.name,'e.target.name')
+        console.log(e.target.value,'e.target.value')
+        return false
+    }
     onFinishFailed = (errorInfo) => {
+        
         console.log('Failed:', errorInfo);
     };
 
@@ -174,7 +185,7 @@ class InfoAvailability extends Component {
                                     >
                                         <Row gutter={14}>
                                             <Col xs={24} sm={24} md={12}>
-                                                {/* <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} /> */}
+                                               
                                                 <Form.Item
                                                     name={[day,field.name , "from_time"]}
                                                     rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
@@ -205,49 +216,10 @@ class InfoAvailability extends Component {
                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
 
                                         >
-                                            {/* <PlacesAutocomplete
-                                                value={this.state.service_address}
-                                                onChange={(e) => this.onLocationChange(day ,e)}
-                                                onSelect={(e) => this.onLocationSelected(day,e)}
-                                            >
-                                                {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-                                                    <div>
-                                                        <Input {...getInputProps({
-                                                            placeholder: 'Service Address',
-                                                        })} />
-                                                        <div className="autocomplete-dropdown-container">
-                                                            {loading && <div>Loading...</div>}
-                                                            {suggestions.map(suggestion => {
-                                                                const className = suggestion.active
-                                                                    ? 'suggestion-item--active'
-                                                                    : 'suggestion-item';
-                                                                // inline style for demonstration purpose
-                                                                const style = suggestion.active
-                                                                    ? { backgroundColor: '#fafafa', cursor: 'pointer' }
-                                                                    : { backgroundColor: '#ffffff', cursor: 'pointer' };
-                                                                return (
-                                                                    <div
-                                                                        {...getSuggestionItemProps(suggestion, {
-                                                                            className,
-                                                                            style,
-                                                                        })}
-                                                                    >
-                                                                        <span>{suggestion.description}</span>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </PlacesAutocomplete> */}
+                                            
                                             <Input 
                                             onChange={v=>{this.onLocationChange(day , v)}}
                                             placeholder={intl.formatMessage(messages.location)}/>
-
-                                            {/* <Select placeholder={intl.formatMessage(messages.location)}>
-                                                <Select.Option value='l1'>location 1</Select.Option>
-                                                <Select.Option value='l2'>location 2</Select.Option>
-                                            </Select> */}
                                         </Form.Item>
 
                                     </div>
@@ -292,6 +264,7 @@ class InfoAvailability extends Component {
 
     render() {
         
+        console.log(this.props.auth.authData,'this.props.auth.authData')
         return (
             <Row justify="center" className="row-form">
                 <div className='col-form col-availability'>
@@ -451,7 +424,7 @@ class InfoAvailability extends Component {
                         <Row gutter={14} style={{ marginLeft: '-22px', marginRight: '-22px' }}>
                             <Col xs={24} sm={24} md={13}>
                                 <Form.Item
-                                    name="cancellation_window"
+                                    name="cancellationWindow"
                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationWindow) }]}
 
                                 >
@@ -464,7 +437,7 @@ class InfoAvailability extends Component {
                             </Col>
                             <Col xs={24} sm={24} md={11}>
                                 <Form.Item
-                                    name="cancellation_fee"
+                                    name="cancellationFee"
                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
 
                                 >
@@ -481,9 +454,9 @@ class InfoAvailability extends Component {
                                 block
                                 type="primary"
                                 htmlType="submit"
-                            // onClick={this.props.onContinue}
+                            onChange={this.handleChange}
                             >
-                                {intl.formatMessage(messages.continue).toUpperCase()}
+                                {intl.formatMessage(messages.update).toUpperCase()}
                             </Button>
                         </Form.Item>
                     </Form>
@@ -495,5 +468,6 @@ class InfoAvailability extends Component {
 
 const mapStateToProps = state => ({
     register: state.register,
+    auth: state.auth
 })
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoAvailability);

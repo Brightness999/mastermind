@@ -4,10 +4,16 @@ import ModalCurrentAppointment from './ModalCurrentAppointment';
 import ModalNewAppointment from './ModalNewAppointment';
 import ModalNewAppointmentForParents from './ModalNewAppointmentForParents';
 import ModalSubsidyProgress from './ModalSubsidyProgress';
+import ModalNoShow from './ModalNoShow';
+import ModalBalance from './ModalBalance';
+import ModalReferralService from './ModalReferralService';
 export {
   ModalCreateDone,
   ModalCancelAppointment,
   ModalCurrentAppointment,
   ModalNewAppointment,ModalNewAppointmentForParents,
-  ModalSubsidyProgress
+  ModalSubsidyProgress,
+  ModalNoShow,
+  ModalBalance,
+  ModalReferralService
 }

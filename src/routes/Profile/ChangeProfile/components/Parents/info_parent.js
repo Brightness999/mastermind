@@ -9,6 +9,8 @@ import messagesLogin from '../../../../Sign/Login/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
 
+import {setInforClientParent, changeInforClientParent} from '../../../../../redux/features/authSlice';
+import {store} from '../../../../../redux/store'
 
 class InfoParent extends Component {
 
@@ -34,7 +36,7 @@ class InfoParent extends Component {
     componentDidMount() {
         
         const {registerData} = this.props.register;
-        
+        console.log(this.props.auth.authDataClientParent,'http://kyniema4.hopto.org:3090/')
         if(!registerData.parentInfo){
             this.props.setRegisterData({parentInfo:this.getDefaultObj() });
         }
@@ -78,13 +80,23 @@ class InfoParent extends Component {
         console.log(fieldName , value);
         this.setValueToReduxRegisterData(fieldName, value);
     }
-
+    getValueInForm = (allValue, allValueChange) => {
+        this.setState({dataChange: allValueChange.children})
+    }
+    updateProfile = async() => {
+        const {authDataClientParent} = this.props.auth;
+        const token = localStorage.getItem('token');
+        const values = await this.form.validateFields();
+        const dataFrom = {...values,id: authDataClientParent.id}
+        try {
+            store.dispatch(setInforClientParent({data: dataFrom, token: token}))
+            this.props.changeInforClientParent(dataFrom)
+        } catch (error) {
+            console.log(error,'error')
+        }
+    }
     onFinish = (values) => {
         console.log('Success:', values);
-        this.props.setRegisterData({parentInfo:values });
-        // localStorage.setItem('inforParent', JSON.stringify(values));
-        
-        this.props.onContinue();
     };
     onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
@@ -102,17 +114,13 @@ class InfoParent extends Component {
             address:address
         })
         this.setValueToReduxRegisterData('address', address);
-        // geocodeByAddress(address)
-        //     .then(results => getLatLng(results[0]))
-        //     .then(latLng => console.log('Success', latLng))
-        //     .catch(error => console.error('Error', error));
     };
 
     
 
 
     render() {
-        console.log(this.props.auth.authData,' authDataauthDataauthData')
+        console.log(this.props.auth.authDataClientParent,' authDataauthDataauthData')
         return (
             <Row justify="center" className="row-form">
                 <div className='col-form col-info-parent'>
@@ -125,7 +133,7 @@ class InfoParent extends Component {
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
                         ref={ref => this.form = ref}
-                        
+                        onValuesChange={this.getValueInForm}
                     >
                         <Form.Item
                             name="familyName"
@@ -294,8 +302,9 @@ class InfoParent extends Component {
                                 block
                                 type="primary"
                                 htmlType="submit"
+                                onClick={this.updateProfile}
                             >
-                                {intl.formatMessage(messages.continue).toUpperCase()}
+                                {intl.formatMessage(messages.update).toUpperCase()}
                             </Button>
                         </Form.Item>
                     </Form>
@@ -313,4 +322,4 @@ const mapStateToProps = (state) => {
     };
 }
 
-export default compose(connect(mapStateToProps, { setRegisterData }))(InfoParent);
+export default compose(connect(mapStateToProps, { setRegisterData, changeInforClientParent }))(InfoParent);

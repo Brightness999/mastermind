@@ -53,6 +53,9 @@ class SubsidyProgram extends Component {
 
     componentDidMount() {
         const {registerData} = this.props.register;
+        const { authData } = this.props.auth
+        console.log(registerData.subsidy,'subsidyresd')
+        console.log(authData,'authDataauthData')
         var arrReduce = [];
         for(var i=0;i<100;i++){
             arrReduce.push( i);
@@ -64,16 +67,16 @@ class SubsidyProgram extends Component {
         arrTime.push(moment('2018-01-19 11:00:00 AM','YYYY-MM-DD hh:mm:ss A'))
 
         this.setState({ReduceList: arrReduce,TimeAvailableList: arrTime});
-        if (registerData.subsidy) {
-            this.form?.setFieldsValue(registerData.subsidy);
+        if (authData) {
+            this.form?.setFieldsValue(authData);
             
         }else{
             this.form.setFieldsValue({reduceWithAcademic:[{}]})
         }
         this.setState({
-            isAcceptProBono: registerData.isAcceptProBono||false,
-            isAcceptReduceRate: registerData.isAcceptReduceRate||false,
-            isWillingOpenPrivate: registerData.isWillingOpenPrivate||false
+            isAcceptProBono: authData.isAcceptProBono||false,
+            isAcceptReduceRate: authData.isAcceptReduceRate||false,
+            isWillingOpenPrivate: authData.isWillingOpenPrivate||false
         })
         this.getDataFromServer();
     }
@@ -578,7 +581,7 @@ class SubsidyProgram extends Component {
                                 htmlType="submit"
                             // onClick={this.props.onContinueProgram}
                             >
-                                {intl.formatMessage(messages.continue).toUpperCase()}
+                                {intl.formatMessage(messages.update).toUpperCase()}
                             </Button>
                         </Form.Item>
                     </Form>
@@ -590,5 +593,6 @@ class SubsidyProgram extends Component {
 
 const mapStateToProps = state => ({
     register: state.register,
+    auth: state.auth
 })
 export default compose(connect(mapStateToProps, { setRegisterData }))(SubsidyProgram);

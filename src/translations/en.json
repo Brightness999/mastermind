@@ -218,6 +218,9 @@
 
   "components.mainheader.new": "new",
   "components.mainheader.search": "Search",
+  "components.mainheader.editProfile": "Edit Profile",
+  "components.mainheader.notification": "Notification",
+  "components.mainheader.logOut": "Log Out",
 
   "components.Modal.edit": "Edit",
   "components.Modal.new": "New",
@@ -261,6 +264,18 @@
   "components.Modal.numberApprovedSessions": "Number of approved sessions",
   "components.Modal.totalRemaining": "Total remaining",
   "components.Modal.appeal": "Appeal",
+  "components.Modal.submitFlag": "Submit Flag",
+  "components.Modal.noShowPenalty": "No show penalty",
+  "components.Modal.penaltyAmount": "Penalty amount",
+  "components.Modal.programPenalty": "Program penalty",
+  "components.Modal.unpaidBalance": "Unpaid balance",
+  "components.Modal.lateFreeAmount": "Late free amount",
+  "components.Modal.currentBalanceDue": "Current balance due",
+  "components.Modal.daysPastDue": "Days past due",
+  "components.Modal.scheduleConsultation": "Schedule Consultation",
+  "components.Modal.referralService": "HMGH Referral Service",
+  "components.Modal.byPhone": "By phone",
+  "components.Modal.additionalDocuments": "Additional documents",
   
   "components.drawerdetail.appointmentDetails": "Appointment Details",
   "components.drawerdetail.what": "What",
@@ -278,6 +293,8 @@
   "components.drawerdetailpost.postSessionFeedback": "Post session feedback",
   "components.drawerdetailpost.markClosed": "Mark as closed",
   "components.drawerdetailpost.flagDependent": "Flag Dependent",
+  "components.drawerdetailpost.pastDueBalance": "Past due balance",
+  "components.drawerdetailpost.noShow": "No show / cancellation",
 
   "routes.Blank.blankPage": "Blank page",
   "routes.Crud.new": "New",

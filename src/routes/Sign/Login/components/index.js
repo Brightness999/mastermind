@@ -9,7 +9,8 @@ import { url } from '../../../../utils/api/baseUrl';
 import axios from 'axios';
 import './index.less';
 import {decode as base64_decode, encode as base64_encode} from 'base-64';
-import { getInfoAuth } from '../../../../redux/features/authSlice';
+import { getInfoAuth, setUser } from '../../../../redux/features/authSlice';
+import {getAppointmentsData} from "../../../../redux/features/appointmentsSlice"
 import {store} from '../../../../redux/store';
 // @connect(({ login, loading, global }) => ({
 //   global,
@@ -72,7 +73,9 @@ export default class extends React.Component {
         console.log('token',  this.props.history , this.props.test1);
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        store.dispatch(getInfoAuth(data.user.role,data.token));
+        store.dispatch(setUser(data.user))
+        store.dispatch(getInfoAuth());
+        store.dispatch(getAppointmentsData({role: data.user.role,token: data.token}))
         data.user.role > 900 ? this.props.history.push(routerLinks.Admin) : this.props.history.push(routerLinks.Dashboard);
       }
     } catch (error) {

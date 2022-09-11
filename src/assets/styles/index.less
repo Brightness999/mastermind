@@ -295,6 +295,33 @@ select:-webkit-autofill:focus {
   } 
 }
 
+.ant-dropdown-placement-bottomRight {
+  .ant-dropdown-menu {
+    background-color: transparent!important;
+    box-shadow: unset;
+    padding: 0;
+  
+    .ant-dropdown-menu-item {
+      background-color: @white;
+      border: 1px solid @primary-color;
+      color: @gray800;
+      margin-bottom: 5px;
+      border-radius: 4px;
+      font-size: 12px;    
+      text-align: center;
+      padding: 3px 12px;
+  
+      &-active,
+      &-selected,
+      &:hover {
+        color: white;
+        background-color: @primary-color-dark;
+        border-color: @primary-color-dark;
+      }
+    }
+  } 
+}
+
 .ant-dropdown-placement-bottomLeft {
   .ant-dropdown-menu {
     .ant-dropdown-menu-item {
@@ -609,6 +636,7 @@ ol {
   position: relative;
 }
 .flex-1 { flex: 1;}
+.flex-2 { flex: 2;}
 .flex { display: flex; }
 .flex-row { flex-direction: row; }
 .flex-col { flex-direction: column; }

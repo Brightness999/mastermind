@@ -119,7 +119,7 @@ export default class extends React.Component {
                 type="primary"
                 htmlType="submit"
               >
-                {intl.formatMessage(messages.confirm).toUpperCase()}
+                {intl.formatMessage(messages.update).toUpperCase()}
               </Button>
             </Form.Item>
           </Form>
