@@ -9,7 +9,7 @@ const initialState = {
 };
 
 export const getAppointmentsData = createAsyncThunk(
-    'auth/getPppointmentsClientData',
+    'auth/getAppointmentsClientData',
     async (data) => {
         let result = {}
         try {
@@ -36,15 +36,22 @@ export const getAppointmentsMonthData = createAsyncThunk(
         try {
             switch (data.role) {
                 case 30:
-                    console.log(data,'token')
+                    
                     result = await request.post(url+'providers/get_my_appointments_in_month' ,data.data, data.token);
-                    console.log(result,'result')
-                    console.log(data,'token')
-                return result.data;
+                break;
                 case 3:
                     result = await request.post(url+'clients/get_my_appointments_in_month' ,data.data, data.token);
-                return result.data;
+                    break;
             }
+            result.data.forEach((appoint)=>{
+                console.log('sida ',data.role==30?(appoint.dependent.firstName+ " " + appoint.dependent.lastName):appoint.provider.name)
+                appoint.title = data.role==30?(appoint.dependent.firstName+ " " + appoint.dependent.lastName):appoint.provider.name;
+                appoint.allDay= false;
+                appoint.start = new Date ( appoint.date);
+                appoint.end = new Date ( appoint.date);
+            });
+            console.log('result after pair',result.data)
+            return result.data;
         } catch (error) {
             console.log(error,'error')
         }
@@ -83,11 +90,15 @@ export const removeAppoint = createAsyncThunk(
                     result = await request.post(url+'providers/cancel_appoint' ,data.data, data.token);
                     console.log(result,'result')
                     console.log(data,'token')
-                return result;
+                    break;
                 case 3:
                     result = await request.post(url+'clients/cancel_appoint' ,data.data, data.token);
-                return result;
+                    break;
             }
+
+            
+      
+            return result;
         } catch (error) {
             console.log(error,'error')
         }

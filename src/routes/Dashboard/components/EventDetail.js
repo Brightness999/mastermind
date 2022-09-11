@@ -21,9 +21,24 @@ class EventDetail extends React.Component {
     isConfirm: false,
   };
 
-  onRescheduleConfirm = () => {
-    this.setState({isConfirm: !this.state.isConfirm});
+  componentDidMount = () =>{
+
   }
+
+  
+
+  onRescheduleConfirm = () => {
+    
+  }
+
+  showCancelConfirm = () =>{
+    this.setState({isConfirm: true});
+  }
+
+  onKeepAppointment = ()=>{
+    this.setState({isConfirm: false});
+  }
+
   onCancelEvent = async() => {
     const { role, id, calendarEvents } = this.props
     const data = {
@@ -84,7 +99,7 @@ class EventDetail extends React.Component {
           <Button type='primary' onClick={this.onRescheduleConfirm}>
             {intl.formatMessage(msgDrawer.reschedule).toUpperCase()}
           </Button>
-          <Button onClick={this.onCancelEvent}>
+          <Button onClick={this.showCancelConfirm}>
             {intl.formatMessage(messages.cancelEvent).toUpperCase()}
           </Button>
         </div>}
@@ -96,8 +111,8 @@ class EventDetail extends React.Component {
             <p className='font-18 font-500'>This cannot be undone & you may <span className='text-red'>lose</span> your slot & won't get it back</p>
           </div>
           <div className='btn-footer'>
-            <Button type='primary' block onClick={this.onRescheduleConfirm}>{intl.formatMessage(msgModal.keepAppointment).toUpperCase()}</Button>
-            <Button className='btn-warning' block onClick={this.props.backView}>{intl.formatMessage(msgModal.confirmCancellation).toUpperCase()}</Button>
+            <Button type='primary' block onClick={this.onKeepAppointment}>{intl.formatMessage(msgModal.keepAppointment).toUpperCase()}</Button>
+            <Button className='btn-warning' block onClick={this.onCancelEvent}>{intl.formatMessage(msgModal.confirmCancellation).toUpperCase()}</Button>
           </div>
         </div>}
       </div>

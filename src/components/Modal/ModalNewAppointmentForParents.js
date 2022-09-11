@@ -30,7 +30,6 @@ class ModalNewAppointmentForParents extends React.Component {
         isPopupComfirm: false,
         isSelectTime: -1,
         listProvider:[],
-        SkillSet:[],
         selectedSkillSet:-1,
         address:'',
         selectedDependent:undefined,
@@ -58,23 +57,12 @@ class ModalNewAppointmentForParents extends React.Component {
             
         }
         this.setState({arrTime:arrTime});
-        this.loadDefaultData()
         this.searchProvider()
-    }
-
-    componentDidUpdate(){
-        console.log('did update',this.props.listDependents)
     }
 
     
 
-    loadDefaultData(){
-        request.post('clients/get_default_value_for_client').then(result=>{
-            var data = result.data;
-            console.log('default value',data);
-            this.setState({SkillSet: data.SkillSet});
-        })
-    }
+    
 
     searchProvider(name){
         
@@ -239,7 +227,7 @@ class ModalNewAppointmentForParents extends React.Component {
                             this.setState({selectedSkillSet: v});
                         }}
                          placeholder={intl.formatMessage(msgCreateAccount.skillsets)}>
-                            {this.state.SkillSet.map((skill,index) =>(<Select.Option value={index}>{skill}</Select.Option>))}
+                            {this.props.SkillSet.map((skill,index) =>(<Select.Option value={index}>{skill}</Select.Option>))}
                         </Select>
                     </Col>
                     <Col xs={24} sm={24} md={8} className='select-small'>
@@ -324,7 +312,7 @@ class ModalNewAppointmentForParents extends React.Component {
                             </div>
                             <div className='count-2'>
                                 <p className='font-10'>Name: {isChoose>=0&&this.state.listProvider[isChoose]!=undefined?this.state.listProvider[isChoose].name:''}</p>
-                                <p className='font-10'>Skillset(s): {isChoose>=0&&this.state.listProvider[isChoose]!=undefined?this.state.SkillSet[this.state.listProvider[isChoose].skillSet]:''}</p>
+                                <p className='font-10'>Skillset(s): {isChoose>=0&&this.state.listProvider[isChoose]!=undefined?this.props.SkillSet[this.state.listProvider[isChoose].skillSet]:''}</p>
                             </div>
                             <p className='font-10'>Practice/Location</p>
                             <div className='count-2'>

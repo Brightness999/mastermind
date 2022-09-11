@@ -79,10 +79,12 @@ export default class extends React.Component {
       providerInfo:{},
       listAppoinmentsRecent:[],
       listAppoinmentsFilter:[],
+      SkillSet:[],
     }
   }
   componentDidMount(){
     if(!!localStorage.getItem('token')&&localStorage.getItem('token').length >0){
+      this.loadDefaultData();
       checkPermission().then(loginData=>{
         loginData.user.role > 900 && this.props.history.push(routerLinks.Admin)
         const appointmentsMonth = store.getState().appointments.dataAppointmentsMonth
@@ -119,6 +121,15 @@ export default class extends React.Component {
     script.onload = () => this.scriptLoaded();
     document.body.appendChild(script);
   }
+
+  loadDefaultData(){
+    request.post('clients/get_default_value_for_client').then(result=>{
+        var data = result.data;
+        console.log('default value',data);
+        this.setState({SkillSet: data.SkillSet});
+    })
+  }
+
 
 
   scriptLoaded = ()=>{
@@ -214,7 +225,8 @@ export default class extends React.Component {
       visible: this.state.visibleNewAppoint,
       onSubmit: this.onSubmitModalNewAppoint,
       onCancel: this.onCloseModalNewAppoint,
-      listDependents: this.state.listDependents
+      listDependents: this.state.listDependents,
+      SkillSet: this.state.SkillSet,
     };
     return (<ModalNewAppointmentForParents {...modalNewAppointProps} />);
     // <ModalNewAppointment {...modalNewAppointProps} />
@@ -330,6 +342,7 @@ export default class extends React.Component {
   handleEventClick = (val) => {
     if(val?.event){
       const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : 0
+      
       this.setState({ 
         isEventDetail: !this.state.isEventDetail,
         idEvent: id
@@ -337,11 +350,14 @@ export default class extends React.Component {
     } else {
       this.setState({ 
         isEventDetail: !this.state.isEventDetail,
-        calendarEvents: val.data
+        // calendarEvents: val.data
       });
     }
     
   }
+
+  
+
   handleEventAdd = (addInfo) => {
     this.props.createEvent(addInfo.event.toPlainObject())
       .catch(() => {
@@ -421,7 +437,7 @@ export default class extends React.Component {
   
   renderPanelAppointmentForProvider = ()=>{
     const appointments = store.getState().appointments.dataAppointments
-    if(this.state.userRole == 30)
+    if(this.state.userRole == 30 || this.state.userRole == 3 )
     return (<Panel
       key="1"
       header={intl.formatMessage(messages.appointments)}
@@ -430,34 +446,11 @@ export default class extends React.Component {
     >
       <PanelAppointment 
         appointments={appointments.docs}
-
+        userRole={this.state.userRole}
       />
     </Panel>);
   }
-  renderPanelAppointmentUpcoming = () => {
-    
-          
-    return (
-      <div key={1} className='list-item'>
-          <div className='item-left'>
-            <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
-            <div className='div-service'>
-              <p className='font-11 mb-0'>Service Type</p>
-              <p className='font-09 mb-0'>Provide Name</p>
-            </div>
-            <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
-            <div className='ml-auto'>
-              <p className='font-12 mb-0'>Time</p>
-              <p className='font-12 font-700 mb-0'>Date</p>
-            </div>
-          </div>
-          <div className='item-right'>
-            <GiBackwardTime size={19} onClick={() => { }} />
-            <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => { }} />
-          </div>
-      </div>
-    )
-  }
+ 
   render() {
     const {
       isFilter,
@@ -701,7 +694,11 @@ export default class extends React.Component {
                   </Button>
                 </Dropdown>
               </div></>}
-            {isEventDetail && <EventDetail backView={this.handleEventClick} id={this.state.idEvent} role={this.state.userRole} calendarEvents={this.state.calendarEvents}/>}
+            {isEventDetail && <EventDetail backView={this.handleEventClick}
+            id={this.state.idEvent} 
+            role={this.state.userRole}
+            calendarEvents={this.state.calendarEvents}
+              />}
           </section>
           <section className='div-multi-choice'>
             <Collapse
@@ -883,8 +880,7 @@ function reportNetworkError() {
 function renderEventContent(eventInfo) {
   return (
     <>
-      <b className='mr-3'>{eventInfo.timeText}</b>
-      <span className='event-title'>{eventInfo.event.title}</span>
+      <b className='mr-3'>{eventInfo.event.title}-{moment(eventInfo.event.start).format('hh:mm')}</b>
     </>
   )
 }

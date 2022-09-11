@@ -453,7 +453,8 @@ export default class extends React.Component {
                   </Button>
                 </Dropdown>
               </div></>}
-            {isEventDetail && <EventDetail backView={this.handleEventClick} />}
+              {/*de lam phan admin sau*/}
+            {/* {isEventDetail && <EventDetail backView={this.handleEventClick} />} */}
           </section>
           <section className='div-multi-choice'>
             <Collapse
