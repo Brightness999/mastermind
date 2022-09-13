@@ -445,7 +445,6 @@ export default class extends React.Component {
       className='appointment-panel'
     >
       <PanelAppointment 
-        appointments={appointments.docs}
         userRole={this.state.userRole}
       />
     </Panel>);
