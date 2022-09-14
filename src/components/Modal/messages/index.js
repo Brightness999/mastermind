@@ -217,4 +217,8 @@ export default {
     id: `${scope}.additionalDocuments`,
     defaultMessage: 'Additional documents',
   },
+  create: {
+    id: `${scope}.create`,
+    defaultMessage: 'Create',
+  },
 };

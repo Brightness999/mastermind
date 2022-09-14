@@ -21,7 +21,8 @@ class SubsidyReview extends React.Component {
       data:  {},
       inforChildren:  [],
       SkillSet:[],
-      childname:''
+      childname:'',
+      listSchools:[],
     }
   }
 
@@ -33,6 +34,7 @@ class SubsidyReview extends React.Component {
       data:registerData.studentInfos [this.props.selectedDependent].subsidyRequest
     })
     this.loadDataFromServer()
+    this.loadSchools();
   }
 
   loadDataFromServer(){
@@ -57,6 +59,30 @@ class SubsidyReview extends React.Component {
         })
   }
 
+  loadSchools() {
+    axios.post(url + 'clients/get_all_schools'
+    ).then(result => {
+        if (result.data.success) {
+            var data = result.data.data;
+            this.setState({ listSchools: data })
+        } else {
+            
+
+        }
+
+    }).catch(err => {
+        console.log(err);
+    })
+  }
+
+  schoolNameFromId(id){
+    for(var i = 0 ; i < this.state.listSchools.length ; i++){
+      if(this.state.listSchools[i]._id == id){
+        return this.state.listSchools[i].name;
+      }
+    }
+    return '';
+  }
 
 
   onSubmit = () => {
@@ -101,7 +127,7 @@ class SubsidyReview extends React.Component {
               <p className='font-20 font-700 mb-10'>{intl.formatMessage(messages.dependentInfo)}</p>
               <div className='review-item'>
                 <p>Dependent : {this.state.childname}</p>
-                <p>School : {school}</p>
+                <p>School : {this.schoolNameFromId(school)}</p>
                 <p>Skillset(s) : {this.state.SkillSet.length>0?this.state.SkillSet[skillSet]:''}</p>
               </div>
             </div>

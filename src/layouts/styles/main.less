@@ -16,7 +16,7 @@
           min-height: auto;
           position: relative;
           padding: 15px 20px;
-          height: 0;
+          // height: 0;
           overflow: auto;
         }
       
@@ -28,5 +28,29 @@
           width: 100%;
         }
     }
-    
+    .ant-layout-sider {
+      flex: 0 0 255px!important;
+      max-width: 255px!important;
+      min-width: 255px!important;
+      width: 255px!important;
+    }
+    .ant-layout-sider-collapsed {
+      flex: 0 0 70px!important;
+      max-width: 70px!important;
+      min-width: 70px!important;
+      width: 70px!important;
+    }
+
+    .btn-collapsed {
+      height: 31px;
+      padding: 5px 10px;
+      background-color: @blue-dark;
+      border: 0;
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      &:focus {
+        box-shadow: unset;
+      }
+    }
 }

@@ -48,6 +48,7 @@ class InfoChild extends Component {
             listServices: [],
             inforChildren: [{}, {}, {}],
             parentInfo: {},
+            listSchools:[],
             // inforChildren,
         }
     }
@@ -91,6 +92,7 @@ class InfoChild extends Component {
         this.form.setFieldsValue({children:studentInfos});
         
         this.loadServices();
+        this.loadSchools();
     }
 
     loadServices() {
@@ -109,9 +111,23 @@ class InfoChild extends Component {
 
         }).catch(err => {
             console.log(err);
-            this.setState({
-                checkEmailExist: false,
-            });
+        })
+    }
+
+    loadSchools() {
+        axios.post(url + 'clients/get_all_schools'
+        ).then(result => {
+            console.log('get_default_value_for_client', result.data);
+            if (result.data.success) {
+                var data = result.data.data;
+                this.setState({ listSchools: data })
+            } else {
+                
+
+            }
+
+        }).catch(err => {
+            console.log(err);
         })
     }
 
@@ -123,7 +139,7 @@ class InfoChild extends Component {
             "guardianPhone": parentInfo.fatherPhoneNumber || parentInfo.motherPhoneNumber,
             "guardianEmail": parentInfo.fatherEmail || parentInfo.motherEmail,
             "backgroundInfor": "",
-            "school": "",
+            "school": undefined,
             "primaryTeacher": "",
             "currentGrade": "",
             "services": [],
@@ -148,13 +164,13 @@ class InfoChild extends Component {
         var selectedObj = { ...studentInfos[index] };
         selectedObj[fieldName] = value;
         studentInfos[index] = selectedObj;
-        console.log(selectedObj, fieldName, value);
+        
         this.props.setRegisterData({ studentInfos: studentInfos });
     }
 
     getBirthday = (index) => {
         if (!!this.props.register.studentInfos && this.props.register.studentInfos[index] != undefined && !!this.props.register.studentInfos[index].birthday_moment) {
-            console.log('da load birthday ', this.props.register.studentInfos[index].birthday_moment)
+            
             return this.props.register.studentInfos[index].birthday_moment;
         }
         return moment();
@@ -193,25 +209,11 @@ class InfoChild extends Component {
             && studentInfo.guardianPhone.length > 0
             && studentInfo.guardianEmail.length > 0
             && studentInfo.backgroundInfor.length > 0
-            && studentInfo.school.length > 0
+            && studentInfo.school?.length > 0
             && studentInfo.primaryTeacher.length > 0
             && studentInfo.currentGrade.length > 0
             && studentInfo.services.length > 0;
-        console.log('vaid for index ', index,
-            !!studentInfo,
-            studentInfo.firstName.length > 0
-            , studentInfo.lastName.length > 0
-            , studentInfo.birthday, studentInfo.birthday.length
-            , studentInfo.birthday.length > 0
-            , studentInfo.guardianPhone.length > 0
-            , studentInfo.guardianEmail.length > 0
-            , studentInfo.backgroundInfor.length > 0
-            , studentInfo.school.length > 0
-            , studentInfo.primaryTeacher.length > 0
-            , studentInfo.currentGrade.length > 0
-            , studentInfo.services.length > 0,
-            "fill in " + isAlreadyFillIn
-        )
+        
         return isAlreadyFillIn;
     }
 
@@ -351,10 +353,28 @@ class InfoChild extends Component {
                                                     name={[field.name, "school"]}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
                                                 >
-                                                    <Input onChange={v => {
+                                                    <Select
+                                                            showArrow
+                                                            placeholder={intl.formatMessage(messages.school)}
+                                                            optionLabelProp="label"
+
+                                                            onChange={v => {
+                                                                console.log(v);
+                                                                this.updateReduxValueFor1Depedent(index, "school", v);
+                                                            }}
+                                                        >
+                                                            {this.state.listSchools.map(school => {
+                                                                return (<Select.Option 
+                                                                    label={school.name} 
+                                                                    value={school._id}>{school.name}</Select.Option>)
+                                                            })}
+
+
+                                                        </Select>
+                                                    {/* <Input onChange={v => {
                                                         this.updateReduxValueFor1Depedent(index, "school", v.target.value);
                                                     }}
-                                                        placeholder={intl.formatMessage(messages.school)} />
+                                                        placeholder={intl.formatMessage(messages.school)} /> */}
                                                 </Form.Item>
                                                 <Row gutter={14}>
                                                     <Col xs={24} sm={24} md={12}>

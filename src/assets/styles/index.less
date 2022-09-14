@@ -160,7 +160,7 @@ select:-webkit-autofill:focus {
   &:focus {
     background-color: @primary-color;
     border-color: @primary-color;
-    box-shadow: 0 0 0 0.2rem  @primary-color;
+    box-shadow: unset;
   }
 
   &:hover {
@@ -251,7 +251,7 @@ select:-webkit-autofill:focus {
     }
   }
   .ant-menu-inline.ant-menu-sub {
-    background:#ff0000;
+    background: transparent;
   }
   .ant-menu-sub .menu-dot::before {
     content: '';
@@ -562,6 +562,9 @@ ol {
 .mx-10 {
   margin-left: 10px !important;
   margin-right: 10px !important;
+}
+.mt-0 {
+  margin-top: 0!important;
 }
 .mt-10 {
   margin-top: 10px!important;
@@ -1357,7 +1360,7 @@ div.ant-typography,
                   .ant-collapse-expand-icon {
                       color: @primary-color-dark;
                       .ant-collapse-arrow {
-                          top: 12px;
+                          top: 14px;
                           transform: unset;
                       }
                   }
@@ -1454,4 +1457,36 @@ div.ant-typography,
       }
     }
   
+}
+.div-title-admin {
+  margin-top: 10px;
+  p {
+    margin-bottom: 0;
+    padding-left: 50px;
+  }
+  .ant-divider {
+    border-color: @gray700;
+    margin: 12px 0 24px 0;
+  }
+}
+.btn-green {
+  color: @green500;
+  &:hover,
+  &:focus {
+    color: @success-color;
+  }
+}
+.btn-blue {
+  color: @primary-color;
+  &:hover,
+  &:focus {
+    color: @primary-color-dark;
+  }
+}
+.btn-red {
+  color: @red400;
+  &:hover,
+  &:focus {
+    color: @red350;
+  }
 }

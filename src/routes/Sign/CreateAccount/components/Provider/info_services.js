@@ -36,7 +36,7 @@ class InfoServices extends Component {
             privateOffice:true,
             isReceiptsProvided:true,
             isNewClientScreening:true,
-
+            listSchools:[],
         }
     }
 
@@ -58,6 +58,7 @@ class InfoServices extends Component {
             isNewClientScreening: serviceInfor.isNewClientScreening,
         })
         this.getDataFromServer()
+        this.loadSchools();
     }
 
     getDataFromServer = () => {
@@ -200,6 +201,23 @@ class InfoServices extends Component {
         this.searchServiceableSchool(text)
     }
 
+    loadSchools() {
+        axios.post(url + 'clients/get_all_schools'
+        ).then(result => {
+            console.log('get_default_value_for_client', result.data);
+            if (result.data.success) {
+                var data = result.data.data;
+                this.setState({ listSchools: data })
+            } else {
+                
+    
+            }
+    
+        }).catch(err => {
+            console.log(err);
+        })
+    }
+
     searchServiceableSchool = (text)=>{
         axios.post(url + 'schools/get_school_infos' , {data:{"search":text}}
         ).then(result => {
@@ -285,13 +303,32 @@ class InfoServices extends Component {
                             name="serviceableSchool"
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.serviceableSchools) }]}
                            >
-                            <AutoComplete
+                            <Select
+                                mode="multiple"
+                                showArrow
+                                placeholder={intl.formatMessage(messages.school)}
+                                optionLabelProp="label"
+
+                                // onChange={v => {
+                                //     console.log(v);
+                                //     this.updateReduxValueFor1Depedent(index, "school", v);
+                                // }}
+                            >
+                                {this.state.listSchools.map(school => {
+                                    return (<Select.Option 
+                                        label={school.name} 
+                                        value={school._id}>{school.name}</Select.Option>)
+                                })}
+
+
+                            </Select>
+                            {/* <AutoComplete
                                 placeholder={intl.formatMessage(messages.serviceableSchools)} 
                                 onChange={v => this.handleChangeServiceable(v)}
                                 options={this.state.ServiceableSchools.map((value,index)=>{
                                     return {key:index ,value: value.name}
                                 })}
-                            />
+                            /> */}
                         </Form.Item>
 
                         <Form.List name="academicLevel">

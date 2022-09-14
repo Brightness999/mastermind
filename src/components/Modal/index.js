@@ -7,6 +7,7 @@ import ModalSubsidyProgress from './ModalSubsidyProgress';
 import ModalNoShow from './ModalNoShow';
 import ModalBalance from './ModalBalance';
 import ModalReferralService from './ModalReferralService';
+import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
 export {
   ModalCreateDone,
   ModalCancelAppointment,
@@ -15,5 +16,6 @@ export {
   ModalSubsidyProgress,
   ModalNoShow,
   ModalBalance,
-  ModalReferralService
+  ModalReferralService,
+  ModalNewSubsidyRequest
 }

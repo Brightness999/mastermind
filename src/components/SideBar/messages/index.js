@@ -1,20 +1,24 @@
-export const scope = 'components.SideBar';
+export const scope = 'components.sidebar';
 
 export default {
-  optionOnline: {
-    id: `${scope}.optionOnline`,
-    defaultMessage: 'Online',
+  test: {
+    id: `${scope}.test`,
+    defaultMessage: 'SideBar',
   },
-  optionBusy: {
-    id: `${scope}.optionBusy`,
-    defaultMessage: 'Busy',
+  userManager: {
+    id: `${scope}.userManager`,
+    defaultMessage: 'User Manager',
   },
-  optionInvisible: {
-    id: `${scope}.optionInvisible`,
-    defaultMessage: 'Invisible',
+  subsidyManager: {
+    id: `${scope}.subsidyManager`,
+    defaultMessage: 'Subsidy Request',
   },
-  optionOffline: {
-    id: `${scope}.optionOffline`,
-    defaultMessage: 'Offline',
-  }
+  systemSetting: {
+    id: `${scope}.systemSetting`,
+    defaultMessage: 'System Setting',
+  },
+  statistics: {
+    id: `${scope}.statistics`,
+    defaultMessage: 'Statistics',
+  },
 };

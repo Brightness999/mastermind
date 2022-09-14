@@ -26,6 +26,7 @@ class ReviewAccount extends Component {
             },
             listServices:[],
             SkillSet:[],
+            listSchools:[],
         }
     }
 
@@ -36,6 +37,7 @@ class ReviewAccount extends Component {
             registerData:registerData
         })
         this.loadDataFromServer();
+        this.loadSchools();
     }
 
     loadDataFromServer(){
@@ -52,6 +54,31 @@ class ReviewAccount extends Component {
                     checkEmailExist:false,
                 });
             })
+    }
+
+    loadSchools() {
+        axios.post(url + 'clients/get_all_schools'
+        ).then(result => {
+            if (result.data.success) {
+                var data = result.data.data;
+                this.setState({ listSchools: data })
+            } else {
+                
+    
+            }
+    
+        }).catch(err => {
+            console.log(err);
+        })
+      }
+    
+    schoolNameFromId(id){
+        for(var i = 0 ; i < this.state.listSchools.length ; i++){
+            if(this.state.listSchools[i]._id == id){
+            return this.state.listSchools[i].name;
+            }
+        }
+        return '';
     }
 
     getServicesName(id){
@@ -160,7 +187,7 @@ class ReviewAccount extends Component {
                                 <div>
                                     <p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.dependentsInfo)}</p>
                                     <p className='font-14 font-700 mb-10'>Dependent #{++index} {item.firstName} {item.lastName} - {item.birthday}</p>
-                                    <p>School : {item.school}</p>
+                                    <p>School : {this.schoolNameFromId( item.school) }</p>
                                     <div className='review-item'>
                                         <p>Teacher : {item.primaryTeacher} </p>
                                         <p>Grade : {item.currentGrade}</p>

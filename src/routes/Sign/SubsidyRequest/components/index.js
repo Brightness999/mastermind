@@ -29,6 +29,7 @@ class SubsidyRequest extends React.Component {
       dependents:[],
       documentUploaded:[],
       isRequestRav:true,
+      listSchools:[],
       // listDenpendent: localStorage.getItem('inforChildren') ? JSON.parse(localStorage.getItem('inforChildren')) : [],
     }
   }
@@ -56,6 +57,7 @@ class SubsidyRequest extends React.Component {
     
     this.loadDataForDependent(this.props.selectedDependent)
     this.loadDataFromServer();
+    this.loadSchools();
   }
 
   loadDataForDependent(index){
@@ -141,6 +143,23 @@ class SubsidyRequest extends React.Component {
             });
         })
   }
+
+  loadSchools() {
+    axios.post(url + 'clients/get_all_schools'
+    ).then(result => {
+        console.log('get_default_value_for_client', result.data);
+        if (result.data.success) {
+            var data = result.data.data;
+            this.setState({ listSchools: data })
+        } else {
+            
+
+        }
+
+    }).catch(err => {
+        console.log(err);
+    })
+}
 
   onChangeDependent(v){
     
@@ -270,10 +289,28 @@ class SubsidyRequest extends React.Component {
                   required: true,
                   message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school)
                 }]}>
-                  <Input onChange={v => {
+                  {/* <Input onChange={v => {
                       
                   }} 
-                  placeholder={intl.formatMessage(messagesCreateAccount.school)} />
+                  placeholder={intl.formatMessage(messagesCreateAccount.school)} /> */}
+                  <Select
+                                                            showArrow
+                                                            placeholder={intl.formatMessage(messages.school)}
+                                                            optionLabelProp="label"
+
+                                                            // onChange={v => {
+                                                            //     console.log(v);
+                                                            //     this.updateReduxValueFor1Depedent(index, "school", v);
+                                                            // }}
+                                                        >
+                                                            {this.state.listSchools.map(school => {
+                                                                return (<Select.Option 
+                                                                    label={school.name} 
+                                                                    value={school._id}>{school.name}</Select.Option>)
+                                                            })}
+
+
+                                                        </Select>
                 {/* <Select placeholder={intl.formatMessage(messagesCreateAccount.school)}>
                   <Select.Option value='s1'>School 1</Select.Option>
                   <Select.Option value='s2'>School 2</Select.Option>

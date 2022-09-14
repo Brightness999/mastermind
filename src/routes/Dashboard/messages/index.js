@@ -130,4 +130,8 @@ export default ({
     id: `${scope}.cancelEvent`,
     defaultMessage: 'Cancel Event',
   },
+  requestNewSubsidy: {
+    id: `${scope}.requestNewSubsidy`,
+    defaultMessage: 'Request new subsidy',
+  },
 });

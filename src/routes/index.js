@@ -2,6 +2,7 @@ import { createRoutes } from '../utils/core';
 import { routerLinks } from './constant';
 import UserLayout from '../layouts/UserLayout';
 import MainLayout from '../layouts/MainLayout';
+import AdminLayout from '../layouts/AdminLayout';
 
 import NotFound from './Pages/404';
 import Page403 from './Pages/403';
@@ -18,6 +19,10 @@ import ResetPass from './Sign/ResetPass';
 import Admin from './Admin';
 import ActiveAccount from './Sign/Login/activeaccount'
 import Changeprofile from './Profile/ChangeProfile';
+import UserManager from './Administrator/UserManager';
+import SubsidyManager from './Administrator/SubsidyManager';
+import SystemSetting from './Administrator/SystemSetting';
+import Statistics from './Administrator/Statistics';
 const routesConfig = app => [
   
   // {
@@ -40,9 +45,20 @@ const routesConfig = app => [
     indexRoute: routerLinks['Dashboard'],
     childRoutes: [
       Dashboard(app),
-      Admin(app),
-      Changeprofile(app),
-
+      Changeprofile(app)
+    ]
+  },
+  {
+    path: '/administrator',
+    title: 'Admin',
+    component: AdminLayout,
+    indexRoute: routerLinks['UserManager'],
+    childRoutes: [
+      // Admin(app),
+      UserManager(app),
+      SubsidyManager(app),
+      SystemSetting(app),
+      Statistics(app)
     ]
   },
   {
