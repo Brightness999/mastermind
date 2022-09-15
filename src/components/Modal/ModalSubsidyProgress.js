@@ -11,13 +11,64 @@ import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import msgRequest from '../../routes/Sign/SubsidyRequest/messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
+import request,{generateSearchStructure} from '../../utils/api/request'
+import {url , switchPathWithRole} from '../../utils/api/baseUrl'
+import moment from 'moment';
 
 const { Step } = Steps;
 class ModalSubsidyProgress extends React.Component {
     state = {
         currentStep: 2,
         isApproved: true,
+        subsidy:{},
+        providers:[],
+        selectedProviders:[],
+        isDisableSchoolFields:false,
     }
+
+    componentDidMount = () => {
+        this.props.setOpennedEvent(this.loadData)
+    }
+
+    loadData = (subsidyId) =>{
+        this.setState({subsidyId:{}});
+        this.loadSubsidyData(subsidyId);
+    }
+
+    loadSubsidyData = (subsidyId)=>{
+        
+        request.post(switchPathWithRole(this.props.userRole)+'get_subsidy_detail' , {subsidyId:subsidyId}).then(result=>{
+            console.log('get_subsidy_detail', result);
+            if(result.success){
+                this.setState({subsidy: result.data});
+                this.loadProvidersInSchool(result.data.school._id);
+            }else{
+                this.props.onCancel();
+            }
+        }).catch(err=>{
+            this.props.onCancel();
+        })
+    }
+
+    loadProvidersInSchool = (schoolId)=>{
+        this.setState({providers:[]});
+        request.post('schools/get_all_provider_in_school',{schoolId:schoolId}).then(result=>{
+            if(result.success){
+                console.log('get_all_provider_in_school',result.data)
+                this.setState({providers: result.data});
+            }else{
+                this.props.onCancel();
+            }
+        }).catch(err=>{
+            this.setState({providers:[]});
+        })
+    }
+
+    clearData = () =>{
+        this.setState({subsidy: {}});
+    }
+
+
     nextStep = () => {
         this.setState({currentStep: this.state.currentStep + 1});
         console.log("Step", this.state.currentStep)
@@ -38,9 +89,208 @@ class ModalSubsidyProgress extends React.Component {
         // else {
         //   window.location.href="/login";
         // }
-      }
-    render() {
+    }
     
+    getSkillSetName(value){
+        return this.props.SkillSet[value];
+    }
+
+    getFileName(path){
+        return path.replace(/^.*[\\\/]/, '')
+    }
+
+    getFileUrl(path){
+        return url+'uploads/'+path;
+    }
+    
+    renderStudentParentInfo(subsidy){
+        const {student,documents} = subsidy;
+        return (<div className='parent-info'>
+        <p className='font-20 font-700'>{intl.formatMessage(messages.parentInformation)}</p>
+        <Row gutter={15}>
+            <Col xs={24} sm={24} md={12}>
+                <p className='font-700'>{intl.formatMessage(msgReview.dependentInfo)}</p>
+                <div className='count-2'>
+                    <p className='font-12'>Dependent:<b>{student.firstName} {student.lastName}</b></p>
+                    <p className='font-12'>School: {student.school.name}</p>
+                    <p className='font-12'>Skillset(s): {this.getSkillSetName(subsidy.skillSet)} </p>
+                    <div className='count-2'>
+                        <p className='font-12'>Age: {moment().diff(student.birthday, 'years',false)}</p>
+                        <p className='font-12'>Grade: {student.currentGrade}</p>
+                    </div>
+                    <p className='font-12'>Teacher: {student.primaryTeacher}</p>
+                </div>
+            </Col>
+            <Col xs={24} sm={24} md={12}>
+                <p className='font-700'>{intl.formatMessage(msgReview.otherCcontacts)}</p>
+                    <div className='count-2'>
+                        <p className='font-12'>Rav name: {subsidy.ravName}</p>
+                        <p className='font-12'>Rav phone: {subsidy.ravPhone}</p>
+                        <p className='font-12'>Rav email: {subsidy.ravEmail}</p>
+                        <p className='font-12'>Therapist name: {subsidy.therapistContact}</p>
+                        <p className='font-12'>Therapist phone: {subsidy.therapistPhone}</p>
+                        <p className='font-12'>Therapist email: {subsidy.therapistEmail}</p>
+                    </div>
+            </Col>
+        </Row>
+        <Divider style={{margin: '12px 0', borderColor: '#d7d7d7'}}/>
+        {!!documents&&documents.length>0&&<Row gutter={15}>
+            <Col xs={24} sm={24} md={12}>
+                <p className='font-700'>{intl.formatMessage(messages.subsidyNotes)}</p>
+                <p className='font-12'>{subsidy.note}</p>
+            </Col>
+            <Col xs={24} sm={24} md={12}>
+                <p className='font-700'>{intl.formatMessage(msgRequest.documents)}</p>
+                {documents.map((document,index )=>{
+                    return <a href={this.getFileUrl(document)} className='font-12'>{this.getFileName(document)}</a>
+                })}
+            </Col>
+        </Row>}
+    </div>)
+    }
+
+    renderSchoolInfo = ()=>{
+        if(this.props.userRole == 60){
+            return (<div className='school-info'>
+            <div className='flex flex-row justify-between'>
+                <p className='font-20 font-700'>{intl.formatMessage(messages.schoolInformation)}</p>
+                <div className='flex flex-row items-center'>
+                    <Button size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button>
+                    <Button size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>
+                </div>
+            </div>
+            <Row gutter={15}>
+                <Col xs={24} sm={24} md={8}>
+                    <p className='font-700 mb-10'>{intl.formatMessage(messages.recommendedProviders)}</p>
+                    <div className='select-md'>
+                        {[0,1,2,].map((_,index)=>{
+                            return <Select 
+                            value={this.state.selectedProviders[index]}
+                            onChange={v=>{
+                                console.log('on dropdown changed',v);
+                                this.setState(prevState => ({
+                                    selectedProviders: {
+                                        ...prevState.selectedProviders,
+                                        [prevState.selectedProviders[index].name]: v,
+                                    },
+                                }));
+                            }}
+                            className='mb-10' 
+                            placeholder={intl.formatMessage(msgCreateAccount.provider)}
+                            >
+                                {this.state.providers.map((provider) =>{
+                                    return (<Select.Option value={provider._id}>{provider.name||provider.referredToAs}</Select.Option>);
+                                }) }
+                            </Select>
+                        })}
+                    </div>
+                </Col>
+                <Col xs={24} sm={24} md={16}>
+                    <p className='font-700 mb-10'>{intl.formatMessage(messages.decisionExplanation)}</p>
+                    <Input.TextArea rows={5} placeholder={intl.formatMessage(msgRequest.generalNotes)}/>
+                </Col>
+            </Row>
+        </div>)
+        }
+    }
+
+    renderConsulation(subsidy){
+        if(subsidy.adminApprovalStatus == 2){
+            return (<div className='consulation-appoint'>
+            <Row gutter={15} align='bottom'>
+                <Col xs={24} sm={24} md={10}>
+                    <p className='font-20 font-700'>{intl.formatMessage(messages.consulationAppointment)}</p>
+                    <p className='font-700'>{intl.formatMessage(messages.consultant)}: <span className='text-uppercase'>Name Here</span></p>
+                </Col>
+                <Col xs={24} sm={24} md={14}>
+                    <div className='flex flex-row justify-between'>
+                        <p><span className='font-700'>Google Meet</span>: <a>meet.google.com/sdf-sasd-gdh</a></p>
+                        <div className='flex flex-row items-center'>
+                            <p className='text-primary'><FaRegCalendarAlt/>{intl.formatMessage(messages.reSchedule)}</p>
+                        </div>
+                    </div>
+                    <div className='flex flex-row justify-between'>
+                        <p><span className='font-700'>{intl.formatMessage(messages.dateTime)}</span>: 12/23/2022 | 7:30pm</p>
+                        <p><span className='font-700'>{intl.formatMessage(messages.phone)}</span>: 0749072340</p>
+                    </div>
+                </Col>
+            </Row>
+        </div>)
+        }
+    }
+
+    renderDecision(subsidy){
+        <div className='subsidy-detail'>
+            <div className='flex flex-row justify-between'>
+                <p className='font-20 font-700'>{intl.formatMessage(messages.subsidyDetails)}</p>
+                <div className='flex flex-row items-center'>
+                    <p className='text-primary'><ImPencil/>{intl.formatMessage(messages.edit)}</p>
+                </div>
+            </div>
+            <Row gutter={15}>
+                <Col xs={24} sm={24} md={8}>
+                    <p><span className='font-700'>{intl.formatMessage(msgCreateAccount.provider)}</span>: <span className='text-uppercase'>Name Here</span></p>
+                </Col>
+                <Col xs={24} sm={24} md={8}>
+                    <p><span className='font-700'>{intl.formatMessage(messages.numberApprovedSessions)}</span>: 20</p>
+                </Col>
+                <Col xs={24} sm={24} md={8} className='text-right sm-text-left'>
+                    <p><span className='font-700'>{intl.formatMessage(messages.totalRemaining)}</span>: 8</p>
+                </Col>
+            </Row>
+        </div>
+    }
+
+    renderSubsidyData(subsidy){
+        if(!subsidy.student){
+            return (<div>Loading...</div>)
+        }
+        return (<div className="steps-content mt-1">
+        {this.renderStudentParentInfo(subsidy)}
+        {this.renderSchoolInfo(subsidy)}
+        {this.renderConsulation(subsidy)}
+        {this.renderConsulation(subsidy)}
+        
+        
+        
+    
+    </div>)
+    }
+
+    
+
+    checkCurrentStep = (subsidy) =>{
+        if(subsidy.status == 2){
+            if(!!subsidy.adminApprovalStatus ){
+                return 3;
+            }
+            return 2;
+        }else if(subsidy.status == -2){
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+
+    footerButton(){
+        if(this.props.userRole == 3){
+            return [
+                
+            ]
+        }
+        return [
+            <Button key="back" onClick={this.props.onCancel}>
+                {intl.formatMessage(messages.decline).toUpperCase()}
+            </Button>,
+            <Button key="submit" type="primary" onClick={this.props.onSubmit} style={{padding: '7.5px 30px'}}>
+                {intl.formatMessage(messages.approve).toUpperCase()}
+                {/* {intl.formatMessage(messages.appeal).toUpperCase()} */}
+            </Button>
+        ]
+    }
+    
+    render() {
+        const {subsidy} = this.state;
         const modalProps = {
             className: 'modal-subsidy-progress',
             title: "",
@@ -49,15 +299,7 @@ class ModalSubsidyProgress extends React.Component {
             onCancel: this.props.onCancel,
             closable: false,
             width: 900,
-            footer: [
-                <Button key="back" onClick={this.props.onCancel}>
-                    {intl.formatMessage(messages.decline).toUpperCase()}
-                </Button>,
-                <Button key="submit" type="primary" onClick={this.props.onSubmit} style={{padding: '7.5px 30px'}}>
-                    {intl.formatMessage(messages.approve).toUpperCase()}
-                    {/* {intl.formatMessage(messages.appeal).toUpperCase()} */}
-                </Button>
-            ]
+            footer: this.footerButton(),
         };
         const { currentStep, isApproved } = this.state;
         return(
@@ -67,138 +309,26 @@ class ModalSubsidyProgress extends React.Component {
                     <div className='flex-1 text-center'>
                         <p className='font-30 font-30-sm'>{intl.formatMessage(messages.subsidyProgress)}</p>
                     </div>
-                    <div style={{width: 110, textAlign: 'right'}}>
-                        {isApproved ?
-                            <p className='text-green500 font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.approved)}</p>
-                            :
-                            <p className='text-red font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.declined)}</p>
-                        }
-                    </div>
+                    {subsidy.status!=0 && <div style={{width: 110, textAlign: 'right'}}>
+                        {subsidy.status == 2&&<p className='text-green500 font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.approved)}</p>}
+                        {subsidy.status==-2&& <p className='text-red font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.declined)}</p>}
+                        
+                    </div>}
                 </div>
-                <div className={isApproved ? '' : 'step-declined'}>
-                    <Steps current={currentStep} responsive={false} style={{maxWidth: 600}}>
+                <div className={subsidy.status !=-2 ? '' : 'step-declined'}>
+                    <Steps current={this.checkCurrentStep(subsidy)} responsive={false} style={{maxWidth: 600}}>
                         <Step key='request' title={intl.formatMessage(messages.request)} icon={<p>1</p>}/>
                         <Step key='school' title={intl.formatMessage(msgCreateAccount.school)} icon={<p>2</p>}/>
                         <Step key='consultation' title={intl.formatMessage(messages.consultation)} icon={<p>3</p>}/>
                         <Step key='decision' title={intl.formatMessage(messages.decision)} icon={<p>4</p>}/>
                     </Steps>
                 </div>
-                {currentStep === 0 && <div className="steps-content"></div>}
+                {/* {currentStep === 0 && <div className="steps-content"></div>}
                 {currentStep === 1 && <div className="steps-content"></div>}
-                {currentStep === 2 && <div className="steps-content mt-1">
-                    <div className='parent-info'>
-                        <p className='font-20 font-700'>{intl.formatMessage(messages.parentInformation)}</p>
-                        <Row gutter={15}>
-                            <Col xs={24} sm={24} md={12}>
-                                <p className='font-700'>{intl.formatMessage(msgReview.dependentInfo)}</p>
-                                <div className='count-2'>
-                                    <p className='font-12'>Depentdent</p>
-                                    <p className='font-12'>School</p>
-                                    <p className='font-12'>Skillset(s)</p>
-                                    <div className='count-2'>
-                                        <p className='font-12'>Age</p>
-                                        <p className='font-12'>Grade</p>
-                                    </div>
-                                    <p className='font-12'>Teacher</p>
-                                </div>
-                            </Col>
-                            <Col xs={24} sm={24} md={12}>
-                                <p className='font-700'>{intl.formatMessage(msgReview.otherCcontacts)}</p>
-                                    <div className='count-2'>
-                                        <p className='font-12'>Rav name</p>
-                                        <p className='font-12'>Rav phone</p>
-                                        <p className='font-12'>Rav email</p>
-                                        <p className='font-12'>Therapist name</p>
-                                        <p className='font-12'>Therapist phone</p>
-                                        <p className='font-12'>Therapist email</p>
-                                    </div>
-                            </Col>
-                        </Row>
-                        <Divider style={{margin: '12px 0', borderColor: '#d7d7d7'}}/>
-                        <Row gutter={15}>
-                            <Col xs={24} sm={24} md={12}>
-                                <p className='font-700'>{intl.formatMessage(messages.subsidyNotes)}</p>
-                                <p className='font-12'>Notes text....</p>
-                            </Col>
-                            <Col xs={24} sm={24} md={12}>
-                                <p className='font-700'>{intl.formatMessage(msgRequest.documents)}</p>
-                                <p className='font-12'>Document #1 title</p>
-                                <p className='font-12'>Document #2 title</p>
-                                <p className='font-12'>Document #3 title</p>
-                                <p className='font-12'>Document #4 title</p>
-                            </Col>
-                        </Row>
-                    </div>
-                    <div className='school-info'>
-                        <div className='flex flex-row justify-between'>
-                            <p className='font-20 font-700'>{intl.formatMessage(messages.schoolInformation)}</p>
-                            <div className='flex flex-row items-center'>
-                                <Button size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button>
-                                <Button size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>
-                            </div>
-                        </div>
-                        <Row gutter={15}>
-                            <Col xs={24} sm={24} md={8}>
-                                <p className='font-700 mb-10'>{intl.formatMessage(messages.recommendedProviders)}</p>
-                                <div className='select-md'>
-                                    <Select className='mb-10' placeholder={intl.formatMessage(msgCreateAccount.provider)}>
-                                        <Select.Option value='p1'>provider 1</Select.Option>
-                                    </Select>
-                                    <Select className='mb-10' placeholder={intl.formatMessage(msgCreateAccount.provider)}>
-                                        <Select.Option value='p2'>provider 2</Select.Option>
-                                    </Select>
-                                    <Select className='mb-10' placeholder={intl.formatMessage(msgCreateAccount.provider)}>
-                                        <Select.Option value='p3'>provider 3</Select.Option>
-                                    </Select>
-                                </div>
-                            </Col>
-                            <Col xs={24} sm={24} md={16}>
-                                <p className='font-700 mb-10'>{intl.formatMessage(messages.decisionExplanation)}</p>
-                                <Input.TextArea rows={5} placeholder={intl.formatMessage(msgRequest.generalNotes)}/>
-                            </Col>
-                        </Row>
-                    </div>
-                    <div className='consulation-appoint'>
-                        <Row gutter={15} align='bottom'>
-                            <Col xs={24} sm={24} md={10}>
-                                <p className='font-20 font-700'>{intl.formatMessage(messages.consulationAppointment)}</p>
-                                <p className='font-700'>{intl.formatMessage(messages.consultant)}: <span className='text-uppercase'>Name Here</span></p>
-                            </Col>
-                            <Col xs={24} sm={24} md={14}>
-                                <div className='flex flex-row justify-between'>
-                                    <p><span className='font-700'>Google Meet</span>: <a>meet.google.com/sdf-sasd-gdh</a></p>
-                                    <div className='flex flex-row items-center'>
-                                        <p className='text-primary'><FaRegCalendarAlt/>{intl.formatMessage(messages.reSchedule)}</p>
-                                    </div>
-                                </div>
-                                <div className='flex flex-row justify-between'>
-                                    <p><span className='font-700'>{intl.formatMessage(messages.dateTime)}</span>: 12/23/2022 | 7:30pm</p>
-                                    <p><span className='font-700'>{intl.formatMessage(messages.phone)}</span>: 0749072340</p>
-                                </div>
-                            </Col>
-                        </Row>
-                    </div>
-                    <div className='subsidy-detail'>
-                        <div className='flex flex-row justify-between'>
-                            <p className='font-20 font-700'>{intl.formatMessage(messages.subsidyDetails)}</p>
-                            <div className='flex flex-row items-center'>
-                                <p className='text-primary'><ImPencil/>{intl.formatMessage(messages.edit)}</p>
-                            </div>
-                        </div>
-                        <Row gutter={15}>
-                            <Col xs={24} sm={24} md={8}>
-                                <p><span className='font-700'>{intl.formatMessage(msgCreateAccount.provider)}</span>: <span className='text-uppercase'>Name Here</span></p>
-                            </Col>
-                            <Col xs={24} sm={24} md={8}>
-                                <p><span className='font-700'>{intl.formatMessage(messages.numberApprovedSessions)}</span>: 20</p>
-                            </Col>
-                            <Col xs={24} sm={24} md={8} className='text-right sm-text-left'>
-                                <p><span className='font-700'>{intl.formatMessage(messages.totalRemaining)}</span>: 8</p>
-                            </Col>
-                        </Row>
-                    </div>
-                </div>}
-                {currentStep === 3 && <div className="steps-content"></div>}
+                {currentStep === 2 && <div className="steps-content"></div>}
+                {currentStep === 3 && <div className="steps-content"></div>} */}
+
+                {this.renderSubsidyData(subsidy)}
             </Modal>
         );
     }

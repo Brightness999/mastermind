@@ -8,14 +8,17 @@ import messagesLogin from '../../routes/Sign/Login/messages';
 import messagesRequest from '../../routes/Sign/SubsidyRequest/messages';
 import './style/index.less';
 import request,{generateSearchStructure} from '../../utils/api/request'
+import {url} from '../../utils/api/baseUrl'
 class ModalNewSubsidyRequest extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             fileList: [],
+            documentUploaded:[],
             uploading: false,
             SkillSet:[],
             listSchools:[],
+            
         }
     }
 
@@ -33,33 +36,36 @@ class ModalNewSubsidyRequest extends React.Component {
         request.post( 'clients/get_default_value_for_client'
             ).then(result=>{
                 console.log('get_default_value_for_client',result.data);
-                if(result.data.success){
-                    var data = result.data.data;
+                if(result.success){
+                    var data = result.data;
+                    
                     this.setState({SkillSet:data.SkillSet})
                 }else{
-                    
+                    this.setState({SkillSet:[]})
                     
                 }
                 
             }).catch(err=>{
                 console.log(err);
-                
+                this.setState({SkillSet:[]})
             })
       }
 
     loadSchools() {
         request.post( 'clients/get_all_schools'
         ).then(result => {
-            console.log('get_default_value_for_client', result.data);
-            if (result.data.success) {
-                var data = result.data.data;
+            
+            if (result.success) {
+                var data = result.data;
+                console.log('get_all_schools', result , data);
                 this.setState({ listSchools: data })
             } else {
-                
+                this.setState({ listSchools: [] })
     
             }
     
         }).catch(err => {
+            this.setState({ listSchools: [] })
             console.log(err);
         })
     }
@@ -72,6 +78,43 @@ class ModalNewSubsidyRequest extends React.Component {
         console.log('Failed:', errorInfo);
     };
 
+    submitNewRequest = async ()=>{
+        console.log('values' , this.form.getFieldsValue());
+        try {
+            const values = await this.form.validateFields();
+            // values.documents = this.state.fileList;
+            values.documents = this.state.fileList.map(file => {
+              return file.response.data;
+            });
+            values.requestContactRav = this.state.isRequestRav;
+
+            request.post('clients/create_subsidy_request' , values).then( result=>{
+                console.log(result)
+                if(result.success){
+                    this.form.resetFields();
+                    this.props.onSubmit();
+                    
+                }else{
+                    this.form.setFields([
+                        {
+                            name: 'documents',
+                            errors: ['error from server'],
+                        },]);
+                }
+            }).catch(err=>{
+                console.log(err);
+                this.form.setFields([
+                    {
+                      name: 'documents',
+                      errors: ['error from server'],
+                    },]);
+            })
+        } catch (error) {
+        console.log('error', error);
+        }
+
+    }
+
     componentDidMount() {
         // let data = localStorage.getItem('subsidyRequest');
         // if (data) {
@@ -82,24 +125,30 @@ class ModalNewSubsidyRequest extends React.Component {
         // }
     }
 
+
+
     onChangeUpload = (info) => {
+    
         if (info.file.status !== 'uploading') {
-            console.log(info.file, info.fileList);
-            this.setState(prevState => ({
-                fileList: [...prevState.fileList, info.file],
-            }));
-            this.form?.setFieldsValue({
-                documents: info.fileList[0].name
-            })
+          console.log(info.file, info.fileList);
+          this.setState(prevState => ({
+            fileList: [...prevState.fileList, info.file],
+          }));
         }
         if (info.file.status === 'done') {
-            message.success(`${info.file.name} file uploaded successfully`);
+          console.log('done',info.file.response);
+          message.success(`${info.file.name} file uploaded successfully`);
+          this.setState({documentUploaded:this.state.documentUploaded.push(info.file.response.data)});
         } else if (info.file.status === 'error') {
-            message.error(`${info.file.name} file upload failed.`);
+          message.error(`${info.file.name} file upload failed.`);
+          this.setState(prevState => ({
+            fileList: [...prevState.fileList, info.file],
+          }));
         }
     }
-    render() {
-
+    render =()=>{
+        const {listDependents} = this.props;
+        const {SkillSet , listSchools} = this.state;
         const modalProps = {
             className: 'modal-new-subsidy',
             title: intl.formatMessage(messagesCreateAccount.subsidyRequest),
@@ -107,19 +156,21 @@ class ModalNewSubsidyRequest extends React.Component {
             onOk: this.props.onSubmit,
             onCancel: this.props.onCancel,
             closable: false,
+            SkillSet:this.state.SkillSet,
+            listSchools:this.state.listSchools,
             // width: 900,
             footer: [
                 <Button key="back" onClick={this.props.onCancel}>
                     {intl.formatMessage(messages.cancel)}
                 </Button>,
-                <Button key="submit" type="primary" onClick={this.props.onSubmit} style={{ padding: '7.5px 30px' }}>
+                <Button key="submit" type="primary" onClick={this.submitNewRequest} style={{ padding: '7.5px 30px' }}>
                     {intl.formatMessage(messages.create)}
                 </Button>
             ]
         };
         const props = {
             name: 'file',
-            action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+            action: url+"clients/upload_document",
             headers: {
                 authorization: 'authorization-text',
             },
@@ -146,11 +197,12 @@ class ModalNewSubsidyRequest extends React.Component {
                                 }]}
                             >
                                 <Select placeholder={intl.formatMessage(messagesCreateAccount.dependent)}>
-                                    {this.props.listDenpendent!=undefined&& this.props.listDependents.length>0 &&this.props.listDependents.map((item, index) => {
+                                    {listDependents!=undefined&& listDependents.length>=0 &&this.props.listDependents.map((item, index) => {
                                         return (
                                             <Select.Option key={index} value={item._id}>{item.firstName} {item.lastName}</Select.Option>
                                         )
                                     })}
+                                    {(listDependents==undefined|| listDependents.length==0) && (<Select.Option key={1} value='-1'>error cmnr</Select.Option>)}
                                 </Select>
                             </Form.Item>
                             <Form.Item name="skillSet" rules=
@@ -159,7 +211,7 @@ class ModalNewSubsidyRequest extends React.Component {
                                     message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.skillsetRequested)
                                 }]}>
                                 <Select placeholder={intl.formatMessage(messagesRequest.skillsetRequested)}>
-                                    {this.state.SkillSet.map((skill, index)=>  <Select.Option value={index}>{skill}</Select.Option>)}
+                                    {SkillSet.map((skill, index)=>  <Select.Option value={index}>{skill}</Select.Option>)}
                                 </Select>
                             </Form.Item>
                             <Form.Item name="school" rules=
@@ -168,8 +220,8 @@ class ModalNewSubsidyRequest extends React.Component {
                                     message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.school)
                                 }]}>
                                 <Select placeholder={intl.formatMessage(messagesCreateAccount.school)}>
-                                    <Select.Option value='s1'>School 1</Select.Option>
-                                    <Select.Option value='s2'>School 2</Select.Option>
+                                    {listSchools.map((school, index)=>  <Select.Option value={school._id}>{school.name}</Select.Option>)}
+                                    
                                 </Select>
                             </Form.Item>
                             <Row gutter={14}>

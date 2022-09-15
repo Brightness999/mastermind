@@ -85,6 +85,7 @@ export default class extends React.Component {
       listDependents:[],
       parentInfo:{},
       providerInfo:{},
+      schoolInfo:{},
       listAppoinmentsRecent:[],
       listAppoinmentsFilter:[],
       SkillSet:[],
@@ -179,6 +180,9 @@ export default class extends React.Component {
       case 'new_appoint_from_client':
         this.setState({ visibleDetailPost: true , });
         return;
+        case 'new_subsidy_request_from_client':
+          this.panelSubsidariesReload&&typeof this.panelSubsidariesReload == 'function'&&this.panelSubsidariesReload(true)
+          return;
     }
   }
 
@@ -192,8 +196,19 @@ export default class extends React.Component {
         this.loadMyProviderInfo();
         return;
       case 60:// get school info
+        this.loadMySchoolInfo();
         return;
     }
+  }
+
+  loadMySchoolInfo = ()=>{
+    request.post('schools/get_my_school_info').then(result=>{
+      var data = result.data;
+      console.log('get_my_school_info',data);
+  
+      this.setState({schoolInfo:data})
+      this.joinRoom(data._id);
+    })
   }
 
   getParentInfo = ()=>{
@@ -202,6 +217,7 @@ export default class extends React.Component {
       console.log('get_parent_profile',data);
   
       this.setState({parentInfo:data})
+      this.joinRoom(data._id);
     })
   }
 
@@ -242,14 +258,7 @@ export default class extends React.Component {
     // <ModalNewAppointment {...modalNewAppointProps} />
   }
 
-  modalSubsidy(){
-    const modalSubsidyProps = {
-      visible: visibleSubsidy,
-      onSubmit: this.onCloseModalSubsidy,
-      onCancel: this.onCloseModalSubsidy,
-    };
-    return (<ModalSubsidyProgress {...modalSubsidyProps} />)
-  }
+  
 
   modalCreateAndEditSubsidyRequest = ()=>{
     
@@ -305,12 +314,18 @@ export default class extends React.Component {
       className: 'popup-scheduled',
     });
   };
-  onShowModalSubsidy = () => {
+  onShowModalSubsidy = (subsidyId) => {
     this.setState({ visibleSubsidy: true });
+    this.reloadModalSubsidyDetail(subsidyId);
   };
+  
+  onCancelSubsidy = () =>{
+
+  }
 
   onCloseModalSubsidy = () => {
     this.setState({ visibleSubsidy: false });
+
   };
 
   onShowModalReferral = () => {
@@ -325,8 +340,9 @@ export default class extends React.Component {
     this.openNewSubsidyRequest();
   };
 
-  onCloseModalNewSubsidy = () => {
+  onCloseModalNewSubsidy = (isNeedReload) => {
     this.setState({ visibleNewSubsidy: false });
+    !!this.panelSubsidariesReload&&this.panelSubsidariesReload(isNeedReload);
   };
 
   handleDateClick = arg => {
@@ -451,11 +467,25 @@ export default class extends React.Component {
     }
   })
 
+  renderModalSubsidyDetail(){
+    const modalSubsidyProps = {
+      visible: this.state.visibleSubsidy,
+      onSubmit: this.onCloseModalSubsidy,
+      onCancel: this.onCloseModalSubsidy,
+    };
+    return (<ModalSubsidyProgress {...modalSubsidyProps}
+      setOpennedEvent = {reload=>{this.reloadModalSubsidyDetail = reload}}
+      userRole={this.state.userRole}
+      SkillSet={this.state.SkillSet}
+      
+    />)
+  }
+
   renderListAppoinmentsRecent = (appoinment , index)=>{
       
     return ( <div key={index} className={appoinment.status ==-1 || appoinment.status ==2?'item-feed done': 'item-feed'}>
       <p className='font-700'>{appoinment.dependent.firstName} {appoinment.dependent.lastName}</p>
-      <p>{appoinment.provider.name}</p>
+      <p>{appoinment.provider.name||appoinment.provider.referredToAs}</p>
       <p>{appoinment.location}</p>
       <p>{moment(appoinment.date).format('hh:mm a')}</p>
       <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{moment(appoinment.date).fromNow()}</p>
@@ -511,6 +541,9 @@ export default class extends React.Component {
                     this.panelSubsidariesReload = reload;
                   }}
                   userRole={this.state.userRole}
+                  SkillSet={this.state.SkillSet}
+                  onShowModalSubsidyDetail={this.onShowModalSubsidy}
+                  onCancelSubsidy={this.onCancelSubsidy}
                 />
               </Panel>
     )
@@ -522,7 +555,6 @@ export default class extends React.Component {
       visibleDetail,
       visibleDetailPost,
       visibleNewAppoint,
-      visibleSubsidy, 
       visiblReferralService,
       isEventDetail,
       isMonth,
@@ -637,11 +669,7 @@ export default class extends React.Component {
       onSubmit: this.onSubmitModalNewAppoint,
       onCancel: this.onCloseModalNewAppoint,
     };
-    const modalSubsidyProps = {
-      visible: visibleSubsidy,
-      onSubmit: this.onCloseModalSubsidy,
-      onCancel: this.onCloseModalSubsidy,
-    };
+    
     const modalReferralServiceProps = {
       visible: visiblReferralService,
       onSubmit: this.onCloseModalReferral,
@@ -650,7 +678,7 @@ export default class extends React.Component {
     
     return (
       <div className="full-layout page dashboard-page">
-        <div className='div-show-subsidy' onClick={this.onShowModalSubsidy} />
+        {/* <div className='div-show-subsidy' onClick={this.onShowModalSubsidy} /> */}
         <div className='div-content'>
           <section className='div-activity-feed box-card'>
             <div className='div-title-feed text-center'>
@@ -870,10 +898,10 @@ export default class extends React.Component {
         />
 
         {this.modalAppointments()}
+        {this.renderModalSubsidyDetail()}
         
         
         
-        <ModalSubsidyProgress {...modalSubsidyProps}/>
         <ModalReferralService {...modalReferralServiceProps}/>
         {this.modalCreateAndEditSubsidyRequest()}
       </div>

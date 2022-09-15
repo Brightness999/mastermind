@@ -83,7 +83,7 @@ class PanelAppointment extends React.Component {
                                 serviceType += item
                                 ) )
                                 }</p> */}
-                            <p className='font-09 mb-0'>{data.provider.name}</p>
+                            <p className='font-09 mb-0'>{data.provider.name||data.provider.referredToAs}</p>
                             </div>
                             <p className='font-11 mb-0 ml-auto mr-5'>{data.location}</p>
                             <div className='ml-auto'>

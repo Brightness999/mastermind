@@ -29,9 +29,9 @@ class PanelSubsidaries extends React.Component {
     this.loadSubsidaryWithStatus();
   }
 
-  requestLoadDataFromMainView = ()=>{
+  requestLoadDataFromMainView = (isForceReload)=>{
     console.log('called')
-    if(this.state.listSubsidaries.length == 0){
+    if(this.state.listSubsidaries.length == 0||isForceReload){
         this.loadSubsidaryWithStatus(this.state.status);
     }
   }
@@ -65,16 +65,67 @@ class PanelSubsidaries extends React.Component {
     this.loadSubsidaryWithStatus(v);
   }
 
+  renderStatus(status){
+    var value = parseInt(status)
+    switch( value ){
+      case 0: return 'PENDING';
+      case 1: return 'APPROVED';
+      case -1: return 'DECLINE';
+      case 2: return 'CANCELLED';
+    }
+    return '';
+  }
+
+  getSkillSetName(value){
+    return this.props.SkillSet[value];
+  }
+
   renderLeftContent(subsidy){
-    return (<div className='item-left'>
-    <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
-    <div className='div-service'>
-        <p className='font-11 mb-0'>Service Type</p>
-        <p className='font-09 mb-0'>Provide Name</p>
-        </div>
-        <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p>
-        <p className='font-12 ml-auto mb-0'>Status</p>
+    if(this.props.userRole == 30){
+      return (<div className='item-left'
+        
+      >
+      <Avatar size={24} icon={<FaUser size={12} />}  
+      
+      />
+      <div className='div-service'
+      >
+          <p className='font-11 mb-0'>{this.getSkillSetName(subsidy.skillSet)}</p>
+          <p className='font-09 mb-0'>{subsidy.student.firstName} {subsidy.student.lastName}</p>
+          </div>
+          {/* <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p> */}
+          <p className='font-12 ml-auto mb-0'>{this.renderStatus(subsidy.status)}</p>
+      </div>);
+    }
+    return (<div className='item-left'
+    >
+    <Avatar size={24} icon={<FaUser size={12} />}  />
+    <div className='div-service' >
+    <p className='font-11 mb-0'>{this.getSkillSetName(subsidy.skillSet)}</p>
+          <p className='font-09 mb-0'>{subsidy.school.name}</p>
+          </div>
+          {/* <p className='font-11 mb-0 ml-auto mr-5'>Case Handler</p> */}
+          <p className='font-12 ml-auto mb-0'>{this.renderStatus(subsidy.status)}</p>
     </div>);
+  }
+
+  callOpenSubsidyDetail(subsidy){
+    this.props.onShowModalSubsidyDetail(subsidy._id);
+  }
+
+  renderRighContent(type, subsidy){
+    if(type == 0 ){
+      return (<div className='item-right'>
+      <GiBackwardTime size={19} onClick={() => { this.callOpenSubsidyDetail(subsidy) }} />
+      <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+    </div>)
+    }
+    if(type == 2 || type == -2){
+      return (<div className='item-right'>
+        <GiBackwardTime size={19} onClick={() => { this.callOpenSubsidyDetail(subsidy) }} />
+      </div>)
+    }
+    
   }
 
   render(){
@@ -87,10 +138,7 @@ class PanelSubsidaries extends React.Component {
                     {this.state.listSubsidaries.length > 0 && this.state.listSubsidaries.map((subsidy, index) =>
                       <div key={index} className='list-item'>
                         {this.renderLeftContent(subsidy)}
-                        <div className='item-right'>
-                          <GiBackwardTime size={19} onClick={() => { }} />
-                          <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => { }} />
-                        </div>
+                        {this.renderRighContent(0,subsidy)}
                       </div>
                     )}
 

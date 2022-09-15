@@ -289,7 +289,7 @@ class ModalNewAppointmentForParents extends React.Component {
                         <div className='doctor-list'>
                             {this.state.listProvider.map((provider, index) => <div key={index} className='doctor-item' onClick={() => this.onChooseDoctor(index)}>
                                 <Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg'/>
-                                <p className='font-10 text-center'>{provider.name}</p>
+                                <p className='font-10 text-center'>{provider.name||provider.referredToAs}</p>
                                 {isChoose === index && <div className='selected-doctor'>
                                     <BsCheck size={12}/>
                                 </div>}
@@ -311,7 +311,7 @@ class ModalNewAppointmentForParents extends React.Component {
                                 <p className='font-12 font-700 ml-auto text-primary'>{intl.formatMessage(messages.screeningRequired)}</p>
                             </div>
                             <div className='count-2'>
-                                <p className='font-10'>Name: {isChoose>=0&&this.state.listProvider[isChoose]!=undefined?this.state.listProvider[isChoose].name:''}</p>
+                                <p className='font-10'>Name: {isChoose>=0&&this.state.listProvider[isChoose]!=undefined?this.state.listProvider[isChoose].referredToAs:''}</p>
                                 <p className='font-10'>Skillset(s): {isChoose>=0&&this.state.listProvider[isChoose]!=undefined?this.props.SkillSet[this.state.listProvider[isChoose].skillSet]:''}</p>
                             </div>
                             <p className='font-10'>Practice/Location</p>
