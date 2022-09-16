@@ -168,6 +168,11 @@
   "routes.Subsidyrequest.documents": "Documents",
   "routes.Subsidyrequest.upload": "Upload",
   "routes.Subsidyrequest.review": "Review",
+  "routes.Subsidyrequest.emailNotValid": "Email is not a valid",
+  "routes.Subsidyrequest.dependent": "Dependent",
+  "routes.Subsidyrequest.school": "School",
+  "routes.Subsidyrequest.phoneNumberValid": "Phone number is not a valid",
+  "routes.Subsidyrequest.requestContactRav": "Request contact (optional)",
 
   "routes.Subsidyreview.reviewSubsidyRequest": "Review subsidy request info",
   "routes.Subsidyreview.dependentInfo": "Dependent info",
@@ -278,6 +283,7 @@
   "components.Modal.byPhone": "By phone",
   "components.Modal.additionalDocuments": "Additional documents",
   "components.Modal.create": "Create",
+  "components.Modal.review": "Review",
 
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.subsidyManager": "Subsidy Request",

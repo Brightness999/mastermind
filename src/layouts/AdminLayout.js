@@ -33,7 +33,7 @@ class AdminLayout extends React.PureComponent {
         const { route, collapsed } = this.state;
 
         return (
-            <Layout className="full-layout main-layout fixed">
+            <Layout className="full-layout admin-layout fixed">
                 <Header>
                     <MainHeader />
                 </Header>

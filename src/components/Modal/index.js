@@ -8,6 +8,8 @@ import ModalNoShow from './ModalNoShow';
 import ModalBalance from './ModalBalance';
 import ModalReferralService from './ModalReferralService';
 import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
+import ModalNewGroup from './ModaNewGroup';
+import ModalNewSubsidyReview from './ModalNewSubsidyReview';
 export {
   ModalCreateDone,
   ModalCancelAppointment,
@@ -17,5 +19,7 @@ export {
   ModalNoShow,
   ModalBalance,
   ModalReferralService,
-  ModalNewSubsidyRequest
+  ModalNewSubsidyRequest,
+  ModalNewGroup,
+  ModalNewSubsidyReview
 }

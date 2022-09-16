@@ -57,7 +57,7 @@ export default class extends React.Component {
           <p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.userManager)}</p>
           <Divider/>
         </div>
-        <Table bordered size='middle' dataSource={dataSource} columns={columns} />;
+        <Table bordered size='middle' dataSource={dataSource} columns={columns} />
       </div>
     );
   }

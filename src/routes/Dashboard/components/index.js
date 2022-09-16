@@ -20,11 +20,13 @@ import { GiBackwardTime } from 'react-icons/gi';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsEnvelope, BsFilter, BsXCircle, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill, BsCheckCircleFill } from 'react-icons/bs';
 import { 
+  ModalNewGroup,
   ModalNewAppointment,
   ModalNewAppointmentForParents, 
   ModalSubsidyProgress,
   ModalReferralService,
-  ModalNewSubsidyRequest
+  ModalNewSubsidyRequest,
+  ModalNewSubsidyReview
 } from '../../../components/Modal';
 
 import CSSAnimate from '../../../components/CSSAnimate';
@@ -73,6 +75,8 @@ export default class extends React.Component {
       visibleSubsidy: false,
       visiblReferralService: false,
       visibleNewSubsidy: false,
+      visibleNewReview: false,
+      visibleNewGroup: false,
       isEventDetail: false,
       idEvent:0,
       isMonth: 1,
@@ -327,6 +331,14 @@ export default class extends React.Component {
     this.setState({ visibleSubsidy: false });
 
   };
+  onSubmitModalSubsidy = () => {
+    this.setState({ visibleSubsidy: false });
+    // 
+  };
+
+  openHierachyModal = (subsidy) =>{
+    this.setState({ visibleNewGroup: true });
+  }
 
   onShowModalReferral = () => {
     this.setState({ visiblReferralService: true });
@@ -340,10 +352,30 @@ export default class extends React.Component {
     this.openNewSubsidyRequest();
   };
 
+  
+  onSubmitModalNewSubsidy = () => {
+    this.setState({ visibleNewSubsidy: false });
+    this.setState({ visibleNewReview: true });
+  };
   onCloseModalNewSubsidy = (isNeedReload) => {
     this.setState({ visibleNewSubsidy: false });
     !!this.panelSubsidariesReload&&this.panelSubsidariesReload(isNeedReload);
   };
+  
+  onSubmitModalNewReview = () => {
+    this.setState({ visibleNewReview: false });
+  };
+  onCloseModalNewReview = () => {
+    this.setState({ visibleNewReview: false });
+    this.setState({ visibleNewSubsidy: true });
+  };
+
+  onShowModalGroup = () => {
+    this.setState({visibleNewGroup: true});
+  }
+  onCloseModalGroup = () => {
+      this.setState({visibleNewGroup: false});
+  }
 
   handleDateClick = arg => {
     // eslint-disable-next-line no-restricted-globals
@@ -474,10 +506,10 @@ export default class extends React.Component {
       onCancel: this.onCloseModalSubsidy,
     };
     return (<ModalSubsidyProgress {...modalSubsidyProps}
-      setOpennedEvent = {reload=>{this.reloadModalSubsidyDetail = reload}}
+      setOpennedEvent = {(reload)=>{this.reloadModalSubsidyDetail = reload}}
       userRole={this.state.userRole}
       SkillSet={this.state.SkillSet}
-      
+      openHierachy={this.openHierachyModal}
     />)
   }
 
@@ -559,7 +591,10 @@ export default class extends React.Component {
       isEventDetail,
       isMonth,
       isGridDayView,
-      visibleNewSubsidy
+      visibleNewSubsidy,
+      visibleNewReview,
+      visibleSubsidy,
+      visibleNewGroup
     } = this.state;
     
     const btnMonthToWeek = (
@@ -669,13 +704,31 @@ export default class extends React.Component {
       onSubmit: this.onSubmitModalNewAppoint,
       onCancel: this.onCloseModalNewAppoint,
     };
-    
+    const modalSubsidyProps = {
+      visible: visibleSubsidy,
+      onSubmit: this.onSubmitModalSubsidy,
+      onCancel: this.onCloseModalSubsidy,
+    };
     const modalReferralServiceProps = {
       visible: visiblReferralService,
       onSubmit: this.onCloseModalReferral,
       onCancel: this.onCloseModalReferral,
     };
-    
+    const modalNewSubsidyProps = {
+      visible: visibleNewSubsidy,
+      onSubmit: this.onSubmitModalNewSubsidy,
+      onCancel: this.onCloseModalNewSubsidy,
+    };
+    const modalNewReviewProps = {
+      visible: visibleNewReview,
+      onSubmit: this.onSubmitModalNewReview,
+      onCancel: this.onCloseModalNewReview,
+    }
+    const modalNewGroupProps = {
+      visible: visibleNewGroup,
+      onSubmit: this.onCloseModalGroup,
+      onCancel: this.onCloseModalGroup,
+    }
     return (
       <div className="full-layout page dashboard-page">
         {/* <div className='div-show-subsidy' onClick={this.onShowModalSubsidy} /> */}
@@ -884,8 +937,10 @@ export default class extends React.Component {
             </Collapse>
           </section>
         </div>
-        <div className='btn-call'>
-          <img src='../images/call.png' />
+        <div className='text-right'>
+          <div className='btn-call'>
+            <img src='../images/call.png' />
+          </div>
         </div>
         <DrawerDetail
           visible={visibleDetail}
@@ -902,8 +957,12 @@ export default class extends React.Component {
         
         
         
-        <ModalReferralService {...modalReferralServiceProps}/>
+        
         {this.modalCreateAndEditSubsidyRequest()}
+        <ModalNewGroup {...modalNewGroupProps}/>
+        <ModalReferralService {...modalReferralServiceProps}/>
+        <ModalNewSubsidyRequest {...modalNewSubsidyProps}/>
+        <ModalNewSubsidyReview {...modalNewReviewProps}/>
       </div>
     );
   }

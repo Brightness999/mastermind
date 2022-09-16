@@ -221,4 +221,8 @@ export default {
     id: `${scope}.create`,
     defaultMessage: 'Create',
   },
+  review: {
+    id: `${scope}.review`,
+    defaultMessage: 'Review',
+  },
 };

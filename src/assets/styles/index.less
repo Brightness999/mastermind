@@ -1088,6 +1088,9 @@ div.ant-typography,
 }
 .dashboard-page,
 .admin-page {
+  flex: auto;
+  min-height: auto;
+  position: relative;
   .div-show-subsidy {
       width: 100%;
       height: 100%;
@@ -1434,14 +1437,15 @@ div.ant-typography,
       }
   }
   .btn-call {
-      text-align: right;
       margin: 20px;
-      z-index: 10;
+      z-index: 20;
       cursor: pointer;
+      display: inline-flex;
 
       img {
           height: 60px;
           width: auto;
+          z-index: 20;
       }
   }
 

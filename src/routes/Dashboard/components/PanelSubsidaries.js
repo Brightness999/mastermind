@@ -5,7 +5,7 @@ import {
 } from 'antd';
 import { FaUser } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
-import { BsEnvelope, BsXCircle, BsFillFlagFill, BsCheckCircleFill } from 'react-icons/bs';
+import { BsEnvelope, BsXCircle, BsFillFlagFill, BsCheckCircleFill ,BsViewList} from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import messages from '../messages';
 import { connect } from 'react-redux';
@@ -62,7 +62,11 @@ class PanelSubsidaries extends React.Component {
 
   handleTabChange = (v)=>{
     console.log('tab change',v);
-    this.loadSubsidaryWithStatus(v);
+    var status = 0;
+    if(v==1) status = 0;
+    if(v == 2) status = -1;
+    if(v==3) status = 1;
+    this.loadSubsidaryWithStatus(status);
   }
 
   renderStatus(status){
@@ -120,9 +124,9 @@ class PanelSubsidaries extends React.Component {
       <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => { }} />
     </div>)
     }
-    if(type == 2 || type == -2){
+    if(type == 1 || type == 2){
       return (<div className='item-right'>
-        <GiBackwardTime size={19} onClick={() => { this.callOpenSubsidyDetail(subsidy) }} />
+        <BsViewList size={19} onClick={() => { this.callOpenSubsidyDetail(subsidy) }} />
       </div>)
     }
     
@@ -134,7 +138,7 @@ class PanelSubsidaries extends React.Component {
         <Tabs defaultActiveKey="1" type="card" size='small'
         onChange={this.handleTabChange}
         >
-                  <TabPane tab={intl.formatMessage(messages.pending)} key="0">
+                  <TabPane tab={intl.formatMessage(messages.pending)} key="1">
                     {this.state.listSubsidaries.length > 0 && this.state.listSubsidaries.map((subsidy, index) =>
                       <div key={index} className='list-item'>
                         {this.renderLeftContent(subsidy)}
@@ -148,13 +152,14 @@ class PanelSubsidaries extends React.Component {
 
 
                   </TabPane>
-                  <TabPane tab={intl.formatMessage(messages.declined)} key="-2">
+                  <TabPane tab={intl.formatMessage(messages.declined)} key="2">
                     {this.state.listSubsidaries.length > 0 && this.state.listSubsidaries.map((subsidy, index) =>
                       <div key={index} className='list-item'>
                         {this.renderLeftContent(subsidy)}
                         <div className='item-right'>
-                          <BsFillFlagFill size={15} onClick={() => { }} />
-                          <BsCheckCircleFill className='text-green500' style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+                        {this.renderRighContent(1,subsidy)}
+                          {/* <BsFillFlagFill size={15} onClick={() => { }} />
+                          <BsCheckCircleFill className='text-green500' style={{ marginTop: 4 }} size={15} onClick={() => { }} /> */}
                         </div>
                       </div>
                     )}
@@ -162,14 +167,15 @@ class PanelSubsidaries extends React.Component {
                         <p style={{padding:"10px"}}>No declined subisdy</p>
                     </div>)}
                   </TabPane>
-                  <TabPane tab={intl.formatMessage(messages.approved)} key="2">
+                  <TabPane tab={intl.formatMessage(messages.approved)} key="3">
                     {this.state.listSubsidaries.length > 0 && this.state.listSubsidaries.map((subsidy, index) =>
                       <div key={index} className='list-item'>
                         {this.renderLeftContent(subsidy)}
-                        <div className='item-right'>
+                        {this.renderRighContent(2,subsidy)}
+                        {/* <div className='item-right'>
                           <BsEnvelope size={15} onClick={() => { }} />
                           <BsFillFlagFill style={{ marginTop: 4 }} size={15} onClick={() => { }} />
-                        </div>
+                        </div> */}
                       </div>
                     )}
                     {this.state.listSubsidaries.length == 0 && (<div key={3} className='list-item'>

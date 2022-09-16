@@ -132,7 +132,8 @@
 .modal-current,
 .modal-new,
 .modal-referral-service,
-.modal-new-subsidy {
+.modal-new-subsidy,
+.modal-new-subsidy-review {
   .header-current {
     background-color: @primary-color-dark;
     padding: 10px 15px;
@@ -253,12 +254,30 @@
   }
 }
 .modal-no-show,
-.modal-balance {
+.modal-balance,
+.modal-new-group {
   .ant-btn-primary {
     font-weight: 400;
     font-size: 14px;
     height: 38px;
     line-height: 1.5;
+  }
+  .div-new-group {
+    text-align: center;
+    padding: 15px 0;
+    border: 1px dashed @gray250;
+    border-radius: 6px;
+  }
+  .ant-list-item {
+    background-color: #ddecfa;
+    margin: 10px 0;
+    border-radius: 6px;
+  }
+  .item-drag {
+    background-color: #ddecfa;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 6px;
   }
 }
 

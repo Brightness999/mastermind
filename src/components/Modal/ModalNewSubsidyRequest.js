@@ -23,7 +23,7 @@ class ModalNewSubsidyRequest extends React.Component {
     }
 
     componentDidMount = () =>{
-        this.props.setOpennedEvent(this.loadData)
+        !!this.props.setOpennedEvent&&this.props.setOpennedEvent(this.loadData)
     }
 
     loadData = () =>{

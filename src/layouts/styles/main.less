@@ -1,56 +1,73 @@
 @import '../../assets/styles/variables.less';
+.main-layout,
+.admin-layout {
+  &.ant-layout {
+    min-height: 100vh;
+    background-color: @primary-bg;
+    .ant-layout-header {
+      background: #fff;
+      height: auto;
+      line-height: 20px;
+      overflow: hidden;
+      padding: 0;
+      box-shadow: 0 2px 4px 0px @gray250;
+    }
+  
+    .ant-layout-footer {
+      background-color: @white;
+      border-top: 1px solid @gray250;
+      padding: 20px;
+      text-align: center;
+      width: 100%;
+    }
+}
+}
 .main-layout {
     &.ant-layout {
-        min-height: 100vh;
-        background-color: @primary-bg;
-        .ant-layout-header {
-          background: #fff;
-          height: auto;
-          line-height: 20px;
-          overflow: hidden;
-          padding: 0;
-          box-shadow: 0 2px 4px 0px @gray250;
-        }
-      
         .ant-layout-content {
           min-height: auto;
           position: relative;
-          padding: 15px 20px;
-          // height: 0;
+          height: 0;
           overflow: auto;
-        }
-      
-        .ant-layout-footer {
-          background-color: @white;
-          border-top: 1px solid @gray250;
-          padding: 20px;
-          text-align: center;
-          width: 100%;
+          & > .page {
+            padding: 15px 20px;
+          }
         }
     }
-    .ant-layout-sider {
-      flex: 0 0 255px!important;
-      max-width: 255px!important;
-      min-width: 255px!important;
-      width: 255px!important;
-    }
-    .ant-layout-sider-collapsed {
-      flex: 0 0 70px!important;
-      max-width: 70px!important;
-      min-width: 70px!important;
-      width: 70px!important;
-    }
-
-    .btn-collapsed {
-      height: 31px;
-      padding: 5px 10px;
-      background-color: @blue-dark;
-      border: 0;
-      position: absolute;
-      left: 20px;
-      top: 20px;
-      &:focus {
-        box-shadow: unset;
+}
+.admin-layout {
+  &.ant-layout {
+      .ant-layout-content {
+        min-height: auto;
+        position: relative;
+        padding: 15px 20px;
+        overflow: auto;
+        height: calc(100vh - 40px);
       }
+  }
+  .ant-layout-sider {
+    flex: 0 0 255px!important;
+    max-width: 255px!important;
+    min-width: 255px!important;
+    width: 255px!important;
+  }
+  .ant-layout-sider-collapsed {
+    flex: 0 0 70px!important;
+    max-width: 70px!important;
+    min-width: 70px!important;
+    width: 70px!important;
+  }
+
+  .btn-collapsed {
+    height: 31px;
+    padding: 5px 10px;
+    background-color: @blue-dark;
+    border: 0;
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    &:focus {
+      box-shadow: unset;
     }
+  }
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, Button, Divider, Steps, Row, Col, Select, Input} from 'antd';
 import { FaRegCalendarAlt } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
+import { ModalNewGroup } from '../Modal'
 import intl from 'react-intl-universal';
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
@@ -24,6 +25,8 @@ class ModalSubsidyProgress extends React.Component {
         providers:[],
         selectedProviders:[],
         isDisableSchoolFields:false,
+        decisionExplanation:"",
+        isFiredButton:false,
     }
 
     componentDidMount = () => {
@@ -31,17 +34,21 @@ class ModalSubsidyProgress extends React.Component {
     }
 
     loadData = (subsidyId) =>{
-        this.setState({subsidyId:{}});
+        this.clearData();
         this.loadSubsidyData(subsidyId);
     }
 
-    loadSubsidyData = (subsidyId)=>{
+    loadSubsidyData = (subsidyId , isNeedLoadSchool=true)=>{
         
         request.post(switchPathWithRole(this.props.userRole)+'get_subsidy_detail' , {subsidyId:subsidyId}).then(result=>{
             console.log('get_subsidy_detail', result);
             if(result.success){
                 this.setState({subsidy: result.data});
-                this.loadProvidersInSchool(result.data.school._id);
+                if(isNeedLoadSchool){
+                    this.loadProvidersInSchool(result.data.school._id);
+                    
+                }
+                
             }else{
                 this.props.onCancel();
             }
@@ -56,6 +63,7 @@ class ModalSubsidyProgress extends React.Component {
             if(result.success){
                 console.log('get_all_provider_in_school',result.data)
                 this.setState({providers: result.data});
+                
             }else{
                 this.props.onCancel();
             }
@@ -65,9 +73,53 @@ class ModalSubsidyProgress extends React.Component {
     }
 
     clearData = () =>{
-        this.setState({subsidy: {}});
+        this.setState({
+            subsidy:{},
+            providers:[],
+            selectedProviders:[],
+            isDisableSchoolFields:false,
+            decisionExplanation:"",
+            isFiredButton:false,
+        });
+
     }
 
+    schoolDenySubsidy(subsidy){
+        
+        request.post('schools/deny_subsidy_request', {subsidyId:subsidy._id }).then(result=>{
+            if(result.success){
+                this.loadSubsidyData(subsidy._id , false);
+            }else{
+
+            }
+        }).catch(err=>{
+            
+        })
+    }
+
+    schoolAcceptSubsidy(subsidy){
+        if(this.state.selectedProviders.length == 0 || this.state.decisionExplanation.length == 0) return;
+        request.post('schools/accept_subsidy_request',{
+            "subsidyId":subsidy._id ,
+            "student": subsidy.student._id,
+            "providers": this.state.selectedProviders, 
+            "decisionExplanation":this.state.decisionExplanation,
+        }).then(result=>{
+            console.log('accept_subsidy_request' , result)
+            if(result.success){
+                this.loadSubsidyData(subsidy._id , false);
+                
+            }else{
+
+            }
+        }).catch(err=>{
+            
+        })
+    }
+
+    openHierachy(subsidy){
+        this.props.openHierachy&&this.props.openHierachy(subsidy);
+    }
 
     nextStep = () => {
         this.setState({currentStep: this.state.currentStep + 1});
@@ -149,15 +201,31 @@ class ModalSubsidyProgress extends React.Component {
     </div>)
     }
 
-    renderSchoolInfo = ()=>{
-        if(this.props.userRole == 60){
-            return (<div className='school-info'>
+    renderButtonsForSchoolInfo(subsidy){
+        return (<div className='flex flex-row items-center'>
+            {subsidy.status == 0 && <Button 
+                onClick={()=>{this.schoolDenySubsidy(subsidy)}}
+                size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button> }
+            {subsidy.status == 0 && <Button
+                onClick={()=>{this.schoolAcceptSubsidy(subsidy)}}
+                size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>}
+            
+            {subsidy.status == 1 && !subsidy.hierachy && <Button
+                onClick={()=>{this.openHierachy(subsidy)}}
+                size='small' type='primary'>{'Hierachi'.toUpperCase()}</Button>}
+            
+        </div>)
+
+        
+    }
+
+    renderSchoolInfo = (subsidy)=>{
+        if(this.props.userRole == 60 ){
+            return (<div className='school-info'
+            >
             <div className='flex flex-row justify-between'>
                 <p className='font-20 font-700'>{intl.formatMessage(messages.schoolInformation)}</p>
-                <div className='flex flex-row items-center'>
-                    <Button size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button>
-                    <Button size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>
-                </div>
+                {this.renderButtonsForSchoolInfo(subsidy)}
             </div>
             <Row gutter={15}>
                 <Col xs={24} sm={24} md={8}>
@@ -187,7 +255,11 @@ class ModalSubsidyProgress extends React.Component {
                 </Col>
                 <Col xs={24} sm={24} md={16}>
                     <p className='font-700 mb-10'>{intl.formatMessage(messages.decisionExplanation)}</p>
-                    <Input.TextArea rows={5} placeholder={intl.formatMessage(msgRequest.generalNotes)}/>
+                    <Input.TextArea 
+                        onChange={v=>{
+                            this.setState({decisionExplanation: v.target.value});
+                        }}
+                        rows={5} placeholder={intl.formatMessage(msgRequest.generalNotes)}/>
                 </Col>
             </Row>
         </div>)
@@ -273,19 +345,20 @@ class ModalSubsidyProgress extends React.Component {
     }
 
     footerButton(){
-        if(this.props.userRole == 3){
+        
+        if(this.state.subsidy.status == -2 || this.state.subsidy.status == 2){
             return [
-                
+                <Button key="back" onClick={this.props.onCancel}>
+                    {intl.formatMessage(messages.decline).toUpperCase()}
+                </Button>,
+                <Button key="submit" type="primary" onClick={this.props.onSubmit} style={{padding: '7.5px 30px'}}>
+                    {intl.formatMessage(messages.approve).toUpperCase()}
+                    {/* {intl.formatMessage(messages.appeal).toUpperCase()} */}
+                </Button>
             ]
         }
         return [
-            <Button key="back" onClick={this.props.onCancel}>
-                {intl.formatMessage(messages.decline).toUpperCase()}
-            </Button>,
-            <Button key="submit" type="primary" onClick={this.props.onSubmit} style={{padding: '7.5px 30px'}}>
-                {intl.formatMessage(messages.approve).toUpperCase()}
-                {/* {intl.formatMessage(messages.appeal).toUpperCase()} */}
-            </Button>
+                
         ]
     }
     
@@ -301,6 +374,7 @@ class ModalSubsidyProgress extends React.Component {
             width: 900,
             footer: this.footerButton(),
         };
+       
         const { currentStep, isApproved } = this.state;
         return(
             <Modal {...modalProps}>
