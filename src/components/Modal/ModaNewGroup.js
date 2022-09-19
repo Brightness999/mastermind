@@ -43,9 +43,11 @@ class ModalNewGroup extends React.Component {
             }else{
                 this.setState({listHierachy:[]});
             }
+            this.props.onCancel();
         }).catch(err=>{
             console.log(err)
             this.setState({listHierachy:[]});
+            this.props.onCancel();
         })
     }
 

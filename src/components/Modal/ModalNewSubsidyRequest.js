@@ -138,7 +138,8 @@ class ModalNewSubsidyRequest extends React.Component {
         if (info.file.status === 'done') {
           console.log('done',info.file.response);
           message.success(`${info.file.name} file uploaded successfully`);
-          this.setState({documentUploaded:this.state.documentUploaded.push(info.file.response.data)});
+          const arrUpload = this.state.documentUploaded||[];
+          this.setState({documentUploaded:arrUpload.push(info.file.response.data)});
         } else if (info.file.status === 'error') {
           message.error(`${info.file.name} file upload failed.`);
           this.setState(prevState => ({

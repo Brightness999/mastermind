@@ -46,6 +46,7 @@ class ModalSubsidyProgress extends React.Component {
         selectProviderFromAdmin:undefined,
         numberOfSessions:undefined,
         priceForSession:undefined,
+        parentWarning:'',
     }
 
     componentDidMount = () => {
@@ -179,7 +180,11 @@ class ModalSubsidyProgress extends React.Component {
     }
 
     schoolAcceptSubsidy(subsidy){
-        if(this.state.selectedProviders.length == 0 || this.state.decisionExplanation.length == 0) return;
+        if(this.state.selectedProviders.length == 0 || this.state.decisionExplanation.length == 0){
+            this.setState({parentWarning:'Please suggest a provider and fill in decision explaintion'})
+            return;
+        }
+        this.setState({parentWarning:''})
         request.post('schools/accept_subsidy_request',{
             "subsidyId":subsidy._id ,
             "student": subsidy.student._id,
@@ -425,7 +430,11 @@ class ModalSubsidyProgress extends React.Component {
             </div>
         </div>)
         }
-        return (<div className='flex flex-row items-center'>
+        return (<div>
+            {this.state.parentWarning.length>0&&<div className='flex flex-row items-center'>
+            <p>{this.state.parentWarning}</p>
+            </div>}
+            <div className='flex flex-row items-center'>
             {subsidy.status == 0 && <Button 
                 onClick={()=>{this.schoolDenySubsidy(subsidy)}}
                 size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button> }
@@ -437,7 +446,7 @@ class ModalSubsidyProgress extends React.Component {
                 onClick={()=>{this.openHierachy(subsidy)}}
                 size='small' type='primary'>{'Hierachi'.toUpperCase()}</Button>}
             
-        </div>)
+        </div></div>)
 
         
     }
