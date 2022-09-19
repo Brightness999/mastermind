@@ -207,6 +207,7 @@ class ModalSubsidyProgress extends React.Component {
 
     createConsulation(subsidy){
         if(!this.state.consulationName || !this.state.selectedHour || !this.state.consulationPhoneNumber || !this.state.consulationPhoneNumber
+            || !this.state.consulationPhoneNumber.length <1
             ||this.state.meetSolution == undefined
             ){
                 message.error('please fill all reuired field');
@@ -246,6 +247,7 @@ class ModalSubsidyProgress extends React.Component {
 
     editConsulation(subsidy){
         if(!this.state.consulationName || !this.state.selectedHour || !this.state.consulationPhoneNumber || !this.state.consulationPhoneNumber
+            || !this.state.consulationPhoneNumber.length <1
             ||this.state.meetSolution == undefined
             ){
                 message.error('please fill all reuired field');
@@ -690,6 +692,7 @@ class ModalSubsidyProgress extends React.Component {
                         <Input
                         disabled={isNotAdmin}
                         value={this.state.numberOfSessions}
+                        type="number"
                         onChange={v=>{this.setState({numberOfSessions: v.target.value})}}
                         />
                     </Col>
@@ -697,6 +700,7 @@ class ModalSubsidyProgress extends React.Component {
                         <p className='font-700'>{intl.formatMessage(messages.totalRemaining)}:</p>
                         <Input
                         value={this.state.priceForSession}
+                        type="number"
                         onChange={v=>{this.setState({priceForSession: v.target.value})}}
                         disabled={isNotAdmin}
                         />

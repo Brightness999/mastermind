@@ -183,6 +183,7 @@ export default class extends React.Component {
   showNotificationForSubsidy(data){
     notification.open({
       message: 'You have new Subsidy',
+      duration:10,
       description:
         'A parent has sent 1 subsidy request, press for view.',
       onClick: () => {
@@ -195,6 +196,7 @@ export default class extends React.Component {
   showNotificationForSubsidyChange(data){
     notification.open({
       message: 'Subsidy Status changed',
+      duration:10,
       description:
         'Press for check subsidy progress.',
       onClick: () => {
@@ -209,6 +211,7 @@ export default class extends React.Component {
       message: 'Subsidy Appeal',
       description:
         '1 user has sent appeal for Subsidy.',
+      duration:10,
       onClick: () => {
         console.log('Notification Clicked!');
         this.onShowModalSubsidy(data );
