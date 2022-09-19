@@ -204,6 +204,18 @@ export default class extends React.Component {
     });
   }
 
+  showNotificationForAppeal(data){
+    notification.open({
+      message: 'Subsidy Appeal',
+      description:
+        '1 user has sent appeal for Subsidy.',
+      onClick: () => {
+        console.log('Notification Clicked!');
+        this.onShowModalSubsidy(data );
+      },
+    });
+  }
+
   handleSocketResult(data){
     switch(data.key){
       case 'new_appoint_from_client':
@@ -217,6 +229,8 @@ export default class extends React.Component {
         this.panelSubsidariesReload&&typeof this.panelSubsidariesReload == 'function'&&this.panelSubsidariesReload(true)
         this.showNotificationForSubsidyChange(data.data);
         return;
+        case 'appeal_subsidy':
+          return;
     }
   }
 
