@@ -28,6 +28,13 @@ class ModalNewSubsidyRequest extends React.Component {
 
     loadData = () =>{
         console.log('new subsidy loaded data' , this.props.listDependents)
+        this.setState({
+            fileList: [],
+            documentUploaded:[],
+            uploading: false,
+            SkillSet:[],
+            listSchools:[],
+        })
         this.loadSchools();
         this.loadDataFromServer();
     }

@@ -43,11 +43,10 @@ class ModalNewGroup extends React.Component {
             }else{
                 this.setState({listHierachy:[]});
             }
-            this.props.onCancel();
+            
         }).catch(err=>{
             console.log(err)
             this.setState({listHierachy:[]});
-            this.props.onCancel();
         })
     }
 
@@ -74,9 +73,12 @@ class ModalNewGroup extends React.Component {
             console.log('create_hierachy' , result);
             if(result.success){
                 this.addHierachyToSubsidy(this.state.subsidyId , result.data._id);
+                this.props.onCancel();
             }else{
+                this.props.onCancel();
             }
         }).catch(err=>{
+            this.props.onCancel();
         })
     }
 
@@ -86,8 +88,10 @@ class ModalNewGroup extends React.Component {
             if(result.success){
                 this.callbackWhenFinished(hierachyId);
             }else{
+                this.props.onCancel();
             }
         }).catch(err=>{
+            this.props.onCancel();
         })
     }
 

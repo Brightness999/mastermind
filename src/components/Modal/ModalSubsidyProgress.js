@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Divider, Steps, Row, Col, Select, Input, DatePicker} from 'antd';
+import { Modal, Button, Divider, Steps, Row, Col, Select, Input, DatePicker,message} from 'antd';
 import { FaRegCalendarAlt } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
 import { ModalNewGroup } from '../Modal'
@@ -47,6 +47,7 @@ class ModalSubsidyProgress extends React.Component {
         numberOfSessions:undefined,
         priceForSession:undefined,
         parentWarning:'',
+        consulationWarning:'',
     }
 
     componentDidMount = () => {
@@ -192,6 +193,7 @@ class ModalSubsidyProgress extends React.Component {
             "decisionExplanation":this.state.decisionExplanation,
         }).then(result=>{
             console.log('accept_subsidy_request' , result)
+            message.success('Approved successfully');
             if(result.success){
                 this.loadSubsidyData(subsidy._id , false);
                 
@@ -204,6 +206,12 @@ class ModalSubsidyProgress extends React.Component {
     }
 
     createConsulation(subsidy){
+        if(!this.state.consulationName || !this.state.selectedHour || !this.state.consulationPhoneNumber || !this.state.consulationPhoneNumber
+            ||this.state.meetSolution == undefined
+            ){
+                message.error('please fill all reuired field');
+            return;
+        }
         if(!!subsidy.consulation){
             this.editConsulation(subsidy);return;
         }
@@ -221,12 +229,13 @@ class ModalSubsidyProgress extends React.Component {
             "date":_selectedDay,
             "phoneNumber": this.state.consulationPhoneNumber,
         };
+        
         // console.log(postData);return;
         request.post(switchPathWithRole(this.props.userRole)+'create_consulation_to_subsidy',postData).then(result=>{
             console.log('create_consulation_to_subsidy' , result)
             if(result.success){
                 this.loadSubsidyData(subsidy._id , false);
-                this.setState({isScheduling:false});
+                this.setState({isScheduling:false , consulationWarning:''});
             }else{
 
             }
@@ -236,6 +245,12 @@ class ModalSubsidyProgress extends React.Component {
     }
 
     editConsulation(subsidy){
+        if(!this.state.consulationName || !this.state.selectedHour || !this.state.consulationPhoneNumber || !this.state.consulationPhoneNumber
+            ||this.state.meetSolution == undefined
+            ){
+                message.error('please fill all reuired field');
+            return;
+        }
         var str = this.state.selectedDate.format("DD/MM/YYYY")+ " " + this.state.selectedHour;
         // console.log(str)
         var _selectedDay = moment(str , 'DD/MM/YYYY hh:mm' ).valueOf();
@@ -252,7 +267,7 @@ class ModalSubsidyProgress extends React.Component {
             console.log('change_consulation' , result)
             if(result.success){
                 this.loadSubsidyData(subsidy._id , false);
-                this.setState({isScheduling:false});
+                this.setState({isScheduling:false, consulationWarning:''});
             }else{
 
             }
@@ -271,6 +286,7 @@ class ModalSubsidyProgress extends React.Component {
             "school": subsidy.school._id,
         }
         if(!this.state.selectProviderFromAdmin || !this.state.numberOfSessions || !this.state.priceForSession){
+            message.error('please fill all reuired field');
             return;
         }
         request.post(switchPathWithRole(this.props.userRole)+'select_final_provider_for_subsidy',postData).then(result=>{
@@ -292,6 +308,7 @@ class ModalSubsidyProgress extends React.Component {
         }
         request.post('clients/appeal_subsidy',postData).then(result=>{
             console.log('appeal_subsidy' , result)
+            message.success('Your appeal has been sent successfully');
             if(result.success){
                 this.loadSubsidyData(subsidy._id , false);
                 this.setState({isScheduling:false});
@@ -354,6 +371,7 @@ class ModalSubsidyProgress extends React.Component {
         }
         request.post('schools/deny_appeal_subsidy',postData).then(result=>{
             console.log('deny_appeal_subsidy' , result)
+            message.success('Denied successfully');
             if(result.success){
                 this.loadSubsidyData(subsidy._id , false);
             }else{
@@ -424,7 +442,7 @@ class ModalSubsidyProgress extends React.Component {
                 onClick={()=>{this.denyAppeal(subsidy)}}
                 size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button>
             <Button
-                onClick={()=>{this.schoolAcceptSubsidy(subsidy)}}
+                onClick={()=>{this.schoolAcceptAcceptSubsidy(subsidy)}}
                 size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>
             
             </div>
