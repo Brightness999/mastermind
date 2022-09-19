@@ -13,7 +13,8 @@ import {
   Col,
   Checkbox,
   Select,
-  message
+  message,
+  notification 
 } from 'antd';
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
@@ -179,6 +180,30 @@ export default class extends React.Component {
     
   }
 
+  showNotificationForSubsidy(data){
+    notification.open({
+      message: 'You have new Subsidy',
+      description:
+        'A parent has sent 1 subsidy request, press for view.',
+      onClick: () => {
+        console.log('Notification Clicked!');
+        this.onShowModalSubsidy(data.data._id );
+      },
+    });
+  }
+
+  showNotificationForSubsidyChange(data){
+    notification.open({
+      message: 'Subsidy Status changed',
+      description:
+        'Press for check subsidy progress.',
+      onClick: () => {
+        console.log('Notification Clicked!');
+        this.onShowModalSubsidy(data );
+      },
+    });
+  }
+
   handleSocketResult(data){
     switch(data.key){
       case 'new_appoint_from_client':
@@ -186,7 +211,12 @@ export default class extends React.Component {
         return;
         case 'new_subsidy_request_from_client':
           this.panelSubsidariesReload&&typeof this.panelSubsidariesReload == 'function'&&this.panelSubsidariesReload(true)
+          this.showNotificationForSubsidy(data);
           return;
+      case  'subsidy_change_status':
+        this.panelSubsidariesReload&&typeof this.panelSubsidariesReload == 'function'&&this.panelSubsidariesReload(true)
+        this.showNotificationForSubsidyChange(data.data);
+        return;
     }
   }
 
@@ -336,8 +366,9 @@ export default class extends React.Component {
     // 
   };
 
-  openHierachyModal = (subsidy) =>{
+  openHierachyModal = (subsidy , callbackAfterChanged) =>{
     this.setState({ visibleNewGroup: true });
+    this.loadDataModalNewGroup(subsidy , callbackAfterChanged);
   }
 
   onShowModalReferral = () => {
@@ -499,7 +530,7 @@ export default class extends React.Component {
     }
   })
 
-  renderModalSubsidyDetail(){
+  renderModalSubsidyDetail =()=>{
     const modalSubsidyProps = {
       visible: this.state.visibleSubsidy,
       onSubmit: this.onCloseModalSubsidy,
@@ -517,7 +548,8 @@ export default class extends React.Component {
       
     return ( <div key={index} className={appoinment.status ==-1 || appoinment.status ==2?'item-feed done': 'item-feed'}>
       <p className='font-700'>{appoinment.dependent.firstName} {appoinment.dependent.lastName}</p>
-      <p>{appoinment.provider.name||appoinment.provider.referredToAs}</p>
+      {appoinment.provider!=undefined&&<p>{appoinment.provider.name||appoinment.provider.referredToAs}</p>}
+      {appoinment.school!=undefined&&<p>{appoinment.school.name}</p>}
       <p>{appoinment.location}</p>
       <p>{moment(appoinment.date).format('hh:mm a')}</p>
       <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{moment(appoinment.date).fromNow()}</p>
@@ -959,9 +991,13 @@ export default class extends React.Component {
         
         
         {this.modalCreateAndEditSubsidyRequest()}
-        <ModalNewGroup {...modalNewGroupProps}/>
+        <ModalNewGroup {...modalNewGroupProps}
+          setLoadData={reload=>{
+            this.loadDataModalNewGroup = reload;
+          }}
+        />
         <ModalReferralService {...modalReferralServiceProps}/>
-        <ModalNewSubsidyRequest {...modalNewSubsidyProps}/>
+        
         <ModalNewSubsidyReview {...modalNewReviewProps}/>
       </div>
     );

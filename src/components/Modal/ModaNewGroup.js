@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button, Input } from 'antd';
+import {  Form,  Select } from 'antd';
 import { BsPlus } from 'react-icons/bs';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend}  from 'react-dnd-html5-backend';
@@ -9,6 +10,8 @@ import messages from './messages';
 import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
+import request,{generateSearchStructure} from '../../utils/api/request'
+import {url , switchPathWithRole} from '../../utils/api/baseUrl'
 
 class ModalNewGroup extends React.Component {
 
@@ -16,24 +19,77 @@ class ModalNewGroup extends React.Component {
         super(props);
         this.state = {
             data: [
-                {
-                    id: 1,
-                    name: "Japanese princess to wed commoner.",
-                },
-                {
-                    id: 2,
-                    name: "Australian walks 100km after outback crash.",
-                },
-                {
-                    id: 3,
-                    name: "Man charged over missing wedding girl.",
-                }
                 
             ],
+            listHierachy:[],
             show: false,
-            droppedBoxNames: []
+            droppedBoxNames: [],
+            schoolId: '',
+            subsidyId:'',
         }
     }
+
+    componentDidMount = () =>{
+        this.props.setLoadData( this.loadAllMyHierachy );
+    }
+
+    loadAllMyHierachy = (subsidy, callbackAfterChanged) =>{
+        this.callbackWhenFinished = callbackAfterChanged
+        this.setState({schoolId:subsidy.school._id , subsidyId: subsidy._id});
+        request.post('schools/get_all_hierachy' , {schoolId:subsidy.school._id}).then(result=>{
+            console.log('get_all_hierachy', result);
+            if(result.success){
+                this.setState({listHierachy:result.data});
+            }else{
+                this.setState({listHierachy:[]});
+            }
+        }).catch(err=>{
+            console.log(err)
+            this.setState({listHierachy:[]});
+        })
+    }
+
+    submitForm = () =>{
+
+        if(!!this.form.getFieldValue('name')&&this.form.getFieldValue('name').length > 0){
+            this.createHierachy(this.form.getFieldValue('name') , this.state.schoolId);
+            return;
+        }
+
+        if(!!this.form.getFieldValue('selectedHierachy') && this.form.getFieldValue('selectedHierachy').length > 0){
+            this.addHierachyToSubsidy(this.state.subsidyId , this.form.getFieldValue('selectedHierachy'));
+            return;
+        }
+
+        this.form.setFields([{
+            name: 'name',
+            errors: ['please enter new name or select a hierachy '],
+        }])
+    }
+
+    createHierachy = (name , schoolId) =>{
+        request.post('schools/create_hierachy' , {name: name,schoolId:schoolId}).then(result=>{
+            console.log('create_hierachy' , result);
+            if(result.success){
+                this.addHierachyToSubsidy(this.state.subsidyId , result.data._id);
+            }else{
+            }
+        }).catch(err=>{
+        })
+    }
+
+    addHierachyToSubsidy = (subsidyId, hierachyId) => {
+        request.post('schools/change_hierachy' , {subsidyId: subsidyId,hierachyId:hierachyId}).then(result=>{
+            console.log('change_hierachy' , result);
+            if(result.success){
+                this.callbackWhenFinished(hierachyId);
+            }else{
+            }
+        }).catch(err=>{
+        })
+    }
+
+
     onDragEnd = (fromIndex, toIndex) => {
         if (toIndex < 0) return;
         const items = [...this.state.data];
@@ -46,23 +102,21 @@ class ModalNewGroup extends React.Component {
         return this.state.droppedBoxNames.indexOf(id) > -1;
     }
 
-    render() {
-
+    render = () => {
+        const {listHierachy} = this.state;
         const modalProps = {
             className: 'modal-new-group',
             title: "Create New Group",
             visible: this.props.visible,
-            onOk: this.props.onSubmit,
-            onCancel: this.props.onCancel,
             closable: false,
             // width: 900,
             footer: [
-                <Button key="back" onClick={this.props.onCancel}>
-                    {intl.formatMessage(messages.cancel)}
-                </Button>,
-                <Button key="submit" type="primary" onClick={this.props.onSubmit}>
-                    {intl.formatMessage(messages.create)}
-                </Button>
+                // <Button key="back" onClick={this.props.onCancel}>
+                //     {intl.formatMessage(messages.cancel)}
+                // </Button>,
+                // <Button key="submit" type="primary" onClick={this.submitForm}>
+                //     Add to this hierachy
+                // </Button>
             ]
         };
 
@@ -72,10 +126,41 @@ class ModalNewGroup extends React.Component {
                 <span className='font-500 font-16 mb-0'>Create new group</span>
             </div>
         )
+        const that = this;
 
         return (
             <Modal {...modalProps}>
-                <p className='font-12 text-center'>Drag & drop the item to create new group</p>
+                <div className='col-form col-subsidy mt-0'>
+                <Form
+                            name="formHierachy"
+                            ref={ref => this.form = ref}
+                        >
+                    <Form.Item name="name">
+                    <Input size="small" placeholder='Enter new hierachy' />
+                            </Form.Item>
+                            <Form.Item name="selectedHierachy"
+                                
+                            >
+                                <Select placeholder='Choose existing hierachy'>
+                                    {!!listHierachy&&listHierachy.length>0&& listHierachy.map((item, index) => {
+                                        return (
+                                            <Select.Option key={index} value={item._id}>{item.name}</Select.Option>
+                                        )
+                                    })}
+                                    
+                                </Select>
+                            </Form.Item>
+                            <Form.Item name="buttons">
+                            <Button key="back" onClick={this.props.onCancel}>
+                    {intl.formatMessage(messages.cancel)}
+                </Button>,
+                <Button key="submit" type="primary" onClick={this.submitForm}>
+                    Add to this hierachy
+                </Button>
+                            </Form.Item>
+                </Form>
+                </div>
+                {/* <p className='font-12 text-center'>Drag & drop the item to create new group</p>
                 <DndProvider backend={HTML5Backend}>
                     <div>
                         <div style={{ overflow: 'hidden', clear: 'both' }}>
@@ -87,7 +172,7 @@ class ModalNewGroup extends React.Component {
                            
                         </div>
                     </div>
-                </DndProvider>
+                </DndProvider> */}
             </Modal>
         );
     }

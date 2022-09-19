@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Divider, Steps, Row, Col, Select, Input} from 'antd';
+import { Modal, Button, Divider, Steps, Row, Col, Select, Input, DatePicker} from 'antd';
 import { FaRegCalendarAlt } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
 import { ModalNewGroup } from '../Modal'
@@ -17,6 +17,13 @@ import {url , switchPathWithRole} from '../../utils/api/baseUrl'
 import moment from 'moment';
 
 const { Step } = Steps;
+
+const arrMeetSolution = [
+    'Google meet',
+    'Zoom',
+    'Direction',
+]
+
 class ModalSubsidyProgress extends React.Component {
     state = {
         currentStep: 2,
@@ -27,6 +34,18 @@ class ModalSubsidyProgress extends React.Component {
         isDisableSchoolFields:false,
         decisionExplanation:"",
         isFiredButton:false,
+        isScheduling:false,
+        consulationName:'',
+        meetSolution:undefined,
+        meetLocation:undefined,
+        consulationDate:undefined,
+        consulationTime:undefined,
+        consulationPhoneNumber:undefined,
+        selectedDate: moment(),
+        selectedHour: undefined,
+        selectProviderFromAdmin:undefined,
+        numberOfSessions:undefined,
+        priceForSession:undefined,
     }
 
     componentDidMount = () => {
@@ -44,10 +63,48 @@ class ModalSubsidyProgress extends React.Component {
             console.log('get_subsidy_detail', result);
             if(result.success){
                 this.setState({subsidy: result.data});
+                if(!!result.data.providers&&result.data.providers.length>0){
+                    console.log(result.data.providers)
+                    this.setState({selectedProviders:result.data.providers});
+                }
+                if(!!result.data.decisionExplanation &&result.data. decisionExplanation.length >0){
+                    console.log(result.data.decisionExplanation)
+                    this.setState({decisionExplanation:result.data.decisionExplanation});
+                }
+
+                // set consulation
+                if(!!result.data.consulation){
+                    console.log('consulation',result.data.consulation)
+                    var consulation= result.data.consulation;
+                    var _moment = moment( consulation.date);
+                    var date = _moment.clone();
+                    var hour = _moment.format('HH:mm');
+                    console.log(date, hour)
+                    this.setState({
+                        consulationName:consulation.name,
+                        meetSolution:consulation.typeForAppointLocation,
+                        meetLocation:consulation.location,
+                        consulationDate:date,
+                        consulationTime:hour,
+                        selectedDate: date,
+                        selectedHour: hour,
+                        consulationPhoneNumber:consulation.phoneNumber,
+                    })
+                }
+
+                if(!!result.data.selectedProvider){
+                    this.setState({
+                        selectProviderFromAdmin:result.data.selectedProvider,
+                        numberOfSessions:result.data.numberOfSessions,
+                        priceForSession:result.data.priceForSession,
+                    })
+                }
+
                 if(isNeedLoadSchool){
                     this.loadProvidersInSchool(result.data.school._id);
                     
                 }
+                
                 
             }else{
                 this.props.onCancel();
@@ -80,6 +137,17 @@ class ModalSubsidyProgress extends React.Component {
             isDisableSchoolFields:false,
             decisionExplanation:"",
             isFiredButton:false,
+            isScheduling:false,
+            consulationName:'',
+            meetSolution:undefined,
+            meetLocation:undefined,
+            consulationDate:undefined,
+            consulationTime:undefined,
+            consulationPhoneNumber:undefined,
+
+            selectProviderFromAdmin:undefined,
+            numberOfSessions:undefined,
+            priceForSession:undefined,
         });
 
     }
@@ -87,6 +155,19 @@ class ModalSubsidyProgress extends React.Component {
     schoolDenySubsidy(subsidy){
         
         request.post('schools/deny_subsidy_request', {subsidyId:subsidy._id }).then(result=>{
+            if(result.success){
+                this.loadSubsidyData(subsidy._id , false);
+            }else{
+
+            }
+        }).catch(err=>{
+            
+        })
+    }
+
+    adminDenySubsidy(subsidy){
+        
+        request.post(switchPathWithRole(this.props.userRole) + 'deny_subsidy_request', {subsidyId:subsidy._id }).then(result=>{
             if(result.success){
                 this.loadSubsidyData(subsidy._id , false);
             }else{
@@ -117,8 +198,115 @@ class ModalSubsidyProgress extends React.Component {
         })
     }
 
+    createConsulation(subsidy){
+        if(!!subsidy.consulation){
+            this.editConsulation(subsidy);return;
+        }
+        var str = this.state.selectedDate.format("DD/MM/YYYY")+ " " + this.state.selectedHour;
+        // console.log(str)
+        var _selectedDay = moment(str , 'DD/MM/YYYY hh:mm' ).valueOf();
+        var postData = {
+            "subsidyId":subsidy._id ,
+            "dependent": subsidy.student._id,
+            "skillSet":subsidy.skillSet,
+            "school":subsidy.school._id,
+            "name":this.state.consulationName,
+            "typeForAppointLocation":this.state.meetSolution,
+            "location":this.state.meetLocation,
+            "date":_selectedDay,
+            "phoneNumber": this.state.consulationPhoneNumber,
+        };
+        // console.log(postData);return;
+        request.post(switchPathWithRole(this.props.userRole)+'create_consulation_to_subsidy',postData).then(result=>{
+            console.log('create_consulation_to_subsidy' , result)
+            if(result.success){
+                this.loadSubsidyData(subsidy._id , false);
+                this.setState({isScheduling:false});
+            }else{
+
+            }
+        }).catch(err=>{
+            
+        })
+    }
+
+    editConsulation(subsidy){
+        var str = this.state.selectedDate.format("DD/MM/YYYY")+ " " + this.state.selectedHour;
+        // console.log(str)
+        var _selectedDay = moment(str , 'DD/MM/YYYY hh:mm' ).valueOf();
+        var postData = {
+            "consulationId": subsidy.consulation._id,
+            "name":this.state.consulationName,
+            "typeForAppointLocation":this.state.meetSolution,
+            "location":this.state.meetLocation,
+            "date":_selectedDay,
+            "phoneNumber": this.state.consulationPhoneNumber,
+        }
+        console.log(postData);
+        request.post(switchPathWithRole(this.props.userRole)+'change_consulation',postData).then(result=>{
+            console.log('change_consulation' , result)
+            if(result.success){
+                this.loadSubsidyData(subsidy._id , false);
+                this.setState({isScheduling:false});
+            }else{
+
+            }
+        }).catch(err=>{
+            
+        })
+    }
+
+    submitSubsidyFromAdmin =(subsidy)=>{
+        var postData = {
+            "selectedProvider": this.state.selectProviderFromAdmin,
+            "numberOfSessions":this.state.numberOfSessions,
+            "priceForSession": this.state.priceForSession,
+            "subsidyId": subsidy._id,
+            "student": subsidy.student._id,
+            "school": subsidy.school._id,
+        }
+        if(!this.state.selectProviderFromAdmin || !this.state.numberOfSessions || !this.state.priceForSession){
+            return;
+        }
+        request.post(switchPathWithRole(this.props.userRole)+'select_final_provider_for_subsidy',postData).then(result=>{
+            console.log('select_final_provider_for_subsidy' , result)
+            if(result.success){
+                this.loadSubsidyData(subsidy._id , false);
+                this.setState({isScheduling:false});
+            }else{
+
+            }
+        }).catch(err=>{
+            
+        })
+    }
+
+    appealSubsidy = () =>{
+        var postData = {
+            subsidyId: this.state.subsidy._id
+        }
+        request.post('clients/appeal_subsidy',postData).then(result=>{
+            console.log('appeal_subsidy' , result)
+            if(result.success){
+                this.loadSubsidyData(subsidy._id , false);
+                this.setState({isScheduling:false});
+            }else{
+
+            }
+        }).catch(err=>{
+            
+        })
+    }
+
     openHierachy(subsidy){
-        this.props.openHierachy&&this.props.openHierachy(subsidy);
+        this.props.openHierachy&&this.props.openHierachy(subsidy , this.callbackHierachy);
+    }
+
+    callbackHierachy = (hierachyId) =>{
+        console.log('this callback call from hierachy')
+        const {subsidy} = this.state;
+        subsidy.hierachy = hierachyId
+        this.setState({subsidy:subsidy});
     }
 
     nextStep = () => {
@@ -153,6 +341,22 @@ class ModalSubsidyProgress extends React.Component {
 
     getFileUrl(path){
         return url+'uploads/'+path;
+    }
+
+    denyAppeal = (subsidy)=>{
+        var postData = {
+            subsidyId: this.state.subsidy._id
+        }
+        request.post('schools/deny_appeal_subsidy',postData).then(result=>{
+            console.log('deny_appeal_subsidy' , result)
+            if(result.success){
+                this.loadSubsidyData(subsidy._id , false);
+            }else{
+
+            }
+        }).catch(err=>{
+            
+        })
     }
     
     renderStudentParentInfo(subsidy){
@@ -202,6 +406,25 @@ class ModalSubsidyProgress extends React.Component {
     }
 
     renderButtonsForSchoolInfo(subsidy){
+        if(this.props.userRole == 3){
+            return;
+        }
+        if(subsidy.isAppeal &&(subsidy.status == -1||subsidy.adminApprovalStatus == -1)){
+            return (<div>
+            <div className='flex flex-row items-center'>
+            <p>User has sent appeal for this, please choose an action </p>
+            </div>
+            <div className='flex flex-row items-center'>
+            <Button 
+                onClick={()=>{this.denyAppeal(subsidy)}}
+                size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button>
+            <Button
+                onClick={()=>{this.schoolAcceptSubsidy(subsidy)}}
+                size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>
+            
+            </div>
+        </div>)
+        }
         return (<div className='flex flex-row items-center'>
             {subsidy.status == 0 && <Button 
                 onClick={()=>{this.schoolDenySubsidy(subsidy)}}
@@ -219,9 +442,39 @@ class ModalSubsidyProgress extends React.Component {
         
     }
 
+    renderButtonsForConsulation(subsidy){
+        
+        return (<div className='flex flex-row items-center'>
+            {(this.state.isScheduling||subsidy.consulation == undefined) && <Button 
+                onClick={()=>{this.createConsulation(subsidy)}}
+                size='small' className='mr-10'>Schedule</Button> }
+            
+        </div>)
+
+        
+    }
+
+    renderButtonsForDecision(subsidy){
+        if(this.props.userRole > 800){
+            return (<div className='flex flex-row items-center'>
+                <Button 
+                    onClick={()=>{this.adminDenySubsidy(subsidy)}}
+                    size='small' className='mr-10'>DECLINE</Button>
+                <Button
+                    onClick={()=>{this.submitSubsidyFromAdmin(subsidy)}}
+                    size='small' type='primary'>APPROVE</Button>
+            </div>)
+        }
+        
+
+        
+    }
+
+
+
     renderSchoolInfo = (subsidy)=>{
-        if(this.props.userRole == 60 ){
-            return (<div className='school-info'
+        
+        return (<div className='school-info'
             >
             <div className='flex flex-row justify-between'>
                 <p className='font-20 font-700'>{intl.formatMessage(messages.schoolInformation)}</p>
@@ -234,14 +487,12 @@ class ModalSubsidyProgress extends React.Component {
                         {[0,1,2,].map((_,index)=>{
                             return <Select 
                             value={this.state.selectedProviders[index]}
+                            disabled={this.state.subsidy.status == 1|| this.state.subsidy.status == -1}
                             onChange={v=>{
                                 console.log('on dropdown changed',v);
-                                this.setState(prevState => ({
-                                    selectedProviders: {
-                                        ...prevState.selectedProviders,
-                                        [prevState.selectedProviders[index].name]: v,
-                                    },
-                                }));
+                                const {selectedProviders} = this.state;
+                                selectedProviders[index] = v;
+                                this.setState({selectedProviders: selectedProviders});
                             }}
                             className='mb-10' 
                             placeholder={intl.formatMessage(msgCreateAccount.provider)}
@@ -256,6 +507,8 @@ class ModalSubsidyProgress extends React.Component {
                 <Col xs={24} sm={24} md={16}>
                     <p className='font-700 mb-10'>{intl.formatMessage(messages.decisionExplanation)}</p>
                     <Input.TextArea 
+                    value={this.state.decisionExplanation}
+                    disabled={this.state.subsidy.status == 1|| this.state.subsidy.status == -1}
                         onChange={v=>{
                             this.setState({decisionExplanation: v.target.value});
                         }}
@@ -263,54 +516,167 @@ class ModalSubsidyProgress extends React.Component {
                 </Col>
             </Row>
         </div>)
-        }
+        
     }
 
-    renderConsulation(subsidy){
-        if(subsidy.adminApprovalStatus == 2){
+    renderConsulation = (subsidy) =>{
+        if(subsidy.status == 1){
+            
             return (<div className='consulation-appoint'>
-            <Row gutter={15} align='bottom'>
+                <div className='flex flex-row justify-between'>
+                <p className='font-20 font-700 mb-10'>{intl.formatMessage(messages.consulationAppointment)}</p>
+                {this.renderButtonsForConsulation(subsidy)}
+            </div>
+                {(!subsidy.consulation||this.state.isScheduling)&&<Row gutter={20} align='bottom'>
                 <Col xs={24} sm={24} md={10}>
-                    <p className='font-20 font-700'>{intl.formatMessage(messages.consulationAppointment)}</p>
-                    <p className='font-700'>{intl.formatMessage(messages.consultant)}: <span className='text-uppercase'>Name Here</span></p>
+                    
+                    <Input placeholder='name of consulation' className='mb-10'
+                    value={this.state.consulationName}
+                    onChange={v=>{this.setState({consulationName:v.target.value})}}
+                    />
+                    <div className='flex flex-row select-md picker-md'>
+                        <DatePicker placeholder='Date of consulation' className='mr-10 flex-1'
+                        value={this.state.selectedDate}
+                        onChange={v=>{
+                            this.setState({selectedDate:v})
+                        }}
+                         />
+                        <Select placeholder='Time'
+                        value={this.state.selectedHour}
+                        onChange={v=>{
+                            this.setState({selectedHour:v});
+                        }}
+                        className='flex-1'>
+                            <Select.Option value='9:00'>9:30am</Select.Option>
+                            <Select.Option value='9:30'>9:30am</Select.Option>
+                            <Select.Option value='10:30'>10:30am</Select.Option>
+                            <Select.Option value='11:00'>11:00am</Select.Option>
+                            <Select.Option value='11:30'>11:30am</Select.Option>
+                            <Select.Option value='13:30'>1:30pm</Select.Option>
+                            <Select.Option value='14:00'>2:00pm</Select.Option>
+                            <Select.Option value='14:30'>2:30pm</Select.Option>
+                            <Select.Option value='15:00'>3:00pm</Select.Option>
+                            <Select.Option value='15:30'>3:30pm</Select.Option>
+                            <Select.Option value='16:00'>4:00pm</Select.Option>
+                            <Select.Option value='16:30'>4:30pm</Select.Option>
+                            <Select.Option value='17:00'>5:00pm</Select.Option>
+                        </Select>
+                    </div>
                 </Col>
                 <Col xs={24} sm={24} md={14}>
                     <div className='flex flex-row justify-between'>
-                        <p><span className='font-700'>Google Meet</span>: <a>meet.google.com/sdf-sasd-gdh</a></p>
-                        <div className='flex flex-row items-center'>
-                            <p className='text-primary'><FaRegCalendarAlt/>{intl.formatMessage(messages.reSchedule)}</p>
+                        <p><span className='font-700'>Meet Solution</span>: </p>
+                        <div className='mb-10 flex flex-row w-70 select-md'>
+                            <Select 
+                                // value={this.state.selectedProviders[index]}
+                                // disabled={this.state.subsidy.status == 1|| this.state.subsidy.status == -1}
+                                onChange={v=>{
+                                    // console.log('on dropdown changed',v);
+                                    // const {selectedProviders} = this.state;
+                                    // selectedProviders[index] = v;
+                                    // this.setState({selectedProviders: selectedProviders});
+                                    this.setState({meetSolution:v})
+                                }}
+                                value={this.state.meetSolution}
+                                className='mr-10' 
+                                placeholder='Meet Solution'
+                            >
+                                {arrMeetSolution.map((value, index)=><Select.Option value={index}>{value}</Select.Option>)}
+                            </Select>
+                            <Input placeholder='address or url'
+                            value={this.state.meetLocation}
+                            onChange={v=>{this.setState({meetLocation: v.target.value})}}
+                            />
                         </div>
                     </div>
                     <div className='flex flex-row justify-between'>
-                        <p><span className='font-700'>{intl.formatMessage(messages.dateTime)}</span>: 12/23/2022 | 7:30pm</p>
-                        <p><span className='font-700'>{intl.formatMessage(messages.phone)}</span>: 0749072340</p>
+                        <p><span className='font-700'>Phone Number</span>: </p>
+                        <div className='w-70'>
+                            <Input placeholder='phone number'
+                            value={this.state.consulationPhoneNumber}
+                            onChange={v=>{this.setState({consulationPhoneNumber:v.target.value})}}
+                            />
+                        </div>
                     </div>
                 </Col>
-            </Row>
+            </Row>}
+            {(!!subsidy.consulation&&!this.state.isScheduling)&&<Row gutter={15} align='bottom'>
+                <Col xs={24} sm={24} md={10}>
+                    <p className='font-20 font-700'>{intl.formatMessage(messages.consulationAppointment)}</p>
+                    <p className='font-700'>{intl.formatMessage(messages.consultant)}: <span className='text-uppercase'>{this.state.consulationName}</span></p>
+                </Col>
+                <Col xs={24} sm={24} md={14}>
+                    <div className='flex flex-row justify-between'>
+                        <p><span className='font-700'>{arrMeetSolution[this.state.meetSolution??0]}</span>: <a>{this.state.meetLocation}</a></p>
+                        <div className='flex flex-row items-center'>
+                            <a className='text-primary'
+                            onClick={()=>{
+                                this.setState({isScheduling:true})
+                            }}
+                            ><FaRegCalendarAlt/>{intl.formatMessage(messages.reSchedule)}</a>
+                        </div>
+                    </div>
+                    <div className='flex flex-row justify-between'>
+                        <p><span className='font-700'>{intl.formatMessage(messages.dateTime)}</span>: {moment(this.state.selectedDate).format('YYYY-MM-DD') } | {this.state.selectedHour}</p>
+                        <p><span className='font-700'>{intl.formatMessage(messages.phone)}</span>: {this.state.consulationPhoneNumber}</p>
+                    </div>
+                </Col>
+                </Row>}
+
+            
         </div>)
+        
         }
     }
-
+    
     renderDecision(subsidy){
-        <div className='subsidy-detail'>
-            <div className='flex flex-row justify-between'>
-                <p className='font-20 font-700'>{intl.formatMessage(messages.subsidyDetails)}</p>
-                <div className='flex flex-row items-center'>
-                    <p className='text-primary'><ImPencil/>{intl.formatMessage(messages.edit)}</p>
+        var isNotAdmin = this.props.userRole <800
+        if(isNotAdmin && subsidy.adminApprovalStatus != 1){
+            return;
+        }
+        return (
+            <div className='subsidy-detail'>
+                <div className='flex flex-row justify-between'>
+                    <p className='font-20 font-700'>{intl.formatMessage(messages.subsidyDetails)}</p>
+                    {this.renderButtonsForDecision(subsidy)}
                 </div>
+                <Row gutter={15}>
+                    <Col xs={24} sm={24} md={8}>
+                        <p className='font-700'>{intl.formatMessage(msgCreateAccount.provider)}:</p>
+                        <Select 
+                            disabled={isNotAdmin}
+                            value={this.state.selectProviderFromAdmin}
+                            onChange={v=>{
+                                this.setState({selectProviderFromAdmin: v});
+                            }}
+                            className='mb-10' 
+                            placeholder={intl.formatMessage(msgCreateAccount.provider)}
+                            >
+                                {this.state.providers.map((provider) =>{
+                                    return (<Select.Option value={provider._id}>{provider.name||provider.referredToAs}</Select.Option>);
+                                }) }
+                            </Select>
+                       
+                    </Col>
+                    <Col xs={24} sm={24} md={8}>
+                        <p className='font-700'>{intl.formatMessage(messages.numberApprovedSessions)}:</p>
+                        <Input
+                        disabled={isNotAdmin}
+                        value={this.state.numberOfSessions}
+                        onChange={v=>{this.setState({numberOfSessions: v.target.value})}}
+                        />
+                    </Col>
+                    <Col xs={24} sm={24} md={8}>
+                        <p className='font-700'>{intl.formatMessage(messages.totalRemaining)}:</p>
+                        <Input
+                        value={this.state.priceForSession}
+                        onChange={v=>{this.setState({priceForSession: v.target.value})}}
+                        disabled={isNotAdmin}
+                        />
+                    </Col>
+                </Row>
             </div>
-            <Row gutter={15}>
-                <Col xs={24} sm={24} md={8}>
-                    <p><span className='font-700'>{intl.formatMessage(msgCreateAccount.provider)}</span>: <span className='text-uppercase'>Name Here</span></p>
-                </Col>
-                <Col xs={24} sm={24} md={8}>
-                    <p><span className='font-700'>{intl.formatMessage(messages.numberApprovedSessions)}</span>: 20</p>
-                </Col>
-                <Col xs={24} sm={24} md={8} className='text-right sm-text-left'>
-                    <p><span className='font-700'>{intl.formatMessage(messages.totalRemaining)}</span>: 8</p>
-                </Col>
-            </Row>
-        </div>
+        )
     }
 
     renderSubsidyData(subsidy){
@@ -321,7 +687,7 @@ class ModalSubsidyProgress extends React.Component {
         {this.renderStudentParentInfo(subsidy)}
         {this.renderSchoolInfo(subsidy)}
         {this.renderConsulation(subsidy)}
-        {this.renderConsulation(subsidy)}
+        {this.renderDecision(subsidy)}
         
         
         
@@ -332,12 +698,12 @@ class ModalSubsidyProgress extends React.Component {
     
 
     checkCurrentStep = (subsidy) =>{
-        if(subsidy.status == 2){
+        if(subsidy.status == 1){
             if(!!subsidy.adminApprovalStatus ){
                 return 3;
             }
             return 2;
-        }else if(subsidy.status == -2){
+        }else if(subsidy.status == -1){
             return 1;
         }else{
             return 0;
@@ -346,14 +712,16 @@ class ModalSubsidyProgress extends React.Component {
 
     footerButton(){
         
-        if(this.state.subsidy.status == -2 || this.state.subsidy.status == 2){
+        if((this.state.subsidy.status == -1 || this.state.subsidy.adminApprovalStatus == -1) && this.props.userRole==3  ){
             return [
                 <Button key="back" onClick={this.props.onCancel}>
-                    {intl.formatMessage(messages.decline).toUpperCase()}
+                    CLOSE
                 </Button>,
-                <Button key="submit" type="primary" onClick={this.props.onSubmit} style={{padding: '7.5px 30px'}}>
-                    {intl.formatMessage(messages.approve).toUpperCase()}
-                    {/* {intl.formatMessage(messages.appeal).toUpperCase()} */}
+                <Button 
+                disabled={this.state.subsidy.isAppeal!=0}
+                key="submit" type="primary" onClick={this.appealSubsidy} style={{padding: '7.5px 30px'}}>
+                    {/* {intl.formatMessage(messages.approve).toUpperCase()} */}
+                    {intl.formatMessage(messages.appeal).toUpperCase()}
                 </Button>
             ]
         }
@@ -384,8 +752,8 @@ class ModalSubsidyProgress extends React.Component {
                         <p className='font-30 font-30-sm'>{intl.formatMessage(messages.subsidyProgress)}</p>
                     </div>
                     {subsidy.status!=0 && <div style={{width: 110, textAlign: 'right'}}>
-                        {subsidy.status == 2&&<p className='text-green500 font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.approved)}</p>}
-                        {subsidy.status==-2&& <p className='text-red font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.declined)}</p>}
+                        {subsidy.status == 1&& subsidy.adminApprovalStatus!=-1&&<p className='text-green500 font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.approved)}</p>}
+                        {(subsidy.status==-1 || subsidy.adminApprovalStatus==-1)&& <p className='text-red font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.declined)}</p>}
                         
                     </div>}
                 </div>

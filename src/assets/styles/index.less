@@ -395,6 +395,7 @@ select:-webkit-autofill:focus {
       height: 32px!important;
     }
     &-single .ant-select-selector .ant-select-selection-placeholder {
+      color: hsv(0, 0, 75%);
       line-height: 32px!important;
     }
     &-single .ant-select-selector .ant-select-selection-item {
@@ -405,6 +406,12 @@ select:-webkit-autofill:focus {
 }
 .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
   font-weight: 400;
+}
+
+.picker-md {
+  .ant-picker {
+    padding: 4.5px 11px 4.5px;
+  }
 }
 .ant-pagination-item {
   &:focus,
@@ -658,6 +665,9 @@ ol {
 .cursor { cursor: pointer;}
 .w-50 {
   width: 50%;
+}
+.w-70 {
+  width: 70%;
 }
 .w-100 {
   width: 100%;
