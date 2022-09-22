@@ -11,8 +11,8 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
-import {setInforProvider, changeInfor} from '../../../../../redux/features/authSlice';
-import {store} from '../../../../../redux/store'
+import { setInforProvider, changeInfor } from '../../../../../redux/features/authSlice';
+import { store } from '../../../../../redux/store'
 class InfoProfile extends Component {
     constructor(props) {
         super(props);
@@ -27,30 +27,45 @@ class InfoProfile extends Component {
             // infor_profile: 
             service_address: '',
             billing_address: '',
-            EmailType:[],
-            ContactNumberType:[],
+            EmailType: [],
+            ContactNumberType: [],
 
-            contactPhoneNumber:[],
-            contactEmail:[],
-            CityConnections:[],
+            contactPhoneNumber: [],
+            contactEmail: [],
+            CityConnections: [],
         }
     }
 
 
     componentDidMount() {
-        const { registerData } = this.props.register;
-        const { authData } = this.props;
+        // const { registerData } = this.props.register;
+        // const { authData } = this.props;
 
         this.getDataFromServer();
         this.searchCityConnection('');
-        var profileInfor = this.getDefaultObj(authData);
-        this.setState({dataForm: authData})
-        this.form.setFieldsValue(profileInfor);
+        // var profileInfor = this.getDefaultObj(authData);
+        // this.setState({ dataForm: authData })
+        // this.form.setFieldsValue(profileInfor);
+
+        const tokenUser = localStorage.getItem('token');
+
+        axios.post(url + 'providers/get_my_provider_info', {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + tokenUser
+            }
+        }).then(result => {
+            const { data } = result.data
+            console.log(data);
+            this.form.setFieldsValue({
+                ...data
+            })
+        })
 
         // if (!authData) {
         //     this.props.setRegisterData({ profileInfor: this.getDefaultObj() });
         // }
-        
+
     }
 
     getDataFromServer = () => {
@@ -59,7 +74,7 @@ class InfoProfile extends Component {
             console.log('get_default_value_for_client', result.data);
             if (result.data.success) {
                 var data = result.data.data;
-                this.setState({ ContactNumberType: data.ContactNumberType , EmailType:data.EmailType, })
+                this.setState({ ContactNumberType: data.ContactNumberType, EmailType: data.EmailType, })
             } else {
                 this.setState({
                     checkEmailExist: false,
@@ -76,14 +91,14 @@ class InfoProfile extends Component {
     }
 
 
-    searchCityConnection(value){
+    searchCityConnection(value) {
         axios.post(url + 'providers/get_city_connections'
         ).then(result => {
             console.log('get_city_connections', result.data);
             if (result.data.success) {
                 var data = result.data.data;
                 console.log('get_city_connections', data.docs);
-                this.setState({CityConnections: data.docs})
+                this.setState({ CityConnections: data.docs })
             } else {
                 this.setState({
                     CityConnections: [],
@@ -97,7 +112,7 @@ class InfoProfile extends Component {
                 CityConnections: [],
             });
         })
-        
+
     }
 
 
@@ -115,17 +130,17 @@ class InfoProfile extends Component {
             contactNumber: data.contactNumber
         };
     }
-    updateProfile = async() => {
-        const {dataForm} = this.state
-        const {authData} = this.props
+    updateProfile = async () => {
+        const { dataForm } = this.state
+        const { authData } = this.props
         const token = localStorage.getItem('token');
         const values = await this.form.validateFields();
-        const valuesForm = {...values,id: authData.id}
+        const valuesForm = { ...values, id: authData.id }
         try {
-            store.dispatch(setInforProvider({data: valuesForm, token: token}))
+            store.dispatch(setInforProvider({ data: valuesForm, token: token }))
             this.props.changeInfor(dataForm)
         } catch (error) {
-            console.log(error,'error')
+            console.log(error, 'error')
         }
     }
     onFinish = (values) => {
@@ -146,16 +161,16 @@ class InfoProfile extends Component {
     }
 
     defaultOnValueChange = (event, fieldName) => {
-        const {dataForm} = this.state
+        const { dataForm } = this.state
         var value = event.target.value;
-        const newData = {...dataForm}
+        const newData = { ...dataForm }
         newData[fieldName] = value
-        this.setState({dataForm: newData})
+        this.setState({ dataForm: newData })
         // this.setValueToReduxRegisterData(fieldName, value);
     }
 
-    onConnectionsChanged = (selected) =>{
-        console.log('connect changed',selected);
+    onConnectionsChanged = (selected) => {
+        console.log('connect changed', selected);
     }
 
     handelChange = (event, fieldName) => {
@@ -174,11 +189,11 @@ class InfoProfile extends Component {
         const children = [];
 
         for (let i = 10; i < 36; i++) {
-        children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
+            children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
         }
 
         const handleChange = (value) => {
-        console.log(`selected ${value}`);
+            console.log(`selected ${value}`);
         };
         return (
             <Row justify="center" className="row-form">
@@ -295,14 +310,14 @@ class InfoProfile extends Component {
                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cityConnections) }]}
 
                         >
-                            <Select 
-                                onChange={v => this.onConnectionsChanged(v, "cityConnection")} 
+                            <Select
+                                onChange={v => this.onConnectionsChanged(v, "cityConnection")}
                                 placeholder={intl.formatMessage(messages.cityConnections)}
                                 showSearch
                                 optionFilterProp="children"
                                 filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
                             >
-                                {this.state.CityConnections.map((value,index)=>{
+                                {this.state.CityConnections.map((value, index) => {
                                     return (<Select.Option value={value._id}>{value.name}</Select.Option>)
                                 })}
                             </Select>
@@ -348,13 +363,13 @@ class InfoProfile extends Component {
                                             <Col xs={8} sm={8} md={8} className='item-remove'>
                                                 <Form.Item
                                                     {...restField}
-                                                    name={[name,'type']}
+                                                    name={[name, 'type']}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type) }]}
                                                     className='bottom-0'
                                                     style={{ marginTop: key === 0 ? 0 : 14 }}
                                                 >
                                                     <Select placeholder={intl.formatMessage(messages.type)}>
-                                                        {this.state.ContactNumberType.map((value,index)=>{
+                                                        {this.state.ContactNumberType.map((value, index) => {
                                                             return (<Select.Option value={index}>{value}</Select.Option>)
                                                         })}
                                                     </Select>
@@ -401,9 +416,9 @@ class InfoProfile extends Component {
                                                     className='bottom-0'
                                                     style={{ marginTop: key === 0 ? 0 : 14 }}
                                                 >
-                                                    
+
                                                     <Select placeholder={intl.formatMessage(messages.type)}>
-                                                        {this.state.EmailType.map((value,index)=>{
+                                                        {this.state.EmailType.map((value, index) => {
                                                             return (<Select.Option value={index}>{value}</Select.Option>)
                                                         })}
                                                     </Select>
@@ -444,4 +459,4 @@ const mapStateToProps = state => ({
     register: state.register,
     authData: state.auth.authData
 })
-export default compose(connect(mapStateToProps, { setRegisterData,changeInfor }))(InfoProfile);
+export default compose(connect(mapStateToProps, { setRegisterData, changeInfor }))(InfoProfile);

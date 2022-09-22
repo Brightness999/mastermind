@@ -40,7 +40,7 @@ class CreateDefault extends Component {
         this.form?.setFieldsValue({
             username: registerData.username || '',
             email: registerData.email || '',
-            password: registerData.password || defaultPassword,
+            password: registerData.password || undefined,
             role: registerData.role || 3,
             account_type: registerData.account_type || intl.formatMessage(messages.parent),
         });

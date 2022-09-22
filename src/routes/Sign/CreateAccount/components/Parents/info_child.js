@@ -48,7 +48,7 @@ class InfoChild extends Component {
             listServices: [],
             inforChildren: [{}, {}, {}],
             parentInfo: {},
-            listSchools:[],
+            listSchools: [],
             // inforChildren,
         }
     }
@@ -60,37 +60,37 @@ class InfoChild extends Component {
         this.setState({
             parentInfo: registerData.parentInfo
         })
-        
-        try{
-            console.log('birthday' , studentInfos[0].birthday, studentInfos[0].birthday_moment, typeof studentInfos[0].birthday_moment );
-        }catch(e){
+
+        try {
+            console.log('birthday', studentInfos[0].birthday, studentInfos[0].birthday_moment, typeof studentInfos[0].birthday_moment);
+        } catch (e) {
 
         }
-        
-        var newChild =this.getDefaultChildObj(registerData.parentInfo);
-        var studentInfos = !!registerData.studentInfos? JSON.parse(JSON.stringify(registerData.studentInfos)) : [newChild,newChild,newChild];
-        
-        
-        if(!registerData.studentInfos){
-            
+
+        var newChild = this.getDefaultChildObj(registerData.parentInfo);
+        var studentInfos = !!registerData.studentInfos ? JSON.parse(JSON.stringify(registerData.studentInfos)) : [newChild, newChild, newChild];
+
+
+        if (!registerData.studentInfos) {
+
             // for(var i = 0 ; i < registerData.studentInfos.length ; i++){
             //     if()
             // }
-            this.props.setRegisterData({studentInfos:studentInfos});
+            this.props.setRegisterData({ studentInfos: studentInfos });
         }
 
-        
-        for(var i = 0 ; i < studentInfos.length ; i++){
-            if((studentInfos[i].birthday+'').length >0){
-                studentInfos[i].birthday_moment =  moment(studentInfos[i].birthday);
+
+        for (var i = 0; i < studentInfos.length; i++) {
+            if ((studentInfos[i].birthday + '').length > 0) {
+                studentInfos[i].birthday_moment = moment(studentInfos[i].birthday);
                 // var obj = {};
                 // obj[(i+'birthday_moment')] = moment(studentInfos[i].birthday);
                 // console.log(this.form.get)
                 // this.form.setFieldValue(obj);
             }
         }
-        this.form.setFieldsValue({children:studentInfos});
-        
+        this.form.setFieldsValue({ children: studentInfos });
+
         this.loadServices();
         this.loadSchools();
     }
@@ -122,7 +122,7 @@ class InfoChild extends Component {
                 var data = result.data.data;
                 this.setState({ listSchools: data })
             } else {
-                
+
 
             }
 
@@ -164,13 +164,13 @@ class InfoChild extends Component {
         var selectedObj = { ...studentInfos[index] };
         selectedObj[fieldName] = value;
         studentInfos[index] = selectedObj;
-        
+
         this.props.setRegisterData({ studentInfos: studentInfos });
     }
 
     getBirthday = (index) => {
         if (!!this.props.register.studentInfos && this.props.register.studentInfos[index] != undefined && !!this.props.register.studentInfos[index].birthday_moment) {
-            
+
             return this.props.register.studentInfos[index].birthday_moment;
         }
         return moment();
@@ -213,7 +213,7 @@ class InfoChild extends Component {
             && studentInfo.primaryTeacher.length > 0
             && studentInfo.currentGrade.length > 0
             && studentInfo.services.length > 0;
-        
+
         return isAlreadyFillIn;
     }
 
@@ -299,13 +299,13 @@ class InfoChild extends Component {
                                                             name={[field.name, "birthday_moment"]}
                                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.dateBirth) }]}
                                                         >
-                                                            <DatePicker format={"YYYY-MM-DD"} placeholder={intl.formatMessage(messages.dateBirth)} 
-                                                            selected={this.getBirthday(index)}
-                                                            onChange={v => {
-                                                                console.log(v.valueOf() , typeof v);
-                                                                // this.updateReduxValueFor1Depedent(index,"birthday_moment" ,v.clone() );
-                                                                this.updateReduxValueFor1Depedent(index,"birthday" ,v.valueOf());
-                                                            }} />
+                                                            <DatePicker format={"YYYY-MM-DD"} placeholder={intl.formatMessage(messages.dateBirth)}
+                                                                selected={this.getBirthday(index)}
+                                                                onChange={v => {
+                                                                    console.log(v.valueOf(), typeof v);
+                                                                    // this.updateReduxValueFor1Depedent(index,"birthday_moment" ,v.clone() );
+                                                                    this.updateReduxValueFor1Depedent(index, "birthday", v.valueOf());
+                                                                }} />
                                                         </Form.Item>
                                                     </Col>
                                                 </Row>
@@ -354,23 +354,23 @@ class InfoChild extends Component {
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
                                                 >
                                                     <Select
-                                                            showArrow
-                                                            placeholder={intl.formatMessage(messages.school)}
-                                                            optionLabelProp="label"
+                                                        showArrow
+                                                        placeholder={intl.formatMessage(messages.school)}
+                                                        optionLabelProp="label"
 
-                                                            onChange={v => {
-                                                                console.log(v);
-                                                                this.updateReduxValueFor1Depedent(index, "school", v);
-                                                            }}
-                                                        >
-                                                            {this.state.listSchools.map(school => {
-                                                                return (<Select.Option 
-                                                                    label={school.name} 
-                                                                    value={school._id}>{school.name}</Select.Option>)
-                                                            })}
+                                                        onChange={v => {
+                                                            console.log(v);
+                                                            this.updateReduxValueFor1Depedent(index, "school", v);
+                                                        }}
+                                                    >
+                                                        {this.state.listSchools.map(school => {
+                                                            return (<Select.Option
+                                                                label={school.name}
+                                                                value={school._id}>{school.name}</Select.Option>)
+                                                        })}
 
 
-                                                        </Select>
+                                                    </Select>
                                                     {/* <Input onChange={v => {
                                                         this.updateReduxValueFor1Depedent(index, "school", v.target.value);
                                                     }}

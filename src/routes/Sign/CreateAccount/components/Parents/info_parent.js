@@ -43,17 +43,17 @@ class InfoParent extends Component {
     }
 
     getDefaultObj=()=>{
-        return {
-            "maritialType": '0',
-            "address":"",
-            "familyName": "wong",
-            "fatherName": "su",
-            "fatherPhoneNumber": "0766667020",
-            "fatherEmail": "123@bcd.com",
-            "motherName": "fong",
-            "motherPhoneNumber": "0766667020",
-            "motherEmail": "321@dfg.com"
-        };
+        // return {
+        //     "maritialType": '0',
+        //     "address":"",
+        //     "familyName": "wong",
+        //     "fatherName": "su",
+        //     "fatherPhoneNumber": "0766667020",
+        //     "fatherEmail": "123@bcd.com",
+        //     "motherName": "fong",
+        //     "motherPhoneNumber": "0766667020",
+        //     "motherEmail": "321@dfg.com"
+        // };
     }
 
     getDefaultValueInitForm=(key)=>{
@@ -74,6 +74,13 @@ class InfoParent extends Component {
     defaultOnValueChange = (event , fieldName)=>{
         
         var value = event.target.value;
+        console.log(fieldName , value);
+        this.setValueToReduxRegisterData(fieldName, value);
+    }
+
+    defaultOnChangeDropdownValue = (value , fieldName)=>{
+        
+        // var value = event.target.value;
         console.log(fieldName , value);
         this.setValueToReduxRegisterData(fieldName, value);
     }
@@ -183,7 +190,7 @@ class InfoParent extends Component {
                         <Form.Item name="maritialType" rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.maritalStatus) }]}
                         >
                             <Select 
-                            onChange={v=>this.defaultOnValueChange(v, "maritialType")}
+                            onChange={v=>this.defaultOnChangeDropdownValue(v, "maritialType")}
                             placeholder={intl.formatMessage(messages.maritalStatus)}>
                                 <Select.Option value='0'>Married</Select.Option>
                                 <Select.Option value='1'>Widowed</Select.Option>

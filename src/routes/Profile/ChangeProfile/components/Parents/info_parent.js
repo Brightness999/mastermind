@@ -8,9 +8,12 @@ import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
+import axios from 'axios';
+import { url } from '../../../../../utils/api/baseUrl';
 
-import {setInforClientParent, changeInforClientParent} from '../../../../../redux/features/authSlice';
-import {store} from '../../../../../redux/store'
+import { setInforClientParent, changeInforClientParent } from '../../../../../redux/features/authSlice';
+import { store } from '../../../../../redux/store'
+
 
 class InfoParent extends Component {
 
@@ -34,21 +37,35 @@ class InfoParent extends Component {
 
 
     componentDidMount() {
-        
-        const {registerData} = this.props.register;
-        console.log(this.props.auth.authDataClientParent,'http://kyniema4.hopto.org:3090/')
-        if(!registerData.parentInfo){
-            this.props.setRegisterData({parentInfo:this.getDefaultObj() });
+
+        // const {registerData} = this.props.register;
+        // console.log(this.props.auth.authDataClientParent,'http://kyniema4.hopto.org:3090/')
+        // if(!registerData.parentInfo){
+        //     this.props.setRegisterData({parentInfo:this.getDefaultObj() });
+        // }
+        // var parentInfo = registerData.parentInfo||this.getDefaultObj();
+        // this.form.setFieldsValue(parentInfo);
+        const tokenUser = localStorage.getItem('token');
+        if (tokenUser) {
+            axios.post(url + 'clients/get_parent_profile', {}, {
+                headers: {
+                    'Authorization': 'Bearer ' + tokenUser
+                }
+            }).then(result => {
+                const { data } = result.data;
+                data.maritialType = (data.maritialType).toString();
+                this.form.setFieldsValue(data);
+            }).catch(err => {
+                console.log(err);
+            })
         }
-        var parentInfo = registerData.parentInfo||this.getDefaultObj();
-        this.form.setFieldsValue(parentInfo);
     }
 
-    getDefaultObj=()=>{
-        const {authDataClientParent} = this.props.auth;
+    getDefaultObj = () => {
+        const { authDataClientParent } = this.props.auth;
         return {
             "maritialType": authDataClientParent.maritialType ?? '',
-            "address":authDataClientParent.address ?? '',
+            "address": authDataClientParent.address ?? '',
             "familyName": authDataClientParent.familyName ?? '',
             "fatherName": authDataClientParent.fatherName ?? '',
             "fatherPhoneNumber": authDataClientParent.fatherPhoneNumber ?? '',
@@ -59,40 +76,40 @@ class InfoParent extends Component {
         };
     }
 
-    getDefaultValueInitForm=(key)=>{
+    getDefaultValueInitForm = (key) => {
         var obj = this.getDefaultObj();
         return obj[key];
-        
+
     }
 
-    setValueToReduxRegisterData = (fieldName , value)=>{
-        const {registerData} = this.props.register;
+    setValueToReduxRegisterData = (fieldName, value) => {
+        const { registerData } = this.props.register;
         var parentInfo = registerData.parentInfo;
-        
+
         var obj = {};
         obj[fieldName] = value;
-        this.props.setRegisterData({parentInfo:{...parentInfo,...obj}});
+        this.props.setRegisterData({ parentInfo: { ...parentInfo, ...obj } });
     }
 
-    defaultOnValueChange = (event , fieldName)=>{
-        
+    defaultOnValueChange = (event, fieldName) => {
+
         var value = event.target.value;
-        console.log(fieldName , value);
+        console.log(fieldName, value);
         this.setValueToReduxRegisterData(fieldName, value);
     }
     getValueInForm = (allValue, allValueChange) => {
-        this.setState({dataChange: allValueChange.children})
+        this.setState({ dataChange: allValueChange.children })
     }
-    updateProfile = async() => {
-        const {authDataClientParent} = this.props.auth;
+    updateProfile = async () => {
+        const { authDataClientParent } = this.props.auth;
         const token = localStorage.getItem('token');
         const values = await this.form.validateFields();
-        const dataFrom = {...values,id: authDataClientParent.id}
+        const dataFrom = { ...values, id: authDataClientParent.id }
         try {
-            store.dispatch(setInforClientParent({data: dataFrom, token: token}))
+            store.dispatch(setInforClientParent({ data: dataFrom, token: token }))
             this.props.changeInforClientParent(dataFrom)
         } catch (error) {
-            console.log(error,'error')
+            console.log(error, 'error')
         }
     }
     onFinish = (values) => {
@@ -103,24 +120,24 @@ class InfoParent extends Component {
     };
 
     handleChangeAddress = address => {
-        console.log('address',address);
-        this.setState({address: address });
+        console.log('address', address);
+        this.setState({ address: address });
         this.setValueToReduxRegisterData('address', address);
     };
 
     handleSelectAddress = address => {
-        console.log('address',address);
+        console.log('address', address);
         this.form.setFieldsValue({
-            address:address
+            address: address
         })
         this.setValueToReduxRegisterData('address', address);
     };
 
-    
+
 
 
     render() {
-        console.log(this.props.auth.authDataClientParent,' authDataauthDataauthData')
+        console.log(this.props.auth.authDataClientParent, ' authDataauthDataauthData')
         return (
             <Row justify="center" className="row-form">
                 <div className='col-form col-info-parent'>
@@ -144,9 +161,9 @@ class InfoParent extends Component {
                                 }
                             ]}
                         >
-                            <Input 
-                            onChange={v=>this.defaultOnValueChange(v, "familyName")}
-                            placeholder={intl.formatMessage(messages.familyName)} 
+                            <Input
+                                onChange={v => this.defaultOnValueChange(v, "familyName")}
+                                placeholder={intl.formatMessage(messages.familyName)}
                             />
                         </Form.Item>
                         <Form.Item
@@ -192,9 +209,9 @@ class InfoParent extends Component {
                         </Form.Item>
                         <Form.Item name="maritialType" rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.maritalStatus) }]}
                         >
-                            <Select 
-                            onChange={v=>this.defaultOnValueChange(v, "maritialType")}
-                            placeholder={intl.formatMessage(messages.maritalStatus)}>
+                            <Select
+                                onChange={v => this.defaultOnValueChange(v, "maritialType")}
+                                placeholder={intl.formatMessage(messages.maritalStatus)}                                >
                                 <Select.Option value='0'>Married</Select.Option>
                                 <Select.Option value='1'>Widowed</Select.Option>
                                 <Select.Option value='2'>Separated</Select.Option>
@@ -211,9 +228,9 @@ class InfoParent extends Component {
                                 }
                             ]}
                         >
-                            <Input 
-                            onChange={v=>this.defaultOnValueChange(v, "fatherName")}
-                            placeholder={intl.formatMessage(messages.fatherName)} />
+                            <Input
+                                onChange={v => this.defaultOnValueChange(v, "fatherName")}
+                                placeholder={intl.formatMessage(messages.fatherName)} />
                         </Form.Item>
                         <Form.Item
                             name="fatherPhoneNumber"
@@ -228,9 +245,9 @@ class InfoParent extends Component {
                                 },
                             ]}
                         >
-                            <Input 
-                            onChange={v=>this.defaultOnValueChange(v,"fatherPhoneNumber" )}
-                            placeholder={intl.formatMessage(messages.phoneNumber)} />
+                            <Input
+                                onChange={v => this.defaultOnValueChange(v, "fatherPhoneNumber")}
+                                placeholder={intl.formatMessage(messages.phoneNumber)} />
                         </Form.Item>
                         <Form.Item
                             name="fatherEmail"
@@ -244,9 +261,9 @@ class InfoParent extends Component {
                                     message: intl.formatMessage(messagesLogin.emailNotValid)
                                 }
                             ]}>
-                            <Input 
-                            onChange={v=>this.defaultOnValueChange(v, "fatherEmail")}
-                            placeholder={intl.formatMessage(messages.email)} />
+                            <Input
+                                onChange={v => this.defaultOnValueChange(v, "fatherEmail")}
+                                placeholder={intl.formatMessage(messages.email)} />
                         </Form.Item>
 
                         <p className='font-16 mb-10'>{intl.formatMessage(messages.mother)}</p>
@@ -258,9 +275,9 @@ class InfoParent extends Component {
                                     message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.motherName)
                                 }
                             ]}>
-                            <Input 
-                            onChange={v=>this.defaultOnValueChange(v, "motherName")}
-                            placeholder={intl.formatMessage(messages.motherName)} />
+                            <Input
+                                onChange={v => this.defaultOnValueChange(v, "motherName")}
+                                placeholder={intl.formatMessage(messages.motherName)} />
                         </Form.Item>
                         <Form.Item
                             name="motherPhoneNumber"
@@ -275,9 +292,9 @@ class InfoParent extends Component {
                                 },
                             ]}
                         >
-                            <Input 
-                            onChange={v=>this.defaultOnValueChange(v, "motherPhoneNumber")}
-                            placeholder={intl.formatMessage(messages.phoneNumber)} />
+                            <Input
+                                onChange={v => this.defaultOnValueChange(v, "motherPhoneNumber")}
+                                placeholder={intl.formatMessage(messages.phoneNumber)} />
                         </Form.Item>
                         <Form.Item
                             name="motherEmail"
@@ -292,9 +309,9 @@ class InfoParent extends Component {
                                 }
                             ]}
                         >
-                            <Input 
-                            onChange={v=>this.defaultOnValueChange(v, "motherEmail")}
-                            placeholder={intl.formatMessage(messages.email)} />
+                            <Input
+                                onChange={v => this.defaultOnValueChange(v, "motherEmail")}
+                                placeholder={intl.formatMessage(messages.email)} />
                         </Form.Item>
 
                         <Form.Item className="form-btn continue-btn" >

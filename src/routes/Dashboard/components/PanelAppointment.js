@@ -21,6 +21,7 @@ class PanelAppointment extends React.Component {
     this.state = {
         appointments:[],
         type:0,
+        currentTab: 1,
     };
   }
 
@@ -46,11 +47,16 @@ class PanelAppointment extends React.Component {
 
   componentDidMount() {
     this.handleTabChange(1)
+    this.props.setReload(this.setReloadData);
+  }
+
+  setReloadData = () =>{
+    this.handleTabChange(this.state.currentTab);
   }
 
   handleTabChange = (v)=>{
     var date = moment().subtract(1, 'day').valueOf();
-    this.setState({appointments: []})
+    this.setState({appointments: [] , currentTab:v})
     
 
     switch(parseInt(v)){

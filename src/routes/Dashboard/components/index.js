@@ -20,10 +20,10 @@ import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsEnvelope, BsFilter, BsXCircle, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill, BsCheckCircleFill } from 'react-icons/bs';
-import { 
+import {
   ModalNewGroup,
   ModalNewAppointment,
-  ModalNewAppointmentForParents, 
+  ModalNewAppointmentForParents,
   ModalSubsidyProgress,
   ModalReferralService,
   ModalNewSubsidyRequest,
@@ -52,12 +52,12 @@ const { Panel } = Collapse;
 const { TabPane } = Tabs;
 
 
-import { socketUrl , socketUrlJSFile } from '../../../utils/api/baseUrl';
-import request,{generateSearchStructure} from '../../../utils/api/request'
+import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
+import request, { generateSearchStructure } from '../../../utils/api/request'
 import moment from 'moment';
 
-import {changeTime, getAppointmentsMonthData, removeAppoint} from '../../../redux/features/appointmentsSlice'
-import {store} from '../../../redux/store'
+import { changeTime, getAppointmentsMonthData, removeAppoint } from '../../../redux/features/appointmentsSlice'
+import { store } from '../../../redux/store'
 
 
 import { routerLinks } from "../../constant";
@@ -79,55 +79,55 @@ export default class extends React.Component {
       visibleNewReview: false,
       visibleNewGroup: false,
       isEventDetail: false,
-      idEvent:0,
+      idEvent: 0,
       isMonth: 1,
       isGridDayView: 'Grid',
 
       canDrop: true,
       calendarWeekends: true,
       calendarEvents: store.getState().appointments.dataAppointmentsMonth ?? events,
-      userRole:-1,
-      listDependents:[],
-      parentInfo:{},
-      providerInfo:{},
-      schoolInfo:{},
-      listAppoinmentsRecent:[],
-      listAppoinmentsFilter:[],
-      SkillSet:[],
-      isEditSubsidyRequest:"",
+      userRole: -1,
+      listDependents: [],
+      parentInfo: {},
+      providerInfo: {},
+      schoolInfo: {},
+      listAppoinmentsRecent: [],
+      listAppoinmentsFilter: [],
+      SkillSet: [],
+      isEditSubsidyRequest: "",
     }
     // this.panelSubsidariesRef = React.forwardRef();
   }
-  componentDidMount(){
-    if(!!localStorage.getItem('token')&&localStorage.getItem('token').length >0){
+  componentDidMount() {
+    if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       this.loadDefaultData();
-      checkPermission().then(loginData=>{
+      checkPermission().then(loginData => {
         loginData.user.role > 900 && this.props.history.push(routerLinks.Admin)
         const appointmentsMonth = store.getState().appointments.dataAppointmentsMonth
         const dataFetchAppointMonth = {
-          role: loginData.user.role, 
+          role: loginData.user.role,
           data: {
-            month: moment().month() + 1, 
-            year:  moment().year()
-          }, 
+            month: moment().month() + 1,
+            year: moment().year()
+          },
           token: loginData.token
         }
-        
-        
+
+
         // const newAppointments = 
         this.setState({
           calendarEvents: appointmentsMonth,
-          userRole:loginData.user.role
-        },()=>{
+          userRole: loginData.user.role
+        }, () => {
           // get list appointments
           this.getMyAppointments();
           store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth))
         })
-        
-      }).catch(err=>{
+
+      }).catch(err => {
         this.props.history.push('/');
       })
-    }else{
+    } else {
       this.props.history.push('/');
     }
 
@@ -138,17 +138,17 @@ export default class extends React.Component {
     document.body.appendChild(script);
   }
 
-  loadDefaultData(){
-    request.post('clients/get_default_value_for_client').then(result=>{
-        var data = result.data;
-        console.log('default value',data);
-        this.setState({SkillSet: data.SkillSet});
+  loadDefaultData() {
+    request.post('clients/get_default_value_for_client').then(result => {
+      var data = result.data;
+      console.log('default value', data);
+      this.setState({ SkillSet: data.SkillSet });
     })
   }
 
 
 
-  scriptLoaded = ()=>{
+  scriptLoaded = () => {
     let opts = {
       query: {
         token: localStorage.getItem('token'),
@@ -156,28 +156,28 @@ export default class extends React.Component {
       withCredentials: true,
       autoConnect: true,
     };
-    this.socket = io(socketUrl , opts);
+    this.socket = io(socketUrl, opts);
     // const socket = socketio.connect(socketUrl , opts);
     this.socket.on('connect_error', e => {
       console.log('connect error ', e);
     });
 
-    this.socket.on('connect', ()=>{
+    this.socket.on('connect', () => {
       console.log('socket connect success');
       // this.disconnect();
       this.getSubprofile();
-      
+
     });
 
-    this.socket.on('socket_result' , data=>{
-      console.log('socket result',data);
+    this.socket.on('socket_result', data => {
+      console.log('socket result', data);
       this.handleSocketResult(data);
     })
 
     this.socket.on('disconnect', e => {
       console.log('socket disconnect', e);
     });
-    
+
   }
 
   showNotificationForSubsidy(data){
@@ -222,7 +222,10 @@ export default class extends React.Component {
   handleSocketResult(data){
     switch(data.key){
       case 'new_appoint_from_client':
-        this.setState({ visibleDetailPost: true , });
+        this.setState({ visibleDetailPost: true, });
+        return;
+      case 'new_subsidy_request_from_client':
+        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
         return;
         case 'new_subsidy_request_from_client':
           this.panelSubsidariesReload&&typeof this.panelSubsidariesReload == 'function'&&this.panelSubsidariesReload(true)
@@ -237,8 +240,8 @@ export default class extends React.Component {
     }
   }
 
-  getSubprofile = () =>{
-    switch(this.state.userRole){
+  getSubprofile = () => {
+    switch (this.state.userRole) {
       case 3: // get parent info
         this.getParentInfo();
         this.loadDependent();
@@ -248,38 +251,48 @@ export default class extends React.Component {
         return;
       case 60:// get school info
         this.loadMySchoolInfo();
+        this.loadDependentForSchool();
         return;
     }
   }
 
-  loadMySchoolInfo = ()=>{
-    request.post('schools/get_my_school_info').then(result=>{
+  loadMySchoolInfo = () => {
+    request.post('schools/get_my_school_info').then(result => {
       var data = result.data;
-      console.log('get_my_school_info',data);
-  
-      this.setState({schoolInfo:data})
+      console.log('get_my_school_info', data);
+
+      this.setState({ schoolInfo: data })
       this.joinRoom(data._id);
     })
   }
 
-  getParentInfo = ()=>{
-    request.post('clients/get_parent_profile').then(result=>{
+  getParentInfo = () => {
+    request.post('clients/get_parent_profile').then(result => {
       var data = result.data;
-      console.log('get_parent_profile',data);
-  
-      this.setState({parentInfo:data})
+      console.log('get_parent_profile', data);
+
+      this.setState({ parentInfo: data })
       this.joinRoom(data._id);
     })
   }
 
-  loadDependent = () =>{
-    request.post('clients/get_child_profile').then(result=>{
-        var data = result.data;
-        console.log('get_child_profile',data);
-        for(var i = 0 ; i < data.length ; i++){
-          this.joinRoom(data[i]._id);
-        }
-        this.setState({listDependents:data})
+  loadDependent = () => {
+    request.post('clients/get_child_profile').then(result => {
+      var data = result.data;
+      console.log('get_child_profile', data);
+      for (var i = 0; i < data.length; i++) {
+        this.joinRoom(data[i]._id);
+      }
+      this.setState({ listDependents: data })
+    })
+  }
+
+  loadDependentForSchool = () =>{
+    request.post('schools/get_my_dependents').then(result=>{
+      if(result.success){
+        this.setState({listDependents:result.data})
+      }
+        
     })
   }
 
@@ -293,11 +306,11 @@ export default class extends React.Component {
     })
   }
 
-  joinRoom = (roomId)=>{
-    this.socket.emit('join_room',roomId);
+  joinRoom = (roomId) => {
+    this.socket.emit('join_room', roomId);
   }
 
-  modalAppointments(){
+  modalAppointments() {
     const modalNewAppointProps = {
       visible: this.state.visibleNewAppoint,
       onSubmit: this.onSubmitModalNewAppoint,
@@ -309,23 +322,23 @@ export default class extends React.Component {
     // <ModalNewAppointment {...modalNewAppointProps} />
   }
 
-  
 
-  modalCreateAndEditSubsidyRequest = ()=>{
-    
+
+  modalCreateAndEditSubsidyRequest = () => {
+
     const modalNewSubsidyProps = {
       visible: this.state.visibleNewSubsidy,
       onSubmit: this.onCloseModalNewSubsidy,
       onCancel: this.onCloseModalNewSubsidy,
       isEditSubsidyRequest: this.state.isEditSubsidyRequest,
-      
+
     };
     return <ModalNewSubsidyRequest {...modalNewSubsidyProps}
-    setOpennedEvent={opennedEvent=>{
-      this.openNewSubsidyRequest = opennedEvent;
-    }}
-    userRole={this.state.userRole}
-    listDependents = {this.state.listDependents}
+      setOpennedEvent={opennedEvent => {
+        this.openNewSubsidyRequest = opennedEvent;
+      }}
+      userRole={this.state.userRole}
+      listDependents={this.state.listDependents}
     />
   }
 
@@ -369,8 +382,8 @@ export default class extends React.Component {
     this.setState({ visibleSubsidy: true });
     this.reloadModalSubsidyDetail(subsidyId);
   };
-  
-  onCancelSubsidy = () =>{
+
+  onCancelSubsidy = () => {
 
   }
 
@@ -383,13 +396,17 @@ export default class extends React.Component {
     // 
   };
 
-  openHierachyModal = (subsidy , callbackAfterChanged) =>{
+  openHierachyModal = (subsidy, callbackAfterChanged) => {
     this.setState({ visibleNewGroup: true });
-    this.loadDataModalNewGroup(subsidy , callbackAfterChanged);
+    this.loadDataModalNewGroup(subsidy, callbackAfterChanged);
   }
 
-  onShowModalReferral = () => {
+  onShowModalReferral = (subsidy , callbackForReload  ) => {
     this.setState({ visiblReferralService: true });
+    if(callbackForReload == undefined){
+      callbackForReload = this.panelAppoimentsReload;
+    }
+    !!this.loadDataModalReferral&&this.loadDataModalReferral(subsidy , callbackForReload);
   };
 
   onCloseModalReferral = () => {
@@ -400,16 +417,16 @@ export default class extends React.Component {
     this.openNewSubsidyRequest();
   };
 
-  
+
   onSubmitModalNewSubsidy = () => {
     this.setState({ visibleNewSubsidy: false });
     this.setState({ visibleNewReview: true });
   };
   onCloseModalNewSubsidy = (isNeedReload) => {
     this.setState({ visibleNewSubsidy: false });
-    !!this.panelSubsidariesReload&&this.panelSubsidariesReload(isNeedReload);
+    !!this.panelSubsidariesReload && this.panelSubsidariesReload(isNeedReload);
   };
-  
+
   onSubmitModalNewReview = () => {
     this.setState({ visibleNewReview: false });
   };
@@ -419,10 +436,10 @@ export default class extends React.Component {
   };
 
   onShowModalGroup = () => {
-    this.setState({visibleNewGroup: true});
+    this.setState({ visibleNewGroup: true });
   }
   onCloseModalGroup = () => {
-      this.setState({visibleNewGroup: false});
+    this.setState({ visibleNewGroup: false });
   }
 
   handleDateClick = arg => {
@@ -472,23 +489,23 @@ export default class extends React.Component {
     }
   }
   handleEventClick = (val) => {
-    if(val?.event){
+    if (val?.event) {
       const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : 0
-      
-      this.setState({ 
+
+      this.setState({
         isEventDetail: !this.state.isEventDetail,
         idEvent: id
       });
     } else {
-      this.setState({ 
+      this.setState({
         isEventDetail: !this.state.isEventDetail,
         // calendarEvents: val.data
       });
     }
-    
+
   }
 
-  
+
 
   handleEventAdd = (addInfo) => {
     this.props.createEvent(addInfo.event.toPlainObject())
@@ -521,29 +538,29 @@ export default class extends React.Component {
     // store.dispatch(removeAppoint(data))
   }
 
-  getMyAppointments(){
-    var url  = 'clients/get_my_appointments';
-    if(this.state.userRole === 30){
+  getMyAppointments() {
+    var url = 'clients/get_my_appointments';
+    if (this.state.userRole === 30) {
       url = 'providers/get_my_appointments'
     }
 
-    request.post(url).then(result=>{
-      if(result.success){
+    request.post(url).then(result => {
+      if (result.success) {
         var data = result.data;
-        console.log(url,data, this.state.userRole);
-        this.setState({listAppoinmentsRecent: data.docs});
-      }else{
-        this.setState({listAppoinmentsRecent: []});
+        console.log(url, data, this.state.userRole);
+        this.setState({ listAppoinmentsRecent: data.docs });
+      } else {
+        this.setState({ listAppoinmentsRecent: [] });
       }
-      
+
     })
 
   }
 
-  onCollapseChange = (v=>{
-    
-    if(v.length>0&& v[v.length-1] == 6){
-      this.panelSubsidariesReload&&this.panelSubsidariesReload();
+  onCollapseChange = (v => {
+
+    if (v.length > 0 && v[v.length - 1] == 6) {
+      this.panelSubsidariesReload && this.panelSubsidariesReload();
     }
   })
 
@@ -554,16 +571,17 @@ export default class extends React.Component {
       onCancel: this.onCloseModalSubsidy,
     };
     return (<ModalSubsidyProgress {...modalSubsidyProps}
-      setOpennedEvent = {(reload)=>{this.reloadModalSubsidyDetail = reload}}
+      setOpennedEvent={(reload) => { this.reloadModalSubsidyDetail = reload }}
       userRole={this.state.userRole}
       SkillSet={this.state.SkillSet}
+      openReferral= {this.onShowModalReferral}
       openHierachy={this.openHierachyModal}
     />)
   }
 
-  renderListAppoinmentsRecent = (appoinment , index)=>{
-      
-    return ( <div key={index} className={appoinment.status ==-1 || appoinment.status ==2?'item-feed done': 'item-feed'}>
+  renderListAppoinmentsRecent = (appoinment, index) => {
+
+    return (<div key={index} className={appoinment.status == -1 || appoinment.status == 2 ? 'item-feed done' : 'item-feed'}>
       <p className='font-700'>{appoinment.dependent.firstName} {appoinment.dependent.lastName}</p>
       {appoinment.provider!=undefined&&<p>{appoinment.provider.name||appoinment.provider.referredToAs}</p>}
       {appoinment.school!=undefined&&<p>{appoinment.school.name}</p>}
@@ -588,48 +606,51 @@ export default class extends React.Component {
       />
     </Badge>
   );
-  
-  renderPanelAppointmentForProvider = ()=>{
+
+  renderPanelAppointmentForProvider = () => {
     const appointments = store.getState().appointments.dataAppointments
-    if(this.state.userRole == 30 || this.state.userRole == 3 )
-    return (<Panel
-      key="1"
-      header={intl.formatMessage(messages.appointments)}
-      extra={this.genExtraTime()}
-      className='appointment-panel'
-    >
-      <PanelAppointment 
-        userRole={this.state.userRole}
-      />
-    </Panel>);
+    if (this.state.userRole == 30 || this.state.userRole == 3)
+      return (<Panel
+        key="1"
+        header={intl.formatMessage(messages.appointments)}
+        extra={this.genExtraTime()}
+        className='appointment-panel'
+      >
+        <PanelAppointment
+          userRole={this.state.userRole}
+          setReload={reload => {
+            this.panelAppoimentsReload = reload;
+          }}
+        />
+      </Panel>);
   }
 
-  renderPanelSubsidaries = ()=>{
+  renderPanelSubsidaries = () => {
     return (
       <Panel
-                header={<div className='flex flex-row justify-between'>
-                  <p className='mb-0'>{intl.formatMessage(messages.subsidaries)}</p>
-                  {this.state.userRole == 3 &&<Button type='primary' size='small' onClick={this.onShowModalNewSubsidy}>
-                    {intl.formatMessage(messages.requestNewSubsidy).toUpperCase()}
-                  </Button>}
-                </div>
-                }
-                key="6"
-                className='subsidaries-panel'
-              >
-                <PanelSubsidaries
-                  setReload={reload=>{
-                    this.panelSubsidariesReload = reload;
-                  }}
-                  userRole={this.state.userRole}
-                  SkillSet={this.state.SkillSet}
-                  onShowModalSubsidyDetail={this.onShowModalSubsidy}
-                  onCancelSubsidy={this.onCancelSubsidy}
-                />
-              </Panel>
+        header={<div className='flex flex-row justify-between'>
+          <p className='mb-0'>{intl.formatMessage(messages.subsidaries)}</p>
+          {this.state.userRole == 3 && <Button type='primary' size='small' onClick={this.onShowModalNewSubsidy}>
+            {intl.formatMessage(messages.requestNewSubsidy).toUpperCase()}
+          </Button>}
+        </div>
+        }
+        key="6"
+        className='subsidaries-panel'
+      >
+        <PanelSubsidaries
+          setReload={reload => {
+            this.panelSubsidariesReload = reload;
+          }}
+          userRole={this.state.userRole}
+          SkillSet={this.state.SkillSet}
+          onShowModalSubsidyDetail={this.onShowModalSubsidy}
+          onCancelSubsidy={this.onCancelSubsidy}
+        />
+      </Panel>
     )
   }
- 
+
   render() {
     const {
       isFilter,
@@ -645,7 +666,7 @@ export default class extends React.Component {
       visibleSubsidy,
       visibleNewGroup
     } = this.state;
-    
+
     const btnMonthToWeek = (
       <Button className='btn-type' onClick={this.handleMonthToWeek}>
         {isMonth ? intl.formatMessage(messages.month) : intl.formatMessage(messages.week)}
@@ -671,7 +692,7 @@ export default class extends React.Component {
         <p className='font-15'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
       </div>
     );
-  
+
 
     const menu = (
       <Menu
@@ -686,7 +707,7 @@ export default class extends React.Component {
           },
           {
             key: '3',
-            label: (<a target="_blank" rel="noopener noreferrer" href="#">{intl.formatMessage(messages.referral)}</a>),
+            label: (<a target="_blank" rel="noopener noreferrer" onClick={this.onShowModalReferral}>{intl.formatMessage(messages.referral)}</a>),
           },
         ]}
       />
@@ -787,10 +808,10 @@ export default class extends React.Component {
               <p className='font-16 text-white mb-0'>{intl.formatMessage(messages.activityFeed)}</p>
             </div>
             <div className='div-list-feed'>
-              {this.state.listAppoinmentsRecent.map((appoinment, index) => this.renderListAppoinmentsRecent(appoinment , index))}
+              {this.state.listAppoinmentsRecent.map((appoinment, index) => this.renderListAppoinmentsRecent(appoinment, index))}
 
 
-             
+
             </div>
           </section>
           <section className='div-calendar box-card'>
@@ -885,17 +906,17 @@ export default class extends React.Component {
                     type='primary'
                     block
                     icon={<FaCalendarAlt size={19} />}
-                    // onClick={this.onShowDrawerDetailPost}
+                  // onClick={this.onShowDrawerDetailPost}
                   >
                     {intl.formatMessage(messages.makeAppointment)}
                   </Button>
                 </Dropdown>
               </div></>}
             {isEventDetail && <EventDetail backView={this.handleEventClick}
-            id={this.state.idEvent} 
-            role={this.state.userRole}
-            calendarEvents={this.state.calendarEvents}
-              />}
+              id={this.state.idEvent}
+              role={this.state.userRole}
+              calendarEvents={this.state.calendarEvents}
+            />}
           </section>
           <section className='div-multi-choice'>
             <Collapse
@@ -982,7 +1003,7 @@ export default class extends React.Component {
                 )}
               </Panel>
               {this.renderPanelSubsidaries()}
-              
+
             </Collapse>
           </section>
         </div>
@@ -996,24 +1017,32 @@ export default class extends React.Component {
           onClose={this.onCloseDrawerDetail}
         />
         <DrawerDetailPost
-          
+
           visible={visibleDetailPost}
           onClose={this.onCloseDrawerDetailPost}
         />
 
         {this.modalAppointments()}
         {this.renderModalSubsidyDetail()}
-        
-        
-        
-        
+
+
+
+
         {this.modalCreateAndEditSubsidyRequest()}
         <ModalNewGroup {...modalNewGroupProps}
-          setLoadData={reload=>{
+          setLoadData={reload => {
             this.loadDataModalNewGroup = reload;
           }}
         />
-        <ModalReferralService {...modalReferralServiceProps}/>
+        <ModalReferralService {...modalReferralServiceProps}
+        SkillSet={this.state.SkillSet}
+        listDependents = {this.state.listDependents}
+        setLoadData={reload=>{
+          this.loadDataModalReferral = reload;
+        }}
+        userRole={this.state.userRole}
+        
+        />
         
         <ModalNewSubsidyReview {...modalNewReviewProps}/>
       </div>
