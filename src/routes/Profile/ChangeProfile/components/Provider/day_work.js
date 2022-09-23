@@ -345,7 +345,7 @@ class SubsidyProgram extends Component {
             <Row justify="center" className="row-form">
                 <div className='col-form col-subsidy-program'>
                     <div className='div-form-title'>
-                        <p className='font-30 text-center mb-10'>{intl.formatMessage(messages.subsidyProgram)}<QuestionCircleOutlined className='text-primary icon-question ' /></p>
+                        <p className='font-30 text-center mb-10'>{intl.formatMessage(messages.dayWork)}<QuestionCircleOutlined className='text-primary icon-question ' /></p>
                     </div>
                     <Form
                         name="form_subsidy_program"
@@ -356,171 +356,77 @@ class SubsidyProgram extends Component {
                         // }}
                         ref={(ref) => { this.form = ref }}
                     >
-                        <div className='flex flex-row mb-10'>
-                            {/* <BsSquare size={11} /> */}
-                            <Checkbox
-                                checked={this.state.isAcceptProBono}
-
-                                onChange={v => {
-                                    console.log('checked change', v)
-                                    this.setState({ isAcceptProBono: v.target.checked })
-                                    this.changeCheckboxValueOnRedux('isAcceptProBono', v.target.checked)
-                                }}
-                            />
-                            <p className='font-15 font-700 mb-0 ml-10'>{intl.formatMessage(messages.offeringVolunteer)}</p>
-                        </div>
-                        <div className='flex flex-row justify-between px-20'>
-                            <p className='mb-10'>{intl.formatMessage(messages.numberSessionsWeek)}</p>
-                            <Form.Item
-                                name="numberSessions"
-                                className='select-small'
-                            >
-                                <Select
-                                    disabled={!this.state.isAcceptProBono}
-
-                                    onChange={v => this.handleSelectChange(v, 'numberSessions')}>
-                                    {this.state.NumberOfSession.map((value) => {
-                                        return (<Select.Option value={value}>{value}</Select.Option>)
-                                    })}
-                                </Select>
-                            </Form.Item>
-                        </div>
-                        <Divider style={{ marginTop: 10, borderColor: '#d7d7d7' }} />
-                        <div className='flex flex-row mb-10'>
-                            {/* <BsSquare size={11} /> */}
-                            <Checkbox
-                                onChange={v => {
-                                    console.log('checked change', v)
-                                    this.setState({ isAcceptReduceRate: v.target.checked })
-                                    this.changeCheckboxValueOnRedux('isAcceptReduceRate', v.target.checked)
-                                }}
-                                checked={this.state.isAcceptReduceRate} />
-                            <p className='font-15 font-700 mb-0 ml-10'>{intl.formatMessage(messages.provideSubsidizedCases)}</p>
-                        </div>
                         <div className='px-20'>
-                            <p className='mb-10'>{intl.formatMessage(messages.academicLevel)}</p>
-                            <Form.List name="reduceWithAcademic">
-                                {(fields, { add, remove }) => (
-                                    <div className='div-time'>
-                                        {fields.map((field) => {
-                                            return (
-                                                <Row key={field.key} gutter={10}>
-                                                    <Col xs={24} sm={24} md={12}>
-                                                        <Form.Item
-                                                            name={[field.name, "level"]}
-                                                            className='select-small'
-                                                            rules={[{ required: !this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.level) }]}
-                                                        >
-                                                            <Select
-                                                                disabled={!this.state.isAcceptReduceRate}
-                                                                onChange={v => {
-                                                                    console.log('on field change')
-                                                                    this.handleSelectChange();
-                                                                }}
-                                                                placeholder={intl.formatMessage(messages.level)}>
-                                                                {this.state.Levels.map((lvl) => {
-                                                                    return (<Select.Option value={lvl}>Grade {lvl}</Select.Option>)
-                                                                })}
-                                                            </Select>
-                                                        </Form.Item>
-                                                    </Col>
-                                                    <Col xs={12} sm={12} md={6}>
-                                                        <Form.Item
-                                                            name={[field.name, "rate"]}
-                                                            className='select-small'
-                                                            style={{ height: "25px !important" }}
-                                                            rules={[{ required: !this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
-                                                        >
-                                                            <Input
-                                                                onChange={v => {
-                                                                    console.log('on field change', v)
-                                                                    if (this.state.isSameRate) {
-                                                                        console.log(this.form.getFieldsValue());
-                                                                        var arr = JSON.parse(JSON.stringify(this.form.getFieldValue('reduceWithAcademic')));
-                                                                        for (var i = 0; i < arr.length; i++) {
-                                                                            if (arr[i] == undefined) arr[i] = {}
-                                                                            arr[i].rate = v.target.value;
-                                                                        }
-                                                                        this.form.setFieldValue('reduceWithAcademic', arr);
-                                                                    }
-
-                                                                }}
-                                                                disabled={!this.state.isAcceptReduceRate}
-                                                                className='input-with-select-small' placeholder={intl.formatMessage(messages.rate)} />
-                                                            {/* <Select placeholder={intl.formatMessage(messages.rate)}>
-                                                                <Select.Option value='r1'>rate 1</Select.Option>
-                                                                <Select.Option value='r2'>rate 2</Select.Option>
-                                                            </Select> */}
-                                                        </Form.Item>
-                                                    </Col>
-                                                    <Col xs={12} sm={12} md={6} className={field.key !== 0 && 'item-remove'}>
-                                                        <Form.Item
-                                                            name={[field.name, "reduced"]}
-                                                            className='select-small'
-                                                            rules={[{ required: !this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced) }]}
-                                                        >
-                                                            <Select
-                                                                onChange={v => {
-                                                                    console.log('on field change')
-                                                                    this.handleSelectChange();
-                                                                }}
-                                                                disabled={!this.state.isAcceptReduceRate}
-                                                                placeholder={intl.formatMessage(messages.reduced)}>
-                                                                {this.state.ReduceList.map(value => {
-                                                                    return <Select.Option value={value}>{value} %</Select.Option>
-                                                                })}
-                                                            </Select>
-                                                        </Form.Item>
-                                                        {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
-                                                    </Col>
-                                                </Row>
-
-                                            );
-                                        }
-                                        )}
-                                        <Row>
-                                            <Col span={8}>
-                                                <div className='flex flex-row'>
-                                                    <BsPlusCircle
-                                                        disabled={!this.state.isAcceptReduceRate}
-                                                        size={14} className='mr-5 text-primary' />
-                                                    <a className='text-primary'
-                                                        disabled={!this.state.isAcceptReduceRate}
-                                                        onClick={() => {
-                                                            add()
-                                                        }}>{intl.formatMessage(messages.addLevel)}</a>
-                                                </div>
-                                            </Col>
-                                            <Col span={16}>
-                                                <div className='flex flex-row items-center justify-end'>
-                                                    <Switch
-                                                        onChange={v => this.setState({ isSameRate: v })}
-                                                        disabled={!this.state.isAcceptReduceRate}
-                                                        size="small" defaultChecked />
-                                                    <p className='ml-10 mb-0'>{intl.formatMessage(messages.sameRateLevels)}</p>
-                                                </div>
-                                            </Col>
-                                        </Row>
-                                    </div>
-                                )}
-                            </Form.List>
-
-
+                            <p className='font-700'>{intl.formatMessage(messages.selectDateTime)}</p>
+                            <div className='calendar'>
+                                <Row gutter={15}>
+                                    <Col xs={24} sm={24} md={15}>
+                                        <Calendar
+                                            fullscreen={false}
+                                            value={valueCalendar}
+                                            onSelect={this.onSelect}
+                                            onPanelChange={this.onPanelChange}
+                                            dateCellRender={(date) => {
+                                                if (this.checkDateExist(date)) {
+                                                    console.log('checked true')
+                                                    return <div
+                                                        className='mydaterender'
+                                                    >{date.day}</div>
+                                                }
+                                                // console.log(date);
+                                                // .mydaterender {
+                                                //     background-color: @blue05;
+                                                //   }
+                                                //   .mydaterenderselecting {
+                                                //     background-color: @bluelight550;
+                                                //   }
+                                                //   .mydaterendernothing {
+                                                //     background-color: @white;
+                                                //   }
+                                            }}
+                                            headerRender={() => {
+                                                return (
+                                                    <div style={{ marginBottom: 10 }}>
+                                                        <Row gutter={8} justify="space-between" align="middle">
+                                                            <Col>
+                                                                <p className='font-16 mb-0'>{selectedDay?.format('MMMM YYYY')}</p>
+                                                            </Col>
+                                                            <Col>
+                                                                <Button
+                                                                    type='text'
+                                                                    className='mr-10 left-btn'
+                                                                    icon={<BiChevronLeft size={25} />}
+                                                                    onClick={this.prevMonth}
+                                                                />
+                                                                <Button
+                                                                    type='text'
+                                                                    className='right-btn'
+                                                                    icon={<BiChevronRight size={25} />}
+                                                                    onClick={this.nextMonth}
+                                                                />
+                                                            </Col>
+                                                        </Row>
+                                                    </div>
+                                                );
+                                            }}
+                                        />
+                                    </Col>
+                                    <Col xs={24} sm={24} md={9} style={{ height: '200px' }}>
+                                        <p className='font-16'>{selectedDay?.format('dddd MMMM DD ')}</p>
+                                        <div className='time-available-title'>
+                                            <p className='font-12 mb-0'><GoPrimitiveDot size={15} />{intl.formatMessage(messages.timesAvailable)}</p>
+                                        </div>
+                                        {this.state.TimeAvailableList.map((timeItem, index) => <div key={index}
+                                            className='time-available'
+                                            // className={isSelectTime === index ? 'time-available active' : 'time-available'} 
+                                            onClick={() => this.addOrRemovePrivateCalendar(selectedDay, timeItem)}>
+                                            <p className='font-12 mb-0'>{this.checkHourExist(timeItem) && <GoPrimitiveDot size={15} />}{timeItem.format('hh:mm A')}</p>
+                                        </div>)}
+                                    </Col>
+                                </Row>
+                            </div>
                         </div>
 
-                        <Divider style={{ borderColor: '#d7d7d7' }} />
-                        <div className='flex flex-row mb-10'>
-                            {/* <BsSquare size={11} /> */}
-                            <Checkbox
-                                onChange={v => {
-                                    console.log('checked change', v)
-                                    this.setState({ isWillingOpenPrivate: v.target.checked })
-                                    this.changeCheckboxValueOnRedux('isWillingOpenPrivate', v.target.checked)
-                                }}
-                                checked={this.state.isWillingOpenPrivate} />
-
-                            <p className='font-15 font-700 mb-0 ml-10'>{intl.formatMessage(messages.openPrivateSlots)}</p>
-                        </div>
                         <Form.Item className="form-btn continue-btn" >
                             <Button
                                 block

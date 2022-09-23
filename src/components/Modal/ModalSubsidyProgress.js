@@ -493,7 +493,7 @@ class ModalSubsidyProgress extends React.Component {
                 onClick={()=>{this.schoolAcceptSubsidy(subsidy)}}
                 size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>}
             
-            {subsidy.status == 1 && !subsidy.hierachy && <Button
+            {subsidy.status == 1 && this.props.userRole<61 && subsidy.adminApprovalStatus==0 && <Button
                 onClick={()=>{this.openHierachy(subsidy)}}
                 size='small' type='primary'>{'Hierachi'.toUpperCase()}</Button>}
             
@@ -504,10 +504,14 @@ class ModalSubsidyProgress extends React.Component {
 
     renderButtonsForConsulation(subsidy){
         
-        return (<div className='flex flex-row items-center'>
-            {(this.state.isScheduling||subsidy.consulation == undefined) && <Button 
-                onClick={()=>{this.createConsulation(subsidy)}}
-                size='small' className='mr-10'>Schedule</Button> }
+        return ( <div className='flex flex-row items-center'>
+            <div className='flex flex-row items-center'>
+                            <a className='text-primary'
+                            onClick={()=>{
+                                !!this.props.openReferral&&this.props.openReferral(this.state.subsidy , this.loadLastReferral);
+                            }}
+                            ><FaRegCalendarAlt/>{intl.formatMessage(messages.reSchedule)}</a>
+                        </div>
             
         </div>)
 
@@ -581,8 +585,16 @@ class ModalSubsidyProgress extends React.Component {
 
     renderConsulation = (subsidy) =>{
         const {referral} = this.state;
+        
         if(subsidy.status == 1){
-            
+            if(referral.typeForAppointLocation == undefined|| referral.location == undefined ){
+                return (<div className='consulation-appoint'>
+                    <div className='flex flex-row justify-between'>
+                    <p className='font-20 font-700 mb-10'>{intl.formatMessage(messages.consulationAppointment)}</p>
+                    {this.renderButtonsForConsulation(subsidy)}
+                </div>
+                </div>);
+            }
             return (<div className='consulation-appoint'>
                 {/* <div className='flex flex-row justify-between'>
                 <p className='font-20 font-700 mb-10'>{intl.formatMessage(messages.consulationAppointment)}</p>
@@ -690,7 +702,7 @@ class ModalSubsidyProgress extends React.Component {
                 </Col>
                 <Col xs={24} sm={24} md={14}>
                     <div className='flex flex-row justify-between'>
-                        <p><span className='font-700'>{referral.typeForAppointLocation!=undefined? arrMeetSolution[referral.typeForAppointLocation]:''}</span>: <a>{referral.location}</a></p>
+                        {referral.typeForAppointLocation!=undefined&&<p><span className='font-700'>{ arrMeetSolution[referral.typeForAppointLocation]}</span>: <a>{referral.location}</a></p>}
                         <div className='flex flex-row items-center'>
                             <a className='text-primary'
                             onClick={()=>{
@@ -700,7 +712,7 @@ class ModalSubsidyProgress extends React.Component {
                         </div>
                     </div>
                     <div className='flex flex-row justify-between'>
-                        <p><span className='font-700'>{intl.formatMessage(messages.dateTime)}</span>: {referral.date!=undefined?moment(referral.date).format('YYYY-MM-DD'):'' } | {referral.date!=undefined?moment(referral.date).format('HH:mm A'):'' }</p>
+                        {referral.date!=undefined&&<p><span className='font-700'>{intl.formatMessage(messages.dateTime)}</span>: {moment(referral.date).format('YYYY-MM-DD') } | {referral.date!=undefined?moment(referral.date).format('HH:mm A'):'' }</p>}
                         <p><span className='font-700'>{intl.formatMessage(messages.phone)}</span>: {referral.phoneNumber}</p>
                     </div>
                 </Col>

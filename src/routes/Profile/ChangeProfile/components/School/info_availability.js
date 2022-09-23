@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Row, Col, Form, Button, Input, Select, Segmented, TimePicker, message } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
@@ -19,7 +20,7 @@ import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-class InfoSchool extends React.Component {
+class InfoAvailability extends React.Component {
     constructor(props) {
         super(props);
 
@@ -361,7 +362,7 @@ class InfoSchool extends React.Component {
             <Row justify="center" className="row-form">
                 <div className='col-form col-school'>
                     <div className='div-form-title mb-10'>
-                        <p className='font-30 text-center mb-0'>{intl.formatMessage(messages.schoolDetails)}</p>
+                        <p className='font-30 text-center mb-0'>{intl.formatMessage(messages.schoolAvailability)}</p>
                     </div>
                     <Form
                         name="form_school"
@@ -369,172 +370,47 @@ class InfoSchool extends React.Component {
                         onFinishFailed={this.onFinishFailed}
 
                         ref={(ref) => { this.form = ref }}
-                        initialValues={{
-                            techContactRef: this.state.techContactRef,
-                            studentContactRef: this.state.studentContactRef,
-                        }}
                     >
-                        <Form.Item
-                            name="name"
-                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.nameSchool) }]}
-                        >
-                            <Input
-                                onChange={event => {
-                                    console.log('name', event.target.value)
-                                    this.setReduxForSchool('name', event.target.value)
-                                }}
-                                placeholder={intl.formatMessage(messages.nameSchool)} />
-                        </Form.Item>
-                        <Form.Item
-                            name="communityServed"
-                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.communitiesServed) }]}
-                        >
-                            <Select
-                                onChange={event => {
-                                    console.log('communityServed', event)
-                                    this.setReduxForSchool('communityServed', event)
-                                }}
-                                placeholder={intl.formatMessage(messages.communitiesServedNote)}>
-                                {this.state.listCommunitiServer?.map((item, index) => {
-                                    return (
-                                        <Select.Option key={index} value={item._id}>{item.name}</Select.Option>
-                                    )
-                                })}
-                            </Select>
-                        </Form.Item>
-
-                        <Form.Item
-                            name="valueForContact"
-                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.schoolAddress) }]}
-                        >
-                            {/* <Input placeholder={intl.formatMessage(messages.schoolAddress)} /> */}
-                            <PlacesAutocomplete
-                                value={this.state.address}
-                                onChange={this.handleChange}
-                                onSelect={this.handleSelect}
-                            >
-                                {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-                                    <div>
-                                        <Input {...getInputProps({
-                                            placeholder: intl.formatMessage(messages.schoolAddress),
-                                            className: 'location-search-input',
-                                        })} />
-                                        <div className="autocomplete-dropdown-container">
-                                            {loading && <div>Loading...</div>}
-                                            {suggestions.map(suggestion => {
-                                                const className = suggestion.active
-                                                    ? 'suggestion-item--active'
-                                                    : 'suggestion-item';
-                                                // inline style for demonstration purpose
-                                                const style = suggestion.active
-                                                    ? { backgroundColor: '#fafafa', cursor: 'pointer' }
-                                                    : { backgroundColor: '#ffffff', cursor: 'pointer' };
-                                                return (
-                                                    <div
-                                                        {...getSuggestionItemProps(suggestion, {
-                                                            className,
-                                                            style,
-                                                        })}
-                                                    >
-                                                        <span>{suggestion.description}</span>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
+                        <div className='div-availability'>
+                            <Segmented options={day_week} block={true} onChange={this.onSelectDay} />
+                            {day_week.map((item, index) => {
+                                // index = ++index
+                                return (
+                                    <div className='div-time' style={{
+                                        display: this.state.dayIsSelected === (index + 1) ? 'block' : 'none'
+                                    }}>
+                                        <p className='mb-10 font-700'>{intl.formatMessage(messages.inSchoolHours)}</p>
+                                        <Row gutter={14}>
+                                            <Col xs={24} sm={24} md={12}>
+                                                <TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
+                                                    use12Hours format="h:mm a"
+                                                    placeholder={intl.formatMessage(messages.from)}
+                                                    value={this.valueForAvailabilityScheduleForOpenHour(this.state.sessionsInSchool, index, 'open')}
+                                                />
+                                            </Col>
+                                            <Col xs={24} sm={24} md={12}>
+                                                <TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'inClose')} use12Hours
+                                                    value={this.valueForAvailabilityScheduleForCloseHour(this.state.sessionsInSchool, index, 'close')}
+                                                    format="h:mm a" placeholder={intl.formatMessage(messages.to)} />
+                                            </Col>
+                                        </Row>
+                                        <p className='mb-10 font-700'>{intl.formatMessage(messages.afterSchoolHours)}</p>
+                                        <Row gutter={14}>
+                                            <Col xs={24} sm={24} md={12}>
+                                                <TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')} use12Hours
+                                                    value={this.valueForAvailabilityScheduleForOpenHour(this.state.sessionsAfterSchool, index, 'open')}
+                                                    format="h:mm a" placeholder={intl.formatMessage(messages.from)} />
+                                            </Col>
+                                            <Col xs={24} sm={24} md={12}>
+                                                <TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'afterClose')} use12Hours
+                                                    value={this.valueForAvailabilityScheduleForCloseHour(this.state.sessionsAfterSchool, index, 'close')}
+                                                    format="h:mm a" placeholder={intl.formatMessage(messages.to)} />
+                                            </Col>
+                                        </Row>
                                     </div>
-                                )}
-                            </PlacesAutocomplete>
-                        </Form.Item>
-                        <Form.List name="techContactRef">
-                            {(fields, { add, remove }) => (
-                                <div>
-                                    {fields.map((field, index) => {
-                                        return (
-                                            <div key={field.key} className={field.key !== 0 && 'item-remove'}>
-                                                <Form.Item
-                                                    name={[field.name, index]}
-                                                    rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.technicalReferralContact) }]}
-                                                >
-                                                    <Input
-                                                        onChange={event => {
-                                                            console.log('techContactRef123', field.key, event.target.value)
-                                                            this.onTechContactRefChange();
-                                                        }}
-                                                        placeholder={intl.formatMessage(messages.technicalReferralContact)} />
-                                                </Form.Item>
-                                                {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => {
-
-                                                    remove(field.name)
-                                                    this.onTechContactRefChange();
-                                                }
-                                                } />}
-                                            </div>
-                                        );
-                                    }
-                                    )}
-                                    <div className='text-center'>
-                                        <Button
-                                            type="text"
-                                            className='add-number-btn mb-10'
-                                            icon={<BsPlusCircle size={17} className='mr-5' />}
-                                            onClick={() => {
-                                                add('');
-                                                this.onTechContactRefChange();
-                                            }}
-                                        >
-                                            {intl.formatMessage(messages.addContact)}
-                                        </Button>
-                                    </div>
-                                </div>
-
-                            )}
-
-                        </Form.List>
-
-                        <Form.List name="studentContactRef">
-                            {(fields, { add, remove }) => (
-                                <div>
-                                    {fields.map((field, index) => {
-                                        return (
-                                            <div key={field.key} className={field.key !== 0 && 'item-remove'}>
-                                                <Form.Item
-                                                    name={index}
-                                                    rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.studentReferralContact) }]}
-                                                >
-                                                    <Input
-                                                        value={'xzcmxzncm,nxz,mcnxz,mc'}
-                                                        onChange={event => {
-                                                            this.onStudentContactRefChange();
-                                                        }}
-                                                        placeholder={intl.formatMessage(messages.studentReferralContact)} />
-                                                </Form.Item>
-                                                {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => {
-
-                                                    remove(field.name)
-                                                    this.onStudentContactRefChange();
-                                                }} />}
-                                            </div>
-                                        );
-                                    }
-                                    )}
-                                    <div className='text-center'>
-                                        <Button
-                                            type="text"
-                                            className='add-number-btn mb-10'
-                                            icon={<BsPlusCircle size={17} className='mr-5' />}
-                                            onClick={() => {
-                                                add(null)
-                                                this.onStudentContactRefChange();
-                                            }}
-                                        >
-                                            {intl.formatMessage(messages.addContact)}
-                                        </Button>
-                                    </div>
-                                </div>
-
-                            )}
-
-                        </Form.List>
+                                )
+                            })}
+                        </div>
 
                         <Form.Item className="form-btn continue-btn" >
                             <Button
@@ -560,5 +436,4 @@ const mapStateToProps = state => {
     }
 }
 
-
-export default compose(connect(mapStateToProps, { setRegisterData }))(InfoSchool);
+export default compose(connect(mapStateToProps, { setRegisterData }))(InfoAvailability);

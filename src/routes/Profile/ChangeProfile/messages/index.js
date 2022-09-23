@@ -458,6 +458,7 @@ export default ({
     id: `${scope}.subsidyProgram`,
     defaultMessage: 'Subsidy Program',
   },
+
   offeringVolunteer: {
     id: `${scope}.offeringVolunteer`,
     defaultMessage: 'I’m offering pro bono/volunteer sessions',
@@ -482,7 +483,7 @@ export default ({
     id: `${scope}.selectDateTime`,
     defaultMessage: 'Select a Date & Time',
   },
-  timesAvailable : {
+  timesAvailable: {
     id: `${scope}.timesAvailable`,
     defaultMessage: 'times you\'re available',
   },
@@ -517,6 +518,10 @@ export default ({
   schoolDetails: {
     id: `${scope}.schoolDetails`,
     defaultMessage: 'School details',
+  },
+  schoolAvailability: {
+    id: `${scope}.schoolAvailability`,
+    defaultMessage: 'School availability',
   },
   nameSchool: {
     id: `${scope}.nameSchool`,
@@ -602,5 +607,9 @@ export default ({
     id: `${scope}.passwordMessage`,
     defaultMessage: 'Please enter your password.',
   },
-  
+  dayWork: {
+    id: `${scope}.dayWork`,
+    defaultMessage: 'Day work',
+  }
+
 });

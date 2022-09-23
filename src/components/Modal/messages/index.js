@@ -225,4 +225,8 @@ export default {
     id: `${scope}.review`,
     defaultMessage: 'Review',
   },
+  save: {
+    id: `${scope}.save`,
+    defaultMessage: 'Save',
+  },
 };

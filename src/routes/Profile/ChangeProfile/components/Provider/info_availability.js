@@ -70,17 +70,12 @@ class InfoAvailability extends Component {
             day_week.map((day, index) => {
                 console.log('day', day)
                 console.log(index);
-                console.log(data.manualSchedule, 'data.manualSchedule[index].startTime');
-                const from_time = 
-                this.form.setFieldsValue({
-                    day: data.manualSchedule
-                })
+                console.log(data.manualSchedule, `data.manualSchedule[${index}].startTime`);
             })
 
         }).catch(err => {
             console.log(err)
         })
-
         this.getDataFromServer();
     }
 

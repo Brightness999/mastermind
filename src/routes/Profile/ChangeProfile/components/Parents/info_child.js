@@ -80,6 +80,7 @@ class InfoChild extends Component {
                 }
             }).then(result => {
                 let { success, data } = result.data;
+                console.log('adta', data)
                 if (success) {
                     data = data.map(item => {
                         return {

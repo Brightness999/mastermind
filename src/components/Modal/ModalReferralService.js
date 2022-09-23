@@ -82,7 +82,7 @@ class ModalReferralService extends React.Component {
 
     loadDataForReferralFromSubsidy = (subsidy , callback) =>{
         this.loadDefaultData();
-        if(subsidy != undefined){
+        if(subsidy != undefined && subsidy.student!=undefined && subsidy.student._id!=undefined){
             console.log('subsidy',subsidy)
             this.setState({
                 subsidyId: subsidy._id,
@@ -278,7 +278,7 @@ class ModalReferralService extends React.Component {
                         <p className='font-30'>{intl.formatMessage(messages.referralService)}</p>
                         <img src='../images/hands.jpeg' className='hands-img'/>
                     </div>
-                    <Row gutter={20} className='mb-20' align="bottom">
+                    <Row gutter={20} className='mb-10' align="bottom">
                         <Col xs={24} sm={24} md={8} className='select-small'>
                             <p className='font-16 mb-5'>{intl.formatMessage(messages.selectOptions)}</p>
                             <Select
@@ -318,7 +318,7 @@ class ModalReferralService extends React.Component {
 
                     <Row gutter={20} className='mb-20' align="bottom">
                         <Col xs={24} sm={24} md={8} >
-                            <div >{intl.formatMessage(messages.subsidyOnly)}<Switch size="small" defaultChecked /></div>
+                            <div >{intl.formatMessage(messages.subsidyOnly)}<Switch size="small" defaultChecked className='ml-10'/></div>
                             
                         </Col>
                         <Col xs={24} sm={24} md={8} className='select-small'>
@@ -332,7 +332,7 @@ class ModalReferralService extends React.Component {
                             </Select>
                         </Col>
                         <Col xs={24} sm={24} md={8}>
-                            <div className='flex flex-row items-center mb-5'>
+                            <div className='flex flex-row items-center'>
                             <Input 
                             value={this.state.meetLocation}
                             onChange={v=>{this.setState({meetLocation:v.target.value})}}
@@ -346,7 +346,7 @@ class ModalReferralService extends React.Component {
                         <Col xs={24} sm={24} md={8}>
                             <div className='provider-profile'>
                                 <p className='font-14 font-700'>{intl.formatMessage(messages.additionalDocuments)}</p>
-                                <div className='upload-document flex-1'>
+                                <div className='upload-document flex-1 mb-10'>
                                     <Upload {...props}>
                                         <Button size='small' type='primary' className='btn-upload'>
                                             {intl.formatMessage(msgRequest.upload).toUpperCase()} <BiUpload size={16}/>

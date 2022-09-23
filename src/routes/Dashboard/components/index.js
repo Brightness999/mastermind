@@ -398,7 +398,7 @@ export default class extends React.Component {
 
   openHierachyModal = (subsidy, callbackAfterChanged) => {
     this.setState({ visibleNewGroup: true });
-    this.loadDataModalNewGroup(subsidy, callbackAfterChanged);
+    !!this.loadDataModalNewGroup&& this.loadDataModalNewGroup(subsidy, callbackAfterChanged);
   }
 
   onShowModalReferral = (subsidy , callbackForReload  ) => {
@@ -1030,6 +1030,7 @@ export default class extends React.Component {
 
         {this.modalCreateAndEditSubsidyRequest()}
         <ModalNewGroup {...modalNewGroupProps}
+          SkillSet={this.state.SkillSet}
           setLoadData={reload => {
             this.loadDataModalNewGroup = reload;
           }}

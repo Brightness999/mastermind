@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Button, Input } from 'antd';
-import {  Form,  Select } from 'antd';
+import { Modal, Button, Input , List , message} from 'antd';
 import { BsPlus } from 'react-icons/bs';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend}  from 'react-dnd-html5-backend';
@@ -12,6 +11,7 @@ import './style/index.less';
 import '../../assets/styles/login.less';
 import request,{generateSearchStructure} from '../../utils/api/request'
 import {url , switchPathWithRole} from '../../utils/api/baseUrl'
+import ReactDragListView from "react-drag-listview";
 
 class ModalNewGroup extends React.Component {
 
@@ -21,157 +21,148 @@ class ModalNewGroup extends React.Component {
             data: [
                 
             ],
-            listHierachy:[],
+            arrListOrderPosition:[],
             show: false,
-            droppedBoxNames: [],
-            schoolId: '',
-            subsidyId:'',
+            droppedBoxNames: []
         }
     }
 
     componentDidMount = () =>{
-        this.props.setLoadData( this.loadAllMyHierachy );
+        this.props.setLoadData(this.loadListHierachyForSchool);
     }
 
-    loadAllMyHierachy = (subsidy, callbackAfterChanged) =>{
-        this.callbackWhenFinished = callbackAfterChanged
-        this.setState({schoolId:subsidy.school._id , subsidyId: subsidy._id});
-        request.post('schools/get_all_hierachy' , {schoolId:subsidy.school._id}).then(result=>{
-            console.log('get_all_hierachy', result);
+    loadListHierachyForSchool = () =>{
+        this.setState({data:[],arrListOrderPosition:[]});
+        request.post('schools/get_all_sub_order_by_hierachy',{}).then(result=>{
             if(result.success){
-                this.setState({listHierachy:result.data});
-            }else{
-                this.setState({listHierachy:[]});
+                var arr = [];
+                for(var i = 0 ;i < result.data.length ; i++){
+                    arr.push(result.data[i].orderPosition);
+                }
+                console.log('old order',arr);
+                this.setState({data: result.data , arrListOrderPosition:arr});
+
             }
-            
-        }).catch(err=>{
-            console.log(err)
-            this.setState({listHierachy:[]});
         })
+        
     }
-
-    submitForm = () =>{
-
-        if(!!this.form.getFieldValue('name')&&this.form.getFieldValue('name').length > 0){
-            this.createHierachy(this.form.getFieldValue('name') , this.state.schoolId);
-            return;
-        }
-
-        if(!!this.form.getFieldValue('selectedHierachy') && this.form.getFieldValue('selectedHierachy').length > 0){
-            this.addHierachyToSubsidy(this.state.subsidyId , this.form.getFieldValue('selectedHierachy'));
-            return;
-        }
-
-        this.form.setFields([{
-            name: 'name',
-            errors: ['please enter new name or select a hierachy '],
-        }])
-    }
-
-    createHierachy = (name , schoolId) =>{
-        request.post('schools/create_hierachy' , {name: name,schoolId:schoolId}).then(result=>{
-            console.log('create_hierachy' , result);
-            if(result.success){
-                this.addHierachyToSubsidy(this.state.subsidyId , result.data._id);
-                this.props.onCancel();
-            }else{
-                this.props.onCancel();
-            }
-        }).catch(err=>{
-            this.props.onCancel();
-        })
-    }
-
-    addHierachyToSubsidy = (subsidyId, hierachyId) => {
-        request.post('schools/change_hierachy' , {subsidyId: subsidyId,hierachyId:hierachyId}).then(result=>{
-            console.log('change_hierachy' , result);
-            if(result.success){
-                this.callbackWhenFinished(hierachyId);
-            }else{
-                this.props.onCancel();
-            }
-        }).catch(err=>{
-            this.props.onCancel();
-        })
-    }
-
 
     onDragEnd = (fromIndex, toIndex) => {
-        if (toIndex < 0) return;
+        if (toIndex < 0) return; // Ignores if outside designated area
+    
         const items = [...this.state.data];
+        
         const item = items.splice(fromIndex, 1)[0];
         items.splice(toIndex, 0, item);
         this.setState({ data: items });
     };
+    // onDragEnd = (fromIndex, toIndex) => {
+    //     if (toIndex < 0) return;
+    //     const items = [...this.state.data];
+    //     const item = items.splice(fromIndex, 1)[0];
+    //     items.splice(toIndex, 0, item);
+    //     this.setState({ data: items });
+    // };
 
-    isDropped = (id) => {
-        return this.state.droppedBoxNames.indexOf(id) > -1;
+    // isDropped = (id) => {
+    //     console.log('dropped item');
+    //     return this.state.droppedBoxNames.indexOf(id) > -1;
+    // }
+
+    getProviderNames =(item)=>{
+        var name = '';
+        for(var i = 0 ; i < item.providers.length;i++){
+            name += item.providers[i].referredToAs??item.providers[i].name + ' ';
+        }
+        return name;
     }
 
-    render = () => {
-        const {listHierachy} = this.state;
+    saveOrderForSubsidaries = ()=>{
+        var list = [];
+        for(var i = 0 ; i< this.state.data.length; i++){
+            list.push({_id: this.state.data[i]._id , orderPosition:this.state.arrListOrderPosition[i]  });
+        }
+        console.log(list);
+        request.post('schools/sort_subsidary_by_hierachy' ,{orderedList: list}).then(result=>{
+            if(result.success){
+                message.success('Saved successfully ')
+                this.props.onCancel();
+            }else{
+                message.error('Cannot save hierachy');
+            }
+            
+        }).catch(err=>{
+            message.error('Cannot save hierachy');
+        })
+    }
+
+    renderListItem(item,index){
+        return (
+            <List.Item
+            className="draggble" 
+                >
+                    <div className='item-drag'  data-testid={`box`}>
+                <p className='font-500 mb-5'>Name: {item.student.firstName} {item.student.lastName}</p>
+                <p className='font-500 mb-5'>Skill: {this.props.SkillSet[item.skillSet]}</p>
+                <p className='font-500 mb-5'>Provider: {this.getProviderNames(item)}</p>
+            </div>
+            </List.Item>
+            
+        )
+    }
+
+
+    render =()=> {
+
         const modalProps = {
             className: 'modal-new-group',
             title: "Create New Group",
             visible: this.props.visible,
+            onOk: this.props.onSubmit,
+            onCancel: this.props.onCancel,
             closable: false,
             // width: 900,
             footer: [
-                // <Button key="back" onClick={this.props.onCancel}>
-                //     {intl.formatMessage(messages.cancel)}
-                // </Button>,
-                // <Button key="submit" type="primary" onClick={this.submitForm}>
-                //     Add to this hierachy
-                // </Button>
+                <Button key="back" onClick={this.props.onCancel}>
+                    {intl.formatMessage(messages.cancel)}
+                </Button>,
+                <Button key="submit" type="primary" onClick={this.saveOrderForSubsidaries}>
+                    {intl.formatMessage(messages.save)}
+                </Button>
             ]
         };
 
         const inputChangeGroup = (
             <div className='div-new-group'>
                 <BsPlus size={24} style={{ verticalAlign: 'bottom' }} />
-                <span className='font-500 font-16 mb-0'>Create new group</span>
+                <span className='font-500 font-16 mb-0'>Hierachy for your subsidaries:</span>
             </div>
         )
-        const that = this;
 
         return (
             <Modal {...modalProps}>
-                <div className='col-form col-subsidy mt-0'>
-                <Form
-                            name="formHierachy"
-                            ref={ref => this.form = ref}
-                        >
-                    <Form.Item name="name">
-                    <Input size="small" placeholder='Enter new hierachy' />
-                            </Form.Item>
-                            <Form.Item name="selectedHierachy"
-                                
-                            >
-                                <Select placeholder='Choose existing hierachy'>
-                                    {!!listHierachy&&listHierachy.length>0&& listHierachy.map((item, index) => {
-                                        return (
-                                            <Select.Option key={index} value={item._id}>{item.name}</Select.Option>
-                                        )
-                                    })}
-                                    
-                                </Select>
-                            </Form.Item>
-                            <Form.Item name="buttons">
-                            <Button key="back" onClick={this.props.onCancel}>
-                    {intl.formatMessage(messages.cancel)}
-                </Button>,
-                <Button key="submit" type="primary" onClick={this.submitForm}>
-                    Add to this hierachy
-                </Button>
-                            </Form.Item>
-                </Form>
-                </div>
+                <ReactDragListView
+                nodeSelector=".ant-list-item.draggble"
+                onDragEnd={this.onDragEnd}
+                >
+                <List
+                    size="small"
+                    bordered
+                    dataSource={this.state.data}
+                    renderItem={(item,index) => {
+                    const draggble =
+                        item !== "Racing car sprays burning fuel into crowd.";
+                    return this.renderListItem(item,index);
+                    }}
+                />
+                </ReactDragListView>
+                
                 {/* <p className='font-12 text-center'>Drag & drop the item to create new group</p>
                 <DndProvider backend={HTML5Backend}>
                     <div>
-                        <div style={{ overflow: 'hidden', clear: 'both' }}>
+                         <div style={{ overflow: 'hidden', clear: 'both' }}>
                             <BoxChange />
-                        </div>
+                        </div> 
                         <div style={{ overflow: 'hidden', clear: 'both' }}>
                             {this.state.data.map((item, index) => <Item name={item.name} isDropped={this.isDropped(item.id)} key={index}/>
                             )}
@@ -179,6 +170,7 @@ class ModalNewGroup extends React.Component {
                         </div>
                     </div>
                 </DndProvider> */}
+
             </Modal>
         );
     }
