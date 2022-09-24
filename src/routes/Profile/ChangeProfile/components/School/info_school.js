@@ -16,6 +16,9 @@ import axios from 'axios';
 import { url } from '../../../../../utils/api/baseUrl';
 import { getCommunitiServer } from '../../../../../utils/api/apiList'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import { setInforSchool } from '../../../../../redux/features/authSlice';
+import { store } from '../../../../../redux/store'
+
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
@@ -51,9 +54,6 @@ class InfoSchool extends React.Component {
             this.form.setFieldsValue({
                 ...data
             })
-
-            console.log(data.communityServed);
-
             this.setState({
                 sessionsInSchool: data.sessionsInSchool,
                 sessionsAfterSchool: data.sessionsAfterSchool,
@@ -340,6 +340,22 @@ class InfoSchool extends React.Component {
         this.setReduxForSchool('studentContactRef', contactRefs);
     }
 
+    updateProfile = async () => {
+        const token = localStorage.getItem('token');
+        const values = await this.form.validateFields();
+        const { user } = this.props.auth
+
+        const { schoolInfo } = user
+
+        const dataForm = { ...values, _id: schoolInfo }
+
+        try {
+            store.dispatch(setInforSchool({ data: dataForm, token }))
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     render() {
         console.log(this.props.auth.authData, 'state')
         const day_week = [
@@ -369,10 +385,6 @@ class InfoSchool extends React.Component {
                         onFinishFailed={this.onFinishFailed}
 
                         ref={(ref) => { this.form = ref }}
-                        initialValues={{
-                            techContactRef: this.state.techContactRef,
-                            studentContactRef: this.state.studentContactRef,
-                        }}
                     >
                         <Form.Item
                             name="name"
@@ -452,7 +464,7 @@ class InfoSchool extends React.Component {
                                         return (
                                             <div key={field.key} className={field.key !== 0 && 'item-remove'}>
                                                 <Form.Item
-                                                    name={[field.name, index]}
+                                                    name={index}
                                                     rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.technicalReferralContact) }]}
                                                 >
                                                     <Input
@@ -541,7 +553,7 @@ class InfoSchool extends React.Component {
                                 block
                                 type="primary"
                                 htmlType="submit"
-
+                                onClick={this.updateProfile}
                             >
                                 {intl.formatMessage(messages.update).toUpperCase()}
                             </Button>

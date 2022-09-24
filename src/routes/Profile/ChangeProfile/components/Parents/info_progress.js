@@ -104,6 +104,25 @@ class InfoProgress extends Component {
         return this.props.onContinue();
     }
 
+    updateProfile(index) {
+        updateProfile = async (index) => {
+            const token = localStorage.getItem('token');
+            const values = await this.form.validateFields();
+            const dataForm = values.children[index];
+            const dataChangeFrom = this.state.dataChange ?? [];
+
+            try {
+                store.dispatch(setInforClientChild({ data: dataForm, token: token }))
+                if (dataChangeFrom.length != 0) {
+                    this.props.changeInforClientChild(dataChangeFrom)
+                }
+            } catch (error) {
+                console.log(error, 'error')
+            }
+
+        }
+    }
+
     logForAvailbitiyArr = () => {
         // console.log('submitting' , this.form.getFieldsValue());
         for (var i = 0; i < this.state.studentInfos.length; i++) {

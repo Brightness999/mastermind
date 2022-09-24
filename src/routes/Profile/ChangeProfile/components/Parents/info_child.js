@@ -141,11 +141,12 @@ class InfoChild extends Component {
 
 
     updateReduxValueFor1Depedent(index, fieldName, value) {
-        const { authDataClientChild } = this.props.auth;
-        var studentInfos = [...authDataClientChild]
-        var selectedObj = { ...studentInfos[index] };
-        selectedObj[fieldName] = value;
-        studentInfos[index] = selectedObj;
+        console.log('updateReduxValueFor1Depedent', index, fieldName, value);
+        // const { authDataClientChild } = this.props.auth;
+        // var studentInfos = [...authDataClientChild]
+        // var selectedObj = { ...studentInfos[index] };
+        // selectedObj[fieldName] = value;
+        // studentInfos[index] = selectedObj;
         // this.props.setRegisterData({ studentInfos: studentInfos });
     }
 
@@ -165,6 +166,8 @@ class InfoChild extends Component {
         const values = await this.form.validateFields();
         const dataForm = values.children[index];
         const dataChangeFrom = this.state.dataChange ?? [];
+
+        console.log('dataForm', dataChangeFrom);
 
         try {
             store.dispatch(setInforClientChild({ data: dataForm, token: token }))

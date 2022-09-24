@@ -55,4 +55,17 @@ export function generateSearchStructure(search = "" ,filter = {} , page= 1 , lim
     }
 }
 
+export function generateSearchStructureWithPopulateSearch(search = "" ,filter = {} , page= 1 , limit=10 , populate = [] , isNestedQuery =false) {
+    return {
+        "data":{
+            "search":search,
+            "filter":filter,
+            "page":page,
+            "limit":limit,
+            "populate":populate,
+            "isNestedQuery": isNestedQuery
+        }
+    }
+}
+
 export default instance;

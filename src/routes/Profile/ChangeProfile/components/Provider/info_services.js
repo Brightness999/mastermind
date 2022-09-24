@@ -13,11 +13,17 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
+import { store } from '../../../../../redux/store';
+import { setInforProvider } from '../../../../../redux/features/authSlice';
 import axios from 'axios';
 
 class InfoServices extends Component {
     constructor(props) {
         super(props);
+
+        console.log(props, 'props')
+
+
         this.state = {
             levels: [
                 { level: "Dependent 1" },
@@ -223,6 +229,22 @@ class InfoServices extends Component {
             });
         })
 
+    }
+
+    updateProfile = async () => {
+        const { user } = this.props.auth;
+        const { parentInfo } = user
+
+        const token = localStorage.getItem('token');
+        const values = await this.form.validateFields();
+
+        const dataFrom = { ...values, _id: parentInfo }
+        try {
+            store.dispatch(setInforClientParent({ data: dataFrom, token: token }))
+            //this.props.changeInforClientParent(dataFrom)
+        } catch (error) {
+            console.log(error, 'error')
+        }
     }
 
     render() {

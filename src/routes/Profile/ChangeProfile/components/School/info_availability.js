@@ -20,6 +20,7 @@ import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
+
 class InfoAvailability extends React.Component {
     constructor(props) {
         super(props);
@@ -52,14 +53,9 @@ class InfoAvailability extends React.Component {
             this.form.setFieldsValue({
                 ...data
             })
-
-            console.log(data.communityServed);
-
             this.setState({
                 sessionsInSchool: data.sessionsInSchool,
                 sessionsAfterSchool: data.sessionsAfterSchool,
-                techContactRef: data.techContactRef,
-                studentContactRef: data.studentContactRef,
             })
         })
 
@@ -417,7 +413,6 @@ class InfoAvailability extends React.Component {
                                 block
                                 type="primary"
                                 htmlType="submit"
-
                             >
                                 {intl.formatMessage(messages.update).toUpperCase()}
                             </Button>

@@ -101,13 +101,17 @@ class InfoParent extends Component {
         this.setState({ dataChange: allValueChange.children })
     }
     updateProfile = async () => {
-        const { authDataClientParent } = this.props.auth;
+        const { user } = this.props.auth;
+        const { parentInfo } = user
+
+
         const token = localStorage.getItem('token');
         const values = await this.form.validateFields();
-        const dataFrom = { ...values, id: authDataClientParent.id }
+
+        const dataFrom = { ...values, _id: parentInfo }
         try {
             store.dispatch(setInforClientParent({ data: dataFrom, token: token }))
-            this.props.changeInforClientParent(dataFrom)
+            //this.props.changeInforClientParent(dataFrom)
         } catch (error) {
             console.log(error, 'error')
         }

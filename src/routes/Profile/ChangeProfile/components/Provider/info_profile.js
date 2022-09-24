@@ -15,7 +15,11 @@ import { setInforProvider, changeInfor } from '../../../../../redux/features/aut
 import { store } from '../../../../../redux/store'
 class InfoProfile extends Component {
     constructor(props) {
+
         super(props);
+
+        console.log('props', props);
+
         this.state = {
             dataForm: [],
             phone_contact: [
@@ -133,6 +137,10 @@ class InfoProfile extends Component {
     updateProfile = async () => {
         const { dataForm } = this.state
         const { authData } = this.props
+
+        console.log('dataForm', this.props);
+        return
+
         const token = localStorage.getItem('token');
         const values = await this.form.validateFields();
         const valuesForm = { ...values, id: authData.id }
