@@ -68,7 +68,7 @@ class InfoChild extends Component {
         }
 
         var newChild = this.getDefaultChildObj(registerData.parentInfo);
-        var studentInfos = !!registerData.studentInfos ? JSON.parse(JSON.stringify(registerData.studentInfos)) : [newChild, newChild, newChild];
+        var studentInfos = !!registerData.studentInfos ? JSON.parse(JSON.stringify(registerData.studentInfos)) : [ newChild];
 
 
         if (!registerData.studentInfos) {

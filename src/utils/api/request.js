@@ -35,13 +35,7 @@ instance.interceptors.response.use((response) => {
     
     return response.data;
 }, error => {
-    console.warn('Error status', error.response.status)
-    // return Promise.reject(error)
-    if (error.response) {
-        return error.response.data
-    } else {
-        return Promise.reject(error)
-    }
+    return Promise.reject(error)
 })
 
 export function generateSearchStructure(search = "" ,filter = {} , page= 1 , limit=10){

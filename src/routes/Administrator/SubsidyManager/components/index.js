@@ -83,11 +83,11 @@ export default class extends React.Component {
       }
 
       if(this.state.filterStatus!=undefined){
-        postData['filterStatus'] = this.state.filterStatus;
+        postData['filterStatus'] = parseInt( this.state.filterStatus );
         
       }
       if(this.state.filterGrade!=undefined){
-        postData['filterGrade'] = this.state.filterGrade;
+        postData['filterGrade'] = parseInt( this.state.filterGrade );
         
       }
       
@@ -123,6 +123,7 @@ export default class extends React.Component {
   }
 
   clearFilter = () => {
+    this.form.resetFields();
     this.setState({
       filterSchool: "",
       filterStudent: "",
@@ -268,7 +269,9 @@ export default class extends React.Component {
         </div>
         <Row >
           <Col xs={24} sm={24} md={20} lg={18} xl={12} className='col-form col-subsidy-manager'>
-            <Form name="form_subsidy">
+            <Form name="form_subsidy"
+            ref={ref=>{this.form=ref;}}
+            >
               <Row gutter={10}>
                 <Col span={12}>
                   <Form.Item name="student_name">

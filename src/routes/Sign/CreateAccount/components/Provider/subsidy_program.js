@@ -117,14 +117,32 @@ class SubsidyProgram extends Component {
     }
     onFinish =async (values) => {
         console.log('Success:', values);
+        var privateCalendars = this.convertCalendarToArray();
+        if(!!this.form.getFieldError('checkAllFields')){
+            this.form.setFields([
+                {
+                  name: 'checkAllFields',
+                  errors: [],
+                },])
+        }
+        if(!privateCalendars||privateCalendars <1){
+            this.form.setFields([
+                {
+                  name: 'checkAllFields',
+                  errors: ['Please choose value for calendars'],
+                },])
+            return;
+        }
+        return;
         const {registerData} = this.props.register;
         console.log('prop',registerData);
 
         var postData = this.copyField(registerData);
-        postData.privateCalendars = this.convertCalendarToArray();
+        postData.privateCalendars = privateCalendars;
         // postData.contactNumber = this.validDateContactPhoneNumber(registerData.profileInfor);
         // postData.contactEmail = this.validDataContactEmail(registerData.profileInfor);
         // 
+        
         console.log(postData);
         
         const response = await axios.post(url + 'users/signup', postData);
@@ -571,7 +589,9 @@ class SubsidyProgram extends Component {
                             </div>
                         </div>
 
-                        <Form.Item className="form-btn continue-btn" >
+                        <Form.Item 
+                        name="checkAllFields"
+                        className="form-btn continue-btn" >
                             <Button
                                 block
                                 type="primary"
