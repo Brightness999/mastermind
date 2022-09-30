@@ -14,7 +14,7 @@ import {
   Checkbox,
   Select,
   message,
-  notification 
+  notification
 } from 'antd';
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
@@ -49,8 +49,6 @@ import EventDetail from './EventDetail';
 import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 const { Panel } = Collapse;
-const { TabPane } = Tabs;
-
 
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request, { generateSearchStructure } from '../../../utils/api/request'
@@ -59,10 +57,10 @@ import moment from 'moment';
 import { changeTime, getAppointmentsMonthData, removeAppoint } from '../../../redux/features/appointmentsSlice'
 import { store } from '../../../redux/store'
 
-
 import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
+import Item from 'antd/lib/list/Item';
 
 export default class extends React.Component {
   constructor(props) {
@@ -113,7 +111,6 @@ export default class extends React.Component {
           token: loginData.token
         }
 
-
         // const newAppointments = 
         this.setState({
           calendarEvents: appointmentsMonth,
@@ -146,8 +143,6 @@ export default class extends React.Component {
     })
   }
 
-
-
   scriptLoaded = () => {
     let opts = {
       query: {
@@ -177,66 +172,65 @@ export default class extends React.Component {
     this.socket.on('disconnect', e => {
       console.log('socket disconnect', e);
     });
-
   }
 
-  showNotificationForSubsidy(data){
+  showNotificationForSubsidy(data) {
     notification.open({
       message: 'You have new Subsidy',
-      duration:10,
+      duration: 10,
       description:
         'A parent has sent 1 subsidy request, press for view.',
       onClick: () => {
         console.log('Notification Clicked!');
-        this.onShowModalSubsidy(data.data._id );
+        this.onShowModalSubsidy(data.data._id);
       },
     });
   }
 
-  showNotificationForSubsidyChange(data){
+  showNotificationForSubsidyChange(data) {
     notification.open({
       message: 'Subsidy Status changed',
-      duration:10,
+      duration: 10,
       description:
         'Press for check subsidy progress.',
       onClick: () => {
         console.log('Notification Clicked!');
-        this.onShowModalSubsidy(data );
+        this.onShowModalSubsidy(data);
       },
     });
   }
 
-  showNotificationForAppeal(data){
+  showNotificationForAppeal(data) {
     notification.open({
       message: 'Subsidy Appeal',
       description:
         '1 user has sent appeal for Subsidy.',
-      duration:10,
+      duration: 10,
       onClick: () => {
         console.log('Notification Clicked!');
-        this.onShowModalSubsidy(data );
+        this.onShowModalSubsidy(data);
       },
     });
   }
 
-  handleSocketResult(data){
-    switch(data.key){
+  handleSocketResult(data) {
+    switch (data.key) {
       case 'new_appoint_from_client':
         this.setState({ visibleDetailPost: true, });
         return;
       case 'new_subsidy_request_from_client':
         this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
         return;
-        case 'new_subsidy_request_from_client':
-          this.panelSubsidariesReload&&typeof this.panelSubsidariesReload == 'function'&&this.panelSubsidariesReload(true)
-          this.showNotificationForSubsidy(data);
-          return;
-      case  'subsidy_change_status':
-        this.panelSubsidariesReload&&typeof this.panelSubsidariesReload == 'function'&&this.panelSubsidariesReload(true)
+      case 'new_subsidy_request_from_client':
+        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
+        this.showNotificationForSubsidy(data);
+        return;
+      case 'subsidy_change_status':
+        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
         this.showNotificationForSubsidyChange(data.data);
         return;
-        case 'appeal_subsidy':
-          return;
+      case 'appeal_subsidy':
+        return;
     }
   }
 
@@ -287,22 +281,21 @@ export default class extends React.Component {
     })
   }
 
-  loadDependentForSchool = () =>{
-    request.post('schools/get_my_dependents').then(result=>{
-      if(result.success){
-        this.setState({listDependents:result.data})
+  loadDependentForSchool = () => {
+    request.post('schools/get_my_dependents').then(result => {
+      if (result.success) {
+        this.setState({ listDependents: result.data })
       }
-        
     })
   }
 
-  loadMyProviderInfo = ()=>{
-    request.post('providers/get_my_provider_info').then(result=>{
-        var data = result.data;
-        console.log('get_my_provider_info',data);
-    
-        this.setState({providerInfo:data})
-        this.joinRoom(data._id);
+  loadMyProviderInfo = () => {
+    request.post('providers/get_my_provider_info').then(result => {
+      var data = result.data;
+      console.log('get_my_provider_info', data);
+
+      this.setState({ providerInfo: data })
+      this.joinRoom(data._id);
     })
   }
 
@@ -321,8 +314,6 @@ export default class extends React.Component {
     return (<ModalNewAppointmentForParents {...modalNewAppointProps} />);
     // <ModalNewAppointment {...modalNewAppointProps} />
   }
-
-
 
   modalCreateAndEditSubsidyRequest = () => {
 
@@ -371,6 +362,7 @@ export default class extends React.Component {
   onCloseModalNewAppoint = () => {
     this.setState({ visibleNewAppoint: false });
   };
+
   onSubmitModalNewAppoint = () => {
     this.setState({ visibleNewAppoint: false });
     message.success({
@@ -378,50 +370,49 @@ export default class extends React.Component {
       className: 'popup-scheduled',
     });
   };
+
   onShowModalSubsidy = (subsidyId) => {
     this.setState({ visibleSubsidy: true });
     this.reloadModalSubsidyDetail(subsidyId);
   };
 
-  onCancelSubsidy = () => {
-
-  }
+  onCancelSubsidy = () => { }
 
   onCloseModalSubsidy = () => {
     this.setState({ visibleSubsidy: false });
-
   };
+
   onSubmitModalSubsidy = () => {
     this.setState({ visibleSubsidy: false });
-    // 
   };
 
   openHierachyModal = (subsidy, callbackAfterChanged) => {
     this.setState({ visibleNewGroup: true });
-    !!this.loadDataModalNewGroup&& this.loadDataModalNewGroup(subsidy, callbackAfterChanged);
+    !!this.loadDataModalNewGroup && this.loadDataModalNewGroup(subsidy, callbackAfterChanged);
   }
 
-  onShowModalReferral = (subsidy , callbackForReload  ) => {
+  onShowModalReferral = (subsidy, callbackForReload) => {
     this.setState({ visiblReferralService: true });
-    if(callbackForReload == undefined){
+    if (callbackForReload == undefined) {
       callbackForReload = this.panelAppoimentsReload;
     }
-    !!this.loadDataModalReferral&&this.loadDataModalReferral(subsidy , callbackForReload);
+    !!this.loadDataModalReferral && this.loadDataModalReferral(subsidy, callbackForReload);
   };
 
   onCloseModalReferral = () => {
     this.setState({ visiblReferralService: false });
   };
+
   onShowModalNewSubsidy = () => {
     this.setState({ visibleNewSubsidy: true });
     this.openNewSubsidyRequest();
   };
 
-
   onSubmitModalNewSubsidy = () => {
     this.setState({ visibleNewSubsidy: false });
     this.setState({ visibleNewReview: true });
   };
+
   onCloseModalNewSubsidy = (isNeedReload) => {
     this.setState({ visibleNewSubsidy: false });
     !!this.panelSubsidariesReload && this.panelSubsidariesReload(isNeedReload);
@@ -430,6 +421,7 @@ export default class extends React.Component {
   onSubmitModalNewReview = () => {
     this.setState({ visibleNewReview: false });
   };
+
   onCloseModalNewReview = () => {
     this.setState({ visibleNewReview: false });
     this.setState({ visibleNewSubsidy: true });
@@ -438,6 +430,7 @@ export default class extends React.Component {
   onShowModalGroup = () => {
     this.setState({ visibleNewGroup: true });
   }
+
   onCloseModalGroup = () => {
     this.setState({ visibleNewGroup: false });
   }
@@ -488,10 +481,10 @@ export default class extends React.Component {
       }, true) // temporary=true, will get overwritten when reducer gives new events
     }
   }
+
   handleEventClick = (val) => {
     if (val?.event) {
       const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : 0
-
       this.setState({
         isEventDetail: !this.state.isEventDetail,
         idEvent: id
@@ -502,10 +495,7 @@ export default class extends React.Component {
         // calendarEvents: val.data
       });
     }
-
   }
-
-
 
   handleEventAdd = (addInfo) => {
     this.props.createEvent(addInfo.event.toPlainObject())
@@ -552,19 +542,16 @@ export default class extends React.Component {
       } else {
         this.setState({ listAppoinmentsRecent: [] });
       }
-
     })
-
   }
 
   onCollapseChange = (v => {
-
     if (v.length > 0 && v[v.length - 1] == 6) {
       this.panelSubsidariesReload && this.panelSubsidariesReload();
     }
   })
 
-  renderModalSubsidyDetail =()=>{
+  renderModalSubsidyDetail = () => {
     const modalSubsidyProps = {
       visible: this.state.visibleSubsidy,
       onSubmit: this.onCloseModalSubsidy,
@@ -574,23 +561,23 @@ export default class extends React.Component {
       setOpennedEvent={(reload) => { this.reloadModalSubsidyDetail = reload }}
       userRole={this.state.userRole}
       SkillSet={this.state.SkillSet}
-      openReferral= {this.onShowModalReferral}
+      openReferral={this.onShowModalReferral}
       openHierachy={this.openHierachyModal}
     />)
   }
 
   renderListAppoinmentsRecent = (appoinment, index) => {
-
-    return (<div key={index} className={appoinment.status == -1 || appoinment.status == 2 ? 'item-feed done' : 'item-feed'}>
-      <p className='font-700'>{appoinment.dependent.firstName} {appoinment.dependent.lastName}</p>
-      {appoinment.provider!=undefined&&<p>{appoinment.provider.name||appoinment.provider.referredToAs}</p>}
-      {appoinment.school!=undefined&&<p>{appoinment.school.name}</p>}
-      <p>{appoinment.location}</p>
-      <p>{moment(appoinment.date).format('hh:mm a')}</p>
-      <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{moment(appoinment.date).fromNow()}</p>
-    </div>);
+    return (
+      <div key={index} className={appoinment.status == -1 || appoinment.status == 2 ? 'item-feed done' : 'item-feed'}>
+        <p className='font-700'>{appoinment.dependent.firstName} {appoinment.dependent.lastName}</p>
+        {appoinment.provider != undefined && <p>{appoinment.provider.name || appoinment.provider.referredToAs}</p>}
+        {appoinment.school != undefined && <p>{appoinment.school.name}</p>}
+        <p>{appoinment.location}</p>
+        <p>{moment(appoinment.date).format('hh:mm a')}</p>
+        <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{moment(appoinment.date).fromNow()}</p>
+      </div>
+    );
   }
-
 
   genExtraTime = () => (
     <BsClockHistory
@@ -598,6 +585,7 @@ export default class extends React.Component {
       onClick={() => { }}
     />
   );
+
   genExtraFlag = () => (
     <Badge size="small" count={2}>
       <BsFillFlagFill
@@ -610,45 +598,51 @@ export default class extends React.Component {
   renderPanelAppointmentForProvider = () => {
     const appointments = store.getState().appointments.dataAppointments
     if (this.state.userRole == 30 || this.state.userRole == 3)
-      return (<Panel
-        key="1"
-        header={intl.formatMessage(messages.appointments)}
-        extra={this.genExtraTime()}
-        className='appointment-panel'
-      >
-        <PanelAppointment
-          userRole={this.state.userRole}
-          setReload={reload => {
-            this.panelAppoimentsReload = reload;
-          }}
-        />
-      </Panel>);
+      return (
+        <Panel
+          key="1"
+          header={intl.formatMessage(messages.appointments)}
+          extra={this.genExtraTime()}
+          className='appointment-panel'
+        >
+          <PanelAppointment
+            userRole={this.state.userRole}
+            setReload={reload => {
+              this.panelAppoimentsReload = reload;
+            }}
+          />
+        </Panel>
+      );
   }
 
   renderPanelSubsidaries = () => {
-    return (
-      <Panel
-        header={<div className='flex flex-row justify-between'>
-          <p className='mb-0'>{intl.formatMessage(messages.subsidaries)}</p>
-          {this.state.userRole == 3 && <Button type='primary' size='small' onClick={this.onShowModalNewSubsidy}>
-            {intl.formatMessage(messages.requestNewSubsidy).toUpperCase()}
-          </Button>}
-        </div>
-        }
-        key="6"
-        className='subsidaries-panel'
-      >
-        <PanelSubsidaries
-          setReload={reload => {
-            this.panelSubsidariesReload = reload;
-          }}
-          userRole={this.state.userRole}
-          SkillSet={this.state.SkillSet}
-          onShowModalSubsidyDetail={this.onShowModalSubsidy}
-          onCancelSubsidy={this.onCancelSubsidy}
-        />
-      </Panel>
-    )
+    if (this.state.userRole == 60 || this.state.userRole == 3)
+      return (
+        <Panel
+          key="6"
+          header={(
+            <div className='flex flex-row justify-between'>
+              <p className='mb-0'>{intl.formatMessage(messages.subsidaries)}</p>
+              {this.state.userRole == 3 && (
+                <Button type='primary' size='small' onClick={this.onShowModalNewSubsidy}>
+                  {intl.formatMessage(messages.requestNewSubsidy).toUpperCase()}
+                </Button>
+              )}
+            </div>
+          )}
+          className='subsidaries-panel'
+        >
+          <PanelSubsidaries
+            setReload={reload => {
+              this.panelSubsidariesReload = reload;
+            }}
+            userRole={this.state.userRole}
+            SkillSet={this.state.SkillSet}
+            onShowModalSubsidyDetail={this.onShowModalSubsidy}
+            onCancelSubsidy={this.onCancelSubsidy}
+          />
+        </Panel>
+      )
   }
 
   render() {
@@ -687,12 +681,12 @@ export default class extends React.Component {
         ]}
       />
     );
+
     const btnFilter = (
       <div className='header-left flex flex-row' onClick={this.onShowFilter}>
         <p className='font-15'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
       </div>
     );
-
 
     const menu = (
       <Menu
@@ -731,6 +725,7 @@ export default class extends React.Component {
         value: 'referrals',
       },
     ];
+
     const optionsSkillset = [
       {
         label: 'Kriah Tutoring' + '(46)',
@@ -769,36 +764,43 @@ export default class extends React.Component {
         value: 'referrals2',
       },
     ];
+
     const modalNewAppointProps = {
       visible: visibleNewAppoint,
       onSubmit: this.onSubmitModalNewAppoint,
       onCancel: this.onCloseModalNewAppoint,
     };
+
     const modalSubsidyProps = {
       visible: visibleSubsidy,
       onSubmit: this.onSubmitModalSubsidy,
       onCancel: this.onCloseModalSubsidy,
     };
+
     const modalReferralServiceProps = {
       visible: visiblReferralService,
       onSubmit: this.onCloseModalReferral,
       onCancel: this.onCloseModalReferral,
     };
+
     const modalNewSubsidyProps = {
       visible: visibleNewSubsidy,
       onSubmit: this.onSubmitModalNewSubsidy,
       onCancel: this.onCloseModalNewSubsidy,
     };
+
     const modalNewReviewProps = {
       visible: visibleNewReview,
       onSubmit: this.onSubmitModalNewReview,
       onCancel: this.onCloseModalNewReview,
     }
+
     const modalNewGroupProps = {
       visible: visibleNewGroup,
       onSubmit: this.onCloseModalGroup,
       onCancel: this.onCloseModalGroup,
     }
+
     return (
       <div className="full-layout page dashboard-page">
         {/* <div className='div-show-subsidy' onClick={this.onShowModalSubsidy} /> */}
@@ -968,7 +970,7 @@ export default class extends React.Component {
                 className='evaluations-panel'
               >
                 <Tabs defaultActiveKey="1" type="card" size='small'>
-                  <TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                  <Item tab={intl.formatMessage(messages.upcoming)} key="1">
                     {new Array(10).fill(null).map((_, index) =>
                       <div key={index} className='list-item padding-item'>
                         <Avatar size={24} icon={<FaUser size={12} />} />
@@ -983,10 +985,10 @@ export default class extends React.Component {
                         </div>
                       </div>
                     )}
-                  </TabPane>
-                  <TabPane tab={intl.formatMessage(messages.past)} key="2">
+                  </Item>
+                  <Item tab={intl.formatMessage(messages.past)} key="2">
                     <div className='list-item padding-item'>{intl.formatMessage(messages.past)}</div>
-                  </TabPane>
+                  </Item>
                 </Tabs>
               </Panel>
               <Panel header={intl.formatMessage(messages.flags)} key="5" extra={this.genExtraFlag()}>
@@ -1003,7 +1005,6 @@ export default class extends React.Component {
                 )}
               </Panel>
               {this.renderPanelSubsidaries()}
-
             </Collapse>
           </section>
         </div>
@@ -1017,17 +1018,11 @@ export default class extends React.Component {
           onClose={this.onCloseDrawerDetail}
         />
         <DrawerDetailPost
-
           visible={visibleDetailPost}
           onClose={this.onCloseDrawerDetailPost}
         />
-
         {this.modalAppointments()}
         {this.renderModalSubsidyDetail()}
-
-
-
-
         {this.modalCreateAndEditSubsidyRequest()}
         <ModalNewGroup {...modalNewGroupProps}
           SkillSet={this.state.SkillSet}
@@ -1036,23 +1031,23 @@ export default class extends React.Component {
           }}
         />
         <ModalReferralService {...modalReferralServiceProps}
-        SkillSet={this.state.SkillSet}
-        listDependents = {this.state.listDependents}
-        setLoadData={reload=>{
-          this.loadDataModalReferral = reload;
-        }}
-        userRole={this.state.userRole}
-        
+          SkillSet={this.state.SkillSet}
+          listDependents={this.state.listDependents}
+          setLoadData={reload => {
+            this.loadDataModalReferral = reload;
+          }}
+          userRole={this.state.userRole}
         />
-        
-        <ModalNewSubsidyReview {...modalNewReviewProps}/>
+        <ModalNewSubsidyReview {...modalNewReviewProps} />
       </div>
     );
   }
 }
+
 function reportNetworkError() {
   alert('This action could not be completed')
 }
+
 function renderEventContent(eventInfo) {
   return (
     <>

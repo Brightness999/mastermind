@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Steps , Input } from 'antd';
+import { Button, Steps } from 'antd';
 import { BiChevronLeft } from 'react-icons/bi';
 import { ModalCreateDone } from '../../../../components/Modal';
 
@@ -18,6 +18,8 @@ import SubsidyProgram from './Provider/subsidy_program';
 import InfoReview from './Provider/info_review';
 import InfoSchool from './School/info_school';
 import InfoAdmin from './Admin/info_admin';
+import InfoConsultant from './Consultant/info_consultant';
+import ConsultantAvailability from './Consultant/info_availability';
 import SubsidyRequest from '../../SubsidyRequest/components';
 import SubsidyReview from '../../SubsidyReview/components';
 import { routerLinks } from "../../../constant";
@@ -30,14 +32,12 @@ export default class extends React.Component {
     super(props);
     this.state = {
       currentStep: 0,
-      subsidyStep:-1,
-      selectedDependent:-1,
+      subsidyStep: -1,
+      selectedDependent: -1,
       accountType: intl.formatMessage(messages.parent),
       visibleCreateDone: false,
     }
   }
-
-
 
   nextStep = () => {
     this.setState({ currentStep: this.state.currentStep + 1 });
@@ -49,12 +49,7 @@ export default class extends React.Component {
   };
 
   handleContinue = (isFinished = false) => {
-    // if(this.state.currentStep <= 2) {
-    //   this.nextStep();
-    // } else {
-    //   this.openModalCreateDone();
-    // }
-    if(isFinished){
+    if (isFinished) {
       this.openModalCreateDone();
       return;
     }
@@ -66,19 +61,21 @@ export default class extends React.Component {
   handleChange = (accountType) => {
     switch (accountType) {
       case intl.formatMessage(messages.parent):
-        return this.setState({accountType: intl.formatMessage(messages.parent)})
+        return this.setState({ accountType: intl.formatMessage(messages.parent) })
       case intl.formatMessage(messages.provider):
-        return this.setState({accountType: intl.formatMessage(messages.provider)})
+        return this.setState({ accountType: intl.formatMessage(messages.provider) })
       case intl.formatMessage(messages.school):
-        return this.setState({accountType: intl.formatMessage(messages.school)})
+        return this.setState({ accountType: intl.formatMessage(messages.school) })
       case intl.formatMessage(messages.admin):
-        return this.setState({accountType: intl.formatMessage(messages.admin)})
+        return this.setState({ accountType: intl.formatMessage(messages.admin) })
+      case intl.formatMessage(messages.consultant):
+        return this.setState({ accountType: intl.formatMessage(messages.consultant) })
     }
   }
 
   handleContinueDefault = (accountType) => {
     if (this.state.currentStep === 0) {
-      this.setState({accountType: accountType});
+      this.setState({ accountType: accountType });
     }
   }
 
@@ -105,36 +102,42 @@ export default class extends React.Component {
             {/* <Step key='info_review' title={intl.formatMessage(messages.reviewInfo)} icon={<p>6</p>} /> */}
           </Steps>
         )
+      case intl.formatMessage(messages.consultant):
+        return (
+          <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 450 }}>
+            <Step key='default' title={intl.formatMessage(messages.accountInfo)} icon={<p>1</p>} />
+            <Step key='info_consultant' title={intl.formatMessage(messages.profileInfo)} icon={<p>2</p>} />
+            <Step key='consultant_availability' title={intl.formatMessage(messages.availabilityInfo)} icon={<p>3</p>} />
+          </Steps>
+        )
     }
   }
 
-  onOpenSubsidyStep = (step , selectedDependent)=>{
-    console.log('step',step , selectedDependent);
+  onOpenSubsidyStep = (step, selectedDependent) => {
+    console.log('step', step, selectedDependent);
     this.setState({
-      subsidyStep:step,
-      selectedDependent:selectedDependent
+      subsidyStep: step,
+      selectedDependent: selectedDependent
     })
   }
 
-  changeSelectedDependent = (selectedDependent)=>{
+  changeSelectedDependent = (selectedDependent) => {
     this.setState({
-      selectedDependent:selectedDependent
+      selectedDependent: selectedDependent
     })
   }
 
-  getSelectedDependent = ()=>{
+  getSelectedDependent = () => {
     return this.state.selectedDependent
   }
 
   openModalCreateDone = () => {
     this.setState({ visibleCreateDone: true });
   }
+
   closeModalCreateDone = () => {
     this.setState({ visibleCreateDone: false });
-
-    
-    this.props.history.push(routerLinks.Login+'/register_success');
-          
+    this.props.history.push(routerLinks.Login + '/register_success');
   }
 
   getStepContentComponent = (currentStep) => {
@@ -142,33 +145,32 @@ export default class extends React.Component {
       case 0:
         return (<CreateDefault onContinue={this.handleContinue} onHandleChangeRoleRegister={this.handleChange} />)
       case 1:
-        
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
             return (<InfoParent onFinishRegister={this.openModalCreateDone} onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
-            // return (<InfoServices onContinue={this.handleContinue} />)
-            // return (<InfoAvailability onContinue={this.handleContinue} />)
-            // return (<SubsidyProgram onContinue={this.handleContinue} />)
             return (<InfoProfile onContinue={this.handleContinue} />)
+          case intl.formatMessage(messages.consultant):
+            return (<InfoConsultant onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.school):
-            return (<InfoSchool onContinue={this.handleContinue}/>)
+            return (<InfoSchool onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.admin):
-            return (<InfoAdmin onContinue={this.handleContinue}/>)
+            return (<InfoAdmin onContinue={this.handleContinue} />)
         }
       case 2:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            if(this.state.subsidyStep == 1){
-              return (<SubsidyRequest selectedDependent={this.state.selectedDependent} changeSelectedDependent={this.changeSelectedDependent}  onOpenSubsidyStep={this.onOpenSubsidyStep} onContinue={this.handleContinue} />)
-            }else if(this.state.subsidyStep == 2){
-              return (<SubsidyReview selectedDependent={this.state.selectedDependent} changeSelectedDependent={this.changeSelectedDependent}  onOpenSubsidyStep={this.onOpenSubsidyStep} onContinue={this.handleContinue} />)
-            }else{
+            if (this.state.subsidyStep == 1) {
+              return (<SubsidyRequest selectedDependent={this.state.selectedDependent} changeSelectedDependent={this.changeSelectedDependent} onOpenSubsidyStep={this.onOpenSubsidyStep} onContinue={this.handleContinue} />)
+            } else if (this.state.subsidyStep == 2) {
+              return (<SubsidyReview selectedDependent={this.state.selectedDependent} changeSelectedDependent={this.changeSelectedDependent} onOpenSubsidyStep={this.onOpenSubsidyStep} onContinue={this.handleContinue} />)
+            } else {
               return (<InfoChild onOpenSubsidyStep={this.onOpenSubsidyStep} changeSelectedDependent={this.changeSelectedDependent} onContinue={this.handleContinue} />)
             }
-            
           case intl.formatMessage(messages.provider):
             return (<InfoServices onContinue={this.handleContinue} />)
+          case intl.formatMessage(messages.consultant):
+            return (<ConsultantAvailability onContinue={this.handleContinue} />)
         }
       case 3:
         switch (this.state.accountType) {
@@ -189,25 +191,21 @@ export default class extends React.Component {
     }
   }
 
-  
-
   render() {
     const { currentStep, visibleCreateDone, accountType } = this.state;
-
     const createDoneProps = {
       visible: visibleCreateDone,
       onSubmit: this.closeModalCreateDone,
       onCancel: this.closeModalCreateDone,
     };
+
     return (
       <div className="full-layout page createaccount-page">
         <div className='step-content'>
           {this.getStepContentComponent(currentStep)}
         </div>
-
         {this.getStepsComponent(accountType)}
         <div className="steps-action">
-
           {/* {currentStep === steps.length - 1 && (
               <Button 
                 type="primary" 

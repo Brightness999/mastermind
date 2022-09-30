@@ -11,7 +11,7 @@ export const registerSlice = createSlice({
     reducers: {
         
         setRegisterData: (state , actions) => {
-            console.log('redux test ',state,actions);
+            // console.log('redux test ',state,actions);
             return {
                 registerData: {
                     ...state.registerData,

@@ -34,6 +34,10 @@ export default ({
     id: `${scope}.provider`,
     defaultMessage: 'Provider',
   },
+  consultant: {
+    id: `${scope}.consultant`,
+    defaultMessage: 'Consultant',
+  },
   school: {
     id: `${scope}.school`,
     defaultMessage: 'School',
@@ -304,7 +308,7 @@ export default ({
   },
   referredAs: {
     id: `${scope}.referredAs`,
-    defaultMessage: 'Referred to as (optional)',
+    defaultMessage: 'Referred to as',
   },
   serviceAddress: {
     id: `${scope}.serviceAddress`,
@@ -349,6 +353,10 @@ export default ({
   professionalExperience: {
     id: `${scope}.professionalExperience`,
     defaultMessage: 'Professional experience',
+  },
+  notes: {
+    id: `${scope}.notes`,
+    defaultMessage: 'Notes',
   },
   profileInfo: {
     id: `${scope}.profileInfo`,

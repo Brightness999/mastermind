@@ -32,9 +32,7 @@ class CreateDefault extends Component {
         };
     }
 
-
     componentDidMount() {
-
         const { registerData } = this.props.register;
         var defaultPassword = 'Aa123@333';
         this.form?.setFieldsValue({
@@ -64,8 +62,9 @@ class CreateDefault extends Component {
                     }
                 }
             )
-            if (emailExits.data.data > 0)
+            if (emailExits.data.data > 0) {
                 return message.error('Email already exists');
+            }
             const usernameExits = await axios.post(url + 'users/check_email_registered',
                 {
                     "searchData": {
@@ -73,16 +72,14 @@ class CreateDefault extends Component {
                     }
                 }
             )
-            if (usernameExits.data.data > 0)
+            if (usernameExits.data.data > 0) {
                 return message.error('Username already exists');
-            // this.props.setRegisterData(values)
+            }
             return this.props.onContinue();
         } catch (error) {
             console.log(error);
-
         }
     }
-
 
     onFinish = values => {
         console.log('Success:', values);
@@ -104,7 +101,6 @@ class CreateDefault extends Component {
     };
 
     handleUsernameChange = event => {
-
         if (!!this.timeoutCheckUsername) {
             clearTimeout(this.timeoutCheckUsername);
             this.timeoutCheckUsername = null;
@@ -116,7 +112,6 @@ class CreateDefault extends Component {
             return;
         }
         this.timeoutCheckUsername = setTimeout(() => {
-
             axios.post(url + 'users/check_email_registered',
                 {
                     "searchData": {
@@ -124,7 +119,6 @@ class CreateDefault extends Component {
                     }
                 }
             ).then(result => {
-                console.log('check uname', result.data);
                 if (result.data.data > 0) {
                     this.form.setFields([
                         {
@@ -132,15 +126,10 @@ class CreateDefault extends Component {
                             errors: [intl.formatMessage(messagesLogin.userExist)],
                         },
                     ])
-
-                } else {
-
                 }
-
             }).catch(err => {
                 console.log(err);
             })
-
         }, 300);
     }
 
@@ -158,14 +147,12 @@ class CreateDefault extends Component {
             });
             return;
         }
-
         var error = this.form.getFieldError("email")
         if (!!error && error.length > 0) {
             console.log("email dang loi", error);
             return;
         }
         this.timeoutCheckUsername = setTimeout(() => {
-
             axios.post(url + 'users/check_email_registered',
                 {
                     "searchData": {
@@ -173,7 +160,6 @@ class CreateDefault extends Component {
                     }
                 }
             ).then(result => {
-                console.log('check email', result.data);
                 if (result.data.data > 0) {
                     this.form.setFields([
                         {
@@ -184,28 +170,22 @@ class CreateDefault extends Component {
                     this.setState({
                         checkEmailExist: true,
                     });
-
                 } else {
                     this.setState({
                         checkEmailExist: false,
                     });
-
                 }
-
             }).catch(err => {
                 console.log(err);
                 this.setState({
                     checkEmailExist: false,
                 });
             })
-
         }, 300);
     }
 
     handleRoleChange = event => {
         this.props.onHandleChangeRoleRegister(event);
-
-
         var role = 0;
         switch (event) {
             case intl.formatMessage(messages.parent):
@@ -216,6 +196,9 @@ class CreateDefault extends Component {
                 break;
             case intl.formatMessage(messages.school):
                 role = 60;
+                break;
+            case intl.formatMessage(messages.consultant):
+                role = 100;
                 break;
         }
         this.props.setRegisterData({
@@ -317,7 +300,7 @@ class CreateDefault extends Component {
                     <div className="div-form-title">
                         <p className="font-30 text-center">{intl.formatMessage(messages.letCreateAccount)}</p>
                     </div>
-                    {/* <Form
+                    <Form
                         name="form_default"
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
@@ -329,21 +312,8 @@ class CreateDefault extends Component {
                         <Form.Item
                             name="username"
                             rules={[{ required: true, message: intl.formatMessage(messages.userMessage) }]}
-                        > */}
-                    <Form name="form_default" onFinish={this.onFinish} onFinishFailed={this.onFinishFailed} ref={ref => this.form = ref}
-                        initialValues={{
-                            account_type: intl.formatMessage(messages.parent),
-                        }}
-                    >
-                        <Form.Item
-                            name="username"
-                            rules={[{ required: true, message: intl.formatMessage(messages.userMessage) }]}
-
                         >
-                            <Input
-                                placeholder={intl.formatMessage(messages.username)}
-                                onChange={this.handleUsernameChange}
-                            />
+                            <Input placeholder={intl.formatMessage(messages.username)} onChange={this.handleUsernameChange} />
                         </Form.Item>
                         <Form.Item
                             name="email"
@@ -358,9 +328,7 @@ class CreateDefault extends Component {
                                 }
                             ]}
                         >
-                            <Input placeholder={intl.formatMessage(messages.email)}
-                                onChange={this.handleEmailChange}
-                            />
+                            <Input placeholder={intl.formatMessage(messages.email)} onChange={this.handleEmailChange} />
                         </Form.Item>
                         <div className="relative">
                             <Form.Item
@@ -378,7 +346,6 @@ class CreateDefault extends Component {
                                     value={this.state.input.password}
                                 />
                             </Form.Item>
-                            {/* <div className="text-red">{error}</div> */}
                             <div className="info-icon">
                                 <QuestionCircleOutlined />
                             </div>
@@ -408,10 +375,10 @@ class CreateDefault extends Component {
                                 <Select.Option value={intl.formatMessage(messages.parent)}>{intl.formatMessage(messages.parent)}</Select.Option>
                                 <Select.Option value={intl.formatMessage(messages.provider)}>{intl.formatMessage(messages.provider)}</Select.Option>
                                 <Select.Option value={intl.formatMessage(messages.school)}>{intl.formatMessage(messages.school)}</Select.Option>
+                                <Select.Option value={intl.formatMessage(messages.consultant)}>{intl.formatMessage(messages.consultant)}</Select.Option>
                                 {/* <Select.Option value={intl.formatMessage(messages.admin)}>{intl.formatMessage(messages.admin)}</Select.Option> */}
                             </Select>
                         </Form.Item>
-
                         <Form.Item className="form-btn continue-btn">
                             <Button block type="primary" htmlType="submit" onClick={this.onSubmit}>
                                 {intl.formatMessage(messages.continue).toUpperCase()}
