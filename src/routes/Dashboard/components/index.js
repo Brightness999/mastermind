@@ -27,7 +27,10 @@ import {
   ModalSubsidyProgress,
   ModalReferralService,
   ModalNewSubsidyRequest,
-  ModalNewSubsidyReview
+  ModalNewSubsidyReview,
+  ModalNewClientScreening,
+  ModalSeparateEvaluation,
+  ModalStandardSession
 } from '../../../components/Modal';
 
 import CSSAnimate from '../../../components/CSSAnimate';
@@ -76,6 +79,7 @@ export default class extends React.Component {
       visibleNewSubsidy: false,
       visibleNewReview: false,
       visibleNewGroup: false,
+      visibleEvaluation: false,
       isEventDetail: false,
       idEvent: 0,
       isMonth: 1,
@@ -435,6 +439,13 @@ export default class extends React.Component {
     this.setState({ visibleNewGroup: false });
   }
 
+  onShowModalEvaluation = () => {
+    this.setState({ visibleEvaluation: true });
+  }
+  onCloseModalEvaluation = () => {
+    this.setState({ visibleEvaluation: false });
+  }
+
   handleDateClick = arg => {
     // eslint-disable-next-line no-restricted-globals
     if (confirm("Would you like to add an event to " + arg.dateStr + " ?")) {
@@ -658,7 +669,8 @@ export default class extends React.Component {
       visibleNewSubsidy,
       visibleNewReview,
       visibleSubsidy,
-      visibleNewGroup
+      visibleNewGroup,
+      visibleEvaluation
     } = this.state;
 
     const btnMonthToWeek = (
@@ -697,7 +709,7 @@ export default class extends React.Component {
           },
           {
             key: '2',
-            label: (<a target="_blank" rel="noopener noreferrer" href="#">{intl.formatMessage(messages.evaluation)}</a>),
+            label: (<a target="_blank" rel="noopener noreferrer" onClick={this.onShowModalEvaluation}>{intl.formatMessage(messages.evaluation)}</a>),
           },
           {
             key: '3',
@@ -800,7 +812,6 @@ export default class extends React.Component {
       onSubmit: this.onCloseModalGroup,
       onCancel: this.onCloseModalGroup,
     }
-
     return (
       <div className="full-layout page dashboard-page">
         {/* <div className='div-show-subsidy' onClick={this.onShowModalSubsidy} /> */}

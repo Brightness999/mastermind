@@ -13,6 +13,9 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 
+import { setInforProvider, changeInfor } from '../../../../../redux/features/authSlice';
+import { store } from '../../../../../redux/store'
+
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios'
 
@@ -56,17 +59,17 @@ class SubsidyProgram extends Component {
         // const { authData } = this.props.auth
         // console.log(registerData.subsidy, 'subsidyresd')
         // console.log(authData, 'authDataauthData')
-        // var arrReduce = [];
-        // for (var i = 0; i < 100; i++) {
-        //     arrReduce.push(i);
-        // }
-        // var arrTime = [];
-        // arrTime.push(moment('2018-01-19 9:30:00 AM', 'YYYY-MM-DD hh:mm:ss A'))
-        // arrTime.push(moment('2018-01-19 10:00:00 AM', 'YYYY-MM-DD hh:mm:ss A'))
-        // arrTime.push(moment('2018-01-19 10:30:00 AM', 'YYYY-MM-DD hh:mm:ss A'))
-        // arrTime.push(moment('2018-01-19 11:00:00 AM', 'YYYY-MM-DD hh:mm:ss A'))
+        var arrReduce = [];
+        for (var i = 0; i < 100; i++) {
+            arrReduce.push(i);
+        }
+        var arrTime = [];
+        arrTime.push(moment('2018-01-19 9:30:00 AM', 'YYYY-MM-DD hh:mm:ss A'))
+        arrTime.push(moment('2018-01-19 10:00:00 AM', 'YYYY-MM-DD hh:mm:ss A'))
+        arrTime.push(moment('2018-01-19 10:30:00 AM', 'YYYY-MM-DD hh:mm:ss A'))
+        arrTime.push(moment('2018-01-19 11:00:00 AM', 'YYYY-MM-DD hh:mm:ss A'))
 
-        // this.setState({ ReduceList: arrReduce, TimeAvailableList: arrTime });
+        this.setState({ ReduceList: arrReduce, TimeAvailableList: arrTime });
         // if (authData) {
         //     this.form?.setFieldsValue(authData);
 
@@ -84,15 +87,16 @@ class SubsidyProgram extends Component {
         }).then(result => {
             const { data } = result.data
             this.form.setFieldsValue({
-                ...data
+                ...data,
+                numberSessions: '1'
             })
 
             console.log(data, 'data')
 
             this.setState({
-                isAcceptProBono: data.isAcceptProBono || false,
-                isAcceptReduceRate: data.isAcceptReduceRate || false,
-                isWillingOpenPrivate: data.isWillingOpenPrivate || false
+                isAcceptProBono: data.isAcceptProBono === 1 ? false : true || false,
+                isAcceptReduceRate: data.isAcceptReduceRate === 1 ? false : true || false,
+                isWillingOpenPrivate: data.isWillingOpenPrivate === 1 ? false : true || false
             })
         })
         this.getDataFromServer();
@@ -104,6 +108,7 @@ class SubsidyProgram extends Component {
             console.log('get_default_value_for_client', result.data);
             if (result.data.success) {
                 var data = result.data.data;
+                console.log(data.AcademicLevel, 'dataAcademicLevel')
                 this.setState({
                     SkillSet: data.SkillSet,
                     AcademicLevel: data.AcademicLevel,
@@ -140,23 +145,23 @@ class SubsidyProgram extends Component {
         const { registerData } = this.props.register;
         console.log('prop', registerData);
 
-        var postData = this.copyField(registerData);
-        postData.privateCalendars = this.convertCalendarToArray();
+        // var postData = this.copyField(registerData);
+        // postData.privateCalendars = this.convertCalendarToArray();
         // postData.contactNumber = this.validDateContactPhoneNumber(registerData.profileInfor);
         // postData.contactEmail = this.validDataContactEmail(registerData.profileInfor);
         // 
-        console.log(postData);
+        // console.log(postData);
 
-        const response = await axios.post(url + 'users/signup', postData);
-        const { success, data } = response.data;
-        if (success) {
-            // this.props.onFinishRegister();
-            // localStorage.setItem('token', data.token);
-            this.props.onContinue(true);
+        // const response = await axios.post(url + 'users/signup', postData);
+        // const { success, data } = response.data;
+        // if (success) {
+        //     // this.props.onFinishRegister();
+        //     // localStorage.setItem('token', data.token);
+        //     this.props.onContinue(true);
 
-        } else {
-            message.error(error?.response?.data?.data ?? error.message);
-        }
+        // } else {
+        //     message.error(error?.response?.data?.data ?? error.message);
+        // }
         // this.props.onContinue();
     };
 
@@ -338,7 +343,27 @@ class SubsidyProgram extends Component {
         }
     }
 
-    
+    updateProfile = async () => {
+        const { user } = this.props.auth;
+
+        console.log('updateProfile', user);
+
+        const { providerInfo } = user
+
+        const token = localStorage.getItem('token');
+        const values = await this.form.validateFields();
+
+        console.log('values', values);
+
+        const dataFrom = { ...values, _id: providerInfo }
+        try {
+            store.dispatch(setInforProvider({ data: dataFrom, token: token }))
+        } catch (error) {
+            console.log(error, 'error')
+        }
+    }
+
+
     render() {
         const { valueCalendar, selectedDay, isSelectTime } = this.state;
         return (
@@ -399,7 +424,7 @@ class SubsidyProgram extends Component {
                         </div>
                         <div className='px-20'>
                             <p className='mb-10'>{intl.formatMessage(messages.academicLevel)}</p>
-                            <Form.List name="reduceWithAcademic">
+                            <Form.List name="academicLevel">
                                 {(fields, { add, remove }) => (
                                     <div className='div-time'>
                                         {fields.map((field) => {
@@ -409,17 +434,17 @@ class SubsidyProgram extends Component {
                                                         <Form.Item
                                                             name={[field.name, "level"]}
                                                             className='select-small'
-                                                            rules={[{ required: !this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.level) }]}
+                                                            rules={[{ required: this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.level) }]}
                                                         >
                                                             <Select
-                                                                disabled={!this.state.isAcceptReduceRate}
+                                                                // disabled={!this.state.isAcceptReduceRate}
                                                                 onChange={v => {
                                                                     console.log('on field change')
                                                                     this.handleSelectChange();
                                                                 }}
                                                                 placeholder={intl.formatMessage(messages.level)}>
-                                                                {this.state.Levels.map((lvl) => {
-                                                                    return (<Select.Option value={lvl}>Grade {lvl}</Select.Option>)
+                                                                {this.state.AcademicLevel.map((lvl, i) => {
+                                                                    return (<Select.Option value={i}>{lvl}</Select.Option>)
                                                                 })}
                                                             </Select>
                                                         </Form.Item>
@@ -429,7 +454,7 @@ class SubsidyProgram extends Component {
                                                             name={[field.name, "rate"]}
                                                             className='select-small'
                                                             style={{ height: "25px !important" }}
-                                                            rules={[{ required: !this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
+                                                            rules={[{ required: this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
                                                         >
                                                             <Input
                                                                 onChange={v => {
@@ -445,7 +470,7 @@ class SubsidyProgram extends Component {
                                                                     }
 
                                                                 }}
-                                                                disabled={!this.state.isAcceptReduceRate}
+                                                                // disabled={!this.state.isAcceptReduceRate}
                                                                 className='input-with-select-small' placeholder={intl.formatMessage(messages.rate)} />
                                                             {/* <Select placeholder={intl.formatMessage(messages.rate)}>
                                                                 <Select.Option value='r1'>rate 1</Select.Option>
@@ -464,7 +489,7 @@ class SubsidyProgram extends Component {
                                                                     console.log('on field change')
                                                                     this.handleSelectChange();
                                                                 }}
-                                                                disabled={!this.state.isAcceptReduceRate}
+                                                                // disabled={!this.state.isAcceptReduceRate}
                                                                 placeholder={intl.formatMessage(messages.reduced)}>
                                                                 {this.state.ReduceList.map(value => {
                                                                     return <Select.Option value={value}>{value} %</Select.Option>
@@ -526,7 +551,8 @@ class SubsidyProgram extends Component {
                                 block
                                 type="primary"
                                 htmlType="submit"
-                            // onClick={this.props.onContinueProgram}
+                                // onClick={this.props.onContinueProgram}
+                                onClick={this.updateProfile}
                             >
                                 {intl.formatMessage(messages.update).toUpperCase()}
                             </Button>

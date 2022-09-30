@@ -193,6 +193,24 @@ class InfoProfile extends Component {
         this.form.setFieldsValue({ [fieldName]: value });
     }
 
+    updateProfile = async () => {
+        const { user } = this.props.auth;
+
+        console.log('updateProfile', user);
+
+        const { providerInfo } = user
+
+        const token = localStorage.getItem('token');
+        const values = await this.form.validateFields();
+
+        const dataFrom = { ...values, _id: providerInfo }
+        try {
+            store.dispatch(setInforProvider({ data: dataFrom, token: token }))
+        } catch (error) {
+            console.log(error, 'error')
+        }
+    }
+
     render() {
         const children = [];
 
@@ -465,6 +483,7 @@ class InfoProfile extends Component {
 
 const mapStateToProps = state => ({
     register: state.register,
-    authData: state.auth.authData
+    authData: state.auth.authData,
+    auth: state.auth
 })
 export default compose(connect(mapStateToProps, { setRegisterData, changeInfor }))(InfoProfile);

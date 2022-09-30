@@ -454,7 +454,7 @@ class ModalSubsidyProgress extends React.Component {
             <Col xs={24} sm={24} md={12}>
                 <p className='font-700'>{intl.formatMessage(msgRequest.documents)}</p>
                 {documents.map((document,index )=>{
-                    return <a href={this.getFileUrl(document)} className='font-12'>{this.getFileName(document)}</a>
+                    return <a href={this.getFileUrl(document)} className='font-12' target="_blank">{this.getFileName(document)}</a>
                 })}
             </Col>
         </Row>}

@@ -215,47 +215,64 @@
       color: @gray300;
     }
 
-    .doctor-list {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      white-space: nowrap;
-      overflow: auto;
-      padding-top: 10px;
+    
+  }
+  .doctor-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow: auto;
+    padding-top: 10px;
 
-      .doctor-item {
-        margin-right: 10px;
-        position: relative;
-        top: 0;
-        left: 0;
-        cursor: pointer;
+    .doctor-item {
+      margin-right: 10px;
+      position: relative;
+      top: 0;
+      left: 0;
+      cursor: pointer;
 
-        .ant-avatar-square {
-          border-radius: 10px;
-          margin-bottom: 3px;
-        }
-       
+      .ant-avatar-square {
+        border-radius: 10px;
+        margin-bottom: 3px;
       }
-      .selected-doctor {
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        z-index: 3;
-        background-color: #1bd9ec;
-        color: #fff;
-        height: 15px;
-        width: 15px;
-        border-radius: 999px;
-        padding: 0 0 0 2px;
-        line-height: 18px;
-        overflow: visible;
+     
+    }
+    .doctor-unavailable {
+      margin-right: 10px;
+      position: relative;
+      top: 0;
+      left: 0;
+      cursor: pointer;
+      opacity: 0.7;
+
+      .ant-avatar-square {
+        border-radius: 10px;
+        margin-bottom: 3px;
       }
+     
+    }
+    .selected-doctor {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      z-index: 3;
+      background-color: #1bd9ec;
+      color: #fff;
+      height: 15px;
+      width: 15px;
+      border-radius: 999px;
+      padding: 0 0 0 2px;
+      line-height: 18px;
+      overflow: visible;
     }
   }
 }
 .modal-no-show,
 .modal-balance,
-.modal-new-group {
+.modal-new-group,
+.modal-new-screening,
+.modal-evaluation {
   .ant-btn-primary {
     font-weight: 400;
     font-size: 14px;
@@ -278,6 +295,21 @@
     margin: 10px 0;
     padding: 10px;
     border-radius: 6px;
+  }
+
+  .detail-item {
+    padding: 15px 0;
+    &:not(:last-child) {
+        border-bottom: 1px solid @gray250;
+    }
+
+    p { margin-bottom: 0}
+    
+    .title {
+        flex: 0 0 100px;
+        text-align: left;
+        margin-right: 10px;
+    }
   }
 }
 

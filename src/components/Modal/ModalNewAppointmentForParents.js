@@ -204,7 +204,7 @@ class ModalNewAppointmentForParents extends React.Component {
     return(
         <Modal {...modalProps}>
             <div className='new-appointment'>
-                <p className='font-30'>{intl.formatMessage(messages.newAppointment)}</p>
+                <p className='font-30 mb-10'>{intl.formatMessage(messages.newAppointment)}</p>
                 <div className='flex flex-row items-center mb-10'>
                     <p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}</p>
                     <div className='flex flex-row items-center ml-20'>
@@ -241,6 +241,7 @@ class ModalNewAppointmentForParents extends React.Component {
                                     <Input {...getInputProps({
                                         placeholder: 'Search Places ...',
                                         className: 'location-search-input',
+                                        size: 'small'
                                     })} />
                                     <div className="autocomplete-dropdown-container">
                                         {loading && <div>Loading...</div>}
