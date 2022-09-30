@@ -129,6 +129,7 @@ class SubsidyProgram extends Component {
     }
 
     onSelect = (newValue) => {
+        console.log(newValue, 'newValue');
         this.setState({ valueCalendar: newValue });
         this.setState({ selectedDay: newValue });
     }

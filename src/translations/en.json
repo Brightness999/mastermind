@@ -284,6 +284,10 @@
   "components.Modal.additionalDocuments": "Additional documents",
   "components.Modal.create": "Create",
   "components.Modal.review": "Review",
+  "components.Modal.accept": "Accept",
+  "components.Modal.standardSession": "Standard Session",
+  "components.Modal.providers": "Providers",
+  "components.Modal.schedule": "Schedule",
 
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.subsidyManager": "Subsidy Request",

@@ -74,11 +74,15 @@ class InfoServices extends Component {
             const { data } = result.data
             console.log(data);
             this.form.setFieldsValue({
-                ...data
+                ...data,
+                'upload_w_9': data.W9FormPath
             })
         })
 
         this.getDataFromServer()
+        this.loadServiceableSchool()
+
+        console.log('state', this.state);
     }
 
     getDataFromServer = () => {
@@ -140,8 +144,7 @@ class InfoServices extends Component {
             serviceInfor: values,
             documentUploaded: this.state.documentUploaded
         })
-
-        this.props.onContinue();
+        // this.props.onContinue();
     };
 
     onFinishFailed = (errorInfo) => {
@@ -177,12 +180,12 @@ class InfoServices extends Component {
     }
 
     setValueToReduxRegisterData = (fieldName, value) => {
-        const { registerData } = this.props.register;
-        var serviceInfor = JSON.parse(JSON.stringify(registerData.serviceInfor));
+        // const { registerData } = this.props.register;
+        // var serviceInfor = JSON.parse(JSON.stringify(registerData.serviceInfor));
 
-        serviceInfor[fieldName] = value;
-        console.log('new value', serviceInfor);
-        this.props.setRegisterData({ serviceInfor: serviceInfor });
+        // serviceInfor[fieldName] = value;
+        // console.log('new value', serviceInfor);
+        // this.props.setRegisterData({ serviceInfor: serviceInfor });
     }
 
     defaultOnValueChange = (event, fieldName) => {
@@ -194,8 +197,6 @@ class InfoServices extends Component {
     handleSelectChange = (fieldName, value) => {
         console.log(fieldName, value);
         this.setValueToReduxRegisterData(fieldName, value);
-
-
     }
 
     handleChangeServiceable = (text) => {
@@ -207,11 +208,12 @@ class InfoServices extends Component {
     }
 
     searchServiceableSchool = (text) => {
-        axios.post(url + 'schools/get_school_infos', { data: { "search": text } }
+        axios.post(url + 'schools/get_school_infos', { data: { "search": '' } }
         ).then(result => {
             console.log('get_school_infos', result.data);
             if (result.data.success) {
                 var data = result.data.data;
+                console.log(data);
                 this.setState({
                     ServiceableSchools: data.docs
                 })
@@ -231,16 +233,46 @@ class InfoServices extends Component {
 
     }
 
+    loadServiceableSchool = () => {
+        axios.post(url + 'schools/get_school_infos', { data: { "search": '' } }
+        ).then(result => {
+            console.log('get_school_infos', result.data);
+            if (result.data.success) {
+                var data = result.data.data;
+                console.log(data);
+                this.setState({
+                    ServiceableSchools: data.docs
+                })
+            } else {
+                this.setState({
+                    ServiceableSchools: [],
+                });
+            }
+
+        }).catch(err => {
+            console.log(err);
+            this.setState({
+                ServiceableSchools: [],
+            });
+        })
+
+    }
+
+
+
     updateProfile = async () => {
         const { user } = this.props.auth;
-        const { parentInfo } = user
+
+        console.log('updateProfile', user);
+
+        const { providerInfo } = user
 
         const token = localStorage.getItem('token');
         const values = await this.form.validateFields();
 
-        const dataFrom = { ...values, _id: parentInfo }
+        const dataFrom = { ...values, _id: providerInfo }
         try {
-            store.dispatch(setInforClientParent({ data: dataFrom, token: token }))
+            store.dispatch(setInforProvider({ data: dataFrom, token: token }))
             //this.props.changeInforClientParent(dataFrom)
         } catch (error) {
             console.log(error, 'error')
@@ -314,6 +346,17 @@ class InfoServices extends Component {
                                     return { key: index, value: value.name }
                                 })}
                             />
+                            {/* <Select
+                                mode="multiple"
+                                placeholder={intl.formatMessage(messages.serviceableSchools)}
+                                onChange={v => this.handleSelectChange('serviceableSchool', v)}
+                                allowClear
+                            >
+
+                                {this.state.ServiceableSchools.map((value, index) => {
+                                    return (<Select.Option value={index}>{value.name}</Select.Option>)
+                                })}
+                            </Select> */}
                         </Form.Item>
 
                         <Form.List name="academicLevel">
@@ -508,7 +551,7 @@ class InfoServices extends Component {
                         </Form.Item>
                         <Form.Item
                             name="references"
-                            rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.references) }]}
+                            rules={[{ message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.references) }]}
                         >
                             <Input
                                 onChange={(event => {
@@ -535,6 +578,7 @@ class InfoServices extends Component {
                                 block
                                 type="primary"
                                 htmlType="submit"
+                                onClick={this.updateProfile}
                             // onClick={this.props.onContinue}
                             >
                                 {intl.formatMessage(messages.update).toUpperCase()}

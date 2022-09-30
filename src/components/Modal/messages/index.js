@@ -229,4 +229,20 @@ export default {
     id: `${scope}.save`,
     defaultMessage: 'Save',
   },
+  accept: {
+    id: `${scope}.accept`,
+    defaultMessage: 'Accept',
+  },
+  standardSession: {
+    id: `${scope}.standardSession`,
+    defaultMessage: 'Standard Session',
+  },
+  providers: {
+    id: `${scope}.providers`,
+    defaultMessage: 'Providers',
+  },
+  schedule: {
+    id: `${scope}.schedule`,
+    defaultMessage: 'Schedule',
+  }
 };

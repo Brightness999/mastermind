@@ -95,6 +95,12 @@ class InfoChild extends Component {
         this.loadSchools();
     }
 
+    createNewChild(){
+        const { registerData } = this.props.register;
+        var newChild = this.getDefaultChildObj(registerData.parentInfo);
+        this.props.setRegisterData({ studentInfos: [...registerData.studentInfos,newChild ] });
+    }
+
     loadServices() {
         axios.post(url + 'clients/get_default_value_for_client'
         ).then(result => {
@@ -136,8 +142,8 @@ class InfoChild extends Component {
             "firstName": "",
             "lastName": "",
             "birthday": "",
-            "guardianPhone": parentInfo.fatherPhoneNumber || parentInfo.motherPhoneNumber,
-            "guardianEmail": parentInfo.fatherEmail || parentInfo.motherEmail,
+            "guardianPhone": parentInfo?.fatherPhoneNumber || parentInfo?.motherPhoneNumber,
+            "guardianEmail": parentInfo?.fatherEmail || parentInfo?.motherEmail,
             "backgroundInfor": "",
             "school": undefined,
             "primaryTeacher": "",
@@ -203,8 +209,9 @@ class InfoChild extends Component {
     checkFillinAllFieldForSubsidy(index) {
         const { registerData } = this.props.register;
         const studentInfo = registerData.studentInfos[index];
-        var isAlreadyFillIn = !!studentInfo && studentInfo.firstName.length > 0
-            && studentInfo.lastName.length > 0
+        try{
+            var isAlreadyFillIn = !!studentInfo && !!studentInfo.firstName&&studentInfo.firstName.length > 0
+            &&!!studentInfo.lastName&& studentInfo.lastName.length > 0
             && ('' + studentInfo.birthday).length > 0
             && studentInfo.guardianPhone.length > 0
             && studentInfo.guardianEmail.length > 0
@@ -214,7 +221,11 @@ class InfoChild extends Component {
             && studentInfo.currentGrade.length > 0
             && studentInfo.services.length > 0;
 
-        return isAlreadyFillIn;
+            return isAlreadyFillIn;
+        }catch(err){
+            return false;
+        }
+        
     }
 
     render() {
@@ -447,11 +458,10 @@ class InfoChild extends Component {
                                             className='add-dependent-btn'
                                             icon={<BsPlusCircle size={17} className='mr-5' />}
                                             onClick={() => {
-                                                let allState = this.state;
-                                                allState.inputs.push({ name: '', visible: false })
-                                                this.setState(allState, () => {
-                                                    add(null)
-                                                })
+                                                // let allState = this.state;
+                                                // allState.inputs.push({ name: '', visible: false })
+                                                this.createNewChild()
+                                                add(null)
                                             }}
                                         >
                                             {intl.formatMessage(messages.addDependent)}

@@ -10,6 +10,10 @@ import ModalReferralService from './ModalReferralService';
 import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
 import ModalNewGroup from './ModaNewGroup';
 import ModalNewSubsidyReview from './ModalNewSubsidyReview';
+import ModalEditUser from './ModalEditUser';
+import ModalNewClientScreening from './ModalNewClientScreening';
+import ModalSeparateEvaluation from './ModalSeparateEvaluation';
+import ModalStandardSession from './ModalStandardSession';
 export {
   ModalCreateDone,
   ModalCancelAppointment,
@@ -21,5 +25,9 @@ export {
   ModalReferralService,
   ModalNewSubsidyRequest,
   ModalNewGroup,
-  ModalNewSubsidyReview
+  ModalNewSubsidyReview,
+  ModalEditUser,
+  ModalNewClientScreening,
+  ModalSeparateEvaluation,
+  ModalStandardSession
 }

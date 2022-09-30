@@ -36,11 +36,8 @@ class InfoAvailability extends Component {
         }
     }
 
-    componentDidMount() {
-        let { registerData } = this.props.register;
-        const { authData } = this.props.auth
-        console.log(day_week, 'registerData')
-        console.log(registerData, 'registerDatazxcxzcxz')
+    async componentDidMount() {
+
         // if (authData) {
 
         // console.log(authData.manualSchedule,'manualSchedule1')
@@ -56,29 +53,66 @@ class InfoAvailability extends Component {
         //     })
         // }
 
+        console.log(this.props.authData, 'authData')
+
         const tokenUser = localStorage.getItem('token');
 
-        axios.post(url + 'providers/get_my_provider_info', {}, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + tokenUser
-            }
-        }).then(result => {
+        try {
+            const result = await axios.post(url + 'providers/get_my_provider_info', {}, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + tokenUser
+                }
+            })
+
             const { data } = result.data
             console.log('Infor avaiability', data);
             this.form.setFieldsValue({
                 ...data
             })
 
-            day_week.map((day, index) => {
-                console.log('day', day)
-                console.log(index);
-                console.log(data.manualSchedule, `data.manualSchedule[${index}].startTime`);
-            })
+            console.log(data.manualSchedule, 'data');
 
-        }).catch(err => {
-            console.log(err)
-        })
+
+            console.log(day_week, 'day_week');
+
+            for (let i = 0; i < day_week.length; i++) {
+                const day = day_week[i];
+                // console.log(day, 'day');
+                // console.log(data.manualSchedule);
+                this.form.setFieldsValue({
+                    day: data.manualSchedule[i]
+                })
+            }
+
+        } catch (error) {
+
+        }
+
+        // axios.post(url + 'providers/get_my_provider_info', {}, {
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         'Authorization': 'Bearer ' + tokenUser
+        //     }
+        // }).then(result => {
+        //     const { data } = result.data
+        //     console.log('Infor avaiability', data);
+        //     this.form.setFieldsValue({
+        //         ...data
+        //     })
+
+        //     // for (let index = 0; index < day_week.length; index++) {
+        //     //     const element = day_week[index];
+        //     //     console.log(element, 'element')
+        //     // }
+
+        //     // console.log('ccc');
+
+
+        // }).catch(err => {
+        //     console.log('load data false');
+        //     console.log(err)
+        // })
         this.getDataFromServer();
     }
 
@@ -305,7 +339,6 @@ class InfoAvailability extends Component {
                         name="form_availability"
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
-
                         ref={ref => this.form = ref}
                     >
                         <p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.autoSyncCalendar)}</p>
@@ -449,9 +482,6 @@ class InfoAvailability extends Component {
                                     </Form.List>
                                 </div>
                             })}
-
-
-
                         </div>
                         <Row gutter={14} style={{ marginLeft: '-22px', marginRight: '-22px' }}>
                             <Col xs={24} sm={24} md={13}>

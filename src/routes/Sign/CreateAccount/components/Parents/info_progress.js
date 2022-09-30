@@ -240,7 +240,7 @@ class InfoProgress extends Component {
         }else{
             this.setState({
                 studentInfos: this.state.studentInfos.map((student, stdIndex) => {
-                    if(stdIndex = index ){
+                    if(stdIndex == index ){
                         return {...student ,availabilitySchedule:arr}
                     }
         
@@ -282,7 +282,7 @@ class InfoProgress extends Component {
         }else{
             this.setState({
                 studentInfos: this.state.studentInfos.map((student, stdIndex) => {
-                    if(stdIndex = index ){
+                    if(stdIndex == index ){
                         return {...student ,availabilitySchedule:arr}
                     }
         
@@ -305,6 +305,33 @@ class InfoProgress extends Component {
         }
         
         this.logForAvailbitiyArr();
+    }
+
+    remove1Item(index ,indexOnAvailabilitySchedule,){
+        const {studentInfos} = this.state;
+        var newStu = [...studentInfos];
+        var arr = [...newStu[index].availabilitySchedule];
+        arr.splice(indexOnAvailabilitySchedule ,1 )
+        console.log('new arr', arr.length);
+        if(this.state.isSameAll){
+            this.setState({
+                studentInfos: this.state.studentInfos.map((student, stdIndex) => {
+                    return {...student ,availabilitySchedule:[...arr]}
+                })
+            });
+        }else{
+            this.setState({
+                studentInfos: this.state.studentInfos.map((student, stdIndex) => {
+                    if(stdIndex == index ){
+                        return {...student ,availabilitySchedule:[...arr]}
+                    }
+        
+                    return student;
+                })
+            });
+            // newStu[index].availabilitySchedule = arr;
+            
+        }
     }
 
     renderItem(field , index){
@@ -366,6 +393,7 @@ class InfoProgress extends Component {
                                                 placeholder={intl.formatMessage(messages.to)} 
                                                 />
                                             {indexOnAvailabilitySchedule === 0 ? null : <BsDashCircle size={16} className='text-red icon-remove' onClick={() => {
+                                                this.remove1Item(index ,indexOnAvailabilitySchedule,)
                                                 // if(this.state.isSameAll){
                                                 //     remove(field.name)
                                                 // }else{
@@ -433,7 +461,15 @@ class InfoProgress extends Component {
                         
                         {/* List of Availability Schedule End */}
                         <div className="form-btn continue-btn" >
-                            <Button
+                        <Form
+                        name="form_default"
+                        // onFinish={this.onFinish}
+                        onFinishFailed={this.onFinishFailed}
+                        
+                        ref={ref => this.form = ref}
+                    >
+                        <Form.Item>
+                        <Button
                                 block
                                 type="primary"
                                 htmlType="submit"
@@ -441,6 +477,9 @@ class InfoProgress extends Component {
                             >
                                 {intl.formatMessage(messages.continue).toUpperCase()}
                             </Button>
+                        </Form.Item>
+                    </Form>
+                           
                         </div>
 
                     </div>

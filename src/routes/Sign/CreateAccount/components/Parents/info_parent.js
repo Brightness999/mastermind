@@ -43,17 +43,17 @@ class InfoParent extends Component {
     }
 
     getDefaultObj=()=>{
-        // return {
-        //     "maritialType": '0',
-        //     "address":"",
-        //     "familyName": "wong",
-        //     "fatherName": "su",
-        //     "fatherPhoneNumber": "0766667020",
-        //     "fatherEmail": "123@bcd.com",
-        //     "motherName": "fong",
-        //     "motherPhoneNumber": "0766667020",
-        //     "motherEmail": "321@dfg.com"
-        // };
+        return {
+            "maritialType": '0',
+            "address":"",
+            "familyName": "wong",
+            "fatherName": "su",
+            "fatherPhoneNumber": "0766667020",
+            "fatherEmail": "123@bcd.com",
+            "motherName": "fong",
+            "motherPhoneNumber": "0766667020",
+            "motherEmail": "321@dfg.com"
+        };
     }
 
     getDefaultValueInitForm=(key)=>{

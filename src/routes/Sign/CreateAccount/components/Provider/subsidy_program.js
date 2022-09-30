@@ -133,7 +133,7 @@ class SubsidyProgram extends Component {
                 },])
             return;
         }
-        return;
+        // return;
         const {registerData} = this.props.register;
         console.log('prop',registerData);
 
