@@ -1,190 +1,259 @@
-import React,  {Component} from 'react';
-import { Row, Col, Button} from 'antd';
+import React, { Component } from 'react';
+import { Row, Col, Button } from 'antd';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
-import messagesReview from '../../../SubsidyReview/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios'
 
 class InfoReview extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			SkillSet: [],
+			AcademicLevel: [],
+			ServiceableSchools: [],
+			ScreenTime: [],
+			CityConnections: [],
+			listSchools: [],
+		}
+	}
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            SkillSet:[],
-            AcademicLevel:[],
-            ServiceableSchools:[],
-            ScreenTime:[],
-            
-        }
-    }
+	componentDidMount() {
+		this.searchCityConnection();
+		this.loadSchools();
+	}
 
-    componentDidMount() {
-        const {registerData} = this.props.register;
-        console.log(registerData);
-        var arrReduce = [];
-        for(var i=0;i<100;i++){
-            arrReduce.push( i);
-        }
-        var arrTime = [];
-        arrTime.push(moment('2018-01-19 9:30:00 AM','YYYY-MM-DD hh:mm:ss A'))
-        arrTime.push(moment('2018-01-19 10:00:00 AM','YYYY-MM-DD hh:mm:ss A'))
-        arrTime.push(moment('2018-01-19 10:30:00 AM','YYYY-MM-DD hh:mm:ss A'))
-        arrTime.push(moment('2018-01-19 11:00:00 AM','YYYY-MM-DD hh:mm:ss A'))
+	searchCityConnection() {
+		axios.post(url + 'providers/get_city_connections'
+		).then(result => {
+			if (result.data.success) {
+				var data = result.data.data;
+				this.setState({ CityConnections: data.docs })
+			} else {
+				this.setState({
+					CityConnections: [],
+				});
+			}
+		}).catch(err => {
+			console.log(err);
+			this.setState({
+				CityConnections: [],
+			});
+		})
+	}
 
-        this.setState({ReduceList: arrReduce,TimeAvailableList: arrTime});
-        if (registerData.subsidy) {
-            this.form?.setFieldsValue(registerData.subsidy);
-            
-        }else{
-            this.form.setFieldsValue({level:[{}]})
-        }
-        this.setState({
-            isAcceptProBono: registerData.isAcceptProBono||false,
-            isAcceptReduceRate: registerData.isAcceptReduceRate||false,
-            isWillingOpenPrivate: registerData.isWillingOpenPrivate||false
-        })
-        this.getDataFromServer();
-    }
+	loadSchools() {
+		axios.post(url + 'clients/get_all_schools'
+		).then(result => {
+			if (result.data.success) {
+				var data = result.data.data;
+				this.setState({ listSchools: data })
+			}
+		}).catch(err => {
+			console.log(err);
+		})
+	}
 
+	onFinish = (values) => {
+		console.log('Success:', values);
+	};
 
+	onFinishFailed = (errorInfo) => {
+		console.log('Failed:', errorInfo);
+	};
 
-    onFinish = (values) => {
-        console.log('Success:', values);
-        // this.props.onContinue(true);
-    };
-    
-    onFinishFailed = (errorInfo) => {
-        console.log('Failed:', errorInfo);
-      };
-    render() {
-        return (
-            <Row justify="center" className="row-form">
-                <Row justify="center" className="row-form">
-                    <div className='col-form col-info-review'>
-                        <div className='div-form-title'>
-                            <p className='font-26'>{intl.formatMessage(messages.reviewAccountInfo)}</p>
-                        </div>
-                        <Row gutter={14}>
-                            <Col xs={24} sm={24} md={6}>
-                                <div>
-                                    <p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.usernameEmail)}</p>
-                                    <p>Username</p>
-                                    <p>Email</p>
-                                </div>
-                                <div>
-                                    <p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.providerInfo)}</p>
-                                    <p>Mother + Family name</p>
-                                    <p>Mother phone</p>
-                                    <p>Mother email</p>
-                                    <div className='height-20'/>
-                                    <p>Father + Family name</p>
-                                    <p>Father phone</p>
-                                    <p>Father email</p>
-                                </div>
-                            </Col>
-                            <Col xs={24} sm={24} md={9}>
-                                <div>
-                                    <p>Street Address </p>
-                                    <p>City State Zip</p>
-                                </div>
-                                <div>
-                                    <p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.ratesInfo)}</p>
-                                    <p className='font-14 font-700 mb-10'>Dependent #1 First + Last Name + DOB</p>
-                                    <p>School</p>
-                                    <div className='review-item'>
-                                        <p>Teacher</p>
-                                        <p>Grade</p>
-                                    </div>
-                                    <div className='review-item'>
-                                        <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.servicesRequested)}</p>
-                                        <p>Has an IEP</p>
-                                    </div>
-                                    <div className='review-item-3'>
-                                        <p>Service#1</p>
-                                        <p>Service#2</p>
-                                        <p>Service#3</p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.availability)}</p>
-                                    <div className='review-item-flex'>
-                                        <div className='item-flex'>
-                                            <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.sunday)}</p>
-                                            <p>AM#1.1 - AM#1.2</p>
-                                            <p>AM#1.1 - AM#1.2</p>
-                                            <p>AM#1.1 - AM#1.2</p>
-                                        </div>
-                                        <div className='item-flex'>
-                                            <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.wednesday)}</p>
-                                            <p>AM#1.1 - AM#1.2</p>
-                                            <p>AM#1.1 - AM#1.2</p>
-                                        </div>
-                                        <div className='item-flex'>
-                                            <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.thursday)}</p>
-                                            <p>AM#1.1 - AM#1.2</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Col>
-                            <Col xs={24} sm={24} md={9}>
-                                <div>
-                                    <p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.subsidyOptions)}</p>
-                                    <p>School</p>
-                                    <div className='review-item'>
-                                        <p>Teacher</p>
-                                        <p>Grade</p>
-                                    </div>
-                                    <div className='review-item'>
-                                        <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.servicesRequested)}</p>
-                                        <p>Has an IEP</p>
-                                    </div>
-                                    <div className='review-item-3'>
-                                        <p>Service#1</p>
-                                        <p>Service#2</p>
-                                        <p>Service#3</p>
-                                    </div>
-                                    <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.availability)}</p>
-                                    <div className='review-item-flex'>
-                                        <div className='item-flex'>
-                                            <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.sunday)}</p>
-                                            <p>AM#1.1 - AM#1.2</p>
-                                            <p>AM#1.1 - AM#1.2</p>
-                                            <p>AM#1.1 - AM#1.2</p>
-                                        </div>
-                                        <div className='item-flex'>
-                                            <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.wednesday)}</p>
-                                            <p>AM#1.1 - AM#1.2</p>
-                                            <p>AM#1.1 - AM#1.2</p>
-                                        </div>
-                                        <div className='item-flex'>
-                                            <p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.thursday)}</p>
-                                            <p>AM#1.1 - AM#1.2</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Col>
-                        </Row>
-                        <div className="form-btn continue-btn" >
-                            <Button
-                                block
-                                type="primary"                                      
-                                htmlType="submit"
-                            >
-                                {intl.formatMessage(messages.confirm).toUpperCase()}
-                            </Button>
-                        </div>
-                    </div>
-                    </Row>
-            </Row>
-        );
-    }
+	render() {
+		const { registerData } = this.props.register;
+
+		return (
+			<Row justify="center" className="row-form">
+				<Row justify="center" className="row-form">
+					<div className='col-form col-info-review'>
+						<div className='div-form-title'>
+							<p className='font-26'>{intl.formatMessage(messages.reviewAccountInfo)}</p>
+						</div>
+						<Row gutter={14}>
+							<Col xs={24} sm={24} md={6}>
+								<div>
+									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.usernameEmail)}</p>
+									<p>Username: {registerData?.username}</p>
+									<p>Email: {registerData?.email}</p>
+								</div>
+								<div>
+									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.providerInfo)}</p>
+									<p>Legal Name: {registerData?.profileInfor?.name}</p>
+									<p>Referred to As: {registerData?.profileInfor?.referredToAs}</p>
+									<p>Service Address: {registerData?.profileInfor?.serviceAddress}</p>
+									<p>Billing Address: {registerData?.profileInfor?.billingAddress}</p>
+									<p>City Connection: {registerData?.profileInfor?.cityConnection}</p>
+									<p>License Number: {registerData?.profileInfor?.licenseNumber}</p>
+									<p>Agency: {registerData?.profileInfor?.agency}</p>
+									<div className='mb-10'>
+										<div>Contact Number:</div>
+										{registerData?.profileInfor?.contactNumber.map((number, index) => (
+											<div key={index} className='flex gap-10'>
+												<span>{number.phoneNumber}</span>
+												<span>{number.type}</span>
+											</div>
+										))}
+									</div>
+									<div className='mb-10'>
+										<div>Contact Email:</div>
+										{registerData?.profileInfor?.contactEmail.map((email, index) => (
+											<div key={index} className='flex gap-10'>
+												<span>{email.email}</span>
+												<span>{email.type}</span>
+											</div>
+										))}
+									</div>
+									<div className='mb-10'>
+										<div>Professional Experience</div>
+										<div>{registerData?.profileInfor.proExp}</div>
+									</div>
+								</div>
+							</Col>
+							<Col xs={24} sm={24} md={9}>
+								<div>
+									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.servicesOffered)}</p>
+									<p>Skillset: {registerData?.serviceInfor?.skillSet}</p>
+									<div className='review-item'>
+										<p>Years of Experience: {registerData?.serviceInfor?.yearExp}</p>
+										<p>SSN: {registerData?.serviceInfor?.SSN}</p>
+									</div>
+									<div className='mb-10'>
+										<div>Serviceable Schools:</div>
+										{registerData?.serviceInfor?.serviceableSchool.map((school, index) => (
+											<div key={index}>{school}</div>
+										))}
+									</div>
+									<div className='mb-10'>
+										<div className='review-item'>
+											<div>Academic Level</div>
+											<div>Rate</div>
+										</div>
+										{registerData?.serviceInfor?.academicLevel.map((academic, index) => (
+											<div key={index} className='review-item'>
+												<p>{academic.level}</p>
+												<p>{academic.rate}</p>
+											</div>
+										))}
+									</div>
+									<p>Reference: {registerData?.serviceInfor?.references}</p>
+									<div className='mb-10'>
+										<div>Public profile:</div>
+										<div>{registerData?.serviceInfor?.publicProfile}</div>
+									</div>
+								</div>
+								<div>
+									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.availability)}</p>
+									<div className='review-item-flex'>
+										<div className='item-flex'>
+											<p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.sunday)}</p>
+											{registerData?.availability.Sunday.map((data, index) => (
+												<div key={index} className='review-item'>
+													<div>{`${data.from_date.month()}/${data.from_date.date()}/${data.from_date.year()}`} - {`${data.to_date.month()}/${data.to_date.date()}/${data.to_date.year()}`}</div>
+													<div>{`${data.from_time.hour()}/${data.from_time.minute()}`} - {`${data.to_time.hour()}/${data.to_time.minute()}`}</div>
+												</div>
+											))}
+										</div>
+										<div className='item-flex'>
+											<p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.monday)}</p>
+											{registerData?.availability.Monday.map((data, index) => (
+												<div key={index} className='review-item'>
+													<div>{`${data.from_date.month()}/${data.from_date.date()}/${data.from_date.year()}`} - {`${data.to_date.month()}/${data.to_date.date()}/${data.to_date.year()}`}</div>
+													<div>{`${data.from_time.hour()}/${data.from_time.minute()}`} - {`${data.to_time.hour()}/${data.to_time.minute()}`}</div>
+												</div>
+											))}
+										</div>
+										<div className='item-flex'>
+											<p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.tuesday)}</p>
+											{registerData?.availability.Tuesday.map((data, index) => (
+												<div key={index} className='review-item'>
+													<div>{`${data.from_date.month()}/${data.from_date.date()}/${data.from_date.year()}`} - {`${data.to_date.month()}/${data.to_date.date()}/${data.to_date.year()}`}</div>
+													<div>{`${data.from_time.hour()}/${data.from_time.minute()}`} - {`${data.to_time.hour()}/${data.to_time.minute()}`}</div>
+												</div>
+											))}
+										</div>
+										<div className='item-flex'>
+											<p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.wednesday)}</p>
+											{registerData?.availability.Wednesday.map((data, index) => (
+												<div key={index} className='review-item'>
+													<div>{`${data.from_date.month()}/${data.from_date.date()}/${data.from_date.year()}`} - {`${data.to_date.month()}/${data.to_date.date()}/${data.to_date.year()}`}</div>
+													<div>{`${data.from_time.hour()}/${data.from_time.minute()}`} - {`${data.to_time.hour()}/${data.to_time.minute()}`}</div>
+												</div>
+											))}
+										</div>
+										<div className='item-flex'>
+											<p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.thursday)}</p>
+											{registerData?.availability.Thursday.map((data, index) => (
+												<div key={index} className='review-item'>
+													<div>{`${data.from_date.month()}/${data.from_date.date()}/${data.from_date.year()}`} - {`${data.to_date.month()}/${data.to_date.date()}/${data.to_date.year()}`}</div>
+													<div>{`${data.from_time.hour()}/${data.from_time.minute()}`} - {`${data.to_time.hour()}/${data.to_time.minute()}`}</div>
+												</div>
+											))}
+										</div>
+										<div className='item-flex'>
+											<p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.friday)}</p>
+											{registerData?.availability.Friday.map((data, index) => (
+												<div key={index} className='review-item'>
+													<div>{`${data.from_date.month()}/${data.from_date.date()}/${data.from_date.year()}`} - {`${data.to_date.month()}/${data.to_date.date()}/${data.to_date.year()}`}</div>
+													<div>{`${data.from_time.hour()}/${data.from_time.minute()}`} - {`${data.to_time.hour()}/${data.to_time.minute()}`}</div>
+												</div>
+											))}
+										</div>
+									</div>
+								</div>
+							</Col>
+							<Col xs={24} sm={24} md={9}>
+								<div>
+									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.subsidyProgram)}</p>
+									<p>{intl.formatMessage(messages.numberSessionsWeek)}: {registerData?.subsidy.numberSessions}</p>
+									<div className='mb-10'>
+										<div>Reduced Academic Levels:</div>
+										{registerData?.subsidy.reduceWithAcademic?.map((academic, index) => (
+											<div key={index} className='flex'>
+												<div>Level: {academic.level}</div>
+												<div>Rate: {academic.rate}</div>
+												<div>Reduced: {academic.reduced}</div>
+											</div>
+										))}
+									</div>
+									<div className='mb-10'>
+										<div>Private Calendars:</div>
+										{registerData.subsidy.privateCalendars?.map((date, index) => (
+											<div key={index} className='flex'>
+												<div>{date.day}</div>
+												<div>
+													{date.availableHours.map((hour, index) => (
+														<div key={index}>{hour}</div>
+													))}
+												</div>
+											</div>
+										))}
+									</div>
+								</div>
+							</Col>
+						</Row>
+						<div className="form-btn continue-btn" >
+							<Button
+								block
+								type="primary"
+								htmlType="submit"
+							>
+								{intl.formatMessage(messages.confirm).toUpperCase()}
+							</Button>
+						</div>
+					</div>
+				</Row>
+			</Row>
+		);
+	}
 }
 const mapStateToProps = state => ({
-    register: state.register,
+	register: state.register,
 })
+
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoReview);

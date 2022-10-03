@@ -1,6 +1,6 @@
 // Page style
 @import '../../../assets/styles/variables.less';
-.dashboard-page {}
+
 .popup-scheduled {
     font-size: 30px;
     margin-top: 80vh;
@@ -14,4 +14,24 @@
             height: 30px;
         }
     }
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    border: 1px solid @gray200;
+}
+
+::-webkit-scrollbar-button {
+    height: 5px;
+    border: 1px solid @gray200;
+    border-bottom: none;
+    border-top: none;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: gray;
+    border-radius: 10px;
+    width: 5px;
+    margin: 10px;
+    padding: 10px;
 }

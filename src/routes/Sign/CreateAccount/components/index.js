@@ -2,7 +2,6 @@ import React from 'react';
 import { Button, Steps } from 'antd';
 import { BiChevronLeft } from 'react-icons/bi';
 import { ModalCreateDone } from '../../../../components/Modal';
-
 import intl from 'react-intl-universal';
 import messages from '../messages';
 import CreateDefault from './create_default';
@@ -10,7 +9,6 @@ import InfoParent from './Parents/info_parent';
 import InfoChild from './Parents/info_child';
 import InfoProgress from './Parents/info_progress';
 import ReviewAccount from './Parents/review_account';
-
 import InfoProfile from './Provider/info_profile';
 import InfoServices from './Provider/info_services';
 import InfoAvailability from './Provider/info_availability';
@@ -41,7 +39,6 @@ export default class extends React.Component {
 
   nextStep = () => {
     this.setState({ currentStep: this.state.currentStep + 1 });
-    console.log("Step", this.state.currentStep)
   };
 
   prevStep = () => {
@@ -99,7 +96,7 @@ export default class extends React.Component {
             <Step key='info_services' title={intl.formatMessage(messages.servicesInfo)} icon={<p>3</p>} />
             <Step key='info_availability' title={intl.formatMessage(messages.availabilityInfo)} icon={<p>4</p>} />
             <Step key='subsidy' title={intl.formatMessage(messages.subsidy)} icon={<p>5</p>} />
-            {/* <Step key='info_review' title={intl.formatMessage(messages.reviewInfo)} icon={<p>6</p>} /> */}
+            <Step key='info_review' title={intl.formatMessage(messages.reviewInfo)} icon={<p>6</p>} />
           </Steps>
         )
       case intl.formatMessage(messages.consultant):
@@ -114,7 +111,6 @@ export default class extends React.Component {
   }
 
   onOpenSubsidyStep = (step, selectedDependent) => {
-    console.log('step', step, selectedDependent);
     this.setState({
       subsidyStep: step,
       selectedDependent: selectedDependent
@@ -122,9 +118,7 @@ export default class extends React.Component {
   }
 
   changeSelectedDependent = (selectedDependent) => {
-    this.setState({
-      selectedDependent: selectedDependent
-    })
+    this.setState({ selectedDependent: selectedDependent })
   }
 
   getSelectedDependent = () => {
@@ -206,13 +200,6 @@ export default class extends React.Component {
         </div>
         {this.getStepsComponent(accountType)}
         <div className="steps-action">
-          {/* {currentStep === steps.length - 1 && (
-              <Button 
-                type="primary" 
-                onClick={() => message.success('Processing complete!')}>
-                Done
-              </Button>
-            )} */}
           {currentStep > 0 && (
             <Button
               type="text"
@@ -222,14 +209,6 @@ export default class extends React.Component {
               <BiChevronLeft size={25} />{intl.formatMessage(messages.back)}
             </Button>
           )}
-          {/* {currentStep < steps.length - 1 && (
-              <Button 
-                type="text" 
-                className='next-btn'
-                onClick={() => this.nextStep()}>
-                Next<BiChevronLeft size={25}/>
-              </Button>
-            )} */}
         </div>
         <ModalCreateDone {...createDoneProps} />
       </div>

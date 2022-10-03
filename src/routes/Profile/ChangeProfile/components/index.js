@@ -12,29 +12,20 @@ import DayWork from './Provider/day_work';
 import InfoChild from './Parents/info_child';
 import InfoParent from './Parents/info_parent';
 import InfoProgress from './Parents/info_progress';
-
 import InfoSchool from './School/info_school';
 import InfoAvaiSchool from './School/info_availability'
-
 import ChangePassword from './ChangePassword';
-
 import InfoAdmin from './Admin/info_admin';
 import { MENU_ADMIN, MENU_PARENT, MENU_PROVIDER, MENU_SCHOOL } from '../constant';
 import { setKeyDefault } from '../service';
 import { store } from '../../../../redux/store';
 
-// @connect(({ login, loading, global }) => ({
-//   global,
-//   login,
-//   loading: loading.models.login
-// }))
 const user = store.getState().auth.user;
 export default class extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      // user : localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : '',
       parent: {
         info_child: true,
         info_parent: false,
@@ -63,6 +54,7 @@ export default class extends React.Component {
       keyActive: setKeyDefault(user.role)
     };
   }
+
   componentDidMount() {
     switch (user.role) {
       case 999:
@@ -74,18 +66,10 @@ export default class extends React.Component {
       case 30:
         this.setState({ listMenu: this.getMenuList(MENU_PROVIDER) });
         break;
-      default:
+      case 3:
         this.setState({ listMenu: this.getMenuList(MENU_PARENT) });
         break;
     }
-  }
-
-  onSubmit = async () => {
-
-  }
-  getBirthday = () => {
-  }
-  defaultOnValueChange = (event, fieldName) => {
   }
 
   getMenuList = (data) => {
@@ -100,6 +84,7 @@ export default class extends React.Component {
     }))
     return menu;
   }
+
   changeMenu = (val) => {
     this.setState({ keyActive: val });
     switch (user.role) {
@@ -151,7 +136,7 @@ export default class extends React.Component {
             break;
         }
         break;
-      default:
+      case 3:
         let newStateParent = { ...this.state.parent }
         switch (val) {
           case 'Info_child':
@@ -202,7 +187,7 @@ export default class extends React.Component {
         } else {
           return <ChangePassword />
         }
-      default:
+      case 3:
         if (parent.info_child) {
           return <InfoChild />
         } else if (parent.info_parent) {
@@ -214,9 +199,10 @@ export default class extends React.Component {
         }
     }
   }
+
   render() {
-    console.log(this.state.school, 'xzcn,.xzncm,.xzncmxz,nclm,')
     const { listMenu, keyActive } = this.state;
+
     return (
       <div className="full-layout page admin-page">
         <div className='div-content'>
@@ -228,7 +214,6 @@ export default class extends React.Component {
           </section>
         </div>
       </div>
-
     );
   }
 }

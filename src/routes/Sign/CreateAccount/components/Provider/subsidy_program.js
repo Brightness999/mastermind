@@ -60,9 +60,9 @@ class SubsidyProgram extends Component {
 		this.setState({ ReduceList: arrReduce, TimeAvailableList: arrTime });
 		if (registerData.subsidy) {
 			this.form?.setFieldsValue(registerData.subsidy);
-
 		} else {
-			this.form.setFieldsValue({ reduceWithAcademic: [{}] })
+			this.form.setFieldsValue({ reduceWithAcademic: [{}] });
+			this.props.setRegisterData({ subsidy: this.getDefaultObj() });
 		}
 		this.setState({
 			isAcceptProBono: registerData.isAcceptProBono || false,
@@ -75,7 +75,6 @@ class SubsidyProgram extends Component {
 	getDataFromServer = () => {
 		axios.post(url + 'providers/get_default_values_for_provider'
 		).then(result => {
-			console.log('get_default_value_for_client', result.data);
 			if (result.data.success) {
 				var data = result.data.data;
 				this.setState({
@@ -100,6 +99,19 @@ class SubsidyProgram extends Component {
 		})
 	}
 
+	getDefaultObj = () => {
+		return {
+			isAcceptProBono: false,
+			isAcceptReduceRate: false,
+			isWillingOpenPrivate: false,
+			numberSessions: '',
+			level: '',
+			reate: '',
+			reduced: '',
+			isSameRate: true,
+		}
+	}
+
 	onSelect = (newValue) => {
 		this.setState({ valueCalendar: newValue });
 		this.setState({ selectedDay: newValue });
@@ -110,7 +122,6 @@ class SubsidyProgram extends Component {
 	}
 
 	onFinish = async (values) => {
-		console.log('Success:', values);
 		var privateCalendars = this.convertCalendarToArray();
 		if (!!this.form.getFieldError('checkAllFields')) {
 			this.form.setFields([
@@ -120,7 +131,7 @@ class SubsidyProgram extends Component {
 				},
 			])
 		}
-		if (!privateCalendars || privateCalendars < 1) {
+		if (this.state.isWillingOpenPrivate && (!privateCalendars || privateCalendars < 1)) {
 			this.form.setFields([
 				{
 					name: 'checkAllFields',
@@ -129,9 +140,9 @@ class SubsidyProgram extends Component {
 			])
 			return;
 		}
-		const { registerData } = this.props.register;
-		var postData = this.copyField(registerData);
-		postData.privateCalendars = privateCalendars;
+		this.props.setRegisterData({ subsidy: { ...values, privateCalendars: privateCalendars } })
+		this.props.onContinue();
+		return;
 		const response = await axios.post(url + 'users/signup', postData);
 		const { success, data } = response.data;
 		if (success) {
@@ -143,8 +154,8 @@ class SubsidyProgram extends Component {
 
 	copyField = (registerData) => {
 		var arr = ["email", "role", "isAcceptProBono", "isAcceptReduceRate", "isWillingOpenPrivate", "password", "username"];
-		var step4Data = this.validDataStep4(registerData.step4);
-		var obj = { ...registerData.profileInfor, ...registerData.subsidy, ...registerData.serviceInfor, ...step4Data };
+		var availability = this.validAvaiability(registerData.availability);
+		var obj = { ...registerData.profileInfor, ...registerData.subsidy, ...registerData.serviceInfor, ...availability };
 		for (var i = 0; i < arr.length; i++) {
 			obj["" + arr[i]] = registerData["" + arr[i]];
 		}
@@ -165,11 +176,11 @@ class SubsidyProgram extends Component {
 		return arr;
 	}
 
-	validDataStep4 = (step4) => {
+	validAvaiability = (availability) => {
 		var manualSchedule = [];
 		for (var i = 0; i < day_week.length; i++) {
-			for (var j = 0; j < step4['' + day_week[i]].length; j++) {
-				var scheduleItem = step4['' + day_week[i]][j];
+			for (var j = 0; j < availability['' + day_week[i]].length; j++) {
+				var scheduleItem = availability['' + day_week[i]][j];
 				manualSchedule.push({
 					"location": scheduleItem.location,
 					"dayInWeek": i,
@@ -181,8 +192,8 @@ class SubsidyProgram extends Component {
 			}
 		}
 		return {
-			cancellationFee: step4.cancellation_fee,
-			cancellationWindow: step4.cancellation_window,
+			cancellationFee: availability.cancellation_fee,
+			cancellationWindow: availability.cancellation_window,
 			manualSchedule: manualSchedule
 		}
 	}
@@ -200,7 +211,6 @@ class SubsidyProgram extends Component {
 	validDateContactPhoneNumber = (profileInfor) => {
 		var arr = [];
 		for (var i = 0; i < profileInfor.contactNumber.length; i++) {
-			console.log(profileInfor.contactNumber[i].contact, profileInfor.contactNumber[i].contact.contactphone)
 			arr.push({
 				"phoneNumber": profileInfor.contactNumber[i].contact.phoneNumber,
 				"type": profileInfor.contactNumber[i].contact.contactphone.type
@@ -227,10 +237,6 @@ class SubsidyProgram extends Component {
 		this.setState({ isSelectTime: index })
 	}
 
-	defaultOnValueChange = (event, fieldName) => {
-		console.log(this.form.getFieldsValue())
-	}
-
 	changeCheckboxValueOnRedux = (name, value) => {
 		var obj = {};
 		obj[name] = value;
@@ -238,7 +244,6 @@ class SubsidyProgram extends Component {
 	}
 
 	handleSelectChange = (value, fieldName) => {
-		console.log(this.form.getFieldsValue())
 		this.props.setRegisterData({ subsidy: this.form.getFieldsValue() })
 	}
 
@@ -323,13 +328,17 @@ class SubsidyProgram extends Component {
 						</div>
 						<div className='flex flex-row justify-between px-20'>
 							<p className='mb-10'>{intl.formatMessage(messages.numberSessionsWeek)}</p>
-							<Form.Item name="numberSessions" className='select-small'>
+							<Form.Item
+								name="numberSessions"
+								className='select-small'
+								rules={[{ required: this.state.isAcceptProBono, message: 'Please select your sessions.' }]}
+							>
 								<Select
 									disabled={!this.state.isAcceptProBono}
 									onChange={v => this.handleSelectChange(v, 'numberSessions')}
 								>
-									{this.state.NumberOfSession.map((value) => (
-										<Select.Option value={value}>{value}</Select.Option>
+									{this.state.NumberOfSession.map((value, index) => (
+										<Select.Option key={index} value={value}>{value}</Select.Option>
 									))}
 								</Select>
 							</Form.Item>
@@ -338,7 +347,6 @@ class SubsidyProgram extends Component {
 						<div className='flex flex-row mb-10'>
 							<Checkbox
 								onChange={v => {
-									console.log('checked change', v)
 									this.setState({ isAcceptReduceRate: v.target.checked })
 									this.changeCheckboxValueOnRedux('isAcceptReduceRate', v.target.checked)
 								}}
@@ -357,17 +365,15 @@ class SubsidyProgram extends Component {
 													<Form.Item
 														name={[field.name, "level"]}
 														className='select-small'
-														rules={[{ required: !this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.level) }]}
+														rules={[{ required: this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.level) }]}
 													>
 														<Select
 															disabled={!this.state.isAcceptReduceRate}
-															onChange={v => {
-																this.handleSelectChange();
-															}}
+															onChange={v => this.handleSelectChange()}
 															placeholder={intl.formatMessage(messages.level)}
 														>
-															{this.state.Levels.map((lvl) => (
-																<Select.Option value={lvl}>Grade {lvl}</Select.Option>
+															{this.state.Levels.map((lvl, index) => (
+																<Select.Option key={index} value={lvl}>Grade {lvl}</Select.Option>
 															))}
 														</Select>
 													</Form.Item>
@@ -377,7 +383,7 @@ class SubsidyProgram extends Component {
 														name={[field.name, "rate"]}
 														className='select-small'
 														style={{ height: "25px !important" }}
-														rules={[{ required: !this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
+														rules={[{ required: this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
 													>
 														<Input
 															onChange={v => {
@@ -389,10 +395,10 @@ class SubsidyProgram extends Component {
 																	}
 																	this.form.setFieldValue('reduceWithAcademic', arr);
 																}
-
 															}}
 															disabled={!this.state.isAcceptReduceRate}
 															className='input-with-select-small' placeholder={intl.formatMessage(messages.rate)}
+															size="large"
 														/>
 													</Form.Item>
 												</Col>
@@ -400,18 +406,15 @@ class SubsidyProgram extends Component {
 													<Form.Item
 														name={[field.name, "reduced"]}
 														className='select-small'
-														rules={[{ required: !this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced) }]}
+														rules={[{ required: this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced) }]}
 													>
 														<Select
-															onChange={v => {
-																console.log('on field change')
-																this.handleSelectChange();
-															}}
+															onChange={v => this.handleSelectChange()}
 															disabled={!this.state.isAcceptReduceRate}
 															placeholder={intl.formatMessage(messages.reduced)}
 														>
-															{this.state.ReduceList.map(value => (
-																<Select.Option value={value}>{value} %</Select.Option>
+															{this.state.ReduceList.map((value, index) => (
+																<Select.Option key={index} value={value}>{value} %</Select.Option>
 															))}
 														</Select>
 													</Form.Item>
@@ -424,14 +427,13 @@ class SubsidyProgram extends Component {
 												<div className='flex flex-row'>
 													<BsPlusCircle
 														disabled={!this.state.isAcceptReduceRate}
-														size={14} className='mr-5 text-primary'
+														size={14}
+														className='mr-5 text-primary'
 													/>
 													<a
 														className='text-primary'
 														disabled={!this.state.isAcceptReduceRate}
-														onClick={() => {
-															add()
-														}}
+														onClick={() => add()}
 													>
 														{intl.formatMessage(messages.addLevel)}
 													</a>
@@ -478,31 +480,29 @@ class SubsidyProgram extends Component {
 													return (<div className='mydaterender'>{date.day}</div>);
 												}
 											}}
-											headerRender={() => {
-												return (
-													<div style={{ marginBottom: 10 }}>
-														<Row gutter={8} justify="space-between" align="middle">
-															<Col>
-																<p className='font-16 mb-0'>{selectedDay?.format('MMMM YYYY')}</p>
-															</Col>
-															<Col>
-																<Button
-																	type='text'
-																	className='mr-10 left-btn'
-																	icon={<BiChevronLeft size={25} />}
-																	onClick={this.prevMonth}
-																/>
-																<Button
-																	type='text'
-																	className='right-btn'
-																	icon={<BiChevronRight size={25} />}
-																	onClick={this.nextMonth}
-																/>
-															</Col>
-														</Row>
-													</div>
-												);
-											}}
+											headerRender={() => (
+												<div style={{ marginBottom: 10 }}>
+													<Row gutter={8} justify="space-between" align="middle">
+														<Col>
+															<p className='font-16 mb-0'>{selectedDay?.format('MMMM YYYY')}</p>
+														</Col>
+														<Col>
+															<Button
+																type='text'
+																className='mr-10 left-btn'
+																icon={<BiChevronLeft size={25} />}
+																onClick={this.prevMonth}
+															/>
+															<Button
+																type='text'
+																className='right-btn'
+																icon={<BiChevronRight size={25} />}
+																onClick={this.nextMonth}
+															/>
+														</Col>
+													</Row>
+												</div>
+											)}
 										/>
 									</Col>
 									<Col xs={24} sm={24} md={9} style={{ height: '200px' }}>
@@ -523,14 +523,9 @@ class SubsidyProgram extends Component {
 								</Row>
 							</div>
 						</div>
-						<Form.Item
-							name="checkAllFields"
-							className="form-btn continue-btn"
-						>
-							<Button block type="primary" htmlType="submit">
-								{intl.formatMessage(messages.continue).toUpperCase()}
-							</Button>
-						</Form.Item>
+						<Button block type="primary" htmlType="submit">
+							{intl.formatMessage(messages.continue).toUpperCase()}
+						</Button>
 					</Form>
 				</div>
 			</Row>

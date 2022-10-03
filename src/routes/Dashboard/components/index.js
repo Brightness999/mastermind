@@ -1,38 +1,9 @@
 import React from 'react';
-import { connect } from 'dva';
-import {
-  Collapse,
-  Badge,
-  Avatar,
-  Tabs,
-  Dropdown,
-  Menu,
-  Button,
-  Segmented,
-  Row,
-  Col,
-  Checkbox,
-  Select,
-  message,
-  notification
-} from 'antd';
+import { Collapse, Badge, Avatar, Tabs, Dropdown, Menu, Button, Segmented, Row, Col, Checkbox, Select, message, notification } from 'antd';
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
-import { GiBackwardTime } from 'react-icons/gi';
 import { MdFormatAlignLeft } from 'react-icons/md';
-import { BsEnvelope, BsFilter, BsXCircle, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill, BsCheckCircleFill } from 'react-icons/bs';
-import {
-  ModalNewGroup,
-  ModalNewAppointment,
-  ModalNewAppointmentForParents,
-  ModalSubsidyProgress,
-  ModalReferralService,
-  ModalNewSubsidyRequest,
-  ModalNewSubsidyReview,
-  ModalNewClientScreening,
-  ModalSeparateEvaluation,
-  ModalStandardSession
-} from '../../../components/Modal';
-
+import { BsFilter, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
+import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
 import DrawerDetailPost from '../../../components/DrawerDetailPost';
@@ -42,7 +13,6 @@ import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
 import timeGridPlugin from '@fullcalendar/timegrid' // a plugin!
 import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClick
 import listPlugin from '@fullcalendar/list';
-
 import "@fullcalendar/daygrid/main.css";
 import "@fullcalendar/timegrid/main.css";
 import events from "../../../utils/calendar/events";
@@ -52,18 +22,14 @@ import EventDetail from './EventDetail';
 import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 const { Panel } = Collapse;
-
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
-import request, { generateSearchStructure } from '../../../utils/api/request'
+import request from '../../../utils/api/request'
 import moment from 'moment';
-
 import { changeTime, getAppointmentsMonthData, removeAppoint } from '../../../redux/features/appointmentsSlice'
 import { store } from '../../../redux/store'
-
 import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
-import Item from 'antd/lib/list/Item';
 
 export default class extends React.Component {
   constructor(props) {
@@ -84,7 +50,6 @@ export default class extends React.Component {
       idEvent: 0,
       isMonth: 1,
       isGridDayView: 'Grid',
-
       canDrop: true,
       calendarWeekends: true,
       calendarEvents: store.getState().appointments.dataAppointmentsMonth ?? events,
@@ -98,8 +63,8 @@ export default class extends React.Component {
       SkillSet: [],
       isEditSubsidyRequest: "",
     }
-    // this.panelSubsidariesRef = React.forwardRef();
   }
+
   componentDidMount() {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       this.loadDefaultData();
@@ -114,8 +79,6 @@ export default class extends React.Component {
           },
           token: loginData.token
         }
-
-        // const newAppointments = 
         this.setState({
           calendarEvents: appointmentsMonth,
           userRole: loginData.user.role
@@ -124,7 +87,6 @@ export default class extends React.Component {
           this.getMyAppointments();
           store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth))
         })
-
       }).catch(err => {
         this.props.history.push('/');
       })
@@ -142,7 +104,6 @@ export default class extends React.Component {
   loadDefaultData() {
     request.post('clients/get_default_value_for_client').then(result => {
       var data = result.data;
-      console.log('default value', data);
       this.setState({ SkillSet: data.SkillSet });
     })
   }
@@ -156,16 +117,13 @@ export default class extends React.Component {
       autoConnect: true,
     };
     this.socket = io(socketUrl, opts);
-    // const socket = socketio.connect(socketUrl , opts);
     this.socket.on('connect_error', e => {
       console.log('connect error ', e);
     });
 
     this.socket.on('connect', () => {
       console.log('socket connect success');
-      // this.disconnect();
       this.getSubprofile();
-
     });
 
     this.socket.on('socket_result', data => {
@@ -257,8 +215,6 @@ export default class extends React.Component {
   loadMySchoolInfo = () => {
     request.post('schools/get_my_school_info').then(result => {
       var data = result.data;
-      console.log('get_my_school_info', data);
-
       this.setState({ schoolInfo: data })
       this.joinRoom(data._id);
     })
@@ -267,8 +223,6 @@ export default class extends React.Component {
   getParentInfo = () => {
     request.post('clients/get_parent_profile').then(result => {
       var data = result.data;
-      console.log('get_parent_profile', data);
-
       this.setState({ parentInfo: data })
       this.joinRoom(data._id);
     })
@@ -277,7 +231,6 @@ export default class extends React.Component {
   loadDependent = () => {
     request.post('clients/get_child_profile').then(result => {
       var data = result.data;
-      console.log('get_child_profile', data);
       for (var i = 0; i < data.length; i++) {
         this.joinRoom(data[i]._id);
       }
@@ -296,8 +249,6 @@ export default class extends React.Component {
   loadMyProviderInfo = () => {
     request.post('providers/get_my_provider_info').then(result => {
       var data = result.data;
-      console.log('get_my_provider_info', data);
-
       this.setState({ providerInfo: data })
       this.joinRoom(data._id);
     })
@@ -316,17 +267,14 @@ export default class extends React.Component {
       SkillSet: this.state.SkillSet,
     };
     return (<ModalNewAppointmentForParents {...modalNewAppointProps} />);
-    // <ModalNewAppointment {...modalNewAppointProps} />
   }
 
   modalCreateAndEditSubsidyRequest = () => {
-
     const modalNewSubsidyProps = {
       visible: this.state.visibleNewSubsidy,
       onSubmit: this.onCloseModalNewSubsidy,
       onCancel: this.onCloseModalNewSubsidy,
       isEditSubsidyRequest: this.state.isEditSubsidyRequest,
-
     };
     return <ModalNewSubsidyRequest {...modalNewSubsidyProps}
       setOpennedEvent={opennedEvent => {
@@ -503,7 +451,6 @@ export default class extends React.Component {
     } else {
       this.setState({
         isEventDetail: !this.state.isEventDetail,
-        // calendarEvents: val.data
       });
     }
   }
@@ -517,7 +464,6 @@ export default class extends React.Component {
   }
 
   handleEventChange = (changeInfo) => {
-    const { calendarEvents } = this.state
     const obj = changeInfo.event.toPlainObject();
     const data = {
       token: localStorage.getItem('token'),
@@ -536,7 +482,6 @@ export default class extends React.Component {
         reportNetworkError()
         removeInfo.revert()
       })
-    // store.dispatch(removeAppoint(data))
   }
 
   getMyAppointments() {
@@ -548,7 +493,6 @@ export default class extends React.Component {
     request.post(url).then(result => {
       if (result.success) {
         var data = result.data;
-        console.log(url, data, this.state.userRole);
         this.setState({ listAppoinmentsRecent: data.docs });
       } else {
         this.setState({ listAppoinmentsRecent: [] });
@@ -583,6 +527,7 @@ export default class extends React.Component {
         <p className='font-700'>{appoinment.dependent.firstName} {appoinment.dependent.lastName}</p>
         {appoinment.provider != undefined && <p>{appoinment.provider.name || appoinment.provider.referredToAs}</p>}
         {appoinment.school != undefined && <p>{appoinment.school.name}</p>}
+        <p>{this.state.SkillSet[appoinment.skillSet[0]]}</p>
         <p>{appoinment.location}</p>
         <p>{moment(appoinment.date).format('hh:mm a')}</p>
         <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{moment(appoinment.date).fromNow()}</p>
@@ -607,7 +552,6 @@ export default class extends React.Component {
   );
 
   renderPanelAppointmentForProvider = () => {
-    const appointments = store.getState().appointments.dataAppointments
     if (this.state.userRole == 30 || this.state.userRole == 3)
       return (
         <Panel
@@ -661,22 +605,18 @@ export default class extends React.Component {
       isFilter,
       visibleDetail,
       visibleDetailPost,
-      visibleNewAppoint,
       visiblReferralService,
       isEventDetail,
       isMonth,
       isGridDayView,
-      visibleNewSubsidy,
       visibleNewReview,
-      visibleSubsidy,
       visibleNewGroup,
-      visibleEvaluation
     } = this.state;
 
     const btnMonthToWeek = (
-      <Button className='btn-type' onClick={this.handleMonthToWeek}>
+      <div role='button' className='btn-type' onClick={this.handleMonthToWeek}>
         {isMonth ? intl.formatMessage(messages.month) : intl.formatMessage(messages.week)}
-      </Button>
+      </div>
     );
     const btnChangeDayView = (
       <Segmented
@@ -777,28 +717,10 @@ export default class extends React.Component {
       },
     ];
 
-    const modalNewAppointProps = {
-      visible: visibleNewAppoint,
-      onSubmit: this.onSubmitModalNewAppoint,
-      onCancel: this.onCloseModalNewAppoint,
-    };
-
-    const modalSubsidyProps = {
-      visible: visibleSubsidy,
-      onSubmit: this.onSubmitModalSubsidy,
-      onCancel: this.onCloseModalSubsidy,
-    };
-
     const modalReferralServiceProps = {
       visible: visiblReferralService,
       onSubmit: this.onCloseModalReferral,
       onCancel: this.onCloseModalReferral,
-    };
-
-    const modalNewSubsidyProps = {
-      visible: visibleNewSubsidy,
-      onSubmit: this.onSubmitModalNewSubsidy,
-      onCancel: this.onCloseModalNewSubsidy,
     };
 
     const modalNewReviewProps = {
@@ -814,7 +736,6 @@ export default class extends React.Component {
     }
     return (
       <div className="full-layout page dashboard-page">
-        {/* <div className='div-show-subsidy' onClick={this.onShowModalSubsidy} /> */}
         <div className='div-content'>
           <section className='div-activity-feed box-card'>
             <div className='div-title-feed text-center'>
@@ -822,114 +743,111 @@ export default class extends React.Component {
             </div>
             <div className='div-list-feed'>
               {this.state.listAppoinmentsRecent.map((appoinment, index) => this.renderListAppoinmentsRecent(appoinment, index))}
-
-
-
             </div>
           </section>
           <section className='div-calendar box-card'>
-            {isFilter && <div className='calendar-filter'>
-              <CSSAnimate className="animated-shorter" type={isFilter ? 'fadeIn' : 'fadeOut'}>
-                <Row gutter={10}>
-                  <Col xs={12} sm={12} md={4}>
-                    <p className='font-10 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
-                    <Checkbox.Group options={optionsEvent} />
-                  </Col>
-                  <Col xs={12} sm={12} md={6} className='skillset-checkbox'>
-                    <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
-                    <Checkbox.Group options={optionsSkillset} />
-                  </Col>
-                  <Col xs={12} sm={12} md={7} className='select-small'>
-                    <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
-                    <Select placeholder={intl.formatMessage(messages.startTypingProvider)}>
-                      <Select.Option value='1'>Dr. Rabinowitz </Select.Option>
-                    </Select>
-                    <div className='div-chip'>
-                      {Array(3).fill(null).map((_, index) => <div key={index} className='chip'>Dr. Rabinowitz <BsX size={16} onClick={null} /></div>)}
-                    </div>
-                  </Col>
-                  <Col xs={12} sm={12} md={7} className='select-small'>
-                    <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
-                    <Select placeholder={intl.formatMessage(messages.startTypingLocation)}>
-                      <Select.Option value='1'>Rabinowitz office</Select.Option>
-                    </Select>
-                    <div className='div-chip'>
-                      {Array(3).fill(null).map((_, index) => <div key={index} className='chip'>Rabinowitz office <BsX size={16} onClick={null} /></div>)}
-                    </div>
-                  </Col>
-                </Row>
-                <div className='text-right'>
-                  <Button size='small' type='primary'>{intl.formatMessage(messages.apply).toUpperCase()}(10)</Button>
+            {isFilter && (
+              <div className='calendar-filter'>
+                <CSSAnimate className="animated-shorter" type={isFilter ? 'fadeIn' : 'fadeOut'}>
+                  <Row gutter={10}>
+                    <Col xs={12} sm={12} md={4}>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
+                      <Checkbox.Group options={optionsEvent} />
+                    </Col>
+                    <Col xs={12} sm={12} md={6} className='skillset-checkbox'>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
+                      <Checkbox.Group options={optionsSkillset} />
+                    </Col>
+                    <Col xs={12} sm={12} md={7} className='select-small'>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
+                      <Select placeholder={intl.formatMessage(messages.startTypingProvider)}>
+                        <Select.Option value='1'>Dr. Rabinowitz </Select.Option>
+                      </Select>
+                      <div className='div-chip'>
+                        {Array(3).fill(null).map((_, index) => <div key={index} className='chip'>Dr. Rabinowitz <BsX size={16} onClick={null} /></div>)}
+                      </div>
+                    </Col>
+                    <Col xs={12} sm={12} md={7} className='select-small'>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
+                      <Select placeholder={intl.formatMessage(messages.startTypingLocation)}>
+                        <Select.Option value='1'>Rabinowitz office</Select.Option>
+                      </Select>
+                      <div className='div-chip'>
+                        {Array(3).fill(null).map((_, index) => <div key={index} className='chip'>Rabinowitz office <BsX size={16} onClick={null} /></div>)}
+                      </div>
+                    </Col>
+                  </Row>
+                  <div className='text-right'>
+                    <Button size='small' type='primary'>{intl.formatMessage(messages.apply).toUpperCase()}(10)</Button>
+                  </div>
+                </CSSAnimate>
+              </div>
+            )}
+            {!isEventDetail && (
+              <>
+                <div className='calendar-content'>
+                  <FullCalendar
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                    ref={this.calendarRef}
+                    headerToolbar={{
+                      left: "filterButton",
+                      center: "prev,title,next",
+                      right: "monthToWeekButton,segmentView"
+                    }}
+                    views={{
+                      monthToWeekButton: {
+                        type: isMonth ? 'dayGridMonth' : 'timeGridWeek',
+                        buttonText: btnMonthToWeek,
+                      },
+                      segmentView: {
+                        type: isGridDayView === 'Grid' ? 'dayGridMonth' : 'listWeek',
+                        buttonText: btnChangeDayView,
+                      },
+                      week: {
+                        titleFormat: { month: 'numeric', day: 'numeric' }
+                      },
+                    }}
+                    customButtons={{
+                      filterButton: {
+                        text: btnFilter,
+                      },
+                    }}
+                    initialView='dayGridMonth'
+                    eventColor='#2d5cfa'
+                    eventDisplay='block'
+                    editable={true}
+                    selectable={true}
+                    selectMirror={true}
+                    dayMaxEvents={true}
+                    weekends={this.state.calendarWeekends}
+                    datesSet={this.handleDates}
+                    events={this.state.calendarEvents}
+                    eventContent={renderEventContent}
+                    eventClick={this.handleEventClick}
+                    eventChange={this.handleEventChange} // called for drag-n-drop/resize
+                    eventRemove={this.handleEventRemove}
+                  />
                 </div>
-              </CSSAnimate>
-            </div>}
-            {!isEventDetail && <><div className='calendar-content'>
-              <FullCalendar
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-                ref={this.calendarRef}
-                headerToolbar={{
-                  left: "filterButton",
-                  center: "prev,title,next",
-                  right: "monthToWeekButton,segmentView"
-                }}
-
-                views={{
-                  monthToWeekButton: {
-                    type: isMonth ? 'dayGridMonth' : 'timeGridWeek',
-                    buttonText: btnMonthToWeek,
-
-                  },
-                  segmentView: {
-                    type: isGridDayView === 'Grid' ? 'dayGridMonth' : 'listWeek',
-                    buttonText: btnChangeDayView,
-                  },
-                  week: {
-                    titleFormat: { month: 'numeric', day: 'numeric' }
-                  },
-                }}
-                customButtons={{
-                  filterButton: {
-                    text: btnFilter,
-                  },
-                }}
-                initialView='dayGridMonth'
-                eventColor='#2d5cfa'
-                eventDisplay='block'
-                editable={true}
-                selectable={true}
-                selectMirror={true}
-                dayMaxEvents={true}
-                weekends={this.state.calendarWeekends}
-                datesSet={this.handleDates}
-                // select={this.handleDateSelect}
-                events={this.state.calendarEvents}
-                // events={events}
-                eventContent={renderEventContent}
-                eventClick={this.handleEventClick}
-                // eventAdd={this.handleEventAdd}
-                eventChange={this.handleEventChange} // called for drag-n-drop/resize
-                eventRemove={this.handleEventRemove}
-              // ref={this.calendarComponentRef}
+                <div className='btn-appointment'>
+                  <Dropdown overlay={menu} placement="topRight">
+                    <Button
+                      type='primary'
+                      block
+                      icon={<FaCalendarAlt size={19} />}
+                    >
+                      {intl.formatMessage(messages.makeAppointment)}
+                    </Button>
+                  </Dropdown>
+                </div>
+              </>
+            )}
+            {isEventDetail && (
+              <EventDetail backView={this.handleEventClick}
+                id={this.state.idEvent}
+                role={this.state.userRole}
+                calendarEvents={this.state.calendarEvents}
               />
-
-            </div>
-              <div className='btn-appointment'>
-                <Dropdown overlay={menu} placement="topRight">
-                  <Button
-                    type='primary'
-                    block
-                    icon={<FaCalendarAlt size={19} />}
-                  // onClick={this.onShowDrawerDetailPost}
-                  >
-                    {intl.formatMessage(messages.makeAppointment)}
-                  </Button>
-                </Dropdown>
-              </div></>}
-            {isEventDetail && <EventDetail backView={this.handleEventClick}
-              id={this.state.idEvent}
-              role={this.state.userRole}
-              calendarEvents={this.state.calendarEvents}
-            />}
+            )}
           </section>
           <section className='div-multi-choice'>
             <Collapse
@@ -955,7 +873,8 @@ export default class extends React.Component {
                       <p className='font-12 mb-0'>Time</p>
                       <p className='font-12 font-700 mb-0'>Date</p>
                     </div>
-                  </div>)}
+                  </div>
+                )}
               </Panel>
               <Panel header={intl.formatMessage(messages.screenings)} key="3">
                 {new Array(10).fill(null).map((_, index) =>
@@ -973,7 +892,8 @@ export default class extends React.Component {
                       <p className='font-12 mb-0'>Time</p>
                       <p className='font-12 font-700 mb-0'>Date</p>
                     </div>
-                  </div>)}
+                  </div>
+                )}
               </Panel>
               <Panel
                 key="4"
@@ -981,7 +901,7 @@ export default class extends React.Component {
                 className='evaluations-panel'
               >
                 <Tabs defaultActiveKey="1" type="card" size='small'>
-                  <Item tab={intl.formatMessage(messages.upcoming)} key="1">
+                  <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {new Array(10).fill(null).map((_, index) =>
                       <div key={index} className='list-item padding-item'>
                         <Avatar size={24} icon={<FaUser size={12} />} />
@@ -996,10 +916,10 @@ export default class extends React.Component {
                         </div>
                       </div>
                     )}
-                  </Item>
-                  <Item tab={intl.formatMessage(messages.past)} key="2">
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
                     <div className='list-item padding-item'>{intl.formatMessage(messages.past)}</div>
-                  </Item>
+                  </Tabs.TabPane>
                 </Tabs>
               </Panel>
               <Panel header={intl.formatMessage(messages.flags)} key="5" extra={this.genExtraFlag()}>
@@ -1061,8 +981,10 @@ function reportNetworkError() {
 
 function renderEventContent(eventInfo) {
   return (
-    <>
-      <b className='mr-3'>{eventInfo.event.title}-{moment(eventInfo.event.start).format('hh:mm')}</b>
-    </>
+    <div className='flex flex-col'>
+      <Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />     
+      <b className='mr-3'>{moment(eventInfo.event.start).format('hh:mm')}</b>
+      <b className='mr-3'>Meeting with {eventInfo.event.title}</b>
+    </div>
   )
 }
