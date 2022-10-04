@@ -121,7 +121,7 @@ class SubsidyProgram extends Component {
 		this.setState({ valueCalendar: newValue });
 	}
 
-	onFinish = async (values) => {
+	onFinish = (values) => {
 		var privateCalendars = this.convertCalendarToArray();
 		if (!!this.form.getFieldError('checkAllFields')) {
 			this.form.setFields([
@@ -142,26 +142,7 @@ class SubsidyProgram extends Component {
 		}
 		this.props.setRegisterData({ subsidy: { ...values, privateCalendars: privateCalendars } })
 		this.props.onContinue();
-		return;
-		const response = await axios.post(url + 'users/signup', postData);
-		const { success, data } = response.data;
-		if (success) {
-			this.props.onContinue(true);
-		} else {
-			message.error(error?.response?.data?.data ?? error.message);
-		}
 	};
-
-	copyField = (registerData) => {
-		var arr = ["email", "role", "isAcceptProBono", "isAcceptReduceRate", "isWillingOpenPrivate", "password", "username"];
-		var availability = this.validAvaiability(registerData.availability);
-		var obj = { ...registerData.profileInfor, ...registerData.subsidy, ...registerData.serviceInfor, ...availability };
-		for (var i = 0; i < arr.length; i++) {
-			obj["" + arr[i]] = registerData["" + arr[i]];
-		}
-		obj.W9FormPath = registerData.uploaded_path;
-		return obj;
-	}
 
 	convertCalendarToArray = () => {
 		var arr = [];
@@ -174,28 +155,6 @@ class SubsidyProgram extends Component {
 			})
 		}
 		return arr;
-	}
-
-	validAvaiability = (availability) => {
-		var manualSchedule = [];
-		for (var i = 0; i < day_week.length; i++) {
-			for (var j = 0; j < availability['' + day_week[i]].length; j++) {
-				var scheduleItem = availability['' + day_week[i]][j];
-				manualSchedule.push({
-					"location": scheduleItem.location,
-					"dayInWeek": i,
-					"openHour": scheduleItem.from_time.hour(),
-					"openMin": scheduleItem.from_time.minutes(),
-					"closeHour": scheduleItem.to_time.hour(),
-					"closeMin": scheduleItem.to_time.minutes()
-				})
-			}
-		}
-		return {
-			cancellationFee: availability.cancellation_fee,
-			cancellationWindow: availability.cancellation_window,
-			manualSchedule: manualSchedule
-		}
 	}
 
 	validDataContactEmail = (profileInfor) => {

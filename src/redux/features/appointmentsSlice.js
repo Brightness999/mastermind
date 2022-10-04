@@ -43,7 +43,7 @@ export const getAppointmentsMonthData = createAsyncThunk(
                     result = await request.post(url+'clients/get_my_appointments_in_month' ,data.data, data.token);
                     break;
             }
-            result.data.forEach((appoint)=>{
+            result.data?.forEach((appoint)=>{
                 console.log('sida ',data.role==30?(appoint.dependent.firstName+ " " + appoint.dependent.lastName):appoint.provider.name)
                 appoint.title = data.role==30?(appoint.dependent.firstName+ " " + appoint.dependent.lastName):appoint.provider.name;
                 appoint.allDay= false;
