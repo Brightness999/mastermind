@@ -829,7 +829,7 @@ export default class extends React.Component {
                   />
                 </div>
                 <div className='btn-appointment'>
-                  <Dropdown overlay={menu} placement="topRight">
+                  <Dropdown overlay={this.state.userRole == 60 ? <></> : menu} placement="topRight">
                     <Button
                       type='primary'
                       block

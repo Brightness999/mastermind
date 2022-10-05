@@ -353,7 +353,8 @@ class InfoServices extends Component {
 							>
 								<Input
 									onChange={v => { }}
-									placeholder={intl.formatMessage(messages.rate)} className='bottom-left-0 mb-0'
+									placeholder={intl.formatMessage(messages.rate)}
+									className='bottom-left-0 mb-0'
 								/>
 							</Form.Item>
 						</div>

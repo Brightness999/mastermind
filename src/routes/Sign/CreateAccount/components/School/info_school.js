@@ -168,8 +168,8 @@ class InfoSchool extends React.Component {
 	}
 
 	onSelectTimeForSesssion(index, value, type) {
-		const hour = value.hour()
-		const minute = value.minute()
+		const hour = value ? value.hour() : 0;
+		const minute = value ? value.minute() : 0;
 
 		switch (type) {
 			case 'inOpen':
@@ -321,7 +321,7 @@ class InfoSchool extends React.Component {
 													? { backgroundColor: '#fafafa', cursor: 'pointer' }
 													: { backgroundColor: '#ffffff', cursor: 'pointer' };
 												return (
-													<div {...getSuggestionItemProps(suggestion, { className, style, key: suggestion.index })}>
+													<div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
 														<span>{suggestion.description}</span>
 													</div>
 												);
@@ -384,7 +384,8 @@ class InfoSchool extends React.Component {
 											>
 												<Input
 													onChange={event => this.onStudentContactRefChange()}
-													placeholder={intl.formatMessage(messages.studentReferralContact)} />
+													placeholder={intl.formatMessage(messages.studentReferralContact)}
+												/>
 											</Form.Item>
 											{field.key !== 0 && (
 												<BsDashCircle
@@ -422,27 +423,34 @@ class InfoSchool extends React.Component {
 										<p className='mb-10 font-700'>{intl.formatMessage(messages.inSchoolHours)}</p>
 										<Row gutter={14}>
 											<Col xs={24} sm={24} md={12}>
-												<TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
-													use12Hours format="h:mm a"
+												<TimePicker
+													onChange={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
+													use12Hours
+													format="h:mm a"
 													placeholder={intl.formatMessage(messages.from)}
 													value={this.valueForAvailabilityScheduleForOpenHour(this.state.sessionsInSchool, index, 'open')}
 												/>
 											</Col>
 											<Col xs={24} sm={24} md={12}>
-												<TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'inClose')} use12Hours
+												<TimePicker
+													onChange={v => this.onSelectTimeForSesssion(index, v, 'inClose')}
 													value={this.valueForAvailabilityScheduleForCloseHour(this.state.sessionsInSchool, index, 'close')}
-													format="h:mm a" placeholder={intl.formatMessage(messages.to)} />
+													use12Hours
+													format="h:mm a"
+													placeholder={intl.formatMessage(messages.to)} />
 											</Col>
 										</Row>
 										<p className='mb-10 font-700'>{intl.formatMessage(messages.afterSchoolHours)}</p>
 										<Row gutter={14}>
 											<Col xs={24} sm={24} md={12}>
-												<TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')} use12Hours
+												<TimePicker
+													onChange={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')} use12Hours
 													value={this.valueForAvailabilityScheduleForOpenHour(this.state.sessionsAfterSchool, index, 'open')}
 													format="h:mm a" placeholder={intl.formatMessage(messages.from)} />
 											</Col>
 											<Col xs={24} sm={24} md={12}>
-												<TimePicker onChange={v => this.onSelectTimeForSesssion(index, v, 'afterClose')} use12Hours
+												<TimePicker
+													onChange={v => this.onSelectTimeForSesssion(index, v, 'afterClose')} use12Hours
 													value={this.valueForAvailabilityScheduleForCloseHour(this.state.sessionsAfterSchool, index, 'close')}
 													format="h:mm a" placeholder={intl.formatMessage(messages.to)} />
 											</Col>
@@ -467,10 +475,8 @@ class InfoSchool extends React.Component {
 	}
 }
 
-const mapStateToProps = state => {
-	return {
-		register: state.register
-	}
-}
+const mapStateToProps = state => ({
+	register: state.register
+})
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoSchool);

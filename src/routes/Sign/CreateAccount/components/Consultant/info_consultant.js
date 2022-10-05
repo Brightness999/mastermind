@@ -7,7 +7,6 @@ import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import PlacesAutocomplete from 'react-places-autocomplete';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
 
@@ -154,16 +153,19 @@ class InfoConsultant extends Component {
               <Select
                 placeholder={intl.formatMessage(messages.skillsets)}
                 onChange={v => this.handelChange('skillSet', v)}>
-                {this.state.SkillSet.map((value, index) => {
-                  return (<Select.Option value={index}>{value}</Select.Option>)
-                })}
+                {this.state.SkillSet.map((value, index) => (
+                  <Select.Option key={index} value={index}>{value}</Select.Option>
+                ))}
               </Select>
             </Form.Item>
             <Form.Item
               name="yearExp"
               rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.yearsExperience) }]}
             >
-              <Input onChange={v => this.defaultOnValueChange(v, 'yearExp')} placeholder={intl.formatMessage(messages.yearsExperience)} />
+              <Input
+                onChange={v => this.defaultOnValueChange(v, 'yearExp')}
+                placeholder={intl.formatMessage(messages.yearsExperience)}
+              />
             </Form.Item>
             <Form.List name="contactNumber">
               {(fields, { add, remove }) => (
@@ -199,9 +201,9 @@ class InfoConsultant extends Component {
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                         >
                           <Select placeholder={intl.formatMessage(messages.type)}>
-                            {this.state.ContactNumberType.map((value, index) => {
-                              return (<Select.Option value={index}>{value}</Select.Option>)
-                            })}
+                            {this.state.ContactNumberType.map((value, index) => (
+                              <Select.Option key={index} value={index}>{value}</Select.Option>
+                            ))}
                           </Select>
                         </Form.Item>
                         {key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(name)} />}
@@ -255,9 +257,9 @@ class InfoConsultant extends Component {
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                         >
                           <Select placeholder={intl.formatMessage(messages.type)}>
-                            {this.state.EmailType.map((value, index) => {
-                              return (<Select.Option value={index}>{value}</Select.Option>)
-                            })}
+                            {this.state.EmailType.map((value, index) => (
+                              <Select.Option key={index} value={index}>{value}</Select.Option>
+                            ))}
                           </Select>
                         </Form.Item>
                         {key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(name)} />}

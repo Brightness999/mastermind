@@ -3,7 +3,6 @@ import { Row, Col, Form, Button, Segmented, TimePicker, message } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
-import moment from 'moment';
 import messages from '../../messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
@@ -154,7 +153,7 @@ class ConsultantAvailability extends Component {
             <div className='div-availability'>
               <Segmented options={day_week} block={true} onChange={this.onSelectDay} />
               {day_week.map((day, index) => (
-                <div id={day} style={{ display: this.state.currentSelectedDay === day ? 'block' : 'none' }}>
+                <div key={index} id={day} style={{ display: this.state.currentSelectedDay === day ? 'block' : 'none' }}>
                   <Form.List name={day}>
                     {(fields, { add, remove }) => (
                       <div className='div-time'>
@@ -162,23 +161,23 @@ class ConsultantAvailability extends Component {
                           <div key={field.key}>
                             <Row gutter={14}>
                               <Col xs={24} sm={24} md={12}>
-                                <Form.Item
-                                  name={[field.name, "from_time"]}
-                                  rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
-                                >
+                                <Form.Item name={[field.name, "from_time"]}>
                                   <TimePicker
                                     onChange={v => this.onChangeScheduleValue(day, v)}
-                                    use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
+                                    use12Hours
+                                    format="h:mm a"
+                                    placeholder={intl.formatMessage(messages.from)}
+                                  />
                                 </Form.Item>
                               </Col>
                               <Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
-                                <Form.Item
-                                  name={[field.name, "to_time"]}
-                                  rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
-                                >
+                                <Form.Item name={[field.name, "to_time"]}>
                                   <TimePicker
                                     onChange={v => this.onChangeScheduleValue(day, v)}
-                                    use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
+                                    use12Hours
+                                    format="h:mm a"
+                                    placeholder={intl.formatMessage(messages.to)}
+                                  />
                                 </Form.Item>
                                 {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
                               </Col>

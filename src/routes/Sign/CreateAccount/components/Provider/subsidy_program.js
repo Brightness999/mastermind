@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Calendar, Select, Switch, Divider, Input, Checkbox, message } from 'antd';
+import { Row, Col, Form, Button, Calendar, Select, Switch, Divider, Input, Checkbox } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
@@ -15,15 +15,6 @@ import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios'
 import 'moment/locale/en-au';
 moment.locale('en');
-
-const day_week = [
-	intl.formatMessage(messages.sunday),
-	intl.formatMessage(messages.monday),
-	intl.formatMessage(messages.tuesday),
-	intl.formatMessage(messages.wednesday),
-	intl.formatMessage(messages.thursday),
-	intl.formatMessage(messages.friday),
-]
 
 class SubsidyProgram extends Component {
 	state = {
@@ -52,10 +43,10 @@ class SubsidyProgram extends Component {
 			arrReduce.push(i);
 		}
 		var arrTime = [];
-		arrTime.push(moment('2018-01-19 9:30:00 AM', 'YYYY-MM-DD hh:mm:ss A'))
-		arrTime.push(moment('2018-01-19 10:00:00 AM', 'YYYY-MM-DD hh:mm:ss A'))
-		arrTime.push(moment('2018-01-19 10:30:00 AM', 'YYYY-MM-DD hh:mm:ss A'))
-		arrTime.push(moment('2018-01-19 11:00:00 AM', 'YYYY-MM-DD hh:mm:ss A'))
+		arrTime.push(moment('9:30:00 AM', 'hh:mm:ss A'))
+		arrTime.push(moment('10:00:00 AM', 'hh:mm:ss A'))
+		arrTime.push(moment('10:30:00 AM', 'hh:mm:ss A'))
+		arrTime.push(moment('11:00:00 AM', 'hh:mm:ss A'))
 
 		this.setState({ ReduceList: arrReduce, TimeAvailableList: arrTime });
 		if (registerData.subsidy) {
@@ -140,7 +131,11 @@ class SubsidyProgram extends Component {
 			])
 			return;
 		}
-		this.props.setRegisterData({ subsidy: { ...values, privateCalendars: privateCalendars } })
+		if (this.state.isWillingOpenPrivate) {
+			this.props.setRegisterData({ subsidy: { ...values, privateCalendars: privateCalendars } })
+		} else {
+			this.props.setRegisterData({ subsidy: { ...values } })
+		}
 		this.props.onContinue();
 	};
 
@@ -356,8 +351,8 @@ class SubsidyProgram extends Component {
 																}
 															}}
 															disabled={!this.state.isAcceptReduceRate}
-															className='input-with-select-small' placeholder={intl.formatMessage(messages.rate)}
-															size="large"
+															className='input-with-select-small'
+															placeholder={intl.formatMessage(messages.rate)}
 														/>
 													</Form.Item>
 												</Col>

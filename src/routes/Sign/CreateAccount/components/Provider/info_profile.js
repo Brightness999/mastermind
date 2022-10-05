@@ -172,7 +172,7 @@ class InfoProfile extends Component {
 										})} />
 										<div className="autocomplete-dropdown-container">
 											{loading && <div>Loading...</div>}
-											{suggestions.map((suggestion, index) => {
+											{suggestions.map(suggestion => {
 												const className = suggestion.active
 													? 'suggestion-item--active'
 													: 'suggestion-item';
@@ -181,7 +181,7 @@ class InfoProfile extends Component {
 													? { backgroundColor: '#fafafa', cursor: 'pointer' }
 													: { backgroundColor: '#ffffff', cursor: 'pointer' };
 												return (
-													<div {...getSuggestionItemProps(suggestion, { className, style, key: index })}>
+													<div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
 														<span>{suggestion.description}</span>
 													</div>
 												);
@@ -208,7 +208,7 @@ class InfoProfile extends Component {
 										})} />
 										<div className="autocomplete-dropdown-container">
 											{loading && <div>Loading...</div>}
-											{suggestions.map((suggestion, index) => {
+											{suggestions.map(suggestion => {
 												const className = suggestion.active
 													? 'suggestion-item--active'
 													: 'suggestion-item';
@@ -217,7 +217,7 @@ class InfoProfile extends Component {
 													? { backgroundColor: '#fafafa', cursor: 'pointer' }
 													: { backgroundColor: '#ffffff', cursor: 'pointer' };
 												return (
-													<div {...getSuggestionItemProps(suggestion, { className, style, key: index })}>
+													<div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
 														<span>{suggestion.description}</span>
 													</div>
 												);

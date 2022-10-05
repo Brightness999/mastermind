@@ -92,7 +92,7 @@ class ReviewAccount extends Component {
 			}
 		}
 		const response = await axios.post(url + 'users/signup', customData);
-		const { success, data } = response.data;
+		const { success } = response.data;
 		if (success) {
 			this.props.onContinue(true);
 		} else {
@@ -143,25 +143,25 @@ class ReviewAccount extends Component {
 						</div>
 						<div>
 							<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.usernameEmail)}</p>
-							<p>Username : {this.state?.registerData.username}</p>
-							<p>Email : {this.state?.registerData.email}</p>
+							<p>Username : {this.state.registerData?.username}</p>
+							<p>Email : {this.state.registerData?.email}</p>
 						</div>
 						<div>
 							<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.parentsInfo)}</p>
 							<p className='font-14 underline'>{intl.formatMessage(messages.mother)}</p>
-							<p>Mother + Family name : {this.state.registerData?.parentInfo.motherName}</p>
-							<p>Mother phone : {this.state.registerData?.parentInfo.motherPhoneNumber}</p>
-							<p>Mother email : {this.state.registerData?.parentInfo.motherEmail}</p>
+							<p>Mother + Family name : {this.state.registerData?.parentInfo?.motherName}</p>
+							<p>Mother phone : {this.state.registerData?.parentInfo?.motherPhoneNumber}</p>
+							<p>Mother email : {this.state.registerData?.parentInfo?.motherEmail}</p>
 							<p className='font-14 underline'>{intl.formatMessage(messages.father)}</p>
-							<p>Father + Family name : {this.state.registerData?.parentInfo.familyName} </p>
-							<p>Father phone : {this.state.registerData?.parentInfo.fatherPhoneNumber}</p>
-							<p>Father email : {this.state.registerData?.parentInfo.fatherEmail}</p>
+							<p>Father + Family name : {this.state.registerData?.parentInfo?.familyName} </p>
+							<p>Father phone : {this.state.registerData?.parentInfo?.fatherPhoneNumber}</p>
+							<p>Father email : {this.state.registerData?.parentInfo?.fatherEmail}</p>
 						</div>
 						<div>
 							<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.address)}</p>
-							<p>Street Address : {this.state.registerData?.parentInfo.address}</p>
+							<p>Street Address : {this.state.registerData?.parentInfo?.address}</p>
 						</div>
-						{this.state.registerData?.studentInfos.map((item, index) => (
+						{this.state.registerData?.studentInfos?.map((item, index) => (
 							<div key={index}>
 								<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.dependentsInfo)}</p>
 								<p className='font-14 font-700 mb-10'>Dependent #{++index} {item.firstName} {item.lastName} - {item.birthday}</p>
@@ -175,7 +175,7 @@ class ReviewAccount extends Component {
 									<p>Has an IEP</p>
 								</div>
 								<div className='review-item-3'>
-									{item.services.map((service, serviceIndex) => (
+									{item.services?.map((service, serviceIndex) => (
 										<p key={serviceIndex}>{this.getServicesName(service)}</p>
 									))}
 								</div>
@@ -186,7 +186,7 @@ class ReviewAccount extends Component {
 											if (this.checkHaveSchedule(dayInWeekIndex, item)) {
 												return (
 													<div key={dayInWeekIndex} className='item-flex'>
-														<p className='font-14 font-700 mb-10'>{day_week[dayInWeekIndex]}</p>
+														<p className='font-14 font-700 mb-10'>{dayInWeek}</p>
 														{this.getScheduleInDay(dayInWeekIndex, item).map((schedule, index) => (
 															<p key={index}>{this.displayHourMin(schedule.openHour)}:{this.displayHourMin(schedule.openMin)} - {this.displayHourMin(schedule.closeHour)}:{this.displayHourMin(schedule.closeMin)}</p>
 														))}
@@ -215,11 +215,9 @@ class ReviewAccount extends Component {
 	}
 }
 
-const mapStateToProps = state => {
-	return {
-		register: state.register
-	}
-}
+const mapStateToProps = state => ({
+	register: state.register
+})
 
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(ReviewAccount);

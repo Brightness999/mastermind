@@ -155,11 +155,31 @@ export default class extends React.Component {
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
             if (this.state.subsidyStep == 1) {
-              return (<SubsidyRequest selectedDependent={this.state.selectedDependent} changeSelectedDependent={this.changeSelectedDependent} onOpenSubsidyStep={this.onOpenSubsidyStep} onContinue={this.handleContinue} />)
+              return (
+                <SubsidyRequest
+                  selectedDependent={this.state.selectedDependent}
+                  changeSelectedDependent={this.changeSelectedDependent}
+                  onOpenSubsidyStep={this.onOpenSubsidyStep}
+                  onContinue={this.handleContinue}
+                />
+              )
             } else if (this.state.subsidyStep == 2) {
-              return (<SubsidyReview selectedDependent={this.state.selectedDependent} changeSelectedDependent={this.changeSelectedDependent} onOpenSubsidyStep={this.onOpenSubsidyStep} onContinue={this.handleContinue} />)
+              return (
+                <SubsidyReview
+                  selectedDependent={this.state.selectedDependent}
+                  changeSelectedDependent={this.changeSelectedDependent}
+                  onOpenSubsidyStep={this.onOpenSubsidyStep}
+                  onContinue={this.handleContinue}
+                />
+              )
             } else {
-              return (<InfoChild onOpenSubsidyStep={this.onOpenSubsidyStep} changeSelectedDependent={this.changeSelectedDependent} onContinue={this.handleContinue} />)
+              return (
+                <InfoChild
+                  onOpenSubsidyStep={this.onOpenSubsidyStep}
+                  changeSelectedDependent={this.changeSelectedDependent}
+                  onContinue={this.handleContinue}
+                />
+              )
             }
           case intl.formatMessage(messages.provider):
             return (<InfoServices onContinue={this.handleContinue} />)

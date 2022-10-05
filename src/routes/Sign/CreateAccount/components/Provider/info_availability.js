@@ -35,16 +35,10 @@ class InfoAvailability extends Component {
 	componentDidMount() {
 		let { registerData } = this.props.register;
 		if (!!registerData.availability) {
-			this.form?.setFieldsValue({
-				...registerData.availability
-			})
-			this.setState({
-				isPrivate: registerData.isPrivate
-			})
+			this.form?.setFieldsValue({ ...registerData.availability })
+			this.setState({ isPrivate: registerData.isPrivate })
 		} else {
-			day_week.map((day) => {
-				this.form.setFieldValue(day, [''])
-			})
+			day_week.map((day) => this.form.setFieldValue(day, ['']))
 		}
 		this.getDataFromServer();
 	}
@@ -156,10 +150,7 @@ class InfoAvailability extends Component {
 													<div key={field.key}>
 														<Row gutter={14}>
 															<Col xs={24} sm={24} md={12}>
-																<Form.Item
-																	name={[field.name, "from_date"]}
-																	rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
-																>
+																<Form.Item name={[field.name, "from_date"]}>
 																	<DatePicker
 																		onChange={v => this.onChangeScheduleValue(day, v)}
 																		format='MM/DD/YYYY'
@@ -168,10 +159,7 @@ class InfoAvailability extends Component {
 																</Form.Item>
 															</Col>
 															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
-																<Form.Item
-																	name={[field.name, "to_date"]}
-																	rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
-																>
+																<Form.Item name={[field.name, "to_date"]}>
 																	<DatePicker
 																		onChange={v => this.onChangeScheduleValue(day, v)}
 																		format='MM/DD/YYY'
@@ -183,10 +171,7 @@ class InfoAvailability extends Component {
 														</Row>
 														<Row gutter={14}>
 															<Col xs={24} sm={24} md={12}>
-																<Form.Item
-																	name={[field.name, "from_time"]}
-																	rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
-																>
+																<Form.Item name={[field.name, "from_time"]}>
 																	<TimePicker
 																		onChange={v => this.onChangeScheduleValue(day, v)}
 																		use12Hours
@@ -196,10 +181,7 @@ class InfoAvailability extends Component {
 																</Form.Item>
 															</Col>
 															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
-																<Form.Item
-																	name={[field.name, "to_time"]}
-																	rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
-																>
+																<Form.Item name={[field.name, "to_time"]}>
 																	<TimePicker
 																		onChange={v => this.onChangeScheduleValue(day, v)}
 																		use12Hours
@@ -210,10 +192,7 @@ class InfoAvailability extends Component {
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 															</Col>
 														</Row>
-														<Form.Item
-															name={[field.name, "location"]}
-															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
-														>
+														<Form.Item name={[field.name, "location"]}>
 															<PlacesAutocomplete
 																onChange={(e) => this.onLocationChange(day, e, "billingAddress")}
 																onSelect={(e) => this.onLocationSelected(day, e, index)}
@@ -235,7 +214,7 @@ class InfoAvailability extends Component {
 																					? { backgroundColor: '#fafafa', cursor: 'pointer' }
 																					: { backgroundColor: '#ffffff', cursor: 'pointer' };
 																				return (
-																					<div {...getSuggestionItemProps(suggestion, { className, style, key: suggestion.index })}>
+																					<div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
 																						<span>{suggestion.description}</span>
 																					</div>
 																				);
