@@ -79,6 +79,7 @@
   "routes.Createaccount.addTimeRange": "Add time range",
   "routes.Createaccount.copyFullWeek": "Copy to full week",
   "routes.Createaccount.progessInfo": "Progess info",
+  "routes.Createaccount.dependentAvailability": "Dependent Availability",
   "routes.Createaccount.selectType": "Select account type",
   "routes.Createaccount.back": "Back",
   "routes.Createaccount.reviewInfo": "Review info",

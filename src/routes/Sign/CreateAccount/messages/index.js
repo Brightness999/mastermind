@@ -274,6 +274,10 @@ export default ({
     id: `${scope}.progessInfo`,
     defaultMessage: 'Progess info',
   },
+  dependentAvailability: {
+    id: `${scope}.dependentAvailability`,
+    defaultMessage: 'Dependent Availability',
+  },
   selectType: {
     id: `${scope}.selectType`,
     defaultMessage: 'Select account type',

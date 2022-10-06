@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Segmented, TimePicker, Switch } from 'antd';
+import { Row, Col, Form, Button, Segmented, TimePicker, Switch, DatePicker } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
@@ -10,7 +10,7 @@ import { compose } from 'redux';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import shortid from 'shortid';
 
-class InfoProgress extends Component {
+class DependentAvailability extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -55,12 +55,6 @@ class InfoProgress extends Component {
 		}
 		this.props.setRegisterData({ studentInfos: studentInfos });
 		return this.props.onContinue();
-	}
-
-	logForAvailbitiyArr = () => {
-		for (var i = 0; i < this.state.studentInfos.length; i++) {
-			console.log('submitting ', i, 'availabilitySchedule', this.state.studentInfos[i].availabilitySchedule.length, this.state.studentInfos[i].availabilitySchedule);
-		}
 	}
 
 	updateReduxValueFor1Depedent(index, fieldName, value) {
@@ -158,18 +152,18 @@ class InfoProgress extends Component {
 
 	valueForAvailabilityScheduleOpenHour(index, indexOnAvailabilitySchedule) {
 		if (!this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule]) return moment('00:00:00', 'HH:mm:ss')
-		return moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openMin}:00`, 'HH:mm:ss')
+		return moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openMin}`, 'HH:mm')
 	}
 
 	valueForAvailabilityScheduleCloseHour(index, indexOnAvailabilitySchedule) {
 		if (!this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule]) return moment('00:00:00', 'HH:mm:ss')
-		return moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeMin}:00`, 'HH:mm:ss')
+		return moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeMin}`, 'HH:mm')
 	}
 
 	valueChangeForOpenHour(index, indexOnAvailabilitySchedule, v) {
 		if (!v) return;// moment('00:00:00', 'HH:mm:ss');
 		const { studentInfos } = this.state;
-		var newStu = [...studentInfos];
+		var newStu = JSON.parse(JSON.stringify(studentInfos));
 		var arr = [...newStu[index].availabilitySchedule];
 		arr[indexOnAvailabilitySchedule].openHour = v.hour();
 		arr[indexOnAvailabilitySchedule].openMin = v.minutes();
@@ -192,27 +186,22 @@ class InfoProgress extends Component {
 		var momentOpen = moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openMin}:00`, 'HH:mm:ss')
 		var momentClose = moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeMin}:00`, 'HH:mm:ss')
 		if (momentClose.isBefore(momentOpen)) {
-			this.setState({
-				hasErrorOnTimeClose: true,
-			})
+			this.setState({ hasErrorOnTimeClose: true })
 		} else {
-			this.setState({
-				hasErrorOnTimeClose: false,
-			})
+			this.setState({ hasErrorOnTimeClose: false })
 		}
-		this.logForAvailbitiyArr();
 	}
 
 	valueChangeForCloseHour(index, indexOnAvailabilitySchedule, v) {
 		if (!v) return;// moment('00:00:00', 'HH:mm:ss');
 		const { studentInfos } = this.state;
-		var newStu = [...studentInfos];
+		var newStu = JSON.parse(JSON.stringify(studentInfos));
 		var arr = [...newStu[index].availabilitySchedule];
 		arr[indexOnAvailabilitySchedule].closeHour = v.hour();
 		arr[indexOnAvailabilitySchedule].closeMin = v.minutes();
 		if (this.state.isSameAll) {
 			this.setState({
-				studentInfos: this.state.studentInfos.map((student, stdIndex) => {
+				studentInfos: this.state.studentInfos.map((student) => {
 					return { ...student, availabilitySchedule: [...arr] }
 				})
 			});
@@ -229,15 +218,10 @@ class InfoProgress extends Component {
 		var momentOpen = moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openMin}:00`, 'HH:mm:ss')
 		var momentClose = moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeMin}:00`, 'HH:mm:ss')
 		if (momentClose.isBefore(momentOpen)) {
-			this.setState({
-				hasErrorOnTimeClose: true,
-			})
+			this.setState({ hasErrorOnTimeClose: true })
 		} else {
-			this.setState({
-				hasErrorOnTimeClose: false,
-			})
+			this.setState({ hasErrorOnTimeClose: false })
 		}
-		this.logForAvailbitiyArr();
 	}
 
 	remove1Item(index, indexOnAvailabilitySchedule,) {
@@ -247,7 +231,7 @@ class InfoProgress extends Component {
 		arr.splice(indexOnAvailabilitySchedule, 1)
 		if (this.state.isSameAll) {
 			this.setState({
-				studentInfos: this.state.studentInfos.map((student, stdIndex) => {
+				studentInfos: this.state.studentInfos.map((student) => {
 					return { ...student, availabilitySchedule: [...arr] }
 				})
 			});
@@ -304,11 +288,12 @@ class InfoProgress extends Component {
 										<Col xs={24} sm={24} md={12} className={indexOnAvailabilitySchedule === 0 ? '' : 'item-remove'}>
 											<TimePicker
 												name={`timer_1${scheduleItem.uid}_${indexOnAvailabilitySchedule}`}
-												onChange={v => this.valueChangeForCloseHour(index, indexOnAvailabilitySchedule, v)}
-												value={this.valueForAvailabilityScheduleCloseHour(index, indexOnAvailabilitySchedule)}
 												use12Hours
 												format="h:mm a"
 												placeholder={intl.formatMessage(messages.to)}
+												value={this.valueForAvailabilityScheduleCloseHour(index, indexOnAvailabilitySchedule)}
+												onChange={v => this.valueChangeForCloseHour(index, indexOnAvailabilitySchedule, v)}
+												disabledTime={(time) => time.isBefore(moment('07:00:00', 'HH:mm:ss'))}
 											/>
 											{indexOnAvailabilitySchedule === 0 ? null : (
 												<BsDashCircle
@@ -322,13 +307,15 @@ class InfoProgress extends Component {
 								)
 							}
 						})}
-						<div className='div-add-time' onClick={() => this.addNewTimeRange(index, this.state.currentDaySelecting[index])}>
-							<BsPlusCircle size={17} className='mr-5 text-primary' />
-							<a className='text-primary'>{intl.formatMessage(messages.addTimeRange)}</a>
-						</div>
-						<div className='text-right div-copy-week' onClick={() => this.copyToFullWeek(index, this.state.currentDaySelecting[index])}>
-							<a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
-							<QuestionCircleOutlined className='text-primary' />
+						<div className='flex justify-between'>
+							<div className='div-add-time' onClick={() => this.addNewTimeRange(index, this.state.currentDaySelecting[index])}>
+								<BsPlusCircle size={17} className='mr-5 text-primary' />
+								<a className='text-primary'>{intl.formatMessage(messages.addTimeRange)}</a>
+							</div>
+							<div className='text-right div-copy-week' onClick={() => this.copyToFullWeek(index, this.state.currentDaySelecting[index])}>
+								<a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
+								<QuestionCircleOutlined className='text-primary' />
+							</div>
 						</div>
 					</div>
 				</div>
@@ -377,4 +364,4 @@ const mapStateToProps = state => ({
 	register: state.register,
 })
 
-export default compose(connect(mapStateToProps, { setRegisterData }))(InfoProgress);
+export default compose(connect(mapStateToProps, { setRegisterData }))(DependentAvailability);

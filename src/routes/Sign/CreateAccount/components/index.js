@@ -7,7 +7,7 @@ import messages from '../messages';
 import CreateDefault from './create_default';
 import InfoParent from './Parents/info_parent';
 import InfoChild from './Parents/info_child';
-import InfoProgress from './Parents/info_progress';
+import DependentAvailability from './Parents/dependent_availability';
 import ReviewAccount from './Parents/review_account';
 import InfoProfile from './Provider/info_profile';
 import InfoServices from './Provider/info_services';
@@ -84,7 +84,7 @@ export default class extends React.Component {
             <Step key='default' title={intl.formatMessage(messages.accountInfo)} icon={<p>1</p>} />
             <Step key='info_parent' title={intl.formatMessage(messages.contactInfo)} icon={<p>2</p>} />
             <Step key='info_child' title={intl.formatMessage(messages.dependentsInfo)} icon={<p>3</p>} />
-            <Step key='info_progress' title={intl.formatMessage(messages.progessInfo)} icon={<p>4</p>} />
+            <Step key='dependent_availability' title={intl.formatMessage(messages.dependentAvailability)} icon={<p>4</p>} />
             <Step key='review_info' title={intl.formatMessage(messages.reviewInfo)} icon={<p>5</p>} />
           </Steps>
         )
@@ -189,7 +189,7 @@ export default class extends React.Component {
       case 3:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<InfoProgress onContinue={this.handleContinue} />)
+            return (<DependentAvailability onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoAvailability onContinue={this.handleContinue} />)
         }
