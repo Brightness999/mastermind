@@ -134,10 +134,7 @@ class InfoConsultant extends Component {
             onFinishFailed={this.onFinishFailed}
             ref={ref => this.form = ref}
           >
-            <Form.Item
-              name="referredToAs"
-              rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.referredAs) }]}
-            >
+            <Form.Item name="referredToAs">
               <Input onChange={v => this.defaultOnValueChange(v, "referredToAs")} placeholder={intl.formatMessage(messages.referredAs)} />
             </Form.Item>
             <Form.Item
