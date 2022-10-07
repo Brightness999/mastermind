@@ -42,6 +42,10 @@ export default ({
     id: `${scope}.referrals`,
     defaultMessage: 'Referrals',
   },
+  consultations: {
+    id: `${scope}.consultations`,
+    defaultMessage: 'Consultations',
+  },
   screenings: {
     id: `${scope}.screenings`,
     defaultMessage: 'Screenings',

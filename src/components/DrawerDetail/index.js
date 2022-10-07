@@ -82,7 +82,7 @@ class DrawerDetail extends Component {
         title={intl.formatMessage(messages.appointmentDetails)}
         closable={true}
         onClose={this.props.onClose}
-        visible={this.props.visible}
+        open={this.props.visible}
         extra={
           <Button type='text' icon={<BsBell size={18}/>}/>
         }

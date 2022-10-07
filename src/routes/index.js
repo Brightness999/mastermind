@@ -22,22 +22,12 @@ import Changeprofile from './Profile/ChangeProfile';
 import UserManager from './Administrator/UserManager';
 import SubsidyManager from './Administrator/SubsidyManager';
 import SystemSetting from './Administrator/SystemSetting';
+import Appointments from './Administrator/Appointments';
+import SchoolsList from './Administrator/SchoolsList';
+import FlagList from './Administrator/FlagList';
+import ConsultationRequests from './Administrator/ConsultationRequests';
 import Statistics from './Administrator/Statistics';
 const routesConfig = app => [
-  
-  // {
-  //   path: '/administrator',
-  //   title: 'System center',
-  //   component: BasicLayout,
-  //   indexRoute: routerLinks['Dashboard'],
-  //   childRoutes: [
-  //     Page403(), 
-  //     Page500(), 
-  //     Dashboard(app), 
-  //     Blank(app),
-      
-  //   ]
-  // },
   {
     path: '/account',
     title: 'Dashboard',
@@ -52,9 +42,13 @@ const routesConfig = app => [
     path: '/administrator',
     title: 'Admin',
     component: AdminLayout,
-    indexRoute: routerLinks['UserManager'],
+    indexRoute: routerLinks['Appointments'],
     childRoutes: [
-      // Admin(app),
+      Appointments(app),
+      SchoolsList(app),
+      FlagList(app),
+      ConsultationRequests(app),
+      Admin(app),
       UserManager(app),
       SubsidyManager(app),
       SystemSetting(app),

@@ -9,6 +9,11 @@ export const routerLinks = {
 
   Dashboard: '/account/dashboard',
   Admin: '/administrator/admin',
+  Appointments: '/administrator/appointments',
+  SchoolsList: '/administrator/schoolslist',
+  FlagList: '/administrator/flaglist',
+  ConsultationRequests: '/administrator/consultationrequests',
+  SchedulingCenter: '/administrator/schedulingcenter',
   UserManager: '/administrator/usermanager',
   SystemSetting: '/administrator/systemsetting',
   SubsidyManager: '/administrator/subsidymanager',

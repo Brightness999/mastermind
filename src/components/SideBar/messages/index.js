@@ -5,13 +5,33 @@ export default {
     id: `${scope}.test`,
     defaultMessage: 'SideBar',
   },
+  appointments: {
+    id: `${scope}.appointments`,
+    defaultMessage: 'Appointments',
+  },
   userManager: {
     id: `${scope}.userManager`,
-    defaultMessage: 'User Manager',
+    defaultMessage: 'Users Center',
+  },
+  schoolsList: {
+    id: `${scope}.schoolsList`,
+    defaultMessage: 'Schools List',
+  },
+  flagList: {
+    id: `${scope}.flagList`,
+    defaultMessage: 'Flag List',
+  },
+  consultationRequests: {
+    id: `${scope}.consultationRequests`,
+    defaultMessage: 'Consultation Requests',
   },
   subsidyManager: {
     id: `${scope}.subsidyManager`,
-    defaultMessage: 'Subsidy Request',
+    defaultMessage: 'Subsidized List',
+  },
+  schedulingCenter: {
+    id: `${scope}.schedulingCenter`,
+    defaultMessage: 'Scheduling Center',
   },
   systemSetting: {
     id: `${scope}.systemSetting`,

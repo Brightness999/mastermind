@@ -65,7 +65,7 @@ class DrawerDetailPost extends Component {
         title={intl.formatMessage(msgDetail.appointmentDetails)}
         closable={true}
         onClose={this.props.onClose}
-        visible={this.props.visible}
+        open={this.props.visible}
       >
         <div>
           <div className='detail-item flex'>
