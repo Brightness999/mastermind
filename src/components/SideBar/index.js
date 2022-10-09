@@ -4,7 +4,7 @@ import { Menu } from 'antd';
 import { FaUsers, FaFileInvoice, FaRegChartBar, FaHandshake, FaFlag, FaSchool } from 'react-icons/fa';
 import { AiOutlineSchedule } from 'react-icons/ai';
 import { IoSettingsSharp } from 'react-icons/io5';
-import { Link, Location } from 'dva/router';
+import { Link } from 'dva/router';
 import intl from "react-intl-universal";
 import { MdContactPhone } from 'react-icons/md';
 import messages from './messages';
@@ -66,6 +66,7 @@ class SideBar extends Component {
         rootClassName="height-full"
         items={items}
         defaultSelectedKeys={[location.pathname]}
+        style={{ overflowY: 'scroll' }}
       />
     );
   }

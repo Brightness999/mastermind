@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Segmented, Row, Col, Checkbox, Select, message, Divider, Input } from 'antd';
+import { Button, Segmented, Row, Col, Checkbox, Select, message, Divider, Input, Avatar } from 'antd';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsFilter, BsX } from 'react-icons/bs';
@@ -9,11 +9,12 @@ import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
 import timeGridPlugin from '@fullcalendar/timegrid' // a plugin!
 import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClick
 import listPlugin from '@fullcalendar/list';
+import PlacesAutocomplete from 'react-places-autocomplete';
 import "@fullcalendar/daygrid/main.css";
 import "@fullcalendar/timegrid/main.css";
+import moment from 'moment';
 import CSSAnimate from '../../../../components/CSSAnimate';
 import DrawerDetail from '../../../../components/DrawerDetail';
-import DrawerDetailPost from '../../../../components/DrawerDetailPost';
 import msgSidebar from '../../../../components/SideBar/messages';
 import msgDashboard from '../../../Dashboard/messages';
 import msgCreateAccount from '../../../Sign/CreateAccount/messages';
@@ -22,7 +23,8 @@ import { routerLinks } from '../../../constant';
 import { checkPermission } from '../../../../utils/auth/checkPermission';
 import request, { generateSearchStructure } from '../../../../utils/api/request';
 import { url } from '../../../../utils/api/baseUrl';
-import PlacesAutocomplete from 'react-places-autocomplete';
+import { store } from '../../../../redux/store';
+import { getAppointmentsMonthData } from '../../../../redux/features/appointmentsSlice';
 
 export default class extends React.Component {
   constructor(props) {
@@ -30,21 +32,18 @@ export default class extends React.Component {
     this.state = {
       isFilter: false,
       visibleDetail: false,
-      visibleDetailPost: false,
-      visibleNewAppoint: false,
       isEventDetail: false,
+      idEvent: 0,
       isMonth: 1,
       isGridDayView: 'Grid',
-      canDrop: true,
       calendarWeekends: true,
-      calendarEvents: [
-        { title: "Event Now", start: new Date(), allDay: true }
-      ],
+      calendarEvents: store.getState().appointments.dataAppointmentsMonth ?? [],
       listProvider: [],
       skillSet: [],
       selectedProviders: [],
       location: '',
       selectedLocations: [],
+      appointments: [],
     }
   }
   calendarRef = React.createRef();
@@ -53,26 +52,28 @@ export default class extends React.Component {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
         loginData.user.role < 900 && this.props.history.push(routerLinks.Dashboard);
-        this.setState({ userRole: loginData.user.role });
-        request.post('clients/search_providers', generateSearchStructure('')).then(result => {
-          if (result.success) {
-            this.setState({ listProvider: result.data })
-          }
+        const appointmentsMonth = store.getState().appointments.dataAppointmentsMonth
+        console.log(appointmentsMonth)
+        const dataFetchAppointMonth = {
+          role: loginData.user.role,
+          data: {
+            month: moment().month() + 1,
+            year: moment().year()
+          },
+          token: loginData.token
+        }
+        this.setState({
+          calendarEvents: appointmentsMonth,
+          userRole: loginData.user.role
+        }, () => {
+          this.getAppointments();
+          store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth))
         })
-        request.post(url + 'providers/get_default_values_for_provider')
-          .then(result => {
-            if (result.success) {
-              const data = result.data;
-              this.setState({ skillSet: data.SkillSet })
-            } else {
-              this.setState({ skillSet: [] });
-            }
-          }).catch(err => {
-            console.log(err);
-            this.setState({ skillSet: [] });
-          })
+        this.getProviders();
+        this.getSkillSet();
       }).catch(err => {
         console.log(err);
+        this.props.history.push('/');
       })
     }
   }
@@ -81,20 +82,16 @@ export default class extends React.Component {
     this.setState({ isFilter: !this.state.isFilter });
   }
 
-  onShowDrawerDetail = () => {
-    this.setState({ visibleDetail: true });
+  onShowDrawerDetail = (val) => {
+    const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : 0
+    this.setState({
+      visibleDetail: true,
+      idEvent: id,
+    });
   };
 
   onCloseDrawerDetail = () => {
     this.setState({ visibleDetail: false });
-  };
-
-  onShowDrawerDetailPost = () => {
-    this.setState({ visibleDetailPost: true });
-  };
-
-  onCloseDrawerDetailPost = () => {
-    this.setState({ visibleDetailPost: false });
   };
 
   handleMonthToWeek = () => {
@@ -111,10 +108,6 @@ export default class extends React.Component {
     } else {
       this.setState({ isGridDayView: 'Grid' });
     }
-  }
-
-  handleEventClick = () => {
-    this.setState({ isEventDetail: !this.state.isEventDetail });
   }
 
   handleEventRemove = (removeInfo) => {
@@ -152,11 +145,48 @@ export default class extends React.Component {
     this.setState({ selectedLocations: this.state.selectedLocations });
   }
 
+  getAppointments = () => {
+    request.post(url + 'admin/get_appointments')
+      .then(result => {
+        if (result.success) {
+          const data = result.data;
+          this.setState({ appointments: data.docs });
+        } else {
+          this.setState({ appointments: [] });
+        }
+      }).catch(err => {
+        console.log(err);
+        this.setState({ appointments: [] });
+      });
+  }
+
+  getSkillSet = () => {
+    request.post(url + 'providers/get_default_values_for_provider')
+      .then(result => {
+        if (result.success) {
+          const data = result.data;
+          this.setState({ skillSet: data.SkillSet });
+        } else {
+          this.setState({ skillSet: [] });
+        }
+      }).catch(err => {
+        console.log(err);
+        this.setState({ skillSet: [] });
+      });
+  }
+
+  getProviders = () => {
+    request.post('clients/search_providers', generateSearchStructure('')).then(result => {
+      if (result.success) {
+        this.setState({ listProvider: result.data });
+      }
+    });
+  }
+
   render() {
     const {
       isFilter,
       visibleDetail,
-      visibleDetailPost,
       isEventDetail,
       isMonth,
       isGridDayView,
@@ -336,10 +366,11 @@ export default class extends React.Component {
                   selectable={true}
                   selectMirror={true}
                   dayMaxEvents={true}
+                  events={this.state.calendarEvents}
                   weekends={this.state.calendarWeekends}
                   datesSet={this.handleDates}
                   eventContent={renderEventContent}
-                  eventClick={this.handleEventClick}
+                  eventClick={this.onShowDrawerDetail}
                   eventRemove={this.handleEventRemove}
                 />
               </div>
@@ -349,10 +380,9 @@ export default class extends React.Component {
         <DrawerDetail
           visible={visibleDetail}
           onClose={this.onCloseDrawerDetail}
-        />
-        <DrawerDetailPost
-          visible={visibleDetailPost}
-          onClose={this.onCloseDrawerDetailPost}
+          id={this.state.idEvent}
+          role={this.state.userRole}
+          calendarEvents={this.state.calendarEvents}
         />
       </div>
     );
@@ -365,9 +395,10 @@ function reportNetworkError() {
 
 function renderEventContent(eventInfo) {
   return (
-    <>
-      <b className='mr-3'>{eventInfo.timeText}</b>
-      <span className='event-title'>{eventInfo.event.title}</span>
-    </>
+    <div className='flex flex-col'>
+      <b className='mr-3'>{moment(eventInfo.event.start).format('hh:mm')}</b>
+      <b className='mr-3'>Provider: {eventInfo.event.extendedProps?.provider?.name}</b>
+      <b className='mr-3'>Requester: {eventInfo.event.extendedProps?.requester?.username}</b>
+    </div>
   )
 }
