@@ -24,7 +24,6 @@ class AdminLayout extends React.PureComponent {
 
 	render() {
 		const { route, collapsed } = this.state;
-		console.log(this.props)
 
 		return (
 			<Layout className="full-layout admin-layout fixed">

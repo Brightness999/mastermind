@@ -43,7 +43,8 @@ export default class extends React.Component {
       selectedProviders: [],
       location: '',
       selectedLocations: [],
-      appointments: [],
+      selectedSkills: [],
+      userRole: -1,
     }
   }
   calendarRef = React.createRef();
@@ -52,23 +53,10 @@ export default class extends React.Component {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
         loginData.user.role < 900 && this.props.history.push(routerLinks.Dashboard);
-        const appointmentsMonth = store.getState().appointments.dataAppointmentsMonth
-        console.log(appointmentsMonth)
-        const dataFetchAppointMonth = {
-          role: loginData.user.role,
-          data: {
-            month: moment().month() + 1,
-            year: moment().year()
-          },
-          token: loginData.token
-        }
-        this.setState({
-          calendarEvents: appointmentsMonth,
-          userRole: loginData.user.role
-        }, () => {
-          this.getAppointments();
-          store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth))
-        })
+        const month = moment().month() + 1;
+        const year = moment().year();
+        this.updateCalendarEvents(loginData.user.role, month, year);
+        this.setState({ userRole: loginData.user.role });
         this.getProviders();
         this.getSkillSet();
       }).catch(err => {
@@ -145,21 +133,6 @@ export default class extends React.Component {
     this.setState({ selectedLocations: this.state.selectedLocations });
   }
 
-  getAppointments = () => {
-    request.post(url + 'admin/get_appointments')
-      .then(result => {
-        if (result.success) {
-          const data = result.data;
-          this.setState({ appointments: data.docs });
-        } else {
-          this.setState({ appointments: [] });
-        }
-      }).catch(err => {
-        console.log(err);
-        this.setState({ appointments: [] });
-      });
-  }
-
   getSkillSet = () => {
     request.post(url + 'providers/get_default_values_for_provider')
       .then(result => {
@@ -183,6 +156,51 @@ export default class extends React.Component {
     });
   }
 
+  handleSelectSkills = (skills) => {
+    this.setState({ selectedSkills: skills });
+  }
+
+  handleApplyFilter = () => {
+    const dataFetchAppointMonth = {
+      role: this.state.userRole,
+      data: {
+        month: moment().month() + 1,
+        year: moment().year()
+      },
+    }
+    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth))
+  }
+
+  handleClickPrevMonth = () => {
+    const calendar = this.calendarRef.current;
+    calendar._calendarApi.prev();
+    const month = calendar._calendarApi.getDate().getMonth() + 1;
+    const year = calendar._calendarApi.getDate().getFullYear();
+    this.updateCalendarEvents(this.state.userRole, month, year);
+  }
+
+  handleClickNextMonth = () => {
+    const calendar = this.calendarRef.current;
+    calendar._calendarApi.next();
+    const month = calendar._calendarApi.getDate().getMonth() + 1;
+    const year = calendar._calendarApi.getDate().getFullYear();
+    this.updateCalendarEvents(this.state.userRole, month, year);
+  }
+
+  updateCalendarEvents(role, month, year) {
+    const dataFetchAppointMonth = {
+      role: role,
+      data: {
+        month: month,
+        year: year,
+      }
+    };
+    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth)).then(() => {
+      const appointmentsMonth = store.getState().appointments.dataAppointmentsMonth;
+      this.setState({ calendarEvents: appointmentsMonth });
+    });
+  }
+
   render() {
     const {
       isFilter,
@@ -194,6 +212,8 @@ export default class extends React.Component {
       listProvider,
       selectedProviders,
       selectedLocations,
+      calendarEvents,
+      calendarWeekends,
     } = this.state;
     const btnMonthToWeek = (
       <div role='button' className='btn-type' onClick={this.handleMonthToWeek}>
@@ -326,7 +346,7 @@ export default class extends React.Component {
                     </Col>
                   </Row>
                   <div className='text-right'>
-                    <Button size='small' type='primary'>{intl.formatMessage(msgDashboard.apply).toUpperCase()}</Button>
+                    <Button size='small' type='primary' onClick={this.handleApplyFilter}>{intl.formatMessage(msgDashboard.apply).toUpperCase()}</Button>
                   </div>
                 </CSSAnimate>
               </div>
@@ -358,6 +378,12 @@ export default class extends React.Component {
                     filterButton: {
                       text: btnFilter,
                     },
+                    prev: {
+                      click: () => this.handleClickPrevMonth()
+                    },
+                    next: {
+                      click: () => this.handleClickNextMonth()
+                    },
                   }}
                   initialView='dayGridMonth'
                   eventColor='#2d5cfa'
@@ -366,9 +392,8 @@ export default class extends React.Component {
                   selectable={true}
                   selectMirror={true}
                   dayMaxEvents={true}
-                  events={this.state.calendarEvents}
-                  weekends={this.state.calendarWeekends}
-                  datesSet={this.handleDates}
+                  events={calendarEvents}
+                  weekends={calendarWeekends}
                   eventContent={renderEventContent}
                   eventClick={this.onShowDrawerDetail}
                   eventRemove={this.handleEventRemove}
