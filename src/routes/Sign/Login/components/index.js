@@ -56,6 +56,8 @@ export default class extends React.Component {
 			const response = await axios.post(url + 'users/login', values);
 			const { success, data } = response.data;
 			if (success) {
+				localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
 				store.dispatch(setUser(data.user))
 				store.dispatch(getInfoAuth());
 				store.dispatch(getAppointmentsData({ role: data.user.role, token: data.token }))
