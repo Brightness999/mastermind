@@ -80,6 +80,8 @@ class ModalNewAppointmentForParents extends React.Component {
 			if (result.success) {
 				this.setState({ listProvider: result.data })
 			}
+		}).catch(err => {
+			console.log('provider list error-----', err);
 		})
 	}
 
@@ -225,6 +227,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			]
 		};
 		const { valueCalendar, selectedDate, isChoose, isSelectTime, selectedDay } = this.state;
+		console.log(this.state.listProvider[isChoose])
 
 		return (
 			<Modal {...modalProps}>
@@ -330,7 +333,7 @@ class ModalNewAppointmentForParents extends React.Component {
 									</div>
 									<div>
 										<p className='font-10 mb-0'>Skillset(s):</p>
-										<p className='font-10'>{isChoose >= 0 && this.state.listProvider[isChoose] != undefined ? this.props.SkillSet[this.state.listProvider[isChoose].skillSet] : ''}</p>
+										<p className='font-10'>{isChoose >= 0 && this.state.listProvider[isChoose] != undefined ? this.state.listProvider[isChoose].skillSet : ''}</p>
 									</div>
 								</div>
 								<p className='font-10'>Practice/Location</p>

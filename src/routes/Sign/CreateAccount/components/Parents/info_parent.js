@@ -27,15 +27,15 @@ class InfoParent extends Component {
 
 	getDefaultObj = () => {
 		return {
-			maritialType: 'married',
-			address: 'San Jose',
-			familyName: 'sasdf',
-			fatherName: 'wr23r',
-			fatherPhoneNumber: '1234561235',
-			fatherEmail: 'asf@sf.com',
-			motherName: 'hljlj',
-			motherPhoneNumber: '12346513321',
-			motherEmail: 'lkjl@sljf.cpo'
+			maritialType: '',
+			address: '',
+			familyName: '',
+			fatherName: '',
+			fatherPhoneNumber: '',
+			fatherEmail: '',
+			motherName: '',
+			motherPhoneNumber: '',
+			motherEmail: ''
 		};
 	}
 

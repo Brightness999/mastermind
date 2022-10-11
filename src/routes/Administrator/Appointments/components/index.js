@@ -53,9 +53,7 @@ export default class extends React.Component {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
         loginData.user.role < 900 && this.props.history.push(routerLinks.Dashboard);
-        const month = moment().month() + 1;
-        const year = moment().year();
-        this.updateCalendarEvents(loginData.user.role, month, year);
+        this.updateCalendarEvents(loginData.user.role);
         this.setState({ userRole: loginData.user.role });
         this.getProviders();
         this.getSkillSet();
@@ -161,38 +159,37 @@ export default class extends React.Component {
   }
 
   handleApplyFilter = () => {
-    const dataFetchAppointMonth = {
-      role: this.state.userRole,
-      data: {
-        month: moment().month() + 1,
-        year: moment().year()
-      },
-    }
-    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth))
+    this.updateCalendarEvents(this.state.userRole);
+    this.setState({ isFilter: false });
   }
 
   handleClickPrevMonth = () => {
     const calendar = this.calendarRef.current;
     calendar._calendarApi.prev();
-    const month = calendar._calendarApi.getDate().getMonth() + 1;
-    const year = calendar._calendarApi.getDate().getFullYear();
-    this.updateCalendarEvents(this.state.userRole, month, year);
+    this.updateCalendarEvents(this.state.userRole);
   }
 
   handleClickNextMonth = () => {
     const calendar = this.calendarRef.current;
     calendar._calendarApi.next();
-    const month = calendar._calendarApi.getDate().getMonth() + 1;
-    const year = calendar._calendarApi.getDate().getFullYear();
-    this.updateCalendarEvents(this.state.userRole, month, year);
+    this.updateCalendarEvents(this.state.userRole);
   }
 
-  updateCalendarEvents(role, month, year) {
+  updateCalendarEvents(role) {
+    const calendar = this.calendarRef.current;
+    const month = calendar._calendarApi.getDate().getMonth() + 1;
+    const year = calendar._calendarApi.getDate().getFullYear();
+    let selectedSkills = [], selectedProviders = [];
+    this.state.selectedSkills.forEach(skill => selectedSkills.push(this.state.skillSet.findIndex(s => s == skill)))
+    this.state.selectedProviders.forEach(provider => selectedProviders.push(this.state.listProvider.find(p => p.name == provider)._id))
     const dataFetchAppointMonth = {
       role: role,
       data: {
         month: month,
         year: year,
+        locations: this.state.selectedLocations,
+        providers: selectedProviders,
+        skills: selectedSkills,
       }
     };
     store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth)).then(() => {
@@ -281,7 +278,7 @@ export default class extends React.Component {
                     </Col>
                     <Col xs={12} sm={12} md={6} className='skillset-checkbox'>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.skillsets)}</p>
-                      <Checkbox.Group className='flex flex-col' options={skillSet} />
+                      <Checkbox.Group className='flex flex-col' value={this.state.selectedSkills} options={skillSet} onChange={v => this.handleSelectSkills(v)} />
                     </Col>
                     <Col xs={12} sm={12} md={7} className='select-small'>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.provider)}</p>
@@ -407,7 +404,7 @@ export default class extends React.Component {
           onClose={this.onCloseDrawerDetail}
           id={this.state.idEvent}
           role={this.state.userRole}
-          calendarEvents={this.state.calendarEvents}
+          calendarEvents={calendarEvents}
         />
       </div>
     );

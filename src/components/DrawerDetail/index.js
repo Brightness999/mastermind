@@ -12,17 +12,18 @@ const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
   state = {
-    hovered: false,
+    isProviderHover: false,
+    isDependentHover: false,
     visibleCancel: false,
     visibleCurrent: false,
   };
 
-  handleHoverChange = (visible) => {
-    this.setState({ hovered: visible });
+  handleProviderHoverChange = (visible) => {
+    this.setState({ isProviderHover: visible });
   };
 
-  handleClickChange = (visible) => {
-    this.setState({ hovered: false });
+  handleDependentHoverChange = (visible) => {
+    this.setState({ isDependentHover: visible });
   };
 
   closeModalCancel = () => {
@@ -42,7 +43,7 @@ class DrawerDetail extends Component {
   }
 
   render() {
-    const { hovered, visibleCancel, visibleCurrent } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent } = this.state;
     const { role, id, calendarEvents } = this.props;
     const event = calendarEvents?.find(e => e._id === id);
 
@@ -72,25 +73,15 @@ class DrawerDetail extends Component {
     const dependentProfile = (
       <div className='provider-profile'>
         <p className='font-16 font-700 mb-10'>{intl.formatMessage(messages.providerProfile)}</p>
-        <div className='count-2'>
-          <p className='font-10'>Name: {event?.provider?.name}</p>
-          <p className='font-10'>Skillset(s): {event?.provider?.skillSet}</p>
+        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr'}}>
+          <p className='font-10'>Name: {event?.dependent?.firstName} {event?.dependent?.lastName}</p>
+          <div className='font-10'>Skillset(s):
+            {event?.dependent?.services?.map((service, i) => (<div key={i}>{service.name}</div>))}
+          </div>
+          <p className='font-10'>Contact number {event?.dependent?.guardianPhone}</p>
+          <p className='font-10'>Contact email: {event?.dependent?.guardianEmail}</p>
         </div>
-        <p className='font-10'>Practice/Location: {event?.provider?.cityConnection}</p>
-        <div className='count-2'>
-          <p className='font-10'>Contact number {event?.provider?.contactNumber?.map((n, i) => (<span key={i}>{n.phoneNumber}</span>))}</p>
-          <p className='font-10'>Contact email: {event?.provider?.contactEmail?.map((e, i) => (<span key={i}>{e.email}</span>))}</p>
-        </div>
-        <div className='count-2'>
-          <p className='font-10'>Academic level(s): {event?.provider?.academicLevel?.map((a, i) => (<span key={i}>level: {a.level}, rate: {a.rate}</span>))}</p>
-          <p className='font-10'>Subsidy (blank or NO Sub.)</p>
-        </div>
-        <div className='profile-text'>
-          <Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-            {event?.provider.publicProfile}
-          </Paragraph>
-        </div>
-      </div>
+      </div >
     );
     const modalCancelProps = {
       visible: visibleCancel,
@@ -121,16 +112,24 @@ class DrawerDetail extends Component {
             </div>
             <p className='font-16'>{event?.title}</p>
           </div>
-          <div className='detail-item flex'>
-            <p className='font-18 font-700 title'>{intl.formatMessage(messages.who)}</p>
-            <p className='font-18 underline text-primary'>{`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</p>
-          </div>
+          <Popover
+            placement="leftTop"
+            content={dependentProfile}
+            trigger="hover"
+            visible={isDependentHover}
+            onVisibleChange={this.handleDependentHoverChange}
+          >
+            <div className='detail-item flex'>
+              <p className='font-18 font-700 title'>{intl.formatMessage(messages.who)}</p>
+              <p className='font-18 underline text-primary'>{`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</p>
+            </div>
+          </Popover>
           <Popover
             placement="leftTop"
             content={providerProfile}
             trigger="hover"
-            visible={hovered}
-            onVisibleChange={this.handleHoverChange}
+            visible={isProviderHover}
+            onVisibleChange={this.handleProviderHoverChange}
           >
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.with)}</p>
@@ -161,7 +160,7 @@ class DrawerDetail extends Component {
               </Button>
             </Col>
           )}
-          {role == 999 && (
+          {role == 3 && (
             <Col span={12}>
               <Button
                 type='primary'
