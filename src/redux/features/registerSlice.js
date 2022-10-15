@@ -1,27 +1,29 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-
 const initialState = {
-    registerData: {},
+	registerData: {},
 };
 
 export const registerSlice = createSlice({
-    name: 'register',
-    initialState,
-    reducers: {
-        
-        setRegisterData: (state , actions) => {
-            // console.log('redux test ',state,actions);
-            return {
-                registerData: {
-                    ...state.registerData,
-                    ...actions.payload,
-                }
-            }
-        }
-    }
+	name: 'register',
+	initialState,
+	reducers: {
+		setRegisterData: (state, actions) => {
+			return {
+				registerData: {
+					...state.registerData,
+					...actions.payload,
+				}
+			}
+		},
+		removeRegisterData: (state, actions) => {
+			return {
+				registerData: {}
+			}
+		}
+	}
 });
 
-export const {  setRegisterData } = registerSlice.actions;
+export const { setRegisterData, removeRegisterData } = registerSlice.actions;
 
 export default registerSlice.reducer;

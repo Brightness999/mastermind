@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { url } from '../../../../../utils/api/baseUrl'
 import axios from 'axios';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 
 class ReviewAccount extends Component {
 	constructor(props) {
@@ -75,14 +75,6 @@ class ReviewAccount extends Component {
 		return '';
 	}
 
-	onFinish = (values) => {
-		this.props.onContinue();
-	};
-
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	onSubmit = async () => {
 		const { registerData } = this.props.register;
 		const customData = JSON.parse(JSON.stringify(registerData));
@@ -94,6 +86,7 @@ class ReviewAccount extends Component {
 		const response = await axios.post(url + 'users/signup', customData);
 		const { success } = response.data;
 		if (success) {
+			this.props.removeRegisterData();
 			this.props.onContinue(true);
 		} else {
 			message.error(error?.response?.data?.data ?? error.message);
@@ -220,4 +213,4 @@ const mapStateToProps = state => ({
 })
 
 
-export default compose(connect(mapStateToProps, { setRegisterData }))(ReviewAccount);
+export default compose(connect(mapStateToProps, { setRegisterData, removeRegisterData }))(ReviewAccount);

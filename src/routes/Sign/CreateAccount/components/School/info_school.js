@@ -9,7 +9,7 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 import axios from 'axios';
 import { url } from '../../../../../utils/api/baseUrl';
 import { getCommunitiServer } from '../../../../../utils/api/apiList'
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
@@ -100,9 +100,10 @@ class InfoSchool extends React.Component {
 
 		// post to server
 		const response = await axios.post(url + 'users/signup', newRegisterData);
-		const { success, data } = response.data;
+		const { success } = response.data;
 		if (success) {
 			this.props.onContinue(true);
+			this.props.removeRegisterData();
 		} else {
 			message.error(error?.response?.data?.data ?? error.message);
 		}
@@ -479,4 +480,4 @@ const mapStateToProps = state => ({
 	register: state.register
 })
 
-export default compose(connect(mapStateToProps, { setRegisterData }))(InfoSchool);
+export default compose(connect(mapStateToProps, { setRegisterData, removeRegisterData }))(InfoSchool);

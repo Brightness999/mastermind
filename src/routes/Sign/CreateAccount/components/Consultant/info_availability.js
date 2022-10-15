@@ -6,7 +6,7 @@ import intl from 'react-intl-universal';
 import messages from '../../messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
 
@@ -78,6 +78,7 @@ class ConsultantAvailability extends Component {
     const response = await axios.post(url + 'users/signup', newRegisterData);
     const { success } = response.data;
     if (success) {
+      this.props.removeRegisterData();
       this.props.onContinue(true);
     } else {
       message.error(error?.response?.data?.data ?? error.message);
@@ -104,7 +105,6 @@ class ConsultantAvailability extends Component {
 
   copyToFullWeek = (dayForCopy) => {
     var arrToCopy = this.form.getFieldValue(dayForCopy);
-    
     day_week.map((newDay) => {
       if (newDay != dayForCopy) {
         this.form.setFieldValue(newDay, arrToCopy);
@@ -236,4 +236,4 @@ const mapStateToProps = state => ({
   register: state.register,
 })
 
-export default compose(connect(mapStateToProps, { setRegisterData }))(ConsultantAvailability);
+export default compose(connect(mapStateToProps, { setRegisterData, removeRegisterData }))(ConsultantAvailability);

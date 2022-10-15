@@ -4,7 +4,7 @@ import intl from 'react-intl-universal';
 import messages from '../../messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios'
 
@@ -66,12 +66,13 @@ class InfoReview extends Component {
 		})
 	}
 
-	onFinish = async (values) => {
+	onSubmit = async (values) => {
 		const { registerData } = this.props.register;
 		var postData = this.copyField(registerData);
 		const response = await axios.post(url + 'users/signup', postData);
 		const { success } = response.data;
 		if (success) {
+			this.props.removeRegisterData();
 			this.props.onContinue(true);
 		} else {
 			message.error(error?.response?.data?.data ?? error.message);
@@ -331,7 +332,7 @@ class InfoReview extends Component {
 								block
 								type="primary"
 								htmlType="submit"
-								onClick={this.onFinish}
+								onClick={this.onSubmit}
 							>
 								{intl.formatMessage(messages.confirm).toUpperCase()}
 							</Button>
@@ -347,4 +348,4 @@ const mapStateToProps = state => ({
 	register: state.register,
 })
 
-export default compose(connect(mapStateToProps, { setRegisterData }))(InfoReview);
+export default compose(connect(mapStateToProps, { setRegisterData, removeRegisterData }))(InfoReview);
