@@ -14,6 +14,7 @@ import ModalEditUser from './ModalEditUser';
 import ModalNewClientScreening from './ModalNewClientScreening';
 import ModalSeparateEvaluation from './ModalSeparateEvaluation';
 import ModalStandardSession from './ModalStandardSession';
+import ModalConfirm from './ModalConfirm';
 export {
   ModalCreateDone,
   ModalCancelAppointment,
@@ -29,5 +30,6 @@ export {
   ModalEditUser,
   ModalNewClientScreening,
   ModalSeparateEvaluation,
-  ModalStandardSession
+  ModalStandardSession,
+  ModalConfirm,
 }

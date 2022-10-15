@@ -5,11 +5,11 @@ import messages from './messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
-class ModalEditUser extends React.Component {
+class ModalConfirm extends React.Component {
 	render() {
 		const modalProps = {
 			className: 'modal-balance',
-			title: "",
+			title: "Confirm",
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: this.props.onCancel,
@@ -25,10 +25,10 @@ class ModalEditUser extends React.Component {
 		};
 		return (
 			<Modal {...modalProps}>
-				<p>Modal edit user</p>
+				<p>{this.props.message}</p>
 			</Modal>
 		);
 	}
 };
 
-export default ModalEditUser;
+export default ModalConfirm;
