@@ -90,10 +90,29 @@ export default class extends React.Component {
 	render() {
 		const { visibleEdit, users, isConfirmModal, confirmMessage } = this.state;
 		const columns = [
-			{ title: 'UserName', dataIndex: 'username', key: 'name' },
-			{ title: 'Email', dataIndex: 'email', key: 'email' },
-			{ title: 'Role', dataIndex: 'role', key: 'role', render: (role) => role == 999 ? 'Admin' : role == 3 ? 'Parent' : role == 30 ? 'Provider' : role == 60 ? 'School' : role == 100 ? 'Consultant' : 'Banned User' },
-			{ title: 'Active', dataIndex: 'isActive', key: 'isActive', render: (isActive) => isActive ? 'True' : 'False' },
+			{ title: 'UserName', dataIndex: 'username', key: 'name', sorter: (a, b) => a.username > b.username ? 1 : -1 },
+			{ title: 'Email', dataIndex: 'email', key: 'email', sorter: (a, b) => a.email > b.email ? 1 : -1 },
+			{
+				title: 'Role', dataIndex: 'role', key: 'role', render: (role) => {
+					switch (role) {
+						case 999: return 'Admin';
+						case 3: return 'Parent';
+						case 30: return 'Provider';
+						case 60: return 'School';
+						case 100: return 'Consultant';
+						default: return 'Banner User';
+					}
+				},
+				filters: [
+					{text: 'Admin',value: 999},
+					{text: 'Parent',value: 3},
+					{text: 'Provider',value: 30},
+					{text: 'School',value: 60},
+					{text: 'Consultant',value: 100},
+				],
+				onFilter: (value, record) => record.role == value,
+			},
+			{ title: 'Active', dataIndex: 'isActive', key: 'isActive', render: (isActive) => isActive ? 'True' : 'False', sorter: (a, b) => a.isActive - b.isActive },
 			{
 				title: 'Action', key: 'action', render: (user) => (
 					<Space size="middle">
