@@ -1,12 +1,13 @@
-import { Divider, Table, Space, Button, Modal } from 'antd';
+import { Divider, Table, Space, Button, Modal, Input } from 'antd';
 import { routerLinks } from '../../../constant';
 import { ModalConfirm, ModalEditUser } from '../../../../components/Modal';
-import React from 'react';
+import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
 import mgsSidebar from '../../../../components/SideBar/messages';
 import './index.less';
 import { checkPermission } from '../../../../utils/auth/checkPermission';
 import request, { generateSearchStructure } from '../../../../utils/api/request';
+import { SearchOutlined } from '@ant-design/icons';
 
 export default class extends React.Component {
 	constructor(props) {
@@ -19,7 +20,8 @@ export default class extends React.Component {
 			confirmMessage: '',
 			userId: '',
 			userState: 1,
-		}
+		};
+		this.searchInput = createRef(null);
 	}
 
 	componentDidMount() {
@@ -90,7 +92,53 @@ export default class extends React.Component {
 	render() {
 		const { visibleEdit, users, isConfirmModal, confirmMessage } = this.state;
 		const columns = [
-			{ title: 'UserName', dataIndex: 'username', key: 'name', sorter: (a, b) => a.username > b.username ? 1 : -1 },
+			{
+				title: 'UserName', dataIndex: 'username', key: 'name',
+				sorter: (a, b) => a.username > b.username ? 1 : -1,
+				filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+					<div style={{ padding: 8 }}>
+						<Input
+							ref={this.searchInput}
+							placeholder={`Search User Name`}
+							value={selectedKeys[0]}
+							onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+							onPressEnter={() => confirm()}
+							style={{ marginBottom: 8, display: 'block' }}
+						/>
+						<Space>
+							<Button
+								type="primary"
+								onClick={() => confirm()}
+								icon={<SearchOutlined />}
+								size="small"
+								style={{ width: 90 }}
+							>
+								Search
+							</Button>
+							<Button
+								onClick={() => clearFilters()}
+								size="small"
+								style={{ width: 90 }}
+							>
+								Reset
+							</Button>
+						</Space>
+					</div>
+				),
+				filterIcon: (filtered) => (
+					<SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+				),
+				onFilter: (value, record) =>
+					record['username']
+						.toString()
+						.toLowerCase()
+						.includes((value).toLowerCase()),
+				onFilterDropdownOpenChange: visible => {
+					if (visible) {
+						setTimeout(() => this.searchInput.current?.select(), 100);
+					}
+				}
+			},
 			{ title: 'Email', dataIndex: 'email', key: 'email', sorter: (a, b) => a.email > b.email ? 1 : -1 },
 			{
 				title: 'Role', dataIndex: 'role', key: 'role', render: (role) => {
@@ -104,11 +152,11 @@ export default class extends React.Component {
 					}
 				},
 				filters: [
-					{text: 'Admin',value: 999},
-					{text: 'Parent',value: 3},
-					{text: 'Provider',value: 30},
-					{text: 'School',value: 60},
-					{text: 'Consultant',value: 100},
+					{ text: 'Admin', value: 999 },
+					{ text: 'Parent', value: 3 },
+					{ text: 'Provider', value: 30 },
+					{ text: 'School', value: 60 },
+					{ text: 'Consultant', value: 100 },
 				],
 				onFilter: (value, record) => record.role == value,
 			},
