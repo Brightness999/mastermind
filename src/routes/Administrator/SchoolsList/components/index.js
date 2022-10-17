@@ -96,7 +96,53 @@ export default class extends React.Component {
 			{ title: 'Email', dataIndex: 'email', key: 'email', sorter: (a, b) => a.email > b.email ? 1 : -1 },
 			{ title: 'School Name', dataIndex: 'schoolInfo', key: 'schoolname', sorter: (a, b) => a?.schoolInfo?.name > b?.schoolInfo?.name ? 1 : -1, render: (schoolInfo) => schoolInfo?.name },
 			{ title: 'Community', dataIndex: 'schoolInfo', key: 'communityserved', sorter: (a, b) => a?.schoolInfo?.communityServed?.name > b?.schoolInfo?.communityServed?.name ? 1 : -1, render: (schoolInfo) => schoolInfo?.communityServed?.name },
-			{ title: 'Address', dataIndex: 'schoolInfo', key: 'address', sorter: (a, b) => a?.schoolInfo?.valueForContact > b?.schoolInfo?.valueForContact ? 1 : -1, render: (schoolInfo) => schoolInfo?.valueForContact },
+			{
+				title: 'Address', dataIndex: 'schoolInfo', key: 'address',
+				sorter: (a, b) => a?.schoolInfo?.valueForContact > b?.schoolInfo?.valueForContact ? 1 : -1, render: (schoolInfo) => schoolInfo?.valueForContact,
+				filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+					<div style={{ padding: 8 }}>
+						<Input
+							ref={this.searchInput}
+							placeholder={`Search Address`}
+							value={selectedKeys[0]}
+							onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+							onPressEnter={() => confirm()}
+							style={{ marginBottom: 8, display: 'block' }}
+						/>
+						<Space>
+							<Button
+								type="primary"
+								onClick={() => confirm()}
+								icon={<SearchOutlined />}
+								size="small"
+								style={{ width: 90 }}
+							>
+								Search
+							</Button>
+							<Button
+								onClick={() => clearFilters() && confirm()}
+								size="small"
+								style={{ width: 90 }}
+							>
+								Reset
+							</Button>
+						</Space>
+					</div>
+				),
+				filterIcon: (filtered) => (
+					<SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+				),
+				onFilter: (value, record) =>
+					record?.schoolInfo?.valueForContact
+						.toString()
+						.toLowerCase()
+						.includes((value).toLowerCase()),
+				onFilterDropdownOpenChange: visible => {
+					if (visible) {
+						setTimeout(() => this.searchInput.current?.select(), 100);
+					}
+				}
+			},
 			{ title: 'Active', dataIndex: 'isActive', key: 'isActive', render: (isActive) => isActive ? 'True' : 'False', sorter: (a, b) => a.isActive - b.isActive },
 			{
 				title: 'Action', key: 'action', render: (user) => (
