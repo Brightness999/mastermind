@@ -61,7 +61,7 @@ export default class extends React.Component {
 	handleActivate = (id, state) => {
 		this.setState({
 			isConfirmModal: true,
-			confirmMessage: `Are you sure to ${state ? 'deactivate' : 'activate'} this user?`,
+			confirmMessage: `Are you sure to ${state ? 'activate' : 'deactivate'} this user?`,
 			userId: id,
 			userState: state,
 		});
