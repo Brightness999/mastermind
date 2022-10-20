@@ -9,6 +9,10 @@ export default {
     id: `${scope}.search`,
     defaultMessage: 'Search',
   },
+  dashboard: {
+    id: `${scope}.dashboard`,
+    defaultMessage: 'Dashboard',
+  },
   editProfile: {
     id: `${scope}.editProfile`,
     defaultMessage: 'Edit Profile',

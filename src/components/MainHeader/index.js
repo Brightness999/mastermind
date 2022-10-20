@@ -1,9 +1,9 @@
-import React, { Component, useRef } from 'react';
+import React, { Component } from 'react';
 import { Link } from 'dva/router';
 import { FaUserAlt, FaUserEdit } from 'react-icons/fa';
 import { BiChevronLeft, BiChevronRight, BiLogOutCircle, BiBell } from 'react-icons/bi';
 import { BsSearch } from 'react-icons/bs';
-import { Badge, Avatar, Button, Input, Menu, Dropdown} from 'antd';
+import { Badge, Avatar, Button, Input, Menu, Dropdown } from 'antd';
 import intl from "react-intl-universal";
 import messages from './messages';
 import './style/index.less';
@@ -11,40 +11,45 @@ import { routerLinks } from '../../routes/constant';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { removeUser } from '../../redux/features/authSlice';
+import { MdOutlineSpaceDashboard } from 'react-icons/md';
 const scrollElement = React.createRef();
-class MainHeader extends Component {
 
+class MainHeader extends Component {
   constructor(props) {
     super(props);
     this.state = {
       user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : '',
     }
-
-  }
-
-  componentDidMount() {
   }
 
   scrollTrans = (scrollOffset) => {
     scrollElement.current.scrollLeft += scrollOffset;
   }
 
-  logout = ()=>{
+  logout = () => {
     localStorage.removeItem('token');
-    this.props.removeUser()
-    // this.props.history.push('/');
+    this.props.removeUser();
   }
+
   render() {
-    console.log(this.props,'props')
-    const infoAuth  = this.props.authData ?? '';
+    const infoAuth = this.props.authData ?? '';
     const clientParent = this.props.authParent ?? '';
-    const {user} = this.state;
+    const { user } = this.state;
     const menu = (
       <Menu
         items={[
           {
             key: '1',
-            icon: <FaUserEdit size={18} color='#495057'/>,
+            icon: <MdOutlineSpaceDashboard size={18} color='#495057' />,
+            label: (
+              <Link to={this.state.user?.role === 999 ? routerLinks.Appointments : routerLinks.Dashboard}>
+                {intl.formatMessage(messages.dashboard)}
+              </Link>
+            ),
+          },
+          {
+            key: '2',
+            icon: <FaUserEdit size={18} color='#495057' />,
             label: (
               <Link to={routerLinks.Changeprofile}>
                 {intl.formatMessage(messages.editProfile)}
@@ -52,8 +57,8 @@ class MainHeader extends Component {
             ),
           },
           {
-            key: '2',
-            icon: <Badge size="small" count={6}><BiBell size={18} color='#495057'/></Badge>,
+            key: '3',
+            icon: <Badge size="small" count={6}><BiBell size={18} color='#495057' /></Badge>,
             label: (
               <a href='#'>
                 Notification
@@ -61,11 +66,11 @@ class MainHeader extends Component {
             ),
           },
           {
-            key: '3',
-            icon: <BiLogOutCircle size={18} color='#495057'/>,
+            key: '4',
+            icon: <BiLogOutCircle size={18} color='#495057' />,
             label: (
               <Link to='/' onClick={this.logout}>
-                
+
                 {intl.formatMessage(messages.logOut)}
               </Link>
             ),
@@ -73,19 +78,20 @@ class MainHeader extends Component {
         ]}
       />
     );
+
     return (
       <div className='component-mainheader'>
         <div className='div-account'>
           <div className='account-icon'>
             <Dropdown overlay={menu} placement="bottomLeft">
               <Badge size="small" count={6}>
-                <Avatar icon={<FaUserAlt size={17} className='text-white'/>} />
+                <Avatar icon={<FaUserAlt size={17} className='text-white' />} />
               </Badge>
             </Dropdown>
           </div>
           <div className='account-name'>
             <p className='mb-0'>{this.state.user.username}</p>
-            <p className='font-10 mb-0'>{ user.role == 3 ? clientParent?.familyName : infoAuth?.name  }</p>
+            <p className='font-10 mb-0'>{user.role == 3 ? clientParent?.familyName : infoAuth?.name}</p>
           </div>
         </div>
         <div className='div-search'>
@@ -127,7 +133,8 @@ const mapStateToProps = state => {
   return {
     authData: state.auth.authData,
     authParent: state.auth.authDataClientParent,
-    authChild : state.auth.authDataClientChild
+    authChild: state.auth.authDataClientChild
   }
 }
-export default compose(connect(mapStateToProps, {removeUser}))(MainHeader);
+
+export default compose(connect(mapStateToProps, { removeUser }))(MainHeader);

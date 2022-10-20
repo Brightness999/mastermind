@@ -759,6 +759,7 @@ export default class extends React.Component {
       onSubmit: this.onCloseModalGroup,
       onCancel: this.onCloseModalGroup,
     }
+
     return (
       <div className="full-layout page dashboard-page">
         <div className='div-content'>
@@ -767,7 +768,7 @@ export default class extends React.Component {
               <p className='font-16 text-white mb-0'>{intl.formatMessage(messages.activityFeed)}</p>
             </div>
             <div className='div-list-feed'>
-              {listAppointmentsRecent.map((appoinment, index) => this.renderListAppoinmentsRecent(appoinment, index))}
+              {listAppointmentsRecent?.filter((appointment) => moment(appointment.date).isAfter(new Date()))?.map((appoinment, index) => this.renderListAppoinmentsRecent(appoinment, index))}
             </div>
           </section>
           <section className='div-calendar box-card'>
