@@ -214,7 +214,7 @@ class ModalReferralService extends React.Component {
 		const modalProps = {
 			className: 'modal-referral-service',
 			title: "",
-			visible: this.props.visible,
+			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: this.props.onCancel,
 			closable: false,
@@ -277,9 +277,7 @@ class ModalReferralService extends React.Component {
 							<Input
 								placeholder={intl.formatMessage(msgCreateAccount.phoneNumber)}
 								value={this.state.consulationPhoneNumber}
-								onChange={v => {
-									this.setState({ consulationPhoneNumber: v.target.value })
-								}}
+								onChange={v => this.setState({ consulationPhoneNumber: v.target.value })}
 								size="small" />
 						</Col>
 					</Row>
@@ -288,7 +286,8 @@ class ModalReferralService extends React.Component {
 							<div >{intl.formatMessage(messages.subsidyOnly)}<Switch size="small" defaultChecked className='ml-10' /></div>
 						</Col>
 						<Col xs={24} sm={24} md={8} className='select-small'>
-							<Select placeholder='Meet Solution'
+							<Select
+								placeholder='Meet Solution'
 								onChange={v => this.setState({ meetSolution: v })}
 								value={this.state.meetSolution}
 							>

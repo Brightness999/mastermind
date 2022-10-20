@@ -49,6 +49,10 @@ export default {
     id: `${scope}.newAppointment`,
     defaultMessage: 'New Appointment',
   },
+  newScreening: {
+    id: `${scope}.newScreening`,
+    defaultMessage: 'New Screening',
+  },
   selectOptions: {
     id: `${scope}.selectOptions`,
     defaultMessage: 'Select options',
@@ -56,6 +60,10 @@ export default {
   subsidyOnly: {
     id: `${scope}.subsidyOnly`,
     defaultMessage: 'Subsidy only',
+  },
+  selectProvider: {
+    id: `${scope}.selectProvider`,
+    defaultMessage: 'Select a provider',
   },
   availableProviders: {
     id: `${scope}.availableProviders`,
@@ -72,6 +80,10 @@ export default {
   searchDoctor: {
     id: `${scope}.searchDoctor`,
     defaultMessage: 'Search a doctor',
+  },
+  searchProvider: {
+    id: `${scope}.searchProvider`,
+    defaultMessage: 'Search a provider',
   },
   areSureChangeAppoint: {
     id: `${scope}.areSureChangeAppoint`,
@@ -145,9 +157,37 @@ export default {
     id: `${scope}.dateTime`,
     defaultMessage: 'Date & Time',
   },
+  date: {
+    id: `${scope}.date`,
+    defaultMessage: 'Date',
+  },
+  time: {
+    id: `${scope}.time`,
+    defaultMessage: 'Time',
+  },
+  notes: {
+    id: `${scope}.notes`,
+    defaultMessage: 'Notes',
+  },
+  pleaseEnter: {
+    id: `${scope}.pleaseEnter`,
+    defaultMessage: 'Please enter your',
+  },
+  pleaseSelect: {
+    id: `${scope}.pleaseSelect`,
+    defaultMessage: 'Please select your',
+  },
   phone: {
     id: `${scope}.phone`,
     defaultMessage: 'Phone',
+  },
+  contactNumber: {
+    id: `${scope}.contactNumber`,
+    defaultMessage: 'Contact Number',
+  },
+  phoneNumberValid: {
+    id: `${scope}.phoneNumberValid`,
+    defaultMessage: 'Phone number is not a valid',
   },
   reSchedule: {
     id: `${scope}.reSchedule`,
@@ -244,5 +284,9 @@ export default {
   schedule: {
     id: `${scope}.schedule`,
     defaultMessage: 'Schedule',
+  },
+  screening: {
+    id: `${scope}.screening`,
+    defaultMessage: 'Screening',
   }
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Popover } from 'antd';
+import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input } from 'antd';
 import { BiChevronLeft, BiChevronRight, BiSearch } from 'react-icons/bi';
 import { BsCheck } from 'react-icons/bs';
 import { GoPrimitiveDot } from 'react-icons/go';
@@ -14,14 +14,14 @@ import './style/index.less';
 import '../../assets/styles/login.less';
 import request, { generateSearchStructure } from '../../utils/api/request'
 import PlacesAutocomplete from 'react-places-autocomplete';
+import ModalNewScreening from './ModalNewScreening';
 
 const { Paragraph } = Typography;
 moment.locale('en');
 
 class ModalNewAppointmentForParents extends React.Component {
 	state = {
-		valueCalendar: moment(),
-		selectedDate: moment(),
+		selectedDate: undefined,
 		currentMonth: moment().format('MMMM YYYY'),
 		isChoose: -1,
 		isConfirm: false,
@@ -35,22 +35,24 @@ class ModalNewAppointmentForParents extends React.Component {
 		arrTime: [],
 		errorMessage: '',
 		selectedDay: 0,
+		scheduleButtonText: intl.formatMessage(messages?.schedule)?.toUpperCase(),
+		visibleNewScreening: false,
 	}
 
 	componentDidMount() {
-		var arrTime = [];
-		var hour9AM = moment('2022-10-30 9:00:00');
-		for (var i = 0; i < 6; i++) {
-			var newTime = hour9AM.clone();
+		let arrTime = [];
+		let hour9AM = moment('2022-10-30 9:00:00');
+		for (let i = 0; i < 6; i++) {
+			let newTime = hour9AM.clone();
 			hour9AM = hour9AM.add(30, 'minutes')
 			arrTime.push({
 				value: newTime,
 				active: true,
 			});
 		}
-		var hour2PM = moment('2022-10-30 14:00:00');
-		for (var i = 0; i < 8; i++) {
-			var newTime = hour2PM.clone();
+		let hour2PM = moment('2022-10-30 14:00:00');
+		for (let i = 0; i < 8; i++) {
+			let newTime = hour2PM.clone();
 			hour2PM = hour2PM.add(30, 'minutes')
 			arrTime.push({
 				value: newTime,
@@ -86,33 +88,65 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	createAppointment = () => {
-		if (this.state.isSelectTime < 0 || this.state.selectedSkillSet < 0 || this.state.address.length == 0 ||
-			this.state.selectedDependent == undefined || this.state.selectedProvider == undefined
-		) {
+		const { isSelectTime, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, selectedDay } = this.state;
+		if (isSelectTime < 0 || selectedSkillSet < 0 || address.length == 0 || selectedDependent == undefined || selectedProvider == undefined) {
 			this.setState({ errorMessage: 'please fill all required field' })
 			return;
 		}
 		this.setState({ errorMessage: '' })
-		var date1 = this.state.selectedDate
-		let { years, months, date } = date1.toObject();
-		var hour = this.state.arrTime[this.state.selectedDay][this.state.isSelectTime].value.clone().set({ years, months, date });
-		var postData = {
-			skillSet: this.state.selectedSkillSet,
-			dependent: this.state.selectedDependent,
-			provider: this.state.selectedProvider,
+		const { years, months, date } = selectedDate.toObject();
+		const hour = arrTime[selectedDay][isSelectTime].value.clone().set({ years, months, date });
+		const postData = {
+			skillSet: selectedSkillSet,
+			dependent: selectedDependent,
+			provider: selectedProvider,
 			date: hour.valueOf(),
-			location: this.state.address,
+			location: address,
 		};
-		request.post('clients/create_appoinment', postData).then(result => {
-			if (result.success) {
-				this.setState({ errorMessage: '' });
-				this.props.onSubmit();
-			} else {
-				this.setState({ errorMessage: result.data })
-			}
-		}).catch(err => {
-			this.setState({ errorMessage: err.message })
+		this.requestCreateAppointment(postData);
+	}
+
+	onSubmitModalNewScreening = (values) => {
+		const { selectedSkillSet, address, selectedDependent, arrTime, selectedDay, selectedDate, selectedProvider, isSelectTime } = this.state;
+		const { years, months, date } = selectedDate.toObject();
+		const hour = arrTime?.[selectedDay]?.[isSelectTime]?.value.clone().set({ years, months, date });
+		const postData = {
+			skillSet: selectedSkillSet,
+			dependent: selectedDependent,
+			provider: selectedProvider,
+			date: hour,
+			phoneNumber: values?.phoneNumber,
+			notes: values?.notes,
+			status: 3,
+			location: address,
+		};
+		this.setState({ visibleNewScreening: false }, () => {
+			this.requestCreateAppointment(postData);
 		})
+	}
+
+	onCloseModalNewScreening = () => {
+		this.setState({ visibleNewScreening: false });
+	}
+
+	modalScreening = () => {
+		const modalNewScreeningProps = {
+			visible: this.state.visibleNewScreening,
+			onSubmit: this.onSubmitModalNewScreening,
+			onCancel: this.onCloseModalNewScreening,
+		};
+		return (<ModalNewScreening {...modalNewScreeningProps} />);
+	}
+
+	createScreening = () => {
+		this.setState({ visibleNewScreening: false });
+		const { selectedSkillSet, address, selectedDependent, selectedProvider } = this.state;
+		if (selectedSkillSet < 0 || address == '' || selectedDependent == undefined || selectedProvider == undefined) {
+			this.setState({ errorMessage: 'please fill all required field' })
+			return;
+		}
+		this.setState({ errorMessage: '' });
+		this.setState({ visibleNewScreening: true });
 	}
 
 	handleChangeAddress = address => {
@@ -124,35 +158,34 @@ class ModalNewAppointmentForParents extends React.Component {
 	};
 
 	onSelectDate = (newValue) => {
-		this.setState({
-			valueCalendar: newValue,
-			selectedDate: newValue,
-			selectedDay: newValue.day(),
-			isSelectTime: -1,
-		});
-	}
-
-	onPanelChange = (newValue) => {
-		this.setState({ valueCalendar: newValue });
+		if (newValue.isAfter(new Date())) {
+			this.setState({
+				selectedDate: newValue,
+				selectedDay: newValue.day(),
+				isSelectTime: -1,
+			});
+		}
 	}
 
 	nextMonth = () => {
-		this.setState({
-			selectedDate: moment(this.state.selectedDate).add(1, 'month'),
-			valueCalendar: moment(this.state.selectedDate).add(1, 'month'),
-			isSelectTime: -1,
-		});
+		if (moment(this.state.selectedDate).add(1, 'month').isAfter(new Date())) {
+			this.setState({
+				selectedDate: moment(this.state.selectedDate).add(1, 'month'),
+				isSelectTime: -1,
+			});
+		}
 	}
 
 	prevMonth = () => {
-		this.setState({
-			selectedDate: moment(this.state.selectedDate).add(-1, 'month'),
-			valueCalendar: moment(this.state.selectedDate).add(-1, 'month'),
-			isSelectTime: -1,
-		});
+		if (moment(this.state.selectedDate).add(-1, 'month').isAfter(new Date())) {
+			this.setState({
+				selectedDate: moment(this.state.selectedDate).add(-1, 'month'),
+				isSelectTime: -1,
+			});
+		}
 	}
 
-	onChooseDoctor = (index) => {
+	onChooseProvider = (index) => {
 		let newArrTime = JSON.parse(JSON.stringify(this.state.arrTime));
 		this.state.listProvider[index].availability.forEach((availableTime, index) => {
 			newArrTime[index].map(time => {
@@ -168,6 +201,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			isChoose: index,
 			selectedProvider: this.state.listProvider[index]._id,
 			arrTime: newArrTime,
+			scheduleButtonText: this.props.listAppointmentsRecent?.filter(a => a.provider?._id == this.state.listProvider[index]._id).find(a => a.type > 0) ? intl.formatMessage(messages.schedule).toUpperCase() : intl.formatMessage(messages.screening).toUpperCase(),
 		});
 	}
 
@@ -182,33 +216,21 @@ class ModalNewAppointmentForParents extends React.Component {
 		this.setState({ isSelectTime: index })
 	}
 
-	render() {
-		const contentConfirm = (
-			<div className='confirm-content'>
-				<p className='text-center mb-5'>{intl.formatMessage(messages.areSureChangeAppoint)}</p>
-				<Row gutter={10}>
-					<Col xs={24} sm={24} md={12}>
-						<p className='font-12 text-center mb-0'>{intl.formatMessage(messages.current)}</p>
-						<div className='current-content'>
-							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>Dr.Blank</span></p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: Dependent Name</p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.where)}: Local Office Name</p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>6:45pm</span> on <span className='font-11 font-700'>July, 26, 2022</span></p>
-						</div>
-					</Col>
-					<Col xs={24} sm={24} md={12}>
-						<p className='font-12 text-center mb-0'>{intl.formatMessage(messages.new)}</p>
-						<div className='new-content'>
-							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>Dr.Blank</span></p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: Dependent Name</p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.where)}: Local Office Name</p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>7:20pm</span> on <span className='font-11 font-700'>July, 28, 2022</span></p>
-						</div>
-					</Col>
-				</Row>
-			</div>
-		);
+	requestCreateAppointment(postData) {
+		request.post('clients/create_appoinment', postData).then(result => {
+			if (result.success) {
+				this.setState({ errorMessage: '' });
+				this.props.onSubmit();
+			} else {
+				this.setState({ errorMessage: result.data });
+			}
+		}).catch(err => {
+			this.setState({ errorMessage: err.message });
+		});
+	}
 
+	render() {
+		const { selectedDate, isChoose, isSelectTime, selectedDay, listProvider, scheduleButtonText, selectedProvider } = this.state;
 		const modalProps = {
 			className: 'modal-new',
 			title: "",
@@ -221,20 +243,18 @@ class ModalNewAppointmentForParents extends React.Component {
 				<Button key="back" onClick={this.props.onCancel}>
 					{intl.formatMessage(msgReview.goBack).toUpperCase()}
 				</Button>,
-				<Button key="submit" type="primary" onClick={this.createAppointment}>
-					{intl.formatMessage(messages.scheduleScreening).toUpperCase()}
+				<Button key="submit" type="primary" onClick={() => scheduleButtonText == intl.formatMessage(messages.schedule).toUpperCase() ? this.createAppointment() : this.createScreening()}>
+					{scheduleButtonText}
 				</Button>
 			]
 		};
-		const { valueCalendar, selectedDate, isChoose, isSelectTime, selectedDay } = this.state;
-		console.log(this.state.listProvider[isChoose])
 
 		return (
 			<Modal {...modalProps}>
 				<div className='new-appointment'>
 					<p className='font-30 mb-10'>{intl.formatMessage(messages.newAppointment)}</p>
 					<div className='flex flex-row items-center mb-10'>
-						<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}</p>
+						<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}<sup>*</sup></p>
 						<div className='flex flex-row items-center ml-20'>
 							<Switch size="small" defaultChecked />
 							<p className='ml-10 mb-0'>{intl.formatMessage(messages.subsidyOnly)}</p>
@@ -247,7 +267,7 @@ class ModalNewAppointmentForParents extends React.Component {
 								value={this.state.selectedDependent}
 								placeholder={intl.formatMessage(msgCreateAccount.dependent)}
 							>
-								{this.props.listDependents.map((dependent, index) => (
+								{this.props.listDependents?.map((dependent, index) => (
 									<Select.Option key={index} value={dependent._id}>{dependent.firstName} {dependent.lastName}</Select.Option>
 								))}
 							</Select>
@@ -257,7 +277,7 @@ class ModalNewAppointmentForParents extends React.Component {
 								onChange={v => this.setState({ selectedSkillSet: v })}
 								placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
 							>
-								{this.props.SkillSet.map((skill, index) => (
+								{this.props.SkillSet?.map((skill, index) => (
 									<Select.Option key={index} value={index}>{skill}</Select.Option>
 								))}
 							</Select>
@@ -282,7 +302,7 @@ class ModalNewAppointmentForParents extends React.Component {
 												// inline style for demonstration purpose
 												const style = suggestion.active ? { backgroundColor: '#fafafa', cursor: 'pointer' } : { backgroundColor: '#ffffff', cursor: 'pointer' };
 												return (
-													<div {...getSuggestionItemProps(suggestion, { className, style, key: index })}>
+													<div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
 														<span>{suggestion.description}</span>
 													</div>
 												);
@@ -294,22 +314,22 @@ class ModalNewAppointmentForParents extends React.Component {
 						</Col>
 					</Row>
 					<div className='choose-doctor'>
-						<p className='font-16 mt-10'>{intl.formatMessage(messages.availableProviders)}</p>
+						<p className='font-16 mt-10'>{intl.formatMessage(messages.selectProvider)}<sup>*</sup></p>
 						<div className='doctor-content'>
 							<div style={{ width: 300 }}>
 								<Input
 									onChange={e => this.searchProvider(e.target.value)}
-									placeholder={intl.formatMessage(messages.searchDoctor)}
+									placeholder={intl.formatMessage(messages.searchProvider)}
 									suffix={<BiSearch size={17} />}
 								/>
 							</div>
-							<p className='font-500 mt-1 mb-0'>{intl.formatMessage(messages.popularDoctors)}</p>
+							<p className='font-500 mt-1 mb-0'>{intl.formatMessage(messages.availableProviders)}</p>
 							<div className='doctor-list'>
-								{this.state.listProvider.map((provider, index) => (
-									<div key={index} className='doctor-item' onClick={() => this.onChooseDoctor(index)}>
+								{listProvider.map((provider, index) => (
+									<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
 										<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
 										<p className='font-10 text-center'>{provider.name || provider.referredToAs}</p>
-										{isChoose === index && (
+										{selectedProvider === provider._id && (
 											<div className='selected-doctor'>
 												<BsCheck size={12} />
 											</div>
@@ -324,59 +344,67 @@ class ModalNewAppointmentForParents extends React.Component {
 							<div className='provider-profile'>
 								<div className='flex flex-row items-center'>
 									<p className='font-16 font-700'>{intl.formatMessage(msgDrawer.providerProfile)}</p>
-									<p className='font-12 font-700 ml-auto text-primary'>{intl.formatMessage(messages.screeningRequired)}</p>
+									<p className='font-12 font-700 ml-auto text-primary'>{listProvider[isChoose]?.isNewClientScreening && intl.formatMessage(messages.screeningRequired)}</p>
 								</div>
 								<div className='count-2'>
 									<div>
 										<p className='font-10 mb-0'>Name:</p>
-										<p className='font-10'>{isChoose >= 0 && this.state.listProvider[isChoose] != undefined ? this.state.listProvider[isChoose].name : ''}</p>
+										<p className='font-10'>{listProvider[isChoose]?.name}</p>
 									</div>
 									<div>
 										<p className='font-10 mb-0'>Skillset(s):</p>
-										<p className='font-10'>{isChoose >= 0 && this.state.listProvider[isChoose] != undefined ? this.state.listProvider[isChoose].skillSet : ''}</p>
+										<p className='font-10'>{listProvider[isChoose]?.skillSet}</p>
 									</div>
 								</div>
-								<p className='font-10'>Practice/Location</p>
+								<p className='font-10'>Practice/Location: {listProvider[isChoose]?.serviceAddress}</p>
 								<div className='count-2'>
-									{isChoose >= 0 && this.state.listProvider[isChoose] != undefined && (
+									{listProvider[isChoose] && (
 										<div>
 											<p className='font-10 mb-0'>Contact number:</p>
-											{this.state.listProvider[isChoose].contactNumber.map((phone, phoneIndex) => (
+											{listProvider[isChoose]?.contactNumber?.map((phone, phoneIndex) => (
 												<p key={phoneIndex} className='font-10'>{phone.phoneNumber}</p>
 											))}
 										</div>
 									)}
-									{isChoose >= 0 && this.state.listProvider[isChoose] != undefined && (
+									{listProvider[isChoose] && (
 										<div>
 											<p className='font-10 mb-0'>Contact email:</p>
-											{this.state.listProvider[isChoose].contactEmail.map((email, emailIndex) => (
+											{listProvider[isChoose]?.contactEmail?.map((email, emailIndex) => (
 												<p key={emailIndex} className='font-10'>{email.email}</p>
 											))}
 										</div>
 									)}
 								</div>
-								<div className='count-2'>
-									<p className='font-10'>Academic level(s)</p>
-									<p className='font-10'>Subsidy </p>
+								<div className='flex'>
+									<div className='font-10 flex-1'>
+										<p>Academic level(s)</p>
+										<div>{listProvider[isChoose]?.academicLevel?.map((level, i) => (
+											<div key={i} className="flex">
+												<span>{level.level}</span>
+												<span className='ml-10'>{level.rate}</span>
+											</div>
+										))}</div>
+									</div>
+									<p className='font-10 flex-1'>Subsidy </p>
 								</div>
 								<div className='profile-text'>
 									<Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-										{isChoose >= 0 && this.state.listProvider[isChoose] != undefined ? this.state.listProvider[isChoose].publicProfile : ''}
+										{listProvider[isChoose]?.publicProfile}
 									</Paragraph>
 								</div>
 							</div>
 						</Col>
 						<Col xs={24} sm={24} md={16}>
 							<div className='px-20'>
-								<p className='font-700'>{intl.formatMessage(msgCreateAccount.selectDateTime)}</p>
+								<p className='font-700'>{intl.formatMessage(msgCreateAccount.selectDateTime)}<sup>*</sup></p>
 								<div className='calendar'>
 									<Row gutter={15}>
 										<Col xs={24} sm={24} md={12}>
 											<Calendar
 												fullscreen={false}
-												value={valueCalendar}
+												value={selectedDate}
 												onSelect={this.onSelectDate}
-												onPanelChange={this.onPanelChange}
+												disabledDate={(date) => date.isBefore(new Date())}
 												headerRender={() => (
 													<div style={{ marginBottom: 10 }}>
 														<Row gutter={8} justify="space-between" align="middle">
@@ -407,7 +435,7 @@ class ModalNewAppointmentForParents extends React.Component {
 												{this.state.arrTime[selectedDay]?.map((time, index) => (
 													<Col key={index} span={12}>
 														<div className={isSelectTime === index ? 'time-available active' : 'time-available'} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
-															<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{time.value.format('hh:mm a')}</p>
+															<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
 														</div>
 													</Col>
 												))}
@@ -418,7 +446,8 @@ class ModalNewAppointmentForParents extends React.Component {
 							</div>
 						</Col>
 					</Row>
-					{this.state.errorMessage.length > 0 && (<p style={{ marginRight: "5px" }}>{this.state.errorMessage}</p>)}
+					{this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}
+					{this.modalScreening()}
 				</div>
 			</Modal>
 		);

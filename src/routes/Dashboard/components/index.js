@@ -1,5 +1,5 @@
 import React from 'react';
-import { Collapse, Badge, Avatar, Tabs, Dropdown, Menu, Button, Segmented, Row, Col, Checkbox, Select, message, notification } from 'antd';
+import { Collapse, Badge, Avatar, Tabs, Dropdown, Menu, Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input } from 'antd';
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsFilter, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
@@ -23,13 +23,14 @@ import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 const { Panel } = Collapse;
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
-import request from '../../../utils/api/request'
+import request, { generateSearchStructure } from '../../../utils/api/request'
 import moment from 'moment';
 import { changeTime, getAppointmentsMonthData, removeAppoint } from '../../../redux/features/appointmentsSlice'
 import { store } from '../../../redux/store'
 import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
+import PlacesAutocomplete from 'react-places-autocomplete';
 
 export default class extends React.Component {
   constructor(props) {
@@ -58,10 +59,15 @@ export default class extends React.Component {
       parentInfo: {},
       providerInfo: {},
       schoolInfo: {},
-      listAppoinmentsRecent: [],
+      listAppointmentsRecent: [],
       listAppoinmentsFilter: [],
       SkillSet: [],
       isEditSubsidyRequest: "",
+      selectedProviders: [],
+      selectedLocations: [],
+      selectedSkills: [],
+      listProvider: [],
+      location: '',
     }
   }
 
@@ -70,28 +76,12 @@ export default class extends React.Component {
       this.loadDefaultData();
       checkPermission().then(loginData => {
         loginData.user.role > 900 && this.props.history.push(routerLinks.Admin)
-        const appointmentsMonth = store.getState().appointments.dataAppointmentsMonth
-        const dataFetchAppointMonth = {
-          role: loginData.user.role,
-          data: {
-            month: moment().month() + 1,
-            year: moment().year()
-          },
-          token: loginData.token
-        }
-        this.setState({
-          calendarEvents: appointmentsMonth,
-          userRole: loginData.user.role
-        }, () => {
-          // get list appointments
-          this.getMyAppointments();
-          store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth))
-        })
+        this.setState({ userRole: loginData.user.role });
+        this.updateCalendarEvents(loginData.user.role);
+        this.getMyAppointments();
       }).catch(err => {
         this.props.history.push('/');
       })
-    } else {
-      this.props.history.push('/');
     }
 
     const script = document.createElement("script");
@@ -103,9 +93,14 @@ export default class extends React.Component {
 
   loadDefaultData() {
     request.post('clients/get_default_value_for_client').then(result => {
-      var data = result.data;
+      let data = result.data;
       this.setState({ SkillSet: data.SkillSet });
-    })
+    });
+    request.post('clients/search_providers', generateSearchStructure('')).then(result => {
+      if (result.success) {
+        this.setState({ listProvider: result.data });
+      }
+    });
   }
 
   scriptLoaded = () => {
@@ -214,7 +209,7 @@ export default class extends React.Component {
 
   loadMySchoolInfo = () => {
     request.post('schools/get_my_school_info').then(result => {
-      var data = result.data;
+      let data = result.data;
       this.setState({ schoolInfo: data })
       this.joinRoom(data._id);
     })
@@ -222,7 +217,7 @@ export default class extends React.Component {
 
   getParentInfo = () => {
     request.post('clients/get_parent_profile').then(result => {
-      var data = result.data;
+      let data = result.data;
       this.setState({ parentInfo: data })
       this.joinRoom(data._id);
     })
@@ -230,8 +225,8 @@ export default class extends React.Component {
 
   loadDependent = () => {
     request.post('clients/get_child_profile').then(result => {
-      var data = result.data;
-      for (var i = 0; i < data.length; i++) {
+      let data = result.data;
+      for (let i = 0; i < data.length; i++) {
         this.joinRoom(data[i]._id);
       }
       this.setState({ listDependents: data })
@@ -248,7 +243,7 @@ export default class extends React.Component {
 
   loadMyProviderInfo = () => {
     request.post('providers/get_my_provider_info').then(result => {
-      var data = result.data;
+      let data = result.data;
       this.setState({ providerInfo: data })
       this.joinRoom(data._id);
     })
@@ -265,6 +260,7 @@ export default class extends React.Component {
       onCancel: this.onCloseModalNewAppoint,
       listDependents: this.state.listDependents,
       SkillSet: this.state.SkillSet,
+      listAppointmentsRecent: this.state.listAppointmentsRecent,
     };
     return (<ModalNewAppointmentForParents {...modalNewAppointProps} />);
   }
@@ -485,17 +481,17 @@ export default class extends React.Component {
   }
 
   getMyAppointments() {
-    var url = 'clients/get_my_appointments';
+    let url = 'clients/get_my_appointments';
     if (this.state.userRole === 30) {
       url = 'providers/get_my_appointments'
     }
 
     request.post(url).then(result => {
       if (result.success) {
-        var data = result.data;
-        this.setState({ listAppoinmentsRecent: data.docs });
+        const data = result.data;
+        this.setState({ listAppointmentsRecent: data.docs });
       } else {
-        this.setState({ listAppoinmentsRecent: [] });
+        this.setState({ listAppointmentsRecent: [] });
       }
     })
   }
@@ -512,13 +508,15 @@ export default class extends React.Component {
       onSubmit: this.onCloseModalSubsidy,
       onCancel: this.onCloseModalSubsidy,
     };
-    return (<ModalSubsidyProgress {...modalSubsidyProps}
-      setOpennedEvent={(reload) => { this.reloadModalSubsidyDetail = reload }}
-      userRole={this.state.userRole}
-      SkillSet={this.state.SkillSet}
-      openReferral={this.onShowModalReferral}
-      openHierachy={this.openHierachyModal}
-    />)
+    return (
+      <ModalSubsidyProgress {...modalSubsidyProps}
+        setOpennedEvent={(reload) => { this.reloadModalSubsidyDetail = reload }}
+        userRole={this.state.userRole}
+        SkillSet={this.state.SkillSet}
+        openReferral={this.onShowModalReferral}
+        openHierachy={this.openHierachyModal}
+      />
+    );
   }
 
   renderListAppoinmentsRecent = (appoinment, index) => {
@@ -535,13 +533,6 @@ export default class extends React.Component {
     );
   }
 
-  genExtraTime = () => (
-    <BsClockHistory
-      size={18}
-      onClick={() => { }}
-    />
-  );
-
   genExtraFlag = () => (
     <Badge size="small" count={2}>
       <BsFillFlagFill
@@ -557,7 +548,7 @@ export default class extends React.Component {
         <Panel
           key="1"
           header={intl.formatMessage(messages.appointments)}
-          extra={this.genExtraTime()}
+          extra={(<BsClockHistory size={18} onClick={() => { }} />)}
           className='appointment-panel'
         >
           <PanelAppointment
@@ -600,6 +591,73 @@ export default class extends React.Component {
       )
   }
 
+  handleClickPrevMonth = () => {
+    const calendar = this.calendarRef.current;
+    calendar._calendarApi.prev();
+    this.updateCalendarEvents(this.state.userRole);
+  }
+
+  handleClickNextMonth = () => {
+    const calendar = this.calendarRef.current;
+    calendar._calendarApi.next();
+    this.updateCalendarEvents(this.state.userRole);
+  }
+
+  updateCalendarEvents(role) {
+    const calendar = this.calendarRef.current;
+    const month = calendar._calendarApi.getDate().getMonth() + 1;
+    const year = calendar._calendarApi.getDate().getFullYear();
+    let selectedSkills = [], selectedProviders = [];
+    this.state.selectedSkills.forEach(skill => selectedSkills.push(this.state.skillSet.findIndex(s => s == skill)));
+    this.state.selectedProviders.forEach(provider => selectedProviders.push(this.state.listProvider.find(p => p.name == provider)._id));
+    const dataFetchAppointMonth = {
+      role: role,
+      data: {
+        month: month,
+        year: year,
+        locations: this.state.selectedLocations,
+        providers: selectedProviders,
+        skills: selectedSkills,
+      }
+    };
+    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth)).then(() => {
+      const appointmentsMonth = store.getState().appointments.dataAppointmentsMonth;
+      this.setState({ calendarEvents: appointmentsMonth });
+    });
+  }
+
+  handleSelectProvider = (name) => {
+    if (!this.state.selectedProviders.includes(name)) {
+      this.setState({ selectedProviders: [...this.state.selectedProviders, name] });
+    }
+  }
+
+  handleRemoveProvider = (index) => {
+    this.state.selectedProviders.splice(index, 1);
+    this.setState({ selectedProviders: this.state.selectedProviders });
+  }
+
+  handelChangeLocation = (location) => {
+    this.setState({ location: location });
+  }
+
+  handleSelectLocation = (location) => {
+    if (!this.state.selectedLocations.includes(location)) {
+      this.setState({ selectedLocations: [...this.state.selectedLocations, location] });
+    }
+    this.setState({ location: '' });
+  }
+
+  handleRemoveLocation = (index) => {
+    this.state.selectedLocations.splice(index, 1);
+    this.setState({ selectedLocations: this.state.selectedLocations });
+  }
+
+  handleApplyFilter = () => {
+    this.updateCalendarEvents(this.state.userRole);
+    this.setState({ isFilter: false });
+  }
+
   render() {
     const {
       isFilter,
@@ -611,6 +669,12 @@ export default class extends React.Component {
       isGridDayView,
       visibleNewReview,
       visibleNewGroup,
+      SkillSet,
+      listProvider,
+      selectedProviders,
+      selectedLocations,
+      listAppointmentsRecent,
+      userRole,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -678,45 +742,6 @@ export default class extends React.Component {
       },
     ];
 
-    const optionsSkillset = [
-      {
-        label: 'Kriah Tutoring' + '(46)',
-        value: 'appointments',
-      },
-      {
-        label: intl.formatMessage(messages.evaluations),
-        value: 'evaluations',
-      },
-      {
-        label: intl.formatMessage(messages.screenings),
-        value: 'screenings',
-      },
-      {
-        label: intl.formatMessage(messages.referrals),
-        value: 'referrals',
-      },
-      {
-        label: intl.formatMessage(messages.homeworkTutoring),
-        value: 'home_work',
-      },
-      {
-        label: 'OT',
-        value: 'OT',
-      },
-      {
-        label: intl.formatMessage(messages.evaluations),
-        value: 'evaluations2',
-      },
-      {
-        label: intl.formatMessage(messages.screenings),
-        value: 'screenings2',
-      },
-      {
-        label: intl.formatMessage(messages.referrals),
-        value: 'referrals2',
-      },
-    ];
-
     const modalReferralServiceProps = {
       visible: visiblReferralService,
       onSubmit: this.onCloseModalReferral,
@@ -742,43 +767,89 @@ export default class extends React.Component {
               <p className='font-16 text-white mb-0'>{intl.formatMessage(messages.activityFeed)}</p>
             </div>
             <div className='div-list-feed'>
-              {this.state.listAppoinmentsRecent.map((appoinment, index) => this.renderListAppoinmentsRecent(appoinment, index))}
+              {listAppointmentsRecent.map((appoinment, index) => this.renderListAppoinmentsRecent(appoinment, index))}
             </div>
           </section>
           <section className='div-calendar box-card'>
             {isFilter && (
-              <div className='calendar-filter'>
-                <CSSAnimate className="animated-shorter" type={isFilter ? 'fadeIn' : 'fadeOut'}>
+              <div className='calendar-filter w-100'>
+                <CSSAnimate className="animated-shorter">
                   <Row gutter={10}>
                     <Col xs={12} sm={12} md={4}>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
-                      <Checkbox.Group options={optionsEvent} />
+                      <Checkbox.Group options={optionsEvent} className="flex flex-col" />
                     </Col>
-                    <Col xs={12} sm={12} md={6} className='skillset-checkbox'>
+                    <Col xs={12} sm={12} md={8} className='skillset-checkbox'>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
-                      <Checkbox.Group options={optionsSkillset} />
+                      <Checkbox.Group options={SkillSet} />
                     </Col>
-                    <Col xs={12} sm={12} md={7} className='select-small'>
+                    <Col xs={12} sm={12} md={6} className='select-small'>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
-                      <Select placeholder={intl.formatMessage(messages.startTypingProvider)}>
-                        <Select.Option value='1'>Dr. Rabinowitz </Select.Option>
+                      <Select
+                        showSearch
+                        placeholder={intl.formatMessage(messages.startTypingProvider)}
+                        value=''
+                        optionFilterProp='children'
+                        filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                        onChange={(v) => this.handleSelectProvider(v)}
+                      >
+                        {listProvider?.map((provider, i) => (
+                          <Select.Option key={i} value={provider.name}>{provider.name}</Select.Option>
+                        ))}
                       </Select>
                       <div className='div-chip'>
-                        {Array(3).fill(null).map((_, index) => <div key={index} className='chip'>Dr. Rabinowitz <BsX size={16} onClick={null} /></div>)}
+                        {selectedProviders?.map((name, i) => (
+                          <div key={i} className='chip'>
+                            {name}
+                            <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
+                        ))}
                       </div>
                     </Col>
-                    <Col xs={12} sm={12} md={7} className='select-small'>
+                    <Col xs={12} sm={12} md={6} className='select-small'>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
-                      <Select placeholder={intl.formatMessage(messages.startTypingLocation)}>
-                        <Select.Option value='1'>Rabinowitz office</Select.Option>
-                      </Select>
+                      <PlacesAutocomplete
+                        value={this.state.location}
+                        onChange={(value) => this.handelChangeLocation(value)}
+                        onSelect={(value) => this.handleSelectLocation(value)}
+                      >
+                        {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+                          <div>
+                            <Input {...getInputProps({
+                              placeholder: 'Service Address',
+                              className: 'location-search-input',
+                            })} />
+                            <div className="autocomplete-dropdown-container">
+                              {loading && <div>Loading...</div>}
+                              {suggestions.map(suggestion => {
+                                const className = suggestion.active
+                                  ? 'suggestion-item--active'
+                                  : 'suggestion-item';
+                                // inline style for demonstration purpose
+                                const style = suggestion.active
+                                  ? { backgroundColor: '#fafafa', cursor: 'pointer' }
+                                  : { backgroundColor: '#ffffff', cursor: 'pointer' };
+                                return (
+                                  <div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
+                                    <span>{suggestion.description}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </PlacesAutocomplete>
                       <div className='div-chip'>
-                        {Array(3).fill(null).map((_, index) => <div key={index} className='chip'>Rabinowitz office <BsX size={16} onClick={null} /></div>)}
+                        {selectedLocations?.map((location, i) => (
+                          <div key={i} className='chip'>
+                            {location}
+                            <BsX size={16} onClick={() => this.handleRemoveLocation(i)} />
+                          </div>
+                        ))}
                       </div>
                     </Col>
                   </Row>
                   <div className='text-right'>
-                    <Button size='small' type='primary'>{intl.formatMessage(messages.apply).toUpperCase()}(10)</Button>
+                    <Button size='small' type='primary' onClick={this.handleApplyFilter}>{intl.formatMessage(messages.apply).toUpperCase()}</Button>
                   </div>
                 </CSSAnimate>
               </div>
@@ -803,14 +874,12 @@ export default class extends React.Component {
                         type: isGridDayView === 'Grid' ? 'dayGridMonth' : 'listWeek',
                         buttonText: btnChangeDayView,
                       },
-                      week: {
-                        titleFormat: { month: 'numeric', day: 'numeric' }
-                      },
+                      week: { titleFormat: { month: 'numeric', day: 'numeric' } },
                     }}
                     customButtons={{
-                      filterButton: {
-                        text: btnFilter,
-                      },
+                      filterButton: { text: btnFilter },
+                      prev: { click: () => this.handleClickPrevMonth() },
+                      next: { click: () => this.handleClickNextMonth() },
                     }}
                     initialView='dayGridMonth'
                     eventColor='#2d5cfa'
@@ -877,20 +946,20 @@ export default class extends React.Component {
                 )}
               </Panel>
               <Panel header={intl.formatMessage(messages.screenings)} key="3">
-                {new Array(10).fill(null).map((_, index) =>
+                {listAppointmentsRecent?.filter(a => a.status == 3)?.map((appointment, index) =>
                   <div key={index} className='list-item padding-item'>
                     <Avatar size={24} icon={<FaUser size={12} />} />
-                    <div className='div-service'>
-                      <p className='font-11 mb-0'>Service Type</p>
-                      <p className='font-09 mb-0'>Provider Name</p>
+                    <div className='div-service flex-1'>
+                      <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                      <p className='font-09 mb-0'>{userRole == 3 ? appointment.provider?.name : userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : ''}</p>
                     </div>
-                    <div className='text-center ml-auto mr-5'>
+                    <div className='text-center ml-auto mr-5 flex-1'>
                       <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
-                      <p className='font-11 mb-0'>Phone number</p>
+                      <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                     </div>
-                    <div className='ml-auto'>
-                      <p className='font-12 mb-0'>Time</p>
-                      <p className='font-12 font-700 mb-0'>Date</p>
+                    <div className='ml-auto flex-1'>
+                      <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
+                      <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
                     </div>
                   </div>
                 )}
@@ -982,7 +1051,7 @@ function reportNetworkError() {
 function renderEventContent(eventInfo) {
   return (
     <div className='flex flex-col'>
-      <Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />     
+      <Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
       <b className='mr-3'>{moment(eventInfo.event.start).format('hh:mm')}</b>
       <b className='mr-3'>Meeting with {eventInfo.event.title}</b>
     </div>
