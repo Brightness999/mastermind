@@ -186,7 +186,7 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	onChooseProvider = (index) => {
-		let newArrTime = JSON.parse(JSON.stringify(this.state.arrTime));
+		const newArrTime = JSON.parse(JSON.stringify(this.state.arrTime));
 		this.state.listProvider[index].availability.forEach((availableTime, index) => {
 			newArrTime[index].map(time => {
 				time.value = moment(time.value);
@@ -197,11 +197,35 @@ class ModalNewAppointmentForParents extends React.Component {
 				}
 			})
 		})
+		let buttonText = intl.formatMessage(messages.schedule).toUpperCase();
+		const appointmentsForChoosenProvider = this.props.listAppointmentsRecent?.filter(appointment => appointment.provider?._id == this.state.listProvider[index]._id);
+		if (this.state.listProvider[index].isNewClientScreening) {
+			if (this.state.listProvider[index].isSeparateEvaluationRate) {
+				if (appointmentsForChoosenProvider?.find(appointment => appointment.status > 1)) {
+					if (!appointmentsForChoosenProvider?.find(appointment => appointment.status > 2)) {
+						buttonText = intl.formatMessage(messages.evaluation).toUpperCase();
+					}
+				} else {
+					buttonText = intl.formatMessage(messages.screening).toUpperCase();
+				}
+			} else {
+				if (!appointmentsForChoosenProvider?.find(appointment => appointment.status > 1)) {
+					buttonText = intl.formatMessage(messages.screening).toUpperCase();
+				}
+			}
+		} else {
+			if (this.state.listProvider[index].isSeparateEvaluationRate) {
+				if (!appointmentsForChoosenProvider?.find(appointment => appointment.status > 2)) {
+					buttonText = intl.formatMessage(messages.evaluation).toUpperCase();
+				}
+			}
+		}
+
 		this.setState({
 			isChoose: index,
 			selectedProvider: this.state.listProvider[index]._id,
 			arrTime: newArrTime,
-			scheduleButtonText: this.props.listAppointmentsRecent?.filter(a => a.provider?._id == this.state.listProvider[index]._id).find(a => a.type > 0) ? intl.formatMessage(messages.schedule).toUpperCase() : intl.formatMessage(messages.screening).toUpperCase(),
+			scheduleButtonText: buttonText,
 		});
 	}
 

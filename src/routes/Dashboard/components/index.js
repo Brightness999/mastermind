@@ -521,7 +521,7 @@ export default class extends React.Component {
 
   renderListAppoinmentsRecent = (appoinment, index) => {
     return (
-      <div key={index} className={appoinment.status == -1 || appoinment.status == 2 ? 'item-feed done' : 'item-feed'}>
+      <div key={index} className={moment(appoinment.date).isBefore(new Date()) ? 'item-feed done' : 'item-feed'}>
         <p className='font-700'>{appoinment.dependent.firstName} {appoinment.dependent.lastName}</p>
         {appoinment.provider != undefined && <p>{appoinment.provider.name || appoinment.provider.referredToAs}</p>}
         {appoinment.school != undefined && <p>{appoinment.school.name}</p>}
@@ -768,7 +768,7 @@ export default class extends React.Component {
               <p className='font-16 text-white mb-0'>{intl.formatMessage(messages.activityFeed)}</p>
             </div>
             <div className='div-list-feed'>
-              {listAppointmentsRecent?.filter((appointment) => moment(appointment.date).isAfter(new Date()))?.map((appoinment, index) => this.renderListAppoinmentsRecent(appoinment, index))}
+              {listAppointmentsRecent?.filter((appointment) => moment(appointment.date).isAfter(new Date().setHours(0, 0, 0)))?.map((appoinment, index) => this.renderListAppoinmentsRecent(appoinment, index))}
             </div>
           </section>
           <section className='div-calendar box-card'>
@@ -947,12 +947,12 @@ export default class extends React.Component {
                 )}
               </Panel>
               <Panel header={intl.formatMessage(messages.screenings)} key="3">
-                {listAppointmentsRecent?.filter(a => a.status == 3)?.map((appointment, index) =>
+                {listAppointmentsRecent?.filter(a => a.status == 1)?.map((appointment, index) =>
                   <div key={index} className='list-item padding-item'>
                     <Avatar size={24} icon={<FaUser size={12} />} />
                     <div className='div-service flex-1'>
                       <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
-                      <p className='font-09 mb-0'>{userRole == 3 ? appointment.provider?.name : userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : ''}</p>
+                      <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
                     </div>
                     <div className='text-center ml-auto mr-5 flex-1'>
                       <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
@@ -972,33 +972,46 @@ export default class extends React.Component {
               >
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {new Array(10).fill(null).map((_, index) =>
+                    {listAppointmentsRecent?.filter(appointment => appointment.status == 2 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item'>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
-                          <p className='font-11 mb-0'>Service Type</p>
-                          <p className='font-09 mb-0'>Provide Name</p>
+                          <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                          <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
                         </div>
-                        <p className='font-11 mb-0 ml-auto mr-5'>Location</p>
+                        <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>Time</p>
-                          <p className='font-12 font-700 mb-0'>Date</p>
+                          <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
+                          <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
                         </div>
                       </div>
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                    <div className='list-item padding-item'>{intl.formatMessage(messages.past)}</div>
+                    {listAppointmentsRecent?.filter(appointment => appointment.status == 2 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item'>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service'>
+                          <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                          <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
+                        </div>
+                        <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
+                        <div className='ml-auto'>
+                          <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
+                          <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
+                        </div>
+                      </div>
+                    )}
                   </Tabs.TabPane>
                 </Tabs>
               </Panel>
               <Panel header={intl.formatMessage(messages.flags)} key="5" extra={this.genExtraFlag()}>
-                {new Array(10).fill(null).map((_, index) =>
+                {listAppointmentsRecent?.filter(appointment => appointment.status == 4)?.map((appointment, index) =>
                   <div key={index} className='list-item padding-item'>
                     <Avatar size={24} icon={<FaUser size={12} />} />
                     <div className='div-service'>
-                      <p className='font-11 mb-0'>Service Type</p>
-                      <p className='font-09 mb-0'>Provide Name</p>
+                      <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                      <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
                     </div>
                     <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
                     <p className='font-12 ml-auto mb-0'>Pay Flag</p>
@@ -1050,11 +1063,13 @@ function reportNetworkError() {
 }
 
 function renderEventContent(eventInfo) {
+  const eventStatus = eventInfo.event.extendedProps?.status == 1 ? 'Screening' : eventInfo.event.extendedProps?.status == 2 ? 'Evaluation' : 'Meeting';
+
   return (
     <div className='flex flex-col'>
       <Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
       <b className='mr-3'>{moment(eventInfo.event.start).format('hh:mm')}</b>
-      <b className='mr-3'>Meeting with {eventInfo.event.title}</b>
+      <b className='mr-3'>{eventStatus} with {eventInfo.event.title}</b>
     </div>
   )
 }

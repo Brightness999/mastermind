@@ -46,22 +46,23 @@ class PanelAppointment extends React.Component {
   }
 
   handleTabChange = (v) => {
-    var date = moment().subtract(1, 'day').valueOf();
+    const date = new Date();
     this.setState({ appointments: [], currentTab: v })
     switch (parseInt(v)) {
       case 1: return this.getMyAppointments({
         "filter": {
-          "status": [0, 1],
+          "status": [3, 4, 5, 6, 7],
           "date": { "$gte": date }
         }
       })
       case 2: return this.getMyAppointments({
         "filter": {
-          "status": [-1, 2]
+          "status": [-1]
         }
       })
       case 3: return this.getMyAppointments({
         "filter": {
+          "status": [3, 4, 5, 6, 7, 100],
           "date": { "$lte": date }
         }
       })

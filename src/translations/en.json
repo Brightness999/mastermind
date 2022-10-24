@@ -296,6 +296,7 @@
   "components.Modal.providers": "Providers",
   "components.Modal.schedule": "Schedule",
   "components.Modal.screening": "Screening",
+  "components.Modal.evaluation": "Evaluation",
   "components.Modal.newScreening": "New Screening",
   "components.Modal.notes": "Notes",
   "components.Modal.pleaseEnter": "Please enter your",

@@ -288,5 +288,9 @@ export default {
   screening: {
     id: `${scope}.screening`,
     defaultMessage: 'Screening',
+  },
+  evaluation: {
+    id: `${scope}.evaluation`,
+    defaultMessage: 'Evaluation',
   }
 };
