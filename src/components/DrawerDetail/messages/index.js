@@ -57,6 +57,10 @@ export default {
     id: `${scope}.providerProfile`,
     defaultMessage: 'Provider profile',
   },
+  dependentProfile: {
+    id: `${scope}.dependentProfile`,
+    defaultMessage: 'Dependent profile',
+  },
   practiceLocation: {
     id: `${scope}.practiceLocation`,
     defaultMessage: 'Practice/Location',

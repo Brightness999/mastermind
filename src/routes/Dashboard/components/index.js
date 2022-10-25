@@ -39,7 +39,7 @@ export default class extends React.Component {
     this.state = {
       isFilter: false,
       userDrawerVisible: false,
-      visibleDetailPost: false,
+      providerDrawervisible: false,
       visibleNewAppoint: false,
       visibleSubsidy: false,
       visiblReferralService: false,
@@ -174,7 +174,7 @@ export default class extends React.Component {
   handleSocketResult(data) {
     switch (data.key) {
       case 'new_appoint_from_client':
-        this.setState({ visibleDetailPost: true, });
+        this.setState({ providerDrawervisible: true, });
         return;
       case 'new_subsidy_request_from_client':
         this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
@@ -289,10 +289,12 @@ export default class extends React.Component {
   }
 
   onShowDrawerDetail = (val) => {
+    const { userRole, listAppointmentsRecent } = this.state;
     const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : val;
-    const selectedEvent = this.state.listAppointmentsRecent?.find(a => a._id == id);
+    const selectedEvent = listAppointmentsRecent?.find(a => a._id == id);
     this.setState({ selectedEvent: selectedEvent });
-    this.state.userRole == 3 && this.setState({ userDrawerVisible: true });
+    userRole == 3 && this.setState({ userDrawerVisible: true });
+    userRole == 30 && this.setState({ providerDrawervisible: true });
   };
 
   onCloseDrawerDetail = () => {
@@ -300,11 +302,11 @@ export default class extends React.Component {
   };
 
   onShowDrawerDetailPost = () => {
-    this.setState({ visibleDetailPost: true });
+    this.setState({ providerDrawervisible: true });
   };
 
   onCloseDrawerDetailPost = () => {
-    this.setState({ visibleDetailPost: false });
+    this.setState({ providerDrawervisible: false });
   };
 
   onShowModalNewAppoint = () => {
@@ -659,7 +661,7 @@ export default class extends React.Component {
     const {
       isFilter,
       userDrawerVisible,
-      visibleDetailPost,
+      providerDrawervisible,
       visiblReferralService,
       isEventDetail,
       isMonth,
@@ -1091,8 +1093,10 @@ export default class extends React.Component {
           skillSet={SkillSet}
         />
         <DrawerDetailPost
-          visible={visibleDetailPost}
+          visible={providerDrawervisible}
           onClose={this.onCloseDrawerDetailPost}
+          event={selectedEvent}
+          skillSet={SkillSet}
         />
         {this.modalAppointments()}
         {this.renderModalSubsidyDetail()}

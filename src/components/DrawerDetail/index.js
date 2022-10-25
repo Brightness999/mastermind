@@ -72,7 +72,7 @@ class DrawerDetail extends Component {
     );
     const dependentProfile = (
       <div className='provider-profile'>
-        <p className='font-16 font-700 mb-10'>{intl.formatMessage(messages.providerProfile)}</p>
+        <p className='font-16 font-700 mb-10'>{intl.formatMessage(messages.dependentProfile)}</p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
           <p className='font-10'>Name: {event?.dependent?.firstName} {event?.dependent?.lastName}</p>
           <div className='font-10'>Skillset(s):
@@ -117,8 +117,8 @@ class DrawerDetail extends Component {
             placement="leftTop"
             content={dependentProfile}
             trigger="hover"
-            visible={isDependentHover}
-            onVisibleChange={this.handleDependentHoverChange}
+            open={isDependentHover}
+            onOpenChange={this.handleDependentHoverChange}
           >
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.who)}</p>
@@ -129,8 +129,8 @@ class DrawerDetail extends Component {
             placement="leftTop"
             content={providerProfile}
             trigger="hover"
-            visible={isProviderHover}
-            onVisibleChange={this.handleProviderHoverChange}
+            open={isProviderHover}
+            onOpenChange={this.handleProviderHoverChange}
           >
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.with)}</p>

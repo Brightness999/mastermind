@@ -5,6 +5,18 @@ export default {
     id: `${scope}.postSessionFeedback`,
     defaultMessage: 'Post session feedback',
   },
+  privateNotes: {
+    id: `${scope}.privateNotes`,
+    defaultMessage: 'Private notes',
+  },
+  providerProfile: {
+    id: `${scope}.providerProfile`,
+    defaultMessage: 'Provider profile',
+  },
+  dependentProfile: {
+    id: `${scope}.dependentProfile`,
+    defaultMessage: 'Dependent profile',
+  },
   markClosed: {
     id: `${scope}.markClosed`,
     defaultMessage: 'Mark as closed',
