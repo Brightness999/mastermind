@@ -68,6 +68,7 @@ export default class extends React.Component {
       listProvider: [],
       location: '',
       selectedEvent: {},
+      selectedEventTypes: [],
     }
   }
 
@@ -593,17 +594,19 @@ export default class extends React.Component {
     const calendar = this.calendarRef.current;
     const month = calendar._calendarApi.getDate().getMonth() + 1;
     const year = calendar._calendarApi.getDate().getFullYear();
-    let selectedSkills = [], selectedProviders = [];
-    this.state.selectedSkills.forEach(skill => selectedSkills.push(this.state.skillSet.findIndex(s => s == skill)));
-    this.state.selectedProviders.forEach(provider => selectedProviders.push(this.state.listProvider.find(p => p.name == provider)._id));
+    const { selectedSkills, selectedProviders, SkillSet, listProvider, selectedLocations, selectedEventTypes } = this.state;
+    let skills = [], providers = [];
+    selectedSkills.forEach(skill => skills.push(SkillSet.findIndex(s => s == skill)));
+    selectedProviders.forEach(provider => providers.push(listProvider.find(p => p.name == provider)._id));
     const dataFetchAppointMonth = {
       role: role,
       data: {
         month: month,
         year: year,
-        locations: this.state.selectedLocations,
-        providers: selectedProviders,
-        skills: selectedSkills,
+        locations: selectedLocations,
+        providers: providers,
+        skills: skills,
+        types: selectedEventTypes,
       }
     };
     store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth)).then(() => {
@@ -639,6 +642,14 @@ export default class extends React.Component {
     this.setState({ selectedLocations: this.state.selectedLocations });
   }
 
+  handleSelectEventType = types => {
+    this.setState({ selectedEventTypes: types });
+  }
+
+  handleSelectSkills = (skills) => {
+    this.setState({ selectedSkills: skills });
+  }
+
   handleApplyFilter = () => {
     this.updateCalendarEvents(this.state.userRole);
     this.setState({ isFilter: false });
@@ -666,6 +677,8 @@ export default class extends React.Component {
       calendarWeekends,
       listDependents,
       selectedEvent,
+      selectedSkills,
+      selectedEventTypes,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -677,14 +690,8 @@ export default class extends React.Component {
       <Segmented
         onChange={this.handleChangeDayView}
         options={[
-          {
-            value: 'Grid',
-            icon: <FaCalendarAlt size={18} />,
-          },
-          {
-            value: 'List',
-            icon: <MdFormatAlignLeft size={20} />,
-          },
+          { value: 'Grid', icon: <FaCalendarAlt size={18} /> },
+          { value: 'List', icon: <MdFormatAlignLeft size={20} /> },
         ]}
       />
     );
@@ -717,19 +724,19 @@ export default class extends React.Component {
     const optionsEvent = [
       {
         label: intl.formatMessage(messages.appointments),
-        value: 'appointments',
+        value: 3,
       },
       {
         label: intl.formatMessage(messages.evaluations),
-        value: 'evaluations',
+        value: 2,
       },
       {
         label: intl.formatMessage(messages.screenings),
-        value: 'screenings',
+        value: 1,
       },
       {
         label: intl.formatMessage(messages.referrals),
-        value: 'referrals',
+        value: 9,
       },
     ];
 
@@ -769,34 +776,36 @@ export default class extends React.Component {
                   <Row gutter={10}>
                     <Col xs={12} sm={12} md={4}>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
-                      <Checkbox.Group options={optionsEvent} className="flex flex-col" />
+                      <Checkbox.Group options={optionsEvent} value={selectedEventTypes} onChange={(v) => this.handleSelectEventType(v)} className="flex flex-col" />
                     </Col>
                     <Col xs={12} sm={12} md={8} className='skillset-checkbox'>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
-                      <Checkbox.Group options={SkillSet} />
+                      <Checkbox.Group options={SkillSet} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
                     </Col>
-                    <Col xs={12} sm={12} md={6} className='select-small'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
-                      <Select
-                        showSearch
-                        placeholder={intl.formatMessage(messages.startTypingProvider)}
-                        value=''
-                        optionFilterProp='children'
-                        filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-                        onChange={(v) => this.handleSelectProvider(v)}
-                      >
-                        {listProvider?.map((provider, i) => (
-                          <Select.Option key={i} value={provider.name}>{provider.name}</Select.Option>
-                        ))}
-                      </Select>
-                      <div className='div-chip'>
-                        {selectedProviders?.map((name, i) => (
-                          <div key={i} className='chip'>
-                            {name}
-                            <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
-                        ))}
-                      </div>
-                    </Col>
+                    {userRole != 30 && (
+                      <Col xs={12} sm={12} md={6} className='select-small'>
+                        <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
+                        <Select
+                          showSearch
+                          placeholder={intl.formatMessage(messages.startTypingProvider)}
+                          value=''
+                          optionFilterProp='children'
+                          filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                          onChange={(v) => this.handleSelectProvider(v)}
+                        >
+                          {listProvider?.map((provider, i) => (
+                            <Select.Option key={i} value={provider.name}>{provider.name}</Select.Option>
+                          ))}
+                        </Select>
+                        <div className='div-chip'>
+                          {selectedProviders?.map((name, i) => (
+                            <div key={i} className='chip'>
+                              {name}
+                              <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
+                          ))}
+                        </div>
+                      </Col>
+                    )}
                     <Col xs={12} sm={12} md={6} className='select-small'>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
                       <PlacesAutocomplete

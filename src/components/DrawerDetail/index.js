@@ -94,7 +94,6 @@ class DrawerDetail extends Component {
       onSubmit: this.closeModalCurrent,
       onCancel: this.closeModalCurrent,
     };
-    console.log(event)
 
     return (
       <Drawer
