@@ -38,7 +38,7 @@ export default class extends React.Component {
     this.socket = undefined;
     this.state = {
       isFilter: false,
-      visibleDetail: false,
+      userDrawerVisible: false,
       visibleDetailPost: false,
       visibleNewAppoint: false,
       visibleSubsidy: false,
@@ -48,7 +48,6 @@ export default class extends React.Component {
       visibleNewGroup: false,
       visibleEvaluation: false,
       isEventDetail: false,
-      idEvent: 0,
       isMonth: 1,
       isGridDayView: 'Grid',
       canDrop: true,
@@ -68,6 +67,7 @@ export default class extends React.Component {
       selectedSkills: [],
       listProvider: [],
       location: '',
+      selectedEvent: {},
     }
   }
 
@@ -287,12 +287,15 @@ export default class extends React.Component {
     this.setState({ isFilter: !this.state.isFilter });
   }
 
-  onShowDrawerDetail = () => {
-    this.setState({ visibleDetail: true });
+  onShowDrawerDetail = (val) => {
+    const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : val;
+    const selectedEvent = this.state.listAppointmentsRecent?.find(a => a._id == id);
+    this.setState({ selectedEvent: selectedEvent });
+    this.state.userRole == 3 && this.setState({ userDrawerVisible: true });
   };
 
   onCloseDrawerDetail = () => {
-    this.setState({ visibleDetail: false });
+    this.setState({ userDrawerVisible: false });
   };
 
   onShowDrawerDetailPost = () => {
@@ -437,20 +440,6 @@ export default class extends React.Component {
     }
   }
 
-  handleEventClick = (val) => {
-    if (val?.event) {
-      const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : 0
-      this.setState({
-        isEventDetail: !this.state.isEventDetail,
-        idEvent: id
-      });
-    } else {
-      this.setState({
-        isEventDetail: !this.state.isEventDetail,
-      });
-    }
-  }
-
   handleEventAdd = (addInfo) => {
     this.props.createEvent(addInfo.event.toPlainObject())
       .catch(() => {
@@ -553,9 +542,8 @@ export default class extends React.Component {
         >
           <PanelAppointment
             userRole={this.state.userRole}
-            setReload={reload => {
-              this.panelAppoimentsReload = reload;
-            }}
+            setReload={reload => this.panelAppoimentsReload = reload}
+            onShowDrawerDetail={this.onShowDrawerDetail}
           />
         </Panel>
       );
@@ -579,9 +567,7 @@ export default class extends React.Component {
           className='subsidaries-panel'
         >
           <PanelSubsidaries
-            setReload={reload => {
-              this.panelSubsidariesReload = reload;
-            }}
+            setReload={reload => this.panelSubsidariesReload = reload}
             userRole={this.state.userRole}
             SkillSet={this.state.SkillSet}
             onShowModalSubsidyDetail={this.onShowModalSubsidy}
@@ -661,7 +647,7 @@ export default class extends React.Component {
   render() {
     const {
       isFilter,
-      visibleDetail,
+      userDrawerVisible,
       visibleDetailPost,
       visiblReferralService,
       isEventDetail,
@@ -675,6 +661,11 @@ export default class extends React.Component {
       selectedLocations,
       listAppointmentsRecent,
       userRole,
+      location,
+      calendarEvents,
+      calendarWeekends,
+      listDependents,
+      selectedEvent,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -809,7 +800,7 @@ export default class extends React.Component {
                     <Col xs={12} sm={12} md={6} className='select-small'>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
                       <PlacesAutocomplete
-                        value={this.state.location}
+                        value={location}
                         onChange={(value) => this.handelChangeLocation(value)}
                         onSelect={(value) => this.handleSelectLocation(value)}
                       >
@@ -889,17 +880,17 @@ export default class extends React.Component {
                     selectable={true}
                     selectMirror={true}
                     dayMaxEvents={true}
-                    weekends={this.state.calendarWeekends}
+                    weekends={calendarWeekends}
                     datesSet={this.handleDates}
-                    events={this.state.calendarEvents}
+                    events={calendarEvents}
                     eventContent={renderEventContent}
-                    eventClick={this.handleEventClick}
+                    eventClick={this.onShowDrawerDetail}
                     eventChange={this.handleEventChange} // called for drag-n-drop/resize
                     eventRemove={this.handleEventRemove}
                   />
                 </div>
                 <div className='btn-appointment'>
-                  <Dropdown overlay={this.state.userRole == 60 ? <></> : menu} placement="topRight">
+                  <Dropdown overlay={userRole == 60 ? <></> : menu} placement="topRight">
                     <Button
                       type='primary'
                       block
@@ -911,13 +902,6 @@ export default class extends React.Component {
                 </div>
               </>
             )}
-            {isEventDetail && (
-              <EventDetail backView={this.handleEventClick}
-                id={this.state.idEvent}
-                role={this.state.userRole}
-                calendarEvents={this.state.calendarEvents}
-              />
-            )}
           </section>
           <section className='div-multi-choice'>
             <Collapse
@@ -928,42 +912,88 @@ export default class extends React.Component {
             >
               {this.renderPanelAppointmentForProvider()}
               <Panel header={intl.formatMessage(messages.referrals)} key="2">
-                {new Array(10).fill(null).map((_, index) =>
-                  <div key={index} className='list-item padding-item'>
-                    <Avatar size={24} icon={<FaUser size={12} />} />
-                    <div className='div-service'>
-                      <p className='font-11 mb-0'>Service Type</p>
-                      <p className='font-09 mb-0'>Referrer Name</p>
-                    </div>
-                    <div className='text-center ml-auto mr-5'>
-                      <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
-                      <p className='font-11 mb-0'>Phone number</p>
-                    </div>
-                    <div className='ml-auto'>
-                      <p className='font-12 mb-0'>Time</p>
-                      <p className='font-12 font-700 mb-0'>Date</p>
-                    </div>
-                  </div>
-                )}
+                <Tabs defaultActiveKey="1" type="card" size='small'>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                    {listAppointmentsRecent?.filter(appointment => appointment.status == 9 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service'>
+                          <p className='font-11 mb-0'>{SkillSet[appointment?.skillSet?.[0]]}</p>
+                          <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
+                        </div>
+                        <div className='text-center ml-auto mr-5'>
+                          <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                          <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                        </div>
+                        <div className='ml-auto'>
+                          <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
+                          <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
+                        </div>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
+                    {listAppointmentsRecent?.filter(appointment => appointment.status == 9 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service'>
+                          <p className='font-11 mb-0'>{SkillSet[appointment?.skillSet?.[0]]}</p>
+                          <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
+                        </div>
+                        <div className='text-center ml-auto mr-5'>
+                          <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                          <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                        </div>
+                        <div className='ml-auto'>
+                          <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
+                          <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
+                        </div>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                </Tabs>
               </Panel>
               <Panel header={intl.formatMessage(messages.screenings)} key="3">
-                {listAppointmentsRecent?.filter(a => a.status == 1)?.map((appointment, index) =>
-                  <div key={index} className='list-item padding-item'>
-                    <Avatar size={24} icon={<FaUser size={12} />} />
-                    <div className='div-service flex-1'>
-                      <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
-                      <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
-                    </div>
-                    <div className='text-center ml-auto mr-5 flex-1'>
-                      <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
-                      <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
-                    </div>
-                    <div className='ml-auto flex-1'>
-                      <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
-                      <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
-                    </div>
-                  </div>
-                )}
+                <Tabs defaultActiveKey="1" type="card" size='small'>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                    {listAppointmentsRecent?.filter(a => a.status == 1 && moment(a.date).isAfter(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service flex-1'>
+                          <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                          <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
+                        </div>
+                        <div className='text-center ml-auto mr-5 flex-1'>
+                          <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                          <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                        </div>
+                        <div className='ml-auto flex-1'>
+                          <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
+                          <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
+                        </div>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
+                    {listAppointmentsRecent?.filter(a => a.status == 1 && moment(a.date).isBefore(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service flex-1'>
+                          <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                          <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
+                        </div>
+                        <div className='text-center ml-auto mr-5 flex-1'>
+                          <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                          <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                        </div>
+                        <div className='ml-auto flex-1'>
+                          <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
+                          <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
+                        </div>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                </Tabs>
               </Panel>
               <Panel
                 key="4"
@@ -973,7 +1003,7 @@ export default class extends React.Component {
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {listAppointmentsRecent?.filter(appointment => appointment.status == 2 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
-                      <div key={index} className='list-item padding-item'>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
                           <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
@@ -989,7 +1019,7 @@ export default class extends React.Component {
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
                     {listAppointmentsRecent?.filter(appointment => appointment.status == 2 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
-                      <div key={index} className='list-item padding-item'>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
                           <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
@@ -1006,17 +1036,34 @@ export default class extends React.Component {
                 </Tabs>
               </Panel>
               <Panel header={intl.formatMessage(messages.flags)} key="5" extra={this.genExtraFlag()}>
-                {listAppointmentsRecent?.filter(appointment => appointment.status == 4)?.map((appointment, index) =>
-                  <div key={index} className='list-item padding-item'>
-                    <Avatar size={24} icon={<FaUser size={12} />} />
-                    <div className='div-service'>
-                      <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
-                      <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
-                    </div>
-                    <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
-                    <p className='font-12 ml-auto mb-0'>Pay Flag</p>
-                  </div>
-                )}
+                <Tabs defaultActiveKey="1" type="card" size='small'>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                    {listAppointmentsRecent?.filter(appointment => appointment.status == 4 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service'>
+                          <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                          <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
+                        </div>
+                        <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
+                        <p className='font-12 ml-auto mb-0'>Pay Flag</p>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
+                    {listAppointmentsRecent?.filter(appointment => appointment.status == 4 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service'>
+                          <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                          <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
+                        </div>
+                        <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
+                        <p className='font-12 ml-auto mb-0'>Pay Flag</p>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                </Tabs>
               </Panel>
               {this.renderPanelSubsidaries()}
             </Collapse>
@@ -1028,8 +1075,11 @@ export default class extends React.Component {
           </div>
         </div>
         <DrawerDetail
-          visible={visibleDetail}
+          visible={userDrawerVisible}
           onClose={this.onCloseDrawerDetail}
+          role={userRole}
+          event={selectedEvent}
+          skillSet={SkillSet}
         />
         <DrawerDetailPost
           visible={visibleDetailPost}
@@ -1039,17 +1089,13 @@ export default class extends React.Component {
         {this.renderModalSubsidyDetail()}
         {this.modalCreateAndEditSubsidyRequest()}
         <ModalNewGroup {...modalNewGroupProps}
-          SkillSet={this.state.SkillSet}
-          setLoadData={reload => {
-            this.loadDataModalNewGroup = reload;
-          }}
+          SkillSet={SkillSet}
+          setLoadData={reload => this.loadDataModalNewGroup = reload}
         />
         <ModalReferralService {...modalReferralServiceProps}
-          SkillSet={this.state.SkillSet}
-          listDependents={this.state.listDependents}
-          setLoadData={reload => {
-            this.loadDataModalReferral = reload;
-          }}
+          SkillSet={SkillSet}
+          listDependents={listDependents}
+          setLoadData={reload => this.loadDataModalReferral = reload}
           userRole={this.state.userRole}
         />
         <ModalNewSubsidyReview {...modalNewReviewProps} />

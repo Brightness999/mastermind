@@ -5,6 +5,18 @@ export default {
     id: `${scope}.appointmentDetails`,
     defaultMessage: 'Appointment Details',
   },
+  evaluationDetails: {
+    id: `${scope}.evaluationDetails`,
+    defaultMessage: 'Evaluation Details',
+  },
+  screeningDetails: {
+    id: `${scope}.screeningDetails`,
+    defaultMessage: 'Screening Details',
+  },
+  phonenumber: {
+    id: `${scope}.phonenumber`,
+    defaultMessage: 'PhoneNumber',
+  },
   what: {
     id: `${scope}.what`,
     defaultMessage: 'What',
@@ -53,16 +65,4 @@ export default {
     id: `${scope}.readMore`,
     defaultMessage: 'read more',
   },
-  // : {
-  //   id: `${scope}.`,
-  //   defaultMessage: '',
-  // },
-  // : {
-  //   id: `${scope}.`,
-  //   defaultMessage: '',
-  // },
-  // : {
-  //   id: `${scope}.`,
-  //   defaultMessage: '',
-  // }
 };

@@ -244,6 +244,8 @@
   "components.Modal.areYouSureCancel": "Are you sure you want to cancel your",
   "components.Modal.thisCannotUndone": "This cannot be undone & you may lose your slot & won't get it back",
   "components.Modal.keepAppoitment": "Keep Appointment",
+  "components.Modal.keepScreening": "Keep Screening",
+  "components.Modal.keepEvaluation": "Keep Evaluation",
   "components.Modal.confirmCancellation": "Confirm Cancellation",
   "components.Modal.currentAppointment": "Current appointment",
   "components.Modal.newAppointment": "New Appointment",
@@ -319,6 +321,9 @@
   "components.sidebar.schedulingCenter": "Scheduling Center",
   
   "components.drawerdetail.appointmentDetails": "Appointment Details",
+  "components.drawerdetail.evaluationDetails": "Evaluation Details",
+  "components.drawerdetail.screeningDetails": "Screening Details",
+  "components.drawerdetail.phonenumber": "PhoneNumber",
   "components.drawerdetail.what": "What",
   "components.drawerdetail.who": "Who",
   "components.drawerdetail.with": "With",

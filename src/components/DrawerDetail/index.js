@@ -8,6 +8,7 @@ import { ImPencil } from 'react-icons/im';
 import { ModalCancelAppointment, ModalCurrentAppointment } from '../../components/Modal';
 import intl from "react-intl-universal";
 import messages from './messages';
+import moment from 'moment';
 const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
@@ -44,8 +45,7 @@ class DrawerDetail extends Component {
 
   render() {
     const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent } = this.state;
-    const { role, id, calendarEvents } = this.props;
-    const event = calendarEvents?.find(e => e._id === id);
+    const { role, event, skillSet } = this.props;
 
     const providerProfile = (
       <div className='provider-profile'>
@@ -65,7 +65,7 @@ class DrawerDetail extends Component {
         </div>
         <div className='profile-text'>
           <Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-            {event?.provider.publicProfile}
+            {event?.provider?.publicProfile}
           </Paragraph>
         </div>
       </div>
@@ -73,7 +73,7 @@ class DrawerDetail extends Component {
     const dependentProfile = (
       <div className='provider-profile'>
         <p className='font-16 font-700 mb-10'>{intl.formatMessage(messages.providerProfile)}</p>
-        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr'}}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
           <p className='font-10'>Name: {event?.dependent?.firstName} {event?.dependent?.lastName}</p>
           <div className='font-10'>Skillset(s):
             {event?.dependent?.services?.map((service, i) => (<div key={i}>{service.name}</div>))}
@@ -87,16 +87,18 @@ class DrawerDetail extends Component {
       visible: visibleCancel,
       onSubmit: this.closeModalCancel,
       onCancel: this.closeModalCancel,
+      event: this.props.event,
     };
     const modalCurrentProps = {
       visible: visibleCurrent,
       onSubmit: this.closeModalCurrent,
       onCancel: this.closeModalCurrent,
     };
+    console.log(event)
 
     return (
       <Drawer
-        title={intl.formatMessage(messages.appointmentDetails)}
+        title={event?.status == 1 ? intl.formatMessage(messages.screeningDetails) : event?.status == 2 ? intl.formatMessage(messages.evaluationDetails) : intl.formatMessage(messages.appointmentDetails)}
         closable={true}
         onClose={this.props.onClose}
         open={this.props.visible}
@@ -110,7 +112,7 @@ class DrawerDetail extends Component {
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.what)}</p>
               <BiDollarCircle size={18} className='mx-10 text-green500' />
             </div>
-            <p className='font-16'>{event?.title}</p>
+            <p className='font-16'>{skillSet?.[event?.skillSet?.[0]]}</p>
           </div>
           <Popover
             placement="leftTop"
@@ -141,46 +143,68 @@ class DrawerDetail extends Component {
           </Popover>
           <div className='detail-item flex'>
             <p className='font-18 font-700 title'>{intl.formatMessage(messages.when)}</p>
-            <p className='font-18'>{new Date(event?.state).toLocaleTimeString()}</p>
+            <p className='font-18'>{new Date(event?.date).toLocaleString()}</p>
           </div>
-          <div className='detail-item flex'>
-            <p className='font-18 font-700 title'>{intl.formatMessage(messages.where)}</p>
-            <p className='font-16'>{event?.location}</p>
-          </div>
+          {event?.status > 1 && (
+            <div className='detail-item flex'>
+              <p className='font-18 font-700 title'>{intl.formatMessage(messages.where)}</p>
+              <p className='font-16'>{event?.location}</p>
+            </div>
+          )}
+          {event?.status == 1 && (
+            <div className='detail-item flex'>
+              <p className='font-18 font-700 title'>{intl.formatMessage(messages.phonenumber)}</p>
+              <p className='font-16'>{event?.phoneNumber}</p>
+            </div>
+          )}
         </div>
         <Row gutter={15} className='list-btn-detail'>
-          {role == 3 && (
-            <Col span={12}>
-              <Button
-                type='primary'
-                icon={<BsClockHistory size={15} />}
-                block
-                onClick={this.openModalCurrent}>
-                {intl.formatMessage(messages.reschedule)}
-              </Button>
-            </Col>
-          )}
-          {role == 3 && (
-            <Col span={12}>
-              <Button
-                type='primary'
-                icon={<BsXCircle size={15} />}
-                block
-                onClick={this.props.onClose}>
-                {intl.formatMessage(messages.cancel)}
-              </Button>
-            </Col>
-          )}
-          {role == 3 && (
+          {(role == 3 && moment(event?.date).isAfter(new Date())) && (
             <>
               <Col span={12}>
-                <Button type='primary' icon={<FaFileContract size={12} />} block>{intl.formatMessage(messages.requestInvoice)}</Button>
+                <Button
+                  type='primary'
+                  icon={<BsClockHistory size={15} />}
+                  block
+                  onClick={this.openModalCurrent}
+                >
+                  {intl.formatMessage(messages.reschedule)}
+                </Button>
               </Col>
-              <Col span={12}>
-                <Button type='primary' icon={<ImPencil size={12} />} block>{intl.formatMessage(messages.editNotes)}</Button>
-              </Col>
+              {event?.status > 3 && (
+                <>
+                  <Col span={12}>
+                    <Button
+                      type='primary'
+                      icon={<FaFileContract size={12} />}
+                      block
+                    >
+                      {intl.formatMessage(messages.requestInvoice)}
+                    </Button>
+                  </Col>
+                  <Col span={12}>
+                    <Button
+                      type='primary'
+                      icon={<ImPencil size={12} />}
+                      block
+                    >
+                      {intl.formatMessage(messages.editNotes)}
+                    </Button>
+                  </Col>
+                </>
+              )}
             </>
           )}
+          <Col span={12}>
+            <Button
+              type='primary'
+              icon={<BsXCircle size={15} />}
+              block
+              onClick={this.openModalCancel}
+            >
+              {intl.formatMessage(messages.cancel)}
+            </Button>
+          </Col>
         </Row>
 
         <ModalCancelAppointment {...modalCancelProps} />

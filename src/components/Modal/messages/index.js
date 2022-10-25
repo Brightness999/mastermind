@@ -37,6 +37,14 @@ export default {
     id: `${scope}.keepAppoitment`,
     defaultMessage: 'Keep Appointment',
   },
+  keepScreening: {
+    id: `${scope}.keepScreening`,
+    defaultMessage: 'Keep Screening',
+  },
+  keepEvaluation: {
+    id: `${scope}.keepEvaluation`,
+    defaultMessage: 'Keep Evaluation',
+  },
   confirmCancellation: {
     id: `${scope}.confirmCancellation`,
     defaultMessage: 'Confirm Cancellation',

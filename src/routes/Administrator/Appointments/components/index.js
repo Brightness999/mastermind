@@ -33,7 +33,6 @@ export default class extends React.Component {
       isFilter: false,
       visibleDetail: false,
       isEventDetail: false,
-      idEvent: 0,
       isMonth: 1,
       isGridDayView: 'Grid',
       calendarWeekends: true,
@@ -45,6 +44,7 @@ export default class extends React.Component {
       selectedLocations: [],
       selectedSkills: [],
       userRole: -1,
+      selectedEvent: {},
     }
   }
   calendarRef = React.createRef();
@@ -72,7 +72,7 @@ export default class extends React.Component {
     const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : 0
     this.setState({
       visibleDetail: true,
-      idEvent: id,
+      selectedEvent: id ? this.state.calendarEvents.find(a => a._id == id) : {},
     });
   };
 
@@ -211,6 +211,10 @@ export default class extends React.Component {
       selectedLocations,
       calendarEvents,
       calendarWeekends,
+      selectedEvent,
+      selectedSkills,
+      userRole,
+      location,
     } = this.state;
     const btnMonthToWeek = (
       <div role='button' className='btn-type' onClick={this.handleMonthToWeek}>
@@ -278,7 +282,7 @@ export default class extends React.Component {
                     </Col>
                     <Col xs={12} sm={12} md={6} className='skillset-checkbox'>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.skillsets)}</p>
-                      <Checkbox.Group className='flex flex-col' value={this.state.selectedSkills} options={skillSet} onChange={v => this.handleSelectSkills(v)} />
+                      <Checkbox.Group className='flex flex-col' value={selectedSkills} options={skillSet} onChange={v => this.handleSelectSkills(v)} />
                     </Col>
                     <Col xs={12} sm={12} md={7} className='select-small'>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.provider)}</p>
@@ -302,7 +306,7 @@ export default class extends React.Component {
                     <Col xs={12} sm={12} md={7} className='select-small'>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.location)}</p>
                       <PlacesAutocomplete
-                        value={this.state.location}
+                        value={location}
                         onChange={(value) => this.handelChangeLocation(value)}
                         onSelect={(value) => this.handleSelectLocation(value)}
                       >
@@ -402,9 +406,9 @@ export default class extends React.Component {
         <DrawerDetail
           visible={visibleDetail}
           onClose={this.onCloseDrawerDetail}
-          id={this.state.idEvent}
-          role={this.state.userRole}
-          calendarEvents={calendarEvents}
+          role={userRole}
+          event={selectedEvent}
+          skillSet={skillSet}
         />
       </div>
     );

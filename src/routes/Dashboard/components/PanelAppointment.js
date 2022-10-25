@@ -29,7 +29,7 @@ class PanelAppointment extends React.Component {
     request.post(url, searchData).then(result => {
       if (result.success) {
         var data = result.data;
-        this.setState({ appointments: data.docs });
+        this.setState({ appointments: data?.docs ?? [] });
       } else {
         this.setState({ appointments: [] });
       }
@@ -71,8 +71,8 @@ class PanelAppointment extends React.Component {
 
   renderItemLeft = (data) => {
     return (
-      <div className='item-left'>
-        <Avatar size={24} icon={<FaUser size={12} />} onClick={this.onShowDrawerDetail} />
+      <div className='item-left'  onClick={() => this.props.onShowDrawerDetail(data._id)}>
+        <Avatar size={24} icon={<FaUser size={12} />} />
         <div className='div-service'>
           {!!data.name && <p className='font-09 mb-0'><b>{data.name}</b></p>}
           {!!data.provider && <p className='font-09 mb-0'>{data.provider.name || data.provider.referredToAs}</p>}
@@ -90,11 +90,9 @@ class PanelAppointment extends React.Component {
   render() {
     const { appointments } = this.state
     return (
-      <Tabs defaultActiveKey="1" type="card" size='small'
-        onChange={this.handleTabChange}
-      >
+      <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
         <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-          {!!appointments && appointments.map((data, index) => (
+          {appointments?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className='item-right'>
@@ -103,14 +101,14 @@ class PanelAppointment extends React.Component {
               </div>
             </div>
           ))}
-          {(!appointments || appointments.length == 0) && (
+          {(appointments?.length == 0) && (
             <div key={1} className='list-item'>
-              <p style={{ padding: "10px" }}>No upcoming appoiment</p>
+              <p className='p-10'>No upcoming appoiment</p>
             </div>
           )}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
-          {!!appointments && appointments.map((data, index) => (
+          {appointments?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className='item-right'>
@@ -119,14 +117,14 @@ class PanelAppointment extends React.Component {
               </div>
             </div>
           ))}
-          {(!appointments || appointments.length == 0) && (
+          {(appointments?.length == 0) && (
             <div key={1} className='list-item'>
-              <p style={{ padding: "10px" }}>No unprocess appoiment</p>
+              <p className='p-10'>No unprocess appoiment</p>
             </div>
           )}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="3">
-          {!!appointments && appointments.map((data, index) => (
+          {appointments?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className='item-right'>
@@ -135,9 +133,9 @@ class PanelAppointment extends React.Component {
               </div>
             </div>
           ))}
-          {(!appointments || appointments.length == 0) && (
+          {(appointments?.length == 0) && (
             <div key={1} className='list-item'>
-              <p style={{ padding: "10px" }}>No past appoiment</p>
+              <p className='p-10'>No past appoiment</p>
             </div>
           )}
         </Tabs.TabPane>
