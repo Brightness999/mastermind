@@ -738,7 +738,7 @@ export default class extends React.Component {
       },
       {
         label: intl.formatMessage(messages.referrals),
-        value: 9,
+        value: 6,
       },
     ];
 
@@ -925,7 +925,7 @@ export default class extends React.Component {
               <Panel header={intl.formatMessage(messages.referrals)} key="2">
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {listAppointmentsRecent?.filter(appointment => appointment.status == 9 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 6 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
@@ -944,7 +944,7 @@ export default class extends React.Component {
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                    {listAppointmentsRecent?.filter(appointment => appointment.status == 9 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 6 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
@@ -967,7 +967,7 @@ export default class extends React.Component {
               <Panel header={intl.formatMessage(messages.screenings)} key="3">
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {listAppointmentsRecent?.filter(a => a.status == 1 && moment(a.date).isAfter(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(a => a.type == 1 && moment(a.date).isAfter(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service flex-1'>
@@ -986,7 +986,7 @@ export default class extends React.Component {
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                    {listAppointmentsRecent?.filter(a => a.status == 1 && moment(a.date).isBefore(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(a => a.type == 1 && moment(a.date).isBefore(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service flex-1'>
@@ -1013,7 +1013,7 @@ export default class extends React.Component {
               >
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {listAppointmentsRecent?.filter(appointment => appointment.status == 2 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 2 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
@@ -1029,7 +1029,7 @@ export default class extends React.Component {
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                    {listAppointmentsRecent?.filter(appointment => appointment.status == 2 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 2 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
@@ -1049,7 +1049,7 @@ export default class extends React.Component {
               <Panel header={intl.formatMessage(messages.flags)} key="5" extra={this.genExtraFlag()}>
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {listAppointmentsRecent?.filter(appointment => appointment.status == 4 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 4 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
@@ -1062,7 +1062,7 @@ export default class extends React.Component {
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                    {listAppointmentsRecent?.filter(appointment => appointment.status == 4 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 4 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
@@ -1122,7 +1122,7 @@ function reportNetworkError() {
 }
 
 function renderEventContent(eventInfo) {
-  const eventStatus = eventInfo.event.extendedProps?.status == 1 ? 'Screening' : eventInfo.event.extendedProps?.status == 2 ? 'Evaluation' : 'Meeting';
+  const eventStatus = eventInfo.event.extendedProps?.type == 1 ? 'Screening' : eventInfo.event.extendedProps?.type == 2 ? 'Evaluation' : 'Meeting';
 
   return (
     <div className='flex flex-col'>

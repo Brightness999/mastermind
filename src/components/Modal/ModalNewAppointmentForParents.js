@@ -102,6 +102,8 @@ class ModalNewAppointmentForParents extends React.Component {
 			provider: selectedProvider,
 			date: hour.valueOf(),
 			location: address,
+			type: 3,
+			statu: 0,
 		};
 		this.requestCreateAppointment(postData);
 	}
@@ -117,7 +119,8 @@ class ModalNewAppointmentForParents extends React.Component {
 			date: hour,
 			phoneNumber: values?.phoneNumber,
 			notes: values?.notes,
-			status: 3,
+			type: 1,
+			status: 0,
 			location: address,
 		};
 		this.setState({ visibleNewScreening: false }, () => {
@@ -201,21 +204,21 @@ class ModalNewAppointmentForParents extends React.Component {
 		const appointmentsForChoosenProvider = this.props.listAppointmentsRecent?.filter(appointment => appointment.provider?._id == this.state.listProvider[index]._id);
 		if (this.state.listProvider[index].isNewClientScreening) {
 			if (this.state.listProvider[index].isSeparateEvaluationRate) {
-				if (appointmentsForChoosenProvider?.find(appointment => appointment.status > 1)) {
-					if (!appointmentsForChoosenProvider?.find(appointment => appointment.status > 2)) {
+				if (appointmentsForChoosenProvider?.find(appointment => appointment.type > 1)) {
+					if (!appointmentsForChoosenProvider?.find(appointment => appointment.type > 2)) {
 						buttonText = intl.formatMessage(messages.evaluation).toUpperCase();
 					}
 				} else {
 					buttonText = intl.formatMessage(messages.screening).toUpperCase();
 				}
 			} else {
-				if (!appointmentsForChoosenProvider?.find(appointment => appointment.status > 1)) {
+				if (!appointmentsForChoosenProvider?.find(appointment => appointment.type > 1)) {
 					buttonText = intl.formatMessage(messages.screening).toUpperCase();
 				}
 			}
 		} else {
 			if (this.state.listProvider[index].isSeparateEvaluationRate) {
-				if (!appointmentsForChoosenProvider?.find(appointment => appointment.status > 2)) {
+				if (!appointmentsForChoosenProvider?.find(appointment => appointment.type > 2)) {
 					buttonText = intl.formatMessage(messages.evaluation).toUpperCase();
 				}
 			}

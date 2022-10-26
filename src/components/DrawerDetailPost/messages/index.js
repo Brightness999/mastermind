@@ -33,4 +33,8 @@ export default {
     id: `${scope}.noShow`,
     defaultMessage: 'No show / cancellation',
   },
+  screeningClosed: {
+    id: `${scope}.screeningClosed`,
+    defaultMessage: 'Screeening closed',
+  },
 };

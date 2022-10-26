@@ -51,19 +51,22 @@ class PanelAppointment extends React.Component {
     switch (parseInt(v)) {
       case 1: return this.getMyAppointments({
         "filter": {
-          "status": [3, 4, 5, 6, 7],
+          "type": [3],
+          "status": [0],
           "date": { "$gte": date }
         }
       })
       case 2: return this.getMyAppointments({
         "filter": {
-          "status": [-1]
+          "type": [3],
+          "status": [-2],
         }
       })
       case 3: return this.getMyAppointments({
         "filter": {
-          "status": [3, 4, 5, 6, 7, 100],
-          "date": { "$lte": date }
+          "type": [3],
+          "status": [0, -1],
+          "date": { "$lt": date }
         }
       })
     }
@@ -71,7 +74,7 @@ class PanelAppointment extends React.Component {
 
   renderItemLeft = (data) => {
     return (
-      <div className='item-left'  onClick={() => this.props.onShowDrawerDetail(data._id)}>
+      <div className='item-left' onClick={() => this.props.onShowDrawerDetail(data._id)}>
         <Avatar size={24} icon={<FaUser size={12} />} />
         <div className='div-service'>
           {!!data.name && <p className='font-09 mb-0'><b>{data.name}</b></p>}

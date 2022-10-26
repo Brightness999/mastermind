@@ -1,23 +1,28 @@
 import './style/index.less';
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Typography, Input, Menu, Dropdown, Popover } from 'antd';
+import { Drawer, Button, Row, Col, Typography, Input, Menu, Dropdown, Popover, message } from 'antd';
 import { BsFillFlagFill, BsCheckCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import intl from "react-intl-universal";
 import messages from './messages';
 import msgDetail from '../DrawerDetail/messages';
 import { ModalNoShow, ModalBalance } from '../../components/Modal';
+import request from '../../utils/api/request';
 const { Paragraph } = Typography;
 
 class DrawerDetailPost extends Component {
-  state = {
-    visibleNoShow: false,
-    visibleBalance: false,
-    publicFeedback: '',
-    privateNotes: '',
-    isProviderHover: false,
-    isDependentHover: false,
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      visibleNoShow: false,
+      visibleBalance: false,
+      publicFeedback: props.event?.publicFeedback ?? '',
+      privateNotes: '',
+      isProviderHover: false,
+      isDependentHover: false,
+      errorMessage: '',
+    };
+  }
 
   onShowModalNoShow = () => {
     this.setState({ visibleNoShow: true });
@@ -50,25 +55,31 @@ class DrawerDetailPost extends Component {
     this.setState({ isDependentHover: visible });
   };
 
-  render() {
-    const menu = (
-      <Menu
-        selectable
-        defaultSelectedKeys={['2']}
-        items={[
-          {
-            key: '1',
-            label: (<a target="_blank" rel={intl.formatMessage(messages.pastDueBalance)} onClick={this.onShowModalBalance}>{intl.formatMessage(messages.pastDueBalance)}</a>),
-          },
-          {
-            key: '2',
-            label: (<a target="_blank" rel={intl.formatMessage(messages.noShow)} onClick={this.onShowModalNoShow}>{intl.formatMessage(messages.noShow)}</a>),
-          }
-        ]}
-      />
-    );
+  handleMarkAsClosed = () => {
+    if (this.props.event?._id) {
+      const data = {
+        appointmentId: this.props.event._id,
+        publicFeedback: this.state.publicFeedback,
+      }
+      request.post('providers/close_appointment', data).then(result => {
+        if (result.success) {
+          this.setState({ errorMessage: '' });
+          message.success({
+            content: intl.formatMessage(messages.screeningClosed),
+            className: 'popup-scheduled',
+          });
+        } else {
+          this.setState({ errorMessage: result.data });
+        }
+      }).catch(error => {
+        console.log('closed error---', error);
+        this.setState({ errorMessage: error.message });
+      })
+    }
+  }
 
-    const { visibleNoShow, visibleBalance, isProviderHover, isDependentHover } = this.state;
+  render() {
+    const { visibleNoShow, visibleBalance, isProviderHover, isDependentHover, publicFeedback } = this.state;
     const { event, skillSet } = this.props;
     const providerProfile = (
       <div className='provider-profile'>
@@ -106,6 +117,22 @@ class DrawerDetailPost extends Component {
         </div>
       </div >
     );
+    const menu = (
+      <Menu
+        selectable
+        defaultSelectedKeys={['2']}
+        items={[
+          {
+            key: '1',
+            label: (<a target="_blank" rel={intl.formatMessage(messages.pastDueBalance)} onClick={this.onShowModalBalance}>{intl.formatMessage(messages.pastDueBalance)}</a>),
+          },
+          {
+            key: '2',
+            label: (<a target="_blank" rel={intl.formatMessage(messages.noShow)} onClick={this.onShowModalNoShow}>{intl.formatMessage(messages.noShow)}</a>),
+          }
+        ]}
+      />
+    );
     const modalNoShowProps = {
       visible: visibleNoShow,
       onSubmit: this.onCloseModalNoShow,
@@ -119,7 +146,7 @@ class DrawerDetailPost extends Component {
 
     return (
       <Drawer
-        title={event?.status == 1 ? intl.formatMessage(msgDetail.screeningDetails) : event?.status == 2 ? intl.formatMessage(msgDetail.evaluationDetails) : intl.formatMessage(msgDetail.appointmentDetails)}
+        title={event?.type == 1 ? intl.formatMessage(msgDetail.screeningDetails) : event?.type == 2 ? intl.formatMessage(msgDetail.evaluationDetails) : intl.formatMessage(msgDetail.appointmentDetails)}
         closable={true}
         onClose={this.props.onClose}
         open={this.props.visible}
@@ -172,32 +199,34 @@ class DrawerDetailPost extends Component {
         </div>
         <div className='post-feedback mt-1'>
           <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.postSessionFeedback)}</p>
-          <Input.TextArea rows={7} onChange={v => this.handleChangeFeedback(v)} placeholder={intl.formatMessage(messages.postSessionFeedback)} />
-        </div>
-        <div className='post-feedback mt-1'>
-          <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.privateNotes)}</p>
-          <Input.TextArea rows={7} onChange={v => this.handleChangeNotes(v)} placeholder={intl.formatMessage(messages.privateNotes)} />
+          <Input.TextArea rows={7} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.postSessionFeedback)} />
         </div>
         <Row gutter={15} className='list-btn-detail'>
           <Col span={12}>
             <Button
               type='primary'
               icon={<BsCheckCircle size={15} />}
-              block>
+              block
+              onClick={() => this.handleMarkAsClosed()}
+            >
               {intl.formatMessage(messages.markClosed)}
             </Button>
           </Col>
-          <Col span={12}>
-            <Dropdown overlay={menu} placement="bottomRight">
-              <Button
-                type='primary'
-                icon={<BsFillFlagFill size={15} />}
-                block>
-                {intl.formatMessage(messages.flagDependent)}
-              </Button>
-            </Dropdown>
-          </Col>
+          {event?.type > 1 && (
+            <Col span={12}>
+              <Dropdown overlay={menu} placement="bottomRight">
+                <Button
+                  type='primary'
+                  icon={<BsFillFlagFill size={15} />}
+                  block
+                >
+                  {intl.formatMessage(messages.flagDependent)}
+                </Button>
+              </Dropdown>
+            </Col>
+          )}
         </Row>
+        {this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}
         <ModalNoShow {...modalNoShowProps} />
         <ModalBalance {...modalBalanceProps} />
       </Drawer>

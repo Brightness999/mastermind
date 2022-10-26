@@ -97,7 +97,7 @@ class DrawerDetail extends Component {
 
     return (
       <Drawer
-        title={event?.status == 1 ? intl.formatMessage(messages.screeningDetails) : event?.status == 2 ? intl.formatMessage(messages.evaluationDetails) : intl.formatMessage(messages.appointmentDetails)}
+        title={event?.type == 1 ? intl.formatMessage(messages.screeningDetails) : event?.type == 2 ? intl.formatMessage(messages.evaluationDetails) : intl.formatMessage(messages.appointmentDetails)}
         closable={true}
         onClose={this.props.onClose}
         open={this.props.visible}
@@ -144,13 +144,13 @@ class DrawerDetail extends Component {
             <p className='font-18 font-700 title'>{intl.formatMessage(messages.when)}</p>
             <p className='font-18'>{new Date(event?.date).toLocaleString()}</p>
           </div>
-          {event?.status > 1 && (
+          {event?.type > 1 && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.where)}</p>
               <p className='font-16'>{event?.location}</p>
             </div>
           )}
-          {event?.status == 1 && (
+          {event?.type == 1 && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.phonenumber)}</p>
               <p className='font-16'>{event?.phoneNumber}</p>
@@ -170,7 +170,7 @@ class DrawerDetail extends Component {
                   {intl.formatMessage(messages.reschedule)}
                 </Button>
               </Col>
-              {event?.status > 3 && (
+              {event?.type > 2 && (
                 <>
                   <Col span={12}>
                     <Button
