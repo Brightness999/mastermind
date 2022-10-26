@@ -13,6 +13,10 @@ export default {
     id: `${scope}.screeningDetails`,
     defaultMessage: 'Screening Details',
   },
+  screeningCancelled: {
+    id: `${scope}.screeningCancelled`,
+    defaultMessage: 'Screening Cancelled',
+  },
   phonenumber: {
     id: `${scope}.phonenumber`,
     defaultMessage: 'PhoneNumber',
@@ -44,6 +48,14 @@ export default {
   cancel: {
     id: `${scope}.cancel`,
     defaultMessage: 'Cancel',
+  },
+  cancelled: {
+    id: `${scope}.cancelled`,
+    defaultMessage: 'Cancelled',
+  },
+  closed: {
+    id: `${scope}.closed`,
+    defaultMessage: 'Closed',
   },
   requestInvoice: {
     id: `${scope}.requestInvoice`,

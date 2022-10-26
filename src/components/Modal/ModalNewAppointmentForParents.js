@@ -189,8 +189,9 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	onChooseProvider = (index) => {
-		const newArrTime = JSON.parse(JSON.stringify(this.state.arrTime));
-		this.state.listProvider[index].availability.forEach((availableTime, index) => {
+		const { listProvider, arrTime } = this.state;
+		const newArrTime = JSON.parse(JSON.stringify(arrTime));
+		listProvider[index].availability.forEach((availableTime, index) => {
 			newArrTime[index].map(time => {
 				time.value = moment(time.value);
 				if ((time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour) || (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin) || (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)) {
@@ -202,31 +203,20 @@ class ModalNewAppointmentForParents extends React.Component {
 		})
 		let buttonText = intl.formatMessage(messages.schedule).toUpperCase();
 		const appointmentsForChoosenProvider = this.props.listAppointmentsRecent?.filter(appointment => appointment.provider?._id == this.state.listProvider[index]._id);
-		if (this.state.listProvider[index].isNewClientScreening) {
-			if (this.state.listProvider[index].isSeparateEvaluationRate) {
-				if (appointmentsForChoosenProvider?.find(appointment => appointment.type > 1)) {
-					if (!appointmentsForChoosenProvider?.find(appointment => appointment.type > 2)) {
-						buttonText = intl.formatMessage(messages.evaluation).toUpperCase();
-					}
-				} else {
-					buttonText = intl.formatMessage(messages.screening).toUpperCase();
-				}
+		if (listProvider[index].isNewClientScreening && !appointmentsForChoosenProvider?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
+			buttonText = intl.formatMessage(messages.screening).toUpperCase();
+		}
+		if (this.state.listProvider[index].isSeparateEvaluationRate && !appointmentsForChoosenProvider?.find(appointment => (appointment.type == 2 && appointment.status == -1))) {
+			if (listProvider[index].isNewClientScreening && !appointmentsForChoosenProvider?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
+				buttonText = intl.formatMessage(messages.screening).toUpperCase();
 			} else {
-				if (!appointmentsForChoosenProvider?.find(appointment => appointment.type > 1)) {
-					buttonText = intl.formatMessage(messages.screening).toUpperCase();
-				}
-			}
-		} else {
-			if (this.state.listProvider[index].isSeparateEvaluationRate) {
-				if (!appointmentsForChoosenProvider?.find(appointment => appointment.type > 2)) {
-					buttonText = intl.formatMessage(messages.evaluation).toUpperCase();
-				}
+				buttonText = intl.formatMessage(messages.evaluation).toUpperCase();
 			}
 		}
 
 		this.setState({
 			isChoose: index,
-			selectedProvider: this.state.listProvider[index]._id,
+			selectedProvider: listProvider[index]._id,
 			arrTime: newArrTime,
 			scheduleButtonText: buttonText,
 		});

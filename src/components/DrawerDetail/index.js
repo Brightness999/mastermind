@@ -1,6 +1,6 @@
 import './style/index.less';
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Typography, Popover } from 'antd';
+import { Drawer, Button, Row, Col, Typography, Popover, message } from 'antd';
 import { BsBell, BsClockHistory, BsXCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
@@ -9,6 +9,7 @@ import { ModalCancelAppointment, ModalCurrentAppointment } from '../../component
 import intl from "react-intl-universal";
 import messages from './messages';
 import moment from 'moment';
+import request from '../../utils/api/request';
 const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
@@ -17,6 +18,7 @@ class DrawerDetail extends Component {
     isDependentHover: false,
     visibleCancel: false,
     visibleCurrent: false,
+    errorMessage: '',
   };
 
   handleProviderHoverChange = (visible) => {
@@ -31,8 +33,24 @@ class DrawerDetail extends Component {
     this.setState({ visibleCancel: false });
   }
 
-  openModalCancel = () => {
-    this.setState({ visibleCancel: true });
+  handleCancelEvent = () => {
+    if (this.props.event?._id) {
+      const data = { appointId: this.props.event._id };
+      request.post('clients/cancel_appoint', data).then(result => {
+        if (result.success) {
+          this.setState({ errorMessage: '' });
+          message.success({
+            content: intl.formatMessage(messages.screeningCancelled),
+            className: 'popup-scheduled',
+          });
+        } else {
+          this.setState({ errorMessage: result.data });
+        }
+      }).catch(error => {
+        console.log('closed error---', error);
+        this.setState({ errorMessage: error.message });
+      })
+    }
   }
 
   closeModalCurrent = () => {
@@ -199,13 +217,14 @@ class DrawerDetail extends Component {
               type='primary'
               icon={<BsXCircle size={15} />}
               block
-              onClick={this.openModalCancel}
+              onClick={this.handleCancelEvent}
+              disabled={event?.status == -1 || event?.status == -2}
             >
-              {intl.formatMessage(messages.cancel)}
+              {event?.status == 0 ? intl.formatMessage(messages.cancel) : event?.status == -1 ? intl.formatMessage(messages.closed) : event?.status == -2 ? intl.formatMessage(messages.cancelled) : ''}
             </Button>
           </Col>
         </Row>
-
+        {this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}
         <ModalCancelAppointment {...modalCancelProps} />
         <ModalCurrentAppointment {...modalCurrentProps} />
       </Drawer>
