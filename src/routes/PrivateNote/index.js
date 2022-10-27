@@ -2,8 +2,8 @@ import { dynamicWrapper, createRoute } from '../../utils/core';
 import { routerLinks } from "../constant";
 
 const routesConfig = app => ({
-  path: routerLinks['Dashboard'],
-  title: 'Dashboard',
+  path: routerLinks['PrivateNote'],
+  title: 'Internal Notes',
   component: dynamicWrapper(app, [import('./model')], () => import('./components'))
 });
 

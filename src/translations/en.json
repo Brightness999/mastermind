@@ -230,6 +230,7 @@
   "components.mainheader.new": "new",
   "components.mainheader.search": "Search",
   "components.mainheader.editProfile": "Edit Profile",
+  "components.mainheader.privateNotes": "Private Notes",
   "components.mainheader.dashboard": "Dashboard",
   "components.mainheader.notification": "Notification",
   "components.mainheader.logOut": "Log Out",

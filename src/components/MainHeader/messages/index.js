@@ -17,6 +17,10 @@ export default {
     id: `${scope}.editProfile`,
     defaultMessage: 'Edit Profile',
   },
+  privateNotes: {
+    id: `${scope}.privateNotes`,
+    defaultMessage: 'Private Notes',
+  },
   notification: {
     id: `${scope}.notification`,
     defaultMessage: 'Notification',

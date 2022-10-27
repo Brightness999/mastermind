@@ -27,6 +27,8 @@ import SchoolsList from './Administrator/SchoolsList';
 import FlagList from './Administrator/FlagList';
 import ConsultationRequests from './Administrator/ConsultationRequests';
 import Statistics from './Administrator/Statistics';
+import PrivateNote from './PrivateNote';
+
 const routesConfig = app => [
   {
     path: '/account',
@@ -35,7 +37,8 @@ const routesConfig = app => [
     indexRoute: routerLinks['Dashboard'],
     childRoutes: [
       Dashboard(app),
-      Changeprofile(app)
+      Changeprofile(app),
+      PrivateNote(app),
     ]
   },
   {

@@ -300,5 +300,9 @@ export default {
   evaluation: {
     id: `${scope}.evaluation`,
     defaultMessage: 'Evaluation',
+  },
+  privateNote: {
+    id: `${scope}.privateNote`,
+    defaultMessage: 'Internal note',
   }
 };

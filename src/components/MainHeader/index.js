@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { removeUser } from '../../redux/features/authSlice';
 import { MdOutlineSpaceDashboard } from 'react-icons/md';
+import { GiNotebook } from 'react-icons/gi';
 const scrollElement = React.createRef();
 
 class MainHeader extends Component {
@@ -35,49 +36,55 @@ class MainHeader extends Component {
     const infoAuth = this.props.authData ?? '';
     const clientParent = this.props.authParent ?? '';
     const { user } = this.state;
-    const menu = (
-      <Menu
-        items={[
-          {
-            key: '1',
-            icon: <MdOutlineSpaceDashboard size={18} color='#495057' />,
-            label: (
-              <Link to={this.state.user?.role === 999 ? routerLinks.Appointments : routerLinks.Dashboard}>
-                {intl.formatMessage(messages.dashboard)}
-              </Link>
-            ),
-          },
-          {
-            key: '2',
-            icon: <FaUserEdit size={18} color='#495057' />,
-            label: (
-              <Link to={routerLinks.Changeprofile}>
-                {intl.formatMessage(messages.editProfile)}
-              </Link>
-            ),
-          },
-          {
-            key: '3',
-            icon: <Badge size="small" count={6}><BiBell size={18} color='#495057' /></Badge>,
-            label: (
-              <a href='#'>
-                Notification
-              </a>
-            ),
-          },
-          {
-            key: '4',
-            icon: <BiLogOutCircle size={18} color='#495057' />,
-            label: (
-              <Link to='/' onClick={this.logout}>
+    const items = [
+      {
+        key: '1',
+        icon: <MdOutlineSpaceDashboard size={18} color='#495057' />,
+        label: (
+          <Link to={user?.role === 999 ? routerLinks.Appointments : routerLinks.Dashboard}>
+            {intl.formatMessage(messages.dashboard)}
+          </Link>
+        ),
+      },
+      {
+        key: '2',
+        icon: <FaUserEdit size={18} color='#495057' />,
+        label: (
+          <Link to={routerLinks.Changeprofile}>
+            {intl.formatMessage(messages.editProfile)}
+          </Link>
+        ),
+      },
+      {
+        key: '3',
+        icon: <Badge size="small" count={6}><BiBell size={18} color='#495057' /></Badge>,
+        label: (
+          <a href='#'>
+            Notification
+          </a>
+        ),
+      },
+      {
+        key: '5',
+        icon: <BiLogOutCircle size={18} color='#495057' />,
+        label: (
+          <Link to='/' onClick={this.logout}>
 
-                {intl.formatMessage(messages.logOut)}
-              </Link>
-            ),
-          },
-        ]}
-      />
-    );
+            {intl.formatMessage(messages.logOut)}
+          </Link>
+        ),
+      },
+    ]
+    user.role != 3 && items.splice(3, 0, {
+      key: '4',
+      icon: <GiNotebook size={18} color='#495057' />,
+      label: (
+        <Link to={routerLinks.PrivateNote}>
+          {intl.formatMessage(messages.privateNotes)}
+        </Link>
+      ),
+    });
+    const menu = (<Menu items={items} />);
 
     return (
       <div className='component-mainheader'>
