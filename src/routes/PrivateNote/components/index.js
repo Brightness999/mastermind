@@ -85,8 +85,7 @@ export default class extends React.Component {
           this.setState({
             dependents: dependents?.map(dependent => {
               if (dependent._id == selectedDependentId) {
-                const newnotes = dependent.notes.filter(note => note.dependent != selectedDependentId);
-                dependent.notes = newnotes;
+                dependent.notes = [];
               }
               return dependent;
             })
@@ -111,18 +110,13 @@ export default class extends React.Component {
       dependent: selectedDependentId,
       note: newnote,
     }
-    if (selectedDependent?.notes?.find(note => note.dependent == selectedDependentId)) {
+    if (selectedDependent?.notes?.[0]) {
       request.post('providers/update_private_note', data).then(res => {
         if (res.success) {
           this.setState({
             dependents: dependents?.map(dependent => {
               if (dependent._id == selectedDependentId) {
-                dependent.notes.map(note => {
-                  if (note.dependent == selectedDependentId) {
-                    note.note = res.data?.note;
-                  }
-                  return note;
-                })
+                dependent.notes = [res.data];
               }
               return dependent;
             })
@@ -161,12 +155,12 @@ export default class extends React.Component {
       { title: 'Birthday', dataIndex: 'birthday', key: 'birthday', type: 'datetime', sorter: (a, b) => a.birthday > b.birthday ? 1 : -1, render: (birthday) => new Date(birthday).toLocaleString() },
       { title: 'Parent Email', dataIndex: 'guardianEmail', key: 'guardianEmail', sorter: (a, b) => a.guardianEmail > b.guardianEmail ? 1 : -1 },
       { title: 'Parent Phone', dataIndex: 'guardianPhone', key: 'guardianPhone', sorter: (a, b) => a.guardianPhone > b.guardianPhone ? 1 : -1 },
-      { title: 'Note', key: 'note', render: (dependent) => dependent.notes?.find(note => note.dependent == dependent._id)?.note },
+      { title: 'Note', key: 'note', render: (dependent) => dependent.notes?.[0]?.note },
       {
         title: 'Action', key: 'action', render: (dependent) => (
           <Space size="middle">
-            <a className='btn-blue' onClick={() => this.onShowModalEdit(dependent._id)}>{dependent.notes?.find(note => note.dependent == dependent._id) ? 'Edit' : 'Create'}</a>
-            <a className='btn-red' onClick={() => this.handleDeleteNote(dependent._id)}>{dependent.notes?.find(note => note.dependent == dependent._id) ? 'Delete' : ''}</a>
+            <a className='btn-blue' onClick={() => this.onShowModalEdit(dependent._id)}>{dependent.notes?.[0] ? 'Edit' : 'Create'}</a>
+            <a className='btn-red' onClick={() => this.handleDeleteNote(dependent._id)}>{dependent.notes?.[0] ? 'Delete' : ''}</a>
           </Space>
         ),
       },

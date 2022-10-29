@@ -18,7 +18,6 @@ import "@fullcalendar/timegrid/main.css";
 import events from "../../../utils/calendar/events";
 import messages from '../messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
-import EventDetail from './EventDetail';
 import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 const { Panel } = Collapse;
@@ -26,7 +25,7 @@ import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request, { generateSearchStructure } from '../../../utils/api/request'
 import moment from 'moment';
 import { changeTime, getAppointmentsMonthData, removeAppoint } from '../../../redux/features/appointmentsSlice'
-import { store } from '../../../redux/store'
+import { store } from '../../../redux/store';
 import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
@@ -76,11 +75,29 @@ export default class extends React.Component {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       this.loadDefaultData();
       checkPermission().then(loginData => {
-        loginData.user.role > 900 && this.props.history.push(routerLinks.Admin)
-        this.setState({ userRole: loginData.user.role });
-        this.updateCalendarEvents(loginData.user.role);
+        loginData?.role == 999 && this.props.history.push(routerLinks.Admin)
+        switch (loginData.role) {
+          case 3:
+            this.setState({
+              parentInfo: loginData.parentInfo,
+              listDependents: loginData.studentInfos
+            });
+            break;
+          case 30:
+            this.setState({ providerInfo: loginData.providerInfo })
+            break;
+          case 60:
+            this.setState({
+              schoolInfo: loginData.schoolInfo,
+              listDependents: loginData.students
+            })
+            break;
+        }
+        this.setState({ userRole: loginData.role });
+        this.updateCalendarEvents(loginData.role);
         this.getMyAppointments();
       }).catch(err => {
+        console.log('check permission error ---', err);
         this.props.history.push('/');
       })
     }
@@ -94,8 +111,8 @@ export default class extends React.Component {
 
   loadDefaultData() {
     request.post('clients/get_default_value_for_client').then(result => {
-      let data = result.data;
-      this.setState({ SkillSet: data.SkillSet });
+      const data = result.data;
+      this.setState({ SkillSet: data.SkillSet?.docs });
     });
     request.post('clients/search_providers', generateSearchStructure('')).then(result => {
       if (result.success) {
@@ -195,75 +212,22 @@ export default class extends React.Component {
   getSubprofile = () => {
     switch (this.state.userRole) {
       case 3: // get parent info
-        this.getParentInfo();
-        this.loadDependent();
+        this.joinRoom(this.state.parentInfo._id);
+        for (let i = 0; i < this.state.listDependents.length; i++) {
+          this.joinRoom(this.state.listDependents[i]._id);
+        }
         return;
       case 30: // get provider info
-        this.loadMyProviderInfo();
+        this.joinRoom(this.state.providerInfo._id);
         return;
       case 60:// get school info
-        this.loadMySchoolInfo();
-        this.loadDependentForSchool();
+        this.joinRoom(this.state.schoolInfo._id);
         return;
     }
   }
 
-  loadMySchoolInfo = () => {
-    request.post('schools/get_my_school_info').then(result => {
-      let data = result.data;
-      this.setState({ schoolInfo: data })
-      this.joinRoom(data._id);
-    })
-  }
-
-  getParentInfo = () => {
-    request.post('clients/get_parent_profile').then(result => {
-      let data = result.data;
-      this.setState({ parentInfo: data })
-      this.joinRoom(data._id);
-    })
-  }
-
-  loadDependent = () => {
-    request.post('clients/get_child_profile').then(result => {
-      let data = result.data;
-      for (let i = 0; i < data.length; i++) {
-        this.joinRoom(data[i]._id);
-      }
-      this.setState({ listDependents: data })
-    })
-  }
-
-  loadDependentForSchool = () => {
-    request.post('schools/get_my_dependents').then(result => {
-      if (result.success) {
-        this.setState({ listDependents: result.data })
-      }
-    })
-  }
-
-  loadMyProviderInfo = () => {
-    request.post('providers/get_my_provider_info').then(result => {
-      let data = result.data;
-      this.setState({ providerInfo: data })
-      this.joinRoom(data._id);
-    })
-  }
-
   joinRoom = (roomId) => {
     this.socket.emit('join_room', roomId);
-  }
-
-  modalAppointments() {
-    const modalNewAppointProps = {
-      visible: this.state.visibleNewAppoint,
-      onSubmit: this.onSubmitModalNewAppoint,
-      onCancel: this.onCloseModalNewAppoint,
-      listDependents: this.state.listDependents,
-      SkillSet: this.state.SkillSet,
-      listAppointmentsRecent: this.state.listAppointmentsRecent,
-    };
-    return (<ModalNewAppointmentForParents {...modalNewAppointProps} />);
   }
 
   modalCreateAndEditSubsidyRequest = () => {
@@ -681,6 +645,8 @@ export default class extends React.Component {
       selectedEvent,
       selectedSkills,
       selectedEventTypes,
+      visibleNewAppoint,
+      parentInfo,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -759,6 +725,16 @@ export default class extends React.Component {
       onSubmit: this.onCloseModalGroup,
       onCancel: this.onCloseModalGroup,
     }
+
+    const modalNewAppointProps = {
+      visible: visibleNewAppoint,
+      onSubmit: this.onSubmitModalNewAppoint,
+      onCancel: this.onCloseModalNewAppoint,
+      listDependents: listDependents,
+      SkillSet: SkillSet,
+      listAppointmentsRecent: listAppointmentsRecent,
+      parentInfo: parentInfo,
+    };
 
     return (
       <div className="full-layout page dashboard-page">
@@ -901,15 +877,15 @@ export default class extends React.Component {
                   />
                 </div>
                 <div className='btn-appointment'>
-                  <Dropdown overlay={userRole == 60 ? <></> : menu} placement="topRight">
-                    <Button
-                      type='primary'
-                      block
-                      icon={<FaCalendarAlt size={19} />}
-                    >
-                      {intl.formatMessage(messages.makeAppointment)}
-                    </Button>
-                  </Dropdown>
+                  <Button
+                    type='primary'
+                    block
+                    icon={<FaCalendarAlt size={19} />}
+                    disabled={userRole != 3}
+                    onClick={() => userRole == 3 && this.onShowModalNewAppoint()}
+                  >
+                    {intl.formatMessage(messages.makeAppointment)}
+                  </Button>
                 </div>
               </>
             )}
@@ -1082,7 +1058,7 @@ export default class extends React.Component {
         </div>
         <div className='text-right'>
           <div className='btn-call'>
-            <img src='../images/call.png' />
+            <img src='../images/call.png' onClick={this.onShowModalReferral} />
           </div>
         </div>
         <DrawerDetail
@@ -1098,7 +1074,8 @@ export default class extends React.Component {
           event={selectedEvent}
           skillSet={SkillSet}
         />
-        {this.modalAppointments()}
+        <ModalNewAppointmentForParents {...modalNewAppointProps} />
+        {/* {visibleNewAppoint && <ModalNewAppointmentForParents {...modalNewAppointProps} />} */}
         {this.renderModalSubsidyDetail()}
         {this.modalCreateAndEditSubsidyRequest()}
         <ModalNewGroup {...modalNewGroupProps}

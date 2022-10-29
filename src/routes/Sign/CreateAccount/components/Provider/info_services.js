@@ -55,9 +55,9 @@ class InfoServices extends Component {
 		axios.post(url + 'providers/get_default_values_for_provider'
 		).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
+				const data = result.data.data;
 				this.setState({
-					SkillSet: data.SkillSet,
+					SkillSet: data.SkillSet.docs,
 					AcademicLevel: data.AcademicLevel,
 					ScreenTime: data.SreenTime,
 				})
@@ -222,8 +222,8 @@ class InfoServices extends Component {
 							<Select
 								placeholder={intl.formatMessage(messages.skillsets)}
 								onChange={v => this.handleSelectChange('skillSet', v)}>
-								{this.state.SkillSet.map((value, index) => (
-									<Select.Option key={index} value={value}>{value}</Select.Option>)
+								{this.state.SkillSet.map((skill, index) => (
+									<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>)
 								)}
 							</Select>
 						</Form.Item>

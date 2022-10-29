@@ -12,8 +12,7 @@ import moment from 'moment';
 import 'moment/locale/en-au';
 import './style/index.less';
 import '../../assets/styles/login.less';
-import request, { generateSearchStructure } from '../../utils/api/request'
-import PlacesAutocomplete from 'react-places-autocomplete';
+import request from '../../utils/api/request'
 import ModalNewScreening from './ModalNewScreening';
 
 const { Paragraph } = Typography;
@@ -30,6 +29,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		listProvider: [],
 		selectedSkillSet: -1,
 		address: '',
+		addressOptions: [],
 		selectedDependent: undefined,
 		selectedProvider: undefined,
 		arrTime: [],
@@ -37,6 +37,8 @@ class ModalNewAppointmentForParents extends React.Component {
 		selectedDay: 0,
 		scheduleButtonText: intl.formatMessage(messages?.schedule)?.toUpperCase(),
 		visibleNewScreening: false,
+		skillSet: this.props.SkillSet,
+		searchKey: '',
 	}
 
 	componentDidMount() {
@@ -77,10 +79,20 @@ class ModalNewAppointmentForParents extends React.Component {
 		this.searchProvider()
 	}
 
-	searchProvider(name) {
-		request.post('clients/search_providers', generateSearchStructure(name)).then(result => {
+	searchProvider(searchKey, address, selectedSkillSet) {
+		const data = {
+			search: searchKey,
+			address: address,
+			skill: selectedSkillSet
+		};
+		request.post('clients/search_providers', data).then(result => {
 			if (result.success) {
-				this.setState({ listProvider: result.data })
+				this.setState({
+					listProvider: result.data.providers,
+					addressOptions: result.data?.locations,
+					isChoose: -1,
+					selectedProvider: undefined,
+				});
 			}
 		}).catch(err => {
 			console.log('provider list error-----', err);
@@ -89,7 +101,7 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	createAppointment = () => {
 		const { isSelectTime, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, selectedDay } = this.state;
-		if (isSelectTime < 0 || selectedSkillSet < 0 || address.length == 0 || selectedDependent == undefined || selectedProvider == undefined) {
+		if (selectedDate?.isBefore(new Date()) ||isSelectTime < 0 || selectedSkillSet < 0 || address.length == 0 || selectedDependent == undefined || selectedProvider == undefined) {
 			this.setState({ errorMessage: 'please fill all required field' })
 			return;
 		}
@@ -108,7 +120,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		this.requestCreateAppointment(postData);
 	}
 
-	onSubmitModalNewScreening = (values) => {
+	onSubmitModalNewScreening = (data) => {
 		const { selectedSkillSet, address, selectedDependent, arrTime, selectedDay, selectedDate, selectedProvider, isSelectTime } = this.state;
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime?.[selectedDay]?.[isSelectTime]?.value.clone().set({ years, months, date });
@@ -117,8 +129,8 @@ class ModalNewAppointmentForParents extends React.Component {
 			dependent: selectedDependent,
 			provider: selectedProvider,
 			date: hour,
-			phoneNumber: values?.phoneNumber,
-			notes: values?.notes,
+			phoneNumber: data?.phoneNumber,
+			notes: data?.notes,
 			type: 1,
 			status: 0,
 			location: address,
@@ -143,8 +155,8 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	createScreening = () => {
 		this.setState({ visibleNewScreening: false });
-		const { selectedSkillSet, address, selectedDependent, selectedProvider } = this.state;
-		if (selectedSkillSet < 0 || address == '' || selectedDependent == undefined || selectedProvider == undefined) {
+		const { selectedDate, isSelectTime, selectedSkillSet, address, selectedDependent, selectedProvider } = this.state;
+		if (!selectedDate?.isSameOrAfter(new Date()) || isSelectTime < 0 || selectedSkillSet < 0 || address == '' || selectedDependent == undefined || selectedProvider == undefined) {
 			this.setState({ errorMessage: 'please fill all required field' })
 			return;
 		}
@@ -154,10 +166,7 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	handleChangeAddress = address => {
 		this.setState({ address: address });
-	};
-
-	handleSelectAddress = address => {
-		this.setState({ address: address });
+		this.searchProvider(this.state.searchKey, address, this.state.selectedSkillSet);
 	};
 
 	onSelectDate = (newValue) => {
@@ -191,8 +200,8 @@ class ModalNewAppointmentForParents extends React.Component {
 	onChooseProvider = (index) => {
 		const { listProvider, arrTime } = this.state;
 		const newArrTime = JSON.parse(JSON.stringify(arrTime));
-		listProvider[index].availability.forEach((availableTime, index) => {
-			newArrTime[index].map(time => {
+		listProvider[index]?.manualSchedule?.forEach((availableTime, index) => {
+			newArrTime[index]?.map(time => {
 				time.value = moment(time.value);
 				if ((time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour) || (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin) || (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)) {
 					time.active = true;
@@ -246,8 +255,38 @@ class ModalNewAppointmentForParents extends React.Component {
 		});
 	}
 
+	handleSearchProvider = (value) => {
+		this.setState({ searchKey: value });
+		this.searchProvider(value, this.state.address, this.state.selectedSkillSet);
+	}
+
+	handlelSelectDependent = (dependentId) => {
+		const dependents = this.props.listDependents;
+		this.setState({
+			selectedDependent: dependentId,
+			skillSet: dependents?.find(dependent => dependent._id == dependentId)?.services,
+		});
+	}
+
+	handleSelectSkill = (skill) => {
+		this.setState({ selectedSkillSet: skill });
+		this.searchProvider(this.state.searchKey, this.state.address, skill);
+	}
+
 	render() {
-		const { selectedDate, isChoose, isSelectTime, selectedDay, listProvider, scheduleButtonText, selectedProvider } = this.state;
+		const {
+			selectedDate,
+			isChoose,
+			isSelectTime,
+			selectedDay,
+			listProvider,
+			scheduleButtonText,
+			selectedProvider,
+			skillSet,
+			arrTime,
+			errorMessage,
+			addressOptions,
+		} = this.state;
 		const modalProps = {
 			className: 'modal-new',
 			title: "",
@@ -280,8 +319,11 @@ class ModalNewAppointmentForParents extends React.Component {
 					<Row gutter={20}>
 						<Col xs={24} sm={24} md={8} className='select-small'>
 							<Select
-								onChange={v => this.setState({ selectedDependent: v })}
-								value={this.state.selectedDependent}
+								showSearch
+								optionFilterProp="children"
+								filterOption={(input, option) => option.children?.join('').includes(input)}
+								filterSort={(optionA, optionB) => optionA.children?.join('').toLowerCase().localeCompare(optionB.children?.join('').toLowerCase())}
+								onChange={value => this.handlelSelectDependent(value)}
 								placeholder={intl.formatMessage(msgCreateAccount.dependent)}
 							>
 								{this.props.listDependents?.map((dependent, index) => (
@@ -291,43 +333,31 @@ class ModalNewAppointmentForParents extends React.Component {
 						</Col>
 						<Col xs={24} sm={24} md={8} className='select-small'>
 							<Select
-								onChange={v => this.setState({ selectedSkillSet: v })}
+								showSearch
+								optionFilterProp="children"
+								filterOption={(input, option) => option.children?.includes(input)}
+								onChange={v => this.handleSelectSkill(v)}
 								placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
 							>
-								{this.props.SkillSet?.map((skill, index) => (
-									<Select.Option key={index} value={index}>{skill}</Select.Option>
+								<Select.Option key="000" value=""></Select.Option>
+								{skillSet?.map((skill, index) => (
+									<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
 								))}
 							</Select>
 						</Col>
 						<Col xs={24} sm={24} md={8} className='select-small'>
-							<PlacesAutocomplete
-								value={this.state.address}
-								onChange={this.handleChangeAddress}
-								onSelect={this.handleSelectAddress}
+							<Select
+								showSearch
+								optionFilterProp="children"
+								filterOption={(input, option) => option.children?.includes(input)}
+								onChange={v => this.handleChangeAddress(v)}
+								placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
 							>
-								{({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-									<div>
-										<Input {...getInputProps({
-											placeholder: 'Search Places ...',
-											className: 'location-search-input',
-											size: 'medium'
-										})} />
-										<div className="autocomplete-dropdown-container">
-											{loading && <div>Loading...</div>}
-											{suggestions.map((suggestion, index) => {
-												const className = suggestion.active ? 'suggestion-item--active' : 'suggestion-item';
-												// inline style for demonstration purpose
-												const style = suggestion.active ? { backgroundColor: '#fafafa', cursor: 'pointer' } : { backgroundColor: '#ffffff', cursor: 'pointer' };
-												return (
-													<div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
-														<span>{suggestion.description}</span>
-													</div>
-												);
-											})}
-										</div>
-									</div>
-								)}
-							</PlacesAutocomplete>
+								<Select.Option key='000' value=''></Select.Option>
+								{addressOptions?.map((address, index) => (
+									<Select.Option key={index} value={address}>{address}</Select.Option>
+								))}
+							</Select>
 						</Col>
 					</Row>
 					<div className='choose-doctor'>
@@ -335,14 +365,14 @@ class ModalNewAppointmentForParents extends React.Component {
 						<div className='doctor-content'>
 							<div style={{ width: 300 }}>
 								<Input
-									onChange={e => this.searchProvider(e.target.value)}
+									onChange={e => this.handleSearchProvider(e.target.value)}
 									placeholder={intl.formatMessage(messages.searchProvider)}
 									suffix={<BiSearch size={17} />}
 								/>
 							</div>
 							<p className='font-500 mt-1 mb-0'>{intl.formatMessage(messages.availableProviders)}</p>
 							<div className='doctor-list'>
-								{listProvider.map((provider, index) => (
+								{listProvider?.map((provider, index) => (
 									<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
 										<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
 										<p className='font-10 text-center'>{provider.name || provider.referredToAs}</p>
@@ -363,20 +393,20 @@ class ModalNewAppointmentForParents extends React.Component {
 									<p className='font-16 font-700'>{intl.formatMessage(msgDrawer.providerProfile)}</p>
 									<p className='font-12 font-700 ml-auto text-primary'>{listProvider[isChoose]?.isNewClientScreening && intl.formatMessage(messages.screeningRequired)}</p>
 								</div>
-								<div className='count-2'>
-									<div>
+								<div className='flex'>
+									<div className='flex-1'>
 										<p className='font-10 mb-0'>Name:</p>
 										<p className='font-10'>{listProvider[isChoose]?.name}</p>
 									</div>
-									<div>
+									<div className='flex-1'>
 										<p className='font-10 mb-0'>Skillset(s):</p>
-										<p className='font-10'>{listProvider[isChoose]?.skillSet}</p>
+										<p className='font-10'>{listProvider[isChoose]?.skillSet?.name}</p>
 									</div>
 								</div>
-								<p className='font-10'>Practice/Location: {listProvider[isChoose]?.serviceAddress}</p>
-								<div className='count-2'>
+								<p className='font-10 flex'><span className='flex-1'>Practice/Location:</span><span className='flex-1'>{listProvider[isChoose]?.serviceAddress}</span></p>
+								<div className='flex'>
 									{listProvider[isChoose] && (
-										<div>
+										<div className='flex-1'>
 											<p className='font-10 mb-0'>Contact number:</p>
 											{listProvider[isChoose]?.contactNumber?.map((phone, phoneIndex) => (
 												<p key={phoneIndex} className='font-10'>{phone.phoneNumber}</p>
@@ -384,7 +414,7 @@ class ModalNewAppointmentForParents extends React.Component {
 										</div>
 									)}
 									{listProvider[isChoose] && (
-										<div>
+										<div className='flex-1'>
 											<p className='font-10 mb-0'>Contact email:</p>
 											{listProvider[isChoose]?.contactEmail?.map((email, emailIndex) => (
 												<p key={emailIndex} className='font-10'>{email.email}</p>
@@ -449,7 +479,7 @@ class ModalNewAppointmentForParents extends React.Component {
 										</Col>
 										<Col xs={24} sm={24} md={12}>
 											<Row gutter={15}>
-												{this.state.arrTime[selectedDay]?.map((time, index) => (
+												{arrTime[selectedDay]?.map((time, index) => (
 													<Col key={index} span={12}>
 														<div className={isSelectTime === index ? 'time-available active' : 'time-available'} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
 															<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
@@ -463,7 +493,7 @@ class ModalNewAppointmentForParents extends React.Component {
 							</div>
 						</Col>
 					</Row>
-					{this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}
+					{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
 					{this.modalScreening()}
 				</div>
 			</Modal>
