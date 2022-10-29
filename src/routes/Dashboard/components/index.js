@@ -475,16 +475,16 @@ export default class extends React.Component {
     );
   }
 
-  renderListAppoinmentsRecent = (appoinment, index) => {
+  renderListAppoinmentsRecent = (appointment, index) => {
     return (
-      <div key={index} className={moment(appoinment.date).isBefore(new Date()) ? 'item-feed done' : 'item-feed'}>
-        <p className='font-700'>{appoinment.dependent.firstName} {appoinment.dependent.lastName}</p>
-        {appoinment.provider != undefined && <p>{appoinment.provider.name || appoinment.provider.referredToAs}</p>}
-        {appoinment.school != undefined && <p>{appoinment.school.name}</p>}
-        <p>{this.state.SkillSet[appoinment.skillSet[0]]}</p>
-        <p>{appoinment.location}</p>
-        <p>{moment(appoinment.date).format('hh:mm a')}</p>
-        <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{moment(appoinment.date).fromNow()}</p>
+      <div key={index} className={moment(appointment.date).isBefore(new Date()) ? 'item-feed done' : 'item-feed'}>
+        <p className='font-700'>{appointment.dependent.firstName} {appointment.dependent.lastName}</p>
+        {appointment.provider != undefined && <p>{appointment.provider.name || appointment.provider.referredToAs}</p>}
+        {appointment.school != undefined && <p>{appointment.school.name}</p>}
+        <p>{appointment.skillSet?.name}</p>
+        <p>{appointment.location}</p>
+        <p>{moment(appointment.date).format('hh:mm a')}</p>
+        <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{moment(appointment.date).fromNow()}</p>
       </div>
     );
   }
@@ -905,7 +905,7 @@ export default class extends React.Component {
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
-                          <p className='font-11 mb-0'>{SkillSet[appointment?.skillSet?.[0]]}</p>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
                           <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
                         </div>
                         <div className='text-center ml-auto mr-5'>
@@ -924,7 +924,7 @@ export default class extends React.Component {
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
-                          <p className='font-11 mb-0'>{SkillSet[appointment?.skillSet?.[0]]}</p>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
                           <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
                         </div>
                         <div className='text-center ml-auto mr-5'>
@@ -947,7 +947,7 @@ export default class extends React.Component {
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service flex-1'>
-                          <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
                           <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
                         </div>
                         <div className='text-center ml-auto mr-5 flex-1'>
@@ -966,7 +966,7 @@ export default class extends React.Component {
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service flex-1'>
-                          <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
                           <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
                         </div>
                         <div className='text-center ml-auto mr-5 flex-1'>
@@ -993,7 +993,7 @@ export default class extends React.Component {
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
-                          <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
                           <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
                         </div>
                         <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
@@ -1009,7 +1009,7 @@ export default class extends React.Component {
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
-                          <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
                           <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
                         </div>
                         <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
@@ -1029,7 +1029,7 @@ export default class extends React.Component {
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
-                          <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
                           <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
                         </div>
                         <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
@@ -1042,7 +1042,7 @@ export default class extends React.Component {
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
-                          <p className='font-11 mb-0'>{SkillSet[appointment.skillSet[0]]}</p>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
                           <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
                         </div>
                         <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
@@ -1075,7 +1075,6 @@ export default class extends React.Component {
           skillSet={SkillSet}
         />
         <ModalNewAppointmentForParents {...modalNewAppointProps} />
-        {/* {visibleNewAppoint && <ModalNewAppointmentForParents {...modalNewAppointProps} />} */}
         {this.renderModalSubsidyDetail()}
         {this.modalCreateAndEditSubsidyRequest()}
         <ModalNewGroup {...modalNewGroupProps}

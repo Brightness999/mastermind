@@ -64,13 +64,14 @@ class DrawerDetail extends Component {
   render() {
     const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent } = this.state;
     const { role, event, skillSet } = this.props;
+    console.log(event)
 
     const providerProfile = (
       <div className='provider-profile'>
         <p className='font-16 font-700 mb-10'>{intl.formatMessage(messages.providerProfile)}</p>
         <div className='count-2'>
           <p className='font-10'>Name: {event?.provider?.name}</p>
-          <p className='font-10'>Skillset(s): {event?.provider?.skillSet}</p>
+          <p className='font-10'>Skillset(s): {event?.provider?.skillSet?.name}</p>
         </div>
         <p className='font-10'>Practice/Location: {event?.provider?.cityConnection}</p>
         <div className='count-2'>
@@ -129,7 +130,7 @@ class DrawerDetail extends Component {
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.what)}</p>
               <BiDollarCircle size={18} className='mx-10 text-green500' />
             </div>
-            <p className='font-16'>{skillSet?.[event?.skillSet?.[0]]}</p>
+            <p className='font-16'>{event?.skillSet?.name}</p>
           </div>
           <Popover
             placement="leftTop"
