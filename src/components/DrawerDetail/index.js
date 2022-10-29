@@ -34,23 +34,30 @@ class DrawerDetail extends Component {
   }
 
   handleCancelEvent = () => {
-    if (this.props.event?._id) {
-      const data = { appointId: this.props.event._id };
-      request.post('clients/cancel_appoint', data).then(result => {
-        if (result.success) {
-          this.setState({ errorMessage: '' });
-          message.success({
-            content: intl.formatMessage(messages.screeningCancelled),
-            className: 'popup-scheduled',
-          });
-        } else {
-          this.setState({ errorMessage: result.data });
-        }
-      }).catch(error => {
-        console.log('closed error---', error);
-        this.setState({ errorMessage: error.message });
-      })
-    }
+    this.setState({ visibleCancel: true });
+  }
+
+  handleConfirmCancel = () => {
+    this.setState({ visibleCancel: false }, () => {
+      if (this.props.event?._id) {
+        const data = { appointId: this.props.event._id };
+        request.post('clients/cancel_appoint', data).then(result => {
+          if (result.success) {
+            this.setState({ errorMessage: '' });
+            message.success({
+              content: intl.formatMessage(messages.screeningCancelled),
+              className: 'popup-scheduled',
+            });
+          } else {
+            this.setState({ errorMessage: result.data });
+          }
+        }).catch(error => {
+          console.log('closed error---', error);
+          this.setState({ errorMessage: error.message });
+        })
+      }
+    });
+
   }
 
   closeModalCurrent = () => {
@@ -63,8 +70,7 @@ class DrawerDetail extends Component {
 
   render() {
     const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent } = this.state;
-    const { role, event, skillSet } = this.props;
-    console.log(event)
+    const { role, event } = this.props;
 
     const providerProfile = (
       <div className='provider-profile'>
@@ -104,7 +110,7 @@ class DrawerDetail extends Component {
     );
     const modalCancelProps = {
       visible: visibleCancel,
-      onSubmit: this.closeModalCancel,
+      onSubmit: this.handleConfirmCancel,
       onCancel: this.closeModalCancel,
       event: this.props.event,
     };
