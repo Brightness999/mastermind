@@ -116,7 +116,7 @@ export default class extends React.Component {
     });
     request.post('clients/search_providers', generateSearchStructure('')).then(result => {
       if (result.success) {
-        this.setState({ listProvider: result.data });
+        this.setState({ listProvider: result.data?.providers ?? [] });
       }
     });
   }
@@ -562,8 +562,8 @@ export default class extends React.Component {
     const year = calendar._calendarApi.getDate().getFullYear();
     const { selectedSkills, selectedProviders, SkillSet, listProvider, selectedLocations, selectedEventTypes } = this.state;
     let skills = [], providers = [];
-    selectedSkills.forEach(skill => skills.push(SkillSet.findIndex(s => s == skill)));
-    selectedProviders.forEach(provider => providers.push(listProvider.find(p => p.name == provider)._id));
+    selectedSkills?.forEach(skill => skills.push(SkillSet.find(s => s.name == skill)?._id));
+    selectedProviders?.forEach(provider => providers.push(listProvider.find(p => p.name == provider)._id));
     const dataFetchAppointMonth = {
       role: role,
       data: {
@@ -648,6 +648,7 @@ export default class extends React.Component {
       visibleNewAppoint,
       parentInfo,
     } = this.state;
+    console.log(SkillSet);
 
     const btnMonthToWeek = (
       <div role='button' className='btn-type' onClick={this.handleMonthToWeek}>
@@ -758,7 +759,7 @@ export default class extends React.Component {
                     </Col>
                     <Col xs={12} sm={12} md={8} className='skillset-checkbox'>
                       <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
-                      <Checkbox.Group options={SkillSet} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
+                      <Checkbox.Group options={SkillSet.map(skill => skill.name)} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
                     </Col>
                     {userRole != 30 && (
                       <Col xs={12} sm={12} md={6} className='select-small'>
@@ -901,7 +902,7 @@ export default class extends React.Component {
               <Panel header={intl.formatMessage(messages.referrals)} key="2">
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {listAppointmentsRecent?.filter(appointment => appointment.type == 6 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 6 && appointment.status == 0 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
@@ -943,7 +944,7 @@ export default class extends React.Component {
               <Panel header={intl.formatMessage(messages.screenings)} key="3">
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {listAppointmentsRecent?.filter(a => a.type == 1 && moment(a.date).isAfter(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(a => a.type == 1 && a.status == 0 && moment(a.date).isAfter(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service flex-1'>
@@ -982,14 +983,10 @@ export default class extends React.Component {
                   </Tabs.TabPane>
                 </Tabs>
               </Panel>
-              <Panel
-                key="4"
-                header={intl.formatMessage(messages.evaluations)}
-                className='evaluations-panel'
-              >
+              <Panel header={intl.formatMessage(messages.evaluations)} key="4">
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {listAppointmentsRecent?.filter(appointment => appointment.type == 2 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 2 && appointment.status == 0 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
@@ -1025,7 +1022,7 @@ export default class extends React.Component {
               <Panel header={intl.formatMessage(messages.flags)} key="5" extra={this.genExtraFlag()}>
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {listAppointmentsRecent?.filter(appointment => appointment.type == 4 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 4 && appointment.status == 0 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>

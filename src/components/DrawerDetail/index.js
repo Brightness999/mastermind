@@ -112,12 +112,13 @@ class DrawerDetail extends Component {
       visible: visibleCancel,
       onSubmit: this.handleConfirmCancel,
       onCancel: this.closeModalCancel,
-      event: this.props.event,
+      event: event,
     };
     const modalCurrentProps = {
       visible: visibleCurrent,
       onSubmit: this.closeModalCurrent,
       onCancel: this.closeModalCurrent,
+      event: event,
     };
 
     return (
@@ -183,7 +184,7 @@ class DrawerDetail extends Component {
           )}
         </div>
         <Row gutter={15} className='list-btn-detail'>
-          {(role == 3 && moment(event?.date).isAfter(new Date())) && (
+          {(role == 3 && moment(event?.date).isAfter(new Date()) && event?.status == 0) && (
             <>
               <Col span={12}>
                 <Button

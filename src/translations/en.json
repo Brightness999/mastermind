@@ -155,6 +155,7 @@
   "routes.Createaccount.uploadMess": "Please upload file",
   "routes.Createaccount.availabilitySchedule": "Availability schedule",
   "routes.Createaccount.numberSessions": "Number sessions",
+  "routes.Createaccount.notes": "Notes",
   
   
 
