@@ -1063,13 +1063,11 @@ export default class extends React.Component {
           onClose={this.onCloseDrawerDetail}
           role={userRole}
           event={selectedEvent}
-          skillSet={SkillSet}
         />
         <DrawerDetailPost
           visible={providerDrawervisible}
           onClose={this.onCloseDrawerDetailPost}
           event={selectedEvent}
-          skillSet={SkillSet}
         />
         <ModalNewAppointmentForParents {...modalNewAppointProps} />
         {this.renderModalSubsidyDetail()}

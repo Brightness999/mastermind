@@ -6,7 +6,7 @@ import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import intl from "react-intl-universal";
 import messages from './messages';
 import msgDetail from '../DrawerDetail/messages';
-import { ModalNoShow, ModalBalance } from '../../components/Modal';
+import { ModalNoShow, ModalBalance, ModalConfirm } from '../../components/Modal';
 import request from '../../utils/api/request';
 const { Paragraph } = Typography;
 
@@ -21,6 +21,9 @@ class DrawerDetailPost extends Component {
       isProviderHover: false,
       isDependentHover: false,
       errorMessage: '',
+      isModalConfirm: false,
+      message: '',
+      isClosed: false,
     };
   }
 
@@ -63,30 +66,64 @@ class DrawerDetailPost extends Component {
       }
       request.post('providers/close_appointment', data).then(result => {
         if (result.success) {
-          this.setState({ errorMessage: '' });
+          this.setState({
+            errorMessage: '',
+            isClosed: true,
+          });
           message.success({
             content: intl.formatMessage(messages.screeningClosed),
             className: 'popup-scheduled',
           });
         } else {
-          this.setState({ errorMessage: result.data });
+          this.setState({
+            errorMessage: result.data,
+            isClosed: false,
+          });
         }
       }).catch(error => {
         console.log('closed error---', error);
-        this.setState({ errorMessage: error.message });
+        this.setState({
+          errorMessage: error.message,
+          isClosed: false,
+        });
       })
     }
   }
 
+  openConfirmModal = () => {
+    this.setState({
+      isModalConfirm: true,
+      message: 'Are you sure you want to mark as closed?'
+    });
+  }
+
+  onConfirm = () => {
+    this.setState({ isModalConfirm: false });
+    this.handleMarkAsClosed();
+  }
+
+  onCancel = () => {
+    this.setState({ isModalConfirm: false });
+  }
+
   render() {
-    const { visibleNoShow, visibleBalance, isProviderHover, isDependentHover, publicFeedback } = this.state;
-    const { event, skillSet } = this.props;
+    const {
+      visibleNoShow,
+      visibleBalance,
+      isProviderHover,
+      isDependentHover,
+      publicFeedback,
+      isModalConfirm,
+      message,
+      isClosed,
+    } = this.state;
+    const { event } = this.props;
     const providerProfile = (
       <div className='provider-profile'>
         <p className='font-16 font-700 mb-10'>{intl.formatMessage(msgDetail.providerProfile)}</p>
         <div className='count-2'>
           <p className='font-10'>Name: {event?.provider?.name}</p>
-          <p className='font-10'>Skillset(s): {event?.provider?.skillSet}</p>
+          <p className='font-10'>Skillset(s): {event?.provider?.skillSet?.name}</p>
         </div>
         <p className='font-10'>Practice/Location: {event?.provider?.cityConnection}</p>
         <div className='count-2'>
@@ -143,6 +180,12 @@ class DrawerDetailPost extends Component {
       onSubmit: this.onCloseModalBalance,
       onCancel: this.onCloseModalBalance,
     };
+    const modalConfirmProps = {
+      visible: isModalConfirm,
+      onSubmit: this.onConfirm,
+      onCancel: this.onCancel,
+      message: message,
+    }
 
     return (
       <Drawer
@@ -156,7 +199,7 @@ class DrawerDetailPost extends Component {
             <div className='title'>
               <p className='font-18 font-700 title'>{intl.formatMessage(msgDetail.what)}</p>
             </div>
-            <p className='font-16'>{skillSet?.[event?.skillSet?.[0]]}</p>
+            <p className='font-16'>{event?.skillSet?.name}</p>
           </div>
           <Popover
             placement="leftTop"
@@ -207,7 +250,8 @@ class DrawerDetailPost extends Component {
               type='primary'
               icon={<BsCheckCircle size={15} />}
               block
-              onClick={() => this.handleMarkAsClosed()}
+              onClick={() => this.openConfirmModal()}
+              disabled={isClosed}
             >
               {intl.formatMessage(messages.markClosed)}
             </Button>
@@ -229,6 +273,7 @@ class DrawerDetailPost extends Component {
         {this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}
         <ModalNoShow {...modalNoShowProps} />
         <ModalBalance {...modalBalanceProps} />
+        <ModalConfirm {...modalConfirmProps} />
       </Drawer>
     );
   }
