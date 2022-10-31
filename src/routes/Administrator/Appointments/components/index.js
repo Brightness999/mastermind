@@ -52,9 +52,9 @@ export default class extends React.Component {
   componentDidMount() {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
-        loginData.user.role < 900 && this.props.history.push(routerLinks.Dashboard);
-        this.updateCalendarEvents(loginData.user.role);
-        this.setState({ userRole: loginData.user.role });
+        loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
+        this.updateCalendarEvents(loginData.role);
+        this.setState({ userRole: loginData.role });
         this.getProviders();
         this.getSkillSet();
       }).catch(err => {

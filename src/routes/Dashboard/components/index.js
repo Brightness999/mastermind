@@ -558,8 +558,8 @@ export default class extends React.Component {
 
   updateCalendarEvents(role) {
     const calendar = this.calendarRef.current;
-    const month = calendar._calendarApi.getDate().getMonth() + 1;
-    const year = calendar._calendarApi.getDate().getFullYear();
+    const month = calendar?._calendarApi.getDate().getMonth() + 1;
+    const year = calendar?._calendarApi.getDate().getFullYear();
     const { selectedSkills, selectedProviders, SkillSet, listProvider, selectedLocations, selectedEventTypes } = this.state;
     let skills = [], providers = [];
     selectedSkills?.forEach(skill => skills.push(SkillSet.find(s => s.name == skill)?._id));
@@ -648,7 +648,6 @@ export default class extends React.Component {
       visibleNewAppoint,
       parentInfo,
     } = this.state;
-    console.log(SkillSet);
 
     const btnMonthToWeek = (
       <div role='button' className='btn-type' onClick={this.handleMonthToWeek}>

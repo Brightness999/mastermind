@@ -26,7 +26,7 @@ export default class extends React.Component {
 	componentDidMount() {
 		if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
 			checkPermission().then(loginData => {
-				loginData.user.role < 900 && this.props.history.push(routerLinks.Dashboard);
+				loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
 				request.post('admin/get_schools').then(result => {
 					console.log(result.data);
 					if (result.success) {
@@ -37,7 +37,7 @@ export default class extends React.Component {
 						});
 					}
 				})
-				this.setState({ userRole: loginData.user.role });
+				this.setState({ userRole: loginData.role });
 			}).catch(err => {
 				console.log(err);
 				this.props.history.push('/');
