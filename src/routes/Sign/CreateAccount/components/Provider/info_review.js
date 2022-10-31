@@ -21,48 +21,35 @@ class InfoReview extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			SkillSet: [],
-			AcademicLevel: [],
-			ServiceableSchools: [],
-			ScreenTime: [],
-			CityConnections: [],
+			cityConnections: [],
 			listSchools: [],
+			skillSet: [],
 		}
 	}
 
 	componentDidMount() {
-		this.searchCityConnection();
-		this.loadSchools();
-	}
-
-	searchCityConnection() {
-		axios.post(url + 'providers/get_city_connections'
-		).then(result => {
+		axios.post(url + 'providers/get_review_info').then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
-				this.setState({ CityConnections: data.docs })
+				this.setState({
+					cityConnections: data.cityConnections,
+					skillSet: data.skillSet,
+					listSchools: data.listSchools,
+				})
 			} else {
 				this.setState({
-					CityConnections: [],
+					cityConnections: [],
+					skillSet: [],
+					listSchools: [],
 				});
 			}
 		}).catch(err => {
 			console.log(err);
 			this.setState({
-				CityConnections: [],
+				cityConnections: [],
+				skillSet: [],
+				listSchools: [],
 			});
-		})
-	}
-
-	loadSchools() {
-		axios.post(url + 'clients/get_all_schools'
-		).then(result => {
-			if (result.data.success) {
-				var data = result.data.data;
-				this.setState({ listSchools: data })
-			}
-		}).catch(err => {
-			console.log(err);
 		})
 	}
 
@@ -82,7 +69,7 @@ class InfoReview extends Component {
 	copyField = (registerData) => {
 		var arr = ["email", "role", "isAcceptProBono", "isAcceptReduceRate", "isWillingOpenPrivate", "password", "username"];
 		var availability = this.validAvaiability(registerData.availability);
-		var obj = { ...registerData.profileInfor, ...registerData.subsidy, ...registerData.serviceInfor, ...availability };
+		var obj = { ...registerData.profileInfor, ...registerData.subsidy, ...registerData.serviceInfor, ...registerData.financialInfor, ...availability };
 		for (var i = 0; i < arr.length; i++) {
 			obj["" + arr[i]] = registerData["" + arr[i]];
 		}
@@ -125,13 +112,13 @@ class InfoReview extends Component {
 	};
 
 	displayHourMin(value) {
-		return value > 9 ? value : ('0' + value)
+		return value > 9 ? value : `0${value}`;
 	}
 
 	render() {
 		const { registerData } = this.props.register;
 		console.log(registerData)
-		const { listSchools, CityConnections } = this.state;
+		const { listSchools, cityConnections, skillSet } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -153,7 +140,7 @@ class InfoReview extends Component {
 									<div><span className='font-700'>Referred to As:</span> {registerData?.profileInfor?.referredToAs}</div>
 									<div><span className='font-700'>Service Address:</span> {registerData?.profileInfor?.serviceAddress}</div>
 									<div><span className='font-700'>Billing Address:</span> {registerData?.profileInfor?.billingAddress}</div>
-									<div><span className='font-700'>City Connection:</span> {CityConnections?.find(a => a._id == registerData?.profileInfor?.cityConnection)?.name}</div>
+									<div><span className='font-700'>City Connection:</span> {cityConnections?.find(a => a._id == registerData?.profileInfor?.cityConnection)?.name}</div>
 									<div><span className='font-700'>License Number:</span> {registerData?.profileInfor?.licenseNumber}</div>
 									<div><span className='font-700'>Agency:</span> {registerData?.profileInfor?.agency}</div>
 									<div className='mb-10'>
@@ -183,7 +170,7 @@ class InfoReview extends Component {
 							<Col xs={24} sm={24} md={8}>
 								<div>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.servicesOffered)}</p>
-									<div><span className='font-700'>Skillset:</span> {registerData?.serviceInfor?.skillSet}</div>
+									<div><span className='font-700'>Skillset:</span> {skillSet?.find(skill => skill._id == registerData?.serviceInfor?.skillSet)?.name}</div>
 									<div className='review-item'>
 										<div><span className='font-700'>Years of Experience:</span> {registerData?.serviceInfor?.yearExp}</div>
 										<div><span className='font-700'>SSN:</span> {registerData?.serviceInfor?.SSN}</div>
@@ -199,7 +186,7 @@ class InfoReview extends Component {
 											<div className='font-700'>Academic Level</div>
 											<div className='font-700'>Rate</div>
 										</div>
-										{registerData?.serviceInfor?.academicLevel.map((academic, index) => (
+										{registerData?.financialInfor?.academicLevel.map((academic, index) => (
 											<div key={index} className='review-item'>
 												<div>{academic.level}</div>
 												<div>{academic.rate}</div>

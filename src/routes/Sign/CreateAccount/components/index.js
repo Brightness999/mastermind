@@ -14,6 +14,7 @@ import InfoServices from './Provider/info_services';
 import InfoAvailability from './Provider/info_availability';
 import SubsidyProgram from './Provider/subsidy_program';
 import InfoReview from './Provider/info_review';
+import InfoFinancial from './Provider/info_financial';
 import InfoSchool from './School/info_school';
 import InfoAdmin from './Admin/info_admin';
 import InfoConsultant from './Consultant/info_consultant';
@@ -50,7 +51,7 @@ export default class extends React.Component {
       this.openModalCreateDone();
       return;
     }
-    if (this.state.currentStep <= 4) {
+    if (this.state.currentStep <= 5) {
       this.nextStep();
     }
   }
@@ -96,7 +97,8 @@ export default class extends React.Component {
             <Step key='info_services' title={intl.formatMessage(messages.servicesInfo)} icon={<p>3</p>} />
             <Step key='info_availability' title={intl.formatMessage(messages.availabilityInfo)} icon={<p>4</p>} />
             <Step key='subsidy' title={intl.formatMessage(messages.subsidy)} icon={<p>5</p>} />
-            <Step key='info_review' title={intl.formatMessage(messages.reviewInfo)} icon={<p>6</p>} />
+            <Step key='info_financial' title={intl.formatMessage(messages.financialInfo)} icon={<p>6</p>} />
+            <Step key='info_review' title={intl.formatMessage(messages.reviewInfo)} icon={<p>7</p>} />
           </Steps>
         )
       case intl.formatMessage(messages.consultant):
@@ -201,6 +203,8 @@ export default class extends React.Component {
             return (<SubsidyProgram onContinue={this.handleContinue} />)
         }
       case 5:
+        return (<InfoFinancial onContinue={this.handleContinue} onFinishRegister={this.openModalCreateDone} />)
+      case 6:
         return (<InfoReview onContinue={this.handleContinue} onFinishRegister={this.openModalCreateDone} />)
     }
   }

@@ -103,6 +103,7 @@
   "routes.Createaccount.profileInfo": "Profile Info",
   "routes.Createaccount.servicesInfo": "Services info",
   "routes.Createaccount.servicesOffered": "Services offered",
+  "routes.Createaccount.FinancialInfo": "Financial Info",
   "routes.Createaccount.skillsets": "Skillsets",
   "routes.Createaccount.yearsExperience": "Years experience",
   "routes.Createaccount.serviceableSchools": "Serviceable schools",

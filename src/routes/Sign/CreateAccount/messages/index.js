@@ -290,6 +290,10 @@ export default ({
     id: `${scope}.reviewInfo`,
     defaultMessage: 'Review info',
   },
+  financialInfo: {
+    id: `${scope}.financialInfo`,
+    defaultMessage: 'Financial info',
+  },
   reviewAccountInfo: {
     id: `${scope}.reviewAccountInfo`,
     defaultMessage: 'Review account information',
