@@ -53,7 +53,7 @@ class InfoReview extends Component {
 		})
 	}
 
-	onSubmit = async (values) => {
+	onSubmit = async () => {
 		const { registerData } = this.props.register;
 		var postData = this.copyField(registerData);
 		const response = await axios.post(url + 'users/signup', postData);
@@ -117,7 +117,6 @@ class InfoReview extends Component {
 
 	render() {
 		const { registerData } = this.props.register;
-		console.log(registerData)
 		const { listSchools, cityConnections, skillSet } = this.state;
 
 		return (
@@ -145,7 +144,7 @@ class InfoReview extends Component {
 									<div><span className='font-700'>Agency:</span> {registerData?.profileInfor?.agency}</div>
 									<div className='mb-10'>
 										<div className='font-700'>Contact Number:</div>
-										{registerData?.profileInfor?.contactNumber.map((number, index) => (
+										{registerData?.profileInfor?.contactNumber?.map((number, index) => (
 											<div key={index} className='review-item'>
 												<span>{number.phoneNumber}</span>
 												<span>{number.type}</span>
@@ -154,7 +153,7 @@ class InfoReview extends Component {
 									</div>
 									<div className='mb-10'>
 										<div className='font-700'>Contact Email:</div>
-										{registerData?.profileInfor?.contactEmail.map((email, index) => (
+										{registerData?.profileInfor?.contactEmail?.map((email, index) => (
 											<div key={index} className='review-item'>
 												<span>{email.email}</span>
 												<span>{email.type}</span>
@@ -177,7 +176,7 @@ class InfoReview extends Component {
 									</div>
 									<div className='mb-10'>
 										<div className='font-700'>Serviceable Schools:</div>
-										{registerData?.serviceInfor?.serviceableSchool.map((school, index) => (
+										{registerData?.serviceInfor?.serviceableSchool?.map((school, index) => (
 											<div key={index}>{listSchools?.find(s => s._id == school)?.name}</div>
 										))}
 									</div>
@@ -186,7 +185,7 @@ class InfoReview extends Component {
 											<div className='font-700'>Academic Level</div>
 											<div className='font-700'>Rate</div>
 										</div>
-										{registerData?.financialInfor?.academicLevel.map((academic, index) => (
+										{registerData?.financialInfor?.academicLevel?.map((academic, index) => (
 											<div key={index} className='review-item'>
 												<div>{academic.level}</div>
 												<div>{academic.rate}</div>
@@ -304,7 +303,7 @@ class InfoReview extends Component {
 											<div key={index} className='flex'>
 												<div>{`${this.displayHourMin(new Date(date.day)?.getMonth() + 1)}/${this.displayHourMin(new Date(date.day)?.getDate())}/${new Date(date.day)?.getFullYear()}`}</div>
 												<div className='ml-20'>
-													{date.availableHours.map((time, index) => (
+													{date.availableHours?.map((time, index) => (
 														<div key={index}>{`${this.displayHourMin(new Date(time)?.getHours())}:${this.displayHourMin(new Date(time)?.getMinutes())}`}</div>
 													))}
 												</div>

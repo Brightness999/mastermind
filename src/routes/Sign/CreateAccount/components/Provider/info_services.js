@@ -15,7 +15,7 @@ class InfoServices extends Component {
 		super(props);
 		this.state = {
 			SkillSet: [],
-			ServiceableSchools: [],
+			serviceableSchool: [],
 			ScreenTime: [],
 			isHomeVisit: true,
 			privateOffice: true,
@@ -35,6 +35,7 @@ class InfoServices extends Component {
 			isHomeVisit: serviceInfor.isHomeVisit,
 			privateOffice: serviceInfor.privateOffice,
 			isNewClientScreening: serviceInfor.isNewClientScreening,
+			serviceableSchool: serviceInfor.serviceableSchool,
 		})
 		this.getDataFromServer()
 		this.loadSchools();
@@ -80,9 +81,7 @@ class InfoServices extends Component {
 	}
 
 	onFinish = (values) => {
-		this.props.setRegisterData({
-			serviceInfor: values,
-		})
+		this.props.setRegisterData({ serviceInfor: values });
 		this.props.onContinue();
 	};
 
@@ -90,25 +89,8 @@ class InfoServices extends Component {
 		console.log('Failed:', errorInfo);
 	};
 
-	setValueToReduxRegisterData = (fieldName, value) => {
-		const { registerData } = this.props.register;
-		var serviceInfor = JSON.parse(JSON.stringify(registerData.serviceInfor));
-		serviceInfor[fieldName] = value;
-		this.props.setRegisterData({ serviceInfor: serviceInfor });
-	}
-
-	defaultOnValueChange = (event, fieldName) => {
-		var value = event.target.value;
-		this.setValueToReduxRegisterData(fieldName, value);
-	}
-
-	handleSelectChange = (fieldName, value) => {
-		this.setValueToReduxRegisterData(fieldName, value);
-	}
-
 	loadSchools() {
-		axios.post(url + 'clients/get_all_schools'
-		).then(result => {
+		axios.post(url + 'clients/get_all_schools').then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
 				this.setState({ listSchools: data })
@@ -119,7 +101,7 @@ class InfoServices extends Component {
 	}
 
 	render() {
-		const { SkillSet, listSchools, isHomeVisit, privateOffice, isNewClientScreening, ScreenTime } = this.state;
+		const { SkillSet, listSchools, isHomeVisit, privateOffice, isNewClientScreening, ScreenTime, serviceableSchool } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -137,9 +119,7 @@ class InfoServices extends Component {
 							name="skillSet"
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
 						>
-							<Select
-								placeholder={intl.formatMessage(messages.skillsets)}
-								onChange={v => this.handleSelectChange('skillSet', v)}>
+							<Select placeholder={intl.formatMessage(messages.skillsets)}>
 								{SkillSet.map((skill, index) => (
 									<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>)
 								)}
@@ -151,7 +131,7 @@ class InfoServices extends Component {
 									name="yearExp"
 									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.yearsExperience) }]}
 								>
-									<Input onChange={v => this.defaultOnValueChange(v, 'yearExp')} placeholder={intl.formatMessage(messages.yearsExperience)} />
+									<Input placeholder={intl.formatMessage(messages.yearsExperience)} />
 								</Form.Item>
 							</Col>
 							<Col xs={24} sm={24} md={12}>
@@ -159,7 +139,7 @@ class InfoServices extends Component {
 									name="SSN"
 									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + 'SSN' }]}
 								>
-									<Input onChange={v => this.defaultOnValueChange(v, 'SSN')} placeholder='SSN' suffix={<QuestionCircleOutlined className='text-primary icon-suffix' />} />
+									<Input placeholder='SSN' suffix={<QuestionCircleOutlined className='text-primary icon-suffix' />} />
 								</Form.Item>
 							</Col>
 						</Row>
@@ -172,6 +152,7 @@ class InfoServices extends Component {
 								showArrow
 								placeholder={intl.formatMessage(messages.school)}
 								optionLabelProp="label"
+								value={serviceableSchool}
 							>
 								{listSchools.map((school, index) => (
 									<Select.Option key={index} label={school.name} value={school._id}>{school.name}</Select.Option>
@@ -180,35 +161,23 @@ class InfoServices extends Component {
 						</Form.Item>
 						<div className='text-center flex flex-row justify-between mb-10'>
 							<div className='flex flex-row items-center w-50'>
-								<Switch size="small"
-									checked={isHomeVisit}
-									onChange={v => {
-										this.setState({ isHomeVisit: v })
-										this.handleSelectChange('isHomeVisit', v)
-									}}
-								/>
+								<Form.Item name="isHomeVisit" rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.homeVisits) }]}>
+									<Switch size="small" checked={isHomeVisit} onChange={v => this.setState({ isHomeVisit: v })} />
+								</Form.Item>
 								<p className='ml-10 mb-0'>{intl.formatMessage(messages.homeVisits)}</p>
 							</div>
 							<div className='flex flex-row items-center w-50'>
-								<Switch size="small"
-									checked={privateOffice}
-									onChange={v => {
-										this.setState({ privateOffice: v })
-										this.handleSelectChange('privateOffice', v)
-									}}
-								/>
+								<Form.Item name="privateOffice" rules={[{ required: true }]}>
+									<Switch size="small" checked={privateOffice} onChange={v => this.setState({ privateOffice: v })} />
+								</Form.Item>
 								<p className='ml-10 mb-0'>{intl.formatMessage(messages.privateOffice)}</p>
 							</div>
 						</div>
 						<div className='text-center flex flex-row justify-between'>
 							<div className='flex flex-row items-center mb-10'>
-								<Switch size="small"
-									checked={isNewClientScreening}
-									onChange={v => {
-										this.setState({ isNewClientScreening: v })
-										this.handleSelectChange('isNewClientScreening', v)
-									}}
-								/>
+								<Form.Item name="isNewClientScreening" rules={[{ required: true }]}>
+									<Switch size="small" checked={isNewClientScreening} onChange={v => this.setState({ isNewClientScreening: v })} />
+								</Form.Item>
 								<p className='ml-10 mb-0'>{intl.formatMessage(messages.newClient)}</p>
 							</div>
 							<Form.Item
@@ -217,10 +186,7 @@ class InfoServices extends Component {
 								className='select-small'
 								rules={[{ required: isNewClientScreening, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.screeningTime) }]}
 							>
-								<Select
-									onChange={v => this.handleSelectChange('screeningTime', v)}
-									placeholder={intl.formatMessage(messages.screeningTime)}
-								>
+								<Select placeholder={intl.formatMessage(messages.screeningTime)}>
 									{ScreenTime.map((value, index) => (
 										<Select.Option key={index} value={index}>{value}</Select.Option>
 									))}
@@ -231,25 +197,13 @@ class InfoServices extends Component {
 							name="references"
 							rules={[{ required: false }]}
 						>
-							<Input
-								onChange={(event => {
-									var value = event.target.value;
-									this.setValueToReduxRegisterData('references', value);
-								})}
-								placeholder={intl.formatMessage(messages.references)}
-							/>
+							<Input placeholder={intl.formatMessage(messages.references)} />
 						</Form.Item>
 						<Form.Item
 							name="publicProfile"
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.publicProfile) }]}
 						>
-							<Input.TextArea
-								onChange={(event => {
-									var value = event.target.value;
-									this.setValueToReduxRegisterData('publicProfile', value);
-								})}
-								rows={4} placeholder={intl.formatMessage(messages.publicProfile)}
-							/>
+							<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.publicProfile)} />
 						</Form.Item>
 						<Form.Item className="form-btn continue-btn" >
 							<Button

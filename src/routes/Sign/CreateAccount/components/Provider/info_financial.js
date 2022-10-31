@@ -44,19 +44,13 @@ class InfoFinancial extends Component {
 		).then(result => {
 			if (result.data.success) {
 				const data = result.data.data;
-				this.setState({
-					AcademicLevel: data.AcademicLevel,
-				})
+				this.setState({ AcademicLevel: data.AcademicLevel });
 			} else {
-				this.setState({
-					AcademicLevel: [],
-				});
+				this.setState({ AcademicLevel: [] });
 			}
 		}).catch(err => {
 			console.log(err);
-			this.setState({
-				AcademicLevel: [],
-			});
+			this.setState({ AcademicLevel: [] });
 		})
 	}
 
@@ -74,11 +68,8 @@ class InfoFinancial extends Component {
 		}
 	}
 
-	onFinish = (values) => {
-		this.props.setRegisterData({
-			financialInfor: values,
-			documentUploaded: this.state.documentUploaded
-		})
+	onFinish = () => {
+		this.props.setRegisterData({ documentUploaded: this.state.documentUploaded });
 		this.props.onContinue();
 	};
 
@@ -88,9 +79,7 @@ class InfoFinancial extends Component {
 
 	onUploadChange = async (info) => {
 		if (info.file.status !== 'uploading') {
-			this.setState(prevState => ({
-				fileList: [...prevState.fileList, info.file],
-			}));
+			this.setState(prevState => ({ fileList: [...prevState.fileList, info.file] }));
 		}
 		if (info.file.status === 'done') {
 			message.success(`${info.file.name} file uploaded successfully`);
@@ -104,9 +93,7 @@ class InfoFinancial extends Component {
 			this.setState(prevState => ({ documentUploaded: [...prevState.documentUploaded, info.file.response.data] }));
 		} else if (info.file.status === 'error') {
 			message.error(`${info.file.name} file upload failed.`);
-			this.setState(prevState => ({
-				fileList: [...prevState.fileList, info.file],
-			}));
+			this.setState(prevState => ({ fileList: [...prevState.fileList, info.file] }));
 		}
 	}
 
@@ -122,13 +109,11 @@ class InfoFinancial extends Component {
 	}
 
 	render() {
-    const { AcademicLevel, sameRateForAllLevel, isSeparateEvaluationRate, isReceiptsProvided } = this.state;
+		const { AcademicLevel, sameRateForAllLevel, isSeparateEvaluationRate, isReceiptsProvided } = this.state;
 		const uploadProps = {
 			name: 'file',
 			action: url + 'providers/upload_temp_w9_form',
-			headers: {
-				authorization: 'authorization-text',
-			},
+			headers: { authorization: 'authorization-text' },
 			onChange: this.onUploadChange,
 			maxCount: 1,
 			showUploadList: false,
