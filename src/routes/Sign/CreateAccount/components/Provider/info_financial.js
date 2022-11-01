@@ -118,6 +118,7 @@ class InfoFinancial extends Component {
 			maxCount: 1,
 			showUploadList: false,
 		};
+		const durations = ['15min', '30min', '1h', '2h', '3h', '4h'];
 
 		return (
 			<Row justify="center" className="row-form">
@@ -218,11 +219,26 @@ class InfoFinancial extends Component {
 								<p className='ml-10 mb-0'>{intl.formatMessage(messages.separateEvaluation)}</p>
 							</div>
 							<Form.Item
+								name="separateEvaluationDuration"
+								className='mb-0'
+								rules={[{ required: isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.duration) }]}
+							>
+								<Select
+									onChange={(v) => this.setValueToReduxRegisterData('separateEvaluationDuration', v)}
+									placeholder={intl.formatMessage(messages.duration)}
+								>
+									{durations?.map((duration, index) => (
+										<Select.Option key={index} value={duration}>{duration}</Select.Option>
+									))}
+								</Select>
+							</Form.Item>
+							<Form.Item
 								name="separateEvaluationRate"
 								className='mb-0'
 								rules={[{ required: isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
 							>
 								<Input
+									onChange={(e) => this.setValueToReduxRegisterData('separateEvaluationRate', e.target.value)}
 									placeholder={intl.formatMessage(messages.rate)}
 									className='bottom-left-0 mb-0'
 								/>

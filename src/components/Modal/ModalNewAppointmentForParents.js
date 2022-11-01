@@ -259,7 +259,7 @@ class ModalNewAppointmentForParents extends React.Component {
 				this.setState({ appointmentType: 2 });
 			}
 		}
-		if (appointmentsForChoosenProvider?.find(appointment => appointment.type == 3)) {
+		if (appointmentsForChoosenProvider?.find(appointment => appointment.type == 3) || (!this.state.listProvider[index].isSeparateEvaluationRate && !this.state.listProvider[index].isNewClientScreening)) {
 			this.setState({ appointmentType: 3 });
 		}
 
@@ -408,22 +408,26 @@ class ModalNewAppointmentForParents extends React.Component {
 									</Select>
 								</Form.Item>
 							</Col>
-							<Col xs={24} sm={24} md={6} className={`select-small ${appointmentType != 1 && 'd-none'}`}>
-								<Form.Item name="phoneNumber" rules={[
-									{ required: true, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
-									{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) }
-								]}>
-									<Input type='text' className='w-100' onChange={e => this.handleChangePhone(e.target.value)} placeholder={intl.formatMessage(msgCreateAccount.phoneNumber)} pattern='^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$' required />
-								</Form.Item>
-							</Col>
+							{appointmentType == 1 && (
+								<Col xs={24} sm={24} md={6} className="select-small">
+									<Form.Item name="phoneNumber" rules={[
+										{ required: true, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
+										{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) }
+									]}>
+										<Input type='text' className='w-100' onChange={e => this.handleChangePhone(e.target.value)} placeholder={intl.formatMessage(msgCreateAccount.phoneNumber)} pattern='^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$' required />
+									</Form.Item>
+								</Col>
+							)}
 						</Row>
-						<Row className={`${appointmentType != 1 ? 'd-none' : ''}`}>
-							<Col xs={24}>
-								<Form.Item name="notes" rules={[{ required: true, message: 'Please enter your synopsis.' }]}>
-									<Input.TextArea rows={5} onChange={e => this.handleChangeNote(e.target.value)} placeholder={intl.formatMessage(msgCreateAccount.notes)} />
-								</Form.Item>
-							</Col>
-						</Row>
+						{appointmentType == 1 && (
+							<Row>
+								<Col xs={24}>
+									<Form.Item name="notes" rules={[{ required: true, message: 'Please enter your synopsis.' }]}>
+										<Input.TextArea rows={5} onChange={e => this.handleChangeNote(e.target.value)} placeholder={intl.formatMessage(msgCreateAccount.notes)} />
+									</Form.Item>
+								</Col>
+							</Row>
+						)}
 						<div className='choose-doctor'>
 							<p className='font-16 mt-10'>{intl.formatMessage(messages.selectProvider)}<sup>*</sup></p>
 							<div className='doctor-content'>

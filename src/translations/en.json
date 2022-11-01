@@ -109,6 +109,7 @@
   "routes.Createaccount.serviceableSchools": "Serviceable schools",
   "routes.Createaccount.academicLevel": "Academic level",
   "routes.Createaccount.rate": "Rate",
+  "routes.Createaccount.duration": "Duration",
   "routes.Createaccount.addLevel": "Add level",
   "routes.Createaccount.sameRateLevels": "Same rate for all levels",
   "routes.Createaccount.separateEvaluation": "Separate evaluation rate",

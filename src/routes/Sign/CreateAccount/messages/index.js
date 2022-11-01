@@ -394,6 +394,10 @@ export default ({
     id: `${scope}.rate`,
     defaultMessage: 'Rate',
   },
+  duration: {
+    id: `${scope}.duration`,
+    defaultMessage: 'Duration',
+  },
   addLevel: {
     id: `${scope}.addLevel`,
     defaultMessage: 'Add level',
