@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Space, Form } from 'antd';
+import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Form, message } from 'antd';
 import { BiChevronLeft, BiChevronRight, BiSearch } from 'react-icons/bi';
 import { BsCheck } from 'react-icons/bs';
 import { GoPrimitiveDot } from 'react-icons/go';
@@ -13,18 +13,14 @@ import 'moment/locale/en-au';
 import './style/index.less';
 import '../../assets/styles/login.less';
 import request from '../../utils/api/request'
-import ModalNewScreening from './ModalNewScreening';
 
 const { Paragraph } = Typography;
 moment.locale('en');
 
 class ModalNewAppointmentForParents extends React.Component {
 	state = {
-		selectedDate: undefined,
-		currentMonth: moment().format('MMMM YYYY'),
+		selectedDate: moment(),
 		isChoose: -1,
-		isConfirm: false,
-		isPopupComfirm: false,
 		isSelectTime: -1,
 		listProvider: [],
 		selectedSkillSet: -1,
@@ -34,9 +30,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		selectedProvider: undefined,
 		arrTime: [],
 		errorMessage: '',
-		selectedDay: 0,
-		visibleNewScreening: false,
-		skillSet: this.props.SkillSet,
+		skillSet: [],
 		searchKey: '',
 		appointmentType: 3,
 		phoneNumber: '',
@@ -52,7 +46,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			hour9AM = hour9AM.add(30, 'minutes')
 			arrTime.push({
 				value: newTime,
-				active: true,
+				active: false,
 			});
 		}
 		let hour2PM = moment('2022-10-30 14:00:00');
@@ -61,25 +55,17 @@ class ModalNewAppointmentForParents extends React.Component {
 			hour2PM = hour2PM.add(30, 'minutes')
 			arrTime.push({
 				value: newTime,
-				active: true,
+				active: false,
 			});
 		}
-		this.setState({
-			arrTime: new Array(7).fill(arrTime).map((t, idx) => {
-				if (idx == 6) {
-					let x = JSON.parse(JSON.stringify(t));
-					x.map(c => {
-						c.value = moment(c.value);
-						c.active = false;
-						return c;
-					})
-					return x;
-				} else {
-					return t;
-				}
-			})
-		});
+		this.setState({ arrTime: arrTime });
 		this.searchProvider()
+	}
+
+	componentDidUpdate(prevProps) {
+		if (prevProps.SkillSet != this.props.SkillSet) {
+			this.setState({ skillSet: this.props.SkillSet });
+		}
 	}
 
 	searchProvider(searchKey, address, selectedSkillSet) {
@@ -103,7 +89,7 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	createAppointment = () => {
-		const { appointmentType, isSelectTime, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, selectedDay, phoneNumber, notes } = this.state;
+		const { appointmentType, isSelectTime, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, phoneNumber, notes, listProvider, isChoose } = this.state;
 		if (appointmentType == 3) {
 			if (selectedProvider == undefined) {
 				this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
@@ -115,7 +101,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			}
 			this.setState({ errorMessage: '' })
 			const { years, months, date } = selectedDate.toObject();
-			const hour = arrTime[selectedDay][isSelectTime].value.clone().set({ years, months, date });
+			const hour = arrTime[isSelectTime].value.clone().set({ years, months, date });
 			const postData = {
 				skillSet: selectedSkillSet,
 				dependent: selectedDependent,
@@ -136,9 +122,15 @@ class ModalNewAppointmentForParents extends React.Component {
 				this.setState({ errorMessage: 'Please select a date and time' })
 				return;
 			}
-			this.setState({ errorMessage: '' })
+			this.setState({ errorMessage: '' });
+			const appointment = listProvider[isChoose]?.appointments?.find(appointment => appointment.type == 2 && appointment.status == 0);
+			if (appointment) {
+				message.warning("You can't create more evaluation.");
+				return;
+			}
+
 			const { years, months, date } = selectedDate.toObject();
-			const hour = arrTime[selectedDay][isSelectTime].value.clone().set({ years, months, date });
+			const hour = arrTime[isSelectTime].value.clone().set({ years, months, date });
 			const postData = {
 				skillSet: selectedSkillSet,
 				dependent: selectedDependent,
@@ -159,9 +151,15 @@ class ModalNewAppointmentForParents extends React.Component {
 				this.setState({ errorMessage: 'Please select a date and time' })
 				return;
 			}
-			this.setState({ errorMessage: '' })
+			this.setState({ errorMessage: '' });
+			const appointment = listProvider[isChoose]?.appointments?.find(appointment => appointment.type == 1 && appointment.status == 0);
+			if (appointment) {
+				message.warning("You can't create more screening.");
+				return;
+			}
+
 			const { years, months, date } = selectedDate.toObject();
-			const hour = arrTime[selectedDay][isSelectTime].value.clone().set({ years, months, date });
+			const hour = arrTime[isSelectTime].value.clone().set({ years, months, date });
 			const postData = {
 				skillSet: selectedSkillSet,
 				dependent: selectedDependent,
@@ -181,62 +179,52 @@ class ModalNewAppointmentForParents extends React.Component {
 		console.log('form data error---', err);
 	}
 
-	onSubmitModalNewScreening = (data) => {
-		const { selectedSkillSet, address, selectedDependent, arrTime, selectedDay, selectedDate, selectedProvider, isSelectTime } = this.state;
-		const { years, months, date } = selectedDate.toObject();
-		const hour = arrTime?.[selectedDay]?.[isSelectTime]?.value.clone().set({ years, months, date });
-		const postData = {
-			skillSet: selectedSkillSet,
-			dependent: selectedDependent,
-			provider: selectedProvider,
-			date: hour,
-			phoneNumber: data?.phoneNumber,
-			notes: data?.notes,
-			type: 1,
-			status: 0,
-			location: address,
-		};
-		this.setState({ visibleNewScreening: false }, () => {
-			this.requestCreateAppointment(postData);
-		})
-	}
-
-	onCloseModalNewScreening = () => {
-		this.setState({ visibleNewScreening: false });
-	}
-
-	modalScreening = () => {
-		const modalNewScreeningProps = {
-			visible: this.state.visibleNewScreening,
-			onSubmit: this.onSubmitModalNewScreening,
-			onCancel: this.onCloseModalNewScreening,
-		};
-		return (<ModalNewScreening {...modalNewScreeningProps} />);
-	}
-
-	createScreening = () => {
-		this.setState({ visibleNewScreening: false });
-		const { selectedDate, isSelectTime, selectedSkillSet, address, selectedDependent, selectedProvider } = this.state;
-		if (!selectedDate?.isSameOrAfter(new Date()) || isSelectTime < 0 || selectedSkillSet < 0 || address == '' || selectedDependent == undefined || selectedProvider == undefined) {
-			this.setState({ errorMessage: 'please fill all required field' })
-			return;
-		}
-		this.setState({ errorMessage: '' });
-		this.setState({ visibleNewScreening: true });
-	}
-
 	handleChangeAddress = address => {
 		this.setState({ address: address });
 		this.searchProvider(this.state.searchKey, address, this.state.selectedSkillSet);
 	};
 
 	onSelectDate = (newValue) => {
-		if (newValue.isAfter(new Date())) {
+		if (newValue.isSameOrAfter(new Date())) {
 			this.setState({
 				selectedDate: newValue,
-				selectedDay: newValue.day(),
 				isSelectTime: -1,
 			});
+			const { isChoose, arrTime, listProvider } = this.state;
+			if (isChoose > -1) {
+				const newArrTime = JSON.parse(JSON.stringify(arrTime));
+				const selectedDay = newValue.day();
+				const appointments = listProvider[isChoose]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
+				const availableTime = listProvider[isChoose]?.manualSchedule?.[selectedDay];
+				if (availableTime) {
+					newArrTime.map(time => {
+						const { years, months, date } = newValue.toObject();
+						time.value = moment(time.value).set({ years, months, date });
+						if ((time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour) || (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin) || (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)) {
+							let flag = true;
+							appointments.forEach(appointment => {
+								if (time.value.isSame(moment(appointment.date))) {
+									flag = false;
+								}
+							})
+							if (flag) {
+								time.active = true;
+							} else {
+								time.active = false;
+							}
+						} else {
+							time.active = false;
+						}
+						return time;
+					})
+				} else {
+					newArrTime.map(time => {
+						time.active = false;
+						return time;
+					})
+				}
+				this.setState({ arrTime: newArrTime });
+			}
 		}
 	}
 
@@ -258,45 +246,58 @@ class ModalNewAppointmentForParents extends React.Component {
 		}
 	}
 
-	onChooseProvider = (index) => {
-		const { listProvider, arrTime } = this.state;
+	onChooseProvider = (providerIndex) => {
+		const { listProvider, arrTime, selectedDate } = this.state;
 		const newArrTime = JSON.parse(JSON.stringify(arrTime));
-		listProvider[index]?.manualSchedule?.forEach((availableTime, index) => {
-			newArrTime[index]?.map(time => {
-				time.value = moment(time.value);
+		const appointments = listProvider[providerIndex]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
+		const availableTime = listProvider[providerIndex]?.manualSchedule?.[selectedDate.day()];
+		if (availableTime) {
+			newArrTime.map(time => {
+				const { years, months, date } = selectedDate?.toObject();
+				time.value = moment(time.value).set({ years, months, date });
 				if ((time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour) || (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin) || (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)) {
-					time.active = true;
+					let flag = true;
+					appointments.forEach(appointment => {
+						if (time.value.isSame(moment(appointment.date))) {
+							flag = false;
+						} else {
+							flag = true;
+						}
+					})
+					if (flag) {
+						time.active = true;
+					} else {
+						time.active = false;
+					}
 				} else {
 					time.active = false;
 				}
+				return time;
 			})
-		})
-		const appointmentsForChoosenProvider = this.props.listAppointmentsRecent?.filter(appointment => appointment.provider?._id == this.state.listProvider[index]._id);
-		if (listProvider[index].isNewClientScreening && !appointmentsForChoosenProvider?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
+		} else {
+			newArrTime.map(time => {
+				time.active = false;
+				return time;
+			})
+		}
+		if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
 			this.setState({ appointmentType: 1 });
 		}
-		if (this.state.listProvider[index].isSeparateEvaluationRate && !appointmentsForChoosenProvider?.find(appointment => (appointment.type == 2 && appointment.status == -1))) {
-			if (listProvider[index].isNewClientScreening && !appointmentsForChoosenProvider?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
+		if (listProvider[providerIndex].isSeparateEvaluationRate && !appointments?.find(appointment => (appointment.type == 2 && appointment.status == -1))) {
+			if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
 				this.setState({ appointmentType: 1 });
 			} else {
 				this.setState({ appointmentType: 2 });
 			}
 		}
-		if (appointmentsForChoosenProvider?.find(appointment => appointment.type == 3) || (!this.state.listProvider[index].isSeparateEvaluationRate && !this.state.listProvider[index].isNewClientScreening)) {
+		if (appointments?.find(appointment => appointment.type == 3) || (!listProvider[providerIndex].isSeparateEvaluationRate && !listProvider[providerIndex].isNewClientScreening)) {
 			this.setState({ appointmentType: 3 });
 		}
 
 		this.setState({
-			isChoose: index,
-			selectedProvider: listProvider[index]._id,
+			isChoose: providerIndex,
+			selectedProvider: listProvider[providerIndex]._id,
 			arrTime: newArrTime,
-		});
-	}
-
-	onConfirm = () => {
-		this.setState({
-			isConfirm: true,
-			isPopupComfirm: true,
 		});
 	}
 
@@ -308,6 +309,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		request.post('clients/create_appoinment', postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
+				this.searchProvider();
 				this.props.onSubmit();
 			} else {
 				this.setState({ errorMessage: result.data });
@@ -347,7 +349,6 @@ class ModalNewAppointmentForParents extends React.Component {
 			selectedDate,
 			isChoose,
 			isSelectTime,
-			selectedDay,
 			listProvider,
 			selectedProvider,
 			skillSet,
@@ -581,7 +582,7 @@ class ModalNewAppointmentForParents extends React.Component {
 											</Col>
 											<Col xs={24} sm={24} md={12}>
 												<Row gutter={15}>
-													{arrTime[selectedDay]?.map((time, index) => (
+													{arrTime?.map((time, index) => (
 														<Col key={index} span={12}>
 															<div className={isSelectTime === index ? 'time-available active' : 'time-available'} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
 																<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
@@ -596,7 +597,6 @@ class ModalNewAppointmentForParents extends React.Component {
 							</Col>
 						</Row>
 						{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
-						{this.modalScreening()}
 						<Row className='justify-end gap-2'>
 							<Button key="back" onClick={this.props.onCancel}>
 								{intl.formatMessage(msgReview.goBack).toUpperCase()}

@@ -600,6 +600,10 @@ export default class extends React.Component {
     this.setState({ isFilter: false });
   }
 
+  displayHourMin(value) {
+		return value > 9 ? value : `0${value}`;
+	}
+
   render() {
     const {
       isFilter,
@@ -873,8 +877,8 @@ export default class extends React.Component {
                           <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                         </div>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
-                          <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
+                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
+                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
                         </div>
                       </div>
                     )}
@@ -892,8 +896,8 @@ export default class extends React.Component {
                           <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                         </div>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
-                          <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
+                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
+                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
                         </div>
                       </div>
                     )}
@@ -915,8 +919,8 @@ export default class extends React.Component {
                           <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                         </div>
                         <div className='ml-auto flex-1'>
-                          <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
-                          <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
+                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
+                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
                         </div>
                       </div>
                     )}
@@ -934,8 +938,8 @@ export default class extends React.Component {
                           <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                         </div>
                         <div className='ml-auto flex-1'>
-                          <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
-                          <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
+                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
+                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
                         </div>
                       </div>
                     )}
@@ -954,8 +958,8 @@ export default class extends React.Component {
                         </div>
                         <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
-                          <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
+                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
+                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
                         </div>
                       </div>
                     )}
@@ -970,8 +974,8 @@ export default class extends React.Component {
                         </div>
                         <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{appointment.date?.split('T')?.[1].split(':')?.[0] + ':' + appointment.date?.split('T')?.[1].split(':')?.[1]}</p>
-                          <p className='font-12 font-700 mb-0'>{appointment.date?.split('T')?.[0]}</p>
+                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
+                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
                         </div>
                       </div>
                     )}
