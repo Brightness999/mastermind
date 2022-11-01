@@ -61,6 +61,10 @@ export default {
     id: `${scope}.newScreening`,
     defaultMessage: 'New Screening',
   },
+  newEvaluation: {
+    id: `${scope}.newEvaluation`,
+    defaultMessage: 'New Evaluation',
+  },
   selectOptions: {
     id: `${scope}.selectOptions`,
     defaultMessage: 'Select options',

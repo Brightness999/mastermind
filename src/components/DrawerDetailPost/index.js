@@ -1,6 +1,6 @@
 import './style/index.less';
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Typography, Input, Menu, Dropdown, Popover, message } from 'antd';
+import { Drawer, Button, Row, Col, Typography, Input, Menu, Dropdown, Popover } from 'antd';
 import { BsFillFlagFill, BsCheckCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import intl from "react-intl-universal";
@@ -23,8 +23,19 @@ class DrawerDetailPost extends Component {
       errorMessage: '',
       isModalConfirm: false,
       message: '',
-      isClosed: false,
+      isClosed: this.props.event?.status == -1,
+      isCancelled: this.props.evnt?.status == -2,
+      modalType: '',
     };
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.event?.status != this.props.event?.status) {
+      this.setState({
+        isCancelled: this.props.event.status < 0,
+        isClosed: this.props.event.status < 0,
+      });
+    }
   }
 
   onShowModalNoShow = () => {
@@ -70,10 +81,6 @@ class DrawerDetailPost extends Component {
             errorMessage: '',
             isClosed: true,
           });
-          message.success({
-            content: intl.formatMessage(messages.screeningClosed),
-            className: 'popup-scheduled',
-          });
         } else {
           this.setState({
             errorMessage: result.data,
@@ -90,16 +97,51 @@ class DrawerDetailPost extends Component {
     }
   }
 
+  handleCancel = () => {
+    if (this.props.event?._id) {
+      const data = { appointId: this.props.event._id };
+      request.post('providers/cancel_appoint', data).then(result => {
+        if (result.success) {
+          this.setState({
+            errorMessage: '',
+            isCancelled: true,
+          });
+        } else {
+          this.setState({
+            errorMessage: result.data,
+            isCancelled: false,
+          });
+        }
+      }).catch(error => {
+        console.log('closed error---', error);
+        this.setState({
+          errorMessage: error.message,
+          isCancelled: false,
+        });
+      })
+    }
+  }
+
   openConfirmModal = () => {
     this.setState({
       isModalConfirm: true,
-      message: 'Are you sure you want to mark as closed?'
+      message: 'Are you sure you want to mark as closed?',
+      modalType: 'close',
+    });
+  }
+
+  openCancelConfirmModal = () => {
+    this.setState({
+      isModalConfirm: true,
+      message: 'Are you sure you want to cancel?',
+      modalType: 'cancel',
     });
   }
 
   onConfirm = () => {
     this.setState({ isModalConfirm: false });
-    this.handleMarkAsClosed();
+    this.state.modalType == 'cancel' && this.handleCancel();
+    this.state.modalType == 'close' && this.handleMarkAsClosed();
   }
 
   onCancel = () => {
@@ -116,6 +158,7 @@ class DrawerDetailPost extends Component {
       isModalConfirm,
       message,
       isClosed,
+      isCancelled,
     } = this.state;
     const { event } = this.props;
     const providerProfile = (
@@ -210,7 +253,7 @@ class DrawerDetailPost extends Component {
           >
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(msgDetail.who)}</p>
-              <p className='font-18 underline text-primary'>{`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</p>
+              <a className='font-18 underline text-primary'>{`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</a>
             </div>
           </Popover>
           <Popover
@@ -269,6 +312,17 @@ class DrawerDetailPost extends Component {
               </Dropdown>
             </Col>
           )}
+          <Col span={12}>
+            <Button
+              type='primary'
+              icon={<BsCheckCircle size={15} />}
+              block
+              onClick={() => this.openCancelConfirmModal()}
+              disabled={isCancelled}
+            >
+              {intl.formatMessage(messages.cancel)}
+            </Button>
+          </Col>
         </Row>
         {this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}
         <ModalNoShow {...modalNoShowProps} />

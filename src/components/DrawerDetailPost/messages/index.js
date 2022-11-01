@@ -21,6 +21,10 @@ export default {
     id: `${scope}.markClosed`,
     defaultMessage: 'Mark as closed',
   },
+  cancel: {
+    id: `${scope}.cancel`,
+    defaultMessage: 'Cancel',
+  },
   flagDependent: {
     id: `${scope}.flagDependent`,
     defaultMessage: 'Flag Dependent',

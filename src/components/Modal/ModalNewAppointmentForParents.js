@@ -127,6 +127,29 @@ class ModalNewAppointmentForParents extends React.Component {
 			};
 			this.requestCreateAppointment(postData);
 		}
+		if (appointmentType == 2) {
+			if (selectedProvider == undefined) {
+				this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
+				return;
+			}
+			if (!selectedDate?.isAfter(new Date()) || isSelectTime < 0) {
+				this.setState({ errorMessage: 'Please select a date and time' })
+				return;
+			}
+			this.setState({ errorMessage: '' })
+			const { years, months, date } = selectedDate.toObject();
+			const hour = arrTime[selectedDay][isSelectTime].value.clone().set({ years, months, date });
+			const postData = {
+				skillSet: selectedSkillSet,
+				dependent: selectedDependent,
+				provider: selectedProvider,
+				date: hour.valueOf(),
+				location: address,
+				type: 2,
+				statu: 0,
+			};
+			this.requestCreateAppointment(postData);
+		}
 		if (appointmentType == 1) {
 			if (selectedProvider == undefined) {
 				this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
@@ -349,7 +372,15 @@ class ModalNewAppointmentForParents extends React.Component {
 			<Modal {...modalProps}>
 				<div className='new-appointment'>
 					<Form onFinish={this.createAppointment} onFinishFailed={this.onFinishFailed}>
-						<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
+						<div className='flex gap-5 items-center'>
+							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
+							{appointmentType == 2 && (
+								<div className='font-20'>
+									<div>{listProvider[isChoose]?.separateEvaluationDuration} evaluation</div>
+									<div>Rate: ${listProvider[isChoose]?.separateEvaluationRate}</div>
+								</div>
+							)}
+						</div>
 						<div className='flex flex-row items-center mb-10'>
 							<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}<sup>*</sup></p>
 							{appointmentType == 3 && (
@@ -462,7 +493,7 @@ class ModalNewAppointmentForParents extends React.Component {
 								<div className='provider-profile'>
 									<div className='flex flex-row items-center'>
 										<p className='font-16 font-700'>{intl.formatMessage(msgDrawer.providerProfile)}</p>
-										<p className='font-12 font-700 ml-auto text-primary'>{listProvider[isChoose]?.isNewClientScreening && intl.formatMessage(messages.screeningRequired)}</p>
+										<p className='font-12 font-700 ml-auto text-primary'>{listProvider[isChoose]?.isNewClientScreening ? intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
 									<div className='flex'>
 										<div className='flex-1'>

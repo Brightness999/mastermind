@@ -13,13 +13,25 @@ import request from '../../utils/api/request';
 const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
-  state = {
-    isProviderHover: false,
-    isDependentHover: false,
-    visibleCancel: false,
-    visibleCurrent: false,
-    errorMessage: '',
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      isProviderHover: false,
+      isDependentHover: false,
+      visibleCancel: false,
+      visibleCurrent: false,
+      errorMessage: '',
+      isCancelled: this.props.evnt?.status == -2,
+    };
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.event?.status != this.props.event?.status) {
+      this.setState({
+        isCancelled: this.props.event.status < 0,
+      });
+    }
+  }
 
   handleProviderHoverChange = (visible) => {
     this.setState({ isProviderHover: visible });
@@ -43,17 +55,26 @@ class DrawerDetail extends Component {
         const data = { appointId: this.props.event._id };
         request.post('clients/cancel_appoint', data).then(result => {
           if (result.success) {
-            this.setState({ errorMessage: '' });
+            this.setState({
+              errorMessage: '',
+              isCancelled: true,
+            });
             message.success({
               content: intl.formatMessage(messages.screeningCancelled),
               className: 'popup-scheduled',
             });
           } else {
-            this.setState({ errorMessage: result.data });
+            this.setState({
+              errorMessage: result.data,
+              isCancelled: true,
+            });
           }
         }).catch(error => {
           console.log('closed error---', error);
-          this.setState({ errorMessage: error.message });
+          this.setState({
+            errorMessage: error.message,
+            isCancelled: true,
+          });
         })
       }
     });
@@ -69,7 +90,7 @@ class DrawerDetail extends Component {
   }
 
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent, isCancelled } = this.state;
     const { role, event } = this.props;
 
     const providerProfile = (
@@ -148,7 +169,7 @@ class DrawerDetail extends Component {
           >
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.who)}</p>
-              <p className='font-18 underline text-primary'>{`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</p>
+              <a className='font-18 underline text-primary'>{`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</a>
             </div>
           </Popover>
           <Popover
@@ -226,7 +247,7 @@ class DrawerDetail extends Component {
               icon={<BsXCircle size={15} />}
               block
               onClick={this.handleCancelEvent}
-              disabled={event?.status == -1 || event?.status == -2}
+              disabled={isCancelled}
             >
               {event?.status == 0 ? intl.formatMessage(messages.cancel) : event?.status == -1 ? intl.formatMessage(messages.closed) : event?.status == -2 ? intl.formatMessage(messages.cancelled) : ''}
             </Button>

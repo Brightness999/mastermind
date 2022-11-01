@@ -1,5 +1,5 @@
 import React from 'react';
-import { Collapse, Badge, Avatar, Tabs, Dropdown, Menu, Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input } from 'antd';
+import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input } from 'antd';
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsFilter, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
@@ -45,7 +45,6 @@ export default class extends React.Component {
       visibleNewSubsidy: false,
       visibleNewReview: false,
       visibleNewGroup: false,
-      visibleEvaluation: false,
       isEventDetail: false,
       isMonth: 1,
       isGridDayView: 'Grid',
@@ -168,19 +167,6 @@ export default class extends React.Component {
       duration: 10,
       description:
         'Press for check subsidy progress.',
-      onClick: () => {
-        console.log('Notification Clicked!');
-        this.onShowModalSubsidy(data);
-      },
-    });
-  }
-
-  showNotificationForAppeal(data) {
-    notification.open({
-      message: 'Subsidy Appeal',
-      description:
-        '1 user has sent appeal for Subsidy.',
-      duration: 10,
       onClick: () => {
         console.log('Notification Clicked!');
         this.onShowModalSubsidy(data);
@@ -351,13 +337,6 @@ export default class extends React.Component {
 
   onCloseModalGroup = () => {
     this.setState({ visibleNewGroup: false });
-  }
-
-  onShowModalEvaluation = () => {
-    this.setState({ visibleEvaluation: true });
-  }
-  onCloseModalEvaluation = () => {
-    this.setState({ visibleEvaluation: false });
   }
 
   handleDateClick = arg => {
@@ -668,25 +647,6 @@ export default class extends React.Component {
       <div className='header-left flex flex-row' onClick={this.onShowFilter}>
         <p className='font-15'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
       </div>
-    );
-
-    const menu = (
-      <Menu
-        items={[
-          {
-            key: '1',
-            label: (<a target="_blank" rel="noopener noreferrer" onClick={this.onShowModalNewAppoint}>{intl.formatMessage(messages.session)}</a>),
-          },
-          {
-            key: '2',
-            label: (<a target="_blank" rel="noopener noreferrer" onClick={this.onShowModalEvaluation}>{intl.formatMessage(messages.evaluation)}</a>),
-          },
-          {
-            key: '3',
-            label: (<a target="_blank" rel="noopener noreferrer" onClick={this.onShowModalReferral}>{intl.formatMessage(messages.referral)}</a>),
-          },
-        ]}
-      />
     );
 
     const optionsEvent = [

@@ -304,6 +304,7 @@
   "components.Modal.screening": "Screening",
   "components.Modal.evaluation": "Evaluation",
   "components.Modal.newScreening": "New Screening",
+  "components.Modal.newEvaluation": "New Evaluation",
   "components.Modal.notes": "Notes",
   "components.Modal.pleaseEnter": "Please enter your",
   "components.Modal.time": "Time",
@@ -352,6 +353,7 @@
   "components.drawerdetailpost.flagDependent": "Flag Dependent",
   "components.drawerdetailpost.pastDueBalance": "Past due balance",
   "components.drawerdetailpost.noShow": "No show / cancellation",
+  "components.drawerdetailpost.cancel": "Cancel",
 
   "routes.Blank.blankPage": "Blank page",
   "routes.Crud.new": "New",
