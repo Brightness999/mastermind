@@ -305,6 +305,10 @@ export default {
     id: `${scope}.evaluation`,
     defaultMessage: 'Evaluation',
   },
+  appointment: {
+    id: `${scope}.appointment`,
+    defaultMessage: 'Appointment',
+  },
   privateNote: {
     id: `${scope}.privateNote`,
     defaultMessage: 'Internal note',

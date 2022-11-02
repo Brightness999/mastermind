@@ -30,6 +30,7 @@ import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
 import PlacesAutocomplete from 'react-places-autocomplete';
+import { setUser } from '../../../redux/features/authSlice';
 
 export default class extends React.Component {
   constructor(props) {
@@ -74,6 +75,7 @@ export default class extends React.Component {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       this.loadDefaultData();
       checkPermission().then(loginData => {
+        store.dispatch(setUser(loginData));
         loginData?.role == 999 && this.props.history.push(routerLinks.Admin)
         switch (loginData.role) {
           case 3:
@@ -338,21 +340,6 @@ export default class extends React.Component {
   onCloseModalGroup = () => {
     this.setState({ visibleNewGroup: false });
   }
-
-  handleDateClick = arg => {
-    // eslint-disable-next-line no-restricted-globals
-    if (confirm("Would you like to add an event to " + arg.dateStr + " ?")) {
-      this.setState({
-        // add new event data
-        calendarEvents: this.state.calendarEvents.concat({
-          // creates a new array
-          title: "New Event",
-          start: arg.date,
-          allDay: arg.allDay
-        })
-      });
-    }
-  };
 
   handleMonthToWeek = () => {
     if (this.state.isMonth === 1) {

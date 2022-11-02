@@ -303,6 +303,7 @@
   "components.Modal.schedule": "Schedule",
   "components.Modal.screening": "Screening",
   "components.Modal.evaluation": "Evaluation",
+  "components.Modal.appointment": "Appointment",
   "components.Modal.newScreening": "New Screening",
   "components.Modal.newEvaluation": "New Evaluation",
   "components.Modal.notes": "Notes",

@@ -90,89 +90,43 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	createAppointment = () => {
 		const { appointmentType, isSelectTime, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, phoneNumber, notes, listProvider, isChoose } = this.state;
-		if (appointmentType == 3) {
-			if (selectedProvider == undefined) {
-				this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
-				return;
-			}
-			if (!selectedDate?.isAfter(new Date()) || isSelectTime < 0) {
-				this.setState({ errorMessage: 'Please select a date and time' })
-				return;
-			}
-			this.setState({ errorMessage: '' })
-			const { years, months, date } = selectedDate.toObject();
-			const hour = arrTime[isSelectTime].value.clone().set({ years, months, date });
-			const postData = {
-				skillSet: selectedSkillSet,
-				dependent: selectedDependent,
-				provider: selectedProvider,
-				date: hour.valueOf(),
-				location: address,
-				type: 3,
-				statu: 0,
-			};
-			this.requestCreateAppointment(postData);
+		if (selectedProvider == undefined) {
+			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
+			return;
 		}
+		if (!selectedDate?.isAfter(new Date()) || isSelectTime < 0) {
+			this.setState({ errorMessage: 'Please select a date and time' })
+			return;
+		}
+		this.setState({ errorMessage: '' })
 		if (appointmentType == 2) {
-			if (selectedProvider == undefined) {
-				this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
-				return;
-			}
-			if (!selectedDate?.isAfter(new Date()) || isSelectTime < 0) {
-				this.setState({ errorMessage: 'Please select a date and time' })
-				return;
-			}
-			this.setState({ errorMessage: '' });
-			const appointment = listProvider[isChoose]?.appointments?.find(appointment => appointment.type == 2 && appointment.status == 0);
+			const appointment = listProvider[isChoose]?.appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 2 && appointment.status == 0);
 			if (appointment) {
 				message.warning("You can't create more evaluation.");
 				return;
 			}
-
-			const { years, months, date } = selectedDate.toObject();
-			const hour = arrTime[isSelectTime].value.clone().set({ years, months, date });
-			const postData = {
-				skillSet: selectedSkillSet,
-				dependent: selectedDependent,
-				provider: selectedProvider,
-				date: hour.valueOf(),
-				location: address,
-				type: 2,
-				statu: 0,
-			};
-			this.requestCreateAppointment(postData);
 		}
 		if (appointmentType == 1) {
-			if (selectedProvider == undefined) {
-				this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
-				return;
-			}
-			if (!selectedDate?.isAfter(new Date()) || isSelectTime < 0) {
-				this.setState({ errorMessage: 'Please select a date and time' })
-				return;
-			}
-			this.setState({ errorMessage: '' });
-			const appointment = listProvider[isChoose]?.appointments?.find(appointment => appointment.type == 1 && appointment.status == 0);
+			const appointment = listProvider[isChoose]?.appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 1 && appointment.status == 0);
 			if (appointment) {
 				message.warning("You can't create more screening.");
 				return;
 			}
-
-			const { years, months, date } = selectedDate.toObject();
-			const hour = arrTime[isSelectTime].value.clone().set({ years, months, date });
-			const postData = {
-				skillSet: selectedSkillSet,
-				dependent: selectedDependent,
-				provider: selectedProvider,
-				date: hour,
-				phoneNumber: phoneNumber,
-				notes: notes,
-				type: 1,
-				status: 0,
-				location: address,
-			};
-			this.requestCreateAppointment(postData);
 		}
+		const { years, months, date } = selectedDate.toObject();
+		const hour = arrTime[isSelectTime].value.clone().set({ years, months, date });
+		const postData = {
+			skillSet: selectedSkillSet,
+			dependent: selectedDependent,
+			provider: selectedProvider,
+			date: hour,
+			location: appointmentType > 1 ? address : '',
+			phoneNumber: appointmentType == 1 ? phoneNumber : '',
+			notes: notes,
+			type: appointmentType,
+			status: 0,
+		};
+		this.requestCreateAppointment(postData);
 	}
 
 	onFinishFailed = (err) => {
@@ -451,15 +405,13 @@ class ModalNewAppointmentForParents extends React.Component {
 								</Col>
 							)}
 						</Row>
-						{appointmentType == 1 && (
-							<Row>
-								<Col xs={24}>
-									<Form.Item name="notes" rules={[{ required: true, message: 'Please enter your synopsis.' }]}>
-										<Input.TextArea rows={5} onChange={e => this.handleChangeNote(e.target.value)} placeholder={intl.formatMessage(msgCreateAccount.notes)} />
-									</Form.Item>
-								</Col>
-							</Row>
-						)}
+						<Row>
+							<Col xs={24}>
+								<Form.Item name="notes">
+									<Input.TextArea rows={3} onChange={e => this.handleChangeNote(e.target.value)} placeholder={intl.formatMessage(msgCreateAccount.notes) + '(optional)'} />
+								</Form.Item>
+							</Col>
+						</Row>
 						<div className='choose-doctor'>
 							<p className='font-16 mt-10'>{intl.formatMessage(messages.selectProvider)}<sup>*</sup></p>
 							<div className='doctor-content'>
@@ -602,9 +554,7 @@ class ModalNewAppointmentForParents extends React.Component {
 								{intl.formatMessage(msgReview.goBack).toUpperCase()}
 							</Button>
 							<Button key="submit" type="primary" htmlType='submit'>
-								{appointmentType == 1 && intl.formatMessage(messages.screening)?.toUpperCase()}
-								{appointmentType == 2 && intl.formatMessage(messages.evaluation)?.toUpperCase()}
-								{appointmentType == 3 && intl.formatMessage(messages.schedule)?.toUpperCase()}
+								{intl.formatMessage(messages.schedule)?.toUpperCase()}
 							</Button>
 						</Row>
 					</Form>

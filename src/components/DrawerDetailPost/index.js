@@ -294,7 +294,7 @@ class DrawerDetailPost extends Component {
               icon={<BsCheckCircle size={15} />}
               block
               onClick={() => this.openConfirmModal()}
-              disabled={isClosed}
+              disabled={isClosed || isCancelled}
             >
               {intl.formatMessage(messages.markClosed)}
             </Button>
@@ -318,7 +318,7 @@ class DrawerDetailPost extends Component {
               icon={<BsCheckCircle size={15} />}
               block
               onClick={() => this.openCancelConfirmModal()}
-              disabled={isCancelled}
+              disabled={isCancelled || isClosed}
             >
               {intl.formatMessage(messages.cancel)}
             </Button>

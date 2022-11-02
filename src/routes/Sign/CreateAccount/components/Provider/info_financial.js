@@ -118,7 +118,7 @@ class InfoFinancial extends Component {
 			maxCount: 1,
 			showUploadList: false,
 		};
-		const durations = ['15min', '30min', '1h', '2h', '3h', '4h'];
+		const durations = ['15 Minute', '30 Minute', '1 Hour', '2 Hours', '3 Hours', '4 Hours'];
 
 		return (
 			<Row justify="center" className="row-form">
