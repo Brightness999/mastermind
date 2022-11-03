@@ -565,6 +565,7 @@ export default class extends React.Component {
             userRole={this.state.userRole}
             setReload={reload => this.panelAppoimentsReload = reload}
             onShowDrawerDetail={this.onShowDrawerDetail}
+            listAppointmentsRecent={this.state.listAppointmentsRecent}
           />
         </Panel>
       );

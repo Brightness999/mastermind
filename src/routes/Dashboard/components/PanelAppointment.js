@@ -25,19 +25,10 @@ class PanelAppointment extends React.Component {
     };
   }
 
-  getMyAppointments = (searchData) => {
-    var url = 'clients/get_my_appointments';
-    if (this.props.userRole === 30) {
-      url = 'providers/get_my_appointments'
+  componentDidUpdate(prevProps) {
+    if (prevProps.listAppointmentsRecent != this.props.listAppointmentsRecent) {
+      this.setState({ appointments: this.props.listAppointmentsRecent });
     }
-    request.post(url, searchData).then(result => {
-      if (result.success) {
-        var data = result.data;
-        this.setState({ appointments: data?.docs ?? [] });
-      } else {
-        this.setState({ appointments: [] });
-      }
-    })
   }
 
   componentDidMount() {
@@ -50,30 +41,7 @@ class PanelAppointment extends React.Component {
   }
 
   handleTabChange = (v) => {
-    const date = new Date();
-    this.setState({ appointments: [], currentTab: v })
-    switch (parseInt(v)) {
-      case 1: return this.getMyAppointments({
-        "filter": {
-          "type": [3],
-          "status": [0],
-          "date": { "$gte": date }
-        }
-      })
-      case 2: return this.getMyAppointments({
-        "filter": {
-          "type": [3],
-          "status": [-2],
-        }
-      })
-      case 3: return this.getMyAppointments({
-        "filter": {
-          "type": [3],
-          "status": [0, -1],
-          "date": { "$lt": date }
-        }
-      })
-    }
+    this.setState({ currentTab: v });
   }
 
   renderItemLeft = (data) => {
@@ -161,7 +129,7 @@ class PanelAppointment extends React.Component {
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
         <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-          {appointments?.map((data, index) => (
+          {appointments?.filter(app => app.type == 3 && [0, -2].includes(app.status) && moment(new Date()).isBefore(moment(new Date(app.date))))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className='item-right'>
@@ -170,7 +138,7 @@ class PanelAppointment extends React.Component {
               </div>
             </div>
           ))}
-          {(appointments?.length == 0) && (
+          {(appointments?.filter(app => app.type == 3 && [0, -2].includes(app.status) && moment(new Date()).isBefore(moment(new Date(app.date))))?.length == 0) && (
             <div key={1} className='list-item'>
               <p className='p-10'>No upcoming appoiment</p>
             </div>
@@ -179,7 +147,7 @@ class PanelAppointment extends React.Component {
           <ModalCurrentAppointment {...modalCurrentProps} />
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
-          {appointments?.map((data, index) => (
+          {appointments?.filter(app => app.type == 3 && app.status == -1 && moment(new Date()).isBefore(moment(new Date(app.date))))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className='item-right'>
@@ -188,14 +156,14 @@ class PanelAppointment extends React.Component {
               </div>
             </div>
           ))}
-          {(appointments?.length == 0) && (
+          {(appointments?.filter(app => app.type == 3 && app.status == -1 && moment(new Date()).isBefore(moment(new Date(app.date))))?.length == 0) && (
             <div key={1} className='list-item'>
               <p className='p-10'>No unprocess appoiment</p>
             </div>
           )}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="3">
-          {appointments?.map((data, index) => (
+          {appointments?.filter(app => app.type == 3 && [0, -1, -2].includes(app.status) && moment(new Date()).isAfter(moment(new Date(app.date))))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className='item-right'>
@@ -204,7 +172,7 @@ class PanelAppointment extends React.Component {
               </div>
             </div>
           ))}
-          {(appointments?.length == 0) && (
+          {(appointments?.filter(app => app.type == 3 && [0, -1, -2].includes(app.status) && moment(new Date()).isAfter(moment(new Date(app.date))))?.length == 0) && (
             <div key={1} className='list-item'>
               <p className='p-10'>No past appoiment</p>
             </div>
