@@ -18,6 +18,8 @@ import "@fullcalendar/timegrid/main.css";
 import events from "../../../utils/calendar/events";
 import messages from '../messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
+import msgModal from '../../../components/Modal/messages';
+import msgDrawer from '../../../components/DrawerDetail/messages';
 import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 const { Panel } = Collapse;
@@ -68,6 +70,7 @@ export default class extends React.Component {
       location: '',
       selectedEvent: {},
       selectedEventTypes: [],
+      intervalId: 0,
     }
   }
 
@@ -97,6 +100,73 @@ export default class extends React.Component {
         this.setState({ userRole: loginData.role });
         this.updateCalendarEvents(loginData.role);
         this.getMyAppointments();
+        const notifications = setInterval(() => {
+          if (loginData.role == 3) {
+            request.post('clients/check_notification').then(res => {
+              res.data?.forEach(appointment => {
+                const key = `open${Date.now()}`;
+                const btn = (
+                  <Button type="primary" size="small" onClick={() => {
+                    notification.close(key);
+                    this.handleCloseNotification(appointment._id);
+                  }}>
+                    Confirm
+                  </Button>
+                );
+                const description = (
+                  <div>
+                    <p className='font-10'>30 minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{appointment?.provider?.name}</span></p>
+                    <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName} ${appointment?.dependent?.lastName}`}</p>
+                    {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location}</p>}
+                    <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
+                  </div>
+                )
+                notification.open({
+                  message: 'Notification',
+                  description,
+                  btn,
+                  key,
+                  onClose: close(key),
+                  duration: 0,
+                  placement: 'top',
+                });
+              })
+            })
+          }
+          if (loginData.role == 30) {
+            request.post('providers/check_notification').then(res => {
+              res.data?.forEach(appointment => {
+                const key = `open${Date.now()}`;
+                const btn = (
+                  <Button type="primary" size="small" onClick={() => {
+                    notification.close(key);
+                    this.handleCloseNotification(appointment._id);
+                  }}>
+                    Confirm
+                  </Button>
+                );
+                const description = (
+                  <div>
+                    <p className='font-10'>30 minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{appointment?.provider?.name}</span></p>
+                    <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName} ${appointment?.dependent?.lastName}`}</p>
+                    {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location}</p>}
+                    <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
+                  </div>
+                )
+                notification.open({
+                  message: 'Notification',
+                  description,
+                  btn,
+                  key,
+                  onClose: close(key),
+                  duration: 0,
+                  placement: 'top',
+                });
+              })
+            })
+          }
+        }, 60000);
+        this.setState({ intervalId: notifications });
       }).catch(err => {
         console.log('check permission error ---', err);
         this.props.history.push('/');
@@ -108,6 +178,22 @@ export default class extends React.Component {
     script.async = true;
     script.onload = () => this.scriptLoaded();
     document.body.appendChild(script);
+  }
+
+  componentWillUnmount() {
+    if (this.state.intervalId) {
+      clearInterval(this.state.intervalId);
+    }
+  }
+
+  displayTime = (value) => {
+    return `${value?.split(' ')[0]?.split(':')[0]}:${value?.split(' ')[0]?.split(':')[1]} ${value?.split(' ')[1]}`;
+  }
+
+  handleCloseNotification = (id) => {
+    request.post('clients/close_notification', { appointmentId: id }).catch(err => {
+      console.log('close notification error---', err);
+    })
   }
 
   loadDefaultData() {
@@ -275,6 +361,7 @@ export default class extends React.Component {
       content: intl.formatMessage(messages.appointmentScheduled),
       className: 'popup-scheduled',
     });
+    this.updateCalendarEvents(this.state.userRole);
   };
 
   onShowModalSubsidy = (subsidyId) => {
@@ -588,8 +675,8 @@ export default class extends React.Component {
   }
 
   displayHourMin(value) {
-		return value > 9 ? value : `0${value}`;
-	}
+    return value > 9 ? value : `0${value}`;
+  }
 
   render() {
     const {

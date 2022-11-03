@@ -257,7 +257,7 @@ class ModalReferralService extends React.Component {
 									this.loadDataForSelectedDependent(selected);
 								}}
 							>
-								{this.props.listDependents.map((dependent, index) => (
+								{this.props.listDependents?.map((dependent, index) => (
 									<Select.Option key={index} value={dependent._id}>{dependent.firstName} {dependent.lastName}</Select.Option>
 								))}
 							</Select>
@@ -268,7 +268,7 @@ class ModalReferralService extends React.Component {
 								disabled={this.state.subsidyId != undefined}
 								onChange={v => this.setState({ selectedSkillSet: v })}
 							>
-								{this.props.SkillSet.map((skill, index) => (
+								{this.props.SkillSet?.map((skill, index) => (
 									<Select.Option key={index} value={index}>{skill}</Select.Option>
 								))}
 							</Select>
@@ -291,7 +291,7 @@ class ModalReferralService extends React.Component {
 								onChange={v => this.setState({ meetSolution: v })}
 								value={this.state.meetSolution}
 							>
-								{arrMeetSolution.map((value, index) => (
+								{arrMeetSolution?.map((value, index) => (
 									<Select.Option key={index} value={index}>{value}</Select.Option>
 								))}
 							</Select>
@@ -366,7 +366,7 @@ class ModalReferralService extends React.Component {
 										</Col>
 										<Col xs={24} sm={24} md={12}>
 											<Row gutter={15}>
-												{arrTime.map((time, index) => (
+												{arrTime?.map((time, index) => (
 													<Col key={index} span={12}>
 														<div className={isSelectTime === index ? 'time-available active' : 'time-available'} onClick={() => this.onSelectTime(index)}>
 															<p className='font-12 mb-0'><GoPrimitiveDot size={15} />{time}</p>

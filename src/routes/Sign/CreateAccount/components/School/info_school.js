@@ -89,10 +89,10 @@ class InfoSchool extends React.Component {
 		// update in school - after school
 		newRegisterData.sessionsInSchool = this.arrDayScheduleFormat(this.state.sessionsInSchool);
 		newRegisterData.sessionsAfterSchool = this.arrDayScheduleFormat(this.state.sessionsAfterSchool);
-		newRegisterData.techContactRef = registerData.techContactRef.map((item, index) => {
+		newRegisterData.techContactRef = registerData.techContactRef?.map((item, index) => {
 			return item.techContactRef;
 		})
-		newRegisterData.studentContactRef = registerData.studentContactRef.map((item, index) => {
+		newRegisterData.studentContactRef = registerData.studentContactRef?.map((item, index) => {
 			return item.studentContactRef;
 		})
 		newRegisterData.parentInfo = null;
