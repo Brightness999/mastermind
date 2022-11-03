@@ -94,11 +94,12 @@ class ModalNewAppointmentForParents extends React.Component {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
 			return;
 		}
+		this.setState({ providerErrorMessage: '' });
 		if (!selectedDate?.isAfter(new Date()) || isSelectTime < 0) {
 			this.setState({ errorMessage: 'Please select a date and time' })
 			return;
 		}
-		this.setState({ errorMessage: '' })
+		this.setState({ errorMessage: '' });
 		if (appointmentType == 2) {
 			const appointment = listProvider[isChoose]?.appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 2 && appointment.status == 0);
 			if (appointment) {

@@ -1,6 +1,6 @@
 import './style/index.less';
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Typography, Popover, message } from 'antd';
+import { Drawer, Button, Row, Col, Typography, Popover } from 'antd';
 import { BsBell, BsClockHistory, BsXCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
@@ -45,7 +45,7 @@ class DrawerDetail extends Component {
     this.setState({ visibleCancel: false });
   }
 
-  handleCancelEvent = () => {
+  openModalCancel = () => {
     this.setState({ visibleCancel: true });
   }
 
@@ -58,10 +58,6 @@ class DrawerDetail extends Component {
             this.setState({
               errorMessage: '',
               isCancelled: true,
-            });
-            message.success({
-              content: intl.formatMessage(messages.screeningCancelled),
-              className: 'popup-scheduled',
             });
           } else {
             this.setState({
@@ -78,7 +74,6 @@ class DrawerDetail extends Component {
         })
       }
     });
-
   }
 
   closeModalCurrent = () => {
@@ -246,7 +241,7 @@ class DrawerDetail extends Component {
               type='primary'
               icon={<BsXCircle size={15} />}
               block
-              onClick={this.handleCancelEvent}
+              onClick={this.openModalCancel}
               disabled={isCancelled}
             >
               {event?.status == 0 ? intl.formatMessage(messages.cancel) : event?.status == -1 ? intl.formatMessage(messages.closed) : event?.status == -2 ? intl.formatMessage(messages.cancelled) : ''}

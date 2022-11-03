@@ -362,6 +362,7 @@ export default class extends React.Component {
       className: 'popup-scheduled',
     });
     this.updateCalendarEvents(this.state.userRole);
+    this.getMyAppointments();
   };
 
   onShowModalSubsidy = (subsidyId) => {

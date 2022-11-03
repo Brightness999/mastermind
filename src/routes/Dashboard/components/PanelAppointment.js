@@ -10,6 +10,7 @@ import { compose } from 'redux';
 import './index.less';
 import moment from 'moment';
 import request from '../../../utils/api/request'
+import { ModalCancelAppointment, ModalCurrentAppointment } from '../../../components/Modal';
 
 class PanelAppointment extends React.Component {
   constructor(props) {
@@ -18,6 +19,9 @@ class PanelAppointment extends React.Component {
       appointments: [],
       type: 0,
       currentTab: 1,
+      visibleCancel: false,
+      visibleCurrent: false,
+      event: {},
     };
   }
 
@@ -90,8 +94,70 @@ class PanelAppointment extends React.Component {
     );
   }
 
+  closeModalCurrent = () => {
+    this.setState({ visibleCurrent: false });
+  }
+
+  openModalCurrent = (data) => {
+    this.setState({
+      visibleCurrent: true,
+      event: data,
+    });
+  }
+
+  closeModalCancel = () => {
+    this.setState({ visibleCancel: false });
+  }
+
+  openModalCancel = (data) => {
+    this.setState({
+      visibleCancel: true,
+      event: data,
+    });
+  }
+
+  handleConfirmCancel = () => {
+    this.setState({ visibleCancel: false }, () => {
+      if (this.state.event?._id) {
+        const data = { appointId: this.state.event._id };
+        request.post('clients/cancel_appoint', data).then(result => {
+          if (result.success) {
+            this.setState({
+              errorMessage: '',
+              isCancelled: true,
+            });
+          } else {
+            this.setState({
+              errorMessage: result.data,
+              isCancelled: true,
+            });
+          }
+        }).catch(error => {
+          console.log('closed error---', error);
+          this.setState({
+            errorMessage: error.message,
+            isCancelled: true,
+          });
+        })
+      }
+    });
+  }
+
   render() {
-    const { appointments } = this.state
+    const { appointments, visibleCancel, visibleCurrent, event } = this.state;
+    const modalCancelProps = {
+      visible: visibleCancel,
+      onSubmit: this.handleConfirmCancel,
+      onCancel: this.closeModalCancel,
+      event: event,
+    };
+    const modalCurrentProps = {
+      visible: visibleCurrent,
+      onSubmit: this.closeModalCurrent,
+      onCancel: this.closeModalCurrent,
+      event: event,
+    };
+
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
         <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
@@ -99,8 +165,8 @@ class PanelAppointment extends React.Component {
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className='item-right'>
-                <GiBackwardTime size={19} onClick={() => { }} />
-                <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+                <GiBackwardTime size={19} onClick={() => this.openModalCurrent(data)} />
+                <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => this.openModalCancel(data)} />
               </div>
             </div>
           ))}
@@ -109,6 +175,8 @@ class PanelAppointment extends React.Component {
               <p className='p-10'>No upcoming appoiment</p>
             </div>
           )}
+          <ModalCancelAppointment {...modalCancelProps} />
+          <ModalCurrentAppointment {...modalCurrentProps} />
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
           {appointments?.map((data, index) => (
