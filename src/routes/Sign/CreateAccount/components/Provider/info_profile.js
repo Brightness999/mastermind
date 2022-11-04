@@ -48,7 +48,7 @@ class InfoProfile extends Component {
 				});
 			}
 		}).catch(err => {
-			console.log(err);
+			console.log('get default values for provider error---', err);
 			this.setState({
 				checkEmailExist: false,
 			});
@@ -67,7 +67,7 @@ class InfoProfile extends Component {
 				});
 			}
 		}).catch(err => {
-			console.log(err);
+			console.log('get city connections error ---', err);
 			this.setState({
 				CityConnections: [],
 			});
@@ -84,8 +84,8 @@ class InfoProfile extends Component {
 			proExp: "",
 			referredToAs: "",
 			serviceAddress: "",
-			contactEmail: [{ email: "", type: '' }],
-			contactNumber: [{ phoneNumber: "", type: '' }],
+			contactEmail: [{ email: "", type: 'Personal' }],
+			contactNumber: [{ phoneNumber: "", type: 'Home' }],
 		};
 	}
 
@@ -126,10 +126,7 @@ class InfoProfile extends Component {
 	}
 
 	render() {
-		const children = [];
-		for (let i = 10; i < 36; i++) {
-			children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
-		}
+		const { service_address, billing_address, CityConnections, ContactNumberType, EmailType } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -160,7 +157,7 @@ class InfoProfile extends Component {
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.serviceAddress) }]}
 						>
 							<PlacesAutocomplete
-								value={this.state.service_address}
+								value={service_address}
 								onChange={(e) => this.handelChange(e, "serviceAddress")}
 								onSelect={(e) => this.handleSelect(e, "serviceAddress")}
 							>
@@ -196,7 +193,7 @@ class InfoProfile extends Component {
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.billingAddress) }]}
 						>
 							<PlacesAutocomplete
-								value={this.state.billing_address}
+								value={billing_address}
 								onChange={(e) => this.handelChange(e, "billingAddress")}
 								onSelect={(e) => this.handleSelect(e, "billingAddress")}
 							>
@@ -238,7 +235,7 @@ class InfoProfile extends Component {
 								optionFilterProp="children"
 								filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
 							>
-								{this.state.CityConnections.map((value, index) => (
+								{CityConnections?.map((value, index) => (
 									<Select.Option key={index} value={value._id}>{value.name}</Select.Option>
 								))}
 							</Select>
@@ -289,7 +286,7 @@ class InfoProfile extends Component {
 													style={{ marginTop: key === 0 ? 0 : 14 }}
 												>
 													<Select placeholder={intl.formatMessage(messages.type)}>
-														{this.state.ContactNumberType.map((value, index) => (
+														{ContactNumberType?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
 													</Select>
@@ -345,7 +342,7 @@ class InfoProfile extends Component {
 													style={{ marginTop: key === 0 ? 0 : 14 }}
 												>
 													<Select placeholder={intl.formatMessage(messages.type)}>
-														{this.state.EmailType.map((value, index) => (
+														{EmailType?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
 													</Select>

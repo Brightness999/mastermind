@@ -450,6 +450,10 @@ export default ({
     id: `${scope}.location`,
     defaultMessage: 'Location',
   },
+  locations: {
+    id: `${scope}.locations`,
+    defaultMessage: 'Locations',
+  },
   privateHMGHAgents: {
     id: `${scope}.privateHMGHAgents`,
     defaultMessage: 'Private for HMGH agents only',

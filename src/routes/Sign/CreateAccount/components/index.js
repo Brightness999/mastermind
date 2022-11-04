@@ -35,6 +35,7 @@ export default class extends React.Component {
       selectedDependent: -1,
       accountType: intl.formatMessage(messages.parent),
       visibleCreateDone: false,
+      listSchool: [],
     }
   }
 
@@ -75,6 +76,10 @@ export default class extends React.Component {
     if (this.state.currentStep === 0) {
       this.setState({ accountType: accountType });
     }
+  }
+
+  handleChangeListSchool = (schools) => {
+    this.setState({ listSchool: schools });
   }
 
   getStepsComponent = (type) => {
@@ -184,7 +189,7 @@ export default class extends React.Component {
               )
             }
           case intl.formatMessage(messages.provider):
-            return (<InfoServices onContinue={this.handleContinue} />)
+            return (<InfoServices onContinue={this.handleContinue} handleChangeListSchool={this.handleChangeListSchool} />)
           case intl.formatMessage(messages.consultant):
             return (<ConsultantAvailability onContinue={this.handleContinue} />)
         }
@@ -193,7 +198,7 @@ export default class extends React.Component {
           case intl.formatMessage(messages.parent):
             return (<DependentAvailability onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
-            return (<InfoAvailability onContinue={this.handleContinue} />)
+            return (<InfoAvailability onContinue={this.handleContinue} listSchool={this.state.listSchool} />)
         }
       case 4:
         switch (this.state.accountType) {

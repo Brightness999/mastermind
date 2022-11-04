@@ -17,8 +17,6 @@ class InfoServices extends Component {
 			SkillSet: [],
 			serviceableSchool: [],
 			ScreenTime: [],
-			isHomeVisit: true,
-			privateOffice: true,
 			isNewClientScreening: true,
 			listSchools: [],
 		}
@@ -32,7 +30,6 @@ class InfoServices extends Component {
 		var serviceInfor = registerData.serviceInfor || this.getDefaultObj();
 		this.form.setFieldsValue(serviceInfor);
 		this.setState({
-			isHomeVisit: serviceInfor.isHomeVisit,
 			privateOffice: serviceInfor.privateOffice,
 			isNewClientScreening: serviceInfor.isNewClientScreening,
 			serviceableSchool: serviceInfor.serviceableSchool,
@@ -74,8 +71,6 @@ class InfoServices extends Component {
 			serviceableSchool: undefined,
 			skillSet: undefined,
 			yearExp: '',
-			isHomeVisit: true,
-			privateOffice: true,
 			isNewClientScreening: true,
 		}
 	}
@@ -93,7 +88,8 @@ class InfoServices extends Component {
 		axios.post(url + 'clients/get_all_schools').then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
-				this.setState({ listSchools: data })
+				this.setState({ listSchools: data });
+				this.props.handleChangeListSchool(data);
 			}
 		}).catch(err => {
 			console.log(err);
@@ -101,7 +97,7 @@ class InfoServices extends Component {
 	}
 
 	render() {
-		const { SkillSet, listSchools, isHomeVisit, privateOffice, isNewClientScreening, ScreenTime, serviceableSchool } = this.state;
+		const { SkillSet, listSchools, isNewClientScreening, ScreenTime, serviceableSchool } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -159,23 +155,9 @@ class InfoServices extends Component {
 								))}
 							</Select>
 						</Form.Item>
-						<div className='text-center flex flex-row justify-between mb-10'>
-							<div className='flex flex-row items-center w-50'>
-								<Form.Item name="isHomeVisit" rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.homeVisits) }]}>
-									<Switch size="small" checked={isHomeVisit} onChange={v => this.setState({ isHomeVisit: v })} />
-								</Form.Item>
-								<p className='ml-10 mb-0'>{intl.formatMessage(messages.homeVisits)}</p>
-							</div>
-							<div className='flex flex-row items-center w-50'>
-								<Form.Item name="privateOffice" rules={[{ required: true }]}>
-									<Switch size="small" checked={privateOffice} onChange={v => this.setState({ privateOffice: v })} />
-								</Form.Item>
-								<p className='ml-10 mb-0'>{intl.formatMessage(messages.privateOffice)}</p>
-							</div>
-						</div>
 						<div className='text-center flex flex-row justify-between'>
 							<div className='flex flex-row items-center mb-10'>
-								<Form.Item name="isNewClientScreening" rules={[{ required: true }]}>
+								<Form.Item name="isNewClientScreening" rules={[{ required: true }]} className="mb-0">
 									<Switch size="small" checked={isNewClientScreening} onChange={v => this.setState({ isNewClientScreening: v })} />
 								</Form.Item>
 								<p className='ml-10 mb-0'>{intl.formatMessage(messages.newClient)}</p>

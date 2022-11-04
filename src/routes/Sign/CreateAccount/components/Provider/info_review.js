@@ -82,7 +82,7 @@ class InfoReview extends Component {
 		for (var i = 0; i < day_week.length; i++) {
 			for (var j = 0; j < availability['' + day_week[i]].length; j++) {
 				var scheduleItem = availability['' + day_week[i]][j];
-				if (scheduleItem.from_time && scheduleItem.to_time && scheduleItem.from_date && scheduleItem.to_date && scheduleItem.location) {
+				if (scheduleItem.from_time && scheduleItem.to_time && (scheduleItem.from_date || scheduleItem.to_date) && scheduleItem.location) {
 					manualSchedule.push({
 						"location": scheduleItem.location,
 						"dayInWeek": i,
@@ -216,7 +216,7 @@ class InfoReview extends Component {
 									</div>
 									<div className='item-flex'>
 										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.monday)}</p>
-										{registerData?.availability?.Moday?.map((data, index) => {
+										{registerData?.availability?.Monday?.map((data, index) => {
 											return (data.from_date && data.to_date && data.from_time && data.to_time && data.location) ? (
 												<div key={index} className='flex'>
 													<div>{`${this.displayHourMin(data.from_date.month() + 1)}/${this.displayHourMin(data.from_date.date())}/${data.from_date.year()}`} - {`${this.displayHourMin(data.to_date.month() + 1)}/${this.displayHourMin(data.to_date.date())}/${data.to_date.year()}`}</div>

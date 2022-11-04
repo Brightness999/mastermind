@@ -5,12 +5,12 @@ import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
+import msgSidebar from '../../../../../components/SideBar/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
-import PlacesAutocomplete from 'react-places-autocomplete';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -28,17 +28,24 @@ class InfoAvailability extends Component {
 			isPrivate: true,
 			CancellationWindow: [],
 			currentSelectedDay: day_week[0],
-			service_address: ''
+			service_address: '',
+			isHomeVisit: true,
+			privateOffice: true,
+			isSchools: true,
+			locations: ['Dependent Home', 'Provider Office'],
+			listSchool: [],
+			selectedSchools: [],
 		}
 	}
 
 	componentDidMount() {
 		let { registerData } = this.props.register;
 		if (!!registerData.availability) {
-			this.form?.setFieldsValue({ ...registerData.availability })
-			this.setState({ isPrivate: registerData.isPrivate })
+			this.form?.setFieldsValue({ ...registerData.availability });
 		} else {
-			day_week.map((day) => this.form.setFieldValue(day, ['']))
+			const listSchool = this.props.listSchool?.filter(school => registerData.serviceInfor?.serviceableSchool.includes(school._id))?.map(school => school.name);
+			this.setState({ listSchool: listSchool });
+			day_week.map((day) => this.form.setFieldValue(day, ['']));
 		}
 		this.getDataFromServer();
 	}
@@ -65,7 +72,7 @@ class InfoAvailability extends Component {
 				this.setState({ CancellationWindow: [] });
 			}
 		}).catch(err => {
-			console.log(err);
+			console.log('get default values for provider error---', err);
 			this.setState({ CancellationWindow: [] });
 		})
 	}
@@ -85,11 +92,11 @@ class InfoAvailability extends Component {
 		}
 	}
 
-	onChangeScheduleValue = (day, value) => {
+	onChangeScheduleValue = () => {
 		this.props.setRegisterData({ availability: this.form.getFieldsValue() });
 	}
 
-	onLocationChange = (day, value) => {
+	onLocationChange = () => {
 		this.props.setRegisterData({ availability: this.form.getFieldsValue() });
 	}
 
@@ -110,7 +117,57 @@ class InfoAvailability extends Component {
 		})
 	}
 
+	handleSwitchHome = (state) => {
+		if (state) {
+			this.setState({
+				isHomeVisit: state,
+				locations: ['Dependent Home', ...this.state.locations],
+			});
+		} else {
+			this.setState({
+				isHomeVisit: state,
+				locations: this.state.locations?.filter(location => location != 'Dependent Home'),
+			});
+		}
+	}
+
+	handleSwitchOffice = (state) => {
+		if (state) {
+			this.setState({
+				privateOffice: state,
+				locations: ['Provider Office', ...this.state.locations],
+			});
+		} else {
+			this.setState({
+				privateOffice: state,
+				locations: this.state.locations?.filter(location => location != 'Provider Office'),
+			});
+		}
+	}
+
+	handleSwitchSchool = (state) => {
+		if (state) {
+			this.setState({ isSchools: state });
+		} else {
+			this.setState({
+				isSchools: state,
+				locations: this.state.locations?.filter(location => location == 'Provider Office' || location == 'Dependent Home'),
+			});
+		}
+	}
+
+	handleSelectSchool = (school) => {
+		this.state.locations.push(school);
+		this.setState({ locations: this.state.locations });
+	}
+
+	handleDeselectSchool = (school) => {
+		this.setState({ locations: this.state.locations.filter(location => location != school) });
+	}
+
 	render() {
+		const { currentSelectedDay, CancellationWindow, isPrivate, privateOffice, isHomeVisit, isSchools, locations, listSchool } = this.state;
+
 		return (
 			<Row justify="center" className="row-form">
 				<div className='col-form col-availability'>
@@ -138,21 +195,62 @@ class InfoAvailability extends Component {
 								</div>
 							</Col>
 						</Row>
+						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.locations)}</p>
+						<div className='mb-10'>
+							<div className='flex flex-row items-center mb-5'>
+								<Switch size="small" checkedChildren="ON" unCheckedChildren="OFF" style={{ width: 50 }} checked={privateOffice} onChange={v => this.handleSwitchOffice(v)} />
+								<p className='ml-10 mb-0'>{intl.formatMessage(messages.privateOffice)}</p>
+							</div>
+							<div className='flex flex-row items-center mb-5'>
+								<Switch size="small" checkedChildren="ON" unCheckedChildren="OFF" style={{ width: 50 }} checked={isHomeVisit} onChange={v => this.handleSwitchHome(v)} />
+								<p className='ml-10 mb-0'>{intl.formatMessage(messages.homeVisits)}</p>
+							</div>
+							<div className='flex flex-row items-center mb-5'>
+								<Switch size="small" checkedChildren="ON" unCheckedChildren="OFF" style={{ width: 50 }} checked={isSchools} onChange={v => this.handleSwitchSchool(v)} />
+								<p className='ml-10 mb-0'>{intl.formatMessage(messages.privateOffice)}</p>
+							</div>
+							{isSchools && (
+								<Select
+									mode="multiple"
+									showArrow
+									placeholder={intl.formatMessage(msgSidebar.schoolsList)}
+									optionLabelProp="label"
+									onSelect={(v) => this.handleSelectSchool(v)}
+									onDeselect={(v) => this.handleDeselectSchool(v)}
+								>
+									{listSchool?.map((school, index) => (
+										<Select.Option key={index} label={school} value={school}>{school}</Select.Option>
+									))}
+								</Select>
+							)}
+						</div>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.manualSchedule)}</p>
 						<div className='div-availability'>
 							<Segmented options={day_week} block={true} onChange={this.onSelectDay} />
 							{day_week.map((day, index) => (
-								<div key={index} id={day} style={{ display: this.state.currentSelectedDay === day ? 'block' : 'none' }}>
+								<div key={index} id={day} style={{ display: currentSelectedDay === day ? 'block' : 'none' }}>
 									<Form.List name={day}>
 										{(fields, { add, remove }) => (
 											<div className='div-time'>
-												{fields.map((field, index) => (
+												{fields.map((field) => (
 													<div key={field.key}>
+														<Form.Item name={[field.name, "location"]}>
+															<Select
+																showArrow
+																placeholder={intl.formatMessage(messages.location)}
+																optionLabelProp="label"
+																onSelect={() => this.onLocationChange()}
+															>
+																{locations.map((location, index) => (
+																	<Select.Option key={index} label={location} value={location}>{location}</Select.Option>
+																))}
+															</Select>
+														</Form.Item>
 														<Row gutter={14}>
 															<Col xs={24} sm={24} md={12}>
 																<Form.Item name={[field.name, "from_date"]}>
 																	<DatePicker
-																		onChange={v => this.onChangeScheduleValue(day, v)}
+																		onChange={() => this.onChangeScheduleValue()}
 																		format='MM/DD/YYYY'
 																		placeholder={intl.formatMessage(messages.from)}
 																	/>
@@ -161,7 +259,7 @@ class InfoAvailability extends Component {
 															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
 																<Form.Item name={[field.name, "to_date"]}>
 																	<DatePicker
-																		onChange={v => this.onChangeScheduleValue(day, v)}
+																		onChange={() => this.onChangeScheduleValue()}
 																		format='MM/DD/YYY'
 																		placeholder={intl.formatMessage(messages.to)}
 																	/>
@@ -173,7 +271,7 @@ class InfoAvailability extends Component {
 															<Col xs={24} sm={24} md={12}>
 																<Form.Item name={[field.name, "from_time"]}>
 																	<TimePicker
-																		onChange={v => this.onChangeScheduleValue(day, v)}
+																		onChange={() => this.onChangeScheduleValue()}
 																		use12Hours
 																		format="h:mm a"
 																		placeholder={intl.formatMessage(messages.from)}
@@ -183,7 +281,7 @@ class InfoAvailability extends Component {
 															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
 																<Form.Item name={[field.name, "to_time"]}>
 																	<TimePicker
-																		onChange={v => this.onChangeScheduleValue(day, v)}
+																		onChange={() => this.onChangeScheduleValue()}
 																		use12Hours
 																		format="h:mm a"
 																		placeholder={intl.formatMessage(messages.to)}
@@ -192,51 +290,18 @@ class InfoAvailability extends Component {
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 															</Col>
 														</Row>
-														<Form.Item name={[field.name, "location"]}>
-															<PlacesAutocomplete
-																onChange={(e) => this.onLocationChange(day, e, "billingAddress")}
-																onSelect={(e) => this.onLocationSelected(day, e, index)}
-															>
-																{({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-																	<div>
-																		<Input {...getInputProps({
-																			placeholder: intl.formatMessage(messages.location),
-																			className: 'location-search-input',
-																		})} />
-																		<div className="autocomplete-dropdown-container">
-																			{loading && <div>Loading...</div>}
-																			{suggestions.map(suggestion => {
-																				const className = suggestion.active
-																					? 'suggestion-item--active'
-																					: 'suggestion-item';
-																				// inline style for demonstration purpose
-																				const style = suggestion.active
-																					? { backgroundColor: '#fafafa', cursor: 'pointer' }
-																					: { backgroundColor: '#ffffff', cursor: 'pointer' };
-																				return (
-																					<div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
-																						<span>{suggestion.description}</span>
-																					</div>
-																				);
-																			})}
-																		</div>
-																	</div>
-																)}
-															</PlacesAutocomplete>
-														</Form.Item>
 													</div>
 												))}
 												<Row>
 													<Col span={8}>
 														<div className='flex flex-row items-center'>
-															<Switch
-																size="small"
-																checked={this.state.isPrivate}
-																onChange={v => {
-																	this.setState({ isPrivate: v })
-																	this.props.setRegisterData({ isPrivate: v })
-																}}
-															/>
+															<Form.Item name="isPrivate" className='mb-0'>
+																<Switch
+																	size="small"
+																	checked={isPrivate}
+																	onChange={v => this.setState({ isPrivate: v })}
+																/>
+															</Form.Item>
 															<p className='font-09 ml-10 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
 														</div>
 													</Col>
@@ -270,7 +335,7 @@ class InfoAvailability extends Component {
 									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationWindow) }]}
 								>
 									<Select placeholder={intl.formatMessage(messages.cancellationWindow)}>
-										{this.state.CancellationWindow.map((value, index) => (
+										{CancellationWindow?.map((value, index) => (
 											<Select.Option key={index} value={value}>{value}</Select.Option>
 										))}
 									</Select>
@@ -294,9 +359,9 @@ class InfoAvailability extends Component {
 								{intl.formatMessage(messages.continue).toUpperCase()}
 							</Button>
 						</Form.Item>
-					</Form>
-				</div>
-			</Row>
+					</Form >
+				</div >
+			</Row >
 		);
 	}
 }

@@ -123,6 +123,7 @@
   "routes.Createaccount.autoSyncCalendar": "Auto sync calendar",
   "routes.Createaccount.manualSchedule": "Manual schedule",
   "routes.Createaccount.location": "Location",
+  "routes.Createaccount.locations": "Locations",
   "routes.Createaccount.privateHMGHAgents": "Private for HMGH agents only",
   "routes.Createaccount.addRange": "Add range",
   "routes.Createaccount.cancellationWindow": "Cancellation window",
