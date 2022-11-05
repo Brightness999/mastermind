@@ -10,6 +10,8 @@ import intl from "react-intl-universal";
 import messages from './messages';
 import moment from 'moment';
 import request from '../../utils/api/request';
+import { store } from '../../redux/store';
+import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
 const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
@@ -59,6 +61,17 @@ class DrawerDetail extends Component {
               errorMessage: '',
               isCancelled: true,
             });
+            store.dispatch(getAppointmentsData({ role: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).role : '' }));
+            const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
+            const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
+            const dataFetchAppointMonth = {
+              role: JSON.parse(localStorage.getItem('user')).role,
+              data: {
+                month: month,
+                year: year,
+              }
+            };
+            store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
           } else {
             this.setState({
               errorMessage: result.data,
@@ -212,41 +225,39 @@ class DrawerDetail extends Component {
                   {intl.formatMessage(messages.reschedule)}
                 </Button>
               </Col>
+              <Col span={12}>
+                <Button
+                  type='primary'
+                  icon={<BsXCircle size={15} />}
+                  block
+                  onClick={this.openModalCancel}
+                  disabled={isCancelled}
+                >
+                  {event?.status == 0 ? intl.formatMessage(messages.cancel) : event?.status == -1 ? intl.formatMessage(messages.closed) : event?.status == -2 ? intl.formatMessage(messages.cancelled) : ''}
+                </Button>
+              </Col>
               {event?.type > 2 && (
-                <>
-                  <Col span={12}>
-                    <Button
-                      type='primary'
-                      icon={<FaFileContract size={12} />}
-                      block
-                    >
-                      {intl.formatMessage(messages.requestInvoice)}
-                    </Button>
-                  </Col>
-                  <Col span={12}>
-                    <Button
-                      type='primary'
-                      icon={<ImPencil size={12} />}
-                      block
-                    >
-                      {intl.formatMessage(messages.editNotes)}
-                    </Button>
-                  </Col>
-                </>
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<FaFileContract size={12} />}
+                    block
+                  >
+                    {intl.formatMessage(messages.requestInvoice)}
+                  </Button>
+                </Col>
               )}
+              <Col span={12}>
+                <Button
+                  type='primary'
+                  icon={<ImPencil size={12} />}
+                  block
+                >
+                  {intl.formatMessage(messages.editNotes)}
+                </Button>
+              </Col>
             </>
           )}
-          <Col span={12}>
-            <Button
-              type='primary'
-              icon={<BsXCircle size={15} />}
-              block
-              onClick={this.openModalCancel}
-              disabled={isCancelled}
-            >
-              {event?.status == 0 ? intl.formatMessage(messages.cancel) : event?.status == -1 ? intl.formatMessage(messages.closed) : event?.status == -2 ? intl.formatMessage(messages.cancelled) : ''}
-            </Button>
-          </Col>
         </Row>
         {this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}
         <ModalCancelAppointment {...modalCancelProps} />

@@ -15,7 +15,6 @@ import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClic
 import listPlugin from '@fullcalendar/list';
 import "@fullcalendar/daygrid/main.css";
 import "@fullcalendar/timegrid/main.css";
-import events from "../../../utils/calendar/events";
 import messages from '../messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
 import msgModal from '../../../components/Modal/messages';
@@ -26,15 +25,17 @@ const { Panel } = Collapse;
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request, { generateSearchStructure } from '../../../utils/api/request'
 import moment from 'moment';
-import { changeTime, getAppointmentsMonthData, removeAppoint } from '../../../redux/features/appointmentsSlice'
+import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice'
 import { store } from '../../../redux/store';
 import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
 import PlacesAutocomplete from 'react-places-autocomplete';
 import { setUser } from '../../../redux/features/authSlice';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 
-export default class extends React.Component {
+class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     this.socket = undefined;
@@ -53,13 +54,13 @@ export default class extends React.Component {
       isGridDayView: 'Grid',
       canDrop: true,
       calendarWeekends: true,
-      calendarEvents: store.getState().appointments.dataAppointmentsMonth ?? events,
+      calendarEvents: this.props.appointmentsInMonth,
       userRole: -1,
       listDependents: [],
       parentInfo: {},
       providerInfo: {},
       schoolInfo: {},
-      listAppointmentsRecent: [],
+      listAppointmentsRecent: this.props.appointments,
       listAppoinmentsFilter: [],
       SkillSet: [],
       isEditSubsidyRequest: "",
@@ -71,7 +72,8 @@ export default class extends React.Component {
       selectedEvent: {},
       selectedEventTypes: [],
       intervalId: 0,
-    }
+    };
+    this.calendarRef = React.createRef();
   }
 
   componentDidMount() {
@@ -99,7 +101,7 @@ export default class extends React.Component {
         }
         this.setState({ userRole: loginData.role });
         this.updateCalendarEvents(loginData.role);
-        this.getMyAppointments();
+        this.getMyAppointments(loginData.role);
         const notifications = setInterval(() => {
           if (loginData.role == 3) {
             request.post('clients/check_notification').then(res => {
@@ -178,6 +180,15 @@ export default class extends React.Component {
     script.async = true;
     script.onload = () => this.scriptLoaded();
     document.body.appendChild(script);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (JSON.stringify(prevProps.appointments) != JSON.stringify(this.props.appointments)) {
+      this.setState({ listAppointmentsRecent: this.props.appointments });
+    }
+    if (JSON.stringify(prevProps.appointmentsInMonth) != JSON.stringify(this.props.appointmentsInMonth)) {
+      this.setState({ calendarEvents: this.props.appointmentsInMonth });
+    }
   }
 
   componentWillUnmount() {
@@ -320,8 +331,6 @@ export default class extends React.Component {
     />
   }
 
-  calendarRef = React.createRef();
-
   onShowFilter = () => {
     this.setState({ isFilter: !this.state.isFilter });
   }
@@ -362,7 +371,7 @@ export default class extends React.Component {
       className: 'popup-scheduled',
     });
     this.updateCalendarEvents(this.state.userRole);
-    this.getMyAppointments();
+    this.getMyAppointments(this.state.userRole);
   };
 
   onShowModalSubsidy = (subsidyId) => {
@@ -490,20 +499,8 @@ export default class extends React.Component {
       })
   }
 
-  getMyAppointments() {
-    let url = 'clients/get_my_appointments';
-    if (this.state.userRole === 30) {
-      url = 'providers/get_my_appointments'
-    }
-
-    request.post(url).then(result => {
-      if (result.success) {
-        const data = result.data;
-        this.setState({ listAppointmentsRecent: data.docs });
-      } else {
-        this.setState({ listAppointmentsRecent: [] });
-      }
-    })
+  getMyAppointments(userRole) {
+    store.dispatch(getAppointmentsData({ role: userRole }));
   }
 
   onCollapseChange = (v => {
@@ -565,7 +562,7 @@ export default class extends React.Component {
             userRole={this.state.userRole}
             setReload={reload => this.panelAppoimentsReload = reload}
             onShowDrawerDetail={this.onShowDrawerDetail}
-            listAppointmentsRecent={this.state.listAppointmentsRecent}
+            calendar={this.calendarRef}
           />
         </Panel>
       );
@@ -630,10 +627,7 @@ export default class extends React.Component {
         types: selectedEventTypes,
       }
     };
-    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth)).then(() => {
-      const appointmentsMonth = store.getState().appointments.dataAppointmentsMonth;
-      this.setState({ calendarEvents: appointmentsMonth });
-    });
+    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
   }
 
   handleSelectProvider = (name) => {
@@ -1102,6 +1096,7 @@ export default class extends React.Component {
           onClose={this.onCloseDrawerDetail}
           role={userRole}
           event={selectedEvent}
+          calendar={this.calendarRef}
         />
         <DrawerDetailPost
           visible={providerDrawervisible}
@@ -1132,13 +1127,28 @@ function reportNetworkError() {
 }
 
 function renderEventContent(eventInfo) {
-  const eventStatus = eventInfo.event.extendedProps?.type == 1 ? 'Screening' : eventInfo.event.extendedProps?.type == 2 ? 'Evaluation' : 'Meeting';
+  const eventType = eventInfo.event.extendedProps?.type == 1 ? 'Screening' : eventInfo.event.extendedProps?.type == 2 ? 'Evaluation' : 'Meeting';
 
   return (
     <div className='flex flex-col'>
-      <Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
-      <b className='mr-3'>{moment(eventInfo.event.start).format('hh:mm')}</b>
-      <b className='mr-3'>{eventStatus} with {eventInfo.event.title}</b>
+      <div className='flex items-center gap-2'>
+        <Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
+        {eventInfo.event.extendedProps?.status == -2 && <span className='font-20 text-black'>Cancelled</span>}
+        {eventInfo.event.extendedProps?.status == -1 && <span className='font-20 text-black'>Closed</span>}
+      </div>
+      <div className='flex flex-col' style={{ textDecoration: eventInfo.event.extendedProps?.status == -2 ? 'line-through' : 'none' }}>
+        <b className='mr-3'>{moment(eventInfo.event.start).format('hh:mm')}</b>
+        <b className='mr-3'>{eventType} with {eventInfo.event.title}</b>
+      </div>
     </div>
   )
 }
+
+const mapStateToProps = state => {
+  return ({
+    appointments: state.appointments.dataAppointments,
+    appointmentsInMonth: state.appointments.dataAppointmentsMonth,
+  })
+}
+
+export default compose(connect(mapStateToProps))(Dashboard);

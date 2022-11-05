@@ -11,12 +11,14 @@ import './index.less';
 import moment from 'moment';
 import request from '../../../utils/api/request'
 import { ModalCancelAppointment, ModalCurrentAppointment } from '../../../components/Modal';
+import { store } from '../../../redux/store';
+import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
 
 class PanelAppointment extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      appointments: [],
+      appointments: this.props.appointments,
       type: 0,
       currentTab: 1,
       visibleCancel: false,
@@ -26,8 +28,8 @@ class PanelAppointment extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.listAppointmentsRecent != this.props.listAppointmentsRecent) {
-      this.setState({ appointments: this.props.listAppointmentsRecent });
+    if (JSON.stringify(prevProps.appointments) != JSON.stringify(this.props.appointments)) {
+      this.setState({ appointments: this.props.appointments });
     }
   }
 
@@ -46,7 +48,7 @@ class PanelAppointment extends React.Component {
 
   renderItemLeft = (data) => {
     return (
-      <div className='item-left' onClick={() => this.props.onShowDrawerDetail(data._id)}>
+      <div className='item-left' style={{ textDecoration: data.status == -2 ? 'line-through' : 'none' }} onClick={() => this.props.onShowDrawerDetail(data._id)}>
         <Avatar size={24} icon={<FaUser size={12} />} />
         <div className='div-service'>
           {!!data.name && <p className='font-09 mb-0'><b>{data.name}</b></p>}
@@ -94,6 +96,17 @@ class PanelAppointment extends React.Component {
               errorMessage: '',
               isCancelled: true,
             });
+            store.dispatch(getAppointmentsData({ role: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).role : '' }));
+            const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
+            const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
+            const dataFetchAppointMonth = {
+              role: JSON.parse(localStorage.getItem('user')).role,
+              data: {
+                month: month,
+                year: year,
+              }
+            };
+            store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
           } else {
             this.setState({
               errorMessage: result.data,
@@ -132,10 +145,12 @@ class PanelAppointment extends React.Component {
           {appointments?.filter(app => app.type == 3 && [0, -2].includes(app.status) && moment(new Date()).isBefore(moment(new Date(app.date))))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
-              <div className='item-right'>
-                <GiBackwardTime size={19} onClick={() => this.openModalCurrent(data)} />
-                <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => this.openModalCancel(data)} />
-              </div>
+              {data.status == 0 && (
+                <div className='item-right'>
+                  <GiBackwardTime size={19} cursor='pointer' onClick={() => this.openModalCurrent(data)} />
+                  <BsXCircle style={{ marginTop: 4 }} size={15} cursor='pointer' onClick={() => this.openModalCancel(data)} />
+                </div>
+              )}
             </div>
           ))}
           {(appointments?.filter(app => app.type == 3 && [0, -2].includes(app.status) && moment(new Date()).isBefore(moment(new Date(app.date))))?.length == 0) && (
@@ -184,7 +199,9 @@ class PanelAppointment extends React.Component {
 }
 
 const mapStateToProps = state => {
-  return ({})
+  return ({
+    appointments: state.appointments.dataAppointments
+  })
 }
 
 export default compose(connect(mapStateToProps))(PanelAppointment);
