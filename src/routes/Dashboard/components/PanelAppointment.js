@@ -64,6 +64,21 @@ class PanelAppointment extends React.Component {
     );
   }
 
+  submitModalCurrent = () => {
+    this.setState({ visibleCurrent: false });
+    store.dispatch(getAppointmentsData({ role: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).role : '' }));
+    const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
+    const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
+    const dataFetchAppointMonth = {
+      role: JSON.parse(localStorage.getItem('user')).role,
+      data: {
+        month: month,
+        year: year,
+      }
+    };
+    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+  }
+
   closeModalCurrent = () => {
     this.setState({ visibleCurrent: false });
   }
@@ -134,7 +149,7 @@ class PanelAppointment extends React.Component {
     };
     const modalCurrentProps = {
       visible: visibleCurrent,
-      onSubmit: this.closeModalCurrent,
+      onSubmit: this.submitModalCurrent,
       onCancel: this.closeModalCurrent,
       event: event,
     };
