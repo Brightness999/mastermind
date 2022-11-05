@@ -1,6 +1,6 @@
 import './style/index.less';
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Typography, Popover } from 'antd';
+import { Drawer, Button, Row, Col, Typography, Popover, Input, message } from 'antd';
 import { BsBell, BsClockHistory, BsXCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
@@ -8,6 +8,7 @@ import { ImPencil } from 'react-icons/im';
 import { ModalCancelAppointment, ModalCurrentAppointment } from '../../components/Modal';
 import intl from "react-intl-universal";
 import messages from './messages';
+import msgModal from '../Modal/messages';
 import moment from 'moment';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
@@ -24,14 +25,17 @@ class DrawerDetail extends Component {
       visibleCurrent: false,
       errorMessage: '',
       isCancelled: this.props.evnt?.status == -2,
+      isShowEditNotes: false,
+      notes: this.props.event?.notes,
     };
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.event?.status != this.props.event?.status) {
-      this.setState({
-        isCancelled: this.props.event.status < 0,
-      });
+      this.setState({ isCancelled: this.props.event.status < 0 });
+    }
+    if (prevProps.event?.notes != this.props.event?.notes) {
+      this.setState({ notes: this.props.event?.notes });
     }
   }
 
@@ -97,8 +101,38 @@ class DrawerDetail extends Component {
     this.setState({ visibleCurrent: true });
   }
 
+  showEditNotes = () => {
+    this.setState({ isShowEditNotes: true });
+  }
+
+  hideEditNotes = () => {
+    this.setState({ isShowEditNotes: false });
+  }
+
+  handleChangeNotes = (value) => {
+    this.setState({ notes: value });
+  }
+
+  handleUpdateNotes = () => {
+    if (this.props.event?._id) {
+      const data = { appointmentId: this.props.event._id, notes: this.state.notes };
+      request.post('clients/update_appointment_notes', data).then(res => {
+        if (res.success) {
+          this.setState({
+            errorMessage: '',
+            isShowEditNotes: false,
+          });
+          message.success('Successfully Updated');
+        }
+      }).catch(err => {
+        console.log('update edit notes error---', err);
+        this.setState({ errorMessage: err.message });
+      })
+    }
+  }
+
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent, isCancelled } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent, isCancelled, isShowEditNotes, notes } = this.state;
     const { role, event } = this.props;
 
     const providerProfile = (
@@ -212,6 +246,27 @@ class DrawerDetail extends Component {
             </div>
           )}
         </div>
+        {isShowEditNotes && (
+          <>
+            <Input.TextArea rows={5} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />
+            <div className='flex gap-2 mt-10'>
+              <Button
+                type='primary'
+                block
+                onClick={this.handleUpdateNotes}
+              >
+                {intl.formatMessage(msgModal.save)}
+              </Button>
+              <Button
+                type='primary'
+                block
+                onClick={this.hideEditNotes}
+              >
+                {intl.formatMessage(messages.cancel)}
+              </Button>
+            </div>
+          </>
+        )}
         <Row gutter={15} className='list-btn-detail'>
           {(role == 3 && moment(event?.date).isAfter(new Date()) && event?.status == 0 && !isCancelled) && (
             <>
@@ -252,6 +307,7 @@ class DrawerDetail extends Component {
                   type='primary'
                   icon={<ImPencil size={12} />}
                   block
+                  onClick={this.showEditNotes}
                 >
                   {intl.formatMessage(messages.editNotes)}
                 </Button>
