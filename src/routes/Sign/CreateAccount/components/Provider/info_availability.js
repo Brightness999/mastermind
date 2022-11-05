@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select, Segmented, TimePicker, Switch, DatePicker } from 'antd';
+import { Row, Col, Form, Button, Input, Select, Segmented, TimePicker, Switch, DatePicker, message } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
@@ -11,6 +11,7 @@ import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
+import moment from 'moment';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -35,11 +36,13 @@ class InfoAvailability extends Component {
 			locations: ['Dependent Home', 'Provider Office'],
 			listSchool: [],
 			selectedSchools: [],
+			selectedLocation: '',
 		}
 	}
 
 	componentDidMount() {
 		let { registerData } = this.props.register;
+		console.log(this.props.listSchool)
 		if (!!registerData.availability) {
 			this.form?.setFieldsValue({ ...registerData.availability });
 		} else {
@@ -88,7 +91,10 @@ class InfoAvailability extends Component {
 
 	onSelectDay = e => {
 		if (e) {
-			this.setState({ currentSelectedDay: e })
+			this.setState({
+				currentSelectedDay: e,
+				selectedLocation: '',
+			})
 		}
 	}
 
@@ -96,8 +102,9 @@ class InfoAvailability extends Component {
 		this.props.setRegisterData({ availability: this.form.getFieldsValue() });
 	}
 
-	onLocationChange = () => {
+	onLocationChange = (location) => {
 		this.props.setRegisterData({ availability: this.form.getFieldsValue() });
+		this.setState({ selectedLocation: location });
 	}
 
 	onLocationSelected = (day, value, index) => {
@@ -165,6 +172,37 @@ class InfoAvailability extends Component {
 		this.setState({ locations: this.state.locations.filter(location => location != school) });
 	}
 
+	getDayOfWeekIndex = (day) => {
+		switch (day) {
+			case intl.formatMessage(messages.sunday): return 0;
+			case intl.formatMessage(messages.monday): return 1;
+			case intl.formatMessage(messages.tuesday): return 2;
+			case intl.formatMessage(messages.wednesday): return 3;
+			case intl.formatMessage(messages.thursday): return 4;
+			case intl.formatMessage(messages.friday): return 5;
+			default: return -1;
+		}
+	}
+
+	handleSelectTime = (value) => {
+		const { selectedLocation, currentSelectedDay } = this.state;
+		if (selectedLocation) {
+			const school = this.props.listSchool?.find(school => school.name == selectedLocation);
+			if (school) {
+				const idx = this.getDayOfWeekIndex(currentSelectedDay);
+				if (idx > -1) {
+					const inOpenTime = moment().set({ hours: school.sessionsInSchool[idx]?.openHour, minutes: school.sessionsInSchool[idx]?.openMin });
+					const inCloseTime = moment().set({ hours: school.sessionsInSchool[idx]?.closeHour, minutes: school.sessionsInSchool[idx]?.closeMin });
+					const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[idx]?.openHour, minutes: school.sessionsAfterSchool[idx]?.openMin });
+					const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[idx]?.closeHour, minutes: school.sessionsAfterSchool[idx]?.closeMin });
+					if (!(value.isBetween(inOpenTime, inCloseTime) || value.isBetween(afterOpenTime, afterCloseTime))) {
+						message.warning("The school is not available at that time. Please select another time.", 5);
+					}
+				}
+			}
+		}
+	}
+
 	render() {
 		const { currentSelectedDay, CancellationWindow, isPrivate, privateOffice, isHomeVisit, isSchools, locations, listSchool } = this.state;
 
@@ -207,7 +245,7 @@ class InfoAvailability extends Component {
 							</div>
 							<div className='flex flex-row items-center mb-5'>
 								<Switch size="small" checkedChildren="ON" unCheckedChildren="OFF" style={{ width: 50 }} checked={isSchools} onChange={v => this.handleSwitchSchool(v)} />
-								<p className='ml-10 mb-0'>{intl.formatMessage(messages.privateOffice)}</p>
+								<p className='ml-10 mb-0'>{intl.formatMessage(messages.school)}</p>
 							</div>
 							{isSchools && (
 								<Select
@@ -239,7 +277,7 @@ class InfoAvailability extends Component {
 																showArrow
 																placeholder={intl.formatMessage(messages.location)}
 																optionLabelProp="label"
-																onSelect={() => this.onLocationChange()}
+																onSelect={(v) => this.onLocationChange(v)}
 															>
 																{locations.map((location, index) => (
 																	<Select.Option key={index} label={location} value={location}>{location}</Select.Option>
@@ -275,6 +313,7 @@ class InfoAvailability extends Component {
 																		use12Hours
 																		format="h:mm a"
 																		placeholder={intl.formatMessage(messages.from)}
+																		onOk={(v) => this.handleSelectTime(v)}
 																	/>
 																</Form.Item>
 															</Col>
@@ -285,6 +324,7 @@ class InfoAvailability extends Component {
 																		use12Hours
 																		format="h:mm a"
 																		placeholder={intl.formatMessage(messages.to)}
+																		onOk={(v) => this.handleSelectTime(v)}
 																	/>
 																</Form.Item>
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}

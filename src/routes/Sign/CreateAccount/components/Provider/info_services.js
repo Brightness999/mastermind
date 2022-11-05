@@ -150,7 +150,7 @@ class InfoServices extends Component {
 								optionLabelProp="label"
 								value={serviceableSchool}
 							>
-								{listSchools.map((school, index) => (
+								{listSchools?.map((school, index) => (
 									<Select.Option key={index} label={school.name} value={school._id}>{school.name}</Select.Option>
 								))}
 							</Select>

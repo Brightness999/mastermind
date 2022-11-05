@@ -86,16 +86,31 @@ class InfoReview extends Component {
 					manualSchedule.push({
 						"location": scheduleItem.location,
 						"dayInWeek": i,
-						"fromYear": scheduleItem.from_date.year(),
-						"fromMonth": scheduleItem.from_date.month(),
-						"fromDate": scheduleItem.from_date.date(),
-						"toYear": scheduleItem.to_date.year(),
-						"toMonth": scheduleItem.to_date.month(),
-						"toDate": scheduleItem.to_date.date(),
+						"fromYear": scheduleItem.from_date?.year() ?? 0,
+						"fromMonth": scheduleItem.from_date?.month() ?? 0,
+						"fromDate": scheduleItem.from_date?.date() ?? 0,
+						"toYear": scheduleItem.to_date?.year() ?? 10000,
+						"toMonth": scheduleItem.to_date?.month() ?? 0,
+						"toDate": scheduleItem.to_date?.date() ?? 0,
 						"openHour": scheduleItem.from_time.hour(),
 						"openMin": scheduleItem.from_time.minutes(),
 						"closeHour": scheduleItem.to_time.hour(),
 						"closeMin": scheduleItem.to_time.minutes()
+					})
+				} else {
+					manualSchedule.push({
+						"location": '',
+						"dayInWeek": i,
+						"fromYear": 0,
+						"fromMonth": 0,
+						"fromDate": 0,
+						"toYear": 0,
+						"toMonth": 0,
+						"toDate": 0,
+						"openHour": 0,
+						"openMin": 0,
+						"closeHour": 0,
+						"closeMin": 0,
 					})
 				}
 			}

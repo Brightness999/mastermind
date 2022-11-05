@@ -207,7 +207,7 @@ class InfoFinancial extends Component {
 								</div>
 							)}
 						</Form.List>
-						<div className='text-center flex flex-row justify-between mb-10'>
+						<div className='text-center flex flex-row justify-between gap-2 mb-10'>
 							<div className='flex flex-row items-center'>
 								<Switch size="small"
 									checked={isSeparateEvaluationRate}

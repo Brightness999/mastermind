@@ -21,7 +21,7 @@ class InfoSchool extends React.Component {
 			listCommunitiServer: [],
 			dayIsSelected: 1,
 			sessionsInSchool: [],
-			sessionsAfterSchool: []
+			sessionsAfterSchool: [],
 		}
 	}
 
@@ -67,14 +67,14 @@ class InfoSchool extends React.Component {
 		}
 	}
 
-	valueForAvailabilityScheduleForOpenHour = (array, index, fieldType = 'open') => {
+	valueForAvailabilityScheduleForOpenHour = (array, index) => {
 		if (array.length - 1 < index) {
 			return moment('00:00:00', 'HH:mm:ss')
 		}
 		return moment(`${array[index].openHour}:${array[index].openMin}:00`, 'HH:mm:ss')
 	}
 
-	valueForAvailabilityScheduleForCloseHour = (array, index, fieldType = 'open') => {
+	valueForAvailabilityScheduleForCloseHour = (array, index) => {
 		if (array.length - 1 < index) {
 			return moment('00:00:00', 'HH:mm:ss')
 		}
@@ -180,7 +180,8 @@ class InfoSchool extends React.Component {
 							return { ...session, openHour: hour, minute: minute }
 						}
 						return session;
-					})
+					}),
+					fromInSchool: value,
 				},
 					this.callbackAfterSetState)
 				break;
@@ -194,7 +195,8 @@ class InfoSchool extends React.Component {
 							}
 						}
 						return session;
-					})
+					}),
+					toInSchool: value,
 				},
 					this.callbackAfterSetState)
 				break;
@@ -208,7 +210,8 @@ class InfoSchool extends React.Component {
 							}
 						}
 						return session;
-					})
+					}),
+					fromAfterSchool: value,
 				},
 					this.callbackAfterSetState)
 				break;
@@ -222,7 +225,8 @@ class InfoSchool extends React.Component {
 							}
 						}
 						return session;
-					})
+					}),
+					toAfterSchool: value,
 				},
 					this.callbackAfterSetState)
 				break;
@@ -429,16 +433,17 @@ class InfoSchool extends React.Component {
 													use12Hours
 													format="h:mm a"
 													placeholder={intl.formatMessage(messages.from)}
-													value={this.valueForAvailabilityScheduleForOpenHour(this.state.sessionsInSchool, index, 'open')}
+													value={this.valueForAvailabilityScheduleForOpenHour(this.state.sessionsInSchool, index)}
 												/>
 											</Col>
 											<Col xs={24} sm={24} md={12}>
 												<TimePicker
 													onChange={v => this.onSelectTimeForSesssion(index, v, 'inClose')}
-													value={this.valueForAvailabilityScheduleForCloseHour(this.state.sessionsInSchool, index, 'close')}
+													value={this.valueForAvailabilityScheduleForCloseHour(this.state.sessionsInSchool, index)}
 													use12Hours
 													format="h:mm a"
-													placeholder={intl.formatMessage(messages.to)} />
+													placeholder={intl.formatMessage(messages.to)}
+												/>
 											</Col>
 										</Row>
 										<p className='mb-10 font-700'>{intl.formatMessage(messages.afterSchoolHours)}</p>
@@ -446,14 +451,16 @@ class InfoSchool extends React.Component {
 											<Col xs={24} sm={24} md={12}>
 												<TimePicker
 													onChange={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')} use12Hours
-													value={this.valueForAvailabilityScheduleForOpenHour(this.state.sessionsAfterSchool, index, 'open')}
-													format="h:mm a" placeholder={intl.formatMessage(messages.from)} />
+													value={this.valueForAvailabilityScheduleForOpenHour(this.state.sessionsAfterSchool, index)}
+													format="h:mm a" placeholder={intl.formatMessage(messages.from)}
+												/>
 											</Col>
 											<Col xs={24} sm={24} md={12}>
 												<TimePicker
 													onChange={v => this.onSelectTimeForSesssion(index, v, 'afterClose')} use12Hours
-													value={this.valueForAvailabilityScheduleForCloseHour(this.state.sessionsAfterSchool, index, 'close')}
-													format="h:mm a" placeholder={intl.formatMessage(messages.to)} />
+													value={this.valueForAvailabilityScheduleForCloseHour(this.state.sessionsAfterSchool, index)}
+													format="h:mm a" placeholder={intl.formatMessage(messages.to)}
+												/>
 											</Col>
 										</Row>
 									</div>

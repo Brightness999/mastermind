@@ -150,12 +150,20 @@ class ModalNewAppointmentForParents extends React.Component {
 				const newArrTime = JSON.parse(JSON.stringify(arrTime));
 				const selectedDay = newValue.day();
 				const appointments = listProvider[isChoose]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
-				const availableTime = listProvider[isChoose]?.manualSchedule?.[selectedDay];
+				const availableTime = listProvider[isChoose]?.manualSchedule?.find(time => time.dayInWeek == selectedDay);
 				if (availableTime) {
+					const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
+					const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
 					newArrTime.map(time => {
 						const { years, months, date } = newValue.toObject();
 						time.value = moment(time.value).set({ years, months, date });
-						if ((time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour) || (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin) || (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)) {
+						if (time.value.isBetween(availableFromDate, availableToDate)
+							&& (
+								(time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour)
+								|| (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin)
+								|| (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)
+							)
+						) {
 							let flag = true;
 							appointments.forEach(appointment => {
 								if (time.value.isSame(moment(appointment.date))) {
@@ -205,12 +213,20 @@ class ModalNewAppointmentForParents extends React.Component {
 		const { listProvider, arrTime, selectedDate } = this.state;
 		const newArrTime = JSON.parse(JSON.stringify(arrTime));
 		const appointments = listProvider[providerIndex]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
-		const availableTime = listProvider[providerIndex]?.manualSchedule?.[selectedDate.day()];
+		const availableTime = listProvider[providerIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDate.day());
 		if (availableTime) {
+			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
+			const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
 			newArrTime.map(time => {
 				const { years, months, date } = selectedDate?.toObject();
 				time.value = moment(time.value).set({ years, months, date });
-				if ((time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour) || (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin) || (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)) {
+				if (time.value.isBetween(availableFromDate, availableToDate)
+					&& (
+						(time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour)
+						|| (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin)
+						|| (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)
+					)
+				) {
 					let flag = true;
 					appointments.forEach(appointment => {
 						if (time.value.isSame(moment(appointment.date))) {
