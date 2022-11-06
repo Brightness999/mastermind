@@ -42,7 +42,6 @@ class InfoAvailability extends Component {
 
 	componentDidMount() {
 		let { registerData } = this.props.register;
-		console.log(this.props.listSchool)
 		if (!!registerData.availability) {
 			this.form?.setFieldsValue({ ...registerData.availability });
 		} else {
@@ -184,18 +183,22 @@ class InfoAvailability extends Component {
 		}
 	}
 
-	handleSelectTime = (value) => {
+	handleSelectTime = (value, type) => {
 		const { selectedLocation, currentSelectedDay } = this.state;
 		if (selectedLocation) {
 			const school = this.props.listSchool?.find(school => school.name == selectedLocation);
 			if (school) {
 				const idx = this.getDayOfWeekIndex(currentSelectedDay);
 				if (idx > -1) {
-					const inOpenTime = moment().set({ hours: school.sessionsInSchool[idx]?.openHour, minutes: school.sessionsInSchool[idx]?.openMin });
-					const inCloseTime = moment().set({ hours: school.sessionsInSchool[idx]?.closeHour, minutes: school.sessionsInSchool[idx]?.closeMin });
-					const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[idx]?.openHour, minutes: school.sessionsAfterSchool[idx]?.openMin });
-					const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[idx]?.closeHour, minutes: school.sessionsAfterSchool[idx]?.closeMin });
-					if (!(value.isBetween(inOpenTime, inCloseTime) || value.isBetween(afterOpenTime, afterCloseTime))) {
+					value = value.set({ seconds: 0, milliseconds: 0 });
+					const inOpenTime = moment().set({ hours: school.sessionsInSchool[idx]?.openHour, minutes: school.sessionsInSchool[idx]?.openMin, seconds: 0, milliseconds: 0 });
+					const inCloseTime = moment().set({ hours: school.sessionsInSchool[idx]?.closeHour, minutes: school.sessionsInSchool[idx]?.closeMin, seconds: 0, milliseconds: 0 });
+					const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[idx]?.openHour, minutes: school.sessionsAfterSchool[idx]?.openMin, seconds: 0, milliseconds: 0 });
+					const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[idx]?.closeHour, minutes: school.sessionsAfterSchool[idx]?.closeMin, seconds: 0, milliseconds: 0 });
+					if (type == 'from' && !((value.isSame(inOpenTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterOpenTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
+						message.warning("The school is not available at that time. Please select another time.", 5);
+					}
+					if (type == 'to' && !((value.isSame(inCloseTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterCloseTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
 						message.warning("The school is not available at that time. Please select another time.", 5);
 					}
 				}
@@ -313,7 +316,7 @@ class InfoAvailability extends Component {
 																		use12Hours
 																		format="h:mm a"
 																		placeholder={intl.formatMessage(messages.from)}
-																		onOk={(v) => this.handleSelectTime(v)}
+																		onOk={(v) => this.handleSelectTime(v, 'from')}
 																	/>
 																</Form.Item>
 															</Col>
@@ -324,7 +327,7 @@ class InfoAvailability extends Component {
 																		use12Hours
 																		format="h:mm a"
 																		placeholder={intl.formatMessage(messages.to)}
-																		onOk={(v) => this.handleSelectTime(v)}
+																		onOk={(v) => this.handleSelectTime(v, 'to')}
 																	/>
 																</Form.Item>
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
