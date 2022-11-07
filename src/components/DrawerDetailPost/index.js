@@ -8,6 +8,7 @@ import messages from './messages';
 import msgDetail from '../DrawerDetail/messages';
 import { ModalNoShow, ModalBalance, ModalConfirm } from '../../components/Modal';
 import request from '../../utils/api/request';
+import moment from 'moment';
 const { Paragraph } = Typography;
 
 class DrawerDetailPost extends Component {
@@ -283,22 +284,26 @@ class DrawerDetailPost extends Component {
             <p className='font-16'>{event?.location}</p>
           </div>
         </div>
-        <div className='post-feedback mt-1'>
-          <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.postSessionFeedback)}</p>
-          <Input.TextArea rows={7} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.postSessionFeedback)} />
-        </div>
+        {moment(event?.date).isBefore(moment()) && event.status == 0 && (
+          <div className='post-feedback mt-1'>
+            <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.postSessionFeedback)}</p>
+            <Input.TextArea rows={7} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.postSessionFeedback)} />
+          </div>
+        )}
         <Row gutter={15} className='list-btn-detail'>
-          <Col span={12}>
-            <Button
-              type='primary'
-              icon={<BsCheckCircle size={15} />}
-              block
-              onClick={() => this.openConfirmModal()}
-              disabled={isClosed || isCancelled}
-            >
-              {intl.formatMessage(messages.markClosed)}
-            </Button>
-          </Col>
+          {moment(event?.date).isBefore(moment()) && event.status == 0 && (
+            <Col span={12}>
+              <Button
+                type='primary'
+                icon={<BsCheckCircle size={15} />}
+                block
+                onClick={() => this.openConfirmModal()}
+                disabled={isClosed || isCancelled}
+              >
+                {intl.formatMessage(messages.markClosed)}
+              </Button>
+            </Col>
+          )}
           {event?.type > 1 && (
             <Col span={12}>
               <Dropdown overlay={menu} placement="bottomRight">
