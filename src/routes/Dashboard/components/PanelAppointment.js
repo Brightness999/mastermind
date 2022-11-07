@@ -157,7 +157,7 @@ class PanelAppointment extends React.Component {
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
         <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-          {appointments?.filter(app => app.type == 3 && [0, -2].includes(app.status) && moment(new Date()).isBefore(moment(new Date(app.date))))?.map((data, index) => (
+          {appointments?.filter(app => app.type == 3 && [0, -2].includes(app.status) && moment(new Date()).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isBefore(moment(app.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {data.status == 0 && (
@@ -168,7 +168,7 @@ class PanelAppointment extends React.Component {
               )}
             </div>
           ))}
-          {(appointments?.filter(app => app.type == 3 && [0, -2].includes(app.status) && moment(new Date()).isBefore(moment(new Date(app.date))))?.length == 0) && (
+          {(appointments?.filter(app => app.type == 3 && [0, -2].includes(app.status) && moment(new Date()).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isBefore(moment(app.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
             <div key={1} className='list-item'>
               <p className='p-10'>No upcoming appoiment</p>
             </div>
@@ -177,7 +177,7 @@ class PanelAppointment extends React.Component {
           <ModalCurrentAppointment {...modalCurrentProps} />
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
-          {appointments?.filter(app => app.type == 3 && app.status == -1 && moment(new Date()).isBefore(moment(new Date(app.date))))?.map((data, index) => (
+          {appointments?.filter(app => app.type == 3 && [0, -1].includes(app.status) && moment(new Date()).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSame(moment(app.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className='item-right'>
@@ -186,14 +186,14 @@ class PanelAppointment extends React.Component {
               </div>
             </div>
           ))}
-          {(appointments?.filter(app => app.type == 3 && app.status == -1 && moment(new Date()).isBefore(moment(new Date(app.date))))?.length == 0) && (
+          {(appointments?.filter(app => app.type == 3 && [0, -1].includes(app.status) && moment(new Date()).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSame(moment(app.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
             <div key={1} className='list-item'>
               <p className='p-10'>No unprocess appoiment</p>
             </div>
           )}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="3">
-          {appointments?.filter(app => app.type == 3 && [0, -1, -2].includes(app.status) && moment(new Date()).isAfter(moment(new Date(app.date))))?.map((data, index) => (
+          {appointments?.filter(app => app.type == 3 && [0, -1, -2].includes(app.status) && moment(new Date()).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isAfter(moment(app.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className='item-right'>
@@ -202,7 +202,7 @@ class PanelAppointment extends React.Component {
               </div>
             </div>
           ))}
-          {(appointments?.filter(app => app.type == 3 && [0, -1, -2].includes(app.status) && moment(new Date()).isAfter(moment(new Date(app.date))))?.length == 0) && (
+          {(appointments?.filter(app => app.type == 3 && [0, -1, -2].includes(app.status) && moment(new Date()).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isAfter(moment(app.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
             <div key={1} className='list-item'>
               <p className='p-10'>No past appoiment</p>
             </div>

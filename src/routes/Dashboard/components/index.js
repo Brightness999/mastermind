@@ -129,7 +129,7 @@ class Dashboard extends React.Component {
                   btn,
                   key,
                   onClose: close(key),
-                  duration: 0,
+                  duration: 10,
                   placement: 'top',
                 });
               })
@@ -532,7 +532,7 @@ class Dashboard extends React.Component {
     const eventType = type == 1 ? 'Screening' : type == 2 ? 'Evaluation' : type == 4 ? 'Consultation' : 'Session';
 
     return (
-      <div key={index} className={`text-white ${moment(appointment.date).isBefore(new Date()) ? 'item-feed done' : 'item-feed'} ${status == -2 ? 'line-through' : ''} bg-${status == 0 ? 'active' : eventType.toLowerCase()}`}>
+      <div key={index} className={`text-white item-feed ${status == -2 ? 'line-through' : ''} bg-${status == 0 ? 'active' : eventType.toLowerCase()}`}>
         <p className='font-700'>{appointment.dependent.firstName} {appointment.dependent.lastName} {status == -2 ? 'Cancelled' : ''}</p>
         {appointment.provider != undefined && <p>{appointment.provider.name || appointment.provider.referredToAs}</p>}
         {appointment.school != undefined && <p>{appointment.school.name}</p>}
