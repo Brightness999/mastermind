@@ -28,8 +28,8 @@ export default class extends React.Component {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
         const data = {
-          id: loginData?.user?._id,
-          role: loginData?.user?.role,
+          id: loginData?._id,
+          role: loginData?.role,
         }
         request.post('providers/get_dependents', data).then(result => {
           if (result.success) {
@@ -41,8 +41,8 @@ export default class extends React.Component {
           }
         })
         this.setState({
-          userRole: loginData.user.role,
-          userId: loginData.user._id,
+          userRole: loginData.role,
+          userId: loginData._id,
         });
       }).catch(err => {
         console.log(err);
