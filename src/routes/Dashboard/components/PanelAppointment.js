@@ -48,7 +48,7 @@ class PanelAppointment extends React.Component {
 
   renderItemLeft = (data) => {
     return (
-      <div className='item-left' style={{ textDecoration: data.status == -2 ? 'line-through' : 'none' }} onClick={() => this.props.onShowDrawerDetail(data._id)}>
+      <div className={`item-left ${data.status == -2 ? 'line-through' : ''}`} onClick={() => this.props.onShowDrawerDetail(data._id)}>
         <Avatar size={24} icon={<FaUser size={12} />} />
         <div className='div-service'>
           {!!data.name && <p className='font-09 mb-0'><b>{data.name}</b></p>}

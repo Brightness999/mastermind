@@ -110,7 +110,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		if (appointmentType == 1) {
 			const appointment = listProvider[isChoose]?.appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 1 && appointment.status == 0);
 			if (appointment) {
-				message.warning("You can't create more screening.");
+				message.warning((<><p>You can't create more screening.</p><p>The screening with {listProvider[isChoose]?.name} is already scheduled at {new Date(appointment.date).toLocaleString()}</p></>), 5);
 				return;
 			}
 		}
@@ -149,7 +149,6 @@ class ModalNewAppointmentForParents extends React.Component {
 			if (isChoose > -1) {
 				const newArrTime = JSON.parse(JSON.stringify(arrTime));
 				const selectedDay = newValue.day();
-				const appointments = listProvider[isChoose]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
 				const availableTime = listProvider[isChoose]?.manualSchedule?.find(time => time.dayInWeek == selectedDay);
 				if (availableTime) {
 					const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
@@ -165,7 +164,7 @@ class ModalNewAppointmentForParents extends React.Component {
 							)
 						) {
 							let flag = true;
-							appointments.forEach(appointment => {
+							this.props.listAppointmentsRecent?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
 								if (time.value.isSame(moment(appointment.date))) {
 									flag = false;
 								}
@@ -228,7 +227,7 @@ class ModalNewAppointmentForParents extends React.Component {
 					)
 				) {
 					let flag = true;
-					appointments.forEach(appointment => {
+					this.props.listAppointmentsRecent?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
 						if (time.value.isSame(moment(appointment.date))) {
 							flag = false;
 						} else {

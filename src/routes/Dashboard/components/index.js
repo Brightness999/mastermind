@@ -527,15 +527,19 @@ class Dashboard extends React.Component {
   }
 
   renderListAppoinmentsRecent = (appointment, index) => {
+    const type = appointment?.type;
+    const status = appointment?.status;
+    const eventType = type == 1 ? 'Screening' : type == 2 ? 'Evaluation' : type == 4 ? 'Consultation' : 'Session';
+
     return (
-      <div key={index} className={moment(appointment.date).isBefore(new Date()) ? 'item-feed done' : 'item-feed'}>
-        <p className='font-700'>{appointment.dependent.firstName} {appointment.dependent.lastName}</p>
+      <div key={index} className={`text-white ${moment(appointment.date).isBefore(new Date()) ? 'item-feed done' : 'item-feed'} ${status == -2 ? 'line-through' : ''} bg-${status == 0 ? 'active' : eventType.toLowerCase()}`}>
+        <p className='font-700'>{appointment.dependent.firstName} {appointment.dependent.lastName} {status == -2 ? 'Cancelled' : ''}</p>
         {appointment.provider != undefined && <p>{appointment.provider.name || appointment.provider.referredToAs}</p>}
         {appointment.school != undefined && <p>{appointment.school.name}</p>}
         <p>{appointment.skillSet?.name}</p>
         <p>{appointment.location}</p>
         <p>{moment(appointment.date).format('hh:mm a')}</p>
-        <p className='font-700 text-primary text-right' style={{ marginTop: '-10px' }}>{moment(appointment.date).fromNow()}</p>
+        <p className='font-700 text-right' style={{ marginTop: '-10px' }}>{moment(appointment.date).fromNow()}</p>
       </div>
     );
   }
@@ -767,7 +771,6 @@ class Dashboard extends React.Component {
       listDependents: listDependents,
       SkillSet: SkillSet,
       listAppointmentsRecent: listAppointmentsRecent,
-      parentInfo: parentInfo,
     };
 
     return (
@@ -895,7 +898,7 @@ class Dashboard extends React.Component {
                       next: { click: () => this.handleClickNextMonth() },
                     }}
                     initialView='dayGridMonth'
-                    eventColor='#2d5cfa'
+                    eventColor='transparent'
                     eventDisplay='block'
                     editable={true}
                     selectable={true}
@@ -1127,16 +1130,18 @@ function reportNetworkError() {
 }
 
 function renderEventContent(eventInfo) {
-  const eventType = eventInfo.event.extendedProps?.type == 1 ? 'Screening' : eventInfo.event.extendedProps?.type == 2 ? 'Evaluation' : 'Meeting';
+  const type = eventInfo.event.extendedProps?.type;
+  const status = eventInfo.event.extendedProps?.status;
+  const eventType = type == 1 ? 'Screening' : type == 2 ? 'Evaluation' : type == 4 ? 'Consultation' : 'Session';
 
   return (
-    <div className='flex flex-col'>
+    <div className={`flex flex-col p-3 rounded-2 bg-${status == 0 ? 'active' : eventType.toLowerCase()}`}>
       <div className='flex items-center gap-2'>
         <Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
         {eventInfo.event.extendedProps?.status == -2 && <span className='font-20 text-black'>Cancelled</span>}
         {eventInfo.event.extendedProps?.status == -1 && <span className='font-20 text-black'>Closed</span>}
       </div>
-      <div className='flex flex-col' style={{ textDecoration: eventInfo.event.extendedProps?.status == -2 ? 'line-through' : 'none' }}>
+      <div className={`flex flex-col ${eventInfo.event.extendedProps?.status == -2 ? 'line-through' : ''}`}>
         <b className='mr-3'>{moment(eventInfo.event.start).format('hh:mm')}</b>
         <b className='mr-3'>{eventType} with {eventInfo.event.title}</b>
       </div>
