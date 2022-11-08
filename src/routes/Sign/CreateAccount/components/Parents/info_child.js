@@ -11,6 +11,8 @@ import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import moment from 'moment';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
+import { getAllSchoolsForParent, getDefaultValueForClient } from '../../../../../../src/utils/api/apiList';
+
 class InfoChild extends Component {
 	constructor(props) {
 		super(props);
@@ -52,9 +54,9 @@ class InfoChild extends Component {
 		}
 		this.form.setFieldsValue({ children: studentInfos });
 		this.loadServices();
-		this.loadSchools();
+		this.loadSchools(registerData.parentInfo);
 	}
-	
+
 	createNewChild() {
 		const { registerData } = this.props.register;
 		var newChild = this.getDefaultChildObj(registerData.parentInfo);
@@ -63,8 +65,7 @@ class InfoChild extends Component {
 	}
 
 	loadServices() {
-		axios.post(url + 'clients/get_default_value_for_client'
-		).then(result => {
+		axios.post(url + getDefaultValueForClient).then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
 				this.setState({ listServices: data.listServices })
@@ -72,19 +73,18 @@ class InfoChild extends Component {
 				this.setState({ checkEmailExist: false });
 			}
 		}).catch(err => {
-			console.log(err);
+			console.log('getDefaultValueForClient error---', err);
 		})
 	}
 
-	loadSchools() {
-		axios.post(url + 'clients/get_all_schools'
-		).then(result => {
+	loadSchools(parentInfo) {
+		axios.post(url + getAllSchoolsForParent, { communityServed: parentInfo?.cityConnection }).then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
 				this.setState({ listSchools: data })
 			}
 		}).catch(err => {
-			console.log(err);
+			console.log('getAllSchoolsForParent error---', err);
 		})
 	}
 
