@@ -37,6 +37,8 @@ class InfoAvailability extends Component {
 			listSchool: [],
 			selectedSchools: [],
 			selectedLocation: '',
+			from_time: undefined,
+			to_time: undefined,
 		}
 	}
 
@@ -184,7 +186,21 @@ class InfoAvailability extends Component {
 	}
 
 	handleSelectTime = (value, type) => {
-		const { selectedLocation, currentSelectedDay } = this.state;
+		const { selectedLocation, currentSelectedDay, from_time, to_time } = this.state;
+    if (type === 'from') {
+      if (to_time && value.isAfter(to_time)) {
+        message.warning('The selected time is not valid.');
+				return;
+      }
+      this.setState({ from_time: value });
+    }
+    if (type === 'to') {
+      if (from_time && from_time.isAfter(value)) {
+        message.warning('The selected time is not valid.');
+				return;
+      }
+      this.setState({ from_time: value });
+    }
 		if (selectedLocation) {
 			const school = this.props.listSchool?.find(school => school.name == selectedLocation);
 			if (school) {

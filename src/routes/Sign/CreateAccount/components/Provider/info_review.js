@@ -83,6 +83,10 @@ class InfoReview extends Component {
 			for (var j = 0; j < availability['' + day_week[i]].length; j++) {
 				var scheduleItem = availability['' + day_week[i]][j];
 				if (scheduleItem.from_time && scheduleItem.to_time && (scheduleItem.from_date || scheduleItem.to_date) && scheduleItem.location) {
+					if (scheduleItem.from_time && scheduleItem.to_time && scheduleItem.from_time.isAfter(scheduleItem.to_time)) {
+						message.warning('The selected time is not valid.');
+						return;
+					}
 					manualSchedule.push({
 						"location": scheduleItem.location,
 						"dayInWeek": i,

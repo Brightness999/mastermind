@@ -295,6 +295,7 @@
   "components.Modal.scheduleConsultation": "Schedule Consultation",
   "components.Modal.referralService": "HMGH Referral Service",
   "components.Modal.byPhone": "By phone",
+  "components.Modal.googleMeet": "Google Meet",
   "components.Modal.additionalDocuments": "Additional documents",
   "components.Modal.create": "Create",
   "components.Modal.review": "Review",

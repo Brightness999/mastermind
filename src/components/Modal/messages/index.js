@@ -265,6 +265,10 @@ export default {
     id: `${scope}.byPhone`,
     defaultMessage: 'By phone',
   },
+  googleMeet: {
+    id: `${scope}.googleMeet`,
+    defaultMessage: 'Google Meet',
+  },
   additionalDocuments: {
     id: `${scope}.additionalDocuments`,
     defaultMessage: 'Additional documents',

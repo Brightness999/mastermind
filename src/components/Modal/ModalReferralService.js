@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Upload, Input, message } from 'antd';
+import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Upload, Input, message, Form } from 'antd';
 import { BiChevronLeft, BiChevronRight, BiUpload } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 import intl from 'react-intl-universal';
@@ -15,12 +15,6 @@ import { url, switchPathWithRole } from '../../utils/api/baseUrl'
 import request from '../../utils/api/request'
 import 'moment/locale/en-au';
 moment.locale('en');
-
-const arrMeetSolution = [
-	'Google meet',
-	'Zoom',
-	'Direction',
-]
 
 const arrTime = [
 	"8:30am",
@@ -41,7 +35,6 @@ const arrTime = [
 
 class ModalReferralService extends React.Component {
 	state = {
-		isChoose: 0,
 		isConfirm: false,
 		isPopupComfirm: false,
 		isSelectTime: -1,
@@ -55,6 +48,9 @@ class ModalReferralService extends React.Component {
 		meetSolution: undefined,
 		note: undefined,
 		subsidyId: undefined,
+		isGoogleMeet: false,
+		selectedDate: moment(),
+		isSelectTime: -1,
 	}
 
 	componentDidMount = () => {
@@ -153,8 +149,8 @@ class ModalReferralService extends React.Component {
 		})
 	}
 
-	onChooseDoctor = (index) => {
-		this.setState({ isChoose: index });
+	onFinishFailed = (values) => {
+		console.log(values);
 	}
 
 	onConfirm = () => {
@@ -182,34 +178,30 @@ class ModalReferralService extends React.Component {
 		return id = _id;
 	}
 
-	render() {
-		const { selectedDate, selectedValue, isChoose, isSelectTime } = this.state;
+	changeMeetingType = (status) => {
+		this.setState({ isGoogleMeet: status });
+	}
 
-		const contentConfirm = (
-			<div className='confirm-content'>
-				<p className='text-center mb-5'>{intl.formatMessage(messages.areSureChangeAppoint)}</p>
-				<Row gutter={10}>
-					<Col xs={24} sm={24} md={12}>
-						<p className='font-12 text-center mb-0'>{intl.formatMessage(messages.current)}</p>
-						<div className='current-content'>
-							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>Dr.Blank</span></p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: Dependent Name</p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.where)}: Local Office Name</p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>6:45pm</span> on <span className='font-11 font-700'>July, 26, 2022</span></p>
-						</div>
-					</Col>
-					<Col xs={24} sm={24} md={12}>
-						<p className='font-12 text-center mb-0'>{intl.formatMessage(messages.new)}</p>
-						<div className='new-content'>
-							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>Dr.Blank</span></p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: Dependent Name</p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.where)}: Local Office Name</p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>7:20pm</span> on <span className='font-11 font-700'>July, 28, 2022</span></p>
-						</div>
-					</Col>
-				</Row>
-			</div>
-		);
+	prevMonth = () => {
+		if (moment(this.state.selectedDate).add(-1, 'month').isAfter(new Date())) {
+			this.setState({
+				selectedDate: moment(this.state.selectedDate).add(-1, 'month'),
+				isSelectTime: -1,
+			});
+		}
+	}
+
+	nextMonth = () => {
+		if (moment(this.state.selectedDate).add(1, 'month').isAfter(new Date())) {
+			this.setState({
+				selectedDate: moment(this.state.selectedDate).add(1, 'month'),
+				isSelectTime: -1,
+			});
+		}
+	}
+
+	render() {
+		const { selectedDate, selectedValue, isSelectTime, selectedDependent, subsidyId, selectedSkillSet, consulationPhoneNumber, note, isGoogleMeet } = this.state;
 
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -219,14 +211,7 @@ class ModalReferralService extends React.Component {
 			onCancel: this.props.onCancel,
 			closable: false,
 			width: 900,
-			footer: [
-				<Button key="back" onClick={this.props.onCancel}>
-					{intl.formatMessage(msgReview.goBack).toUpperCase()}
-				</Button>,
-				<Button key="submit" type="primary" onClick={this.createConsulation}>
-					{intl.formatMessage(messages.scheduleConsultation).toUpperCase()}
-				</Button>
-			]
+			footer: []
 		};
 
 		const props = {
@@ -238,148 +223,157 @@ class ModalReferralService extends React.Component {
 			onChange: this.onChangeUpload,
 			maxCount: 1,
 		};
+
 		return (
 			<Modal {...modalProps}>
 				<div className='new-appointment'>
 					<div className='flex mt-10'>
 						<p className='font-30'>{intl.formatMessage(messages.referralService)}</p>
-						<img src='../images/hands.jpeg' className='hands-img' />
+						<img src='../images/hands.png' className='hands-img' />
 					</div>
-					<Row gutter={20} className='mb-10' align="bottom">
-						<Col xs={24} sm={24} md={8} className='select-small'>
-							<p className='font-16 mb-5'>{intl.formatMessage(messages.selectOptions)}</p>
-							<Select
-								value={this.state.selectedDependent}
-								disabled={this.state.subsidyId != undefined}
-								onChange={v => {
-									this.setState({ selectedDependent: v });
-									var selected = this.props.listDependents.find(x => x._id === v);
-									this.loadDataForSelectedDependent(selected);
-								}}
-							>
-								{this.props.listDependents?.map((dependent, index) => (
-									<Select.Option key={index} value={dependent._id}>{dependent.firstName} {dependent.lastName}</Select.Option>
-								))}
-							</Select>
-						</Col>
-						<Col xs={24} sm={24} md={8} className='select-small'>
-							<Select placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
-								value={this.state.selectedSkillSet}
-								disabled={this.state.subsidyId != undefined}
-								onChange={v => this.setState({ selectedSkillSet: v })}
-							>
-								{this.props.SkillSet?.map((skill, index) => (
-									<Select.Option key={index} value={index}>{skill}</Select.Option>
-								))}
-							</Select>
-						</Col>
-						<Col xs={24} sm={24} md={8}>
-							<Input
-								placeholder={intl.formatMessage(msgCreateAccount.phoneNumber)}
-								value={this.state.consulationPhoneNumber}
-								onChange={v => this.setState({ consulationPhoneNumber: v.target.value })}
-								size="small" />
-						</Col>
-					</Row>
-					<Row gutter={20} className='mb-20' align="bottom">
-						<Col xs={24} sm={24} md={8} >
-							<div >{intl.formatMessage(messages.subsidyOnly)}<Switch size="small" defaultChecked className='ml-10' /></div>
-						</Col>
-						<Col xs={24} sm={24} md={8} className='select-small'>
-							<Select
-								placeholder='Meet Solution'
-								onChange={v => this.setState({ meetSolution: v })}
-								value={this.state.meetSolution}
-							>
-								{arrMeetSolution?.map((value, index) => (
-									<Select.Option key={index} value={index}>{value}</Select.Option>
-								))}
-							</Select>
-						</Col>
-						<Col xs={24} sm={24} md={8}>
-							<div className='flex flex-row items-center'>
-								<Input
-									value={this.state.meetLocation}
-									onChange={v => { this.setState({ meetLocation: v.target.value }) }}
-									placeholder='Url or address for meeting'
-									size="small"
-								/>
-							</div>
-						</Col>
-					</Row>
-					<Row gutter={10}>
-						<Col xs={24} sm={24} md={8}>
-							<div className='provider-profile'>
-								<p className='font-14 font-700'>{intl.formatMessage(messages.additionalDocuments)}</p>
-								<div className='upload-document flex-1 mb-10'>
-									<Upload {...props}>
-										<Button size='small' type='primary' className='btn-upload'>
-											{intl.formatMessage(msgRequest.upload).toUpperCase()} <BiUpload size={16} />
-										</Button>
-									</Upload>
+					<Form
+						name='consultation-form'
+						onFinish={this.createConsulation}
+						onFinishFailed={this.onFinishFailed}
+						ref={ref => this.form = ref}
+					>
+						<Row gutter={20} className='mb-10' align="bottom">
+							<Col xs={24} sm={24} md={8} className='select-small'>
+								<p className='font-16 mb-5'>{intl.formatMessage(messages.selectOptions)}</p>
+								<Form.Item name='selectedDependent' rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.dependent) }]}>
+									<Select
+										placeholder={intl.formatMessage(msgCreateAccount.dependent)}
+										value={selectedDependent}
+										disabled={subsidyId != undefined}
+										onChange={v => {
+											this.setState({ selectedDependent: v });
+											var selected = this.props.listDependents.find(x => x._id === v);
+											this.loadDataForSelectedDependent(selected);
+										}}
+									>
+										{this.props.listDependents?.map((dependent, index) => (
+											<Select.Option key={index} value={dependent._id}>{dependent.firstName} {dependent.lastName}</Select.Option>
+										))}
+									</Select>
+								</Form.Item>
+							</Col>
+							<Col xs={24} sm={24} md={8} className='select-small'>
+								<Form.Item name='selectedSkillSet' rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.skillsets).slice(0, -1) }]}>
+									<Select
+										placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
+										value={selectedSkillSet}
+										disabled={subsidyId != undefined}
+										onChange={v => this.setState({ selectedSkillSet: v })}
+									>
+										{this.props.SkillSet?.map((skill, index) => (
+											<Select.Option key={index} value={index}>{skill.name}</Select.Option>
+										))}
+									</Select>
+								</Form.Item>
+							</Col>
+							<Col xs={24} sm={24} md={8}>
+								<div className='flex gap-2 pb-10'>
+									<div>{intl.formatMessage(messages.byPhone)}</div>
+									<Switch className='phone-googlemeet-switch' checked={isGoogleMeet} onChange={this.changeMeetingType} />
+									<div>{intl.formatMessage(messages.googleMeet)}</div>
 								</div>
-								<Input.TextArea
-									value={this.state.note}
-									onChange={v => { this.setState({ note: v.target.value }) }}
-									rows={6}
-									placeholder={intl.formatMessage(msgReview.notes)}
-									className='font-12'
-								/>
-							</div>
-						</Col>
-						<Col xs={24} sm={24} md={16}>
-							<div className='px-20'>
-								<p className='font-700'>{intl.formatMessage(msgCreateAccount.selectDateTime)}</p>
-								<div className='calendar'>
-									<Row gutter={15}>
-										<Col xs={24} sm={24} md={12}>
-											<Calendar
-												fullscreen={false}
-												onSelect={this.onSelectDate}
-												onPanelChange={this.onPanelChange}
-												value={this.state.selectedDate}
-												onChange={v => this.setState({ selectedDate: v })}
-												headerRender={() => (
-													<div style={{ marginBottom: 10 }}>
-														<Row gutter={8} justify="space-between" align="middle">
-															<Col>
-																<p className='font-12 mb-0'>{selectedValue?.format('MMMM YYYY')}</p>
-															</Col>
-															<Col>
-																<Button
-																	type='text'
-																	className='mr-10 left-btn'
-																	icon={<BiChevronLeft size={25} />}
-																	onClick={this.prevMonth}
-																/>
-																<Button
-																	type='text'
-																	className='right-btn'
-																	icon={<BiChevronRight size={25} />}
-																	onClick={this.nextMonth}
-																/>
-															</Col>
-														</Row>
-													</div>
-												)}
-											/>
-										</Col>
-										<Col xs={24} sm={24} md={12}>
-											<Row gutter={15}>
-												{arrTime?.map((time, index) => (
-													<Col key={index} span={12}>
-														<div className={isSelectTime === index ? 'time-available active' : 'time-available'} onClick={() => this.onSelectTime(index)}>
-															<p className='font-12 mb-0'><GoPrimitiveDot size={15} />{time}</p>
+								<Form.Item
+									name='phoneNumber'
+									rules={[
+										{ required: !isGoogleMeet, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
+										{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
+									]}
+								>
+									<Input
+										placeholder={intl.formatMessage(msgCreateAccount.phoneNumber)}
+										value={consulationPhoneNumber}
+										onChange={v => this.setState({ consulationPhoneNumber: v.target.value })}
+										className={`${isGoogleMeet ? 'display-none' : ''}`}
+									/>
+								</Form.Item>
+							</Col>
+						</Row>
+						<Row gutter={10}>
+							<Col xs={24} sm={24} md={8}>
+								<div className='provider-profile'>
+									<p className='font-14 font-700'>{intl.formatMessage(messages.additionalDocuments)}</p>
+									<div className='upload-document flex-1 mb-10'>
+										<Upload {...props}>
+											<Button size='small' type='primary' className='btn-upload'>
+												{intl.formatMessage(msgRequest.upload).toUpperCase()} <BiUpload size={16} />
+											</Button>
+										</Upload>
+									</div>
+									<Input.TextArea
+										value={note}
+										onChange={e => { this.setState({ note: e.target.value }) }}
+										rows={6}
+										placeholder={intl.formatMessage(msgReview.notes)}
+										className='font-12'
+									/>
+								</div>
+							</Col>
+							<Col xs={24} sm={24} md={16}>
+								<div className='px-20'>
+									<p className='font-700'>{intl.formatMessage(msgCreateAccount.selectDateTime)}</p>
+									<div className='calendar'>
+										<Row gutter={15}>
+											<Col xs={24} sm={24} md={12}>
+												<Calendar
+													fullscreen={false}
+													value={selectedDate}
+													onSelect={this.onSelectDate}
+													disabledDate={(date) => date.isBefore(new Date())}
+													headerRender={() => (
+														<div className='mb-10'>
+															<Row gutter={8} justify="space-between" align="middle">
+																<Col>
+																	<p className='font-12 mb-0'>{selectedValue?.format('MMMM YYYY')}</p>
+																</Col>
+																<Col>
+																	<Button
+																		type='text'
+																		className='mr-10 left-btn'
+																		icon={<BiChevronLeft size={25} />}
+																		onClick={this.prevMonth}
+																	/>
+																	<Button
+																		type='text'
+																		className='right-btn'
+																		icon={<BiChevronRight size={25} />}
+																		onClick={this.nextMonth}
+																	/>
+																</Col>
+															</Row>
 														</div>
-													</Col>
-												))}
-											</Row>
-										</Col>
-									</Row>
+													)}
+												/>
+											</Col>
+											<Col xs={24} sm={24} md={12}>
+												<Row gutter={15}>
+													{arrTime?.map((time, index) => (
+														<Col key={index} span={12}>
+															<div className={isSelectTime === index ? 'time-available active' : 'time-available'} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
+																<p className='font-12 mb-0'><GoPrimitiveDot className='active' size={15} />{time}</p>
+															</div>
+														</Col>
+													))}
+												</Row>
+											</Col>
+										</Row>
+									</div>
 								</div>
-							</div>
-						</Col>
-					</Row>
+							</Col>
+						</Row>
+						<Row justify='end' className='gap-2'>
+							<Button key="back" onClick={this.props.onCancel}>
+								{intl.formatMessage(msgReview.goBack).toUpperCase()}
+							</Button>
+							<Button key="submit" type="primary" htmlType='submit'>
+								{intl.formatMessage(messages.scheduleConsultation).toUpperCase()}
+							</Button>
+						</Row>
+					</Form>
 				</div>
 			</Modal>
 		);

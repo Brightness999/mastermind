@@ -24,6 +24,8 @@ class ConsultantAvailability extends Component {
     super(props);
     this.state = {
       currentSelectedDay: day_week[0],
+      from_time: undefined,
+      to_time: undefined,
     }
   }
 
@@ -47,19 +49,23 @@ class ConsultantAvailability extends Component {
     for (var i = 0; i < day_week.length; i++) {
       for (var j = 0; j < values['' + day_week[i]].length; j++) {
         var scheduleItem = values['' + day_week[i]][j];
-        if (scheduleItem.from_time && scheduleItem.to_time && scheduleItem.from_date && scheduleItem.to_date) {
+        if (scheduleItem.from_time && scheduleItem.to_time && (scheduleItem.from_date || scheduleItem.to_date)) {
+          if (scheduleItem.from_time && scheduleItem.to_time && scheduleItem.from_time.isAfter(scheduleItem.to_time)) {
+            message.warning('The selected time is not valid.');
+            return;
+          }
           manualSchedule.push({
             "dayInWeek": i,
-            "fromYear": scheduleItem.from_time.year(),
-            "fromMonth": scheduleItem.from_time.month(),
-            "fromDate": scheduleItem.from_time.date(),
-            "toYear": scheduleItem.to_time.year(),
-            "toMonth": scheduleItem.to_time.month(),
-            "toDate": scheduleItem.to_time.date(),
+            "fromYear": scheduleItem.from_date.year() ?? 0,
+            "fromMonth": scheduleItem.from_date.month() ?? 0,
+            "fromDate": scheduleItem.from_date.date() ?? 0,
+            "toYear": scheduleItem.to_date.year() ?? 10000,
+            "toMonth": scheduleItem.to_date.month() ?? 0,
+            "toDate": scheduleItem.to_date.date() ?? 0,
             "openHour": scheduleItem.from_time.hour(),
             "openMin": scheduleItem.from_time.minutes(),
             "closeHour": scheduleItem.to_time.hour(),
-            "closeMin": scheduleItem.to_time.minutes()
+            "closeMin": scheduleItem.to_time.minutes(),
           })
         }
       }
@@ -97,7 +103,7 @@ class ConsultantAvailability extends Component {
     }
   }
 
-  onChangeScheduleValue = (day, value) => {
+  onChangeScheduleValue = () => {
     this.props.setRegisterData({
       step2: this.form.getFieldsValue()
     });
@@ -110,6 +116,22 @@ class ConsultantAvailability extends Component {
         this.form.setFieldValue(newDay, arrToCopy);
       }
     })
+  }
+
+  onSelectTime = (type, value) => {
+    const { from_time, to_time } = this.state;
+    if (type === 'from') {
+      if (to_time && value.isAfter(to_time)) {
+        message.warning('The selected time is not valid.');
+      }
+      this.setState({ from_time: value });
+    }
+    if (type === 'to') {
+      if (from_time && from_time.isAfter(value)) {
+        message.warning('The selected time is not valid.');
+      }
+      this.setState({ from_time: value });
+    }
   }
 
   render() {
@@ -156,7 +178,7 @@ class ConsultantAvailability extends Component {
                                   <DatePicker
                                     format="MM/DD/YYY"
                                     placeholder={intl.formatMessage(messages.from)}
-                                    onChange={v => this.onChangeScheduleValue(day, v)}
+                                    onChange={() => this.onChangeScheduleValue()}
                                   />
                                 </Form.Item>
                               </Col>
@@ -165,7 +187,7 @@ class ConsultantAvailability extends Component {
                                   <DatePicker
                                     format="MM/DD/YYYY"
                                     placeholder={intl.formatMessage(messages.to)}
-                                    onChange={v => this.onChangeScheduleValue(day, v)}
+                                    onChange={() => this.onChangeScheduleValue()}
                                   />
                                 </Form.Item>
                                 {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
@@ -175,20 +197,22 @@ class ConsultantAvailability extends Component {
                               <Col xs={24} sm={24} md={12}>
                                 <Form.Item name={[field.name, "from_time"]}>
                                   <TimePicker
-                                    onChange={v => this.onChangeScheduleValue(day, v)}
+                                    onChange={() => this.onChangeScheduleValue()}
                                     use12Hours
                                     format="h:mm a"
                                     placeholder={intl.formatMessage(messages.from)}
+                                    onOk={(v) => this.onSelectTime('from', v)}
                                   />
                                 </Form.Item>
                               </Col>
                               <Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
                                 <Form.Item name={[field.name, "to_time"]}>
                                   <TimePicker
-                                    onChange={v => this.onChangeScheduleValue(day, v)}
+                                    onChange={() => this.onChangeScheduleValue()}
                                     use12Hours
                                     format="h:mm a"
                                     placeholder={intl.formatMessage(messages.to)}
+                                    onOk={(v) => this.onSelectTime('to', v)}
                                   />
                                 </Form.Item>
                                 {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
