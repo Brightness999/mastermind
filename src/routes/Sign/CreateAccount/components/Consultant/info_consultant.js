@@ -9,6 +9,7 @@ import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
+import { getCityConnections } from '../../../../../../src/utils/api/apiList';
 
 class InfoConsultant extends Component {
   constructor(props) {
@@ -16,16 +17,16 @@ class InfoConsultant extends Component {
     this.state = {
       EmailType: [],
       ContactNumberType: [],
-      contactPhoneNumber: [],
       contactEmail: [],
       SkillSet: [],
+      CityConnections: [],
     }
   }
 
   componentDidMount() {
     const { registerData } = this.props.register;
     this.getDataFromServer();
-    this.searchCityConnection('');
+    this.searchCityConnection();
     var consultantInfo = registerData.consultantInfo || this.getDefaultObj();
     this.form.setFieldsValue(consultantInfo);
     if (!registerData.consultantInfo) {
@@ -55,8 +56,8 @@ class InfoConsultant extends Component {
     })
   }
 
-  searchCityConnection(value) {
-    axios.post(url + 'providers/get_city_connections'
+  searchCityConnection() {
+    axios.post(url + getCityConnections
     ).then(result => {
       if (result.data.success) {
         var data = result.data.data;
@@ -117,10 +118,7 @@ class InfoConsultant extends Component {
   }
 
   render() {
-    const children = [];
-    for (let i = 10; i < 36; i++) {
-      children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
-    }
+    const { CityConnections, SkillSet, EmailType, ContactNumberType } = this.state;
 
     return (
       <Row justify="center" className="row-form">
@@ -138,6 +136,21 @@ class InfoConsultant extends Component {
               <Input onChange={v => this.defaultOnValueChange(v, "referredToAs")} placeholder={intl.formatMessage(messages.referredAs)} />
             </Form.Item>
             <Form.Item
+              name="cityConnection"
+              rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cityConnections) }]}
+            >
+              <Select
+                placeholder={intl.formatMessage(messages.cityConnections)}
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
+              >
+                {CityConnections?.map((value, index) => (
+                  <Select.Option key={index} value={value._id}>{value.name}</Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
               name="proExp"
               rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.professionalExperience) }]}
             >
@@ -150,7 +163,7 @@ class InfoConsultant extends Component {
               <Select
                 placeholder={intl.formatMessage(messages.skillsets)}
                 onChange={v => this.handelChange('skillSet', v)}>
-                {this.state.SkillSet.map((value, index) => (
+                {SkillSet.map((value, index) => (
                   <Select.Option key={index} value={index}>{value}</Select.Option>
                 ))}
               </Select>
@@ -198,7 +211,7 @@ class InfoConsultant extends Component {
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                         >
                           <Select placeholder={intl.formatMessage(messages.type)}>
-                            {this.state.ContactNumberType.map((value, index) => (
+                            {ContactNumberType.map((value, index) => (
                               <Select.Option key={index} value={index}>{value}</Select.Option>
                             ))}
                           </Select>
@@ -254,7 +267,7 @@ class InfoConsultant extends Component {
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                         >
                           <Select placeholder={intl.formatMessage(messages.type)}>
-                            {this.state.EmailType.map((value, index) => (
+                            {EmailType.map((value, index) => (
                               <Select.Option key={index} value={index}>{value}</Select.Option>
                             ))}
                           </Select>

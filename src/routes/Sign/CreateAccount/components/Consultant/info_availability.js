@@ -24,8 +24,6 @@ class ConsultantAvailability extends Component {
     super(props);
     this.state = {
       currentSelectedDay: day_week[0],
-      from_time: undefined,
-      to_time: undefined,
     }
   }
 
@@ -45,15 +43,10 @@ class ConsultantAvailability extends Component {
   onFinish = async (values) => {
     const { registerData } = this.props.register;
     var manualSchedule = [];
-
     for (var i = 0; i < day_week.length; i++) {
       for (var j = 0; j < values['' + day_week[i]].length; j++) {
         var scheduleItem = values['' + day_week[i]][j];
         if (scheduleItem.from_time && scheduleItem.to_time && (scheduleItem.from_date || scheduleItem.to_date)) {
-          if (scheduleItem.from_time && scheduleItem.to_time && scheduleItem.from_time.isAfter(scheduleItem.to_time)) {
-            message.warning('The selected time is not valid.');
-            return;
-          }
           manualSchedule.push({
             "dayInWeek": i,
             "fromYear": scheduleItem.from_date.year() ?? 0,
@@ -66,6 +59,21 @@ class ConsultantAvailability extends Component {
             "openMin": scheduleItem.from_time.minutes(),
             "closeHour": scheduleItem.to_time.hour(),
             "closeMin": scheduleItem.to_time.minutes(),
+          })
+        } else {
+          manualSchedule.push({
+            "location": '',
+            "dayInWeek": i,
+            "fromYear": 0,
+            "fromMonth": 0,
+            "fromDate": 0,
+            "toYear": 0,
+            "toMonth": 0,
+            "toDate": 0,
+            "openHour": 0,
+            "openMin": 0,
+            "closeHour": 0,
+            "closeMin": 0,
           })
         }
       }
@@ -116,22 +124,6 @@ class ConsultantAvailability extends Component {
         this.form.setFieldValue(newDay, arrToCopy);
       }
     })
-  }
-
-  onSelectTime = (type, value) => {
-    const { from_time, to_time } = this.state;
-    if (type === 'from') {
-      if (to_time && value.isAfter(to_time)) {
-        message.warning('The selected time is not valid.');
-      }
-      this.setState({ from_time: value });
-    }
-    if (type === 'to') {
-      if (from_time && from_time.isAfter(value)) {
-        message.warning('The selected time is not valid.');
-      }
-      this.setState({ from_time: value });
-    }
   }
 
   render() {
@@ -201,7 +193,6 @@ class ConsultantAvailability extends Component {
                                     use12Hours
                                     format="h:mm a"
                                     placeholder={intl.formatMessage(messages.from)}
-                                    onOk={(v) => this.onSelectTime('from', v)}
                                   />
                                 </Form.Item>
                               </Col>
@@ -212,7 +203,6 @@ class ConsultantAvailability extends Component {
                                     use12Hours
                                     format="h:mm a"
                                     placeholder={intl.formatMessage(messages.to)}
-                                    onOk={(v) => this.onSelectTime('to', v)}
                                   />
                                 </Form.Item>
                                 {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}

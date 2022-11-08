@@ -8,7 +8,7 @@ import messagesLogin from '../../../Login/messages';
 import PlacesAutocomplete from 'react-places-autocomplete';
 import axios from 'axios';
 import { url } from '../../../../../utils/api/baseUrl';
-import { getCommunitiServer } from '../../../../../utils/api/apiList'
+import { getCityConnections } from '../../../../../utils/api/apiList'
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -149,7 +149,7 @@ class InfoSchool extends React.Component {
 	};
 
 	loadCommunitiServer = () => {
-		axios.post(url + getCommunitiServer).then(response => {
+		axios.post(url + getCityConnections).then(response => {
 			const { success, data } = response.data
 			if (success) {
 				this.setState({ listCommunitiServer: data.docs })

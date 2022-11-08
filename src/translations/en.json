@@ -145,7 +145,7 @@
   "routes.Createaccount.confirm": "Confirm",
   "routes.Createaccount.schoolDetails": "School details",
   "routes.Createaccount.nameSchool": "Name of school",
-  "routes.Createaccount.communitiesServedNote": "Communities served (select all that apply)",
+  "routes.Createaccount.communitiesServedNote": "Communities served",
   "routes.Createaccount.communitiesServed": "Communities served",
   "routes.Createaccount.schoolAddress": "School address",
   "routes.Createaccount.technicalReferralContact": "Technical Referral Contact",

@@ -7,12 +7,16 @@ import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
+import axios from 'axios';
+import { url } from '../../../../../utils/api/baseUrl';
+import { getCityConnections } from '../../../../../../src/utils/api/apiList';
 
 class InfoParent extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			address: '',
+			CityConnections: [],
 		};
 	}
 
@@ -23,11 +27,12 @@ class InfoParent extends Component {
 		}
 		var parentInfo = registerData.parentInfo || this.getDefaultObj();
 		this.form.setFieldsValue(parentInfo);
+		this.searchCityConnection();
 	}
 
 	getDefaultObj = () => {
 		return {
-			maritialType: '',
+			maritialType: undefined,
 			address: '',
 			familyName: '',
 			fatherName: '',
@@ -35,8 +40,28 @@ class InfoParent extends Component {
 			fatherEmail: '',
 			motherName: '',
 			motherPhoneNumber: '',
-			motherEmail: ''
+			motherEmail: '',
+			cityConnection: undefined,
 		};
+	}
+
+	searchCityConnection() {
+		axios.post(url + getCityConnections
+		).then(result => {
+			if (result.data.success) {
+				var data = result.data.data;
+				this.setState({ CityConnections: data.docs })
+			} else {
+				this.setState({
+					CityConnections: [],
+				});
+			}
+		}).catch(err => {
+			console.log(err);
+			this.setState({
+				CityConnections: [],
+			});
+		})
 	}
 
 	getDefaultValueInitForm = (key) => {
@@ -81,6 +106,8 @@ class InfoParent extends Component {
 	};
 
 	render() {
+		const { address, CityConnections } = this.state;
+
 		return (
 			<Row justify="center" className="row-form">
 				<div className='col-form col-info-parent'>
@@ -108,7 +135,7 @@ class InfoParent extends Component {
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.address) }]}
 						>
 							<PlacesAutocomplete
-								value={this.state.address}
+								value={address}
 								onChange={this.handleChangeAddress}
 								onSelect={this.handleSelectAddress}
 							>
@@ -140,9 +167,21 @@ class InfoParent extends Component {
 							</PlacesAutocomplete>
 						</Form.Item>
 						<Form.Item
-							name="maritialType"
-							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.maritalStatus) }]}
+							name="cityConnection"
+							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cityConnections) }]}
 						>
+							<Select
+								placeholder={intl.formatMessage(messages.cityConnections)}
+								showSearch
+								optionFilterProp="children"
+								filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
+							>
+								{CityConnections?.map((value, index) => (
+									<Select.Option key={index} value={value._id}>{value.name}</Select.Option>
+								))}
+							</Select>
+						</Form.Item>
+						<Form.Item name="maritialType">
 							<Select
 								onChange={v => this.defaultOnChangeDropdownValue(v, "maritialType")}
 								placeholder={intl.formatMessage(messages.maritalStatus)}

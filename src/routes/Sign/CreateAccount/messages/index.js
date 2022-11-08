@@ -544,7 +544,7 @@ export default ({
   },
   communitiesServedNote: {
     id: `${scope}.communitiesServedNote`,
-    defaultMessage: 'Communities served (select all that apply)',
+    defaultMessage: 'Communities served',
   },
   communitiesServed: {
     id: `${scope}.communitiesServed`,

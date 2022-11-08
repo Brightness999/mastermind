@@ -54,10 +54,11 @@ class InfoChild extends Component {
 		this.loadServices();
 		this.loadSchools();
 	}
-
+	
 	createNewChild() {
 		const { registerData } = this.props.register;
 		var newChild = this.getDefaultChildObj(registerData.parentInfo);
+		this.form.setFieldsValue({ children: registerData.studentInfos });
 		this.props.setRegisterData({ studentInfos: [...registerData.studentInfos, newChild] });
 	}
 
@@ -241,7 +242,7 @@ class InfoChild extends Component {
 															label={intl.formatMessage(messages.guardianPhone)}>
 															<Input
 																onChange={v => this.updateReduxValueFor1Depedent(index, "guardianPhone", v.target.value)}
-																placeholder='{PARENTS} AUTOFILL'
+																placeholder={intl.formatMessage(messages.contactNumber)}
 															/>
 														</Form.Item>
 													</Col>
@@ -251,7 +252,7 @@ class InfoChild extends Component {
 															label={intl.formatMessage(messages.guardianEmail)}>
 															<Input
 																onChange={v => this.updateReduxValueFor1Depedent(index, "guardianEmail", v.target.value)}
-																placeholder='{PARENTS} AUTOFILL'
+																placeholder={intl.formatMessage(messages.contactEmail)}
 															/>
 														</Form.Item>
 													</Col>

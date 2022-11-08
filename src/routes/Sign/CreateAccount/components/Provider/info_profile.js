@@ -111,10 +111,6 @@ class InfoProfile extends Component {
 		this.setValueToReduxRegisterData(fieldName, value);
 	}
 
-	onConnectionsChanged = (selected) => {
-		console.log('connect changed', selected);
-	}
-
 	handelChange = (event, fieldName) => {
 		var value = event;
 		this.setValueToReduxRegisterData(fieldName, value);
@@ -229,7 +225,6 @@ class InfoProfile extends Component {
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cityConnections) }]}
 						>
 							<Select
-								onChange={v => this.onConnectionsChanged(v, "cityConnection")}
 								placeholder={intl.formatMessage(messages.cityConnections)}
 								showSearch
 								optionFilterProp="children"
