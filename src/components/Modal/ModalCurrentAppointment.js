@@ -16,6 +16,7 @@ const { Paragraph } = Typography;
 import 'moment/locale/en-au';
 moment.locale('en');
 import { store } from '../../redux/store';
+import { rescheduleAppointmentForParent, searchProvidersForParent } from '../../utils/api/apiList';
 
 class ModalCurrentAppointment extends React.Component {
 	state = {
@@ -76,7 +77,7 @@ class ModalCurrentAppointment extends React.Component {
 			address: address,
 			skill: selectedSkillSet
 		};
-		request.post('clients/search_providers', data).then(result => {
+		request.post(searchProvidersForParent, data).then(result => {
 			if (result.success) {
 				this.setState({
 					listProvider: result.data.providers,
@@ -255,7 +256,7 @@ class ModalCurrentAppointment extends React.Component {
 	}
 
 	requestUpdateAppointment(postData) {
-		request.post('clients/reschedule_appointment', postData).then(result => {
+		request.post(rescheduleAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
 				this.searchProvider();

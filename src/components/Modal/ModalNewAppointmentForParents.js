@@ -13,6 +13,7 @@ import 'moment/locale/en-au';
 import './style/index.less';
 import '../../assets/styles/login.less';
 import request from '../../utils/api/request'
+import { createAppointmentForParent, searchProvidersForParent } from '../../utils/api/apiList';
 
 const { Paragraph } = Typography;
 moment.locale('en');
@@ -74,7 +75,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			address: address,
 			skill: selectedSkillSet
 		};
-		request.post('clients/search_providers', data).then(result => {
+		request.post(searchProvidersForParent, data).then(result => {
 			if (result.success) {
 				this.setState({
 					listProvider: result.data.providers,
@@ -276,7 +277,7 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	requestCreateAppointment(postData) {
-		request.post('clients/create_appoinment', postData).then(result => {
+		request.post(createAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
 				this.searchProvider();

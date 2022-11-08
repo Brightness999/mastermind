@@ -9,7 +9,7 @@ import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
-import { getCityConnections } from '../../../../../../src/utils/api/apiList';
+import { getCityConnections } from '../../../../../utils/api/apiList';
 
 class InfoConsultant extends Component {
   constructor(props) {

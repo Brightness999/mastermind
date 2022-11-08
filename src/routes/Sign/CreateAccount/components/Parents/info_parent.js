@@ -9,7 +9,7 @@ import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
 import axios from 'axios';
 import { url } from '../../../../../utils/api/baseUrl';
-import { getCityConnections } from '../../../../../../src/utils/api/apiList';
+import { getCityConnections } from '../../../../../utils/api/apiList';
 
 class InfoParent extends Component {
 	constructor(props) {

@@ -9,6 +9,7 @@ import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
+import { getAllSchoolsForParent, getDefaultValueForProvider } from '../../../../../utils/api/apiList';
 
 class InfoServices extends Component {
 	constructor(props) {
@@ -35,12 +36,11 @@ class InfoServices extends Component {
 			serviceableSchool: serviceInfor.serviceableSchool,
 		})
 		this.getDataFromServer()
-		this.loadSchools();
+		this.loadSchools(registerData.profileInfor);
 	}
 
 	getDataFromServer = () => {
-		axios.post(url + 'providers/get_default_values_for_provider'
-		).then(result => {
+		axios.post(url + getDefaultValueForProvider).then(result => {
 			if (result.data.success) {
 				const data = result.data.data;
 				this.setState({
@@ -84,8 +84,8 @@ class InfoServices extends Component {
 		console.log('Failed:', errorInfo);
 	};
 
-	loadSchools() {
-		axios.post(url + 'clients/get_all_schools').then(result => {
+	loadSchools(providerInfor) {
+		axios.post(url + getAllSchoolsForParent, { communityServed: providerInfor?.cityConnection }).then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
 				this.setState({ listSchools: data });

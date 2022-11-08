@@ -10,6 +10,7 @@ import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
+import { getCityConnections, getDefaultValueForProvider } from '../../../../../utils/api/apiList';
 
 class InfoProfile extends Component {
 	constructor(props) {
@@ -28,7 +29,7 @@ class InfoProfile extends Component {
 	componentDidMount() {
 		const { registerData } = this.props.register;
 		this.getDataFromServer();
-		this.searchCityConnection('');
+		this.searchCityConnection();
 		var profileInfor = registerData.profileInfor || this.getDefaultObj();
 		this.form.setFieldsValue(profileInfor);
 		if (!registerData.profileInfor) {
@@ -37,8 +38,7 @@ class InfoProfile extends Component {
 	}
 
 	getDataFromServer = () => {
-		axios.post(url + 'providers/get_default_values_for_provider'
-		).then(result => {
+		axios.post(url + getDefaultValueForProvider).then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
 				this.setState({ ContactNumberType: data.ContactNumberType, EmailType: data.EmailType, })
@@ -55,9 +55,8 @@ class InfoProfile extends Component {
 		})
 	}
 
-	searchCityConnection(value) {
-		axios.post(url + 'providers/get_city_connections'
-		).then(result => {
+	searchCityConnection() {
+		axios.post(url + getCityConnections).then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
 				this.setState({ CityConnections: data.docs })

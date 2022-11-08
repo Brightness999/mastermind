@@ -34,6 +34,7 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 import { setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { checkNotificationForClient, checkNotificationForProvider, closeNotificationForClient, getDefaultValueForClient, searchProvidersForParent } from '../../../utils/api/apiList';
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -104,7 +105,7 @@ class Dashboard extends React.Component {
         this.getMyAppointments(loginData.role);
         const notifications = setInterval(() => {
           if (loginData.role == 3) {
-            request.post('clients/check_notification').then(res => {
+            request.post(checkNotificationForClient).then(res => {
               res.data?.forEach(appointment => {
                 const key = `open${Date.now()}`;
                 const btn = (
@@ -136,7 +137,7 @@ class Dashboard extends React.Component {
             })
           }
           if (loginData.role == 30) {
-            request.post('providers/check_notification').then(res => {
+            request.post(checkNotificationForProvider).then(res => {
               res.data?.forEach(appointment => {
                 const key = `open${Date.now()}`;
                 const btn = (
@@ -202,17 +203,17 @@ class Dashboard extends React.Component {
   }
 
   handleCloseNotification = (id) => {
-    request.post('clients/close_notification', { appointmentId: id }).catch(err => {
+    request.post(closeNotificationForClient, { appointmentId: id }).catch(err => {
       console.log('close notification error---', err);
     })
   }
 
   loadDefaultData() {
-    request.post('clients/get_default_value_for_client').then(result => {
+    request.post(getDefaultValueForClient).then(result => {
       const data = result.data;
       this.setState({ SkillSet: data.SkillSet?.docs });
     });
-    request.post('clients/search_providers', generateSearchStructure('')).then(result => {
+    request.post(searchProvidersForParent, generateSearchStructure('')).then(result => {
       if (result.success) {
         this.setState({ listProvider: result.data?.providers ?? [] });
       }

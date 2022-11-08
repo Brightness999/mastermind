@@ -10,6 +10,7 @@ import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
+import { getDefaultValueForProvider, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
 
 class InfoFinancial extends Component {
 	constructor(props) {
@@ -40,8 +41,7 @@ class InfoFinancial extends Component {
 	}
 
 	getDataFromServer = () => {
-		axios.post(url + 'providers/get_default_values_for_provider'
-		).then(result => {
+		axios.post(url + getDefaultValueForProvider).then(result => {
 			if (result.data.success) {
 				const data = result.data.data;
 				this.setState({ AcademicLevel: data.AcademicLevel });
@@ -112,7 +112,7 @@ class InfoFinancial extends Component {
 		const { AcademicLevel, sameRateForAllLevel, isSeparateEvaluationRate, isReceiptsProvided } = this.state;
 		const uploadProps = {
 			name: 'file',
-			action: url + 'providers/upload_temp_w9_form',
+			action: url + uploadTempW9FormForProvider,
 			headers: { authorization: 'authorization-text' },
 			onChange: this.onUploadChange,
 			maxCount: 1,

@@ -9,6 +9,7 @@ import msgDetail from '../DrawerDetail/messages';
 import { ModalNoShow, ModalBalance, ModalConfirm } from '../../components/Modal';
 import request from '../../utils/api/request';
 import moment from 'moment';
+import { cancelAppointmentForProvider, closeAppointmentForProvider } from '../../utils/api/apiList';
 const { Paragraph } = Typography;
 
 class DrawerDetailPost extends Component {
@@ -76,7 +77,7 @@ class DrawerDetailPost extends Component {
         appointmentId: this.props.event._id,
         publicFeedback: this.state.publicFeedback,
       }
-      request.post('providers/close_appointment', data).then(result => {
+      request.post(closeAppointmentForProvider, data).then(result => {
         if (result.success) {
           this.setState({
             errorMessage: '',
@@ -101,7 +102,7 @@ class DrawerDetailPost extends Component {
   handleCancel = () => {
     if (this.props.event?._id) {
       const data = { appointId: this.props.event._id };
-      request.post('providers/cancel_appoint', data).then(result => {
+      request.post(cancelAppointmentForProvider, data).then(result => {
         if (result.success) {
           this.setState({
             errorMessage: '',

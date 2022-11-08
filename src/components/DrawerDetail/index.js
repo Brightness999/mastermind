@@ -13,6 +13,7 @@ import moment from 'moment';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
+import { cancelAppointmentForParent, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
@@ -59,7 +60,7 @@ class DrawerDetail extends Component {
     this.setState({ visibleCancel: false }, () => {
       if (this.props.event?._id) {
         const data = { appointId: this.props.event._id };
-        request.post('clients/cancel_appoint', data).then(result => {
+        request.post(cancelAppointmentForParent, data).then(result => {
           if (result.success) {
             this.setState({
               errorMessage: '',
@@ -131,7 +132,7 @@ class DrawerDetail extends Component {
   handleUpdateNotes = () => {
     if (this.props.event?._id) {
       const data = { appointmentId: this.props.event._id, notes: this.state.notes };
-      request.post('clients/update_appointment_notes', data).then(res => {
+      request.post(updateAppointmentNotesForParent, data).then(res => {
         if (res.success) {
           this.setState({
             errorMessage: '',

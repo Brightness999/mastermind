@@ -7,6 +7,7 @@ import { compose } from 'redux'
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios'
+import { getReviewInfoForProvider, userSignUp } from '../../../../../utils/api/apiList';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -28,7 +29,7 @@ class InfoReview extends Component {
 	}
 
 	componentDidMount() {
-		axios.post(url + 'providers/get_review_info').then(result => {
+		axios.post(url + getReviewInfoForProvider).then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
 				this.setState({
@@ -56,7 +57,7 @@ class InfoReview extends Component {
 	onSubmit = async () => {
 		const { registerData } = this.props.register;
 		var postData = this.copyField(registerData);
-		const response = await axios.post(url + 'users/signup', postData);
+		const response = await axios.post(url + userSignUp, postData);
 		const { success } = response.data;
 		if (success) {
 			this.props.removeRegisterData();
@@ -223,13 +224,13 @@ class InfoReview extends Component {
 										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.sunday)}</p>
 										{registerData?.availability?.Sunday?.map((data, index) => {
 											return (data.from_date && data.to_date && data.from_time && data.to_time && data.location) ? (
-												<>
-													<div key={index} className='flex'>
+												<React.Fragment key={index}>
+													<div className='flex'>
 														<div>{`${this.displayHourMin(data.from_date.month() + 1)}/${this.displayHourMin(data.from_date.date())}/${data.from_date.year()}`} - {`${this.displayHourMin(data.to_date.month() + 1)}/${this.displayHourMin(data.to_date.date())}/${data.to_date.year()}`}</div>
 														<div className='ml-20'>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
 													</div>
 													<div>{data.location}</div>
-												</>
+												</React.Fragment>
 											) : null
 										})}
 									</div>
@@ -248,13 +249,13 @@ class InfoReview extends Component {
 										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.tuesday)}</p>
 										{registerData?.availability?.Tuesday?.map((data, index) => {
 											return (data.from_date && data.to_date && data.from_time && data.to_time && data.location) ? (
-												<>
-													<div key={index} className='flex'>
+												<React.Fragment key={index}>
+													<div className='flex'>
 														<div>{`${this.displayHourMin(data.from_date.month() + 1)}/${this.displayHourMin(data.from_date.date())}/${data.from_date.year()}`} - {`${this.displayHourMin(data.to_date.month() + 1)}/${this.displayHourMin(data.to_date.date())}/${data.to_date.year()}`}</div>
 														<div className='ml-20'>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
 													</div>
 													<div>{data.location}</div>
-												</>
+												</React.Fragment>
 											) : null
 										})}
 									</div>
@@ -262,13 +263,13 @@ class InfoReview extends Component {
 										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.wednesday)}</p>
 										{registerData?.availability?.Wednesday?.map((data, index) => {
 											return (data.from_date && data.to_date && data.from_time && data.to_time && data.location) ? (
-												<>
-													<div key={index} className='flex'>
+												<React.Fragment key={index}>
+													<div className='flex'>
 														<div>{`${this.displayHourMin(data.from_date.month() + 1)}/${this.displayHourMin(data.from_date.date())}/${data.from_date.year()}`} - {`${this.displayHourMin(data.to_date.month() + 1)}/${this.displayHourMin(data.to_date.date())}/${data.to_date.year()}`}</div>
 														<div className='ml-20'>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
 													</div>
 													<div>{data.location}</div>
-												</>
+												</React.Fragment>
 											) : null
 										})}
 									</div>
@@ -276,13 +277,13 @@ class InfoReview extends Component {
 										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.thursday)}</p>
 										{registerData?.availability?.Thursday?.map((data, index) => {
 											return (data.from_date && data.to_date && data.from_time && data.to_time && data.location) ? (
-												<>
-													<div key={index} className='flex'>
+												<React.Fragment key={index}>
+													<div className='flex'>
 														<div>{`${this.displayHourMin(data.from_date.month() + 1)}/${this.displayHourMin(data.from_date.date())}/${data.from_date.year()}`} - {`${this.displayHourMin(data.to_date.month() + 1)}/${this.displayHourMin(data.to_date.date())}/${data.to_date.year()}`}</div>
 														<div className='ml-20'>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
 													</div>
 													<div>{data.location}</div>
-												</>
+												</React.Fragment>
 											) : null
 										})}
 									</div>
@@ -290,13 +291,13 @@ class InfoReview extends Component {
 										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.friday)}</p>
 										{registerData?.availability?.Friday?.map((data, index) => {
 											return (data.from_date && data.to_date && data.from_time && data.to_time && data.location) ? (
-												<>
-													<div key={index} className='flex'>
+												<React.Fragment key={index}>
+													<div className='flex'>
 														<div>{`${this.displayHourMin(data.from_date.month() + 1)}/${this.displayHourMin(data.from_date.date())}/${data.from_date.year()}`} - {`${this.displayHourMin(data.to_date.month() + 1)}/${this.displayHourMin(data.to_date.date())}/${data.to_date.year()}`}</div>
 														<div className='ml-20'>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
 													</div>
 													<div>{data.location}</div>
-												</>
+												</React.Fragment>
 											) : null
 										})}
 									</div>

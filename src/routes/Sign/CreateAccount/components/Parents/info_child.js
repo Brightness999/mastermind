@@ -11,7 +11,7 @@ import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import moment from 'moment';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
-import { getAllSchoolsForParent, getDefaultValueForClient } from '../../../../../../src/utils/api/apiList';
+import { getAllSchoolsForParent, getDefaultValueForClient } from '../../../../../utils/api/apiList';
 
 class InfoChild extends Component {
 	constructor(props) {

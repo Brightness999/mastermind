@@ -13,6 +13,7 @@ import request from '../../../utils/api/request'
 import { ModalCancelAppointment, ModalCurrentAppointment } from '../../../components/Modal';
 import { store } from '../../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
+import { cancelAppointmentForParent } from '../../../utils/api/apiList';
 
 class PanelAppointment extends React.Component {
   constructor(props) {
@@ -105,7 +106,7 @@ class PanelAppointment extends React.Component {
     this.setState({ visibleCancel: false }, () => {
       if (this.state.event?._id) {
         const data = { appointId: this.state.event._id };
-        request.post('clients/cancel_appoint', data).then(result => {
+        request.post(cancelAppointmentForParent, data).then(result => {
           if (result.success) {
             this.setState({
               errorMessage: '',

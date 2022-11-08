@@ -16,21 +16,21 @@ import request from '../../utils/api/request'
 import 'moment/locale/en-au';
 moment.locale('en');
 
-const arrTime = [
-	"8:30am",
-	"9:00am",
-	"9:30am",
-	"10:30am",
-	"11:00am",
-	"11:30am",
-	"1:30pm",
-	"2:00pm",
-	"2:30pm",
-	"3:00pm",
-	"3:30pm",
-	"4:00pm",
-	"4:30pm",
-	"5:00pm",
+const initialValues = [
+	{ value: "8:30am", active: false },
+	{ value: "9:00am", active: false },
+	{ value: "9:30am", active: false },
+	{ value: "10:30am", active: false },
+	{ value: "11:00am", active: false },
+	{ value: "11:30am", active: false },
+	{ value: "1:30pm", active: false },
+	{ value: "2:00pm", active: false },
+	{ value: "2:30pm", active: false },
+	{ value: "3:00pm", active: false },
+	{ value: "3:30pm", active: false },
+	{ value: "4:00pm", active: false },
+	{ value: "4:30pm", active: false },
+	{ value: "5:00pm", active: false },
 ];
 
 class ModalReferralService extends React.Component {
@@ -51,106 +51,99 @@ class ModalReferralService extends React.Component {
 		isGoogleMeet: false,
 		selectedDate: moment(),
 		isSelectTime: -1,
+		errorMessage: '',
+		arrTime: initialValues,
 	}
 
 	componentDidMount = () => {
-		this.props.setLoadData(this.loadDataForReferralFromSubsidy);
+		// this.props.setLoadData(this.loadDataForReferralFromSubsidy);
 	}
 
-	loadDefaultData() {
-		this.setState({
-			fileList: [],
-			uploading: false,
-			selectedDependent: undefined,
-			selectedSkillSet: undefined,
-			schoolInfo: undefined,
-			consulationPhoneNumber: undefined,
-			meetLocation: undefined,
-			meetSolution: undefined,
-			note: undefined,
-			subsidyId: undefined,
-		})
-	}
+	// loadDefaultData() {
+	// 	this.setState({
+	// 		fileList: [],
+	// 		uploading: false,
+	// 		selectedDependent: undefined,
+	// 		selectedSkillSet: undefined,
+	// 		schoolInfo: undefined,
+	// 		consulationPhoneNumber: undefined,
+	// 		meetLocation: undefined,
+	// 		meetSolution: undefined,
+	// 		note: undefined,
+	// 		subsidyId: undefined,
+	// 	})
+	// }
 
-	loadDataForReferralFromSubsidy = (subsidy, callback) => {
-		this.loadDefaultData();
-		if (subsidy != undefined && subsidy.student != undefined && subsidy.student._id != undefined) {
-			this.setState({
-				subsidyId: subsidy._id,
-				selectedSkillSet: subsidy.skillSet,
-				schoolInfo: subsidy.school,
-				selectedDependent: subsidy.student._id,
-				consulationPhoneNumber: subsidy.school.techContactRef[0],
-			})
-		}
-		if (callback != undefined) {
-			this.callbackForReferral = callback
-		} else {
-			this.callbackForReferral = undefined;
-		}
-	}
+	// loadDataForReferralFromSubsidy = (subsidy, callback) => {
+	// 	this.loadDefaultData();
+	// 	if (subsidy != undefined && subsidy.student != undefined && subsidy.student._id != undefined) {
+	// 		this.setState({
+	// 			subsidyId: subsidy._id,
+	// 			selectedSkillSet: subsidy.skillSet,
+	// 			schoolInfo: subsidy.school,
+	// 			selectedDependent: subsidy.student._id,
+	// 			consulationPhoneNumber: subsidy.school.techContactRef[0],
+	// 		})
+	// 	}
+	// 	if (callback != undefined) {
+	// 		this.callbackForReferral = callback
+	// 	} else {
+	// 		this.callbackForReferral = undefined;
+	// 	}
+	// }
 
-	loadDataForSelectedDependent(dependent) {
-		var schoolId = dependent.school._id || dependent.school;
-		if (!!this.state.schoolInfo && schoolId == this.state.schoolInfo._id) {
-			return;
-		}
-		request.post('schools/get_school_info', { 'schoolId': schoolId }).then(result => {
-			if (result.success) {
-				this.setState({ schoolInfo: result.data, consulationPhoneNumber: result.data.techContactRef[0] });
-			} else {
-				this.setState({ schoolInfo: undefined });
-			}
-		}).catch(err => {
-			console.log(err);
-			this.setState({ schoolInfo: undefined });
-		})
-	}
+	// loadDataForSelectedDependent(dependent) {
+	// 	var schoolId = dependent.school._id || dependent.school;
+	// 	if (!!this.state.schoolInfo && schoolId == this.state.schoolInfo._id) {
+	// 		return;
+	// 	}
+	// 	request.post('schools/get_school_info', { 'schoolId': schoolId }).then(result => {
+	// 		if (result.success) {
+	// 			this.setState({ schoolInfo: result.data, consulationPhoneNumber: result.data.techContactRef[0] });
+	// 		} else {
+	// 			this.setState({ schoolInfo: undefined });
+	// 		}
+	// 	}).catch(err => {
+	// 		console.log(err);
+	// 		this.setState({ schoolInfo: undefined });
+	// 	})
+	// }
 
 	createConsulation = () => {
-		if (!this.state.consulationPhoneNumber
-			|| this.state.consulationPhoneNumber.length < 1
-			|| this.state.meetSolution == undefined ||
-			this.state.isSelectTime < 0
-		) {
-			console.log(this.state.consulationPhoneNumber
-				, this.state.consulationPhoneNumber.length < 1
-				, this.state.meetSolution == undefined,
-				this.state.isSelectTime < 0)
-			message.error('please fill all reuired field');
+		const { subsidyId, selectedDependent, selectedSkillSet, consulationPhoneNumber, fileList, note, isSelectTime, selectedDate, arrTime } = this.state;
+
+		if (!selectedDate?.isAfter(new Date()) || isSelectTime < 0) {
+			this.setState({ errorMessage: 'Please select a date and time' })
 			return;
 		}
 
-		var str = this.state.selectedDate.format("DD/MM/YYYY") + " " + arrTime[this.state.isSelectTime];
-		var _selectedDay = moment(str, 'DD/MM/YYYY hh:mm').valueOf();
-		var postData = {
-			"subsidyId": this.state.subsidyId,
-			"dependent": this.state.selectedDependent,
-			"skillSet": this.state.selectedSkillSet,
-			"school": this.state.schoolInfo._id,
-			"typeForAppointLocation": this.state.meetSolution,
-			"location": this.state.meetLocation,
+		const str = selectedDate.format("DD/MM/YYYY") + " " + arrTime[isSelectTime];
+		const _selectedDay = moment(str, 'DD/MM/YYYY hh:mm').valueOf();
+		const postData = {
+			"subsidyId": subsidyId,
+			"dependent": selectedDependent,
+			"skillSet": selectedSkillSet,
 			"date": _selectedDay,
-			"phoneNumber": this.state.consulationPhoneNumber,
-			"addtionalDocuments": this.state.fileList.length > 0 ? [this.state.fileList[0].response.data] : [],
-			"note": this.state.note,
+			"phoneNumber": consulationPhoneNumber,
+			"addtionalDocuments": fileList.length > 0 ? [fileList[0].response.data] : [],
+			"note": note,
 		};
 
-		request.post(switchPathWithRole(this.props.userRole) + 'create_consulation_to_subsidy', postData).then(result => {
-			if (result.success) {
-				!!this.callbackForReferral && this.callbackForReferral()
-				this.props.onCancel();
-			} else {
-				message.error('cannot create referral');
-			}
-		}).catch(err => {
-			console.log(err);
-			message.error('cannot create referral');
-		})
+		// request.post(switchPathWithRole(this.props.userRole) + 'create_consulation_to_subsidy', postData).then(result => {
+		// 	if (result.success) {
+		// 		!!this.callbackForReferral && this.callbackForReferral()
+		// 		this.props.onCancel();
+		// 	} else {
+		// 		message.error('cannot create referral');
+		// 	}
+		// }).catch(err => {
+		// 	console.log(err);
+		// 	message.error('cannot create referral');
+		// })
 	}
 
 	onFinishFailed = (values) => {
-		console.log(values);
+		console.log('Failed', values);
 	}
 
 	onConfirm = () => {
@@ -159,7 +152,7 @@ class ModalReferralService extends React.Component {
 	}
 
 	onSelectTime = (index) => {
-		this.setState({ isSelectTime: index })
+		this.setState({ isSelectTime: index });
 	}
 
 	onChangeUpload = (info) => {
@@ -200,8 +193,23 @@ class ModalReferralService extends React.Component {
 		}
 	}
 
+	handleSelectDependent = (value) => {
+		this.setState({ selectedDependent: value });
+		// const selected = this.props.listDependents.find(x => x._id === value);
+		// this.loadDataForSelectedDependent(selected);
+	}
+
+	onSelectDate = (newValue) => {
+		if (newValue.isSameOrAfter(new Date())) {
+			this.setState({
+				selectedDate: newValue,
+				isSelectTime: -1,
+			});
+		}
+	}
+
 	render() {
-		const { selectedDate, selectedValue, isSelectTime, selectedDependent, subsidyId, selectedSkillSet, consulationPhoneNumber, note, isGoogleMeet } = this.state;
+		const { selectedDate, isSelectTime, selectedDependent, subsidyId, selectedSkillSet, consulationPhoneNumber, note, isGoogleMeet, errorMessage, arrTime } = this.state;
 
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -245,11 +253,7 @@ class ModalReferralService extends React.Component {
 										placeholder={intl.formatMessage(msgCreateAccount.dependent)}
 										value={selectedDependent}
 										disabled={subsidyId != undefined}
-										onChange={v => {
-											this.setState({ selectedDependent: v });
-											var selected = this.props.listDependents.find(x => x._id === v);
-											this.loadDataForSelectedDependent(selected);
-										}}
+										onChange={v => this.handleSelectDependent(v)}
 									>
 										{this.props.listDependents?.map((dependent, index) => (
 											<Select.Option key={index} value={dependent._id}>{dependent.firstName} {dependent.lastName}</Select.Option>
@@ -328,7 +332,7 @@ class ModalReferralService extends React.Component {
 														<div className='mb-10'>
 															<Row gutter={8} justify="space-between" align="middle">
 																<Col>
-																	<p className='font-12 mb-0'>{selectedValue?.format('MMMM YYYY')}</p>
+																	<p className='font-12 mb-0'>{selectedDate?.format('MMMM YYYY')}</p>
 																</Col>
 																<Col>
 																	<Button
@@ -354,7 +358,7 @@ class ModalReferralService extends React.Component {
 													{arrTime?.map((time, index) => (
 														<Col key={index} span={12}>
 															<div className={isSelectTime === index ? 'time-available active' : 'time-available'} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
-																<p className='font-12 mb-0'><GoPrimitiveDot className='active' size={15} />{time}</p>
+																<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{time.value}</p>
 															</div>
 														</Col>
 													))}
@@ -365,6 +369,7 @@ class ModalReferralService extends React.Component {
 								</div>
 							</Col>
 						</Row>
+						{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
 						<Row justify='end' className='gap-2'>
 							<Button key="back" onClick={this.props.onCancel}>
 								{intl.formatMessage(msgReview.goBack).toUpperCase()}

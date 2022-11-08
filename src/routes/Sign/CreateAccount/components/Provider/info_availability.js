@@ -12,6 +12,7 @@ import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
 import moment from 'moment';
+import { getDefaultValueForProvider } from '../../../../../utils/api/apiList';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -65,8 +66,7 @@ class InfoAvailability extends Component {
 	}
 
 	getDataFromServer = () => {
-		axios.post(url + 'providers/get_default_values_for_provider'
-		).then(result => {
+		axios.post(url + getDefaultValueForProvider).then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
 				this.setState({ CancellationWindow: data.CancellationWindow, })
