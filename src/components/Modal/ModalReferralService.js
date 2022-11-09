@@ -11,52 +11,67 @@ import msgRequest from '../../routes/Sign/SubsidyRequest/messages';
 import moment from 'moment';
 import './style/index.less';
 import '../../assets/styles/login.less';
-import { url, switchPathWithRole } from '../../utils/api/baseUrl'
+import { url } from '../../utils/api/baseUrl'
 import request from '../../utils/api/request'
 import 'moment/locale/en-au';
+import { createAppointmentForParent, getAllConsultantForParent, getConsultationsForDependent } from '../../utils/api/apiList';
 moment.locale('en');
-
-const initialValues = [
-	{ value: "8:30am", active: false },
-	{ value: "9:00am", active: false },
-	{ value: "9:30am", active: false },
-	{ value: "10:30am", active: false },
-	{ value: "11:00am", active: false },
-	{ value: "11:30am", active: false },
-	{ value: "1:30pm", active: false },
-	{ value: "2:00pm", active: false },
-	{ value: "2:30pm", active: false },
-	{ value: "3:00pm", active: false },
-	{ value: "3:30pm", active: false },
-	{ value: "4:00pm", active: false },
-	{ value: "4:30pm", active: false },
-	{ value: "5:00pm", active: false },
-];
 
 class ModalReferralService extends React.Component {
 	state = {
 		isConfirm: false,
 		isPopupComfirm: false,
-		isSelectTime: -1,
+		selectedTimeIndex: -1,
 		fileList: [],
 		uploading: false,
 		selectedDependent: undefined,
 		selectedSkillSet: undefined,
 		schoolInfo: undefined,
-		consulationPhoneNumber: undefined,
+		phoneNumber: undefined,
 		meetLocation: undefined,
 		meetSolution: undefined,
 		note: undefined,
 		subsidyId: undefined,
 		isGoogleMeet: false,
 		selectedDate: moment(),
-		isSelectTime: -1,
 		errorMessage: '',
-		arrTime: initialValues,
+		arrTime: [],
+		appointments: [],
+		consultants: [],
 	}
 
 	componentDidMount = () => {
 		// this.props.setLoadData(this.loadDataForReferralFromSubsidy);
+		let arrTime = [];
+		let hour9AM = moment().set({ hours: 9, minutes: 0, seconds: 0, milliseconds: 0 });
+		for (let i = 0; i < 6; i++) {
+			let newTime = hour9AM.clone();
+			hour9AM = hour9AM.add(30, 'minutes')
+			arrTime.push({
+				value: newTime,
+				active: false,
+			});
+		}
+		let hour2PM = moment().set({ hours: 14, minutes: 0, seconds: 0, milliseconds: 0 });
+		for (let i = 0; i < 8; i++) {
+			let newTime = hour2PM.clone();
+			hour2PM = hour2PM.add(30, 'minutes')
+			arrTime.push({
+				value: newTime,
+				active: false,
+			});
+		}
+		this.setState({ arrTime: arrTime });
+		request.post(getAllConsultantForParent).then(res => {
+			if (res.success) {
+				this.setState({ consultants: res.data });
+			} else {
+				this.setState({ consultants: [] });
+			}
+		}).catch(err => {
+			console.log('get all consultants error---', err);
+			this.setState({ consultants: [] });
+		})
 	}
 
 	// loadDefaultData() {
@@ -66,7 +81,7 @@ class ModalReferralService extends React.Component {
 	// 		selectedDependent: undefined,
 	// 		selectedSkillSet: undefined,
 	// 		schoolInfo: undefined,
-	// 		consulationPhoneNumber: undefined,
+	// 		phoneNumber: undefined,
 	// 		meetLocation: undefined,
 	// 		meetSolution: undefined,
 	// 		note: undefined,
@@ -82,7 +97,7 @@ class ModalReferralService extends React.Component {
 	// 			selectedSkillSet: subsidy.skillSet,
 	// 			schoolInfo: subsidy.school,
 	// 			selectedDependent: subsidy.student._id,
-	// 			consulationPhoneNumber: subsidy.school.techContactRef[0],
+	// 			phoneNumber: subsidy.school.techContactRef[0],
 	// 		})
 	// 	}
 	// 	if (callback != undefined) {
@@ -99,7 +114,7 @@ class ModalReferralService extends React.Component {
 	// 	}
 	// 	request.post('schools/get_school_info', { 'schoolId': schoolId }).then(result => {
 	// 		if (result.success) {
-	// 			this.setState({ schoolInfo: result.data, consulationPhoneNumber: result.data.techContactRef[0] });
+	// 			this.setState({ schoolInfo: result.data, phoneNumber: result.data.techContactRef[0] });
 	// 		} else {
 	// 			this.setState({ schoolInfo: undefined });
 	// 		}
@@ -110,36 +125,38 @@ class ModalReferralService extends React.Component {
 	// }
 
 	createConsulation = () => {
-		const { subsidyId, selectedDependent, selectedSkillSet, consulationPhoneNumber, fileList, note, isSelectTime, selectedDate, arrTime } = this.state;
+		const { selectedDependent, selectedSkillSet, phoneNumber, fileList, note, selectedTimeIndex, selectedDate, arrTime, isGoogleMeet } = this.state;
 
-		if (!selectedDate?.isAfter(new Date()) || isSelectTime < 0) {
-			this.setState({ errorMessage: 'Please select a date and time' })
+		if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
+			this.setState({ errorMessage: 'Please select a date and time' });
 			return;
 		}
+		this.setState({ errorMessage: '' });
 
-		const str = selectedDate.format("DD/MM/YYYY") + " " + arrTime[isSelectTime];
-		const _selectedDay = moment(str, 'DD/MM/YYYY hh:mm').valueOf();
+		const { years, months, date } = selectedDate.toObject();
+		const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
 		const postData = {
-			"subsidyId": subsidyId,
-			"dependent": selectedDependent,
-			"skillSet": selectedSkillSet,
-			"date": _selectedDay,
-			"phoneNumber": consulationPhoneNumber,
-			"addtionalDocuments": fileList.length > 0 ? [fileList[0].response.data] : [],
-			"note": note,
+			dependent: selectedDependent,
+			skillSet: selectedSkillSet,
+			date: selectedTime,
+			phoneNumber: isGoogleMeet ? undefined : phoneNumber,
+			addtionalDocuments: fileList.length > 0 ? [fileList[0].response.data] : [],
+			notes: note,
+			type: 4,
+			status: 0,
 		};
 
-		// request.post(switchPathWithRole(this.props.userRole) + 'create_consulation_to_subsidy', postData).then(result => {
-		// 	if (result.success) {
-		// 		!!this.callbackForReferral && this.callbackForReferral()
-		// 		this.props.onCancel();
-		// 	} else {
-		// 		message.error('cannot create referral');
-		// 	}
-		// }).catch(err => {
-		// 	console.log(err);
-		// 	message.error('cannot create referral');
-		// })
+		request.post(createAppointmentForParent, postData).then(result => {
+			if (result.success) {
+				// !!this.callbackForReferral && this.callbackForReferral()
+				this.props.onSubmit();
+			} else {
+				message.error('cannot create referral');
+			}
+		}).catch(err => {
+			console.log(err);
+			message.error('cannot create referral');
+		})
 	}
 
 	onFinishFailed = (values) => {
@@ -152,7 +169,7 @@ class ModalReferralService extends React.Component {
 	}
 
 	onSelectTime = (index) => {
-		this.setState({ isSelectTime: index });
+		this.setState({ selectedTimeIndex: index });
 	}
 
 	onChangeUpload = (info) => {
@@ -179,7 +196,7 @@ class ModalReferralService extends React.Component {
 		if (moment(this.state.selectedDate).add(-1, 'month').isAfter(new Date())) {
 			this.setState({
 				selectedDate: moment(this.state.selectedDate).add(-1, 'month'),
-				isSelectTime: -1,
+				selectedTimeIndex: -1,
 			});
 		}
 	}
@@ -188,13 +205,23 @@ class ModalReferralService extends React.Component {
 		if (moment(this.state.selectedDate).add(1, 'month').isAfter(new Date())) {
 			this.setState({
 				selectedDate: moment(this.state.selectedDate).add(1, 'month'),
-				isSelectTime: -1,
+				selectedTimeIndex: -1,
 			});
 		}
 	}
 
 	handleSelectDependent = (value) => {
 		this.setState({ selectedDependent: value });
+		request.post(getConsultationsForDependent, { dependent: value }).then(res => {
+			if (res.success) {
+				this.setState({ appointments: res.data });
+			} else {
+				this.setState({ appointments: [] });
+			}
+		}).catch(err => {
+			console.log('get consultations error---', err);
+			this.setState({ appointments: [] });
+		})
 		// const selected = this.props.listDependents.find(x => x._id === value);
 		// this.loadDataForSelectedDependent(selected);
 	}
@@ -203,13 +230,48 @@ class ModalReferralService extends React.Component {
 		if (newValue.isSameOrAfter(new Date())) {
 			this.setState({
 				selectedDate: newValue,
-				isSelectTime: -1,
+				selectedTimeIndex: -1,
 			});
+			const { appointments, consultants, arrTime, selectedDependent } = this.state;
+			const { years, months, date } = newValue.toObject();
+			const dayInWeek = newValue.day();
+			const newArrTime = arrTime.map(time => {
+				if (selectedDependent) {
+					time.value = time.value.set({ years: years, months: months, date: date });
+					let consultant_length = 0; let appointment_length = 0;
+					consultants.forEach(consultant => {
+						const availableTime = consultant.manualSchedule.find(s => s.dayInWeek == dayInWeek);
+						const fromDate = moment().set({ years: availableTime?.fromYear, months: availableTime?.fromMonth, date: availableTime?.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+						const toDate = moment().set({ years: availableTime?.toYear, months: availableTime?.toMonth, date: availableTime?.toDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+						const openTime = moment().set({ years, months, date, hours: availableTime?.openHour, minutes: availableTime?.openMin });
+						const closeTime = moment().set({ years, months, date, hours: availableTime?.closeHour, minutes: availableTime?.closeMin });
+						if (newValue.isBetween(fromDate, toDate) && (time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime))) {
+							consultant_length++;
+						}
+					})
+					appointments.forEach(appointment => {
+						console.log(time.value, moment(appointment.date))
+						if (time.value.isSame(moment(appointment.date))) {
+							appointment_length++;
+						}
+					})
+					console.log(consultant_length - appointment_length)
+					if (consultant_length - appointment_length > 0) {
+						time.active = true;
+					} else {
+						time.active = false;
+					}
+				} else {
+					time.active = false;
+				}
+				return time;
+			})
+			this.setState({ arrTime: newArrTime });
 		}
 	}
 
 	render() {
-		const { selectedDate, isSelectTime, selectedDependent, subsidyId, selectedSkillSet, consulationPhoneNumber, note, isGoogleMeet, errorMessage, arrTime } = this.state;
+		const { selectedDate, selectedTimeIndex, selectedDependent, subsidyId, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime } = this.state;
 
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -270,7 +332,7 @@ class ModalReferralService extends React.Component {
 										onChange={v => this.setState({ selectedSkillSet: v })}
 									>
 										{this.props.SkillSet?.map((skill, index) => (
-											<Select.Option key={index} value={index}>{skill.name}</Select.Option>
+											<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
 										))}
 									</Select>
 								</Form.Item>
@@ -290,8 +352,8 @@ class ModalReferralService extends React.Component {
 								>
 									<Input
 										placeholder={intl.formatMessage(msgCreateAccount.phoneNumber)}
-										value={consulationPhoneNumber}
-										onChange={v => this.setState({ consulationPhoneNumber: v.target.value })}
+										value={phoneNumber}
+										onChange={v => this.setState({ phoneNumber: v.target.value })}
 										className={`${isGoogleMeet ? 'display-none' : ''}`}
 									/>
 								</Form.Item>
@@ -357,8 +419,8 @@ class ModalReferralService extends React.Component {
 												<Row gutter={15}>
 													{arrTime?.map((time, index) => (
 														<Col key={index} span={12}>
-															<div className={isSelectTime === index ? 'time-available active' : 'time-available'} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
-																<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{time.value}</p>
+															<div className={selectedTimeIndex === index ? 'time-available active' : 'time-available'} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
+																<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
 															</div>
 														</Col>
 													))}

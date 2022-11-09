@@ -24,6 +24,7 @@ class ConsultantAvailability extends Component {
     super(props);
     this.state = {
       currentSelectedDay: day_week[0],
+      errorMessage: '',
     }
   }
 
@@ -43,59 +44,70 @@ class ConsultantAvailability extends Component {
   onFinish = async (values) => {
     const { registerData } = this.props.register;
     var manualSchedule = [];
-    for (var i = 0; i < day_week.length; i++) {
-      for (var j = 0; j < values['' + day_week[i]].length; j++) {
-        var scheduleItem = values['' + day_week[i]][j];
-        if (scheduleItem.from_time && scheduleItem.to_time && (scheduleItem.from_date || scheduleItem.to_date)) {
-          manualSchedule.push({
-            "dayInWeek": i,
-            "fromYear": scheduleItem.from_date.year() ?? 0,
-            "fromMonth": scheduleItem.from_date.month() ?? 0,
-            "fromDate": scheduleItem.from_date.date() ?? 0,
-            "toYear": scheduleItem.to_date.year() ?? 10000,
-            "toMonth": scheduleItem.to_date.month() ?? 0,
-            "toDate": scheduleItem.to_date.date() ?? 0,
-            "openHour": scheduleItem.from_time.hour(),
-            "openMin": scheduleItem.from_time.minutes(),
-            "closeHour": scheduleItem.to_time.hour(),
-            "closeMin": scheduleItem.to_time.minutes(),
-          })
-        } else {
-          manualSchedule.push({
-            "location": '',
-            "dayInWeek": i,
-            "fromYear": 0,
-            "fromMonth": 0,
-            "fromDate": 0,
-            "toYear": 0,
-            "toMonth": 0,
-            "toDate": 0,
-            "openHour": 0,
-            "openMin": 0,
-            "closeHour": 0,
-            "closeMin": 0,
-          })
+    const invalidDayInWeek = Object.values(values).findIndex(times => {
+      if (times.find(v => v.from_date?.isAfter(v.to_date) || v.from_time?.isAfter(v.to_time))) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+    if (invalidDayInWeek < 0) {
+      this.setState({ errorMessage: '' });
+      for (var i = 0; i < day_week.length; i++) {
+        for (var j = 0; j < values['' + day_week[i]].length; j++) {
+          var scheduleItem = values['' + day_week[i]][j];
+          if (scheduleItem.from_time && scheduleItem.to_time && (scheduleItem.from_date || scheduleItem.to_date)) {
+            manualSchedule.push({
+              "dayInWeek": i,
+              "fromYear": scheduleItem.from_date.year() ?? 0,
+              "fromMonth": scheduleItem.from_date.month() ?? 0,
+              "fromDate": scheduleItem.from_date.date() ?? 0,
+              "toYear": scheduleItem.to_date.year() ?? 10000,
+              "toMonth": scheduleItem.to_date.month() ?? 0,
+              "toDate": scheduleItem.to_date.date() ?? 0,
+              "openHour": scheduleItem.from_time.hour(),
+              "openMin": scheduleItem.from_time.minutes(),
+              "closeHour": scheduleItem.to_time.hour(),
+              "closeMin": scheduleItem.to_time.minutes(),
+            })
+          } else {
+            manualSchedule.push({
+              "location": '',
+              "dayInWeek": i,
+              "fromYear": 0,
+              "fromMonth": 0,
+              "fromDate": 0,
+              "toYear": 0,
+              "toMonth": 0,
+              "toDate": 0,
+              "openHour": 0,
+              "openMin": 0,
+              "closeHour": 0,
+              "closeMin": 0,
+            })
+          }
         }
       }
-    }
+      var newRegisterData = {
+        email: registerData.email,
+        password: registerData.password,
+        role: registerData.role,
+        username: registerData.username,
+        manualSchedule: manualSchedule,
+        ...registerData.consultantInfo
+      }
 
-    var newRegisterData = {
-      email: registerData.email,
-      password: registerData.password,
-      role: registerData.role,
-      username: registerData.username,
-      manualSchedule: manualSchedule,
-      ...registerData.consultantInfo
-    }
-
-    // post to server
-    const response = await axios.post(url + 'users/signup', newRegisterData);
-    const { success } = response.data;
-    if (success) {
-      this.props.removeRegisterData();
-      this.props.onContinue(true);
+      // post to server
+      const response = await axios.post(url + 'users/signup', newRegisterData);
+      const { success } = response.data;
+      if (success) {
+        this.props.removeRegisterData();
+        this.props.onContinue(true);
+      } else {
+        message.error(error?.response?.data?.data ?? error.message);
+      }
     } else {
-      message.error(error?.response?.data?.data ?? error.message);
+      this.setState({ errorMessage: 'The selected time is not valid' });
     }
   };
 
@@ -127,6 +139,8 @@ class ConsultantAvailability extends Component {
   }
 
   render() {
+    const { errorMessage, currentSelectedDay } = this.state;
+
     return (
       <Row justify="center" className="row-form">
         <div className='col-form col-availability'>
@@ -158,7 +172,7 @@ class ConsultantAvailability extends Component {
             <div className='div-availability'>
               <Segmented options={day_week} block={true} onChange={this.onSelectDay} />
               {day_week.map((day, index) => (
-                <div key={index} id={day} style={{ display: this.state.currentSelectedDay === day ? 'block' : 'none' }}>
+                <div key={index} id={day} style={{ display: currentSelectedDay === day ? 'block' : 'none' }}>
                   <Form.List name={day}>
                     {(fields, { add, remove }) => (
                       <div className='div-time'>
@@ -230,6 +244,7 @@ class ConsultantAvailability extends Component {
                 </div>
               ))}
             </div>
+            {errorMessage.length > 0 && (<p className='text-left text-red'>{errorMessage}</p>)}
             <Form.Item className="form-btn continue-btn" >
               <Button
                 block

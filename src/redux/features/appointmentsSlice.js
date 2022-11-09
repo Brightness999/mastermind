@@ -47,7 +47,6 @@ export const getAppointmentsMonthData = createAsyncThunk(
 					break;
 			}
 			result.data?.forEach((appoint) => {
-				appoint.title = data.role == 30 ? (appoint.dependent.firstName + " " + appoint.dependent.lastName) : appoint.provider.name;
 				appoint.allDay = false;
 				appoint.start = new Date(appoint.date);
 				appoint.end = new Date(appoint.date);

@@ -407,6 +407,16 @@ class Dashboard extends React.Component {
     this.setState({ visiblReferralService: false });
   };
 
+  onSubmitModalReferral = () => {
+    this.setState({ visiblReferralService: false });
+    message.success({
+      content: intl.formatMessage(messages.appointmentScheduled),
+      className: 'popup-scheduled',
+    });
+    this.updateCalendarEvents(this.state.userRole);
+    this.getMyAppointments(this.state.userRole);
+  };
+
   onShowModalNewSubsidy = () => {
     this.setState({ visibleNewSubsidy: true });
     this.openNewSubsidyRequest();
@@ -704,8 +714,8 @@ class Dashboard extends React.Component {
       selectedSkills,
       selectedEventTypes,
       visibleNewAppoint,
-      parentInfo,
     } = this.state;
+    console.log(listAppointmentsRecent, calendarEvents)
 
     const btnMonthToWeek = (
       <div role='button' className='btn-type' onClick={this.handleMonthToWeek}>
@@ -749,7 +759,7 @@ class Dashboard extends React.Component {
 
     const modalReferralServiceProps = {
       visible: visiblReferralService,
-      onSubmit: this.onCloseModalReferral,
+      onSubmit: this.onSubmitModalReferral,
       onCancel: this.onCloseModalReferral,
     };
 
@@ -939,7 +949,7 @@ class Dashboard extends React.Component {
               <Panel header={intl.formatMessage(messages.referrals)} key="2">
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {listAppointmentsRecent?.filter(appointment => appointment.type == 6 && appointment.status == 0 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 4 && appointment.status == 0 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>

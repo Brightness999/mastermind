@@ -26,7 +26,6 @@ class InfoConsultant extends Component {
   componentDidMount() {
     const { registerData } = this.props.register;
     this.getDataFromServer();
-    this.searchCityConnection();
     var consultantInfo = registerData.consultantInfo || this.getDefaultObj();
     this.form.setFieldsValue(consultantInfo);
     if (!registerData.consultantInfo) {
@@ -42,36 +41,14 @@ class InfoConsultant extends Component {
           ContactNumberType: data.ContactNumberType,
           EmailType: data.EmailType,
           SkillSet: data.SkillSet,
+          CityConnections: data.CityConnections,
         })
       } else {
-        this.setState({
-          checkEmailExist: false,
-        });
+        this.setState({ checkEmailExist: false });
       }
     }).catch(err => {
       console.log(err);
-      this.setState({
-        checkEmailExist: false,
-      });
-    })
-  }
-
-  searchCityConnection() {
-    axios.post(url + getCityConnections
-    ).then(result => {
-      if (result.data.success) {
-        var data = result.data.data;
-        this.setState({ CityConnections: data.docs })
-      } else {
-        this.setState({
-          CityConnections: [],
-        });
-      }
-    }).catch(err => {
-      console.log(err);
-      this.setState({
-        CityConnections: [],
-      });
+      this.setState({ checkEmailExist: false });
     })
   }
 
@@ -88,6 +65,7 @@ class InfoConsultant extends Component {
       contactNumber: [{
         phoneNumber: "", type: 0
       }],
+      cityConnection: undefined,
     };
   }
 
