@@ -1,6 +1,10 @@
 export const scope = 'components.drawerdetail';
 
 export default {
+  consultationDetails: {
+    id: `${scope}.consultationDetails`,
+    defaultMessage: 'Consultation Details',
+  },
   appointmentDetails: {
     id: `${scope}.appointmentDetails`,
     defaultMessage: 'Appointment Details',

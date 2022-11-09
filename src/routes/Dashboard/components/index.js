@@ -715,7 +715,6 @@ class Dashboard extends React.Component {
       selectedEventTypes,
       visibleNewAppoint,
     } = this.state;
-    console.log(listAppointmentsRecent, calendarEvents)
 
     const btnMonthToWeek = (
       <div role='button' className='btn-type' onClick={this.handleMonthToWeek}>

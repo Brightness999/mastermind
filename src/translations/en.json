@@ -329,6 +329,7 @@
   "components.sidebar.schedulingCenter": "Scheduling Center",
   
   "components.drawerdetail.appointmentDetails": "Appointment Details",
+  "components.drawerdetail.consultationDetails": "Consultation Details",
   "components.drawerdetail.evaluationDetails": "Evaluation Details",
   "components.drawerdetail.screeningDetails": "Screening Details",
   "components.drawerdetail.screeningCancelled": "Screening Cancelled",

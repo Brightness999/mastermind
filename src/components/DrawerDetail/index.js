@@ -202,7 +202,7 @@ class DrawerDetail extends Component {
 
     return (
       <Drawer
-        title={event?.type == 1 ? intl.formatMessage(messages.screeningDetails) : event?.type == 2 ? intl.formatMessage(messages.evaluationDetails) : intl.formatMessage(messages.appointmentDetails)}
+        title={event?.type == 1 ? intl.formatMessage(messages.screeningDetails) : event?.type == 2 ? intl.formatMessage(messages.evaluationDetails) : event?.type == 3 ? intl.formatMessage(messages.appointmentDetails) : intl.formatMessage(messages.consultationDetails)}
         closable={true}
         onClose={this.props.onClose}
         open={this.props.visible}
@@ -230,32 +230,41 @@ class DrawerDetail extends Component {
               <a className='font-18 underline text-primary'>{`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</a>
             </div>
           </Popover>
-          <Popover
-            placement="leftTop"
-            content={providerProfile}
-            trigger="hover"
-            open={isProviderHover}
-            onOpenChange={this.handleProviderHoverChange}
-          >
+          {event?.type == 4 ? (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.with)}</p>
               <div className='flex flex-row flex-1'>
-                <a className='font-18 underline text-primary'>{event?.provider?.name}</a>
-                <BiInfoCircle size={12} className='text-primary ml-auto' />
+                <div className='font-18'>Consultant</div>
               </div>
             </div>
-          </Popover>
+          ) : (
+            <Popover
+              placement="leftTop"
+              content={providerProfile}
+              trigger="hover"
+              open={isProviderHover}
+              onOpenChange={this.handleProviderHoverChange}
+            >
+              <div className='detail-item flex'>
+                <p className='font-18 font-700 title'>{intl.formatMessage(messages.with)}</p>
+                <div className='flex flex-row flex-1'>
+                  <a className='font-18 underline text-primary'>{event?.provider?.name}</a>
+                  <BiInfoCircle size={12} className='text-primary ml-auto' />
+                </div>
+              </div>
+            </Popover>
+          )}
           <div className='detail-item flex'>
             <p className='font-18 font-700 title'>{intl.formatMessage(messages.when)}</p>
             <p className='font-18'>{new Date(event?.date).toLocaleString()}</p>
           </div>
-          {event?.type > 1 && (
+          {[2, 3].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.where)}</p>
               <p className='font-16'>{event?.location}</p>
             </div>
           )}
-          {event?.type == 1 && (
+          {[1, 4].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.phonenumber)}</p>
               <p className='font-16'>{event?.phoneNumber}</p>
@@ -307,7 +316,7 @@ class DrawerDetail extends Component {
                   {event?.status == 0 ? intl.formatMessage(messages.cancel) : event?.status == -1 ? intl.formatMessage(messages.closed) : event?.status == -2 ? intl.formatMessage(messages.cancelled) : ''}
                 </Button>
               </Col>
-              {event?.type > 2 && (
+              {[2, 3].includes(event?.type) && (
                 <Col span={12}>
                   <Button
                     type='primary'
