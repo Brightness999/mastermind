@@ -14,6 +14,7 @@ import './style/index.less';
 import '../../assets/styles/login.less';
 import request from '../../utils/api/request'
 import { createAppointmentForParent, searchProvidersForParent } from '../../utils/api/apiList';
+import { store } from '../../redux/store';
 
 const { Paragraph } = Typography;
 moment.locale('en');
@@ -60,7 +61,9 @@ class ModalNewAppointmentForParents extends React.Component {
 			});
 		}
 		this.setState({ arrTime: arrTime });
-		this.searchProvider()
+		if (store.getState().auth.user.role < 100) {
+			this.searchProvider()
+		}
 	}
 
 	componentDidUpdate(prevProps) {

@@ -2,6 +2,7 @@ import { url } from '../../utils/api/baseUrl';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { helper } from '../../utils/auth/helper';
 import request, { generateSearchStructure } from '../../utils/api/request'
+import { getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider } from '../../utils/api/apiList';
 const token = localStorage.getItem('token')
 const initialState = {
 	dataAppointments: {},
@@ -15,13 +16,16 @@ export const getAppointmentsData = createAsyncThunk(
 		try {
 			switch (data.role) {
 				case 999:
-					result = await request.post(url + 'admin/get_appointments', {}, data.token);
+					result = await request.post(url + getAppointmentsForAdmin, {}, data.token);
+					return result.data?.docs;
+				case 100:
+					result = await request.post(url + getAppointmentsForConsultant, {}, data.token);
 					return result.data?.docs;
 				case 30:
-					result = await request.post(url + 'providers/get_my_appointments', {}, data.token);
+					result = await request.post(url + getAppointmentsForProvider, {}, data.token);
 					return result.data?.docs;
 				case 3:
-					result = await request.post(url + 'clients/get_my_appointments', {}, data.token);
+					result = await request.post(url + getAppointmentsForParent, {}, data.token);
 					return result.data?.docs;
 			}
 		} catch (error) {
@@ -37,13 +41,16 @@ export const getAppointmentsMonthData = createAsyncThunk(
 		try {
 			switch (data.role) {
 				case 999:
-					result = await request.post(url + 'admin/get_appointments_in_month', data.data);
+					result = await request.post(url + getAppointmentsInMonthForAdmin, data.data);
+					break;
+				case 100:
+					result = await request.post(url + getAppointmentsInMonthForConsultant, data.data);
 					break;
 				case 30:
-					result = await request.post(url + 'providers/get_my_appointments_in_month', data.data);
+					result = await request.post(url + getAppointmentsInMonthForProvider, data.data);
 					break;
 				case 3:
-					result = await request.post(url + 'clients/get_my_appointments_in_month', data.data);
+					result = await request.post(url + getAppointmentsInMonthForParent, data.data);
 					break;
 			}
 			result.data?.forEach((appoint) => {

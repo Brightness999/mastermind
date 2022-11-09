@@ -1,8 +1,17 @@
 
 export const userSignUp = 'users/signup'
 
+export const getAppointmentsForAdmin = 'admin/get_appointments'
+export const getAppointmentsInMonthForAdmin = 'admin/get_appointments_in_month'
+
+export const getDefaultValuesForConsultant = 'consultants/get_default_values_for_consultant'
+export const getAppointmentsForConsultant = 'consultants/get_my_appointments'
+export const getAppointmentsInMonthForConsultant = 'consultants/get_my_appointments_in_month'
+
 export const getCommunitiServer = 'schools/get_list_communites'
 
+export const getAppointmentsForProvider = 'providers/get_my_appointments'
+export const getAppointmentsInMonthForProvider = 'providers/get_my_appointments_in_month'
 export const getCityConnections = 'providers/get_city_connections'
 export const getDefaultValueForProvider = 'providers/get_default_values_for_provider'
 export const getReviewInfoForProvider = 'providers/get_review_info'
@@ -11,6 +20,8 @@ export const checkNotificationForProvider = 'providers/check_notification'
 export const closeAppointmentForProvider = 'providers/close_appointment'
 export const cancelAppointmentForProvider = 'providers/cancel_appoint'
 
+export const getAppointmentsForParent = 'clients/get_my_appointments'
+export const getAppointmentsInMonthForParent = 'clients/get_my_appointments_in_month'
 export const searchProvidersForParent = 'clients/search_providers'
 export const createAppointmentForParent = 'clients/create_appoinment'
 export const getAllSchoolsForParent = 'clients/get_all_schools'

@@ -285,14 +285,14 @@ class DrawerDetailPost extends Component {
             <p className='font-16'>{event?.location}</p>
           </div>
         </div>
-        {moment(event?.date).isBefore(moment()) && event.status == 0 && (
+        {moment(event?.date).isBefore(moment()) && event?.status == 0 && (
           <div className='post-feedback mt-1'>
             <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.postSessionFeedback)}</p>
             <Input.TextArea rows={7} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.postSessionFeedback)} />
           </div>
         )}
         <Row gutter={15} className='list-btn-detail'>
-          {moment(event?.date).isBefore(moment()) && event.status == 0 && (
+          {moment(event?.date).isBefore(moment()) && event?.status == 0 && (
             <Col span={12}>
               <Button
                 type='primary'

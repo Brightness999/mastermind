@@ -1,11 +1,10 @@
 import React from 'react';
-import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Upload, Input, message, Form } from 'antd';
+import { Modal, Button, Row, Col, Switch, Select, Calendar, Upload, Input, message, Form } from 'antd';
 import { BiChevronLeft, BiChevronRight, BiUpload } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 import intl from 'react-intl-universal';
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import msgDrawer from '../../components/DrawerDetail/messages';
 import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import msgRequest from '../../routes/Sign/SubsidyRequest/messages';
 import moment from 'moment';
@@ -14,24 +13,17 @@ import '../../assets/styles/login.less';
 import { url } from '../../utils/api/baseUrl'
 import request from '../../utils/api/request'
 import 'moment/locale/en-au';
-import { createAppointmentForParent, getAllConsultantForParent, getConsultationsForDependent } from '../../utils/api/apiList';
+import { createAppointmentForParent, getAllConsultantForParent } from '../../utils/api/apiList';
 moment.locale('en');
 
 class ModalReferralService extends React.Component {
 	state = {
-		isConfirm: false,
-		isPopupComfirm: false,
 		selectedTimeIndex: -1,
 		fileList: [],
-		uploading: false,
 		selectedDependent: undefined,
 		selectedSkillSet: undefined,
-		schoolInfo: undefined,
 		phoneNumber: undefined,
-		meetLocation: undefined,
-		meetSolution: undefined,
 		note: undefined,
-		subsidyId: undefined,
 		isGoogleMeet: false,
 		selectedDate: moment(),
 		errorMessage: '',
@@ -41,7 +33,6 @@ class ModalReferralService extends React.Component {
 	}
 
 	componentDidMount = () => {
-		// this.props.setLoadData(this.loadDataForReferralFromSubsidy);
 		let arrTime = [];
 		let hour9AM = moment().set({ hours: 9, minutes: 0, seconds: 0, milliseconds: 0 });
 		for (let i = 0; i < 6; i++) {
@@ -62,67 +53,24 @@ class ModalReferralService extends React.Component {
 			});
 		}
 		this.setState({ arrTime: arrTime });
+		this.getConsultationData();
+	}
+
+	getConsultationData = () => {
 		request.post(getAllConsultantForParent).then(res => {
 			if (res.success) {
-				this.setState({ consultants: res.data });
+				this.setState({
+					consultants: res.data?.consultants,
+					appointments: res.data?.appointments,
+				});
 			} else {
-				this.setState({ consultants: [] });
+				this.setState({ consultants: [], appointments: [] });
 			}
 		}).catch(err => {
 			console.log('get all consultants error---', err);
-			this.setState({ consultants: [] });
-		})
+			this.setState({ consultants: [], appointments: [] });
+		});
 	}
-
-	// loadDefaultData() {
-	// 	this.setState({
-	// 		fileList: [],
-	// 		uploading: false,
-	// 		selectedDependent: undefined,
-	// 		selectedSkillSet: undefined,
-	// 		schoolInfo: undefined,
-	// 		phoneNumber: undefined,
-	// 		meetLocation: undefined,
-	// 		meetSolution: undefined,
-	// 		note: undefined,
-	// 		subsidyId: undefined,
-	// 	})
-	// }
-
-	// loadDataForReferralFromSubsidy = (subsidy, callback) => {
-	// 	this.loadDefaultData();
-	// 	if (subsidy != undefined && subsidy.student != undefined && subsidy.student._id != undefined) {
-	// 		this.setState({
-	// 			subsidyId: subsidy._id,
-	// 			selectedSkillSet: subsidy.skillSet,
-	// 			schoolInfo: subsidy.school,
-	// 			selectedDependent: subsidy.student._id,
-	// 			phoneNumber: subsidy.school.techContactRef[0],
-	// 		})
-	// 	}
-	// 	if (callback != undefined) {
-	// 		this.callbackForReferral = callback
-	// 	} else {
-	// 		this.callbackForReferral = undefined;
-	// 	}
-	// }
-
-	// loadDataForSelectedDependent(dependent) {
-	// 	var schoolId = dependent.school._id || dependent.school;
-	// 	if (!!this.state.schoolInfo && schoolId == this.state.schoolInfo._id) {
-	// 		return;
-	// 	}
-	// 	request.post('schools/get_school_info', { 'schoolId': schoolId }).then(result => {
-	// 		if (result.success) {
-	// 			this.setState({ schoolInfo: result.data, phoneNumber: result.data.techContactRef[0] });
-	// 		} else {
-	// 			this.setState({ schoolInfo: undefined });
-	// 		}
-	// 	}).catch(err => {
-	// 		console.log(err);
-	// 		this.setState({ schoolInfo: undefined });
-	// 	})
-	// }
 
 	createConsulation = () => {
 		const { selectedDependent, selectedSkillSet, phoneNumber, fileList, note, selectedTimeIndex, selectedDate, arrTime, isGoogleMeet } = this.state;
@@ -148,7 +96,8 @@ class ModalReferralService extends React.Component {
 
 		request.post(createAppointmentForParent, postData).then(result => {
 			if (result.success) {
-				// !!this.callbackForReferral && this.callbackForReferral()
+				this.setState({ selectedDate: undefined, selectedTimeIndex: -1 })
+				this.getConsultationData();
 				this.props.onSubmit();
 			} else {
 				message.error('cannot create referral');
@@ -161,11 +110,6 @@ class ModalReferralService extends React.Component {
 
 	onFinishFailed = (values) => {
 		console.log('Failed', values);
-	}
-
-	onConfirm = () => {
-		this.setState({ isConfirm: true });
-		this.setState({ isPopupComfirm: true });
 	}
 
 	onSelectTime = (index) => {
@@ -182,10 +126,6 @@ class ModalReferralService extends React.Component {
 				fileList: info.fileList,
 			}));
 		}
-	}
-
-	isSameId = (id, _id) => {
-		return id = _id;
 	}
 
 	changeMeetingType = (status) => {
@@ -212,18 +152,6 @@ class ModalReferralService extends React.Component {
 
 	handleSelectDependent = (value) => {
 		this.setState({ selectedDependent: value });
-		request.post(getConsultationsForDependent, { dependent: value }).then(res => {
-			if (res.success) {
-				this.setState({ appointments: res.data });
-			} else {
-				this.setState({ appointments: [] });
-			}
-		}).catch(err => {
-			console.log('get consultations error---', err);
-			this.setState({ appointments: [] });
-		})
-		// const selected = this.props.listDependents.find(x => x._id === value);
-		// this.loadDataForSelectedDependent(selected);
 	}
 
 	onSelectDate = (newValue) => {
@@ -271,7 +199,7 @@ class ModalReferralService extends React.Component {
 	}
 
 	render() {
-		const { selectedDate, selectedTimeIndex, selectedDependent, subsidyId, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime } = this.state;
+		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime } = this.state;
 
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -314,7 +242,6 @@ class ModalReferralService extends React.Component {
 									<Select
 										placeholder={intl.formatMessage(msgCreateAccount.dependent)}
 										value={selectedDependent}
-										disabled={subsidyId != undefined}
 										onChange={v => this.handleSelectDependent(v)}
 									>
 										{this.props.listDependents?.map((dependent, index) => (
@@ -328,7 +255,6 @@ class ModalReferralService extends React.Component {
 									<Select
 										placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
 										value={selectedSkillSet}
-										disabled={subsidyId != undefined}
 										onChange={v => this.setState({ selectedSkillSet: v })}
 									>
 										{this.props.SkillSet?.map((skill, index) => (
@@ -446,4 +372,5 @@ class ModalReferralService extends React.Component {
 		);
 	}
 };
+
 export default ModalReferralService;

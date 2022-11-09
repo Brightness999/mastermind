@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select, message } from 'antd';
+import { Row, Col, Form, Button, Input, Select } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
@@ -9,7 +9,7 @@ import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
-import { getCityConnections } from '../../../../../utils/api/apiList';
+import { getDefaultValuesForConsultant } from '../../../../../utils/api/apiList';
 
 class InfoConsultant extends Component {
   constructor(props) {
@@ -34,7 +34,7 @@ class InfoConsultant extends Component {
   }
 
   getDataFromServer = () => {
-    axios.post(url + 'consultants/get_default_values_for_consultant').then(result => {
+    axios.post(url + getDefaultValuesForConsultant).then(result => {
       if (result.data.success) {
         var data = result.data.data;
         this.setState({
