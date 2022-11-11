@@ -23,6 +23,7 @@ class InfoFinancial extends Component {
 			sameRateForAllLevel: true,
 			isSeparateEvaluationRate: true,
 			isReceiptsProvided: true,
+			durations: [],
 		}
 	}
 
@@ -44,13 +45,22 @@ class InfoFinancial extends Component {
 		axios.post(url + getDefaultValueForProvider).then(result => {
 			if (result.data.success) {
 				const data = result.data.data;
-				this.setState({ AcademicLevel: data.AcademicLevel });
+				this.setState({
+					AcademicLevel: data.AcademicLevel,
+					durations: data.durations,
+				});
 			} else {
-				this.setState({ AcademicLevel: [] });
+				this.setState({ 
+					AcademicLevel: [],
+					durations: [],
+				 });
 			}
 		}).catch(err => {
-			console.log(err);
-			this.setState({ AcademicLevel: [] });
+			console.log('get default data for provider error---', err);
+			this.setState({ 
+				AcademicLevel: [],
+				durations: [],
+			 });
 		})
 	}
 
@@ -61,6 +71,7 @@ class InfoFinancial extends Component {
 				rate: "",
 			}],
 			separateEvaluationRate: "",
+			separateEvaluationDuration: "",
 			serviceableSchool: undefined,
 			upload_w_9: "",
 			isSeparateEvaluationRate: true,
@@ -109,7 +120,7 @@ class InfoFinancial extends Component {
 	}
 
 	render() {
-		const { AcademicLevel, sameRateForAllLevel, isSeparateEvaluationRate, isReceiptsProvided } = this.state;
+		const { AcademicLevel, sameRateForAllLevel, isSeparateEvaluationRate, isReceiptsProvided, durations } = this.state;
 		const uploadProps = {
 			name: 'file',
 			action: url + uploadTempW9FormForProvider,
@@ -118,7 +129,6 @@ class InfoFinancial extends Component {
 			maxCount: 1,
 			showUploadList: false,
 		};
-		const durations = ['15 Minute', '30 Minute', '1 Hour', '2 Hours', '3 Hours', '4 Hours'];
 
 		return (
 			<Row justify="center" className="row-form">
@@ -220,7 +230,7 @@ class InfoFinancial extends Component {
 							</div>
 							<Form.Item
 								name="separateEvaluationDuration"
-								className='mb-0'
+								className='mb-0 w-50'
 								rules={[{ required: isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.duration) }]}
 							>
 								<Select
@@ -228,7 +238,7 @@ class InfoFinancial extends Component {
 									placeholder={intl.formatMessage(messages.duration)}
 								>
 									{durations?.map((duration, index) => (
-										<Select.Option key={index} value={duration}>{duration}</Select.Option>
+										<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
 									))}
 								</Select>
 							</Form.Item>

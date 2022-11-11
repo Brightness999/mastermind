@@ -38,6 +38,7 @@ class InfoAvailability extends Component {
 			listSchool: [],
 			selectedSchools: [],
 			selectedLocation: '',
+			durations: [],
 		}
 	}
 
@@ -69,13 +70,22 @@ class InfoAvailability extends Component {
 		axios.post(url + getDefaultValueForProvider).then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
-				this.setState({ CancellationWindow: data.CancellationWindow, })
+				this.setState({
+					CancellationWindow: data.CancellationWindow,
+					durations: data.durations,
+				})
 			} else {
-				this.setState({ CancellationWindow: [] });
+				this.setState({
+					CancellationWindow: [],
+					durations: [],
+				});
 			}
 		}).catch(err => {
 			console.log('get default values for provider error---', err);
-			this.setState({ CancellationWindow: [] });
+			this.setState({
+				CancellationWindow: [],
+				durations: [],
+			});
 		})
 	}
 
@@ -185,7 +195,7 @@ class InfoAvailability extends Component {
 
 	handleSelectTime = (value, type) => {
 		const { selectedLocation, currentSelectedDay } = this.state;
-    if (selectedLocation) {
+		if (selectedLocation) {
 			const school = this.props.listSchool?.find(school => school.name == selectedLocation);
 			if (school) {
 				const idx = this.getDayOfWeekIndex(currentSelectedDay);
@@ -207,7 +217,7 @@ class InfoAvailability extends Component {
 	}
 
 	render() {
-		const { currentSelectedDay, CancellationWindow, isPrivate, privateOffice, isHomeVisit, isSchools, locations, listSchool } = this.state;
+		const { currentSelectedDay, CancellationWindow, isPrivate, privateOffice, isHomeVisit, isSchools, locations, listSchool, durations } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -372,7 +382,19 @@ class InfoAvailability extends Component {
 							))}
 						</div>
 						<Row gutter={14} style={{ marginLeft: '-22px', marginRight: '-22px' }}>
-							<Col xs={24} sm={24} md={13}>
+							<Col xs={24} sm={24} md={8}>
+								<Form.Item
+									name="duration"
+									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.duration) }]}
+								>
+									<Select placeholder={intl.formatMessage(messages.duration)}>
+										{durations?.map((duration, index) => (
+											<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
+										))}
+									</Select>
+								</Form.Item>
+							</Col>
+							<Col xs={24} sm={24} md={8}>
 								<Form.Item
 									name="cancellation_window"
 									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationWindow) }]}
@@ -384,7 +406,7 @@ class InfoAvailability extends Component {
 									</Select>
 								</Form.Item>
 							</Col>
-							<Col xs={24} sm={24} md={11}>
+							<Col xs={24} sm={24} md={8}>
 								<Form.Item
 									name="cancellation_fee"
 									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}

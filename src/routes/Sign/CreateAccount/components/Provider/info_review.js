@@ -25,6 +25,7 @@ class InfoReview extends Component {
 			cityConnections: [],
 			listSchools: [],
 			skillSet: [],
+			durations: [],
 		}
 	}
 
@@ -36,20 +37,23 @@ class InfoReview extends Component {
 					cityConnections: data.cityConnections,
 					skillSet: data.skillSet,
 					listSchools: data.listSchools,
+					durations: data.durations,
 				})
 			} else {
 				this.setState({
 					cityConnections: [],
 					skillSet: [],
 					listSchools: [],
+					durations: [],
 				});
 			}
 		}).catch(err => {
-			console.log(err);
+			console.log('get default data for provider error---', err);
 			this.setState({
 				cityConnections: [],
 				skillSet: [],
 				listSchools: [],
+				durations: [],
 			});
 		})
 	}
@@ -84,10 +88,6 @@ class InfoReview extends Component {
 			for (var j = 0; j < availability['' + day_week[i]].length; j++) {
 				var scheduleItem = availability['' + day_week[i]][j];
 				if (scheduleItem.from_time && scheduleItem.to_time && (scheduleItem.from_date || scheduleItem.to_date) && scheduleItem.location) {
-					if (scheduleItem.from_time && scheduleItem.to_time && scheduleItem.from_time.isAfter(scheduleItem.to_time)) {
-						message.warning('The selected time is not valid.');
-						return;
-					}
 					manualSchedule.push({
 						"location": scheduleItem.location,
 						"dayInWeek": i,
@@ -123,6 +123,7 @@ class InfoReview extends Component {
 		return {
 			cancellationFee: availability.cancellation_fee,
 			cancellationWindow: availability.cancellation_window,
+			duration: availability.duration,
 			manualSchedule: manualSchedule
 		}
 	}
