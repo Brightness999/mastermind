@@ -137,27 +137,6 @@ class InfoChild extends Component {
 		console.log('Failed:', errorInfo);
 	};
 
-	checkFillinAllFieldForSubsidy(index) {
-		const { registerData } = this.props.register;
-		const studentInfo = registerData.studentInfos[index];
-		try {
-			const isAlreadyFillIn = !!studentInfo && !!studentInfo.firstName && studentInfo.firstName.length > 0
-				&& !!studentInfo.lastName && studentInfo.lastName.length > 0
-				&& ('' + studentInfo.birthday).length > 0
-				&& studentInfo.guardianPhone.length > 0
-				&& studentInfo.guardianEmail.length > 0
-				&& studentInfo.backgroundInfor.length > 0
-				&& studentInfo.school?.length > 0
-				&& studentInfo.primaryTeacher.length > 0
-				&& studentInfo.currentGrade.length > 0
-				&& studentInfo.services.length > 0;
-
-			return isAlreadyFillIn;
-		} catch (err) {
-			return false;
-		}
-	}
-
 	render() {
 		return (
 			<Row justify="center" className="row-form">
@@ -324,13 +303,6 @@ class InfoChild extends Component {
 															))}
 														</Select>
 													</Form.Item>
-													<Button
-														className='ml-10'
-														disabled={!this.checkFillinAllFieldForSubsidy(index)}
-														onClick={v => this.props.onOpenSubsidyStep(1, index)}
-													>
-														{intl.formatMessage(messages.subsidyRequest)}
-													</Button>
 												</div>
 											</div>
 										)

@@ -298,7 +298,7 @@ class DrawerDetail extends Component {
           </>
         )}
         <Row gutter={15} className='list-btn-detail'>
-          {(role == 3 && moment(event?.date).isAfter(new Date()) && event?.status == 0 && !isCancelled) && (
+          {(role != 30 && moment(event?.date).isAfter(new Date()) && event?.status == 0 && !isCancelled) && (
             <>
               <Col span={12}>
                 <Button
