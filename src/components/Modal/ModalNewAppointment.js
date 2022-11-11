@@ -37,29 +37,48 @@ class ModalNewAppointment extends React.Component {
 		phoneNumber: '',
 		notes: '',
 		providerErrorMessage: '',
+		duration: 30,
+	}
+
+	getArrTime = (type, providerIndex) => {
+		let arrTime = [];
+		let duration = 30;
+		const { listProvider } = this.state;
+		const provider = listProvider[providerIndex];
+		if (type) {
+			if (type == 1 || type == 3) {
+				duration = provider?.duration;
+			}
+			if (type == 2) {
+				duration = provider?.duration * 1 + provider?.separateEvaluationDuration * 1
+			}
+		}
+		this.setState({ duration: duration });
+
+		let hour9AM = moment('2022-10-30 9:00:00');
+		for (let i = 0; i < 180 / duration; i++) {
+			let newTime = hour9AM.clone();
+			hour9AM = hour9AM.add(duration, 'minutes')
+			arrTime.push({
+				value: newTime,
+				active: false,
+			});
+		}
+
+		let hour2PM = moment('2022-10-30 14:00:00');
+		for (let i = 0; i < 240 / duration; i++) {
+			let newTime = hour2PM.clone();
+			hour2PM = hour2PM.add(duration, 'minutes')
+			arrTime.push({
+				value: newTime,
+				active: false,
+			});
+		}
+		return arrTime
 	}
 
 	componentDidMount() {
-		let arrTime = [];
-		let hour9AM = moment('2022-10-30 9:00:00');
-		for (let i = 0; i < 6; i++) {
-			let newTime = hour9AM.clone();
-			hour9AM = hour9AM.add(30, 'minutes')
-			arrTime.push({
-				value: newTime,
-				active: false,
-			});
-		}
-		let hour2PM = moment('2022-10-30 14:00:00');
-		for (let i = 0; i < 8; i++) {
-			let newTime = hour2PM.clone();
-			hour2PM = hour2PM.add(30, 'minutes')
-			arrTime.push({
-				value: newTime,
-				active: false,
-			});
-		}
-		this.setState({ arrTime: arrTime });
+		this.setState({ arrTime: this.getArrTime(0) });
 		this.searchProvider()
 	}
 
@@ -80,7 +99,7 @@ class ModalNewAppointment extends React.Component {
 			if (result.success) {
 				const data = result.data;
 				this.setState({
-					listProvider: data.providers,
+					listProvider: data?.providers,
 					addressOptions: data?.locations,
 					selectedProviderIndex: -1,
 					selectedProvider: undefined,
@@ -93,7 +112,7 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	createAppointment = () => {
-		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, phoneNumber, notes, listProvider, selectedProviderIndex } = this.state;
+		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, phoneNumber, notes, listProvider, selectedProviderIndex, duration } = this.state;
 		if (selectedProvider == undefined) {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
 			return;
@@ -128,6 +147,7 @@ class ModalNewAppointment extends React.Component {
 			location: appointmentType > 1 ? address : '',
 			phoneNumber: appointmentType == 1 ? phoneNumber : '',
 			notes: notes,
+			duration: duration,
 			type: appointmentType,
 			status: 0,
 		};
@@ -149,9 +169,9 @@ class ModalNewAppointment extends React.Component {
 				selectedDate: newValue,
 				selectedTimeIndex: -1,
 			});
-			const { selectedProviderIndex, selectedDependent, arrTime, listProvider } = this.state;
+			const { selectedProviderIndex, selectedDependent, listProvider, appointmentType } = this.state;
 			if (selectedProviderIndex > -1) {
-				const newArrTime = JSON.parse(JSON.stringify(arrTime));
+				const newArrTime = this.getArrTime(appointmentType, selectedProviderIndex);
 				const selectedDay = newValue.day();
 				const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDay);
 				if (availableTime) {
@@ -221,9 +241,29 @@ class ModalNewAppointment extends React.Component {
 
 	onChooseProvider = (providerIndex) => {
 		this.setState({ providerErrorMessage: '' });
-		const { listProvider, arrTime, selectedDate, selectedDependent, selectedProviderIndex } = this.state;
-		const newArrTime = JSON.parse(JSON.stringify(arrTime));
+		const { listProvider, selectedDate, selectedDependent, selectedProviderIndex } = this.state;
 		const appointments = listProvider[providerIndex]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
+		let appointmentType = 0;
+
+		if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
+			this.setState({ appointmentType: 1 });
+			appointmentType = 1;
+		}
+		if (listProvider[providerIndex].isSeparateEvaluationRate && !appointments?.find(appointment => (appointment.type == 2 && appointment.status == -1))) {
+			if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
+				this.setState({ appointmentType: 1 });
+				appointmentType = 1;
+			} else {
+				this.setState({ appointmentType: 2 });
+				appointmentType = 2;
+			}
+		}
+		if (appointments?.find(appointment => appointment.type == 3) || (!listProvider[providerIndex].isSeparateEvaluationRate && !listProvider[providerIndex].isNewClientScreening)) {
+			this.setState({ appointmentType: 3 });
+			appointmentType = 3;
+		}
+
+		const newArrTime = this.getArrTime(appointmentType, providerIndex);
 		const availableTime = listProvider[providerIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDate.day());
 		if (availableTime) {
 			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
@@ -259,19 +299,6 @@ class ModalNewAppointment extends React.Component {
 				time.active = false;
 				return time;
 			})
-		}
-		if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
-			this.setState({ appointmentType: 1 });
-		}
-		if (listProvider[providerIndex].isSeparateEvaluationRate && !appointments?.find(appointment => (appointment.type == 2 && appointment.status == -1))) {
-			if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
-				this.setState({ appointmentType: 1 });
-			} else {
-				this.setState({ appointmentType: 2 });
-			}
-		}
-		if (appointments?.find(appointment => appointment.type == 3) || (!listProvider[providerIndex].isSeparateEvaluationRate && !listProvider[providerIndex].isNewClientScreening)) {
-			this.setState({ appointmentType: 3 });
 		}
 
 		this.setState({
@@ -339,6 +366,7 @@ class ModalNewAppointment extends React.Component {
 			addressOptions,
 			appointmentType,
 		} = this.state;
+		console.log(listProvider);
 		const modalProps = {
 			className: 'modal-new',
 			title: "",

@@ -147,6 +147,11 @@ class DrawerDetail extends Component {
     }
   }
 
+  displayDuration = () => {
+    const { event } = this.props;
+    return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.duration, 'minutes').format('hh:mm a')}`;
+  }
+
   render() {
     const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent, isCancelled, isShowEditNotes, notes } = this.state;
     const { role, event } = this.props;
@@ -256,7 +261,7 @@ class DrawerDetail extends Component {
           )}
           <div className='detail-item flex'>
             <p className='font-18 font-700 title'>{intl.formatMessage(messages.when)}</p>
-            <p className='font-18'>{new Date(event?.date).toLocaleString()}</p>
+            <p className='font-18'>{this.displayDuration()}</p>
           </div>
           {[2, 3].includes(event?.type) && (
             <div className='detail-item flex'>
