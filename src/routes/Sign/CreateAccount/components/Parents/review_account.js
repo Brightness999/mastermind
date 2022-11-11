@@ -8,6 +8,7 @@ import { compose } from 'redux';
 import { url } from '../../../../../utils/api/baseUrl'
 import axios from 'axios';
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
+import { getAllSchoolsForParent, getDefaultValueForClient } from '../../../../../utils/api/apiList';
 
 class ReviewAccount extends Component {
 	constructor(props) {
@@ -18,7 +19,6 @@ class ReviewAccount extends Component {
 				studentInfos: [],
 			},
 			listServices: [],
-			SkillSet: [],
 			listSchools: [],
 		}
 	}
@@ -31,11 +31,10 @@ class ReviewAccount extends Component {
 	}
 
 	loadDataFromServer() {
-		axios.post(url + 'clients/get_default_value_for_client'
-		).then(result => {
+		axios.post(url + getDefaultValueForClient).then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
-				this.setState({ SkillSet: data.SkillSet, listServices: data.listServices })
+				this.setState({ listServices: data.SkillSet })
 			}
 		}).catch(err => {
 			console.log(err);
@@ -46,8 +45,7 @@ class ReviewAccount extends Component {
 	}
 
 	loadSchools() {
-		axios.post(url + 'clients/get_all_schools'
-		).then(result => {
+		axios.post(url + getAllSchoolsForParent).then(result => {
 			if (result.data.success) {
 				var data = result.data.data;
 				this.setState({ listSchools: data })
@@ -55,24 +53,6 @@ class ReviewAccount extends Component {
 		}).catch(err => {
 			console.log(err);
 		})
-	}
-
-	schoolNameFromId(id) {
-		for (var i = 0; i < this.state.listSchools.length; i++) {
-			if (this.state.listSchools[i]._id == id) {
-				return this.state.listSchools[i].name;
-			}
-		}
-		return '';
-	}
-
-	getServicesName(id) {
-		for (var i = 0; i < this.state.listServices.length; i++) {
-			if (this.state.listServices[i]._id == id) {
-				return this.state.listServices[i].name;
-			}
-		}
-		return '';
 	}
 
 	onSubmit = async () => {
@@ -126,6 +106,7 @@ class ReviewAccount extends Component {
 			intl.formatMessage(messages.thursday),
 			intl.formatMessage(messages.friday),
 		]
+		const { registerData, listSchools, listServices } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -136,29 +117,29 @@ class ReviewAccount extends Component {
 						</div>
 						<div>
 							<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.usernameEmail)}</p>
-							<p>Username : {this.state.registerData?.username}</p>
-							<p>Email : {this.state.registerData?.email}</p>
+							<p>Username : {registerData?.username}</p>
+							<p>Email : {registerData?.email}</p>
 						</div>
 						<div>
 							<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.parentsInfo)}</p>
 							<p className='font-14 underline'>{intl.formatMessage(messages.mother)}</p>
-							<p>Mother + Family name : {this.state.registerData?.parentInfo?.motherName}</p>
-							<p>Mother phone : {this.state.registerData?.parentInfo?.motherPhoneNumber}</p>
-							<p>Mother email : {this.state.registerData?.parentInfo?.motherEmail}</p>
+							<p>Mother + Family name : {registerData?.parentInfo?.motherName}</p>
+							<p>Mother phone : {registerData?.parentInfo?.motherPhoneNumber}</p>
+							<p>Mother email : {registerData?.parentInfo?.motherEmail}</p>
 							<p className='font-14 underline'>{intl.formatMessage(messages.father)}</p>
-							<p>Father + Family name : {this.state.registerData?.parentInfo?.familyName} </p>
-							<p>Father phone : {this.state.registerData?.parentInfo?.fatherPhoneNumber}</p>
-							<p>Father email : {this.state.registerData?.parentInfo?.fatherEmail}</p>
+							<p>Father + Family name : {registerData?.parentInfo?.familyName} </p>
+							<p>Father phone : {registerData?.parentInfo?.fatherPhoneNumber}</p>
+							<p>Father email : {registerData?.parentInfo?.fatherEmail}</p>
 						</div>
 						<div>
 							<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.address)}</p>
-							<p>Street Address : {this.state.registerData?.parentInfo?.address}</p>
+							<p>Street Address : {registerData?.parentInfo?.address}</p>
 						</div>
-						{this.state.registerData?.studentInfos?.map((item, index) => (
+						{registerData?.studentInfos?.map((item, index) => (
 							<div key={index}>
 								<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.dependentsInfo)}</p>
 								<p className='font-14 font-700 mb-10'>Dependent #{++index} {item.firstName} {item.lastName} - {item.birthday}</p>
-								<p>School : {this.schoolNameFromId(item.school)}</p>
+								<p>School : {listSchools?.find(school => school._id == item.school)?.name}</p>
 								<div className='review-item'>
 									<p>Teacher : {item.primaryTeacher} </p>
 									<p>Grade : {item.currentGrade}</p>
@@ -169,7 +150,7 @@ class ReviewAccount extends Component {
 								</div>
 								<div className='review-item-3'>
 									{item.services?.map((service, serviceIndex) => (
-										<p key={serviceIndex}>{this.getServicesName(service)}</p>
+										<p key={serviceIndex}>{listServices?.find(skill => skill._id == service)?.name}</p>
 									))}
 								</div>
 								<div>

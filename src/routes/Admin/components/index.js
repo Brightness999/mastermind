@@ -1,12 +1,11 @@
 import React from 'react';
-import { Badge, Dropdown, Menu, Button, Segmented, Row, Col, Checkbox, Select, message, Divider } from 'antd';
+import { Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input, Divider } from 'antd';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
-import { BsFilter, BsX, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
-import { ModalSubsidyProgress } from '../../../components/Modal';
+import { BsFilter, BsX } from 'react-icons/bs';
+import { ModalNewGroup, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalNewAppointment } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
-import DrawerDetailPost from '../../../components/DrawerDetailPost';
 import intl from 'react-intl-universal';
 import FullCalendar from '@fullcalendar/react' // must go before plugins
 import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
@@ -15,83 +14,212 @@ import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClic
 import listPlugin from '@fullcalendar/list';
 import "@fullcalendar/daygrid/main.css";
 import "@fullcalendar/timegrid/main.css";
-import msgDashboard from '../../Dashboard/messages';
-import msgCreateAccount from '../../Sign/CreateAccount/messages';
-import './index.less';
-import { routerLinks } from '../../constant';
-import { checkPermission } from '../../../utils/auth/checkPermission';
-import request, { generateSearchStructure } from '../../../utils/api/request'
+import messages from '../../Dashboard/messages';
+import messagesCreateAccount from '../../Sign/CreateAccount/messages';
 import msgSidebar from '../../../components/SideBar/messages';
+import { checkPermission } from '../../../utils/auth/checkPermission';
+import './index.less';
+import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
+import request from '../../../utils/api/request'
+import moment from 'moment';
+import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice'
+import { store } from '../../../redux/store';
+import { routerLinks } from "../../constant";
+import PlacesAutocomplete from 'react-places-autocomplete';
+import { setUser } from '../../../redux/features/authSlice';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import { getDefaultDataForAdmin } from '../../../utils/api/apiList';
 
-export default class extends React.Component {
+class SchedulingCenter extends React.Component {
   constructor(props) {
     super(props);
+    this.socket = undefined;
     this.state = {
       isFilter: false,
-      visibleDetail: false,
-      visibleDetailPost: false,
+      userDrawerVisible: false,
       visibleNewAppoint: false,
       visibleSubsidy: false,
+      visiblReferralService: false,
+      visibleNewSubsidy: false,
+      visibleNewReview: false,
+      visibleNewGroup: false,
       isEventDetail: false,
       isMonth: 1,
       isGridDayView: 'Grid',
-      canDrop: true,
       calendarWeekends: true,
-      calendarEvents: [
-        { title: "Event Now", start: new Date(), allDay: true }
-      ],
+      calendarEvents: this.props.appointmentsInMonth,
+      userRole: -1,
+      listDependents: [],
+      parentInfo: {},
+      providerInfo: {},
+      schoolInfo: {},
+      listAppointmentsRecent: this.props.appointments,
+      SkillSet: [],
+      isEditSubsidyRequest: "",
+      selectedProviders: [],
+      selectedLocations: [],
+      selectedSkills: [],
       listProvider: [],
-      skillSet: [],
-    }
+      location: '',
+      selectedEvent: {},
+      selectedEventTypes: [],
+    };
+    this.calendarRef = React.createRef();
   }
-  calendarRef = React.createRef();
 
   componentDidMount() {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
-        loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
+        store.dispatch(setUser(loginData));
+        loginData?.role < 999 && this.props.history.push(routerLinks.Dashboard)
         this.setState({ userRole: loginData.role });
-        request.post('clients/search_providers', generateSearchStructure('')).then(result => {
-          if (result.success) {
-            this.setState({ listProvider: result.data })
-          }
-        })
-        request.post(url + 'providers/get_default_values_for_provider')
-          .then(result => {
-            if (result.data.success) {
-              var data = result.data.data;
-              this.setState({ skillSet: data.SkillSet })
-            } else {
-              this.setState({ skillSet: [] });
-            }
-          }).catch(err => {
-            console.log(err);
-            this.setState({ skillSet: [] });
-          })
+        this.updateCalendarEvents(loginData.role);
+        this.getMyAppointments(loginData.role);
+        this.loadDefaultData();
       }).catch(err => {
-        console.log(err);
+        console.log('check permission error ---', err);
+        this.props.history.push('/');
       })
     }
+
+    const script = document.createElement("script");
+    script.src = socketUrlJSFile;
+    script.async = true;
+    script.onload = () => this.scriptLoaded();
+    document.body.appendChild(script);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (JSON.stringify(prevProps.appointments) != JSON.stringify(this.props.appointments)) {
+      this.setState({ listAppointmentsRecent: this.props.appointments });
+    }
+    if (JSON.stringify(prevProps.appointmentsInMonth) != JSON.stringify(this.props.appointmentsInMonth)) {
+      this.setState({ calendarEvents: this.props.appointmentsInMonth });
+    }
+  }
+
+  loadDefaultData() {
+    request.post(getDefaultDataForAdmin).then(res => {
+      if (res.success) {
+        const data = res.data;
+        this.setState({
+          SkillSet: data?.skillSet,
+          listProvider: data?.providers,
+          listDependents: data?.dependents,
+        })
+      } else {
+        console.log('get default data error---', err);
+      }
+    }).catch(err => {
+      console.log('get default data error---', err);
+    });
+  }
+
+  scriptLoaded = () => {
+    let opts = {
+      query: {
+        token: localStorage.getItem('token'),
+      },
+      withCredentials: true,
+      autoConnect: true,
+    };
+    this.socket = io(socketUrl, opts);
+    this.socket.on('connect_error', e => {
+      console.log('connect error ', e);
+    });
+
+    this.socket.on('connect', () => {
+      console.log('socket connect success');
+    });
+
+    this.socket.on('socket_result', data => {
+      console.log('socket result', data);
+      this.handleSocketResult(data);
+    })
+
+    this.socket.on('disconnect', e => {
+      console.log('socket disconnect', e);
+    });
+  }
+
+  showNotificationForSubsidy(data) {
+    notification.open({
+      message: 'You have new Subsidy',
+      duration: 10,
+      description:
+        'A parent has sent 1 subsidy request, press for view.',
+      onClick: () => {
+        console.log('Notification Clicked!');
+        this.onShowModalSubsidy(data.data._id);
+      },
+    });
+  }
+
+  showNotificationForSubsidyChange(data) {
+    notification.open({
+      message: 'Subsidy Status changed',
+      duration: 10,
+      description:
+        'Press for check subsidy progress.',
+      onClick: () => {
+        console.log('Notification Clicked!');
+        this.onShowModalSubsidy(data);
+      },
+    });
+  }
+
+  handleSocketResult(data) {
+    switch (data.key) {
+      case 'new_appoint_from_client':
+        this.setState({ providerDrawervisible: true, });
+        return;
+      case 'new_subsidy_request_from_client':
+        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
+        return;
+      case 'new_subsidy_request_from_client':
+        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
+        this.showNotificationForSubsidy(data);
+        return;
+      case 'subsidy_change_status':
+        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
+        this.showNotificationForSubsidyChange(data.data);
+        return;
+      case 'appeal_subsidy':
+        return;
+    }
+  }
+
+  modalCreateAndEditSubsidyRequest = () => {
+    const modalNewSubsidyProps = {
+      visible: this.state.visibleNewSubsidy,
+      onSubmit: this.onCloseModalNewSubsidy,
+      onCancel: this.onCloseModalNewSubsidy,
+      isEditSubsidyRequest: this.state.isEditSubsidyRequest,
+    };
+    return <ModalNewSubsidyRequest {...modalNewSubsidyProps}
+      setOpennedEvent={opennedEvent => {
+        this.openNewSubsidyRequest = opennedEvent;
+      }}
+      userRole={this.state.userRole}
+      listDependents={this.state.listDependents}
+    />
   }
 
   onShowFilter = () => {
     this.setState({ isFilter: !this.state.isFilter });
   }
 
-  onShowDrawerDetail = () => {
-    this.setState({ visibleDetail: true });
+  onShowDrawerDetail = (val) => {
+    const { listAppointmentsRecent } = this.state;
+    const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : val;
+    const selectedEvent = listAppointmentsRecent?.find(a => a._id == id);
+    this.setState({ selectedEvent: selectedEvent });
+    this.setState({ userDrawerVisible: true });
   };
 
   onCloseDrawerDetail = () => {
-    this.setState({ visibleDetail: false });
-  };
-
-  onShowDrawerDetailPost = () => {
-    this.setState({ visibleDetailPost: true });
-  };
-
-  onCloseDrawerDetailPost = () => {
-    this.setState({ visibleDetailPost: false });
+    this.setState({ userDrawerVisible: false });
   };
 
   onShowModalNewAppoint = () => {
@@ -105,33 +233,86 @@ export default class extends React.Component {
   onSubmitModalNewAppoint = () => {
     this.setState({ visibleNewAppoint: false });
     message.success({
-      content: intl.formatMessage(msgDashboard.appointmentScheduled),
+      content: intl.formatMessage(messages.appointmentScheduled),
       className: 'popup-scheduled',
     });
+    this.updateCalendarEvents(this.state.userRole);
+    this.getMyAppointments(this.state.userRole);
   };
 
-  onShowModalSubsidy = () => {
+  onShowModalSubsidy = (subsidyId) => {
     this.setState({ visibleSubsidy: true });
+    this.reloadModalSubsidyDetail(subsidyId);
   };
+
+  onCancelSubsidy = () => { }
 
   onCloseModalSubsidy = () => {
     this.setState({ visibleSubsidy: false });
   };
 
-  handleDateClick = arg => {
-    // eslint-disable-next-line no-restricted-globals
-    if (confirm("Would you like to add an event to " + arg.dateStr + " ?")) {
-      this.setState({
-        // add new event data
-        calendarEvents: this.state.calendarEvents.concat({
-          // creates a new array
-          title: "New Event",
-          start: arg.date,
-          allDay: arg.allDay
-        })
-      });
-    }
+  onSubmitModalSubsidy = () => {
+    this.setState({ visibleSubsidy: false });
   };
+
+  openHierachyModal = (subsidy, callbackAfterChanged) => {
+    this.setState({ visibleNewGroup: true });
+    !!this.loadDataModalNewGroup && this.loadDataModalNewGroup(subsidy, callbackAfterChanged);
+  }
+
+  onShowModalReferral = (subsidy, callbackForReload) => {
+    this.setState({ visiblReferralService: true });
+    if (callbackForReload == undefined) {
+      callbackForReload = this.panelAppoimentsReload;
+    }
+    !!this.loadDataModalReferral && this.loadDataModalReferral(subsidy, callbackForReload);
+  };
+
+  onCloseModalReferral = () => {
+    this.setState({ visiblReferralService: false });
+  };
+
+  onSubmitModalReferral = () => {
+    this.setState({ visiblReferralService: false });
+    message.success({
+      content: intl.formatMessage(messages.appointmentScheduled),
+      className: 'popup-scheduled',
+    });
+    this.updateCalendarEvents(this.state.userRole);
+    this.getMyAppointments(this.state.userRole);
+  };
+
+  onShowModalNewSubsidy = () => {
+    this.setState({ visibleNewSubsidy: true });
+    this.openNewSubsidyRequest();
+  };
+
+  onSubmitModalNewSubsidy = () => {
+    this.setState({ visibleNewSubsidy: false });
+    this.setState({ visibleNewReview: true });
+  };
+
+  onCloseModalNewSubsidy = (isNeedReload) => {
+    this.setState({ visibleNewSubsidy: false });
+    !!this.panelSubsidariesReload && this.panelSubsidariesReload(isNeedReload);
+  };
+
+  onSubmitModalNewReview = () => {
+    this.setState({ visibleNewReview: false });
+  };
+
+  onCloseModalNewReview = () => {
+    this.setState({ visibleNewReview: false });
+    this.setState({ visibleNewSubsidy: true });
+  };
+
+  onShowModalGroup = () => {
+    this.setState({ visibleNewGroup: true });
+  }
+
+  onCloseModalGroup = () => {
+    this.setState({ visibleNewGroup: false });
+  }
 
   handleMonthToWeek = () => {
     if (this.state.isMonth === 1) {
@@ -149,38 +330,17 @@ export default class extends React.Component {
     }
   }
 
-  handleDateSelect = (selectInfo) => {
-    let calendarApi = selectInfo.view.calendar
-    let title = prompt('Please enter a new title for your event')
-    calendarApi.unselect() // clear date selection
-    if (title) {
-      calendarApi.addEvent({ // will render immediately. will call handleEventAdd
-        title,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
-        allDay: selectInfo.allDay
-      }, true) // temporary=true, will get overwritten when reducer gives new events
-    }
-  }
-
-  handleEventClick = () => {
-    this.setState({ isEventDetail: !this.state.isEventDetail });
-  }
-
-  handleEventAdd = (addInfo) => {
-    this.props.createEvent(addInfo.event.toPlainObject())
-      .catch(() => {
-        reportNetworkError()
-        addInfo.revert()
-      })
-  }
-
   handleEventChange = (changeInfo) => {
-    this.props.updateEvent(changeInfo.event.toPlainObject())
-      .catch(() => {
-        reportNetworkError()
-        changeInfo.revert()
-      })
+    const obj = changeInfo.event.toPlainObject();
+    const data = {
+      token: localStorage.getItem('token'),
+      role: this.state.userRole,
+      data: {
+        appointId: obj.extendedProps._id,
+        date: new Date(obj.start).getTime()
+      }
+    }
+    store.dispatch(changeTime(data))
   }
 
   handleEventRemove = (removeInfo) => {
@@ -191,99 +351,194 @@ export default class extends React.Component {
       })
   }
 
+  getMyAppointments(userRole) {
+    store.dispatch(getAppointmentsData({ role: userRole }));
+  }
+
+  renderModalSubsidyDetail = () => {
+    const modalSubsidyProps = {
+      visible: this.state.visibleSubsidy,
+      onSubmit: this.onCloseModalSubsidy,
+      onCancel: this.onCloseModalSubsidy,
+    };
+    return (
+      <ModalSubsidyProgress {...modalSubsidyProps}
+        setOpennedEvent={(reload) => { this.reloadModalSubsidyDetail = reload }}
+        userRole={this.state.userRole}
+        SkillSet={this.state.SkillSet}
+        openReferral={this.onShowModalReferral}
+        openHierachy={this.openHierachyModal}
+      />
+    );
+  }
+
+  handleClickPrevMonth = () => {
+    const calendar = this.calendarRef.current;
+    calendar._calendarApi.prev();
+    this.updateCalendarEvents(this.state.userRole);
+  }
+
+  handleClickNextMonth = () => {
+    const calendar = this.calendarRef.current;
+    calendar._calendarApi.next();
+    this.updateCalendarEvents(this.state.userRole);
+  }
+
+  updateCalendarEvents(role) {
+    const calendar = this.calendarRef.current;
+    const month = calendar?._calendarApi.getDate().getMonth() + 1;
+    const year = calendar?._calendarApi.getDate().getFullYear();
+    const { selectedSkills, selectedProviders, SkillSet, listProvider, selectedLocations, selectedEventTypes } = this.state;
+    let skills = [], providers = [];
+    selectedSkills?.forEach(skill => skills.push(SkillSet.find(s => s.name == skill)?._id));
+    selectedProviders?.forEach(provider => providers.push(listProvider.find(p => p.name == provider)._id));
+    const dataFetchAppointMonth = {
+      role: role,
+      data: {
+        month: month,
+        year: year,
+        locations: selectedLocations,
+        providers: providers,
+        skills: skills,
+        types: selectedEventTypes,
+      }
+    };
+    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+  }
+
+  handleSelectProvider = (name) => {
+    if (!this.state.selectedProviders.includes(name)) {
+      this.setState({ selectedProviders: [...this.state.selectedProviders, name] });
+    }
+  }
+
+  handleRemoveProvider = (index) => {
+    this.state.selectedProviders.splice(index, 1);
+    this.setState({ selectedProviders: this.state.selectedProviders });
+  }
+
+  handelChangeLocation = (location) => {
+    this.setState({ location: location });
+  }
+
+  handleSelectLocation = (location) => {
+    if (!this.state.selectedLocations.includes(location)) {
+      this.setState({ selectedLocations: [...this.state.selectedLocations, location] });
+    }
+    this.setState({ location: '' });
+  }
+
+  handleRemoveLocation = (index) => {
+    this.state.selectedLocations.splice(index, 1);
+    this.setState({ selectedLocations: this.state.selectedLocations });
+  }
+
+  handleSelectEventType = types => {
+    this.setState({ selectedEventTypes: types });
+  }
+
+  handleSelectSkills = (skills) => {
+    this.setState({ selectedSkills: skills });
+  }
+
+  handleApplyFilter = () => {
+    this.updateCalendarEvents(this.state.userRole);
+    this.setState({ isFilter: false });
+  }
+
   render() {
     const {
       isFilter,
-      visibleDetail,
-      visibleDetailPost,
-      visibleNewAppoint,
-      visibleSubsidy,
+      userDrawerVisible,
+      visiblReferralService,
       isEventDetail,
       isMonth,
       isGridDayView,
-      skillSet
+      visibleNewReview,
+      visibleNewGroup,
+      SkillSet,
+      listProvider,
+      selectedProviders,
+      selectedLocations,
+      listAppointmentsRecent,
+      userRole,
+      location,
+      calendarEvents,
+      calendarWeekends,
+      listDependents,
+      selectedEvent,
+      selectedSkills,
+      selectedEventTypes,
+      visibleNewAppoint,
     } = this.state;
-    const genExtraTime = () => (<BsClockHistory size={18} onClick={() => { }} />);
-    const genExtraFlag = () => (
-      <Badge size="small" count={2}>
-        <BsFillFlagFill size={18} onClick={() => { }} />
-      </Badge>
-    );
+
     const btnMonthToWeek = (
       <div role='button' className='btn-type' onClick={this.handleMonthToWeek}>
-        {isMonth ? intl.formatMessage(msgDashboard.month) : intl.formatMessage(msgDashboard.week)}
+        {isMonth ? intl.formatMessage(messages.month) : intl.formatMessage(messages.week)}
       </div>
     );
     const btnChangeDayView = (
       <Segmented
         onChange={this.handleChangeDayView}
         options={[
-          {
-            value: 'Grid',
-            icon: <FaCalendarAlt size={18} />,
-          },
-          {
-            value: 'List',
-            icon: <MdFormatAlignLeft size={20} />,
-          },
-        ]}
-      />
-    );
-    const btnFilter = (
-      <div className='header-left flex flex-row' onClick={this.onShowFilter}>
-        <p className='font-15'>{intl.formatMessage(msgDashboard.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
-      </div>
-    );
-    const menu = (
-      <Menu
-        items={[
-          {
-            key: '1',
-            label: (<a target="_blank" rel="noopener noreferrer" onClick={this.onShowModalNewAppoint}>{intl.formatMessage(msgDashboard.session)}</a>),
-          },
-          {
-            key: '2',
-            label: (<a target="_blank" rel="noopener noreferrer" href="#">{intl.formatMessage(msgDashboard.evaluation)}</a>),
-          },
-          {
-            key: '3',
-            label: (<a target="_blank" rel="noopener noreferrer" href="#">{intl.formatMessage(msgDashboard.referral)}</a>),
-          },
+          { value: 'Grid', icon: <FaCalendarAlt size={18} /> },
+          { value: 'List', icon: <MdFormatAlignLeft size={20} /> },
         ]}
       />
     );
 
+    const btnFilter = (
+      <div className='header-left flex flex-row' onClick={this.onShowFilter}>
+        {userRole != 100 && (
+          <p className='font-15'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
+        )}
+      </div>
+    );
+
     const optionsEvent = [
       {
-        label: intl.formatMessage(msgDashboard.appointments),
-        value: 'appointments',
+        label: intl.formatMessage(messages.appointments),
+        value: 3,
       },
       {
-        label: intl.formatMessage(msgDashboard.evaluations),
-        value: 'evaluations',
+        label: intl.formatMessage(messages.evaluations),
+        value: 2,
       },
       {
-        label: intl.formatMessage(msgDashboard.screenings),
-        value: 'screenings',
+        label: intl.formatMessage(messages.screenings),
+        value: 1,
       },
       {
-        label: intl.formatMessage(msgDashboard.referrals),
-        value: 'referrals',
-      },
-      {
-        label: intl.formatMessage(msgDashboard.consultations),
-        value: 'consultations',
+        label: intl.formatMessage(messages.referrals),
+        value: 6,
       },
     ];
+
+    const modalReferralServiceProps = {
+      visible: visiblReferralService,
+      onSubmit: this.onSubmitModalReferral,
+      onCancel: this.onCloseModalReferral,
+    };
+
+    const modalNewReviewProps = {
+      visible: visibleNewReview,
+      onSubmit: this.onSubmitModalNewReview,
+      onCancel: this.onCloseModalNewReview,
+    }
+
+    const modalNewGroupProps = {
+      visible: visibleNewGroup,
+      onSubmit: this.onCloseModalGroup,
+      onCancel: this.onCloseModalGroup,
+    }
+
     const modalNewAppointProps = {
       visible: visibleNewAppoint,
       onSubmit: this.onSubmitModalNewAppoint,
       onCancel: this.onCloseModalNewAppoint,
-    };
-    const modalSubsidyProps = {
-      visible: visibleSubsidy,
-      onSubmit: this.onCloseModalSubsidy,
-      onCancel: this.onCloseModalSubsidy,
+      listDependents: listDependents,
+      SkillSet: SkillSet,
+      listAppointmentsRecent: listAppointmentsRecent,
     };
 
     return (
@@ -296,117 +551,172 @@ export default class extends React.Component {
           <section className='div-calendar box-card'>
             {isFilter && (
               <div className='calendar-filter w-100'>
-                <CSSAnimate className="animated-shorter" type={isFilter ? 'fadeIn' : 'fadeOut'}>
+                <CSSAnimate className="animated-shorter">
                   <Row gutter={10}>
                     <Col xs={12} sm={12} md={4}>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgDashboard.eventType)}</p>
-                      <Checkbox.Group className='flex flex-col' options={optionsEvent} />
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
+                      <Checkbox.Group options={optionsEvent} value={selectedEventTypes} onChange={(v) => this.handleSelectEventType(v)} className="flex flex-col" />
                     </Col>
-                    <Col xs={12} sm={12} md={6} className='skillset-checkbox'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.skillsets)}</p>
-                      <Checkbox.Group className='flex flex-col' options={skillSet} />
+                    <Col xs={12} sm={12} md={8} className='skillset-checkbox'>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
+                      <Checkbox.Group options={SkillSet.map(skill => skill.name)} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
                     </Col>
-                    <Col xs={12} sm={12} md={7} className='select-small'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.provider)}</p>
-                      <Select placeholder={intl.formatMessage(msgDashboard.startTypingProvider)}>
-                        <Select.Option value='1'>Dr. Rabinowitz </Select.Option>
-                      </Select>
+                    {userRole != 30 && (
+                      <Col xs={12} sm={12} md={6} className='select-small'>
+                        <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
+                        <Select
+                          showSearch
+                          placeholder={intl.formatMessage(messages.startTypingProvider)}
+                          value=''
+                          optionFilterProp='children'
+                          filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                          onChange={(v) => this.handleSelectProvider(v)}
+                        >
+                          {listProvider?.map((provider, i) => (
+                            <Select.Option key={i} value={provider.name}>{provider.name}</Select.Option>
+                          ))}
+                        </Select>
+                        <div className='div-chip'>
+                          {selectedProviders?.map((name, i) => (
+                            <div key={i} className='chip'>
+                              {name}
+                              <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
+                          ))}
+                        </div>
+                      </Col>
+                    )}
+                    <Col xs={12} sm={12} md={6} className='select-small'>
+                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
+                      <PlacesAutocomplete
+                        value={location}
+                        onChange={(value) => this.handelChangeLocation(value)}
+                        onSelect={(value) => this.handleSelectLocation(value)}
+                      >
+                        {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+                          <div>
+                            <Input {...getInputProps({
+                              placeholder: 'Service Address',
+                              className: 'location-search-input',
+                            })} />
+                            <div className="autocomplete-dropdown-container">
+                              {loading && <div>Loading...</div>}
+                              {suggestions.map(suggestion => {
+                                const className = suggestion.active
+                                  ? 'suggestion-item--active'
+                                  : 'suggestion-item';
+                                // inline style for demonstration purpose
+                                const style = suggestion.active
+                                  ? { backgroundColor: '#fafafa', cursor: 'pointer' }
+                                  : { backgroundColor: '#ffffff', cursor: 'pointer' };
+                                return (
+                                  <div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
+                                    <span>{suggestion.description}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </PlacesAutocomplete>
                       <div className='div-chip'>
-                        {Array(3).fill(null).map((_, index) => <div key={index} className='chip'>Dr. Rabinowitz <BsX size={16} onClick={null} /></div>)}
-                      </div>
-                    </Col>
-                    <Col xs={12} sm={12} md={7} className='select-small'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.location)}</p>
-                      <Select placeholder={intl.formatMessage(msgDashboard.startTypingLocation)}>
-                        <Select.Option value='1'>Rabinowitz office</Select.Option>
-                      </Select>
-                      <div className='div-chip'>
-                        {Array(3).fill(null).map((_, index) => <div key={index} className='chip'>Rabinowitz office <BsX size={16} onClick={null} /></div>)}
+                        {selectedLocations?.map((location, i) => (
+                          <div key={i} className='chip'>
+                            {location}
+                            <BsX size={16} onClick={() => this.handleRemoveLocation(i)} />
+                          </div>
+                        ))}
                       </div>
                     </Col>
                   </Row>
                   <div className='text-right'>
-                    <Button size='small' type='primary'>{intl.formatMessage(msgDashboard.apply).toUpperCase()}(10)</Button>
+                    <Button size='small' type='primary' onClick={this.handleApplyFilter}>{intl.formatMessage(messages.apply).toUpperCase()}</Button>
                   </div>
                 </CSSAnimate>
               </div>
             )}
-            {!isEventDetail && <>
-              <div className='calendar-content'>
-                <FullCalendar
-                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-                  ref={this.calendarRef}
-                  headerToolbar={{
-                    left: "filterButton",
-                    center: "prev,title,next",
-                    right: "monthToWeekButton,segmentView"
-                  }}
-                  views={{
-                    monthToWeekButton: {
-                      type: isMonth ? 'dayGridMonth' : 'timeGridWeek',
-                      buttonText: btnMonthToWeek,
-                    },
-                    segmentView: {
-                      type: isGridDayView === 'Grid' ? 'dayGridMonth' : 'listWeek',
-                      buttonText: btnChangeDayView,
-                    },
-                    week: {
-                      titleFormat: { month: 'numeric', day: 'numeric' }
-                    },
-                  }}
-                  customButtons={{
-                    filterButton: {
-                      text: btnFilter,
-                    },
-                  }}
-                  initialView='dayGridMonth'
-                  eventColor='#2d5cfa'
-                  eventDisplay='block'
-                  editable={true}
-                  selectable={true}
-                  selectMirror={true}
-                  dayMaxEvents={true}
-                  weekends={this.state.calendarWeekends}
-                  datesSet={this.handleDates}
-                  // select={this.handleDateSelect}
-                  // events={this.state.calendarEvents}
-                  eventContent={renderEventContent}
-                  eventClick={this.handleEventClick}
-                  // eventAdd={this.handleEventAdd}
-                  // eventChange={this.handleEventChange} // called for drag-n-drop/resize
-                  eventRemove={this.handleEventRemove}
-                // ref={this.calendarComponentRef}
-                />
-              </div>
-              <div className='btn-appointment'>
-                <Dropdown overlay={menu} placement="topRight">
+            {!isEventDetail && (
+              <>
+                <div className='calendar-content'>
+                  <FullCalendar
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                    ref={this.calendarRef}
+                    headerToolbar={{
+                      left: "filterButton",
+                      center: "prev,title,next",
+                      right: "monthToWeekButton,segmentView"
+                    }}
+                    views={{
+                      monthToWeekButton: {
+                        type: isMonth ? 'dayGridMonth' : 'timeGridWeek',
+                        buttonText: btnMonthToWeek,
+                      },
+                      segmentView: {
+                        type: isGridDayView === 'Grid' ? 'dayGridMonth' : 'listWeek',
+                        buttonText: btnChangeDayView,
+                      },
+                      week: { titleFormat: { month: 'numeric', day: 'numeric' } },
+                    }}
+                    customButtons={{
+                      filterButton: { text: btnFilter },
+                      prev: { click: () => this.handleClickPrevMonth() },
+                      next: { click: () => this.handleClickNextMonth() },
+                    }}
+                    initialView='dayGridMonth'
+                    eventColor='transparent'
+                    eventDisplay='block'
+                    editable={true}
+                    selectable={true}
+                    selectMirror={true}
+                    dayMaxEvents={true}
+                    weekends={calendarWeekends}
+                    datesSet={this.handleDates}
+                    events={calendarEvents}
+                    eventContent={renderEventContent}
+                    eventClick={this.onShowDrawerDetail}
+                    eventChange={this.handleEventChange} // called for drag-n-drop/resize
+                    eventRemove={this.handleEventRemove}
+                  />
+                </div>
+                <div className='btn-appointment'>
                   <Button
                     type='primary'
                     block
                     icon={<FaCalendarAlt size={19} />}
-                    onClick={this.onShowDrawerDetailPost}
+                    onClick={() => this.onShowModalNewAppoint()}
                   >
-                    {intl.formatMessage(msgDashboard.makeAppointment)}
+                    {intl.formatMessage(messages.makeAppointment)}
                   </Button>
-                </Dropdown>
-              </div></>}
+                </div>
+              </>
+            )}
           </section>
         </div>
-        <div className='btn-call'>
-          <img src='../images/call.png' />
+        <div className='text-right'>
+          <div className='btn-call'>
+            <img src='../images/call.png' onClick={this.onShowModalReferral} />
+          </div>
         </div>
         <DrawerDetail
-          visible={visibleDetail}
+          visible={userDrawerVisible}
           onClose={this.onCloseDrawerDetail}
+          role={userRole}
+          event={selectedEvent}
+          calendar={this.calendarRef}
         />
-        <DrawerDetailPost
-          visible={visibleDetailPost}
-          onClose={this.onCloseDrawerDetailPost}
+        <ModalNewAppointment {...modalNewAppointProps} />
+        {this.renderModalSubsidyDetail()}
+        {this.modalCreateAndEditSubsidyRequest()}
+        <ModalNewGroup {...modalNewGroupProps}
+          SkillSet={SkillSet}
+          setLoadData={reload => this.loadDataModalNewGroup = reload}
         />
-        <ModalSubsidyProgress
-          {...modalSubsidyProps}
-          setOpennedEvent={(reload) => { this.reloadModalSubsidyDetail = reload }}
+        <ModalReferralService {...modalReferralServiceProps}
+          SkillSet={SkillSet}
+          listDependents={listDependents}
+          setLoadData={reload => this.loadDataModalReferral = reload}
+          userRole={this.state.userRole}
         />
+        <ModalNewSubsidyReview {...modalNewReviewProps} />
       </div>
     );
   }
@@ -417,10 +727,34 @@ function reportNetworkError() {
 }
 
 function renderEventContent(eventInfo) {
+  const type = eventInfo.event.extendedProps?.type;
+  const status = eventInfo.event.extendedProps?.status;
+  const eventType = type == 1 ? 'Screening' : type == 2 ? 'Evaluation' : type == 4 ? 'Consultation' : 'Session';
+  const provider = () => type == 4 ? null : (<b>Provider: {eventInfo.event.extendedProps?.provider?.name}</b>)
+
   return (
-    <>
-      <b className='mr-3'>{eventInfo.timeText}</b>
-      <span className='event-title'>{eventInfo.event.title}</span>
-    </>
+    <div className={`flex flex-col p-3 rounded-2 bg-${status == 0 ? 'active' : eventType.toLowerCase()}`}>
+      <div className='flex items-center gap-2'>
+        {eventInfo.event.extendedProps?.status == -2 && <span className='font-20 text-black'>Cancelled</span>}
+        {eventInfo.event.extendedProps?.status == -1 && <span className='font-20 text-black'>Closed</span>}
+      </div>
+      <div className={`flex flex-col text-white ${eventInfo.event.extendedProps?.status == -2 ? 'line-through' : ''}`}>
+        <div className='flex gap-2'>
+          <b>{moment(eventInfo.event.start).format('hh:mm a')}</b>
+          <b>{eventType}</b>
+        </div>
+        <b>Dependent: {eventInfo.event.extendedProps?.dependent?.firstName + ' ' + eventInfo.event.extendedProps?.dependent?.lastName}</b>
+        {provider()}
+      </div>
+    </div>
   )
 }
+
+const mapStateToProps = state => {
+  return ({
+    appointments: state.appointments.dataAppointments,
+    appointmentsInMonth: state.appointments.dataAppointmentsMonth,
+  })
+}
+
+export default compose(connect(mapStateToProps))(SchedulingCenter);

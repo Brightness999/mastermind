@@ -22,8 +22,8 @@ moment.locale('en');
 class ModalNewAppointmentForParents extends React.Component {
 	state = {
 		selectedDate: moment(),
-		isChoose: -1,
-		isSelectTime: -1,
+		selectedProviderIndex: -1,
+		selectedTimeIndex: -1,
 		listProvider: [],
 		selectedSkillSet: -1,
 		address: '',
@@ -38,6 +38,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		phoneNumber: '',
 		notes: '',
 		providerErrorMessage: '',
+		appointments: [],
 	}
 
 	componentDidMount() {
@@ -83,8 +84,9 @@ class ModalNewAppointmentForParents extends React.Component {
 				this.setState({
 					listProvider: result.data.providers,
 					addressOptions: result.data?.locations,
-					isChoose: -1,
+					selectedProviderIndex: -1,
 					selectedProvider: undefined,
+					selectedTimeIndex: -1,
 				});
 			}
 		}).catch(err => {
@@ -93,33 +95,33 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	createAppointment = () => {
-		const { appointmentType, isSelectTime, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, phoneNumber, notes, listProvider, isChoose } = this.state;
+		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, phoneNumber, notes, listProvider, selectedProviderIndex } = this.state;
 		if (selectedProvider == undefined) {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
 			return;
 		}
 		this.setState({ providerErrorMessage: '' });
-		if (!selectedDate?.isAfter(new Date()) || isSelectTime < 0) {
+		if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
 			this.setState({ errorMessage: 'Please select a date and time' })
 			return;
 		}
 		this.setState({ errorMessage: '' });
 		if (appointmentType == 2) {
-			const appointment = listProvider[isChoose]?.appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 2 && appointment.status == 0);
+			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 2 && appointment.status == 0);
 			if (appointment) {
 				message.warning("You can't create more evaluation.");
 				return;
 			}
 		}
 		if (appointmentType == 1) {
-			const appointment = listProvider[isChoose]?.appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 1 && appointment.status == 0);
+			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 1 && appointment.status == 0);
 			if (appointment) {
-				message.warning((<><p>You can't create more screening.</p><p>The screening with {listProvider[isChoose]?.name} is already scheduled at {new Date(appointment.date).toLocaleString()}</p></>), 5);
+				message.warning((<><p>You can't create more screening.</p><p>The screening with {listProvider[selectedProviderIndex]?.name} is already scheduled at {new Date(appointment.date).toLocaleString()}</p></>), 5);
 				return;
 			}
 		}
 		const { years, months, date } = selectedDate.toObject();
-		const hour = arrTime[isSelectTime].value.clone().set({ years, months, date });
+		const hour = arrTime[selectedTimeIndex].value.clone().set({ years, months, date });
 		const postData = {
 			skillSet: selectedSkillSet,
 			dependent: selectedDependent,
@@ -147,13 +149,14 @@ class ModalNewAppointmentForParents extends React.Component {
 		if (newValue.isSameOrAfter(new Date())) {
 			this.setState({
 				selectedDate: newValue,
-				isSelectTime: -1,
+				selectedTimeIndex: -1,
 			});
-			const { isChoose, arrTime, listProvider } = this.state;
-			if (isChoose > -1) {
+			const { selectedProviderIndex, arrTime, listProvider } = this.state;
+			if (selectedProviderIndex > -1) {
 				const newArrTime = JSON.parse(JSON.stringify(arrTime));
 				const selectedDay = newValue.day();
-				const availableTime = listProvider[isChoose]?.manualSchedule?.find(time => time.dayInWeek == selectedDay);
+				const appointments = listProvider[selectedProviderIndex]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
+				const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDay);
 				if (availableTime) {
 					const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 					const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
@@ -169,6 +172,11 @@ class ModalNewAppointmentForParents extends React.Component {
 						) {
 							let flag = true;
 							this.props.listAppointmentsRecent?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
+								if (time.value.isSame(moment(appointment.date))) {
+									flag = false;
+								}
+							})
+							appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
 								if (time.value.isSame(moment(appointment.date))) {
 									flag = false;
 								}
@@ -198,7 +206,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		if (moment(this.state.selectedDate).add(1, 'month').isAfter(new Date())) {
 			this.setState({
 				selectedDate: moment(this.state.selectedDate).add(1, 'month'),
-				isSelectTime: -1,
+				selectedTimeIndex: -1,
 			});
 		}
 	}
@@ -207,7 +215,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		if (moment(this.state.selectedDate).add(-1, 'month').isAfter(new Date())) {
 			this.setState({
 				selectedDate: moment(this.state.selectedDate).add(-1, 'month'),
-				isSelectTime: -1,
+				selectedTimeIndex: -1,
 			});
 		}
 	}
@@ -234,8 +242,11 @@ class ModalNewAppointmentForParents extends React.Component {
 					this.props.listAppointmentsRecent?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
 						if (time.value.isSame(moment(appointment.date))) {
 							flag = false;
-						} else {
-							flag = true;
+						}
+					})
+					appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
+						if (time.value.isSame(moment(appointment.date))) {
+							flag = false;
 						}
 					})
 					if (flag) {
@@ -269,14 +280,14 @@ class ModalNewAppointmentForParents extends React.Component {
 		}
 
 		this.setState({
-			isChoose: providerIndex,
+			selectedProviderIndex: providerIndex,
 			selectedProvider: listProvider[providerIndex]._id,
 			arrTime: newArrTime,
 		});
 	}
 
 	onSelectTime = (index) => {
-		this.setState({ isSelectTime: index })
+		this.setState({ selectedTimeIndex: index })
 	}
 
 	requestCreateAppointment(postData) {
@@ -321,8 +332,8 @@ class ModalNewAppointmentForParents extends React.Component {
 	render() {
 		const {
 			selectedDate,
-			isChoose,
-			isSelectTime,
+			selectedProviderIndex,
+			selectedTimeIndex,
 			listProvider,
 			selectedProvider,
 			skillSet,
@@ -351,8 +362,8 @@ class ModalNewAppointmentForParents extends React.Component {
 							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType == 2 && (
 								<div className='font-20'>
-									<div>{listProvider[isChoose]?.separateEvaluationDuration} evaluation</div>
-									<div>Rate: ${listProvider[isChoose]?.separateEvaluationRate}</div>
+									<div>{listProvider[selectedProviderIndex]?.separateEvaluationDuration} evaluation</div>
+									<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
 								</div>
 							)}
 						</div>
@@ -466,32 +477,32 @@ class ModalNewAppointmentForParents extends React.Component {
 								<div className='provider-profile'>
 									<div className='flex flex-row items-center'>
 										<p className='font-16 font-700'>{intl.formatMessage(msgDrawer.providerProfile)}</p>
-										<p className='font-12 font-700 ml-auto text-primary'>{listProvider[isChoose]?.isNewClientScreening ? intl.formatMessage(messages.screeningRequired) : ''}</p>
+										<p className='font-12 font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
 									<div className='flex'>
 										<div className='flex-1'>
 											<p className='font-10 mb-0'>Name:</p>
-											<p className='font-10'>{listProvider[isChoose]?.name}</p>
+											<p className='font-10'>{listProvider[selectedProviderIndex]?.name}</p>
 										</div>
 										<div className='flex-1'>
 											<p className='font-10 mb-0'>Skillset(s):</p>
-											<p className='font-10'>{listProvider[isChoose]?.skillSet?.name}</p>
+											<p className='font-10'>{listProvider[selectedProviderIndex]?.skillSet?.name}</p>
 										</div>
 									</div>
-									<p className='font-10 flex'><span className='flex-1'>Practice/Location:</span><span className='flex-1'>{listProvider[isChoose]?.serviceAddress}</span></p>
+									<p className='font-10 flex'><span className='flex-1'>Practice/Location:</span><span className='flex-1'>{listProvider[selectedProviderIndex]?.serviceAddress}</span></p>
 									<div className='flex'>
-										{listProvider[isChoose] && (
+										{listProvider[selectedProviderIndex] && (
 											<div className='flex-1'>
 												<p className='font-10 mb-0'>Contact number:</p>
-												{listProvider[isChoose]?.contactNumber?.map((phone, phoneIndex) => (
+												{listProvider[selectedProviderIndex]?.contactNumber?.map((phone, phoneIndex) => (
 													<p key={phoneIndex} className='font-10'>{phone.phoneNumber}</p>
 												))}
 											</div>
 										)}
-										{listProvider[isChoose] && (
+										{listProvider[selectedProviderIndex] && (
 											<div className='flex-1'>
 												<p className='font-10 mb-0'>Contact email:</p>
-												{listProvider[isChoose]?.contactEmail?.map((email, emailIndex) => (
+												{listProvider[selectedProviderIndex]?.contactEmail?.map((email, emailIndex) => (
 													<p key={emailIndex} className='font-10'>{email.email}</p>
 												))}
 											</div>
@@ -500,7 +511,7 @@ class ModalNewAppointmentForParents extends React.Component {
 									<div className='flex'>
 										<div className='font-10 flex-1'>
 											<p>Academic level(s)</p>
-											<div>{listProvider[isChoose]?.academicLevel?.map((level, i) => (
+											<div>{listProvider[selectedProviderIndex]?.academicLevel?.map((level, i) => (
 												<div key={i} className="flex">
 													<span>{level.level}</span>
 													<span className='ml-10'>{level.rate}</span>
@@ -511,7 +522,7 @@ class ModalNewAppointmentForParents extends React.Component {
 									</div>
 									<div className='profile-text'>
 										<Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-											{listProvider[isChoose]?.publicProfile}
+											{listProvider[selectedProviderIndex]?.publicProfile}
 										</Paragraph>
 									</div>
 								</div>
@@ -556,7 +567,7 @@ class ModalNewAppointmentForParents extends React.Component {
 												<Row gutter={15}>
 													{arrTime?.map((time, index) => (
 														<Col key={index} span={12}>
-															<div className={isSelectTime === index ? 'time-available active' : 'time-available'} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
+															<div className={selectedTimeIndex === index ? 'time-available active' : 'time-available'} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
 																<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
 															</div>
 														</Col>

@@ -3,6 +3,8 @@ export const userSignUp = 'users/signup'
 
 export const getAppointmentsForAdmin = 'admin/get_appointments'
 export const getAppointmentsInMonthForAdmin = 'admin/get_appointments_in_month'
+export const getDefaultDataForAdmin = 'admin/get_default_data'
+export const searchProvidersForAdmin = 'admin/search_providers'
 
 export const getDefaultValuesForConsultant = 'consultants/get_default_values_for_consultant'
 export const getAppointmentsForConsultant = 'consultants/get_my_appointments'

@@ -42,12 +42,12 @@ class InfoChild extends Component {
 	componentDidMount() {
 		const { registerData } = this.props.register;
 		this.setState({ parentInfo: registerData.parentInfo })
-		var newChild = this.getDefaultChildObj(registerData.parentInfo);
-		var studentInfos = !!registerData.studentInfos ? JSON.parse(JSON.stringify(registerData.studentInfos)) : [newChild];
+		const newChild = this.getDefaultChildObj(registerData.parentInfo);
+		let studentInfos = !!registerData.studentInfos ? JSON.parse(JSON.stringify(registerData.studentInfos)) : [newChild];
 		if (!registerData.studentInfos) {
 			this.props.setRegisterData({ studentInfos: studentInfos });
 		}
-		for (var i = 0; i < studentInfos.length; i++) {
+		for (let i = 0; i < studentInfos.length; i++) {
 			if ((studentInfos[i].birthday + '').length > 0) {
 				studentInfos[i].birthday_moment = moment(studentInfos[i].birthday);
 			}
@@ -59,7 +59,7 @@ class InfoChild extends Component {
 
 	createNewChild() {
 		const { registerData } = this.props.register;
-		var newChild = this.getDefaultChildObj(registerData.parentInfo);
+		const newChild = this.getDefaultChildObj(registerData.parentInfo);
 		this.form.setFieldsValue({ children: registerData.studentInfos });
 		this.props.setRegisterData({ studentInfos: [...registerData.studentInfos, newChild] });
 	}
@@ -67,8 +67,8 @@ class InfoChild extends Component {
 	loadServices() {
 		axios.post(url + getDefaultValueForClient).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
-				this.setState({ listServices: data.listServices })
+				const data = result.data.data;
+				this.setState({ listServices: data.SkillSet })
 			} else {
 				this.setState({ checkEmailExist: false });
 			}
@@ -80,7 +80,7 @@ class InfoChild extends Component {
 	loadSchools(parentInfo) {
 		axios.post(url + getAllSchoolsForParent, { communityServed: parentInfo?.cityConnection }).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
+				const data = result.data.data;
 				this.setState({ listSchools: data })
 			}
 		}).catch(err => {
@@ -89,7 +89,7 @@ class InfoChild extends Component {
 	}
 
 	getDefaultChildObj(parentInfo) {
-		var obj = {
+		const obj = {
 			"firstName": "",
 			"lastName": "",
 			"birthday": "",
@@ -108,15 +108,15 @@ class InfoChild extends Component {
 
 	onRemove1Depenent(index) {
 		const { registerData } = this.props.register;
-		var studentInfos = [...registerData.studentInfos]
+		let studentInfos = [...registerData.studentInfos]
 		studentInfos.splice(index, 1);
 		this.props.setRegisterData({ studentInfos: studentInfos });
 	}
 
 	updateReduxValueFor1Depedent(index, fieldName, value) {
 		const { registerData } = this.props.register;
-		var studentInfos = [...registerData.studentInfos]
-		var selectedObj = { ...studentInfos[index] };
+		let studentInfos = [...registerData.studentInfos]
+		let selectedObj = { ...studentInfos[index] };
 		selectedObj[fieldName] = value;
 		studentInfos[index] = selectedObj;
 		this.props.setRegisterData({ studentInfos: studentInfos });
@@ -141,7 +141,7 @@ class InfoChild extends Component {
 		const { registerData } = this.props.register;
 		const studentInfo = registerData.studentInfos[index];
 		try {
-			var isAlreadyFillIn = !!studentInfo && !!studentInfo.firstName && studentInfo.firstName.length > 0
+			const isAlreadyFillIn = !!studentInfo && !!studentInfo.firstName && studentInfo.firstName.length > 0
 				&& !!studentInfo.lastName && studentInfo.lastName.length > 0
 				&& ('' + studentInfo.birthday).length > 0
 				&& studentInfo.guardianPhone.length > 0

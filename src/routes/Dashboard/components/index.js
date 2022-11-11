@@ -1159,7 +1159,7 @@ function renderEventContent(eventInfo) {
         {eventInfo.event.extendedProps?.status == -2 && <span className='font-20 text-black'>Cancelled</span>}
         {eventInfo.event.extendedProps?.status == -1 && <span className='font-20 text-black'>Closed</span>}
       </div>
-      <div className={`flex flex-col ${eventInfo.event.extendedProps?.status == -2 ? 'line-through' : ''}`}>
+      <div className={`flex flex-col text-white ${eventInfo.event.extendedProps?.status == -2 ? 'line-through' : ''}`}>
         <b className='mr-3'>{moment(eventInfo.event.start).format('hh:mm a')}</b>
         <b className='mr-3'>{eventType} with {eventInfo.event.title}</b>
       </div>
