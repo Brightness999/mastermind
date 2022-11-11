@@ -344,7 +344,7 @@ class Dashboard extends React.Component {
     const selectedEvent = listAppointmentsRecent?.find(a => a._id == id);
     this.setState({ selectedEvent: selectedEvent });
     userRole == 3 && this.setState({ userDrawerVisible: true });
-    userRole == 30 && this.setState({ providerDrawervisible: true });
+    (userRole == 30 || userRole == 100) && this.setState({ providerDrawervisible: true });
   };
 
   onCloseDrawerDetail = () => {
@@ -1118,11 +1118,13 @@ class Dashboard extends React.Component {
           role={userRole}
           event={selectedEvent}
           calendar={this.calendarRef}
-        />
+          />
         <DrawerDetailPost
           visible={providerDrawervisible}
           onClose={this.onCloseDrawerDetailPost}
           event={selectedEvent}
+          role={userRole}
+          calendar={this.calendarRef}
         />
         <ModalNewAppointmentForParents {...modalNewAppointProps} />
         {this.renderModalSubsidyDetail()}

@@ -2,7 +2,7 @@ import './style/index.less';
 import React, { Component } from 'react';
 import { Drawer, Button, Row, Col, Typography, Input, Menu, Dropdown, Popover } from 'antd';
 import { BsFillFlagFill, BsCheckCircle } from 'react-icons/bs';
-import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
+import { BiInfoCircle } from 'react-icons/bi';
 import intl from "react-intl-universal";
 import messages from './messages';
 import msgDetail from '../DrawerDetail/messages';
@@ -10,6 +10,9 @@ import { ModalNoShow, ModalBalance, ModalConfirm } from '../../components/Modal'
 import request from '../../utils/api/request';
 import moment from 'moment';
 import { cancelAppointmentForProvider, closeAppointmentForProvider } from '../../utils/api/apiList';
+import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
+import { store } from '../../redux/store';
+
 const { Paragraph } = Typography;
 
 class DrawerDetailPost extends Component {
@@ -83,6 +86,17 @@ class DrawerDetailPost extends Component {
             errorMessage: '',
             isClosed: true,
           });
+          store.dispatch(getAppointmentsData({ role: this.props.role }));
+          const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
+          const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
+          const dataFetchAppointMonth = {
+            role: this.props.role,
+            data: {
+              month: month,
+              year: year,
+            }
+          };
+          store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
         } else {
           this.setState({
             errorMessage: result.data,
@@ -108,6 +122,17 @@ class DrawerDetailPost extends Component {
             errorMessage: '',
             isCancelled: true,
           });
+          store.dispatch(getAppointmentsData({ role: this.props.role }));
+          const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
+          const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
+          const dataFetchAppointMonth = {
+            role: this.props.role,
+            data: {
+              month: month,
+              year: year,
+            }
+          };
+          store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
         } else {
           this.setState({
             errorMessage: result.data,
@@ -234,7 +259,7 @@ class DrawerDetailPost extends Component {
 
     return (
       <Drawer
-        title={event?.type == 1 ? intl.formatMessage(msgDetail.screeningDetails) : event?.type == 2 ? intl.formatMessage(msgDetail.evaluationDetails) : intl.formatMessage(msgDetail.appointmentDetails)}
+        title={event?.type == 1 ? intl.formatMessage(msgDetail.screeningDetails) : event?.type == 2 ? intl.formatMessage(msgDetail.evaluationDetails) : event?.type == 3 ? intl.formatMessage(msgDetail.appointmentDetails) : intl.formatMessage(msgDetail.consultationDetails)}
         closable={true}
         onClose={this.props.onClose}
         open={this.props.visible}
@@ -258,32 +283,46 @@ class DrawerDetailPost extends Component {
               <a className='font-18 underline text-primary'>{`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</a>
             </div>
           </Popover>
-          <Popover
-            placement="leftTop"
-            content={providerProfile}
-            trigger="hover"
-            open={isProviderHover}
-            onOpenChange={this.handleProviderHoverChange}
-          >
+          {event?.type == 4 ? (
             <div className='detail-item flex'>
-              <div className='flex flex-row title'>
-                <p className='font-18 font-700'>{intl.formatMessage(msgDetail.with)}</p>
-                <BiDollarCircle size={18} className='mx-10 text-primary' />
-              </div>
+              <p className='font-18 font-700 title'>{intl.formatMessage(msgDetail.with)}</p>
               <div className='flex flex-row flex-1'>
-                <p className='font-18 underline text-primary'>{event?.provider?.name}</p>
-                <BiInfoCircle size={12} className='text-primary ml-auto' />
+                <div className='font-18'>Consultant</div>
               </div>
             </div>
-          </Popover>
+          ) : (
+            <Popover
+              placement="leftTop"
+              content={providerProfile}
+              trigger="hover"
+              open={isProviderHover}
+              onOpenChange={this.handleProviderHoverChange}
+            >
+              <div className='detail-item flex'>
+                <p className='font-18 font-700 title'>{intl.formatMessage(msgDetail.with)}</p>
+                <div className='flex flex-row flex-1'>
+                  <a className='font-18 underline text-primary'>{event?.provider?.name}</a>
+                  <BiInfoCircle size={12} className='text-primary ml-auto' />
+                </div>
+              </div>
+            </Popover>
+          )}
           <div className='detail-item flex'>
             <p className='font-18 font-700 title'>{intl.formatMessage(msgDetail.when)}</p>
             <p className='font-18'>{new Date(event?.date).toLocaleString()}</p>
           </div>
-          <div className='detail-item flex'>
-            <p className='font-18 font-700 title'>{intl.formatMessage(msgDetail.where)}</p>
-            <p className='font-16'>{event?.location}</p>
-          </div>
+          {[2, 3].includes(event?.type) && (
+            <div className='detail-item flex'>
+              <p className='font-18 font-700 title'>{intl.formatMessage(msgDetail.where)}</p>
+              <p className='font-16'>{event?.location}</p>
+            </div>
+          )}
+          {[1, 4].includes(event?.type) && (
+            <div className='detail-item flex'>
+              <p className='font-18 font-700 title'>{intl.formatMessage(msgDetail.phonenumber)}</p>
+              <p className='font-16'>{event?.phoneNumber}</p>
+            </div>
+          )}
         </div>
         {moment(event?.date).isBefore(moment()) && event?.status == 0 && (
           <div className='post-feedback mt-1'>
@@ -305,7 +344,7 @@ class DrawerDetailPost extends Component {
               </Button>
             </Col>
           )}
-          {event?.type > 1 && (
+          {(event?.type > 1 && event?.status == -1 && moment(event?.date).isBefore(new Date())) && (
             <Col span={12}>
               <Dropdown overlay={menu} placement="bottomRight">
                 <Button

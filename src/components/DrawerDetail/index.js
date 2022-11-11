@@ -66,11 +66,11 @@ class DrawerDetail extends Component {
               errorMessage: '',
               isCancelled: true,
             });
-            store.dispatch(getAppointmentsData({ role: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).role : '' }));
+            store.dispatch(getAppointmentsData({ role: this.props.role }));
             const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
             const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
             const dataFetchAppointMonth = {
-              role: JSON.parse(localStorage.getItem('user')).role,
+              role: this.props.role,
               data: {
                 month: month,
                 year: year,
@@ -96,11 +96,11 @@ class DrawerDetail extends Component {
 
   submitModalCurrent = () => {
     this.setState({ visibleCurrent: false });
-    store.dispatch(getAppointmentsData({ role: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).role : '' }));
+    store.dispatch(getAppointmentsData({ role: this.props.role }));
     const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
     const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
     const dataFetchAppointMonth = {
-      role: JSON.parse(localStorage.getItem('user')).role,
+      role: this.props.role,
       data: {
         month: month,
         year: year,
