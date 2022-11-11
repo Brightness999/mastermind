@@ -53,11 +53,10 @@ class ModalReferralService extends React.Component {
 			});
 		}
 		this.setState({ arrTime: arrTime });
-		this.getConsultationData();
 	}
 
-	getConsultationData = () => {
-		request.post(getAllConsultantForParent).then(res => {
+	getConsultationData = (dependentId) => {
+		request.post(getAllConsultantForParent, { dependentId: dependentId }).then(res => {
 			if (res.success) {
 				this.setState({
 					consultants: res.data?.consultants,
@@ -96,8 +95,14 @@ class ModalReferralService extends React.Component {
 
 		request.post(createAppointmentForParent, postData).then(result => {
 			if (result.success) {
-				this.setState({ selectedDate: undefined, selectedTimeIndex: -1 })
-				this.getConsultationData();
+				this.setState({
+					selectedDate: undefined,
+					selectedTimeIndex: -1,
+					arrTime: this.state.arrTime.map(time => { time.active = false; return time; }),
+					selectedDependent: undefined,
+					selectedSkillSet: undefined,
+				})
+				this.form.setFieldsValue({ selectedDependent: undefined, selectedSkillSet: undefined });
 				this.props.onSubmit();
 			} else {
 				message.error('cannot create referral');
@@ -152,6 +157,7 @@ class ModalReferralService extends React.Component {
 
 	handleSelectDependent = (value) => {
 		this.setState({ selectedDependent: value });
+		this.getConsultationData(value);
 	}
 
 	onSelectDate = (newValue) => {
@@ -178,12 +184,10 @@ class ModalReferralService extends React.Component {
 						}
 					})
 					appointments.forEach(appointment => {
-						console.log(time.value, moment(appointment.date))
 						if (time.value.isSame(moment(appointment.date))) {
 							appointment_length++;
 						}
 					})
-					console.log(consultant_length - appointment_length)
 					if (consultant_length - appointment_length > 0) {
 						time.active = true;
 					} else {

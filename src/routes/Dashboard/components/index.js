@@ -213,7 +213,7 @@ class Dashboard extends React.Component {
   loadDefaultData() {
     request.post(getDefaultValueForClient).then(result => {
       const data = result.data;
-      this.setState({ SkillSet: data.SkillSet?.docs });
+      this.setState({ SkillSet: data.SkillSet });
     });
     request.post(searchProvidersForParent, generateSearchStructure('')).then(result => {
       if (result.success) {
