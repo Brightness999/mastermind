@@ -21,7 +21,7 @@ class DrawerDetailPost extends Component {
     this.state = {
       visibleNoShow: false,
       visibleBalance: false,
-      publicFeedback: props.event?.publicFeedback ?? '',
+      publicFeedback: this.props.event?.publicFeedback ?? '',
       privateNotes: '',
       isProviderHover: false,
       isDependentHover: false,

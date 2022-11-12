@@ -366,7 +366,6 @@ class ModalNewAppointment extends React.Component {
 			addressOptions,
 			appointmentType,
 		} = this.state;
-		console.log(listProvider);
 		const modalProps = {
 			className: 'modal-new',
 			title: "",

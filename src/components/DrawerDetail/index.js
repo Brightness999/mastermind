@@ -9,6 +9,7 @@ import { ModalCancelAppointment, ModalCurrentAppointment } from '../../component
 import intl from "react-intl-universal";
 import messages from './messages';
 import msgModal from '../Modal/messages';
+import msgDetailPost from '../DrawerDetailPost/messages';
 import moment from 'moment';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
@@ -25,15 +26,20 @@ class DrawerDetail extends Component {
       visibleCancel: false,
       visibleCurrent: false,
       errorMessage: '',
-      isCancelled: this.props.evnt?.status == -2,
+      isNotPending: this.props.evnt?.status < 0,
       isShowEditNotes: false,
       notes: this.props.event?.notes,
+      isModalConfirm: false,
+      message: '',
+      publicFeedback: this.props.event?.publicFeedback ?? '',
     };
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.event?.status != this.props.event?.status) {
-      this.setState({ isCancelled: this.props.event.status < 0 });
+      this.setState({
+        isNotPending: this.props.event.status < 0,
+      });
     }
     if (prevProps.event?.notes != this.props.event?.notes) {
       this.setState({ notes: this.props.event?.notes });
@@ -56,6 +62,10 @@ class DrawerDetail extends Component {
     this.setState({ visibleCancel: true });
   }
 
+  handleChangeFeedback = feedback => {
+    this.setState({ publicFeedback: feedback });
+  }
+
   handleConfirmCancel = () => {
     this.setState({ visibleCancel: false }, () => {
       if (this.props.event?._id) {
@@ -64,7 +74,7 @@ class DrawerDetail extends Component {
           if (result.success) {
             this.setState({
               errorMessage: '',
-              isCancelled: true,
+              isNotPending: true,
             });
             store.dispatch(getAppointmentsData({ role: this.props.role }));
             const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
@@ -80,14 +90,14 @@ class DrawerDetail extends Component {
           } else {
             this.setState({
               errorMessage: result.data,
-              isCancelled: true,
+              isNotPending: true,
             });
           }
         }).catch(error => {
           console.log('closed error---', error);
           this.setState({
             errorMessage: error.message,
-            isCancelled: true,
+            isNotPending: true,
           });
         })
       }
@@ -152,8 +162,65 @@ class DrawerDetail extends Component {
     return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.duration, 'minutes').format('hh:mm a')}`;
   }
 
+
+  handleMarkAsClosed = () => {
+    if (this.props.event?._id) {
+      const data = {
+        appointmentId: this.props.event._id,
+        publicFeedback: this.state.publicFeedback,
+      }
+      request.post(closeAppointmentForProvider, data).then(result => {
+        if (result.success) {
+          this.setState({
+            errorMessage: '',
+            isNotPending: true,
+          });
+          store.dispatch(getAppointmentsData({ role: this.props.role }));
+          const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
+          const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
+          const dataFetchAppointMonth = {
+            role: this.props.role,
+            data: {
+              month: month,
+              year: year,
+            }
+          };
+          store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+        } else {
+          this.setState({
+            errorMessage: result.data,
+            isNotPending: false,
+          });
+        }
+      }).catch(error => {
+        console.log('closed error---', error);
+        this.setState({
+          errorMessage: error.message,
+          isNotPending: false,
+        });
+      })
+    }
+  }
+
+  openConfirmModal = () => {
+    this.setState({
+      isModalConfirm: true,
+      message: 'Are you sure you want to mark as closed?',
+      modalType: 'close',
+    });
+  }
+
+  onConfirm = () => {
+    this.setState({ isModalConfirm: false });
+    this.handleMarkAsClosed();
+  }
+
+  onCancel = () => {
+    this.setState({ isModalConfirm: false });
+  }
+
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent, isCancelled, isShowEditNotes, notes } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback } = this.state;
     const { role, event } = this.props;
 
     const providerProfile = (
@@ -209,7 +276,7 @@ class DrawerDetail extends Component {
       <Drawer
         title={event?.type == 1 ? intl.formatMessage(messages.screeningDetails) : event?.type == 2 ? intl.formatMessage(messages.evaluationDetails) : event?.type == 3 ? intl.formatMessage(messages.appointmentDetails) : intl.formatMessage(messages.consultationDetails)}
         closable={true}
-        onClose={this.props.onClose}
+        onClose={() => { this.props.onClose(); this.setState({ isShowEditNotes: false }); }}
         open={this.props.visible}
         extra={
           <Button type='text' icon={<BsBell size={18} />} />
@@ -297,8 +364,14 @@ class DrawerDetail extends Component {
             </div>
           </>
         )}
+        {moment(event?.date).isBefore(moment()) && event?.status == 0 && (
+          <div className='post-feedback mt-1'>
+            <p className='font-18 font-700 mb-5'>{intl.formatMessage(msgDetailPost.postSessionFeedback)}</p>
+            <Input.TextArea rows={7} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.postSessionFeedback)} />
+          </div>
+        )}
         <Row gutter={15} className='list-btn-detail'>
-          {(role != 30 && moment(event?.date).isAfter(new Date()) && event?.status == 0 && !isCancelled) && (
+          {(role != 30 && moment(event?.date).isAfter(moment()) && event?.status == 0 && !isNotPending) && (
             <>
               <Col span={12}>
                 <Button
@@ -316,7 +389,7 @@ class DrawerDetail extends Component {
                   icon={<BsXCircle size={15} />}
                   block
                   onClick={this.openModalCancel}
-                  disabled={isCancelled}
+                  disabled={isNotPending}
                 >
                   {event?.status == 0 ? intl.formatMessage(messages.cancel) : event?.status == -1 ? intl.formatMessage(messages.closed) : event?.status == -2 ? intl.formatMessage(messages.cancelled) : ''}
                 </Button>
@@ -329,6 +402,19 @@ class DrawerDetail extends Component {
                     block
                   >
                     {intl.formatMessage(messages.requestInvoice)}
+                  </Button>
+                </Col>
+              )}
+              {moment(event?.date).isBefore(moment()) && event?.status == 0 && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<BsCheckCircle size={15} />}
+                    block
+                    onClick={() => this.openConfirmModal()}
+                    disabled={isNotPending}
+                  >
+                    {intl.formatMessage(msgDetailPost.markClosed)}
                   </Button>
                 </Col>
               )}
