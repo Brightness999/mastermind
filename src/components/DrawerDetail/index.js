@@ -367,7 +367,7 @@ class DrawerDetail extends Component {
         {moment(event?.date).isBefore(moment()) && event?.status == 0 && (
           <div className='post-feedback mt-1'>
             <p className='font-18 font-700 mb-5'>{intl.formatMessage(msgDetailPost.postSessionFeedback)}</p>
-            <Input.TextArea rows={7} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.postSessionFeedback)} />
+            <Input.TextArea rows={7} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(msgDetailPost.postSessionFeedback)} />
           </div>
         )}
         <Row gutter={15} className='list-btn-detail'>

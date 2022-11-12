@@ -7,7 +7,10 @@ const initialState = {
 	user: [],
 	authData: [],
 	authDataClientChild: [],
-	authDataClientParent: []
+	authDataClientParent: [],
+	dependents: [],
+	providers: [],
+	skillSet: [],
 };
 
 export const getInfoAuth = createAsyncThunk(
@@ -100,6 +103,15 @@ export const authSlice = createSlice({
 		changeInfor(state, action) {
 			state.authData = action.payload
 		},
+		setDependents(state, action) {
+			state.dependents = action.payload
+		},
+		setProviders(state, action) {
+			state.providers = action.payload
+		},
+		setSkillSet(state, action) {
+			state.skillSet = action.payload
+		},
 		logout(state) {
 			localStorage.removeItem('token');
 			helper.history.push('/');
@@ -124,6 +136,6 @@ export const authSlice = createSlice({
 	}
 });
 
-export const { logout, setAuthData, setUser, removeUser, changeInforClientChild, changeInforClientParent, changeInfor } = authSlice.actions;
+export const { logout, setAuthData, setUser, removeUser, changeInforClientChild, changeInforClientParent, changeInfor, setDependents, setProviders, setSkillSet } = authSlice.actions;
 
 export default authSlice.reducer;
