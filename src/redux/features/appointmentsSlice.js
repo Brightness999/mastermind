@@ -20,7 +20,7 @@ export const getAppointmentsData = createAsyncThunk(
 					return result.data?.docs;
 				case 100:
 					result = await request.post(url + getAppointmentsForConsultant, {}, data.token);
-					return result.data?.docs;
+					return result.data;
 				case 30:
 					result = await request.post(url + getAppointmentsForProvider, {}, data.token);
 					return result.data?.docs;

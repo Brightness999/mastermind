@@ -45,13 +45,11 @@ class ModalNewAppointment extends React.Component {
 		let duration = 30;
 		const { listProvider } = this.state;
 		const provider = listProvider[providerIndex];
-		if (type) {
-			if (type == 1 || type == 3) {
-				duration = provider?.duration;
-			}
-			if (type == 2) {
-				duration = provider?.duration * 1 + provider?.separateEvaluationDuration * 1
-			}
+		if (type == 1 || type == 3) {
+			duration = provider?.duration;
+		}
+		if (type == 2) {
+			duration = provider?.duration * 1 + provider?.separateEvaluationDuration * 1
 		}
 		this.setState({ duration: duration });
 
@@ -174,19 +172,22 @@ class ModalNewAppointment extends React.Component {
 				const newArrTime = this.getArrTime(appointmentType, selectedProviderIndex);
 				const selectedDay = newValue.day();
 				const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDay);
+				let duration = 30;
+				if (appointmentType == 1 || appointmentType == 3) {
+					duration = listProvider[selectedProviderIndex]?.duration;
+				}
+				if (appointmentType == 2) {
+					duration = listProvider[selectedProviderIndex]?.duration * 1 + listProvider[selectedProviderIndex]?.separateEvaluationDuration * 1
+				}
 				if (availableTime) {
 					const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 					const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
+					const openTime = newValue.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
+					const closeTime = newValue.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-duration, 'minutes');
 					newArrTime.map(time => {
 						const { years, months, date } = newValue.toObject();
 						time.value = moment(time.value).set({ years, months, date });
-						if (time.value.isBetween(availableFromDate, availableToDate)
-							&& (
-								(time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour)
-								|| (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin)
-								|| (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)
-							)
-						) {
+						if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
 							let flag = true;
 							this.props.listAppointmentsRecent?.filter(appointment => (appointment.status == 0) && (appointment.provider?._id == selectedProviderIndex || appointment.dependent?._id == selectedDependent))?.forEach(appointment => {
 								if (time.value.isSame(moment(appointment.date))) {
@@ -265,19 +266,22 @@ class ModalNewAppointment extends React.Component {
 
 		const newArrTime = this.getArrTime(appointmentType, providerIndex);
 		const availableTime = listProvider[providerIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDate.day());
+		let duration = 30;
+		if (appointmentType == 1 || appointmentType == 3) {
+			duration = listProvider[providerIndex]?.duration;
+		}
+		if (appointmentType == 2) {
+			duration = listProvider[providerIndex]?.duration * 1 + listProvider[providerIndex]?.separateEvaluationDuration * 1
+		}
 		if (availableTime) {
 			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 			const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
+			const openTime = selectedDate.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
+			const closeTime = selectedDate.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-duration, 'minutes');
 			newArrTime.map(time => {
 				const { years, months, date } = selectedDate?.toObject();
 				time.value = moment(time.value).set({ years, months, date });
-				if (time.value.isBetween(availableFromDate, availableToDate)
-					&& (
-						(time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour)
-						|| (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin)
-						|| (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)
-					)
-				) {
+				if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
 					let flag = true;
 					this.props.listAppointmentsRecent?.filter(appointment => (appointment.status == 0) && (appointment.provider?._id == selectedProviderIndex || appointment.dependent?._id == selectedDependent))?.forEach(appointment => {
 						if (time.value.isSame(moment(appointment.date))) {
@@ -394,7 +398,7 @@ class ModalNewAppointment extends React.Component {
 							<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}<sup>*</sup></p>
 							{appointmentType == 3 && (
 								<div className='flex flex-row items-center ml-20'>
-									<Switch size="small" defaultChecked />
+									<Switch size="small" />
 									<p className='ml-10 mb-0'>{intl.formatMessage(messages.subsidyOnly)}</p>
 								</div>
 							)}

@@ -31,10 +31,10 @@ import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { setUser } from '../../../redux/features/authSlice';
+import { setDependents, setLocations, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { checkNotificationForClient, checkNotificationForProvider, closeNotificationForClient, getDefaultValueForClient, searchProvidersForParent } from '../../../utils/api/apiList';
+import { checkNotificationForClient, checkNotificationForProvider, closeNotificationForClient, getDefaultDataForAdmin, getDefaultValueForClient, searchProvidersForParent } from '../../../utils/api/apiList';
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -61,6 +61,7 @@ class Dashboard extends React.Component {
       parentInfo: {},
       providerInfo: {},
       schoolInfo: {},
+      consultantInfo: {},
       listAppointmentsRecent: this.props.appointments,
       listAppoinmentsFilter: [],
       SkillSet: [],
@@ -84,10 +85,7 @@ class Dashboard extends React.Component {
         loginData?.role == 999 && this.props.history.push(routerLinks.Admin)
         switch (loginData.role) {
           case 3:
-            this.setState({
-              parentInfo: loginData.parentInfo,
-              listDependents: loginData.studentInfos
-            });
+            this.setState({ parentInfo: loginData.parentInfo });
             this.loadDefaultData();
             break;
           case 30:
@@ -95,10 +93,11 @@ class Dashboard extends React.Component {
             this.loadDefaultData();
             break;
           case 60:
-            this.setState({
-              schoolInfo: loginData.schoolInfo,
-              listDependents: loginData.students
-            })
+            this.setState({ schoolInfo: loginData.schoolInfo })
+            this.loadDefaultData();
+            break;
+          case 100:
+            this.setState({ consultantInfo: loginData.consultantInfo });
             this.loadDefaultData();
             break;
         }
@@ -108,66 +107,70 @@ class Dashboard extends React.Component {
         const notifications = setInterval(() => {
           if (loginData.role == 3) {
             request.post(checkNotificationForClient).then(res => {
-              res.data?.forEach(appointment => {
-                const key = `open${Date.now()}`;
-                const btn = (
-                  <Button type="primary" size="small" onClick={() => {
-                    notification.close(key);
-                    this.handleCloseNotification(appointment._id);
-                  }}>
-                    Confirm
-                  </Button>
-                );
-                const description = (
-                  <div>
-                    <p className='font-10'>30 minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{appointment?.provider?.name}</span></p>
-                    <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName} ${appointment?.dependent?.lastName}`}</p>
-                    {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location}</p>}
-                    <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
-                  </div>
-                )
-                notification.open({
-                  message: 'Notification',
-                  description,
-                  btn,
-                  key,
-                  onClose: close(key),
-                  duration: 10,
-                  placement: 'top',
-                });
-              })
+              if (res.success) {
+                res.data?.forEach(appointment => {
+                  const key = `open${Date.now()}`;
+                  const btn = (
+                    <Button type="primary" size="small" onClick={() => {
+                      notification.close(key);
+                      this.handleCloseNotification(appointment._id);
+                    }}>
+                      Confirm
+                    </Button>
+                  );
+                  const description = (
+                    <div>
+                      <p className='font-10'>30 minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{appointment?.provider?.name}</span></p>
+                      <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName} ${appointment?.dependent?.lastName}`}</p>
+                      {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location}</p>}
+                      <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
+                    </div>
+                  )
+                  notification.open({
+                    message: 'Notification',
+                    description,
+                    btn,
+                    key,
+                    onClose: close(key),
+                    duration: 10,
+                    placement: 'top',
+                  });
+                })
+              }
             })
           }
           if (loginData.role == 30) {
             request.post(checkNotificationForProvider).then(res => {
-              res.data?.forEach(appointment => {
-                const key = `open${Date.now()}`;
-                const btn = (
-                  <Button type="primary" size="small" onClick={() => {
-                    notification.close(key);
-                    this.handleCloseNotification(appointment._id);
-                  }}>
-                    Confirm
-                  </Button>
-                );
-                const description = (
-                  <div>
-                    <p className='font-10'>30 minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{appointment?.provider?.name}</span></p>
-                    <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName} ${appointment?.dependent?.lastName}`}</p>
-                    {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location}</p>}
-                    <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
-                  </div>
-                )
-                notification.open({
-                  message: 'Notification',
-                  description,
-                  btn,
-                  key,
-                  onClose: close(key),
-                  duration: 0,
-                  placement: 'top',
-                });
-              })
+              if (res.success) {
+                res.data?.forEach(appointment => {
+                  const key = `open${Date.now()}`;
+                  const btn = (
+                    <Button type="primary" size="small" onClick={() => {
+                      notification.close(key);
+                      this.handleCloseNotification(appointment._id);
+                    }}>
+                      Confirm
+                    </Button>
+                  );
+                  const description = (
+                    <div>
+                      <p className='font-10'>30 minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{appointment?.provider?.name}</span></p>
+                      <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName} ${appointment?.dependent?.lastName}`}</p>
+                      {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location}</p>}
+                      <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
+                    </div>
+                  )
+                  notification.open({
+                    message: 'Notification',
+                    description,
+                    btn,
+                    key,
+                    onClose: close(key),
+                    duration: 0,
+                    placement: 'top',
+                  });
+                })
+              }
             })
           }
         }, 60000);
@@ -211,15 +214,20 @@ class Dashboard extends React.Component {
   }
 
   loadDefaultData() {
-    request.post(getDefaultValueForClient).then(result => {
-      const data = result.data;
-      this.setState({ SkillSet: data.SkillSet });
-    });
-    request.post(searchProvidersForParent, generateSearchStructure('')).then(result => {
+    request.post(getDefaultDataForAdmin).then(result => {
       if (result.success) {
-        this.setState({ listProvider: result.data?.providers ?? [] });
+        const data = result.data;
+        this.setState({
+          listProvider: data?.providers,
+          SkillSet: data?.skillSet,
+          listDependents: data?.dependents,
+        })
+        store.dispatch(setDependents(data?.dependents));
+        store.dispatch(setProviders(data?.providers));
+        store.dispatch(setSkillSet(data?.skillSet));
+        store.dispatch(setLocations(data?.locations));
       }
-    });
+    })
   }
 
   scriptLoaded = () => {
@@ -343,8 +351,8 @@ class Dashboard extends React.Component {
     const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : val;
     const selectedEvent = listAppointmentsRecent?.find(a => a._id == id);
     this.setState({ selectedEvent: selectedEvent });
-    userRole == 3 && this.setState({ userDrawerVisible: true });
-    (userRole == 30 || userRole == 100) && this.setState({ providerDrawervisible: true });
+    (userRole == 3 || userRole == 100) && this.setState({ userDrawerVisible: true });
+    userRole == 30 && this.setState({ providerDrawervisible: true });
   };
 
   onCloseDrawerDetail = () => {
@@ -784,7 +792,6 @@ class Dashboard extends React.Component {
       onCancel: this.onCloseModalNewAppoint,
       listDependents: listDependents,
       SkillSet: SkillSet,
-      listAppointmentsRecent: listAppointmentsRecent,
     };
 
     return (
@@ -932,8 +939,8 @@ class Dashboard extends React.Component {
                     type='primary'
                     block
                     icon={<FaCalendarAlt size={19} />}
-                    disabled={userRole != 3}
-                    onClick={() => userRole == 3 && this.onShowModalNewAppoint()}
+                    disabled={userRole == 30 || userRole == 60}
+                    onClick={() => (userRole == 3 || userRole == 100) && this.onShowModalNewAppoint()}
                   >
                     {intl.formatMessage(messages.makeAppointment)}
                   </Button>
@@ -1118,7 +1125,7 @@ class Dashboard extends React.Component {
           role={userRole}
           event={selectedEvent}
           calendar={this.calendarRef}
-          />
+        />
         <DrawerDetailPost
           visible={providerDrawervisible}
           onClose={this.onCloseDrawerDetailPost}

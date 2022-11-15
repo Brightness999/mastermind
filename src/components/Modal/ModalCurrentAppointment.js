@@ -26,7 +26,7 @@ class ModalCurrentAppointment extends React.Component {
 		listProvider: store.getState().auth.providers,
 		selectedSkillSet: -1,
 		address: '',
-		addressOptions: [],
+		addressOptions: store.getState().auth.locations,
 		selectedDependent: undefined,
 		selectedProvider: undefined,
 		arrTime: [],
@@ -47,13 +47,11 @@ class ModalCurrentAppointment extends React.Component {
 		let duration = 30;
 		const { listProvider } = this.state;
 		const provider = listProvider[providerIndex];
-		if (type) {
-			if (type == 1 || type == 3) {
-				duration = provider?.duration;
-			}
-			if (type == 2) {
-				duration = provider?.duration * 1 + provider?.separateEvaluationDuration * 1
-			}
+		if (type == 1 || type == 3) {
+			duration = provider?.duration;
+		}
+		if (type == 2) {
+			duration = provider?.duration * 1 + provider?.separateEvaluationDuration * 1
 		}
 		this.setState({ duration: duration });
 
@@ -96,7 +94,6 @@ class ModalCurrentAppointment extends React.Component {
 			if (result.success) {
 				this.setState({
 					listProvider: result.data.providers,
-					addressOptions: result.data?.locations,
 					selectedProviderIndex: -1,
 					selectedProvider: undefined,
 				});
@@ -145,19 +142,22 @@ class ModalCurrentAppointment extends React.Component {
 				const selectedDay = newValue.day();
 				const appointments = listProvider[selectedProviderIndex]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
 				const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDay);
+				let duration = 30;
+				if (appointmentType == 1 || appointmentType == 3) {
+					duration = listProvider[selectedProviderIndex]?.duration;
+				}
+				if (appointmentType == 2) {
+					duration = listProvider[selectedProviderIndex]?.duration * 1 + listProvider[selectedProviderIndex]?.separateEvaluationDuration * 1
+				}
 				if (availableTime) {
 					const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 					const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
+					const openTime = newValue.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
+					const closeTime = newValue.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-duration, 'minutes');
 					newArrTime.map(time => {
 						const { years, months, date } = newValue.toObject();
 						time.value = moment(time.value).set({ years, months, date });
-						if (time.value.isBetween(availableFromDate, availableToDate)
-							&& (
-								(time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour)
-								|| (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin)
-								|| (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)
-							)
-						) {
+						if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
 							let flag = true;
 							dependents.find(dependent => dependent._id == selectedDependent)?.appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
 								if (time.value.isSame(moment(appointment.date))) {
@@ -357,6 +357,11 @@ class ModalCurrentAppointment extends React.Component {
 		this.requestUpdateAppointment(postData);
 	}
 
+	displayDuration = () => {
+		const { event } = this.props;
+		return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.duration, 'minutes').format('hh:mm a')}`;
+	}
+
 	render() {
 		const { selectedDate, selectedProviderIndex, selectedTimeIndex, listProvider, selectedProvider, skillSet, arrTime, errorMessage, providerErrorMessage, addressOptions, appointmentType, selectedDependent, address, phoneNumber, isConfirm, dependents } = this.state;
 		const { event } = this.props;
@@ -402,19 +407,19 @@ class ModalCurrentAppointment extends React.Component {
 				<div className='header-current'>
 					<Row gutter="15" align="bottom">
 						<Col xs={24} sm={24} md={8}>
-							<p className='font-24 font-700'>{intl.formatMessage(messages.current)} {event?.type == 3 && intl.formatMessage(messages.appointment)}{event?.type == 2 && intl.formatMessage(messages.evaluation)}{event?.type == 1 && intl.formatMessage(messages.screening)}</p>
+							<p className='font-24 font-700'>{intl.formatMessage(messages.current)} {event?.type == 3 && intl.formatMessage(messages.appointment)}{event?.type == 2 && intl.formatMessage(messages.evaluation)}{event?.type == 1 && intl.formatMessage(messages.screening)}{event?.type == 4 && intl.formatMessage(messages.consultation)}</p>
 							<p className='font-16'>{`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</p>
 							<p className='font-16'>{event?.provider?.name}</p>
 						</Col>
 						<Col xs={24} sm={24} md={8}>
 							<p className={`font-16 ${event?.type != 3 ? 'display-none' : ''}`}>{intl.formatMessage(msgCreateAccount.subsidy)}</p>
 							<p className={`font-16 font-700 ${event?.type != 2 ? 'display-none' : ''}`}>{event?.separateEvaluationDuration} {intl.formatMessage(messages.evaluation)}</p>
-							<p className='font-16'>{event?.type == 1 ? event?.phoneNumber : event?.location}</p>
+							<p className='font-16'>{(event?.type == 1 || event?.type == 4) ? event?.phoneNumber : event?.location}</p>
 						</Col>
 						<Col xs={24} sm={24} md={8}>
 							<p></p>
 							<p className='font-16'>{event?.skillSet?.name}</p>
-							<p className='font-16'>{`${new Date(event?.date)?.toLocaleDateString()} ${this.displayTime(new Date(event?.date)?.toLocaleTimeString())}`}</p>
+							<p className='font-16'>{this.displayDuration()}</p>
 						</Col>
 					</Row>
 				</div>
@@ -433,7 +438,7 @@ class ModalCurrentAppointment extends React.Component {
 							<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}<sup>*</sup></p>
 							{appointmentType == 3 && (
 								<div className='flex flex-row items-center ml-20'>
-									<Switch size="small" defaultChecked />
+									<Switch size="small" />
 									<p className='ml-10 mb-0'>{intl.formatMessage(messages.subsidyOnly)}</p>
 								</div>
 							)}

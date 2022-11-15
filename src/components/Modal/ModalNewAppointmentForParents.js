@@ -13,7 +13,7 @@ import 'moment/locale/en-au';
 import './style/index.less';
 import '../../assets/styles/login.less';
 import request from '../../utils/api/request'
-import { createAppointmentForParent, searchProvidersForParent } from '../../utils/api/apiList';
+import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils/api/apiList';
 import { store } from '../../redux/store';
 
 const { Paragraph } = Typography;
@@ -41,30 +41,44 @@ class ModalNewAppointmentForParents extends React.Component {
 		appointments: [],
 	}
 
-	componentDidMount() {
+	getArrTime = (type, providerIndex) => {
 		let arrTime = [];
+		let duration = 30;
+		const { listProvider } = this.state;
+		const provider = listProvider[providerIndex];
+		if (type == 1 || type == 3) {
+			duration = provider?.duration;
+		}
+		if (type == 2) {
+			duration = provider?.duration * 1 + provider?.separateEvaluationDuration * 1
+		}
+		this.setState({ duration: duration });
+
 		let hour9AM = moment('2022-10-30 9:00:00');
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < 180 / duration; i++) {
 			let newTime = hour9AM.clone();
-			hour9AM = hour9AM.add(30, 'minutes')
+			hour9AM = hour9AM.add(duration, 'minutes')
 			arrTime.push({
 				value: newTime,
 				active: false,
 			});
 		}
+
 		let hour2PM = moment('2022-10-30 14:00:00');
-		for (let i = 0; i < 8; i++) {
+		for (let i = 0; i < 240 / duration; i++) {
 			let newTime = hour2PM.clone();
-			hour2PM = hour2PM.add(30, 'minutes')
+			hour2PM = hour2PM.add(duration, 'minutes')
 			arrTime.push({
 				value: newTime,
 				active: false,
 			});
 		}
-		this.setState({ arrTime: arrTime });
-		if (store.getState().auth.user.role < 100) {
-			this.searchProvider()
-		}
+		return arrTime
+	}
+
+	componentDidMount() {
+		this.setState({ arrTime: this.getArrTime(0) });
+		this.searchProvider();
 	}
 
 	componentDidUpdate(prevProps) {
@@ -79,10 +93,10 @@ class ModalNewAppointmentForParents extends React.Component {
 			address: address,
 			skill: selectedSkillSet
 		};
-		request.post(searchProvidersForParent, data).then(result => {
+		request.post(searchProvidersForAdmin, data).then(result => {
 			if (result.success) {
 				this.setState({
-					listProvider: result.data.providers,
+					listProvider: result.data?.providers,
 					addressOptions: result.data?.locations,
 					selectedProviderIndex: -1,
 					selectedProvider: undefined,
@@ -151,27 +165,30 @@ class ModalNewAppointmentForParents extends React.Component {
 				selectedDate: newValue,
 				selectedTimeIndex: -1,
 			});
-			const { selectedProviderIndex, arrTime, listProvider } = this.state;
+			const { selectedProviderIndex, listProvider, appointmentType, selectedDependent } = this.state;
 			if (selectedProviderIndex > -1) {
-				const newArrTime = JSON.parse(JSON.stringify(arrTime));
+				const newArrTime = this.getArrTime(appointmentType, selectedProviderIndex);
 				const selectedDay = newValue.day();
 				const appointments = listProvider[selectedProviderIndex]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
 				const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDay);
+				let duration = 30;
+				if (appointmentType == 1 || appointmentType == 3) {
+					duration = listProvider[selectedProviderIndex]?.duration;
+				}
+				if (appointmentType == 2) {
+					duration = listProvider[selectedProviderIndex]?.duration * 1 + listProvider[selectedProviderIndex]?.separateEvaluationDuration * 1
+				}
 				if (availableTime) {
 					const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 					const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
+					const openTime = newValue.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
+					const closeTime = newValue.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-duration, 'minutes');
 					newArrTime.map(time => {
 						const { years, months, date } = newValue.toObject();
 						time.value = moment(time.value).set({ years, months, date });
-						if (time.value.isBetween(availableFromDate, availableToDate)
-							&& (
-								(time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour)
-								|| (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin)
-								|| (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)
-							)
-						) {
+						if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
 							let flag = true;
-							this.props.listAppointmentsRecent?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
+							this.props.listDependents?.find(dependent => dependent._id == selectedDependent)?.appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
 								if (time.value.isSame(moment(appointment.date))) {
 									flag = false;
 								}
@@ -221,25 +238,47 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	onChooseProvider = (providerIndex) => {
-		const { listProvider, arrTime, selectedDate } = this.state;
-		const newArrTime = JSON.parse(JSON.stringify(arrTime));
+		this.setState({ providerErrorMessage: '' });
+		const { listProvider, selectedDate, selectedDependent } = this.state;
 		const appointments = listProvider[providerIndex]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
+		let appointmentType = 0;
+		if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
+			this.setState({ appointmentType: 1 });
+			appointmentType = 1;
+		}
+		if (listProvider[providerIndex].isSeparateEvaluationRate && !appointments?.find(appointment => (appointment.type == 2 && appointment.status == -1))) {
+			if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
+				this.setState({ appointmentType: 1 });
+				appointmentType = 1;
+			} else {
+				this.setState({ appointmentType: 2 });
+				appointmentType = 2;
+			}
+		}
+		if (appointments?.find(appointment => appointment.type == 3) || (!listProvider[providerIndex].isSeparateEvaluationRate && !listProvider[providerIndex].isNewClientScreening)) {
+			this.setState({ appointmentType: 3 });
+			appointmentType = 3;
+		}
+		const newArrTime = this.getArrTime(appointmentType, providerIndex);
 		const availableTime = listProvider[providerIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDate.day());
+		let duration = 30;
+		if (appointmentType == 1 || appointmentType == 3) {
+			duration = listProvider[providerIndex]?.duration;
+		}
+		if (appointmentType == 2) {
+			duration = listProvider[providerIndex]?.duration * 1 + listProvider[providerIndex]?.separateEvaluationDuration * 1
+		}
 		if (availableTime) {
 			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 			const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
+			const openTime = selectedDate.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
+			const closeTime = selectedDate.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-duration, 'minutes');
 			newArrTime.map(time => {
 				const { years, months, date } = selectedDate?.toObject();
 				time.value = moment(time.value).set({ years, months, date });
-				if (time.value.isBetween(availableFromDate, availableToDate)
-					&& (
-						(time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour)
-						|| (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin)
-						|| (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)
-					)
-				) {
+				if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
 					let flag = true;
-					this.props.listAppointmentsRecent?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
+					this.props.listDependents?.find(dependent => dependent._id == selectedDependent)?.appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
 						if (time.value.isSame(moment(appointment.date))) {
 							flag = false;
 						}
@@ -264,19 +303,6 @@ class ModalNewAppointmentForParents extends React.Component {
 				time.active = false;
 				return time;
 			})
-		}
-		if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
-			this.setState({ appointmentType: 1 });
-		}
-		if (listProvider[providerIndex].isSeparateEvaluationRate && !appointments?.find(appointment => (appointment.type == 2 && appointment.status == -1))) {
-			if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
-				this.setState({ appointmentType: 1 });
-			} else {
-				this.setState({ appointmentType: 2 });
-			}
-		}
-		if (appointments?.find(appointment => appointment.type == 3) || (!listProvider[providerIndex].isSeparateEvaluationRate && !listProvider[providerIndex].isNewClientScreening)) {
-			this.setState({ appointmentType: 3 });
 		}
 
 		this.setState({
@@ -371,7 +397,7 @@ class ModalNewAppointmentForParents extends React.Component {
 							<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}<sup>*</sup></p>
 							{appointmentType == 3 && (
 								<div className='flex flex-row items-center ml-20'>
-									<Switch size="small" defaultChecked />
+									<Switch size="small" />
 									<p className='ml-10 mb-0'>{intl.formatMessage(messages.subsidyOnly)}</p>
 								</div>
 							)}

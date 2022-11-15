@@ -357,17 +357,19 @@ class DrawerDetailPost extends Component {
               </Dropdown>
             </Col>
           )}
-          <Col span={12}>
-            <Button
-              type='primary'
-              icon={<BsCheckCircle size={15} />}
-              block
-              onClick={() => this.openCancelConfirmModal()}
-              disabled={isCancelled || isClosed}
-            >
-              {intl.formatMessage(messages.cancel)}
-            </Button>
-          </Col>
+          {event?.status == 0 && (
+            <Col span={12}>
+              <Button
+                type='primary'
+                icon={<BsCheckCircle size={15} />}
+                block
+                onClick={() => this.openCancelConfirmModal()}
+                disabled={isCancelled || isClosed}
+              >
+                {intl.formatMessage(messages.cancel)}
+              </Button>
+            </Col>
+          )}
         </Row>
         {this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}
         <ModalNoShow {...modalNoShowProps} />
