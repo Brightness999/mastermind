@@ -30,7 +30,7 @@ class InfoProfile extends Component {
 		const { registerData } = this.props.register;
 		this.getDataFromServer();
 		this.searchCityConnection();
-		var profileInfor = registerData.profileInfor || this.getDefaultObj();
+		const profileInfor = registerData.profileInfor || this.getDefaultObj();
 		this.form.setFieldsValue(profileInfor);
 		if (!registerData.profileInfor) {
 			this.props.setRegisterData({ profileInfor: this.getDefaultObj() });
@@ -40,7 +40,7 @@ class InfoProfile extends Component {
 	getDataFromServer = () => {
 		axios.post(url + getDefaultValueForProvider).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
+				const data = result.data.data;
 				this.setState({ ContactNumberType: data.ContactNumberType, EmailType: data.EmailType, })
 			} else {
 				this.setState({
@@ -58,7 +58,7 @@ class InfoProfile extends Component {
 	searchCityConnection() {
 		axios.post(url + getCityConnections).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
+				const data = result.data.data;
 				this.setState({ CityConnections: data.docs })
 			} else {
 				this.setState({
@@ -99,19 +99,18 @@ class InfoProfile extends Component {
 
 	setValueToReduxRegisterData = (fieldName, value) => {
 		const { registerData } = this.props.register;
-		var profileInfor = registerData.profileInfor;
-		var obj = {};
+		const profileInfor = registerData.profileInfor;
+		let obj = {};
 		obj[fieldName] = value;
 		this.props.setRegisterData({ profileInfor: { ...profileInfor, ...obj } });
 	}
 
 	defaultOnValueChange = (event, fieldName) => {
-		var value = event.target.value;
+		const value = event.target.value;
 		this.setValueToReduxRegisterData(fieldName, value);
 	}
 
-	handelChange = (event, fieldName) => {
-		var value = event;
+	handelChange = (value, fieldName) => {
 		this.setValueToReduxRegisterData(fieldName, value);
 	}
 
@@ -131,30 +130,34 @@ class InfoProfile extends Component {
 					</div>
 					<Form
 						name="form_profile_provider"
+						layout='vertical'
 						onFinish={this.onFinish}
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<Form.Item
 							name="name"
+							label={intl.formatMessage(messages.legalName)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.legalName) }]}
 						>
 							<Input onChange={v => this.defaultOnValueChange(v, "legalName")} placeholder={intl.formatMessage(messages.legalName)} />
 						</Form.Item>
 						<Form.Item
 							name="referredToAs"
+							label={intl.formatMessage(messages.referredAs)}
 							rules={[{ required: false }]}
 						>
 							<Input onChange={v => this.defaultOnValueChange(v, "referredToAs")} placeholder={intl.formatMessage(messages.referredAs)} />
 						</Form.Item>
 						<Form.Item
 							name="serviceAddress"
+							label={intl.formatMessage(messages.serviceAddress)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.serviceAddress) }]}
 						>
 							<PlacesAutocomplete
 								value={service_address}
-								onChange={(e) => this.handelChange(e, "serviceAddress")}
-								onSelect={(e) => this.handleSelect(e, "serviceAddress")}
+								onChange={(value) => this.handelChange(value, "serviceAddress")}
+								onSelect={(value) => this.handleSelect(value, "serviceAddress")}
 							>
 								{({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
 									<div>
@@ -185,12 +188,13 @@ class InfoProfile extends Component {
 						</Form.Item>
 						<Form.Item
 							name="billingAddress"
+							label={intl.formatMessage(messages.billingAddress)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.billingAddress) }]}
 						>
 							<PlacesAutocomplete
 								value={billing_address}
-								onChange={(e) => this.handelChange(e, "billingAddress")}
-								onSelect={(e) => this.handleSelect(e, "billingAddress")}
+								onChange={(value) => this.handelChange(value, "billingAddress")}
+								onSelect={(value) => this.handleSelect(value, "billingAddress")}
 							>
 								{({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
 									<div key='billingaddress'>
@@ -221,6 +225,7 @@ class InfoProfile extends Component {
 						</Form.Item>
 						<Form.Item
 							name="cityConnection"
+							label={intl.formatMessage(messages.cityConnections)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cityConnections) }]}
 						>
 							<Select
@@ -236,12 +241,14 @@ class InfoProfile extends Component {
 						</Form.Item>
 						<Form.Item
 							name="licenseNumber"
+							label={intl.formatMessage(messages.licenseNumber)}
 							rules={[{ required: false }]}
 						>
 							<Input onChange={v => this.defaultOnValueChange(v, "licenseNumber")} placeholder={intl.formatMessage(messages.licenseNumber)} />
 						</Form.Item>
 						<Form.Item
 							name="agency"
+							label={intl.formatMessage(messages.agency)}
 							rules={[{ required: false }]}
 						>
 							<Input onChange={v => this.defaultOnValueChange(v, "agency")} placeholder={intl.formatMessage(messages.agency)} />
@@ -255,6 +262,7 @@ class InfoProfile extends Component {
 												<Form.Item
 													{...restField}
 													name={[name, 'phoneNumber']}
+													label={intl.formatMessage(messages.contactNumber)}
 													className='bottom-0'
 													style={{ marginTop: key === 0 ? 0 : 14 }}
 													rules={[
@@ -275,6 +283,7 @@ class InfoProfile extends Component {
 												<Form.Item
 													{...restField}
 													name={[name, 'type']}
+													label={intl.formatMessage(messages.type)}
 													rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type) }]}
 													className='bottom-0'
 													style={{ marginTop: key === 0 ? 0 : 14 }}
@@ -311,6 +320,7 @@ class InfoProfile extends Component {
 												<Form.Item
 													{...restField}
 													name={[name, 'email']}
+													label={intl.formatMessage(messages.contactEmail)}
 													className='bottom-0'
 													style={{ marginTop: key === 0 ? 0 : 14 }}
 													rules={[
@@ -331,6 +341,7 @@ class InfoProfile extends Component {
 												<Form.Item
 													{...restField}
 													name={[name, 'type']}
+													label={intl.formatMessage(messages.type)}
 													rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type) }]}
 													className='bottom-0'
 													style={{ marginTop: key === 0 ? 0 : 14 }}
@@ -360,6 +371,7 @@ class InfoProfile extends Component {
 						</Form.List>
 						<Form.Item
 							name="proExp"
+							label={intl.formatMessage(messages.professionalExperience)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.professionalExperience) }]}
 						>
 							<Input.TextArea onChange={v => this.defaultOnValueChange(v, "proExp")} rows={4} placeholder={intl.formatMessage(messages.professionalExperience)} />

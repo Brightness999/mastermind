@@ -28,7 +28,7 @@ class InfoServices extends Component {
 		if (!registerData.serviceInfor) {
 			this.props.setRegisterData({ serviceInfor: this.getDefaultObj() });
 		}
-		var serviceInfor = registerData.serviceInfor || this.getDefaultObj();
+		const serviceInfor = registerData.serviceInfor || this.getDefaultObj();
 		this.form.setFieldsValue(serviceInfor);
 		this.setState({
 			privateOffice: serviceInfor.privateOffice,
@@ -87,7 +87,7 @@ class InfoServices extends Component {
 	loadSchools(providerInfor) {
 		axios.post(url + getAllSchoolsForParent, { communityServed: providerInfor?.cityConnection }).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
+				const data = result.data.data;
 				this.setState({ listSchools: data });
 				this.props.handleChangeListSchool(data);
 			}
@@ -107,12 +107,14 @@ class InfoServices extends Component {
 					</div>
 					<Form
 						name="form_services_offered"
+						layout='vertical'
 						onFinish={this.onFinish}
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<Form.Item
 							name="skillSet"
+							label={intl.formatMessage(messages.skillsets)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
 						>
 							<Select placeholder={intl.formatMessage(messages.skillsets)}>
@@ -125,6 +127,7 @@ class InfoServices extends Component {
 							<Col xs={24} sm={24} md={12}>
 								<Form.Item
 									name="yearExp"
+									label={intl.formatMessage(messages.yearsExperience)}
 									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.yearsExperience) }]}
 								>
 									<Input placeholder={intl.formatMessage(messages.yearsExperience)} />
@@ -133,6 +136,7 @@ class InfoServices extends Component {
 							<Col xs={24} sm={24} md={12}>
 								<Form.Item
 									name="SSN"
+									label="SSN"
 									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + 'SSN' }]}
 								>
 									<Input placeholder='SSN' suffix={<QuestionCircleOutlined className='text-primary icon-suffix' />} />
@@ -141,6 +145,7 @@ class InfoServices extends Component {
 						</Row>
 						<Form.Item
 							name="serviceableSchool"
+							label={intl.formatMessage(messages.serviceableSchools)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.serviceableSchools) }]}
 						>
 							<Select
@@ -157,14 +162,23 @@ class InfoServices extends Component {
 						</Form.Item>
 						<div className='text-center flex flex-row justify-between'>
 							<div className='flex flex-row items-center mb-10'>
-								<Form.Item name="isNewClientScreening" rules={[{ required: true }]} className="mb-0">
-									<Switch size="small" checked={isNewClientScreening} onChange={v => this.setState({ isNewClientScreening: v })} />
+								<Form.Item
+									name="isNewClientScreening"
+									rules={[{ required: true }]}
+									className="mb-0"
+								>
+									<Switch
+										size="small"
+										checked={isNewClientScreening}
+										onChange={v => this.setState({ isNewClientScreening: v })}
+									/>
 								</Form.Item>
 								<p className='ml-10 mb-0'>{intl.formatMessage(messages.newClient)}</p>
 							</div>
 							<Form.Item
 								size='small'
 								name="screeningTime"
+								label={intl.formatMessage(messages.screeningTime)}
 								className='select-small'
 								rules={[{ required: isNewClientScreening, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.screeningTime) }]}
 							>
@@ -177,12 +191,14 @@ class InfoServices extends Component {
 						</div>
 						<Form.Item
 							name="references"
+							label={intl.formatMessage(messages.references)}
 							rules={[{ required: false }]}
 						>
 							<Input placeholder={intl.formatMessage(messages.references)} />
 						</Form.Item>
 						<Form.Item
 							name="publicProfile"
+							label={intl.formatMessage(messages.publicProfile)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.publicProfile) }]}
 						>
 							<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.publicProfile)} />

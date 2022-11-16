@@ -8,7 +8,7 @@ import messagesLogin from '../../../Login/messages';
 import PlacesAutocomplete from 'react-places-autocomplete';
 import axios from 'axios';
 import { url } from '../../../../../utils/api/baseUrl';
-import { getCityConnections } from '../../../../../utils/api/apiList'
+import { getCityConnections, userSignUp } from '../../../../../utils/api/apiList'
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -84,7 +84,7 @@ class InfoSchool extends React.Component {
 
 	onFinish = async (values) => {
 		const { registerData } = this.props.register;
-		var newRegisterData = JSON.parse(JSON.stringify(registerData));
+		let newRegisterData = JSON.parse(JSON.stringify(registerData));
 
 		// update in school - after school
 		newRegisterData.sessionsInSchool = this.arrDayScheduleFormat(this.state.sessionsInSchool);
@@ -99,7 +99,7 @@ class InfoSchool extends React.Component {
 		newRegisterData.studentInfos = null;
 
 		// post to server
-		const response = await axios.post(url + 'users/signup', newRegisterData);
+		const response = await axios.post(url + userSignUp, newRegisterData);
 		const { success } = response.data;
 		if (success) {
 			this.props.onContinue(true);
@@ -110,16 +110,16 @@ class InfoSchool extends React.Component {
 	};
 
 	arrDayScheduleFormat = (arr) => {
-		var newArr = [];
-		for (var i = 0; i < arr.length; i++) {
+		let newArr = [];
+		for (let i = 0; i < arr.length; i++) {
 			if (i == 1) {
-				for (var z = 1; z < 5; z++) {
-					var newSche = { ...arr[i] };
+				for (let z = 1; z < 5; z++) {
+					let newSche = { ...arr[i] };
 					newSche.dayInWeek = z;
 					newArr.push(newSche);
 				}
 			} else {
-				var newSche = { ...arr[i] };
+				let newSche = { ...arr[i] };
 				newSche.dayInWeek = i == 0 ? 0 : 5;
 				newArr.push(newSche);
 			}
@@ -132,7 +132,7 @@ class InfoSchool extends React.Component {
 	};
 
 	setReduxForSchool(fieldName, value) {
-		var obj = {};
+		let obj = {};
 		obj[fieldName] = value;
 		this.props.setRegisterData(obj);
 	}
@@ -241,12 +241,12 @@ class InfoSchool extends React.Component {
 	}
 
 	onTechContactRefChange = () => {
-		var contactRefs = this.form.getFieldValue('techContactRef');
+		const contactRefs = this.form.getFieldValue('techContactRef');
 		this.setReduxForSchool('techContactRef', contactRefs);
 	}
 
 	onStudentContactRefChange = () => {
-		var contactRefs = this.form.getFieldValue('studentContactRef');
+		const contactRefs = this.form.getFieldValue('studentContactRef');
 		this.setReduxForSchool('studentContactRef', contactRefs);
 	}
 
@@ -274,12 +274,14 @@ class InfoSchool extends React.Component {
 					</div>
 					<Form
 						name="form_school"
+						layout='vertical'
 						onFinish={this.onFinish}
 						onFinishFailed={this.onFinishFailed}
 						ref={(ref) => { this.form = ref }}
 					>
 						<Form.Item
 							name="name"
+							label={intl.formatMessage(messages.nameSchool)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.nameSchool) }]}
 						>
 							<Input
@@ -289,6 +291,7 @@ class InfoSchool extends React.Component {
 						</Form.Item>
 						<Form.Item
 							name="communityServed"
+							label={intl.formatMessage(messages.communitiesServed)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.communitiesServed) }]}
 						>
 							<Select
@@ -302,6 +305,7 @@ class InfoSchool extends React.Component {
 						</Form.Item>
 						<Form.Item
 							name="valueForContact"
+							label={intl.formatMessage(messages.schoolAddress)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.schoolAddress) }]}
 						>
 							<PlacesAutocomplete
@@ -343,6 +347,7 @@ class InfoSchool extends React.Component {
 										<div key={field.key} className={field.key !== 0 ? 'item-remove' : ''}>
 											<Form.Item
 												name={[field.name, "techContactRef"]}
+												label={intl.formatMessage(messages.technicalReferralContact)}
 												rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.technicalReferralContact) }]}
 											>
 												<Input
@@ -385,6 +390,7 @@ class InfoSchool extends React.Component {
 										<div key={field.key} className={field.key !== 0 ? 'item-remove' : ''}>
 											<Form.Item
 												name={[field.name, "studentContactRef"]}
+												label={intl.formatMessage(messages.studentReferralContact)}
 												rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.studentReferralContact) }]}
 											>
 												<Input

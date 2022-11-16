@@ -69,7 +69,7 @@ class InfoAvailability extends Component {
 	getDataFromServer = () => {
 		axios.post(url + getDefaultValueForProvider).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
+				const data = result.data.data;
 				this.setState({
 					CancellationWindow: data.CancellationWindow,
 					durations: data.durations,
@@ -117,7 +117,7 @@ class InfoAvailability extends Component {
 	}
 
 	onLocationSelected = (day, value, index) => {
-		var arr = this.form.getFieldValue(day);
+		let arr = this.form.getFieldValue(day);
 		if (arr[index] == undefined) arr[index] = {};
 		arr[index].location = value;
 		this.form.setFieldValue(day, arr);
@@ -125,7 +125,7 @@ class InfoAvailability extends Component {
 	}
 
 	copyToFullWeek = (dayForCopy) => {
-		var arrToCopy = this.form.getFieldValue(dayForCopy);
+		const arrToCopy = this.form.getFieldValue(dayForCopy);
 		day_week.map((newDay) => {
 			if (newDay != dayForCopy) {
 				this.form.setFieldValue(newDay, arrToCopy);
@@ -227,6 +227,7 @@ class InfoAvailability extends Component {
 					</div>
 					<Form
 						name="form_availability"
+						layout='vertical'
 						onFinish={this.onFinish}
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
@@ -382,10 +383,12 @@ class InfoAvailability extends Component {
 							))}
 						</div>
 						<Row gutter={14} style={{ marginLeft: '-22px', marginRight: '-22px' }}>
-							<Col xs={24} sm={24} md={8}>
+							<Col xs={24} sm={24} md={8} className='flex items-end'>
 								<Form.Item
 									name="duration"
+									label={intl.formatMessage(messages.duration)}
 									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.duration) }]}
+									className='mb-0 w-100'
 								>
 									<Select placeholder={intl.formatMessage(messages.duration)}>
 										{durations?.map((duration, index) => (
@@ -394,10 +397,12 @@ class InfoAvailability extends Component {
 									</Select>
 								</Form.Item>
 							</Col>
-							<Col xs={24} sm={24} md={8}>
+							<Col xs={24} sm={24} md={8} className='flex items-end'>
 								<Form.Item
 									name="cancellation_window"
+									label={intl.formatMessage(messages.cancellationWindow)}
 									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationWindow) }]}
+									className='mb-0 w-100'
 								>
 									<Select placeholder={intl.formatMessage(messages.cancellationWindow)}>
 										{CancellationWindow?.map((value, index) => (
@@ -406,10 +411,12 @@ class InfoAvailability extends Component {
 									</Select>
 								</Form.Item>
 							</Col>
-							<Col xs={24} sm={24} md={8}>
+							<Col xs={24} sm={24} md={8} className='flex items-end'>
 								<Form.Item
 									name="cancellation_fee"
+									label={intl.formatMessage(messages.cancellationFee)}
 									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
+									className='mb-0 w-100'
 								>
 									<Input placeholder={intl.formatMessage(messages.cancellationFee)} />
 								</Form.Item>

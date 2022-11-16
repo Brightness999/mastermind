@@ -12,6 +12,7 @@ import { compose } from 'redux';
 import { setRegisterData } from '../../../../redux/features/registerSlice';
 import { url } from '../../../../utils/api/baseUrl';
 import axios from 'axios';
+import { getDefaultValueForClient, getAllSchoolsForParent, uploadDocumentForParent } from '../../../../utils/api/apiList';
 
 class SubsidyRequest extends React.Component {
 	constructor(props) {
@@ -38,8 +39,8 @@ class SubsidyRequest extends React.Component {
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
-		var arrDependent = [];
-		for (var i = 0; i < registerData.studentInfos.length; i++) {
+		let arrDependent = [];
+		for (let i = 0; i < registerData.studentInfos.length; i++) {
 			if (registerData.studentInfos[i].firstName.length > 0 || registerData.studentInfos[i].lastName.length > 0) {
 				arrDependent.push(registerData.studentInfos[i]);
 			}
@@ -82,39 +83,20 @@ class SubsidyRequest extends React.Component {
 
 	updateReduxValueFor1Depedent(index, fieldName, value) {
 		const { registerData } = this.props.register;
-		var studentInfos = [...registerData.studentInfos]
-		var selectedObj = { ...studentInfos[index] };
+		let studentInfos = [...registerData.studentInfos]
+		let selectedObj = { ...studentInfos[index] };
 		selectedObj[fieldName] = value;
 		studentInfos[index] = selectedObj;
 		this.props.setRegisterData({ studentInfos: studentInfos });
 	}
 
-	uploadFileToServer = async (file) => {
-		// Create an object of formData
-		const formData = new FormData();
-
-		// Update the formData object
-		formData.append(
-			"myFile",
-			file,
-			file.name
-		);
-
-		// Request made to the backend api
-		// Send formData object
-		var postResult = await axios.post(url + "clients/upload_document", formData);
-	}
-
 	loadDataFromServer() {
-		axios.post(url + 'clients/get_default_value_for_client'
-		).then(result => {
+		axios.post(url + getDefaultValueForClient).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
+				const data = result.data.data;
 				this.setState({ SkillSet: data.SkillSet })
 			} else {
-				this.setState({
-					checkEmailExist: false,
-				});
+				this.setState({ checkEmailExist: false });
 			}
 		}).catch(err => {
 			console.log(err);
@@ -125,10 +107,9 @@ class SubsidyRequest extends React.Component {
 	}
 
 	loadSchools() {
-		axios.post(url + 'clients/get_all_schools'
-		).then(result => {
+		axios.post(url + getAllSchoolsForParent).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
+				const data = result.data.data;
 				this.setState({ listSchools: data })
 			}
 		}).catch(err => {
@@ -188,7 +169,7 @@ class SubsidyRequest extends React.Component {
 	render() {
 		const props = {
 			name: 'file',
-			action: url + "clients/upload_document",
+			action: url + uploadDocumentForParent,
 			headers: {
 				authorization: 'authorization-text',
 			},
@@ -235,7 +216,7 @@ class SubsidyRequest extends React.Component {
 							>
 								<Select placeholder={intl.formatMessage(messages.skillsetRequested)}>
 									{this.state.SkillSet.map((skill, index) => (
-										<Select.Option key={index} value={index}>{skill}</Select.Option>
+										<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
 									))}
 								</Select>
 							</Form.Item>

@@ -1,5 +1,6 @@
 
 export const userSignUp = 'users/signup'
+export const checkEmailRegistered = 'users/check_email_registered'
 
 export const getAppointmentsForAdmin = 'admin/get_appointments'
 export const getAppointmentsInMonthForAdmin = 'admin/get_appointments_in_month'
@@ -35,3 +36,4 @@ export const updateAppointmentNotesForParent = 'clients/update_appointment_notes
 export const rescheduleAppointmentForParent = 'clients/reschedule_appointment'
 export const getAllConsultantForParent = 'clients/get_all_consultants'
 export const getConsultationsForDependent = 'clients/get_consultations_for_dependent'
+export const uploadDocumentForParent = 'clients/upload_document'

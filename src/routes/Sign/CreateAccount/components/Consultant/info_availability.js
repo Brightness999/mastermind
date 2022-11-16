@@ -9,6 +9,7 @@ import { compose } from 'redux'
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
+import { userSignUp } from '../../../../../utils/api/apiList';
 
 const day_week = [
   intl.formatMessage(messages.sunday),
@@ -43,7 +44,7 @@ class ConsultantAvailability extends Component {
 
   onFinish = async (values) => {
     const { registerData } = this.props.register;
-    var manualSchedule = [];
+    let manualSchedule = [];
     const invalidDayInWeek = Object.values(values).findIndex(times => {
       if (times.find(v => v.from_date?.isAfter(v.to_date) || v.from_time?.isAfter(v.to_time))) {
         return true;
@@ -53,9 +54,9 @@ class ConsultantAvailability extends Component {
     });
     if (invalidDayInWeek < 0) {
       this.setState({ errorMessage: '' });
-      for (var i = 0; i < day_week.length; i++) {
-        for (var j = 0; j < values['' + day_week[i]].length; j++) {
-          var scheduleItem = values['' + day_week[i]][j];
+      for (let i = 0; i < day_week.length; i++) {
+        for (let j = 0; j < values['' + day_week[i]].length; j++) {
+          let scheduleItem = values['' + day_week[i]][j];
           if (scheduleItem.from_time && scheduleItem.to_time && (scheduleItem.from_date || scheduleItem.to_date)) {
             manualSchedule.push({
               "dayInWeek": i,
@@ -88,7 +89,7 @@ class ConsultantAvailability extends Component {
           }
         }
       }
-      var newRegisterData = {
+      const newRegisterData = {
         email: registerData.email,
         password: registerData.password,
         role: registerData.role,
@@ -98,7 +99,7 @@ class ConsultantAvailability extends Component {
       }
 
       // post to server
-      const response = await axios.post(url + 'users/signup', newRegisterData);
+      const response = await axios.post(url + userSignUp, newRegisterData);
       const { success } = response.data;
       if (success) {
         this.props.removeRegisterData();
@@ -130,7 +131,7 @@ class ConsultantAvailability extends Component {
   }
 
   copyToFullWeek = (dayForCopy) => {
-    var arrToCopy = this.form.getFieldValue(dayForCopy);
+    const arrToCopy = this.form.getFieldValue(dayForCopy);
     day_week.map((newDay) => {
       if (newDay != dayForCopy) {
         this.form.setFieldValue(newDay, arrToCopy);

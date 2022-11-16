@@ -33,7 +33,7 @@ class ReviewAccount extends Component {
 	loadDataFromServer() {
 		axios.post(url + getDefaultValueForClient).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
+				const data = result.data.data;
 				this.setState({ listServices: data.SkillSet })
 			}
 		}).catch(err => {
@@ -47,7 +47,7 @@ class ReviewAccount extends Component {
 	loadSchools() {
 		axios.post(url + getAllSchoolsForParent).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
+				const data = result.data.data;
 				this.setState({ listSchools: data })
 			}
 		}).catch(err => {
@@ -58,7 +58,7 @@ class ReviewAccount extends Component {
 	onSubmit = async () => {
 		const { registerData } = this.props.register;
 		const customData = JSON.parse(JSON.stringify(registerData));
-		for (var i = 0; i < customData.studentInfos.length; i++) {
+		for (let i = 0; i < customData.studentInfos.length; i++) {
 			if (!!customData.studentInfos[i].subsidyRequest && customData.studentInfos[i].subsidyRequest.documentUploaded.length > 0) {
 				customData.studentInfos[i].subsidyRequest.documents = customData.studentInfos[i].subsidyRequest.documentUploaded;
 			}
@@ -75,7 +75,7 @@ class ReviewAccount extends Component {
 	}
 
 	checkHaveSchedule(dayInWeek, studentInfo) {
-		for (var i = 0; i < studentInfo.availabilitySchedule.length; i++) {
+		for (let i = 0; i < studentInfo.availabilitySchedule.length; i++) {
 			if (studentInfo.availabilitySchedule[i].dayInWeek == dayInWeek) {
 				return true;
 			}
@@ -84,8 +84,8 @@ class ReviewAccount extends Component {
 	}
 
 	getScheduleInDay(dayInWeek, studentInfo) {
-		var arr = [];
-		for (var i = 0; i < studentInfo.availabilitySchedule.length; i++) {
+		const arr = [];
+		for (let i = 0; i < studentInfo.availabilitySchedule.length; i++) {
 			if (studentInfo.availabilitySchedule[i].dayInWeek == dayInWeek) {
 				arr.push(studentInfo.availabilitySchedule[i])
 			}

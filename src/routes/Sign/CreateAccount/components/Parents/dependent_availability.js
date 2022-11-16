@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Segmented, TimePicker, Switch, DatePicker } from 'antd';
+import { Row, Col, Form, Button, Segmented, TimePicker, Switch } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
@@ -25,11 +25,11 @@ class DependentAvailability extends Component {
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
-		var studentInfos = registerData.studentInfos
+		const studentInfos = registerData.studentInfos
 		this.form?.setFieldsValue({ children: studentInfos });
 		if (this.state.currentDaySelecting.length == 0) {
-			var arr = []
-			for (var i = 0; i < studentInfos.length; i++) {
+			let arr = []
+			for (let i = 0; i < studentInfos.length; i++) {
 				arr.push(0);
 			}
 			this.setState({ currentDaySelecting: arr });
@@ -47,9 +47,9 @@ class DependentAvailability extends Component {
 
 	onSubmit = async () => {
 		const { registerData } = this.props.register;
-		var studentInfos = [...registerData.studentInfos]
-		for (var i = 0; i < this.state.studentInfos.length; i++) {
-			var selectedObj = { ...studentInfos[i] };
+		let studentInfos = [...registerData.studentInfos]
+		for (let i = 0; i < this.state.studentInfos.length; i++) {
+			let selectedObj = { ...studentInfos[i] };
 			selectedObj['availabilitySchedule'] = this.state.studentInfos[i].availabilitySchedule;
 			studentInfos[i] = selectedObj;
 		}
@@ -59,8 +59,8 @@ class DependentAvailability extends Component {
 
 	updateReduxValueFor1Depedent(index, fieldName, value) {
 		const { registerData } = this.props.register;
-		var studentInfos = [...registerData.studentInfos]
-		var selectedObj = { ...studentInfos[index] };
+		let studentInfos = [...registerData.studentInfos]
+		let selectedObj = { ...studentInfos[index] };
 		selectedObj[fieldName] = value;
 		studentInfos[index] = selectedObj;
 		this.props.setRegisterData({ studentInfos: studentInfos });
@@ -79,8 +79,8 @@ class DependentAvailability extends Component {
 
 	addNewTimeRange = (index, dayInWeek) => {
 		const { studentInfos } = this.state;
-		var newStu = [...studentInfos];
-		var arr = [...newStu[index].availabilitySchedule];
+		const newStu = [...studentInfos];
+		const arr = [...newStu[index].availabilitySchedule];
 		arr.push(this.defaultTimeRangeItem(dayInWeek))
 		if (this.state.isSameAll) {
 			this.setState({
@@ -102,20 +102,20 @@ class DependentAvailability extends Component {
 
 	copyToFullWeek = (index, dayInWeek) => {
 		const { studentInfos } = this.state;
-		var newStu = [...studentInfos];
-		var arr = [];
+		const newStu = [...studentInfos];
+		let arr = [];
 
 		// get all field in selected day
-		var arrForCopy = [];
-		for (var i = 0; i < newStu[index].availabilitySchedule.length; i++) {
+		let arrForCopy = [];
+		for (let i = 0; i < newStu[index].availabilitySchedule.length; i++) {
 			if (newStu[index].availabilitySchedule[i].dayInWeek == dayInWeek) {
 				arrForCopy.push(newStu[index].availabilitySchedule[i]);
 			}
 		}
 
-		for (var i = 0; i < 6; i++) {
-			for (var j = 0; j < arrForCopy.length; j++) {
-				var item = { ...arrForCopy[j] };
+		for (let i = 0; i < 6; i++) {
+			for (let j = 0; j < arrForCopy.length; j++) {
+				let item = { ...arrForCopy[j] };
 				item.dayInWeek = i;
 				arr.push(item);
 			}
@@ -141,7 +141,7 @@ class DependentAvailability extends Component {
 	onChangeSelectingDay = (index, newDay) => {
 		const { currentDaySelecting } = this.state;
 		if (this.state.isSameAll) {
-			for (var i = 0; i < currentDaySelecting.length; i++) {
+			for (let i = 0; i < currentDaySelecting.length; i++) {
 				currentDaySelecting[i] = newDay;
 			}
 		} else {
@@ -163,8 +163,8 @@ class DependentAvailability extends Component {
 	valueChangeForOpenHour(index, indexOnAvailabilitySchedule, v) {
 		if (!v) return;// moment('00:00:00', 'HH:mm:ss');
 		const { studentInfos } = this.state;
-		var newStu = JSON.parse(JSON.stringify(studentInfos));
-		var arr = [...newStu[index].availabilitySchedule];
+		const newStu = JSON.parse(JSON.stringify(studentInfos));
+		let arr = [...newStu[index].availabilitySchedule];
 		arr[indexOnAvailabilitySchedule].openHour = v.hour();
 		arr[indexOnAvailabilitySchedule].openMin = v.minutes();
 		if (this.state.isSameAll) {
@@ -183,8 +183,8 @@ class DependentAvailability extends Component {
 				})
 			});
 		}
-		var momentOpen = moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openMin}:00`, 'HH:mm:ss')
-		var momentClose = moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeMin}:00`, 'HH:mm:ss')
+		const momentOpen = moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openMin}:00`, 'HH:mm:ss')
+		const momentClose = moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeMin}:00`, 'HH:mm:ss')
 		if (momentClose.isBefore(momentOpen)) {
 			this.setState({ hasErrorOnTimeClose: true })
 		} else {
@@ -195,8 +195,8 @@ class DependentAvailability extends Component {
 	valueChangeForCloseHour(index, indexOnAvailabilitySchedule, v) {
 		if (!v) return;// moment('00:00:00', 'HH:mm:ss');
 		const { studentInfos } = this.state;
-		var newStu = JSON.parse(JSON.stringify(studentInfos));
-		var arr = [...newStu[index].availabilitySchedule];
+		const newStu = JSON.parse(JSON.stringify(studentInfos));
+		let arr = [...newStu[index].availabilitySchedule];
 		arr[indexOnAvailabilitySchedule].closeHour = v.hour();
 		arr[indexOnAvailabilitySchedule].closeMin = v.minutes();
 		if (this.state.isSameAll) {
@@ -215,8 +215,8 @@ class DependentAvailability extends Component {
 				})
 			});
 		}
-		var momentOpen = moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openMin}:00`, 'HH:mm:ss')
-		var momentClose = moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeMin}:00`, 'HH:mm:ss')
+		const momentOpen = moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openMin}:00`, 'HH:mm:ss')
+		const momentClose = moment(`${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeHour}:${this.state.studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeMin}:00`, 'HH:mm:ss')
 		if (momentClose.isBefore(momentOpen)) {
 			this.setState({ hasErrorOnTimeClose: true })
 		} else {
@@ -226,8 +226,8 @@ class DependentAvailability extends Component {
 
 	remove1Item(index, indexOnAvailabilitySchedule,) {
 		const { studentInfos } = this.state;
-		var newStu = [...studentInfos];
-		var arr = [...newStu[index].availabilitySchedule];
+		const newStu = [...studentInfos];
+		let arr = [...newStu[index].availabilitySchedule];
 		arr.splice(indexOnAvailabilitySchedule, 1)
 		if (this.state.isSameAll) {
 			this.setState({

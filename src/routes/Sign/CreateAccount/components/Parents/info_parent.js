@@ -25,7 +25,7 @@ class InfoParent extends Component {
 		if (!registerData.parentInfo) {
 			this.props.setRegisterData({ parentInfo: this.getDefaultObj() });
 		}
-		var parentInfo = registerData.parentInfo || this.getDefaultObj();
+		const parentInfo = registerData.parentInfo || this.getDefaultObj();
 		this.form.setFieldsValue(parentInfo);
 		this.searchCityConnection();
 	}
@@ -46,10 +46,9 @@ class InfoParent extends Component {
 	}
 
 	searchCityConnection() {
-		axios.post(url + getCityConnections
-		).then(result => {
+		axios.post(url + getCityConnections).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
+				const data = result.data.data;
 				this.setState({ CityConnections: data.docs })
 			} else {
 				this.setState({
@@ -65,20 +64,20 @@ class InfoParent extends Component {
 	}
 
 	getDefaultValueInitForm = (key) => {
-		var obj = this.getDefaultObj();
+		const obj = this.getDefaultObj();
 		return obj[key];
 	}
 
 	setValueToReduxRegisterData = (fieldName, value) => {
 		const { registerData } = this.props.register;
-		var parentInfo = registerData.parentInfo;
-		var obj = {};
+		const parentInfo = registerData.parentInfo;
+		let obj = {};
 		obj[fieldName] = value;
 		this.props.setRegisterData({ parentInfo: { ...parentInfo, ...obj } });
 	}
 
 	defaultOnValueChange = (event, fieldName) => {
-		var value = event.target.value;
+		const value = event.target.value;
 		this.setValueToReduxRegisterData(fieldName, value);
 	}
 
@@ -117,12 +116,15 @@ class InfoParent extends Component {
 					</div>
 					<Form
 						name="form_contact"
+						layout='vertical'
 						onFinish={this.onFinish}
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
+						<p className='font-16 mb-10 text-bold'>{intl.formatMessage(messages.family)}</p>
 						<Form.Item
 							name="familyName"
+							label={intl.formatMessage(messages.familyName)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.familyName) }]}
 						>
 							<Input
@@ -132,6 +134,7 @@ class InfoParent extends Component {
 						</Form.Item>
 						<Form.Item
 							name="address"
+							label={intl.formatMessage(messages.address)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.address) }]}
 						>
 							<PlacesAutocomplete
@@ -168,6 +171,7 @@ class InfoParent extends Component {
 						</Form.Item>
 						<Form.Item
 							name="cityConnection"
+							label={intl.formatMessage(messages.cityConnections)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cityConnections) }]}
 						>
 							<Select
@@ -181,7 +185,7 @@ class InfoParent extends Component {
 								))}
 							</Select>
 						</Form.Item>
-						<Form.Item name="maritialType">
+						<Form.Item name="maritialType" label={intl.formatMessage(messages.maritalStatus)}>
 							<Select
 								onChange={v => this.defaultOnChangeDropdownValue(v, "maritialType")}
 								placeholder={intl.formatMessage(messages.maritalStatus)}
@@ -192,9 +196,10 @@ class InfoParent extends Component {
 								<Select.Option value='3'>Divorced</Select.Option>
 							</Select>
 						</Form.Item>
-						<p className='font-16 mb-10'>{intl.formatMessage(messages.father)}</p>
+						<p className='font-16 mb-10 text-bold'>{intl.formatMessage(messages.father)}</p>
 						<Form.Item
 							name="fatherName"
+							label={intl.formatMessage(messages.name)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.fatherName) }]}
 						>
 							<Input
@@ -204,6 +209,7 @@ class InfoParent extends Component {
 						</Form.Item>
 						<Form.Item
 							name="fatherPhoneNumber"
+							label={intl.formatMessage(messages.phoneNumber)}
 							rules={[
 								{
 									required: true,
@@ -222,6 +228,7 @@ class InfoParent extends Component {
 						</Form.Item>
 						<Form.Item
 							name="fatherEmail"
+							label={intl.formatMessage(messages.email)}
 							rules={[
 								{
 									required: true,
@@ -237,9 +244,10 @@ class InfoParent extends Component {
 								placeholder={intl.formatMessage(messages.email)}
 							/>
 						</Form.Item>
-						<p className='font-16 mb-10'>{intl.formatMessage(messages.mother)}</p>
+						<p className='font-16 mb-10 text-bold'>{intl.formatMessage(messages.mother)}</p>
 						<Form.Item
 							name="motherName"
+							label={intl.formatMessage(messages.name)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.motherName) }]}>
 							<Input
 								onChange={v => this.defaultOnValueChange(v, "motherName")}
@@ -248,6 +256,7 @@ class InfoParent extends Component {
 						</Form.Item>
 						<Form.Item
 							name="motherPhoneNumber"
+							label={intl.formatMessage(messages.phoneNumber)}
 							rules={[
 								{
 									required: true,
@@ -266,6 +275,7 @@ class InfoParent extends Component {
 						</Form.Item>
 						<Form.Item
 							name="motherEmail"
+							label={intl.formatMessage(messages.email)}
 							rules={[
 								{
 									required: true,

@@ -32,7 +32,7 @@ class InfoFinancial extends Component {
 		if (!registerData.financialInfor) {
 			this.props.setRegisterData({ financialInfor: this.getDefaultObj() });
 		}
-		var financialInfor = registerData.financialInfor || this.getDefaultObj();
+		const financialInfor = registerData.financialInfor || this.getDefaultObj();
 		this.form.setFieldsValue(financialInfor);
 		this.setState({
 			isSeparateEvaluationRate: financialInfor.isSeparateEvaluationRate,
@@ -50,17 +50,17 @@ class InfoFinancial extends Component {
 					durations: data.durations,
 				});
 			} else {
-				this.setState({ 
+				this.setState({
 					AcademicLevel: [],
 					durations: [],
-				 });
+				});
 			}
 		}).catch(err => {
 			console.log('get default data for provider error---', err);
-			this.setState({ 
+			this.setState({
 				AcademicLevel: [],
 				durations: [],
-			 });
+			});
 		})
 	}
 
@@ -71,7 +71,7 @@ class InfoFinancial extends Component {
 				rate: "",
 			}],
 			separateEvaluationRate: "",
-			separateEvaluationDuration: "",
+			separateEvaluationDuration: undefined,
 			serviceableSchool: undefined,
 			upload_w_9: "",
 			isSeparateEvaluationRate: true,
@@ -110,7 +110,7 @@ class InfoFinancial extends Component {
 
 	setValueToReduxRegisterData = (fieldName, value) => {
 		const { registerData } = this.props.register;
-		var financialInfor = JSON.parse(JSON.stringify(registerData.financialInfor));
+		let financialInfor = JSON.parse(JSON.stringify(registerData.financialInfor));
 		financialInfor[fieldName] = value;
 		this.props.setRegisterData({ financialInfor: financialInfor });
 	}
@@ -138,6 +138,7 @@ class InfoFinancial extends Component {
 					</div>
 					<Form
 						name="form_services_offered"
+						layout='vertical'
 						onFinish={this.onFinish}
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
@@ -151,13 +152,14 @@ class InfoFinancial extends Component {
 												<Col xs={16} sm={16} md={16}>
 													<Form.Item
 														name={[field.name, "level"]}
+														label={intl.formatMessage(messages.level)}
 														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.academicLevel) }]}
 														className='bottom-0'
 														style={{ marginTop: field.key === 0 ? 0 : 14 }}
 													>
 														<Select
 															onChange={(event => {
-																var arr = this.form.getFieldValue('academicLevel')
+																const arr = this.form.getFieldValue('academicLevel')
 																this.setValueToReduxRegisterData('academicLevel', arr);
 															})}
 															placeholder={intl.formatMessage(messages.academicLevel)}
@@ -171,6 +173,7 @@ class InfoFinancial extends Component {
 												<Col xs={8} sm={8} md={8} className={field.key !== 0 && 'item-remove'}>
 													<Form.Item
 														name={[field.name, "rate"]}
+														label={intl.formatMessage(messages.rate)}
 														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
 														className='bottom-0'
 														style={{ marginTop: field.key === 0 ? 0 : 14 }}
@@ -178,9 +181,9 @@ class InfoFinancial extends Component {
 														<Input
 															placeholder={intl.formatMessage(messages.rate)}
 															onChange={(event => {
-																var value = event.target.value;
-																var arr = JSON.parse(JSON.stringify(this.form.getFieldValue('academicLevel')));
-																for (var i = 0; i < arr.length; i++) {
+																const value = event.target.value;
+																let arr = JSON.parse(JSON.stringify(this.form.getFieldValue('academicLevel')));
+																for (let i = 0; i < arr.length; i++) {
 																	if (arr[i] == undefined) arr[i] = {};
 																	arr[i].rate = value;
 																}
@@ -230,6 +233,7 @@ class InfoFinancial extends Component {
 							</div>
 							<Form.Item
 								name="separateEvaluationDuration"
+								label={intl.formatMessage(messages.duration)}
 								className='mb-0 w-50'
 								rules={[{ required: isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.duration) }]}
 							>
@@ -244,6 +248,7 @@ class InfoFinancial extends Component {
 							</Form.Item>
 							<Form.Item
 								name="separateEvaluationRate"
+								label={intl.formatMessage(messages.rate)}
 								className='mb-0'
 								rules={[{ required: isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
 							>

@@ -13,6 +13,7 @@
   "routes.Login.emailNotValid": "Email is not a valid",
   "routes.Login.emailExist": "Email is in use",
   "routes.Login.userExist": "Username is in use",
+  "routes.Login.contactNumber": "Contact Number",
 
   "routes.Createaccount.letCreateAccount": "Let’s get you started",
   "routes.Createaccount.username": "Username",
@@ -36,6 +37,7 @@
   "routes.Createaccount.userMessage": "Please enter your username.",
   "routes.Createaccount.tellYourself": "Tell us about yourself",
   "routes.Createaccount.contactInformation": "Contact information",
+  "routes.Createaccount.family": "Family",
   "routes.Createaccount.familyName": "Family name",
   "routes.Createaccount.address": "Address",
   "routes.Createaccount.maritalStatus": "Marital status (Optional)",
@@ -59,6 +61,7 @@
   "routes.Createaccount.primaryTeacher": "Primary teacher",
   "routes.Createaccount.currentGrade": "Current grade",
   "routes.Createaccount.servicesRequired": "Services required",
+  "routes.Createaccount.services": "Services",
   "routes.Createaccount.subsidyRequest": "Subsidy Request",
   "routes.Createaccount.addDependent": "Add dependent",
   "routes.Createaccount.remove": "Remove",

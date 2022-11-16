@@ -32,7 +32,7 @@ class InfoReview extends Component {
 	componentDidMount() {
 		axios.post(url + getReviewInfoForProvider).then(result => {
 			if (result.data.success) {
-				var data = result.data.data;
+				const data = result.data.data;
 				this.setState({
 					cityConnections: data.cityConnections,
 					skillSet: data.skillSet,
@@ -60,7 +60,7 @@ class InfoReview extends Component {
 
 	onSubmit = async () => {
 		const { registerData } = this.props.register;
-		var postData = this.copyField(registerData);
+		const postData = this.copyField(registerData);
 		const response = await axios.post(url + userSignUp, postData);
 		const { success } = response.data;
 		if (success) {
@@ -72,10 +72,10 @@ class InfoReview extends Component {
 	};
 
 	copyField = (registerData) => {
-		var arr = ["email", "role", "isAcceptProBono", "isAcceptReduceRate", "isWillingOpenPrivate", "password", "username"];
-		var availability = this.validAvaiability(registerData.availability);
-		var obj = { ...registerData.profileInfor, ...registerData.subsidy, ...registerData.serviceInfor, ...registerData.financialInfor, ...availability };
-		for (var i = 0; i < arr.length; i++) {
+		const arr = ["email", "role", "isAcceptProBono", "isAcceptReduceRate", "isWillingOpenPrivate", "password", "username"];
+		const availability = this.validAvaiability(registerData.availability);
+		let obj = { ...registerData.profileInfor, ...registerData.subsidy, ...registerData.serviceInfor, ...registerData.financialInfor, ...availability };
+		for (let i = 0; i < arr.length; i++) {
 			obj["" + arr[i]] = registerData["" + arr[i]];
 		}
 		obj.W9FormPath = registerData.uploaded_path;
@@ -83,10 +83,10 @@ class InfoReview extends Component {
 	}
 
 	validAvaiability = (availability) => {
-		var manualSchedule = [];
-		for (var i = 0; i < day_week.length; i++) {
-			for (var j = 0; j < availability['' + day_week[i]].length; j++) {
-				var scheduleItem = availability['' + day_week[i]][j];
+		let manualSchedule = [];
+		for (let i = 0; i < day_week.length; i++) {
+			for (let j = 0; j < availability['' + day_week[i]].length; j++) {
+				const scheduleItem = availability['' + day_week[i]][j];
 				if (scheduleItem.from_time && scheduleItem.to_time && (scheduleItem.from_date || scheduleItem.to_date) && scheduleItem.location) {
 					manualSchedule.push({
 						"location": scheduleItem.location,

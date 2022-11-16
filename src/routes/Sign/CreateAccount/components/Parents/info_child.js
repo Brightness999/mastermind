@@ -147,6 +147,7 @@ class InfoChild extends Component {
 					</div>
 					<Form
 						name="form_contact"
+						layout='vertical'
 						onFinish={this.onFinish}
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
@@ -180,6 +181,7 @@ class InfoChild extends Component {
 													<Col xs={24} sm={24} md={9}>
 														<Form.Item
 															name={[field.name, "firstName"]}
+															label={intl.formatMessage(messages.firstName)}
 															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.firstName) }]}
 														>
 															<Input
@@ -191,6 +193,7 @@ class InfoChild extends Component {
 													<Col xs={24} sm={24} md={9}>
 														<Form.Item
 															name={[field.name, "lastName"]}
+															label={intl.formatMessage(messages.lastName)}
 															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.lastName) }]}
 														>
 															<Input
@@ -202,6 +205,7 @@ class InfoChild extends Component {
 													<Col xs={24} sm={24} md={6}>
 														<Form.Item
 															name={[field.name, "birthday_moment"]}
+															label={intl.formatMessage(messages.dateBirth)}
 															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.dateBirth) }]}
 														>
 															<DatePicker
@@ -238,6 +242,7 @@ class InfoChild extends Component {
 												</Row>
 												<Form.Item
 													name={[field.name, "backgroundInfor"]}
+													label={intl.formatMessage(messages.backgroundInformation)}
 													rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.backgroundInformation) }]}
 												>
 													<Input.TextArea
@@ -248,6 +253,7 @@ class InfoChild extends Component {
 												</Form.Item>
 												<Form.Item
 													name={[field.name, "school"]}
+													label={intl.formatMessage(messages.school)}
 													rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
 												>
 													<Select
@@ -265,6 +271,7 @@ class InfoChild extends Component {
 													<Col xs={24} sm={24} md={12}>
 														<Form.Item
 															name={[field.name, "primaryTeacher"]}
+															label={intl.formatMessage(messages.primaryTeacher)}
 															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
 														>
 															<Input
@@ -276,6 +283,7 @@ class InfoChild extends Component {
 													<Col xs={24} sm={24} md={12}>
 														<Form.Item
 															name={[field.name, "currentGrade"]}
+															label={intl.formatMessage(messages.currentGrade)}
 															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.currentGrade) }]}
 														>
 															<Input
@@ -288,6 +296,7 @@ class InfoChild extends Component {
 												<div className='flex flex-row'>
 													<Form.Item
 														name={[field.name, 'services']}
+														label={intl.formatMessage(messages.services)}
 														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
 														className='add-services bottom-0 flex-1'
 													>
@@ -303,6 +312,12 @@ class InfoChild extends Component {
 															))}
 														</Select>
 													</Form.Item>
+													<Button
+														className='ml-10'
+														onClick={v => this.props.onOpenSubsidyStep(1, index)}
+													>
+														{intl.formatMessage(messages.subsidyRequest)}
+													</Button>
 												</div>
 											</div>
 										)

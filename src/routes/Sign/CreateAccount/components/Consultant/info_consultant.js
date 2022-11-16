@@ -26,7 +26,7 @@ class InfoConsultant extends Component {
   componentDidMount() {
     const { registerData } = this.props.register;
     this.getDataFromServer();
-    var consultantInfo = registerData.consultantInfo || this.getDefaultObj();
+    const consultantInfo = registerData.consultantInfo || this.getDefaultObj();
     this.form.setFieldsValue(consultantInfo);
     if (!registerData.consultantInfo) {
       this.props.setRegisterData({ consultantInfo: this.getDefaultObj() });
@@ -36,7 +36,7 @@ class InfoConsultant extends Component {
   getDataFromServer = () => {
     axios.post(url + getDefaultValuesForConsultant).then(result => {
       if (result.data.success) {
-        var data = result.data.data;
+        const data = result.data.data;
         this.setState({
           ContactNumberType: data.ContactNumberType,
           EmailType: data.EmailType,
@@ -80,14 +80,14 @@ class InfoConsultant extends Component {
 
   setValueToReduxRegisterData = (fieldName, value) => {
     const { registerData } = this.props.register;
-    var consultantInfo = registerData.consultantInfo;
-    var obj = {};
+    const consultantInfo = registerData.consultantInfo;
+    let obj = {};
     obj[fieldName] = value;
     this.props.setRegisterData({ consultantInfo: { ...consultantInfo, ...obj } });
   }
 
   defaultOnValueChange = (event, fieldName) => {
-    var value = event.target.value;
+    const value = event.target.value;
     this.setValueToReduxRegisterData(fieldName, value);
   }
 
@@ -106,15 +106,17 @@ class InfoConsultant extends Component {
           </div>
           <Form
             name="form_profile_provider"
+            layout='vertical'
             onFinish={this.onFinish}
             onFinishFailed={this.onFinishFailed}
             ref={ref => this.form = ref}
           >
-            <Form.Item name="referredToAs">
+            <Form.Item name="referredToAs" label={intl.formatMessage(messages.referredAs)}>
               <Input onChange={v => this.defaultOnValueChange(v, "referredToAs")} placeholder={intl.formatMessage(messages.referredAs)} />
             </Form.Item>
             <Form.Item
               name="cityConnection"
+              label={intl.formatMessage(messages.cityConnections)}
               rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cityConnections) }]}
             >
               <Select
@@ -130,12 +132,14 @@ class InfoConsultant extends Component {
             </Form.Item>
             <Form.Item
               name="proExp"
+              label={intl.formatMessage(messages.professionalExperience)}
               rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.professionalExperience) }]}
             >
               <Input.TextArea onChange={v => this.defaultOnValueChange(v, "proExp")} rows={4} placeholder={intl.formatMessage(messages.professionalExperience)} />
             </Form.Item>
             <Form.Item
               name="skillSet"
+              label={intl.formatMessage(messages.skillsets)}
               rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
             >
               <Select
@@ -148,6 +152,7 @@ class InfoConsultant extends Component {
             </Form.Item>
             <Form.Item
               name="yearExp"
+              label={intl.formatMessage(messages.yearsExperience)}
               rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.yearsExperience) }]}
             >
               <Input
@@ -164,6 +169,7 @@ class InfoConsultant extends Component {
                         <Form.Item
                           {...restField}
                           name={[name, 'phoneNumber']}
+                          label={intl.formatMessage(messages.contactNumber)}
                           className='bottom-0'
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                           rules={[
@@ -184,6 +190,7 @@ class InfoConsultant extends Component {
                         <Form.Item
                           {...restField}
                           name={[name, 'type']}
+                          label={intl.formatMessage(messages.type)}
                           rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type) }]}
                           className='bottom-0'
                           style={{ marginTop: key === 0 ? 0 : 14 }}
@@ -220,6 +227,7 @@ class InfoConsultant extends Component {
                         <Form.Item
                           {...restField}
                           name={[name, 'email']}
+                          label={intl.formatMessage(messages.contactEmail)}
                           className='bottom-0'
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                           rules={[
@@ -240,6 +248,7 @@ class InfoConsultant extends Component {
                         <Form.Item
                           {...restField}
                           name={[name, 'type']}
+                          label={intl.formatMessage(messages.type)}
                           rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type) }]}
                           className='bottom-0'
                           style={{ marginTop: key === 0 ? 0 : 14 }}
@@ -269,6 +278,7 @@ class InfoConsultant extends Component {
             </Form.List>
             <Form.Item
               name="notes"
+              label={intl.formatMessage(messages.notes)}
               rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.notes) }]}
             >
               <Input.TextArea onChange={v => this.defaultOnValueChange(v, "notes")} rows={4} placeholder={intl.formatMessage(messages.notes)} />

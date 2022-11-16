@@ -98,6 +98,10 @@ export default ({
     id: `${scope}.contactInformation`,
     defaultMessage: 'Contact information',
   },
+  family: {
+    id: `${scope}.family`,
+    defaultMessage: 'Family',
+  },
   familyName: {
     id: `${scope}.familyName`,
     defaultMessage: 'Family name',
@@ -189,6 +193,10 @@ export default ({
   currentGrade: {
     id: `${scope}.currentGrade`,
     defaultMessage: 'Current grade',
+  },
+  services: {
+    id: `${scope}.services`,
+    defaultMessage: 'Services',
   },
   servicesRequired: {
     id: `${scope}.servicesRequired`,
