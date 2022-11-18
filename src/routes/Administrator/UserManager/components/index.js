@@ -1,4 +1,4 @@
-import { Divider, Table, Space, Button, Modal, Input } from 'antd';
+import { Divider, Table, Space, Button, Input } from 'antd';
 import { routerLinks } from '../../../constant';
 import { ModalConfirm, ModalEditUser } from '../../../../components/Modal';
 import React, { createRef } from 'react';
@@ -6,8 +6,9 @@ import intl from 'react-intl-universal';
 import mgsSidebar from '../../../../components/SideBar/messages';
 import './index.less';
 import { checkPermission } from '../../../../utils/auth/checkPermission';
-import request, { generateSearchStructure } from '../../../../utils/api/request';
+import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
+import { activateUser, getUsers } from '../../../../utils/api/apiList';
 
 export default class extends React.Component {
 	constructor(props) {
@@ -28,7 +29,7 @@ export default class extends React.Component {
 		if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
 			checkPermission().then(loginData => {
 				loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
-				request.post('admin/get_users').then(result => {
+				request.post(getUsers).then(result => {
 					if (result.success) {
 						this.setState({
 							users: result.data?.map((user, i) => {
@@ -68,7 +69,12 @@ export default class extends React.Component {
 	}
 
 	handleConfirm = () => {
-		request.post('admin/activate_user', { userId: this.state.userId, isActive: this.state.userState }).then(() => {
+		const data = {
+			userId: this.state.userId,
+			isActive: this.state.userState
+		};
+
+		request.post(activateUser, data).then(() => {
 			this.state.users.map(user => {
 				if (user._id == this.state.userId) {
 					user.isActive = this.state.userState;

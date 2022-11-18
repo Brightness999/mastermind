@@ -17,7 +17,7 @@ class ThemeLayout extends React.PureComponent {
     const {childRoutes} = routerData;
 
     return (
-      <Layout className="full-layout theme-layout fixed">
+      <Layout className="full-layout theme-layout">
         <Header>
           <ThemeHeader/>
         </Header>

@@ -11,6 +11,7 @@ import DependentAvailability from './Parents/dependent_availability';
 import ReviewAccount from './Parents/review_account';
 import InfoProfile from './Provider/info_profile';
 import InfoServices from './Provider/info_services';
+import InfoScheduling from './Provider/info_scheduling';
 import InfoAvailability from './Provider/info_availability';
 import SubsidyProgram from './Provider/subsidy_program';
 import InfoReview from './Provider/info_review';
@@ -19,8 +20,6 @@ import InfoSchool from './School/info_school';
 import InfoAdmin from './Admin/info_admin';
 import InfoConsultant from './Consultant/info_consultant';
 import ConsultantAvailability from './Consultant/info_availability';
-import SubsidyRequest from '../../SubsidyRequest/components';
-import SubsidyReview from '../../SubsidyReview/components';
 import { routerLinks } from "../../../constant";
 import './index.less';
 import '../../../../assets/styles/login.less';
@@ -35,7 +34,6 @@ export default class extends React.Component {
       selectedDependent: -1,
       accountType: intl.formatMessage(messages.parent),
       visibleCreateDone: false,
-      listSchool: [],
     }
   }
 
@@ -78,10 +76,6 @@ export default class extends React.Component {
     }
   }
 
-  handleChangeListSchool = (schools) => {
-    this.setState({ listSchool: schools });
-  }
-
   getStepsComponent = (type) => {
     switch (type) {
       case intl.formatMessage(messages.parent):
@@ -98,11 +92,11 @@ export default class extends React.Component {
         return (
           <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 450 }}>
             <Step key='default' title={intl.formatMessage(messages.accountInfo)} icon={<p>1</p>} />
-            <Step key='info_profile' title={intl.formatMessage(messages.profileInfo)} icon={<p>2</p>} />
-            <Step key='info_services' title={intl.formatMessage(messages.servicesInfo)} icon={<p>3</p>} />
-            <Step key='info_availability' title={intl.formatMessage(messages.availabilityInfo)} icon={<p>4</p>} />
-            <Step key='subsidy' title={intl.formatMessage(messages.subsidy)} icon={<p>5</p>} />
-            <Step key='info_financial' title={intl.formatMessage(messages.financialInfo)} icon={<p>6</p>} />
+            <Step key='info_general' title={intl.formatMessage(messages.generalInformation)} icon={<p>2</p>} />
+            <Step key='info_professional' title={intl.formatMessage(messages.professionalInformation)} icon={<p>3</p>} />
+            <Step key='info_scheduling' title={intl.formatMessage(messages.scheduling)} icon={<p>4</p>} />
+            <Step key='info_availability' title={intl.formatMessage(messages.availability)} icon={<p>5</p>} />
+            <Step key='info_billing' title={intl.formatMessage(messages.billingDetails)} icon={<p>6</p>} />
             <Step key='info_review' title={intl.formatMessage(messages.reviewInfo)} icon={<p>7</p>} />
           </Steps>
         )
@@ -161,35 +155,9 @@ export default class extends React.Component {
       case 2:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            if (this.state.subsidyStep == 1) {
-              return (
-                <SubsidyRequest
-                  selectedDependent={this.state.selectedDependent}
-                  changeSelectedDependent={this.changeSelectedDependent}
-                  onOpenSubsidyStep={this.onOpenSubsidyStep}
-                  onContinue={this.handleContinue}
-                />
-              )
-            } else if (this.state.subsidyStep == 2) {
-              return (
-                <SubsidyReview
-                  selectedDependent={this.state.selectedDependent}
-                  changeSelectedDependent={this.changeSelectedDependent}
-                  onOpenSubsidyStep={this.onOpenSubsidyStep}
-                  onContinue={this.handleContinue}
-                />
-              )
-            } else {
-              return (
-                <InfoChild
-                  onOpenSubsidyStep={this.onOpenSubsidyStep}
-                  changeSelectedDependent={this.changeSelectedDependent}
-                  onContinue={this.handleContinue}
-                />
-              )
-            }
+            return (<InfoChild onOpenSubsidyStep={this.onOpenSubsidyStep} changeSelectedDependent={this.changeSelectedDependent} onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
-            return (<InfoServices onContinue={this.handleContinue} handleChangeListSchool={this.handleChangeListSchool} />)
+            return (<InfoServices onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.consultant):
             return (<ConsultantAvailability onContinue={this.handleContinue} />)
         }
@@ -198,17 +166,17 @@ export default class extends React.Component {
           case intl.formatMessage(messages.parent):
             return (<DependentAvailability onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
-            return (<InfoAvailability onContinue={this.handleContinue} listSchool={this.state.listSchool} />)
+            return (<InfoScheduling onContinue={this.handleContinue} />)
         }
       case 4:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
             return (<ReviewAccount onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
-            return (<SubsidyProgram onContinue={this.handleContinue} />)
+            return (<InfoAvailability onContinue={this.handleContinue} />)
         }
       case 5:
-        return (<InfoFinancial onContinue={this.handleContinue} onFinishRegister={this.openModalCreateDone} />)
+        return (<InfoFinancial onContinue={this.handleContinue} />)
       case 6:
         return (<InfoReview onContinue={this.handleContinue} onFinishRegister={this.openModalCreateDone} />)
     }

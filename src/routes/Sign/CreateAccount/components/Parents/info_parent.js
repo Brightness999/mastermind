@@ -9,14 +9,15 @@ import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
 import axios from 'axios';
 import { url } from '../../../../../utils/api/baseUrl';
-import { getCityConnections } from '../../../../../utils/api/apiList';
+import { getDefaultValueForClient } from '../../../../../utils/api/apiList';
 
 class InfoParent extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			address: '',
-			CityConnections: [],
+			cityConnections: [],
+			maritialTypes: [],
 		};
 	}
 
@@ -46,19 +47,24 @@ class InfoParent extends Component {
 	}
 
 	searchCityConnection() {
-		axios.post(url + getCityConnections).then(result => {
+		axios.post(url + getDefaultValueForClient).then(result => {
 			if (result.data.success) {
 				const data = result.data.data;
-				this.setState({ CityConnections: data.docs })
+				this.setState({
+					cityConnections: data?.cityConnections,
+					maritialTypes: data?.MaritialType,
+				})
 			} else {
 				this.setState({
-					CityConnections: [],
+					cityConnections: [],
+					maritialTypes: [],
 				});
 			}
 		}).catch(err => {
-			console.log(err);
+			console.log('get default data for client error---', err);
 			this.setState({
-				CityConnections: [],
+				cityConnections: [],
+				maritialTypes: [],
 			});
 		})
 	}
@@ -105,7 +111,7 @@ class InfoParent extends Component {
 	};
 
 	render() {
-		const { address, CityConnections } = this.state;
+		const { address, cityConnections, maritialTypes } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -180,7 +186,7 @@ class InfoParent extends Component {
 								optionFilterProp="children"
 								filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
 							>
-								{CityConnections?.map((value, index) => (
+								{cityConnections?.map((value, index) => (
 									<Select.Option key={index} value={value._id}>{value.name}</Select.Option>
 								))}
 							</Select>
@@ -190,10 +196,9 @@ class InfoParent extends Component {
 								onChange={v => this.defaultOnChangeDropdownValue(v, "maritialType")}
 								placeholder={intl.formatMessage(messages.maritalStatus)}
 							>
-								<Select.Option value='0'>Married</Select.Option>
-								<Select.Option value='1'>Widowed</Select.Option>
-								<Select.Option value='2'>Separated</Select.Option>
-								<Select.Option value='3'>Divorced</Select.Option>
+								{maritialTypes?.map((type, index) => (
+									<Select.Option key={index} value={index}>{type}</Select.Option>
+								))}
 							</Select>
 						</Form.Item>
 						<p className='font-16 mb-10 text-bold'>{intl.formatMessage(messages.father)}</p>

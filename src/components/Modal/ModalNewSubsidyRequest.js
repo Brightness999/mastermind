@@ -8,6 +8,7 @@ import messagesRequest from '../../routes/Sign/SubsidyRequest/messages';
 import './style/index.less';
 import request from '../../utils/api/request'
 import { url } from '../../utils/api/baseUrl'
+import { createSubsidyRequest, getAllSchoolsForParent, getDefaultValueForClient } from '../../utils/api/apiList';
 
 class ModalNewSubsidyRequest extends React.Component {
 	constructor(props) {
@@ -38,32 +39,30 @@ class ModalNewSubsidyRequest extends React.Component {
 	}
 
 	loadDataFromServer() {
-		request.post('clients/get_default_value_for_client'
-		).then(result => {
+		request.post(getDefaultValueForClient).then(result => {
 			if (result.success) {
-				var data = result.data;
+				const data = result.data;
 				this.setState({ SkillSet: data.SkillSet })
 			} else {
 				this.setState({ SkillSet: [] })
 			}
 		}).catch(err => {
-			console.log(err);
+			console.log('get default data for client error---', err);
 			this.setState({ SkillSet: [] })
 		})
 	}
 
 	loadSchools() {
-		request.post('clients/get_all_schools'
-		).then(result => {
+		request.post(getAllSchoolsForParent).then(result => {
 			if (result.success) {
-				var data = result.data;
+				const data = result.data;
 				this.setState({ listSchools: data })
 			} else {
 				this.setState({ listSchools: [] })
 			}
 		}).catch(err => {
+			console.log('get all schools error---', err);
 			this.setState({ listSchools: [] })
-			console.log(err);
 		})
 	}
 
@@ -82,7 +81,7 @@ class ModalNewSubsidyRequest extends React.Component {
 				return file.response.data;
 			});
 			values.requestContactRav = this.state.isRequestRav;
-			request.post('clients/create_subsidy_request', values).then(result => {
+			request.post(createSubsidyRequest, values).then(result => {
 				if (result.success) {
 					this.form.resetFields();
 					this.props.onSubmit();
@@ -90,11 +89,11 @@ class ModalNewSubsidyRequest extends React.Component {
 					this.form.setFields([{ name: 'documents', errors: ['error from server'] }]);
 				}
 			}).catch(err => {
-				console.log(err);
+				console.log('create subsidy request error---', err);
 				this.form.setFields([{ name: 'documents', errors: ['error from server'] }]);
 			})
 		} catch (error) {
-			console.log('error', error);
+			console.log('create subsidy request error---', error);
 		}
 	}
 
@@ -151,6 +150,7 @@ class ModalNewSubsidyRequest extends React.Component {
 					<div className='col-form col-subsidy mt-0'>
 						<Form
 							name="form_subsidy_request"
+							layout='vertical'
 							initialValues={{ remember: true }}
 							onFinish={this.onFinish}
 							onFinishFailed={this.onFinishFailed}
@@ -158,6 +158,7 @@ class ModalNewSubsidyRequest extends React.Component {
 						>
 							<Form.Item
 								name="student"
+								label={intl.formatMessage(messagesRequest.dependent)}
 								rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.dependent) }]}
 							>
 								<Select placeholder={intl.formatMessage(messagesCreateAccount.dependent)}>
@@ -171,6 +172,7 @@ class ModalNewSubsidyRequest extends React.Component {
 							</Form.Item>
 							<Form.Item
 								name="skillSet"
+								label={intl.formatMessage(messagesCreateAccount.skillsets)}
 								rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.skillsetRequested) }]}
 							>
 								<Select placeholder={intl.formatMessage(messagesRequest.skillsetRequested)}>
@@ -179,6 +181,7 @@ class ModalNewSubsidyRequest extends React.Component {
 							</Form.Item>
 							<Form.Item
 								name="school"
+								label={intl.formatMessage(messagesRequest.school)}
 								rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.school) }]}
 							>
 								<Select placeholder={intl.formatMessage(messagesCreateAccount.school)}>
@@ -195,12 +198,13 @@ class ModalNewSubsidyRequest extends React.Component {
 								<Col xs={24} sm={24} md={12}>
 									<Form.Item
 										name="ravPhone"
+										label={intl.formatMessage(messagesRequest.ravPhone)}
 										rules={[
 											{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.ravPhone) },
 											{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messagesRequest.phoneNumberValid) },
 										]}
 									>
-										<Input size="small" placeholder={intl.formatMessage(messagesRequest.ravPhone) + ' #'} />
+										<Input placeholder={intl.formatMessage(messagesRequest.ravPhone) + ' #'} />
 									</Form.Item>
 								</Col>
 							</Row>
@@ -208,61 +212,43 @@ class ModalNewSubsidyRequest extends React.Component {
 								<Col xs={24} sm={24} md={12}>
 									<Form.Item
 										name="ravName"
+										label={intl.formatMessage(messagesRequest.nameOfRav)}
 										rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.nameOfRav) }]}
 									>
-										<Input size="small" placeholder={intl.formatMessage(messagesRequest.nameOfRav)} />
+										<Input placeholder={intl.formatMessage(messagesRequest.nameOfRav)} />
 									</Form.Item>
 								</Col>
 								<Col xs={24} sm={24} md={12}>
 									<Form.Item
 										name="ravEmail"
+										label={intl.formatMessage(messagesRequest.ravEmail)}
 										rules={[
 											{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.ravEmail) },
 											{ type: 'email', message: intl.formatMessage(messagesRequest.emailNotValid) }
 										]}
 									>
-										<Input size="small" placeholder={intl.formatMessage(messagesRequest.ravEmail)} />
+										<Input placeholder={intl.formatMessage(messagesRequest.ravEmail)} />
 									</Form.Item>
 								</Col>
 							</Row>
 							<Form.Item
 								name="requestContactRav"
-								rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.requestContactRav) }]}
+								label={intl.formatMessage(messagesRequest.requestContactRav)}
 							>
 								<Input placeholder={intl.formatMessage(messagesRequest.requestContactRav)} />
 							</Form.Item>
-							<Row gutter={14}>
-								<Col xs={24} sm={24} md={12}>
-									<Form.Item
-										name="therapistPhone"
-										rules={[
-											{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.therapistPhone) },
-											{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messagesRequest.phoneNumberValid) }
-										]}
-									>
-										<Input size="small" placeholder={intl.formatMessage(messagesRequest.therapistPhone)} />
-									</Form.Item>
-								</Col>
-								<Col xs={24} sm={24} md={12}>
-									<Form.Item
-										name="therapistEmail"
-										rules={[
-											{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.therapistEmail) },
-											{ type: 'email', message: intl.formatMessage(messagesRequest.emailNotValid) }
-										]}
-									>
-										<Input size="small" placeholder={intl.formatMessage(messagesRequest.therapistEmail)} />
-									</Form.Item>
-								</Col>
-							</Row>
 							<Divider style={{ marginTop: 0, marginBottom: 15, borderColor: '#d7d7d7' }} />
 							<Form.Item
 								name="note"
+								label={intl.formatMessage(messagesRequest.generalNotes)}
 								rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.generalNotes) }]}
 							>
 								<Input.TextArea rows={5} placeholder={intl.formatMessage(messagesRequest.generalNotes)} />
 							</Form.Item>
-							<Form.Item name="documents" className='input-download'
+							<Form.Item
+								name="documents"
+								label={intl.formatMessage(messagesRequest.upload)}
+								className='input-download'
 								rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesRequest.upload) }]}
 							>
 								<div className='input-download flex flex-row justify-between'>

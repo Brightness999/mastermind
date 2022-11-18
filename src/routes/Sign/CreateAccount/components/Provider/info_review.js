@@ -74,7 +74,7 @@ class InfoReview extends Component {
 	copyField = (registerData) => {
 		const arr = ["email", "role", "isAcceptProBono", "isAcceptReduceRate", "isWillingOpenPrivate", "password", "username"];
 		const availability = this.validAvaiability(registerData.availability);
-		let obj = { ...registerData.profileInfor, ...registerData.subsidy, ...registerData.serviceInfor, ...registerData.financialInfor, ...availability };
+		let obj = { ...registerData.profileInfor, ...registerData.subsidy, ...registerData.serviceInfor, ...registerData.financialInfor, ...registerData.scheduling, ...availability };
 		for (let i = 0; i < arr.length; i++) {
 			obj["" + arr[i]] = registerData["" + arr[i]];
 		}
@@ -89,42 +89,42 @@ class InfoReview extends Component {
 				const scheduleItem = availability['' + day_week[i]][j];
 				if (scheduleItem.from_time && scheduleItem.to_time && (scheduleItem.from_date || scheduleItem.to_date) && scheduleItem.location) {
 					manualSchedule.push({
-						"location": scheduleItem.location,
-						"dayInWeek": i,
-						"fromYear": scheduleItem.from_date?.year() ?? 0,
-						"fromMonth": scheduleItem.from_date?.month() ?? 0,
-						"fromDate": scheduleItem.from_date?.date() ?? 0,
-						"toYear": scheduleItem.to_date?.year() ?? 10000,
-						"toMonth": scheduleItem.to_date?.month() ?? 0,
-						"toDate": scheduleItem.to_date?.date() ?? 0,
-						"openHour": scheduleItem.from_time.hour(),
-						"openMin": scheduleItem.from_time.minutes(),
-						"closeHour": scheduleItem.to_time.hour(),
-						"closeMin": scheduleItem.to_time.minutes()
+						isPrivate: scheduleItem.isPrivate,
+						location: scheduleItem.location,
+						dayInWeek: i,
+						fromYear: scheduleItem.from_date?.year() ?? 0,
+						fromMonth: scheduleItem.from_date?.month() ?? 0,
+						fromDate: scheduleItem.from_date?.date() ?? 0,
+						toYear: scheduleItem.to_date?.year() ?? 10000,
+						toMonth: scheduleItem.to_date?.month() ?? 0,
+						toDate: scheduleItem.to_date?.date() ?? 0,
+						openHour: scheduleItem.from_time.hour(),
+						openMin: scheduleItem.from_time.minutes(),
+						closeHour: scheduleItem.to_time.hour(),
+						closeMin: scheduleItem.to_time.minutes()
 					})
 				} else {
 					manualSchedule.push({
-						"location": '',
-						"dayInWeek": i,
-						"fromYear": 0,
-						"fromMonth": 0,
-						"fromDate": 0,
-						"toYear": 0,
-						"toMonth": 0,
-						"toDate": 0,
-						"openHour": 0,
-						"openMin": 0,
-						"closeHour": 0,
-						"closeMin": 0,
+						isPrivate: false,
+						location: '',
+						dayInWeek: i,
+						fromYear: 0,
+						fromMonth: 0,
+						fromDate: 0,
+						toYear: 0,
+						toMonth: 0,
+						toDate: 0,
+						openHour: 0,
+						openMin: 0,
+						closeHour: 0,
+						closeMin: 0,
 					})
 				}
 			}
 		}
 		return {
-			cancellationFee: availability.cancellation_fee,
-			cancellationWindow: availability.cancellation_window,
-			duration: availability.duration,
-			manualSchedule: manualSchedule
+			manualSchedule: manualSchedule,
+			serviceableSchool: availability.serviceableSchool,
 		}
 	}
 

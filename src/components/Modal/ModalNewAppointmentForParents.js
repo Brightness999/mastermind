@@ -6,7 +6,6 @@ import { GoPrimitiveDot } from 'react-icons/go';
 import intl from 'react-intl-universal';
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import msgDrawer from '../../components/DrawerDetail/messages';
 import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import moment from 'moment';
 import 'moment/locale/en-au';
@@ -14,7 +13,7 @@ import './style/index.less';
 import '../../assets/styles/login.less';
 import request from '../../utils/api/request'
 import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils/api/apiList';
-import { store } from '../../redux/store';
+import { FaHandHoldingUsd } from 'react-icons/fa';
 
 const { Paragraph } = Typography;
 moment.locale('en');
@@ -78,7 +77,6 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	componentDidMount() {
 		this.setState({ arrTime: this.getArrTime(0) });
-		this.searchProvider();
 	}
 
 	componentDidUpdate(prevProps) {
@@ -155,8 +153,9 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	handleChangeAddress = address => {
+		const { searchKey, selectedSkillSet } = this.state;
 		this.setState({ address: address });
-		this.searchProvider(this.state.searchKey, address, this.state.selectedSkillSet);
+		this.searchProvider(searchKey, address, selectedSkillSet);
 	};
 
 	onSelectDate = (newValue) => {
@@ -317,10 +316,11 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	requestCreateAppointment(postData) {
+		const { searchKey, address, selectedSkillSet } = this.state;
 		request.post(createAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
-				this.searchProvider();
+				this.searchProvider(searchKey, address, selectedSkillSet);
 				this.props.onSubmit();
 			} else {
 				this.setState({ errorMessage: result.data });
@@ -331,11 +331,12 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	handleSearchProvider = (value) => {
+		const { address, selectedSkillSet } = this.state;
 		this.setState({ searchKey: value });
-		this.searchProvider(value, this.state.address, this.state.selectedSkillSet);
+		this.searchProvider(value, address, selectedSkillSet);
 	}
 
-	handlelSelectDependent = (dependentId) => {
+	handleSelectDependent = (dependentId) => {
 		const dependents = this.props.listDependents;
 		this.setState({
 			selectedDependent: dependentId,
@@ -344,8 +345,9 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	handleSelectSkill = (skill) => {
+		const { searchKey, address } = this.state;
 		this.setState({ selectedSkillSet: skill });
-		this.searchProvider(this.state.searchKey, this.state.address, skill);
+		this.searchProvider(searchKey, address, skill);
 	}
 
 	handleChangePhone = (number) => {
@@ -374,8 +376,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			title: "",
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
-			onCancel: this.props.onCancel,
-			closable: false,
+			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
 			width: 900,
 			footer: []
 		};
@@ -383,7 +384,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		return (
 			<Modal {...modalProps}>
 				<div className='new-appointment'>
-					<Form onFinish={this.createAppointment} onFinishFailed={this.onFinishFailed}>
+					<Form onFinish={this.createAppointment} onFinishFailed={this.onFinishFailed} layout='vertical'>
 						<div className='flex gap-5 items-center'>
 							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType == 2 && (
@@ -404,13 +405,17 @@ class ModalNewAppointmentForParents extends React.Component {
 						</div>
 						<Row gutter={20}>
 							<Col xs={24} sm={24} md={appointmentType == 1 ? 6 : 8} className='select-small'>
-								<Form.Item name="dependent" rules={[{ required: true, message: 'Please select a dependent' }]}>
+								<Form.Item
+									name="dependent"
+									label={intl.formatMessage(msgCreateAccount.dependent)}
+									rules={[{ required: true, message: 'Please select a dependent' }]}
+								>
 									<Select
 										showSearch
 										optionFilterProp="children"
 										filterOption={(input, option) => option.children?.join('').includes(input)}
 										filterSort={(optionA, optionB) => optionA.children?.join('').toLowerCase().localeCompare(optionB.children?.join('').toLowerCase())}
-										onChange={value => this.handlelSelectDependent(value)}
+										onChange={value => this.handleSelectDependent(value)}
 										placeholder={intl.formatMessage(msgCreateAccount.dependent)}
 									>
 										{this.props.listDependents?.map((dependent, index) => (
@@ -420,7 +425,11 @@ class ModalNewAppointmentForParents extends React.Component {
 								</Form.Item>
 							</Col>
 							<Col xs={24} sm={24} md={appointmentType == 1 ? 6 : 8} className='select-small'>
-								<Form.Item name="skill" rules={[{ required: true, message: 'Please select a skill.' }]}>
+								<Form.Item
+									name="skill"
+									label={intl.formatMessage(msgCreateAccount.skillsets)}
+									rules={[{ required: true, message: 'Please select a skill.' }]}
+								>
 									<Select
 										showSearch
 										optionFilterProp="children"
@@ -428,7 +437,6 @@ class ModalNewAppointmentForParents extends React.Component {
 										onChange={v => this.handleSelectSkill(v)}
 										placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
 									>
-										<Select.Option key="000" value=""></Select.Option>
 										{skillSet?.map((skill, index) => (
 											<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
 										))}
@@ -436,15 +444,18 @@ class ModalNewAppointmentForParents extends React.Component {
 								</Form.Item>
 							</Col>
 							<Col xs={24} sm={24} md={appointmentType == 1 ? 6 : 8} className='select-small'>
-								<Form.Item name="address" rules={[{ required: appointmentType == 3, message: "Select an appointment location." }]}>
+								<Form.Item
+									name="address"
+									label={intl.formatMessage(msgCreateAccount.location)}
+									rules={[{ required: appointmentType == 3, message: "Select a location." }]}
+								>
 									<Select
 										showSearch
 										optionFilterProp="children"
 										filterOption={(input, option) => option.children?.includes(input)}
 										onChange={v => this.handleChangeAddress(v)}
-										placeholder={intl.formatMessage(msgCreateAccount.address)}
+										placeholder={intl.formatMessage(msgCreateAccount.location)}
 									>
-										<Select.Option key='000' value=''></Select.Option>
 										{addressOptions?.map((address, index) => (
 											<Select.Option key={index} value={address}>{address}</Select.Option>
 										))}
@@ -453,10 +464,13 @@ class ModalNewAppointmentForParents extends React.Component {
 							</Col>
 							{appointmentType == 1 && (
 								<Col xs={24} sm={24} md={6} className="select-small">
-									<Form.Item name="phoneNumber" rules={[
-										{ required: true, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
-										{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) }
-									]}>
+									<Form.Item
+										name="phoneNumber"
+										label={intl.formatMessage(msgCreateAccount.contactNumber)}
+										rules={[
+											{ required: true, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
+											{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) }
+										]}>
 										<Input type='text' className='w-100' onChange={e => this.handleChangePhone(e.target.value)} placeholder={intl.formatMessage(msgCreateAccount.phoneNumber)} pattern='^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$' required />
 									</Form.Item>
 								</Col>
@@ -464,7 +478,7 @@ class ModalNewAppointmentForParents extends React.Component {
 						</Row>
 						<Row>
 							<Col xs={24}>
-								<Form.Item name="notes">
+								<Form.Item name="notes" label={intl.formatMessage(msgCreateAccount.notes)}>
 									<Input.TextArea rows={3} onChange={e => this.handleChangeNote(e.target.value)} placeholder={intl.formatMessage(msgCreateAccount.notes) + '(optional)'} />
 								</Form.Item>
 							</Col>
@@ -502,50 +516,43 @@ class ModalNewAppointmentForParents extends React.Component {
 							<Col xs={24} sm={24} md={8}>
 								<div className='provider-profile'>
 									<div className='flex flex-row items-center'>
-										<p className='font-16 font-700'>{intl.formatMessage(msgDrawer.providerProfile)}</p>
+										<p className='font-16 font-700'>{listProvider[selectedProviderIndex]?.name}{listProvider[selectedProviderIndex]?.academicLevel?.length && <FaHandHoldingUsd size={16} className='mx-10 text-green500' />}</p>
 										<p className='font-12 font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
 									<div className='flex'>
 										<div className='flex-1'>
-											<p className='font-10 mb-0'>Name:</p>
-											<p className='font-10'>{listProvider[selectedProviderIndex]?.name}</p>
+											{listProvider[selectedProviderIndex]?.contactNumber?.map((phone, index) => (
+												<p key={index} className='font-10'>{phone.phoneNumber}</p>
+											))}
+											{listProvider[selectedProviderIndex]?.contactEmail?.map((email, index) => (
+												<p key={index} className='font-10'>{email.email}</p>
+											))}
+											{listProvider[selectedProviderIndex]?.serviceAddress && (
+												<p className='font-10'>{listProvider[selectedProviderIndex].serviceAddress}</p>
+											)}
 										</div>
 										<div className='flex-1'>
-											<p className='font-10 mb-0'>Skillset(s):</p>
-											<p className='font-10'>{listProvider[selectedProviderIndex]?.skillSet?.name}</p>
+
 										</div>
 									</div>
-									<p className='font-10 flex'><span className='flex-1'>Practice/Location:</span><span className='flex-1'>{listProvider[selectedProviderIndex]?.serviceAddress}</span></p>
 									<div className='flex'>
-										{listProvider[selectedProviderIndex] && (
-											<div className='flex-1'>
-												<p className='font-10 mb-0'>Contact number:</p>
-												{listProvider[selectedProviderIndex]?.contactNumber?.map((phone, phoneIndex) => (
-													<p key={phoneIndex} className='font-10'>{phone.phoneNumber}</p>
-												))}
-											</div>
-										)}
-										{listProvider[selectedProviderIndex] && (
-											<div className='flex-1'>
-												<p className='font-10 mb-0'>Contact email:</p>
-												{listProvider[selectedProviderIndex]?.contactEmail?.map((email, emailIndex) => (
-													<p key={emailIndex} className='font-10'>{email.email}</p>
-												))}
-											</div>
-										)}
-									</div>
-									<div className='flex'>
+										<div className='flex-1'>
+											<p className='font-10 mb-0 text-bold'>Skillset(s):</p>
+											{listProvider[selectedProviderIndex]?.skillSet?.map((skill, index) => (
+												<p key={index} className='font-10 mb-0'>{skill.name}</p>
+											))}
+										</div>
 										<div className='font-10 flex-1'>
-											<p>Academic level(s)</p>
+											<p className='mb-0 text-bold'>Grade level(s)</p>
 											<div>{listProvider[selectedProviderIndex]?.academicLevel?.map((level, i) => (
 												<div key={i} className="flex">
 													<span>{level.level}</span>
-													<span className='ml-10'>{level.rate}</span>
+													<span className='ml-10'>${level.rate}</span>
 												</div>
 											))}</div>
 										</div>
-										<p className='font-10 flex-1'>Subsidy </p>
 									</div>
+									<p className='font-10 mb-0 text-bold'>Profile</p>
 									<div className='profile-text'>
 										<Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
 											{listProvider[selectedProviderIndex]?.publicProfile}

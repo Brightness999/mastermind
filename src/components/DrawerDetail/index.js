@@ -161,7 +161,7 @@ class DrawerDetail extends Component {
 
   displayDuration = () => {
     const { event } = this.props;
-    return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.duration, 'minutes').format('hh:mm a')}`;
+    return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.provider?.duration, 'minutes').format('hh:mm a')}`;
   }
 
 
@@ -228,20 +228,41 @@ class DrawerDetail extends Component {
 
     const providerProfile = (
       <div className='provider-profile'>
-        <p className='font-16 font-700 mb-10'>{intl.formatMessage(messages.providerProfile)}</p>
-        <div className='count-2'>
-          <p className='font-10'>Name: {event?.provider?.name}</p>
-          <p className='font-10'>Skillset(s): {event?.provider?.skillSet?.name}</p>
+        <p className='font-16 font-700 mb-10'>{event?.provider?.name}</p>
+        <div className='flex'>
+          <div className='flex-1'>
+            {event?.provider?.contactNumber?.map((phone, index) => (
+              <p key={index} className='font-10'>{phone.phoneNumber}</p>
+            ))}
+            {event?.provider?.contactEmail?.map((email, index) => (
+              <p key={index} className='font-10'>{email.email}</p>
+            ))}
+            {event?.provider?.serviceAddress && (
+              <p className='font-10'>{event?.provider.serviceAddress}</p>
+            )}
+          </div>
+          <div className='flex-1'>
+
+          </div>
         </div>
-        <p className='font-10'>Practice/Location: {event?.provider?.serviceAddress}</p>
-        <div className='count-2'>
-          <p className='font-10'>Contact number {event?.provider?.contactNumber?.map((n, i) => (<span key={i}>{n.phoneNumber}</span>))}</p>
-          <p className='font-10'>Contact email: {event?.provider?.contactEmail?.map((e, i) => (<span key={i}>{e.email}</span>))}</p>
+        <div className='flex'>
+          <div className='flex-1'>
+            <p className='font-10 mb-0 text-bold'>Skillset(s):</p>
+            {event?.provider?.skillSet?.map((skill, index) => (
+              <p key={index} className='font-10 mb-0'>{skill.name}</p>
+            ))}
+          </div>
+          <div className='font-10 flex-1'>
+            <p className='mb-0 text-bold'>Grade level(s)</p>
+            <div>{event?.provider?.academicLevel?.map((level, i) => (
+              <div key={i} className="flex">
+                <span>{level.level}</span>
+                <span className='ml-10'>${level.rate}</span>
+              </div>
+            ))}</div>
+          </div>
         </div>
-        <div className='count-2'>
-          <p className='font-10'>Academic level(s) : {event?.provider?.academicLevel?.map((a, i) => (<span key={i}>level: {a.level}, rate: {a.rate}</span>))}</p>
-          <p className='font-10'>Subsidy (blank or NO Sub.)</p>
-        </div>
+        <p className='font-10 mb-0 text-bold'>Profile</p>
         <div className='profile-text'>
           <Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
             {event?.provider?.publicProfile}
@@ -251,14 +272,16 @@ class DrawerDetail extends Component {
     );
     const dependentProfile = (
       <div className='provider-profile'>
-        <p className='font-16 font-700 mb-10'>{intl.formatMessage(messages.dependentProfile)}</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-          <p className='font-10'>Name: {event?.dependent?.firstName} {event?.dependent?.lastName}</p>
-          <div className='font-10'>Skillset(s):
+        <p className='font-16 font-700 mb-10'>{event?.dependent?.firstName} {event?.dependent?.lastName}</p>
+        <div className='flex'>
+          <div className='flex-1'>
+            <p className='font-10 mb-0'>{event?.dependent?.guardianPhone}</p>
+            <p className='font-10 mb-0'>{event?.dependent?.guardianEmail}</p>
+          </div>
+          <div className='flex-1 font-10'>
+            <div className='text-bold'>Skillset</div>
             {event?.dependent?.services?.map((service, i) => (<div key={i}>{service.name}</div>))}
           </div>
-          <p className='font-10'>Contact number {event?.dependent?.guardianPhone}</p>
-          <p className='font-10'>Contact email: {event?.dependent?.guardianEmail}</p>
         </div>
       </div >
     );

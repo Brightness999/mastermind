@@ -154,21 +154,6 @@ class ConsultantAvailability extends Component {
             onFinishFailed={this.onFinishFailed}
             ref={ref => this.form = ref}
           >
-            <p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.autoSyncCalendar)}</p>
-            <Row gutter={10}>
-              <Col span={12}>
-                <div className='div-gg'>
-                  <img src='../images/gg.png' />
-                  <p className='font-16 mb-0'>Google</p>
-                </div>
-              </Col>
-              <Col span={12}>
-                <div className='div-gg'>
-                  <img src='../images/outlook.png' />
-                  <p className='font-16 mb-0'>Outlook</p>
-                </div>
-              </Col>
-            </Row>
             <p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.manualSchedule)}</p>
             <div className='div-availability'>
               <Segmented options={day_week} block={true} onChange={this.onSelectDay} />

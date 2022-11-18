@@ -55,7 +55,7 @@ class MainLayout extends React.PureComponent {
     const {route} = this.state;
     
     return (
-      <Layout className="full-layout main-layout fixed">
+      <Layout className="full-layout main-layout">
         <Header>
           <MainHeader />
         </Header>

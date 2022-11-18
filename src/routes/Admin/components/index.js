@@ -44,7 +44,6 @@ class SchedulingCenter extends React.Component {
       visibleNewSubsidy: false,
       visibleNewReview: false,
       visibleNewGroup: false,
-      isEventDetail: false,
       isMonth: 1,
       isGridDayView: 'Grid',
       calendarWeekends: true,
@@ -454,7 +453,6 @@ class SchedulingCenter extends React.Component {
       isFilter,
       userDrawerVisible,
       visiblReferralService,
-      isEventDetail,
       isMonth,
       isGridDayView,
       visibleNewReview,
@@ -550,6 +548,16 @@ class SchedulingCenter extends React.Component {
           <p className='font-16 font-500'>{intl.formatMessage(msgSidebar.schedulingCenter)}</p>
           <Divider />
         </div>
+        <div className='btn-appointment mb-10 flex justify-end'>
+          <Button
+            type='primary'
+            block
+            icon={<FaCalendarAlt size={19} />}
+            onClick={() => this.onShowModalNewAppoint()}
+          >
+            <span>{intl.formatMessage(messages.makeAppointment)}</span>
+          </Button>
+        </div>
         <div className='div-content'>
           <section className='div-calendar box-card'>
             {isFilter && (
@@ -637,61 +645,48 @@ class SchedulingCenter extends React.Component {
                 </CSSAnimate>
               </div>
             )}
-            {!isEventDetail && (
-              <>
-                <div className='calendar-content'>
-                  <FullCalendar
-                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-                    ref={this.calendarRef}
-                    headerToolbar={{
-                      left: "filterButton",
-                      center: "prev,title,next",
-                      right: "monthToWeekButton,segmentView"
-                    }}
-                    views={{
-                      monthToWeekButton: {
-                        type: isMonth ? 'dayGridMonth' : 'timeGridWeek',
-                        buttonText: btnMonthToWeek,
-                      },
-                      segmentView: {
-                        type: isGridDayView === 'Grid' ? 'dayGridMonth' : 'listWeek',
-                        buttonText: btnChangeDayView,
-                      },
-                      week: { titleFormat: { month: 'numeric', day: 'numeric' } },
-                    }}
-                    customButtons={{
-                      filterButton: { text: btnFilter },
-                      prev: { click: () => this.handleClickPrevMonth() },
-                      next: { click: () => this.handleClickNextMonth() },
-                    }}
-                    initialView='dayGridMonth'
-                    eventColor='transparent'
-                    eventDisplay='block'
-                    editable={true}
-                    selectable={true}
-                    selectMirror={true}
-                    dayMaxEvents={true}
-                    weekends={calendarWeekends}
-                    datesSet={this.handleDates}
-                    events={calendarEvents}
-                    eventContent={renderEventContent}
-                    eventClick={this.onShowDrawerDetail}
-                    eventChange={this.handleEventChange} // called for drag-n-drop/resize
-                    eventRemove={this.handleEventRemove}
-                  />
-                </div>
-                <div className='btn-appointment'>
-                  <Button
-                    type='primary'
-                    block
-                    icon={<FaCalendarAlt size={19} />}
-                    onClick={() => this.onShowModalNewAppoint()}
-                  >
-                    {intl.formatMessage(messages.makeAppointment)}
-                  </Button>
-                </div>
-              </>
-            )}
+            <div className='calendar-content'>
+              <FullCalendar
+                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                ref={this.calendarRef}
+                headerToolbar={{
+                  left: "filterButton",
+                  center: "prev,title,next",
+                  right: "monthToWeekButton,segmentView"
+                }}
+                views={{
+                  monthToWeekButton: {
+                    type: isMonth ? 'dayGridMonth' : 'timeGridWeek',
+                    buttonText: btnMonthToWeek,
+                  },
+                  segmentView: {
+                    type: isGridDayView === 'Grid' ? 'dayGridMonth' : 'listWeek',
+                    buttonText: btnChangeDayView,
+                  },
+                  week: { titleFormat: { month: 'numeric', day: 'numeric' } },
+                }}
+                customButtons={{
+                  filterButton: { text: btnFilter },
+                  prev: { click: () => this.handleClickPrevMonth() },
+                  next: { click: () => this.handleClickNextMonth() },
+                }}
+                initialView='dayGridMonth'
+                eventColor='transparent'
+                eventDisplay='block'
+                editable={true}
+                selectable={true}
+                selectMirror={true}
+                dayMaxEvents={true}
+                weekends={calendarWeekends}
+                datesSet={this.handleDates}
+                events={calendarEvents}
+                eventContent={renderEventContent}
+                eventClick={this.onShowDrawerDetail}
+                eventChange={this.handleEventChange} // called for drag-n-drop/resize
+                eventRemove={this.handleEventRemove}
+                height="calc(100vh - 230px)"
+              />
+            </div>
           </section>
         </div>
         <div className='text-right'>

@@ -210,7 +210,6 @@ class ModalReferralService extends React.Component {
 			title: "",
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
-			onCancel: this.props.onCancel,
 			closable: false,
 			width: 900,
 			footer: []
@@ -235,6 +234,7 @@ class ModalReferralService extends React.Component {
 					</div>
 					<Form
 						name='consultation-form'
+						layout='vertical'
 						onFinish={this.createConsulation}
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
@@ -242,7 +242,11 @@ class ModalReferralService extends React.Component {
 						<Row gutter={20} className='mb-10' align="bottom">
 							<Col xs={24} sm={24} md={8} className='select-small'>
 								<p className='font-16 mb-5'>{intl.formatMessage(messages.selectOptions)}</p>
-								<Form.Item name='selectedDependent' rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.dependent) }]}>
+								<Form.Item
+									name='selectedDependent'
+									label={intl.formatMessage(msgCreateAccount.dependent)}
+									rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.dependent) }]}
+								>
 									<Select
 										placeholder={intl.formatMessage(msgCreateAccount.dependent)}
 										value={selectedDependent}
@@ -255,7 +259,11 @@ class ModalReferralService extends React.Component {
 								</Form.Item>
 							</Col>
 							<Col xs={24} sm={24} md={8} className='select-small'>
-								<Form.Item name='selectedSkillSet' rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.skillsets).slice(0, -1) }]}>
+								<Form.Item
+									name='selectedSkillSet'
+									label={intl.formatMessage(msgCreateAccount.skillsets)}
+									rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.skillsets).slice(0, -1) }]}
+								>
 									<Select
 										placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
 										value={selectedSkillSet}
@@ -275,13 +283,14 @@ class ModalReferralService extends React.Component {
 								</div>
 								<Form.Item
 									name='phoneNumber'
+									label={intl.formatMessage(msgCreateAccount.contactNumber)}
 									rules={[
 										{ required: !isGoogleMeet, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
 										{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
 									]}
 								>
 									<Input
-										placeholder={intl.formatMessage(msgCreateAccount.phoneNumber)}
+										placeholder={intl.formatMessage(msgCreateAccount.contactNumber)}
 										value={phoneNumber}
 										onChange={v => this.setState({ phoneNumber: v.target.value })}
 										className={`${isGoogleMeet ? 'display-none' : ''}`}

@@ -50,7 +50,6 @@ class Dashboard extends React.Component {
       visibleNewSubsidy: false,
       visibleNewReview: false,
       visibleNewGroup: false,
-      isEventDetail: false,
       isMonth: 1,
       isGridDayView: 'Grid',
       canDrop: true,
@@ -705,7 +704,6 @@ class Dashboard extends React.Component {
       userDrawerVisible,
       providerDrawervisible,
       visiblReferralService,
-      isEventDetail,
       isMonth,
       isGridDayView,
       visibleNewReview,
@@ -806,6 +804,17 @@ class Dashboard extends React.Component {
             </div>
           </section>
           <section className='div-calendar box-card'>
+            <div className='btn-appointment'>
+              <Button
+                type='primary'
+                block
+                icon={<FaCalendarAlt size={19} />}
+                disabled={userRole == 30 || userRole == 60}
+                onClick={() => (userRole == 3 || userRole == 100) && this.onShowModalNewAppoint()}
+              >
+                {intl.formatMessage(messages.makeAppointment)}
+              </Button>
+            </div>
             {isFilter && (
               <div className='calendar-filter w-100'>
                 <CSSAnimate className="animated-shorter">
@@ -891,62 +900,48 @@ class Dashboard extends React.Component {
                 </CSSAnimate>
               </div>
             )}
-            {!isEventDetail && (
-              <>
-                <div className='calendar-content'>
-                  <FullCalendar
-                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-                    ref={this.calendarRef}
-                    headerToolbar={{
-                      left: "filterButton",
-                      center: "prev,title,next",
-                      right: "monthToWeekButton,segmentView"
-                    }}
-                    views={{
-                      monthToWeekButton: {
-                        type: isMonth ? 'dayGridMonth' : 'timeGridWeek',
-                        buttonText: btnMonthToWeek,
-                      },
-                      segmentView: {
-                        type: isGridDayView === 'Grid' ? 'dayGridMonth' : 'listWeek',
-                        buttonText: btnChangeDayView,
-                      },
-                      week: { titleFormat: { month: 'numeric', day: 'numeric' } },
-                    }}
-                    customButtons={{
-                      filterButton: { text: btnFilter },
-                      prev: { click: () => this.handleClickPrevMonth() },
-                      next: { click: () => this.handleClickNextMonth() },
-                    }}
-                    initialView='dayGridMonth'
-                    eventColor='transparent'
-                    eventDisplay='block'
-                    editable={true}
-                    selectable={true}
-                    selectMirror={true}
-                    dayMaxEvents={true}
-                    weekends={calendarWeekends}
-                    datesSet={this.handleDates}
-                    events={calendarEvents}
-                    eventContent={renderEventContent}
-                    eventClick={this.onShowDrawerDetail}
-                    eventChange={this.handleEventChange} // called for drag-n-drop/resize
-                    eventRemove={this.handleEventRemove}
-                  />
-                </div>
-                <div className='btn-appointment'>
-                  <Button
-                    type='primary'
-                    block
-                    icon={<FaCalendarAlt size={19} />}
-                    disabled={userRole == 30 || userRole == 60}
-                    onClick={() => (userRole == 3 || userRole == 100) && this.onShowModalNewAppoint()}
-                  >
-                    {intl.formatMessage(messages.makeAppointment)}
-                  </Button>
-                </div>
-              </>
-            )}
+            <div className='calendar-content'>
+              <FullCalendar
+                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                ref={this.calendarRef}
+                headerToolbar={{
+                  left: "filterButton",
+                  center: "prev,title,next",
+                  right: "monthToWeekButton,segmentView"
+                }}
+                views={{
+                  monthToWeekButton: {
+                    type: isMonth ? 'dayGridMonth' : 'timeGridWeek',
+                    buttonText: btnMonthToWeek,
+                  },
+                  segmentView: {
+                    type: isGridDayView === 'Grid' ? 'dayGridMonth' : 'listWeek',
+                    buttonText: btnChangeDayView,
+                  },
+                  week: { titleFormat: { month: 'numeric', day: 'numeric' } },
+                }}
+                customButtons={{
+                  filterButton: { text: btnFilter },
+                  prev: { click: () => this.handleClickPrevMonth() },
+                  next: { click: () => this.handleClickNextMonth() },
+                }}
+                initialView='dayGridMonth'
+                eventColor='transparent'
+                eventDisplay='block'
+                editable={true}
+                selectable={true}
+                selectMirror={true}
+                dayMaxEvents={true}
+                weekends={calendarWeekends}
+                datesSet={this.handleDates}
+                events={calendarEvents}
+                eventContent={renderEventContent}
+                eventClick={this.onShowDrawerDetail}
+                eventChange={this.handleEventChange} // called for drag-n-drop/resize
+                eventRemove={this.handleEventRemove}
+                height="calc(100vh - 190px)"
+              />
+            </div>
           </section>
           {[3, 30].includes(userRole) && (
             <section className='div-multi-choice'>

@@ -54,10 +54,8 @@ class InfoConsultant extends Component {
 
   getDefaultObj = () => {
     return {
-      proExp: "",
       notes: "",
       referredToAs: "",
-      yearExp: "",
       contactEmail: [{
         email: "",
         type: 0
@@ -66,6 +64,7 @@ class InfoConsultant extends Component {
         phoneNumber: "", type: 0
       }],
       cityConnection: undefined,
+      skillSet: 0,
     };
   }
 
@@ -131,34 +130,20 @@ class InfoConsultant extends Component {
               </Select>
             </Form.Item>
             <Form.Item
-              name="proExp"
-              label={intl.formatMessage(messages.professionalExperience)}
-              rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.professionalExperience) }]}
-            >
-              <Input.TextArea onChange={v => this.defaultOnValueChange(v, "proExp")} rows={4} placeholder={intl.formatMessage(messages.professionalExperience)} />
-            </Form.Item>
-            <Form.Item
               name="skillSet"
               label={intl.formatMessage(messages.skillsets)}
               rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
             >
               <Select
                 placeholder={intl.formatMessage(messages.skillsets)}
-                onChange={v => this.handelChange('skillSet', v)}>
+                onChange={v => this.handelChange('skillSet', v)}
+                value={0}
+                disabled
+              >
                 {SkillSet.map((value, index) => (
                   <Select.Option key={index} value={index}>{value}</Select.Option>
                 ))}
               </Select>
-            </Form.Item>
-            <Form.Item
-              name="yearExp"
-              label={intl.formatMessage(messages.yearsExperience)}
-              rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.yearsExperience) }]}
-            >
-              <Input
-                onChange={v => this.defaultOnValueChange(v, 'yearExp')}
-                placeholder={intl.formatMessage(messages.yearsExperience)}
-              />
             </Form.Item>
             <Form.List name="contactNumber">
               {(fields, { add, remove }) => (
@@ -279,7 +264,6 @@ class InfoConsultant extends Component {
             <Form.Item
               name="notes"
               label={intl.formatMessage(messages.notes)}
-              rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.notes) }]}
             >
               <Input.TextArea onChange={v => this.defaultOnValueChange(v, "notes")} rows={4} placeholder={intl.formatMessage(messages.notes)} />
             </Form.Item>

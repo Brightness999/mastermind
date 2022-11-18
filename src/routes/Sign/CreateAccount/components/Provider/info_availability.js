@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select, Segmented, TimePicker, Switch, DatePicker, message } from 'antd';
+import { Row, Col, Form, Button, Select, Segmented, TimePicker, Switch, DatePicker, message, Divider } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
 import msgSidebar from '../../../../../components/SideBar/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
@@ -12,7 +11,7 @@ import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
 import moment from 'moment';
-import { getDefaultValueForProvider } from '../../../../../utils/api/apiList';
+import { getAllSchoolsForParent } from '../../../../../utils/api/apiList';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -27,70 +26,46 @@ class InfoAvailability extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			isPrivate: true,
-			CancellationWindow: [],
 			currentSelectedDay: day_week[0],
-			service_address: '',
 			isHomeVisit: true,
-			privateOffice: true,
+			isPrivateOffice: true,
 			isSchools: true,
 			locations: ['Dependent Home', 'Provider Office'],
 			listSchool: [],
-			selectedSchools: [],
 			selectedLocation: '',
-			durations: [],
 		}
 	}
 
 	componentDidMount() {
-		let { registerData } = this.props.register;
+		const { registerData } = this.props.register;
 		if (!!registerData.availability) {
 			this.form?.setFieldsValue({ ...registerData.availability });
+			this.setState({
+				isHomeVisit: registerData.availability?.isHomeVisit,
+				isPrivateOffice: registerData.availability?.isPrivateOffice,
+				isSchools: registerData.availability?.isSchools,
+			})
 		} else {
-			const listSchool = this.props.listSchool?.filter(school => registerData.serviceInfor?.serviceableSchool.includes(school._id))?.map(school => school.name);
-			this.setState({ listSchool: listSchool });
 			day_week.map((day) => this.form.setFieldValue(day, ['']));
+			this.form.setFieldsValue({ serviceableSchool: [] });
 		}
-		this.getDataFromServer();
+		this.loadSchools(registerData.profileInfor);
 	}
 
-	defaultTimeRangeItem = (dayInWeek) => {
-		return {
-			"uid": shortid.generate() + '' + Date.now(),
-			"location": undefined,
-			"dayInWeek": dayInWeek,
-			"openHour": 7,
-			"openMin": 0,
-			"closeHour": 18,
-			"closeMin": 0
-		}
-	}
-
-	getDataFromServer = () => {
-		axios.post(url + getDefaultValueForProvider).then(result => {
+	loadSchools(providerInfor) {
+		axios.post(url + getAllSchoolsForParent, { communityServed: providerInfor?.cityConnection }).then(result => {
 			if (result.data.success) {
 				const data = result.data.data;
-				this.setState({
-					CancellationWindow: data.CancellationWindow,
-					durations: data.durations,
-				})
-			} else {
-				this.setState({
-					CancellationWindow: [],
-					durations: [],
-				});
+				this.setState({ listSchool: data });
 			}
 		}).catch(err => {
-			console.log('get default values for provider error---', err);
-			this.setState({
-				CancellationWindow: [],
-				durations: [],
-			});
+			console.log('get all schools for parent error---', err);
 		})
 	}
 
 	onFinish = (values) => {
-		this.props.setRegisterData({ availability: values });
+		const { isHomeVisit, isSchools, isPrivateOffice } = this.state;
+		this.props.setRegisterData({ availability: { ...values, isHomeVisit, isSchools, isPrivateOffice } });
 		this.props.onContinue();
 	};
 
@@ -114,14 +89,6 @@ class InfoAvailability extends Component {
 	onLocationChange = (location) => {
 		this.props.setRegisterData({ availability: this.form.getFieldsValue() });
 		this.setState({ selectedLocation: location });
-	}
-
-	onLocationSelected = (day, value, index) => {
-		let arr = this.form.getFieldValue(day);
-		if (arr[index] == undefined) arr[index] = {};
-		arr[index].location = value;
-		this.form.setFieldValue(day, arr);
-		this.props.setRegisterData({ availability: this.form.getFieldsValue() });
 	}
 
 	copyToFullWeek = (dayForCopy) => {
@@ -150,12 +117,12 @@ class InfoAvailability extends Component {
 	handleSwitchOffice = (state) => {
 		if (state) {
 			this.setState({
-				privateOffice: state,
+				isPrivateOffice: state,
 				locations: ['Provider Office', ...this.state.locations],
 			});
 		} else {
 			this.setState({
-				privateOffice: state,
+				isPrivateOffice: state,
 				locations: this.state.locations?.filter(location => location != 'Provider Office'),
 			});
 		}
@@ -172,13 +139,16 @@ class InfoAvailability extends Component {
 		}
 	}
 
-	handleSelectSchool = (school) => {
-		this.state.locations.push(school);
-		this.setState({ locations: this.state.locations });
+	handleSelectSchool = (schoolId) => {
+		const { locations, listSchool } = this.state;
+		locations.push(listSchool?.find(school => school._id == schoolId)?.name);
+		this.setState({ locations: locations });
 	}
 
-	handleDeselectSchool = (school) => {
-		this.setState({ locations: this.state.locations.filter(location => location != school) });
+	handleDeselectSchool = (schoolId) => {
+		const { locations, listSchool } = this.state;
+		const schoolName = listSchool?.find(school => school._id == schoolId)?.name;
+		this.setState({ locations: locations.filter(location => location != schoolName) });
 	}
 
 	getDayOfWeekIndex = (day) => {
@@ -194,9 +164,9 @@ class InfoAvailability extends Component {
 	}
 
 	handleSelectTime = (value, type) => {
-		const { selectedLocation, currentSelectedDay } = this.state;
+		const { selectedLocation, currentSelectedDay, listSchool } = this.state;
 		if (selectedLocation) {
-			const school = this.props.listSchool?.find(school => school.name == selectedLocation);
+			const school = listSchool?.find(school => school.name == selectedLocation);
 			if (school) {
 				const idx = this.getDayOfWeekIndex(currentSelectedDay);
 				if (idx > -1) {
@@ -217,7 +187,7 @@ class InfoAvailability extends Component {
 	}
 
 	render() {
-		const { currentSelectedDay, CancellationWindow, isPrivate, privateOffice, isHomeVisit, isSchools, locations, listSchool, durations } = this.state;
+		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -232,25 +202,10 @@ class InfoAvailability extends Component {
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
-						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.autoSyncCalendar)}</p>
-						<Row gutter={10}>
-							<Col span={12}>
-								<div className='div-gg'>
-									<img src='../images/gg.png' />
-									<p className='font-16 mb-0'>Google</p>
-								</div>
-							</Col>
-							<Col span={12}>
-								<div className='div-gg'>
-									<img src='../images/outlook.png' />
-									<p className='font-16 mb-0'>Outlook</p>
-								</div>
-							</Col>
-						</Row>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.locations)}</p>
 						<div className='mb-10'>
 							<div className='flex flex-row items-center mb-5'>
-								<Switch size="small" checkedChildren="ON" unCheckedChildren="OFF" style={{ width: 50 }} checked={privateOffice} onChange={v => this.handleSwitchOffice(v)} />
+								<Switch size="small" checkedChildren="ON" unCheckedChildren="OFF" style={{ width: 50 }} checked={isPrivateOffice} onChange={v => this.handleSwitchOffice(v)} />
 								<p className='ml-10 mb-0'>{intl.formatMessage(messages.privateOffice)}</p>
 							</div>
 							<div className='flex flex-row items-center mb-5'>
@@ -262,18 +217,24 @@ class InfoAvailability extends Component {
 								<p className='ml-10 mb-0'>{intl.formatMessage(messages.school)}</p>
 							</div>
 							{isSchools && (
-								<Select
-									mode="multiple"
-									showArrow
-									placeholder={intl.formatMessage(msgSidebar.schoolsList)}
-									optionLabelProp="label"
-									onSelect={(v) => this.handleSelectSchool(v)}
-									onDeselect={(v) => this.handleDeselectSchool(v)}
+								<Form.Item
+									name="serviceableSchool"
+									label={intl.formatMessage(messages.serviceableSchools)}
+									rules={[{ required: isSchools }]}
 								>
-									{listSchool?.map((school, index) => (
-										<Select.Option key={index} label={school} value={school}>{school}</Select.Option>
-									))}
-								</Select>
+									<Select
+										mode="multiple"
+										showArrow
+										placeholder={intl.formatMessage(msgSidebar.schoolsList)}
+										optionLabelProp="label"
+										onSelect={(v) => this.handleSelectSchool(v)}
+										onDeselect={(v) => this.handleDeselectSchool(v)}
+									>
+										{listSchool?.map((school, index) => (
+											<Select.Option key={index} label={school.name} value={school._id}>{school.name}</Select.Option>
+										))}
+									</Select>
+								</Form.Item>
 							)}
 						</div>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.manualSchedule)}</p>
@@ -286,6 +247,7 @@ class InfoAvailability extends Component {
 											<div className='div-time'>
 												{fields.map((field) => (
 													<div key={field.key}>
+														{field.key != 0 && <Divider className='bg-gray' />}
 														<Form.Item name={[field.name, "location"]}>
 															<Select
 																showArrow
@@ -344,22 +306,16 @@ class InfoAvailability extends Component {
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 															</Col>
 														</Row>
+														<div className='flex items-center justify-start gap-2'>
+															<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
+																<Switch size="small" />
+															</Form.Item>
+															<p className='font-09'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
+														</div>
 													</div>
 												))}
 												<Row>
-													<Col span={8}>
-														<div className='flex flex-row items-center'>
-															<Form.Item name="isPrivate" className='mb-0'>
-																<Switch
-																	size="small"
-																	checked={isPrivate}
-																	onChange={v => this.setState({ isPrivate: v })}
-																/>
-															</Form.Item>
-															<p className='font-09 ml-10 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
-														</div>
-													</Col>
-													<Col span={8}>
+													<Col span={12}>
 														<div className='div-add-time justify-center'>
 															<BsPlusCircle size={17} className='mr-5 text-primary' />
 															<a className='text-primary' onClick={() => add()}>
@@ -367,8 +323,8 @@ class InfoAvailability extends Component {
 															</a>
 														</div>
 													</Col>
-													<Col span={8}>
-														<div className='text-right div-copy-week'>
+													<Col span={12}>
+														<div className='text-center div-copy-week'>
 															<a className='font-10 underline text-primary' onClick={() => this.copyToFullWeek(day)}>
 																{intl.formatMessage(messages.copyFullWeek)}
 															</a>
@@ -382,46 +338,6 @@ class InfoAvailability extends Component {
 								</div>
 							))}
 						</div>
-						<Row gutter={14} style={{ marginLeft: '-22px', marginRight: '-22px' }}>
-							<Col xs={24} sm={24} md={8} className='flex items-end'>
-								<Form.Item
-									name="duration"
-									label={intl.formatMessage(messages.duration)}
-									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.duration) }]}
-									className='mb-0 w-100'
-								>
-									<Select placeholder={intl.formatMessage(messages.duration)}>
-										{durations?.map((duration, index) => (
-											<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
-										))}
-									</Select>
-								</Form.Item>
-							</Col>
-							<Col xs={24} sm={24} md={8} className='flex items-end'>
-								<Form.Item
-									name="cancellation_window"
-									label={intl.formatMessage(messages.cancellationWindow)}
-									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationWindow) }]}
-									className='mb-0 w-100'
-								>
-									<Select placeholder={intl.formatMessage(messages.cancellationWindow)}>
-										{CancellationWindow?.map((value, index) => (
-											<Select.Option key={index} value={value}>{value}</Select.Option>
-										))}
-									</Select>
-								</Form.Item>
-							</Col>
-							<Col xs={24} sm={24} md={8} className='flex items-end'>
-								<Form.Item
-									name="cancellation_fee"
-									label={intl.formatMessage(messages.cancellationFee)}
-									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
-									className='mb-0 w-100'
-								>
-									<Input placeholder={intl.formatMessage(messages.cancellationFee)} />
-								</Form.Item>
-							</Col>
-						</Row>
 						<Form.Item className="form-btn continue-btn" >
 							<Button
 								block

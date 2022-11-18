@@ -94,6 +94,22 @@ export default ({
     id: `${scope}.tellYourself`,
     defaultMessage: 'Tell us about yourself',
   },
+  generalInformation: {
+    id: `${scope}.generalInformation`,
+    defaultMessage: 'General Information',
+  },
+  professionalInformation: {
+    id: `${scope}.professionalInformation`,
+    defaultMessage: 'Professional Information',
+  },
+  scheduling: {
+    id: `${scope}.scheduling`,
+    defaultMessage: 'Scheduling',
+  },
+  billingDetails: {
+    id: `${scope}.billingDetails`,
+    defaultMessage: 'Billing Details',
+  },
   contactInformation: {
     id: `${scope}.contactInformation`,
     defaultMessage: 'Contact information',
@@ -158,13 +174,17 @@ export default ({
     id: `${scope}.dependent`,
     defaultMessage: 'Dependent',
   },
+  dependents: {
+    id: `${scope}.dependents`,
+    defaultMessage: 'Dependents',
+  },
   hasIEP: {
     id: `${scope}.hasIEP`,
     defaultMessage: 'Has an IEP?',
   },
   firstName: {
     id: `${scope}.firstName`,
-    defaultMessage: 'First namev',
+    defaultMessage: 'First name',
   },
   lastName: {
     id: `${scope}.lastName`,
@@ -185,6 +205,10 @@ export default ({
   backgroundInformation: {
     id: `${scope}.backgroundInformation`,
     defaultMessage: 'Background information',
+  },
+  briefProfile: {
+    id: `${scope}.briefProfile`,
+    defaultMessage: 'Brief Profile',
   },
   primaryTeacher: {
     id: `${scope}.primaryTeacher`,
@@ -402,13 +426,21 @@ export default ({
     id: `${scope}.rate`,
     defaultMessage: 'Rate',
   },
+  standardSessionDuration: {
+    id: `${scope}.standardSessionDuration`,
+    defaultMessage: 'Standard session duration',
+  },
+  evaluationDuration: {
+    id: `${scope}.evaluationDuration`,
+    defaultMessage: 'Evaluation duration',
+  },
   duration: {
     id: `${scope}.duration`,
     defaultMessage: 'Duration',
   },
   addLevel: {
     id: `${scope}.addLevel`,
-    defaultMessage: 'Add level',
+    defaultMessage: 'Add level rate',
   },
   sameRateLevels: {
     id: `${scope}.sameRateLevels`,
@@ -430,9 +462,13 @@ export default ({
     id: `${scope}.receiptsRequest`,
     defaultMessage: 'Receipts provided for insurance upon request',
   },
-  newClient: {
-    id: `${scope}.newClient`,
+  newClientScreening: {
+    id: `${scope}.newClientScreening`,
     defaultMessage: 'New client screening',
+  },
+  newClientEvaluation: {
+    id: `${scope}.newClientEvaluation`,
+    defaultMessage: 'New client evaluation',
   },
   screeningTime: {
     id: `${scope}.screeningTime`,

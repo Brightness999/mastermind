@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select, Switch } from 'antd';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Form, Button, Input, Select } from 'antd';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
@@ -9,17 +8,13 @@ import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
-import { getAllSchoolsForParent, getDefaultValueForProvider } from '../../../../../utils/api/apiList';
+import { getDefaultValueForProvider } from '../../../../../utils/api/apiList';
 
 class InfoServices extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			SkillSet: [],
-			serviceableSchool: [],
-			ScreenTime: [],
-			isNewClientScreening: true,
-			listSchools: [],
 		}
 	}
 
@@ -30,48 +25,29 @@ class InfoServices extends Component {
 		}
 		const serviceInfor = registerData.serviceInfor || this.getDefaultObj();
 		this.form.setFieldsValue(serviceInfor);
-		this.setState({
-			privateOffice: serviceInfor.privateOffice,
-			isNewClientScreening: serviceInfor.isNewClientScreening,
-			serviceableSchool: serviceInfor.serviceableSchool,
-		})
 		this.getDataFromServer()
-		this.loadSchools(registerData.profileInfor);
 	}
 
 	getDataFromServer = () => {
 		axios.post(url + getDefaultValueForProvider).then(result => {
 			if (result.data.success) {
 				const data = result.data.data;
-				this.setState({
-					SkillSet: data.SkillSet.docs,
-					ScreenTime: data.SreenTime,
-				})
+				this.setState({ SkillSet: data.SkillSet.docs });
 			} else {
-				this.setState({
-					SkillSet: [],
-					ScreenTime: [],
-				});
+				this.setState({ SkillSet: [] });
 			}
 		}).catch(err => {
-			console.log(err);
-			this.setState({
-				SkillSet: [],
-				ScreenTime: [],
-			});
+			console.log('get default value for provider error ---', err);
+			this.setState({ SkillSet: [] });
 		})
 	}
 
 	getDefaultObj = () => {
 		return {
-			SSN: "",
 			publicProfile: "",
 			references: "",
-			screeningTime: undefined,
-			serviceableSchool: undefined,
 			skillSet: undefined,
 			yearExp: '',
-			isNewClientScreening: true,
 		}
 	}
 
@@ -84,26 +60,14 @@ class InfoServices extends Component {
 		console.log('Failed:', errorInfo);
 	};
 
-	loadSchools(providerInfor) {
-		axios.post(url + getAllSchoolsForParent, { communityServed: providerInfor?.cityConnection }).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
-				this.setState({ listSchools: data });
-				this.props.handleChangeListSchool(data);
-			}
-		}).catch(err => {
-			console.log(err);
-		})
-	}
-
 	render() {
-		const { SkillSet, listSchools, isNewClientScreening, ScreenTime, serviceableSchool } = this.state;
+		const { SkillSet } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
 				<div className='col-form col-info-parent'>
 					<div className='div-form-title'>
-						<p className='font-30 text-center mb-10'>{intl.formatMessage(messages.servicesOffered)}</p>
+						<p className='font-30 text-center mb-10'>{intl.formatMessage(messages.professionalInformation)}</p>
 					</div>
 					<Form
 						name="form_services_offered"
@@ -117,14 +81,14 @@ class InfoServices extends Component {
 							label={intl.formatMessage(messages.skillsets)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
 						>
-							<Select placeholder={intl.formatMessage(messages.skillsets)}>
+							<Select mode="multiple" showArrow placeholder={intl.formatMessage(messages.skillsets)}>
 								{SkillSet.map((skill, index) => (
-									<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>)
-								)}
+									<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
+								))}
 							</Select>
 						</Form.Item>
 						<Row gutter={14}>
-							<Col xs={24} sm={24} md={12}>
+							<Col xs={24} sm={24} md={24}>
 								<Form.Item
 									name="yearExp"
 									label={intl.formatMessage(messages.yearsExperience)}
@@ -133,75 +97,20 @@ class InfoServices extends Component {
 									<Input placeholder={intl.formatMessage(messages.yearsExperience)} />
 								</Form.Item>
 							</Col>
-							<Col xs={24} sm={24} md={12}>
-								<Form.Item
-									name="SSN"
-									label="SSN"
-									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + 'SSN' }]}
-								>
-									<Input placeholder='SSN' suffix={<QuestionCircleOutlined className='text-primary icon-suffix' />} />
-								</Form.Item>
-							</Col>
 						</Row>
-						<Form.Item
-							name="serviceableSchool"
-							label={intl.formatMessage(messages.serviceableSchools)}
-							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.serviceableSchools) }]}
-						>
-							<Select
-								mode="multiple"
-								showArrow
-								placeholder={intl.formatMessage(messages.school)}
-								optionLabelProp="label"
-								value={serviceableSchool}
-							>
-								{listSchools?.map((school, index) => (
-									<Select.Option key={index} label={school.name} value={school._id}>{school.name}</Select.Option>
-								))}
-							</Select>
-						</Form.Item>
-						<div className='text-center flex flex-row justify-between'>
-							<div className='flex flex-row items-center mb-10'>
-								<Form.Item
-									name="isNewClientScreening"
-									rules={[{ required: true }]}
-									className="mb-0"
-								>
-									<Switch
-										size="small"
-										checked={isNewClientScreening}
-										onChange={v => this.setState({ isNewClientScreening: v })}
-									/>
-								</Form.Item>
-								<p className='ml-10 mb-0'>{intl.formatMessage(messages.newClient)}</p>
-							</div>
-							<Form.Item
-								size='small'
-								name="screeningTime"
-								label={intl.formatMessage(messages.screeningTime)}
-								className='select-small'
-								rules={[{ required: isNewClientScreening, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.screeningTime) }]}
-							>
-								<Select placeholder={intl.formatMessage(messages.screeningTime)}>
-									{ScreenTime.map((value, index) => (
-										<Select.Option key={index} value={index}>{value}</Select.Option>
-									))}
-								</Select>
-							</Form.Item>
-						</div>
-						<Form.Item
-							name="references"
-							label={intl.formatMessage(messages.references)}
-							rules={[{ required: false }]}
-						>
-							<Input placeholder={intl.formatMessage(messages.references)} />
-						</Form.Item>
 						<Form.Item
 							name="publicProfile"
 							label={intl.formatMessage(messages.publicProfile)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.publicProfile) }]}
 						>
 							<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.publicProfile)} />
+						</Form.Item>
+						<Form.Item
+							name="references"
+							label={intl.formatMessage(messages.references)}
+							rules={[{ required: false }]}
+						>
+							<Input placeholder={intl.formatMessage(messages.references)} />
 						</Form.Item>
 						<Form.Item className="form-btn continue-btn" >
 							<Button
