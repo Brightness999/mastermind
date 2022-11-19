@@ -214,18 +214,31 @@ class Dashboard extends React.Component {
 
   loadDefaultData() {
     request.post(getDefaultDataForAdmin).then(result => {
-      if (result.success) {
-        const data = result.data;
+      const { data, success } = result;
+      if (success) {
         this.setState({
           listProvider: data?.providers,
           SkillSet: data?.skillSet,
           listDependents: data?.dependents,
-        })
+        });
         store.dispatch(setDependents(data?.dependents));
         store.dispatch(setProviders(data?.providers));
         store.dispatch(setSkillSet(data?.skillSet));
         store.dispatch(setLocations(data?.locations));
+      } else {
+        this.setState({
+          listProvider: [],
+          SkillSet: [],
+          listDependents: [],
+        });
       }
+    }).catch(err => {
+      console.log('get default data error ---', err);
+      this.setState({
+        listProvider: [],
+        SkillSet: [],
+        listDependents: [],
+      });
     })
   }
 
@@ -1152,19 +1165,21 @@ function reportNetworkError() {
 }
 
 function renderEventContent(eventInfo) {
-  const type = eventInfo.event.extendedProps?.type;
-  const status = eventInfo.event.extendedProps?.status;
+  const event = eventInfo.event.extendedProps;
+  const type = event?.type;
+  const status = event?.status;
   const eventType = type == 1 ? 'Screening' : type == 2 ? 'Evaluation' : type == 4 ? 'Consultation' : 'Session';
 
   return (
     <div className={`flex flex-col p-3 rounded-2 bg-${status == 0 ? 'active' : eventType.toLowerCase()}`}>
       <div className='flex items-center gap-2'>
         <Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
-        {eventInfo.event.extendedProps?.status == -2 && <span className='font-20 text-black'>Cancelled</span>}
-        {eventInfo.event.extendedProps?.status == -1 && <span className='font-20 text-black'>Closed</span>}
+        {event?.status == -2 && <span className='font-20 text-black'>Cancelled</span>}
+        {event?.status == -1 && <span className='font-20 text-black'>Closed</span>}
       </div>
-      <div className={`flex flex-col text-white ${eventInfo.event.extendedProps?.status == -2 ? 'line-through' : ''}`}>
+      <div className={`flex flex-col text-white ${event?.status == -2 ? 'line-through' : ''}`}>
         <b className='mr-3'>{moment(eventInfo.event.start).format('hh:mm a')}</b>
+        <b className='mr-3'>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</b>
         <b className='mr-3'>{eventType} with {eventInfo.event.title}</b>
       </div>
     </div>

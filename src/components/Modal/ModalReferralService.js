@@ -210,7 +210,7 @@ class ModalReferralService extends React.Component {
 			title: "",
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
-			closable: false,
+			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
 			width: 900,
 			footer: []
 		};

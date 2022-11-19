@@ -25,7 +25,7 @@ class ModalCurrentAppointment extends React.Component {
 		selectedProviderIndex: -1,
 		selectedTimeIndex: -1,
 		listProvider: [],
-		selectedSkillSet: -1,
+		selectedSkillSet: undefined,
 		address: '',
 		addressOptions: store.getState().auth.locations,
 		selectedDependent: undefined,
@@ -87,19 +87,27 @@ class ModalCurrentAppointment extends React.Component {
 			search: searchKey,
 			address: address,
 			skill: selectedSkillSet,
-			cityConnection: this.state.dependents?.find(d => d._id == dependentId)?.parent[0]?.parentInfo[0]?.cityConnection,
+			dependentId: dependentId,
 		};
 
 		request.post(searchProvidersForAdmin, data).then(result => {
-			if (result.success) {
-				this.setState({
-					listProvider: result.data.providers,
-					selectedProviderIndex: -1,
-					selectedProvider: undefined,
-				});
+			const { data, success } = result;
+			if (success) {
+				this.setState({ listProvider: data.providers });
+			} else {
+				this.setState({ listProvider: [] });
 			}
+			this.setState({
+				selectedProviderIndex: -1,
+				selectedProvider: undefined,
+			});
 		}).catch(err => {
 			console.log('provider list error-----', err);
+			this.setState({
+				listProvider: [],
+				selectedProviderIndex: -1,
+				selectedProvider: undefined,
+			});
 		})
 	}
 
@@ -427,9 +435,9 @@ class ModalCurrentAppointment extends React.Component {
 					<Form onFinish={this.createAppointment} onFinishFailed={this.onFinishFailed} layout='vertical'>
 						<div className='flex gap-5 items-center'>
 							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
-							{appointmentType == 2 && (
+							{appointmentType == 2 && selectedProviderIndex > -1 && (
 								<div className='font-20'>
-									<div>{listProvider[selectedProviderIndex]?.separateEvaluationDuration} evaluation</div>
+									<div>{listProvider[selectedProviderIndex]?.separateEvaluationDuration * 1 + listProvider[selectedProviderIndex]?.duration * 1}Minutes evaluation</div>
 									<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
 								</div>
 							)}
@@ -540,7 +548,7 @@ class ModalCurrentAppointment extends React.Component {
 									{listProvider?.map((provider, index) => (
 										<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
 											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
-											<p className='font-10 text-center'>{provider.name || provider.referredToAs}</p>
+											<p className='font-10 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
 											{selectedProvider === provider._id && (
 												<div className='selected-doctor'>
 													<BsCheck size={12} />
@@ -556,7 +564,7 @@ class ModalCurrentAppointment extends React.Component {
 							<Col xs={24} sm={24} md={8}>
 								<div className='provider-profile'>
 									<div className='flex flex-row items-center'>
-										<p className='font-16 font-700'>{listProvider[selectedProviderIndex]?.name}{listProvider[selectedProviderIndex]?.academicLevel?.length && <FaHandHoldingUsd size={16} className='mx-10 text-green500' />}</p>
+										<p className='font-16 font-700'>{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}{!!listProvider[selectedProviderIndex]?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}</p>
 										<p className='font-12 font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
 									<div className='flex'>

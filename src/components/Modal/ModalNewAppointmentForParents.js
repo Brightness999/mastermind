@@ -24,7 +24,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		selectedProviderIndex: -1,
 		selectedTimeIndex: -1,
 		listProvider: [],
-		selectedSkillSet: -1,
+		selectedSkillSet: undefined,
 		address: '',
 		addressOptions: [],
 		selectedDependent: undefined,
@@ -85,24 +85,40 @@ class ModalNewAppointmentForParents extends React.Component {
 		}
 	}
 
-	searchProvider(searchKey, address, selectedSkillSet) {
+	searchProvider(searchKey, address, selectedSkillSet, dependentId) {
 		const data = {
 			search: searchKey,
 			address: address,
-			skill: selectedSkillSet
+			skill: selectedSkillSet,
+			dependentId: dependentId,
 		};
 		request.post(searchProvidersForAdmin, data).then(result => {
-			if (result.success) {
+			const { data, success } = result;
+			if (success) {
 				this.setState({
-					listProvider: result.data?.providers,
-					addressOptions: result.data?.locations,
-					selectedProviderIndex: -1,
-					selectedProvider: undefined,
-					selectedTimeIndex: -1,
+					listProvider: data?.providers,
+					addressOptions: data?.locations,
+				});
+			} else {
+				this.setState({
+					listProvider: [],
+					addressOptions: [],
 				});
 			}
+			this.setState({
+				selectedProviderIndex: -1,
+				selectedProvider: undefined,
+				selectedTimeIndex: -1,
+			});
 		}).catch(err => {
 			console.log('provider list error-----', err);
+			this.setState({
+				listProvider: [],
+				addressOptions: [],
+				selectedProviderIndex: -1,
+				selectedProvider: undefined,
+				selectedTimeIndex: -1,
+			});
 		})
 	}
 
@@ -121,7 +137,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		if (appointmentType == 2) {
 			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 2 && appointment.status == 0);
 			if (appointment) {
-				message.warning("You can't create more evaluation.");
+				message.warning("scheduling with this provider will be available after the evaluation");
 				return;
 			}
 		}
@@ -153,9 +169,9 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	handleChangeAddress = address => {
-		const { searchKey, selectedSkillSet } = this.state;
+		const { searchKey, selectedSkillSet, selectedDependent } = this.state;
 		this.setState({ address: address });
-		this.searchProvider(searchKey, address, selectedSkillSet);
+		this.searchProvider(searchKey, address, selectedSkillSet, selectedDependent);
 	};
 
 	onSelectDate = (newValue) => {
@@ -316,11 +332,11 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	requestCreateAppointment(postData) {
-		const { searchKey, address, selectedSkillSet } = this.state;
+		const { searchKey, address, selectedSkillSet, selectedDependent } = this.state;
 		request.post(createAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
-				this.searchProvider(searchKey, address, selectedSkillSet);
+				this.searchProvider(searchKey, address, selectedSkillSet, selectedDependent);
 				this.props.onSubmit();
 			} else {
 				this.setState({ errorMessage: result.data });
@@ -331,23 +347,25 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	handleSearchProvider = (value) => {
-		const { address, selectedSkillSet } = this.state;
+		const { address, selectedSkillSet, selectedDependent } = this.state;
 		this.setState({ searchKey: value });
-		this.searchProvider(value, address, selectedSkillSet);
+		this.searchProvider(value, address, selectedSkillSet, selectedDependent);
 	}
 
 	handleSelectDependent = (dependentId) => {
 		const dependents = this.props.listDependents;
+		const { searchKey, address, selectedSkillSet } = this.state;
 		this.setState({
 			selectedDependent: dependentId,
 			skillSet: dependents?.find(dependent => dependent._id == dependentId)?.services,
 		});
+		this.searchProvider(searchKey, address, selectedSkillSet, dependentId);
 	}
 
 	handleSelectSkill = (skill) => {
-		const { searchKey, address } = this.state;
+		const { searchKey, address, selectedDependent } = this.state;
 		this.setState({ selectedSkillSet: skill });
-		this.searchProvider(searchKey, address, skill);
+		this.searchProvider(searchKey, address, skill, selectedDependent);
 	}
 
 	handleChangePhone = (number) => {
@@ -387,9 +405,9 @@ class ModalNewAppointmentForParents extends React.Component {
 					<Form onFinish={this.createAppointment} onFinishFailed={this.onFinishFailed} layout='vertical'>
 						<div className='flex gap-5 items-center'>
 							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
-							{appointmentType == 2 && (
+							{appointmentType == 2 && selectedProviderIndex > -1 && (
 								<div className='font-20'>
-									<div>{listProvider[selectedProviderIndex]?.separateEvaluationDuration} evaluation</div>
+									<div>{listProvider[selectedProviderIndex]?.separateEvaluationDuration * 1 + listProvider[selectedProviderIndex]?.duration * 1}Minutes evaluation</div>
 									<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
 								</div>
 							)}
@@ -500,7 +518,7 @@ class ModalNewAppointmentForParents extends React.Component {
 									{listProvider?.map((provider, index) => (
 										<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
 											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
-											<p className='font-10 text-center'>{provider.name || provider.referredToAs}</p>
+											<p className='font-10 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
 											{selectedProvider === provider._id && (
 												<div className='selected-doctor'>
 													<BsCheck size={12} />
@@ -516,7 +534,7 @@ class ModalNewAppointmentForParents extends React.Component {
 							<Col xs={24} sm={24} md={8}>
 								<div className='provider-profile'>
 									<div className='flex flex-row items-center'>
-										<p className='font-16 font-700'>{listProvider[selectedProviderIndex]?.name}{listProvider[selectedProviderIndex]?.academicLevel?.length && <FaHandHoldingUsd size={16} className='mx-10 text-green500' />}</p>
+										<p className='font-16 font-700'>{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}{!!listProvider[selectedProviderIndex]?.academicLevel?.length && <FaHandHoldingUsd size={16} className='mx-10 text-green500' />}</p>
 										<p className='font-12 font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
 									<div className='flex'>

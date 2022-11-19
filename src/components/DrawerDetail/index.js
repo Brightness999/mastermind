@@ -228,7 +228,7 @@ class DrawerDetail extends Component {
 
     const providerProfile = (
       <div className='provider-profile'>
-        <p className='font-16 font-700 mb-10'>{event?.provider?.name}</p>
+        <p className='font-16 font-700 mb-10'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
         <div className='flex'>
           <div className='flex-1'>
             {event?.provider?.contactNumber?.map((phone, index) => (
@@ -352,7 +352,7 @@ class DrawerDetail extends Component {
               <div className='detail-item flex'>
                 <p className='font-18 font-700 title'>{intl.formatMessage(messages.with)}</p>
                 <div className='flex flex-row flex-1'>
-                  <a className='font-18 underline text-primary'>{event?.provider?.name}</a>
+                  <a className='font-18 underline text-primary'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</a>
                   <BiInfoCircle size={12} className='text-primary ml-auto' />
                 </div>
               </div>
