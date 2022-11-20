@@ -108,6 +108,10 @@ class Dashboard extends React.Component {
             request.post(checkNotificationForClient).then(res => {
               if (res.success) {
                 res.data?.forEach(appointment => {
+                  let duration = appointment.provider?.duration;
+                  if (appointment.type == 2) {
+                    duration = duration * 1 + appointment.provider?.separateEvaluateDuration * 1;
+                  }
                   const key = `open${Date.now()}`;
                   const btn = (
                     <Button type="primary" size="small" onClick={() => {
@@ -119,9 +123,9 @@ class Dashboard extends React.Component {
                   );
                   const description = (
                     <div>
-                      <p className='font-10'>30 minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{appointment?.provider?.name}</span></p>
-                      <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName} ${appointment?.dependent?.lastName}`}</p>
-                      {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location}</p>}
+                      <p className='font-10'>{duration ?? ''} minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{`${appointment?.provider?.firstName ?? ''} ${appointment?.provider?.lastName ?? ''}`}</span></p>
+                      <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName ?? ''} ${appointment?.dependent?.lastName ?? ''}`}</p>
+                      {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber ?? ''}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location ?? ''}</p>}
                       <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
                     </div>
                   )
@@ -142,6 +146,10 @@ class Dashboard extends React.Component {
             request.post(checkNotificationForProvider).then(res => {
               if (res.success) {
                 res.data?.forEach(appointment => {
+                  let duration = appointment.provider?.duration;
+                  if (appointment.type == 2) {
+                    duration = duration * 1 + appointment.provider?.separateEvaluateDuration * 1;
+                  }
                   const key = `open${Date.now()}`;
                   const btn = (
                     <Button type="primary" size="small" onClick={() => {
@@ -153,9 +161,9 @@ class Dashboard extends React.Component {
                   );
                   const description = (
                     <div>
-                      <p className='font-10'>30 minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{appointment?.provider?.name}</span></p>
-                      <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName} ${appointment?.dependent?.lastName}`}</p>
-                      {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location}</p>}
+                      <p className='font-10'>{duration} minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{`${appointment?.provider?.firstName ?? ''} ${appointment?.provider?.lastName ?? ''}`}</span></p>
+                      <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName ?? ''} ${appointment?.dependent?.lastName ?? ''}`}</p>
+                      {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber ?? ''}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location ?? ''}</p>}
                       <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
                     </div>
                   )
