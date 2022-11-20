@@ -725,23 +725,24 @@ function reportNetworkError() {
 }
 
 function renderEventContent(eventInfo) {
-  const type = eventInfo.event.extendedProps?.type;
-  const status = eventInfo.event.extendedProps?.status;
+  const event = eventInfo.event.extendedProps;
+  const type = event?.type;
+  const status = event?.status;
   const eventType = type == 1 ? 'Screening' : type == 2 ? 'Evaluation' : type == 4 ? 'Consultation' : 'Session';
-  const provider = () => type == 4 ? null : (<b>Provider: {eventInfo.event.extendedProps?.provider?.name}</b>)
+  const provider = () => type == 4 ? null : (<b>Provider: {`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</b>)
 
   return (
     <div className={`flex flex-col p-3 rounded-2 bg-${status == 0 ? 'active' : eventType.toLowerCase()}`}>
       <div className='flex items-center gap-2'>
-        {eventInfo.event.extendedProps?.status == -2 && <span className='font-20 text-black'>Cancelled</span>}
-        {eventInfo.event.extendedProps?.status == -1 && <span className='font-20 text-black'>Closed</span>}
+        {event?.status == -2 && <span className='font-20 text-black'>Cancelled</span>}
+        {event?.status == -1 && <span className='font-20 text-black'>Closed</span>}
       </div>
-      <div className={`flex flex-col text-white ${eventInfo.event.extendedProps?.status == -2 ? 'line-through' : ''}`}>
+      <div className={`flex flex-col text-white ${event?.status == -2 ? 'line-through' : ''}`}>
         <div className='flex gap-2'>
           <b>{moment(eventInfo.event.start).format('hh:mm a')}</b>
           <b>{eventType}</b>
         </div>
-        <b>Dependent: {eventInfo.event.extendedProps?.dependent?.firstName + ' ' + eventInfo.event.extendedProps?.dependent?.lastName}</b>
+        <b>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</b>
         {provider()}
       </div>
     </div>

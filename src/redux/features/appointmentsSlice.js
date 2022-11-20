@@ -55,9 +55,9 @@ export const getAppointmentsMonthData = createAsyncThunk(
 			}
 			result.data?.forEach((appoint) => {
 				if (appoint.type < 4) {
-					appoint.title = data.role > 3 ? `${appoint.dependent.firstName ?? ''} ${appoint.dependent.lastName ?? ''}` : `${appoint.provider.firstName} ${appoint.provider.lastName}`;
+					appoint.title = data.role > 3 ? `${appoint.dependent?.firstName ?? ''} ${appoint.dependent?.lastName ?? ''}` : `${appoint.provider?.firstName} ${appoint.provider?.lastName}`;
 				} else {
-					appoint.title = data.role == 100 ? `${appoint.dependent.firstName ?? ''} ${appoint.dependent.lastName ?? ''}` : 'Consultant';
+					appoint.title = data.role == 100 ? `${appoint.dependent?.firstName ?? ''} ${appoint.dependent?.lastName ?? ''}` : 'Consultant';
 				}
 				appoint.allDay = false;
 				appoint.start = new Date(appoint.date);
