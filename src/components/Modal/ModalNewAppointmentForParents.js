@@ -255,25 +255,40 @@ class ModalNewAppointmentForParents extends React.Component {
 	onChooseProvider = (providerIndex) => {
 		this.setState({ providerErrorMessage: '' });
 		const { listProvider, selectedDate, selectedDependent } = this.state;
-		const appointments = listProvider[providerIndex]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
+		const appointments = listProvider[providerIndex]?.appointments ?? [];
 		let appointmentType = 0;
-		if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
-			this.setState({ appointmentType: 1 });
-			appointmentType = 1;
-		}
-		if (listProvider[providerIndex].isSeparateEvaluationRate && !appointments?.find(appointment => (appointment.type == 2 && appointment.status == -1))) {
-			if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
-				this.setState({ appointmentType: 1 });
-				appointmentType = 1;
+
+		if (listProvider[providerIndex].isNewClientScreening) {
+			if (listProvider[providerIndex].isSeparateEvaluationRate) {
+				if (appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 1 && appointment.status == -1)) {
+					if (appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 2 && appointment.status == -1)) {
+						appointmentType = 3;
+					} else {
+						appointmentType = 2;
+					}
+				} else {
+					appointmentType = 1;
+				}
 			} else {
-				this.setState({ appointmentType: 2 });
-				appointmentType = 2;
+				if (appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 1 && appointment.status == -1)) {
+					appointmentType = 3;
+				} else {
+					appointmentType = 1;
+				}
+			}
+		} else {
+			if (listProvider[providerIndex].isSeparateEvaluationRate) {
+				if (appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 2 && appointment.status == -1)) {
+					appointmentType = 3;
+				} else {
+					appointmentType = 2;
+				}
+			} else {
+				appointmentType = 3;
 			}
 		}
-		if (appointments?.find(appointment => appointment.type == 3) || (!listProvider[providerIndex].isSeparateEvaluationRate && !listProvider[providerIndex].isNewClientScreening)) {
-			this.setState({ appointmentType: 3 });
-			appointmentType = 3;
-		}
+		this.setState({ appointmentType: appointmentType });
+
 		const newArrTime = this.getArrTime(appointmentType, providerIndex);
 		const availableTime = listProvider[providerIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDate.day());
 		let duration = 30;

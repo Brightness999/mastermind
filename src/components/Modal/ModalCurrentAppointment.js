@@ -80,6 +80,18 @@ class ModalCurrentAppointment extends React.Component {
 
 	componentDidMount() {
 		this.setState({ arrTime: this.getArrTime(0) });
+		const event = this.props.event;
+		this.setState({
+			selectedDependent: event?.dependent?._id,
+			selectedSkillSet: event?.skillSet?._id,
+			address: event?.location ?? undefined,
+			phoneNumber: event?.phoneNumber,
+			appointmentType: event?.type,
+			notes: event?.notes,
+			skillSet: store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.services ?? [],
+		});
+		this.form?.setFieldsValue({ dependent: event?.dependent?._id, skill: event?.skillSet?._id, address: event?.location, phoneNumber: event?.phoneNumber });
+		this.searchProvider('', event?.location, event?.skillSet?._id, event?.dependent?._id);
 	}
 
 	searchProvider(searchKey, address, selectedSkillSet, dependentId) {
@@ -219,26 +231,39 @@ class ModalCurrentAppointment extends React.Component {
 	onChooseProvider = (providerIndex) => {
 		this.setState({ providerErrorMessage: '' });
 		const { listProvider, selectedDate, dependents, selectedDependent } = this.state;
-		const appointments = listProvider[providerIndex]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
+		const appointments = listProvider[providerIndex]?.appointments ?? [];
 		let appointmentType = 0;
 
-		if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
-			this.setState({ appointmentType: 1 });
-			appointmentType = 1;
-		}
-		if (listProvider[providerIndex].isSeparateEvaluationRate && !appointments?.find(appointment => (appointment.type == 2 && appointment.status == -1))) {
-			if (listProvider[providerIndex].isNewClientScreening && !appointments?.find(appointment => (appointment.type == 1 && appointment.status == -1))) {
-				this.setState({ appointmentType: 1 });
-				appointmentType = 1;
+		if (listProvider[providerIndex].isNewClientScreening) {
+			if (listProvider[providerIndex].isSeparateEvaluationRate) {
+				if (appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 1 && appointment.status == -1)) {
+					if (appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 2 && appointment.status == -1)) {
+						appointmentType = 3;
+					} else {
+						appointmentType = 2;
+					}
+				} else {
+					appointmentType = 1;
+				}
 			} else {
-				this.setState({ appointmentType: 2 });
-				appointmentType = 2;
+				if (appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 1 && appointment.status == -1)) {
+					appointmentType = 3;
+				} else {
+					appointmentType = 1;
+				}
+			}
+		} else {
+			if (listProvider[providerIndex].isSeparateEvaluationRate) {
+				if (appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 2 && appointment.status == -1)) {
+					appointmentType = 3;
+				} else {
+					appointmentType = 2;
+				}
+			} else {
+				appointmentType = 3;
 			}
 		}
-		if (appointments?.find(appointment => appointment.type == 3) || (!listProvider[providerIndex].isSeparateEvaluationRate && !listProvider[providerIndex].isNewClientScreening)) {
-			this.setState({ appointmentType: 3 });
-			appointmentType = 3;
-		}
+		this.setState({ appointmentType: appointmentType });
 
 		const newArrTime = this.getArrTime(appointmentType, providerIndex);
 		const availableTime = listProvider[providerIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDate.day());
@@ -261,7 +286,7 @@ class ModalCurrentAppointment extends React.Component {
 							flag = false;
 						}
 					})
-					appointments.forEach(appointment => {
+					appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
 						if (time.value.isSame(moment(appointment.date))) {
 							flag = false;
 						}
@@ -391,8 +416,8 @@ class ModalCurrentAppointment extends React.Component {
 					<Col xs={24} sm={24} md={12}>
 						<p className='font-12 text-center mb-0'>{intl.formatMessage(messages.current)}</p>
 						<div className='current-content'>
-							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>{event?.provider?.name}</span></p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</p>
+							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</span></p>
+							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
 							{event?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {event?.phoneNumber}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {event?.location}</p>}
 							<p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(event?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(event?.date)?.toLocaleDateString()}</span></p>
 						</div>
@@ -400,8 +425,8 @@ class ModalCurrentAppointment extends React.Component {
 					<Col xs={24} sm={24} md={12}>
 						<p className='font-12 text-center mb-0'>{intl.formatMessage(messages.new)}</p>
 						<div className='new-content'>
-							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>{listProvider[selectedProviderIndex]?.name}</span></p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${dependents.find(dependent => dependent._id == selectedDependent)?.firstName} ${dependents?.find(dependent => dependent._id == selectedDependent)?.lastName}`}</p>
+							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}</span></p>
+							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${dependents.find(dependent => dependent._id == selectedDependent)?.firstName ?? ''} ${dependents?.find(dependent => dependent._id == selectedDependent)?.lastName ?? ''}`}</p>
 							{appointmentType == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {phoneNumber}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {address}</p>}
 							<p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(selectedDate?.toString())?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(selectedDate?.toString())?.toLocaleDateString()}</span></p>
 						</div>
@@ -416,23 +441,23 @@ class ModalCurrentAppointment extends React.Component {
 					<Row gutter="15" align="bottom">
 						<Col xs={24} sm={24} md={8}>
 							<p className='font-24 font-700'>{intl.formatMessage(messages.current)} {event?.type == 3 && intl.formatMessage(messages.appointment)}{event?.type == 2 && intl.formatMessage(messages.evaluation)}{event?.type == 1 && intl.formatMessage(messages.screening)}{event?.type == 4 && intl.formatMessage(messages.consultation)}</p>
-							<p className='font-16'>{`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</p>
-							<p className='font-16'>{event?.provider?.name}</p>
+							<p className='font-16'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
+							<p className='font-16'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
 						</Col>
 						<Col xs={24} sm={24} md={8}>
 							<p className={`font-16 ${event?.type != 3 ? 'display-none' : ''}`}>{intl.formatMessage(msgCreateAccount.subsidy)}</p>
-							<p className={`font-16 font-700 ${event?.type != 2 ? 'display-none' : ''}`}>{event?.separateEvaluationDuration} {intl.formatMessage(messages.evaluation)}</p>
-							<p className='font-16'>{(event?.type == 1 || event?.type == 4) ? event?.phoneNumber : event?.location}</p>
+							<p className={`font-16 font-700 ${event?.type != 2 ? 'display-none' : ''}`}>{event?.separateEvaluationDuration ?? ''} {intl.formatMessage(messages.evaluation)}</p>
+							<p className='font-16'>{(event?.type == 1 || event?.type == 4) ? event?.phoneNumber ?? '' : event?.location ?? ''}</p>
 						</Col>
 						<Col xs={24} sm={24} md={8}>
 							<p></p>
-							<p className='font-16'>{event?.skillSet?.name}</p>
+							<p className='font-16'>{event?.skillSet?.name ?? ''}</p>
 							<p className='font-16'>{this.displayDuration()}</p>
 						</Col>
 					</Row>
 				</div>
 				<div className='new-appointment'>
-					<Form onFinish={this.createAppointment} onFinishFailed={this.onFinishFailed} layout='vertical'>
+					<Form name="current-appointment" onFinish={this.createAppointment} onFinishFailed={this.onFinishFailed} layout='vertical' ref={ref => this.form = ref}>
 						<div className='flex gap-5 items-center'>
 							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType == 2 && selectedProviderIndex > -1 && (

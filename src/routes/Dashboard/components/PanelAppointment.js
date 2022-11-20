@@ -47,19 +47,17 @@ class PanelAppointment extends React.Component {
     this.setState({ currentTab: v });
   }
 
-  renderItemLeft = (data) => {
+  renderItemLeft = (event) => {
     return (
-      <div className={`item-left ${data.status == -2 ? 'line-through' : ''}`} onClick={() => this.props.onShowDrawerDetail(data._id)}>
+      <div className={`item-left ${event.status == -2 ? 'line-through' : ''}`} onClick={() => this.props.onShowDrawerDetail(event._id)}>
         <Avatar size={24} icon={<FaUser size={12} />} />
         <div className='div-service'>
-          {!!data.name && <p className='font-09 mb-0'><b>{data.name}</b></p>}
-          {!!data.provider && <p className='font-09 mb-0'>{data.provider.name || data.provider.referredToAs}</p>}
-          {!!data.school && <p className='font-09 mb-0'>{data.school.name}</p>}
+          <p className='font-09 mb-0'>{`${event.provider.firstName ?? ''} ${event.provider.lastName ?? ''}`}{event?.school?.name}</p>
         </div>
-        <p className='font-11 mb-0 ml-auto mr-5'>{data.location}</p>
+        <p className='font-11 mb-0 ml-auto mr-5'>{event.location}</p>
         <div className='ml-auto'>
-          <p className='font-12 mb-0'>{moment(data.date).format("HH:mm:ss")}</p>
-          <p className='font-12 font-700 mb-0'>{moment(data.date).format('YYYY-MM-DD')}</p>
+          <p className='font-12 mb-0'>{moment(event.date).format("HH:mm:ss")}</p>
+          <p className='font-12 font-700 mb-0'>{moment(event.date).format('YYYY-MM-DD')}</p>
         </div>
       </div>
     );
@@ -175,7 +173,7 @@ class PanelAppointment extends React.Component {
             </div>
           )}
           <ModalCancelAppointment {...modalCancelProps} />
-          <ModalCurrentAppointment {...modalCurrentProps} />
+          {visibleCurrent && <ModalCurrentAppointment {...modalCurrentProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
           {appointments?.filter(app => app.type == 3 && [0, -1].includes(app.status) && moment(new Date()).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSame(moment(app.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (

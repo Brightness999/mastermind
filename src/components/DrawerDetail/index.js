@@ -161,7 +161,11 @@ class DrawerDetail extends Component {
 
   displayDuration = () => {
     const { event } = this.props;
-    return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.provider?.duration, 'minutes').format('hh:mm a')}`;
+    let duration = event?.provider?.duration ?? 0;
+    if (event.type == 2) {
+      duration = duration * 1 + event?.provider?.separateEvaluationDuration * 1;
+    }
+    return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(duration, 'minutes').format('hh:mm a')}`;
   }
 
 
@@ -470,7 +474,7 @@ class DrawerDetail extends Component {
         </Row>
         {this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}
         <ModalCancelAppointment {...modalCancelProps} />
-        <ModalCurrentAppointment {...modalCurrentProps} />
+        {visibleCurrent && <ModalCurrentAppointment {...modalCurrentProps} />}
         <ModalConfirm {...modalConfirmProps} />
       </Drawer>
     );
