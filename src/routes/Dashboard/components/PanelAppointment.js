@@ -25,6 +25,7 @@ class PanelAppointment extends React.Component {
       visibleCancel: false,
       visibleCurrent: false,
       event: {},
+      userRole: store.getState().auth.user.role
     };
   }
 
@@ -65,11 +66,11 @@ class PanelAppointment extends React.Component {
 
   submitModalCurrent = () => {
     this.setState({ visibleCurrent: false });
-    store.dispatch(getAppointmentsData({ role: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).role : '' }));
+    store.dispatch(getAppointmentsData({ role: this.state.userRole }));
     const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
     const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
     const dataFetchAppointMonth = {
-      role: JSON.parse(localStorage.getItem('user')).role,
+      role: this.state.userRole,
       data: {
         month: month,
         year: year,
@@ -102,19 +103,20 @@ class PanelAppointment extends React.Component {
 
   handleConfirmCancel = () => {
     this.setState({ visibleCancel: false }, () => {
-      if (this.state.event?._id) {
-        const data = { appointId: this.state.event._id };
+      const { event, userRole } = this.state;
+      if (event?._id) {
+        const data = { appointId: event._id };
         request.post(cancelAppointmentForParent, data).then(result => {
           if (result.success) {
             this.setState({
               errorMessage: '',
               isCancelled: true,
             });
-            store.dispatch(getAppointmentsData({ role: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).role : '' }));
+            store.dispatch(getAppointmentsData({ role: userRole }));
             const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
             const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
             const dataFetchAppointMonth = {
-              role: JSON.parse(localStorage.getItem('user')).role,
+              role: userRole,
               data: {
                 month: month,
                 year: year,

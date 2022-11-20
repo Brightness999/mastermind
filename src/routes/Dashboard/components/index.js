@@ -371,8 +371,7 @@ class Dashboard extends React.Component {
     const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : val;
     const selectedEvent = listAppointmentsRecent?.find(a => a._id == id);
     this.setState({ selectedEvent: selectedEvent });
-    (userRole == 3 || userRole == 100) && this.setState({ userDrawerVisible: true });
-    userRole == 30 && this.setState({ providerDrawervisible: true });
+    [3, 30, 100].includes(userRole) && this.setState({ userDrawerVisible: true });
   };
 
   onCloseDrawerDetail = () => {
@@ -1025,7 +1024,7 @@ class Dashboard extends React.Component {
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service flex-1'>
                             <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
+                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                           </div>
                           <div className='text-center ml-auto mr-5 flex-1'>
                             <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
@@ -1044,7 +1043,7 @@ class Dashboard extends React.Component {
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service flex-1'>
                             <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
+                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                           </div>
                           <div className='text-center ml-auto mr-5 flex-1'>
                             <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
@@ -1067,7 +1066,7 @@ class Dashboard extends React.Component {
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service'>
                             <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
+                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                           </div>
                           <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                           <div className='ml-auto'>
@@ -1083,7 +1082,7 @@ class Dashboard extends React.Component {
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service'>
                             <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
+                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                           </div>
                           <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                           <div className='ml-auto'>
@@ -1103,7 +1102,7 @@ class Dashboard extends React.Component {
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service'>
                             <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
+                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                           </div>
                           <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
                           <p className='font-12 ml-auto mb-0'>Pay Flag</p>
@@ -1116,7 +1115,7 @@ class Dashboard extends React.Component {
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service'>
                             <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? appointment.dependent?.firstName + appointment.dependent?.lastName : appointment.provider?.name}</p>
+                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                           </div>
                           <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
                           <p className='font-12 ml-auto mb-0'>Pay Flag</p>

@@ -1,7 +1,7 @@
 import './style/index.less';
 import React, { Component } from 'react';
 import { Drawer, Button, Row, Col, Typography, Input, Menu, Dropdown, Popover } from 'antd';
-import { BsFillFlagFill, BsCheckCircle } from 'react-icons/bs';
+import { BsFillFlagFill, BsCheckCircle, BsClockHistory } from 'react-icons/bs';
 import { BiInfoCircle } from 'react-icons/bi';
 import intl from "react-intl-universal";
 import messages from './messages';
@@ -28,18 +28,14 @@ class DrawerDetailPost extends Component {
       errorMessage: '',
       isModalConfirm: false,
       message: '',
-      isClosed: this.props.event?.status == -1,
-      isCancelled: this.props.evnt?.status == -2,
+      isNotPending: this.props.event?.status < 0,
       modalType: '',
     };
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (prevProps.event?.status != this.props.event?.status) {
-      this.setState({
-        isCancelled: this.props.event.status < 0,
-        isClosed: this.props.event.status < 0,
-      });
+      this.setState({ isNotPending: this.props.event.status < 0 });
     }
   }
 
@@ -84,7 +80,7 @@ class DrawerDetailPost extends Component {
         if (result.success) {
           this.setState({
             errorMessage: '',
-            isClosed: true,
+            isNotPending: true,
           });
           store.dispatch(getAppointmentsData({ role: this.props.role }));
           const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
@@ -100,14 +96,14 @@ class DrawerDetailPost extends Component {
         } else {
           this.setState({
             errorMessage: result.data,
-            isClosed: false,
+            isNotPending: false,
           });
         }
       }).catch(error => {
         console.log('closed error---', error);
         this.setState({
           errorMessage: error.message,
-          isClosed: false,
+          isNotPending: false,
         });
       })
     }
@@ -120,7 +116,7 @@ class DrawerDetailPost extends Component {
         if (result.success) {
           this.setState({
             errorMessage: '',
-            isCancelled: true,
+            isNotPending: true,
           });
           store.dispatch(getAppointmentsData({ role: this.props.role }));
           const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
@@ -136,14 +132,14 @@ class DrawerDetailPost extends Component {
         } else {
           this.setState({
             errorMessage: result.data,
-            isCancelled: false,
+            isNotPending: false,
           });
         }
       }).catch(error => {
         console.log('closed error---', error);
         this.setState({
           errorMessage: error.message,
-          isCancelled: false,
+          isNotPending: false,
         });
       })
     }
@@ -163,6 +159,14 @@ class DrawerDetailPost extends Component {
       message: 'Are you sure you want to cancel?',
       modalType: 'cancel',
     });
+  }
+  
+  closeModalCurrent = () => {
+    this.setState({ visibleCurrent: false });
+  }
+
+  openModalCurrent = () => {
+    this.setState({ visibleCurrent: true });
   }
 
   onConfirm = () => {
@@ -184,43 +188,65 @@ class DrawerDetailPost extends Component {
       publicFeedback,
       isModalConfirm,
       message,
-      isClosed,
-      isCancelled,
+      isNotPending,
     } = this.state;
     const { event } = this.props;
     const providerProfile = (
       <div className='provider-profile'>
-        <p className='font-16 font-700 mb-10'>{intl.formatMessage(msgDetail.providerProfile)}</p>
-        <div className='count-2'>
-          <p className='font-10'>Name: {event?.provider?.name}</p>
-          <p className='font-10'>Skillset(s): {event?.provider?.skillSet?.name}</p>
+        <p className='font-16 font-700 mb-10'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
+        <div className='flex'>
+          <div className='flex-1'>
+            {event?.provider?.contactNumber?.map((phone, index) => (
+              <p key={index} className='font-10'>{phone.phoneNumber}</p>
+            ))}
+            {event?.provider?.contactEmail?.map((email, index) => (
+              <p key={index} className='font-10'>{email.email}</p>
+            ))}
+            {event?.provider?.serviceAddress && (
+              <p className='font-10'>{event?.provider.serviceAddress}</p>
+            )}
+          </div>
+          <div className='flex-1'>
+
+          </div>
         </div>
-        <p className='font-10'>Practice/Location: {event?.provider?.cityConnection}</p>
-        <div className='count-2'>
-          <p className='font-10'>Contact number {event?.provider?.contactNumber?.map((n, i) => (<span key={i}>{n.phoneNumber}</span>))}</p>
-          <p className='font-10'>Contact email: {event?.provider?.contactEmail?.map((e, i) => (<span key={i}>{e.email}</span>))}</p>
+        <div className='flex'>
+          <div className='flex-1'>
+            <p className='font-10 mb-0 text-bold'>Skillset(s):</p>
+            {event?.provider?.skillSet?.map((skill, index) => (
+              <p key={index} className='font-10 mb-0'>{skill.name}</p>
+            ))}
+          </div>
+          <div className='font-10 flex-1'>
+            <p className='mb-0 text-bold'>Grade level(s)</p>
+            <div>{event?.provider?.academicLevel?.map((level, i) => (
+              <div key={i} className="flex">
+                <span>{level.level}</span>
+                <span className='ml-10'>${level.rate}</span>
+              </div>
+            ))}</div>
+          </div>
         </div>
-        <div className='count-2'>
-          <p className='font-10'>Academic level(s) : {event?.provider?.academicLevel?.map((a, i) => (<span key={i}>level: {a.level}, rate: {a.rate}</span>))}</p>
-          <p className='font-10'>Subsidy (blank or NO Sub.)</p>
-        </div>
+        <p className='font-10 mb-0 text-bold'>Profile</p>
         <div className='profile-text'>
           <Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-            {event?.provider?.publicProfile}
+            {event?.provider?.publicProfile ?? ''}
           </Paragraph>
         </div>
       </div>
     );
     const dependentProfile = (
       <div className='provider-profile'>
-        <p className='font-16 font-700 mb-10'>{intl.formatMessage(msgDetail.dependentProfile)}</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-          <p className='font-10'>Name: {event?.dependent?.firstName} {event?.dependent?.lastName}</p>
-          <div className='font-10'>Skillset(s):
+        <p className='font-16 font-700 mb-10'>{event?.dependent?.firstName ?? ''} {event?.dependent?.lastName ?? ''}</p>
+        <div className='flex'>
+          <div className='flex-1'>
+            <p className='font-10 mb-0'>{event?.dependent?.guardianPhone ?? ''}</p>
+            <p className='font-10 mb-0'>{event?.dependent?.guardianEmail ?? ''}</p>
+          </div>
+          <div className='flex-1 font-10'>
+            <div className='text-bold'>Skillset</div>
             {event?.dependent?.services?.map((service, i) => (<div key={i}>{service.name}</div>))}
           </div>
-          <p className='font-10'>Contact number {event?.dependent?.guardianPhone}</p>
-          <p className='font-10'>Contact email: {event?.dependent?.guardianEmail}</p>
         </div>
       </div >
     );
@@ -280,7 +306,7 @@ class DrawerDetailPost extends Component {
           >
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(msgDetail.who)}</p>
-              <a className='font-18 underline text-primary'>{`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</a>
+              <a className='font-18 underline text-primary'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</a>
             </div>
           </Popover>
           {event?.type == 4 ? (
@@ -301,7 +327,7 @@ class DrawerDetailPost extends Component {
               <div className='detail-item flex'>
                 <p className='font-18 font-700 title'>{intl.formatMessage(msgDetail.with)}</p>
                 <div className='flex flex-row flex-1'>
-                  <a className='font-18 underline text-primary'>{event?.provider?.name}</a>
+                  <a className='font-18 underline text-primary'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</a>
                   <BiInfoCircle size={12} className='text-primary ml-auto' />
                 </div>
               </div>
@@ -338,13 +364,13 @@ class DrawerDetailPost extends Component {
                 icon={<BsCheckCircle size={15} />}
                 block
                 onClick={() => this.openConfirmModal()}
-                disabled={isClosed || isCancelled}
+                disabled={isNotPending}
               >
                 {intl.formatMessage(messages.markClosed)}
               </Button>
             </Col>
           )}
-          {(event?.type > 1 && event?.status == -1 && moment(event?.date).isBefore(new Date())) && (
+          {(event?.type > 1 && event?.status == -1 && moment(event?.date).isBefore(moment())) && (
             <Col span={12}>
               <Dropdown overlay={menu} placement="bottomRight">
                 <Button
@@ -358,17 +384,29 @@ class DrawerDetailPost extends Component {
             </Col>
           )}
           {event?.status == 0 && (
-            <Col span={12}>
-              <Button
-                type='primary'
-                icon={<BsCheckCircle size={15} />}
-                block
-                onClick={() => this.openCancelConfirmModal()}
-                disabled={isCancelled || isClosed}
-              >
-                {intl.formatMessage(messages.cancel)}
-              </Button>
-            </Col>
+            <>
+              <Col span={12}>
+                <Button
+                  type='primary'
+                  icon={<BsClockHistory size={15} />}
+                  block
+                  onClick={this.openModalCurrent}
+                >
+                  {intl.formatMessage(msgDetail.reschedule)}
+                </Button>
+              </Col>
+              <Col span={12}>
+                <Button
+                  type='primary'
+                  icon={<BsCheckCircle size={15} />}
+                  block
+                  onClick={() => this.openCancelConfirmModal()}
+                  disabled={isNotPending}
+                >
+                  {intl.formatMessage(messages.cancel)}
+                </Button>
+              </Col>
+            </>
           )}
         </Row>
         {this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}

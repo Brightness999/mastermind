@@ -26,7 +26,7 @@ class DrawerDetail extends Component {
       visibleCancel: false,
       visibleCurrent: false,
       errorMessage: '',
-      isNotPending: this.props.evnt?.status < 0,
+      isNotPending: this.props.event?.status < 0,
       isShowEditNotes: false,
       notes: this.props.event?.notes,
       isModalConfirm: false,
@@ -37,9 +37,7 @@ class DrawerDetail extends Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.event?.status != this.props.event?.status) {
-      this.setState({
-        isNotPending: this.props.event.status < 0,
-      });
+      this.setState({ isNotPending: this.props.event.status < 0 });
     }
     if (prevProps.event?.notes != this.props.event?.notes) {
       this.setState({ notes: this.props.event?.notes });
@@ -276,11 +274,11 @@ class DrawerDetail extends Component {
     );
     const dependentProfile = (
       <div className='provider-profile'>
-        <p className='font-16 font-700 mb-10'>{event?.dependent?.firstName} {event?.dependent?.lastName}</p>
+        <p className='font-16 font-700 mb-10'>{event?.dependent?.firstName ?? ''} {event?.dependent?.lastName ?? ''}</p>
         <div className='flex'>
           <div className='flex-1'>
-            <p className='font-10 mb-0'>{event?.dependent?.guardianPhone}</p>
-            <p className='font-10 mb-0'>{event?.dependent?.guardianEmail}</p>
+            <p className='font-10 mb-0'>{event?.dependent?.guardianPhone ?? ''}</p>
+            <p className='font-10 mb-0'>{event?.dependent?.guardianEmail ?? ''}</p>
           </div>
           <div className='flex-1 font-10'>
             <div className='text-bold'>Skillset</div>
@@ -335,7 +333,7 @@ class DrawerDetail extends Component {
           >
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.who)}</p>
-              <a className='font-18 underline text-primary'>{`${event?.dependent?.firstName} ${event?.dependent?.lastName}`}</a>
+              <a className='font-18 underline text-primary'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</a>
             </div>
           </Popover>
           {event?.type == 4 ? (
@@ -423,7 +421,7 @@ class DrawerDetail extends Component {
           </>
         )}
         <Row gutter={15} className='list-btn-detail'>
-          {(role != 30 && event?.status == 0 && !isNotPending) && (
+          {(event?.status == 0 && !isNotPending) && (
             <>
               <Col span={12}>
                 <Button
