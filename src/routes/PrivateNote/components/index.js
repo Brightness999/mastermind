@@ -1,12 +1,13 @@
 import { Divider, Table, Space } from 'antd';
 import { routerLinks } from '../../constant';
-import { ModalConfirm, ModalEditNote } from '../../../components/Modal';
+import { ModalConfirm, ModalEditNote, ModalDependentDetail } from '../../../components/Modal';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
-import messages from '../messages';
+import msgMainHeader from '../../../components/MainHeader/messages';
 import './index.less';
 import { checkPermission } from '../../../utils/auth/checkPermission';
 import request from '../../../utils/api/request';
+import { createPrivateNote, deletePrivateNote, getDependents, updatePrivateNote } from '../../../utils/api/apiList';
 
 export default class extends React.Component {
   constructor(props) {
@@ -20,6 +21,8 @@ export default class extends React.Component {
       userId: '',
       selectedDependentId: '',
       note: '',
+      visibleDependent: false,
+      selectedDependent: {},
     };
     this.searchInput = createRef(null);
   }
@@ -27,11 +30,7 @@ export default class extends React.Component {
   componentDidMount() {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
-        const data = {
-          id: loginData?._id,
-          role: loginData?.role,
-        }
-        request.post('providers/get_dependents', data).then(result => {
+        request.post(getDependents).then(result => {
           if (result.success) {
             this.setState({
               dependents: result?.data?.map((user, i) => {
@@ -39,6 +38,9 @@ export default class extends React.Component {
               }) ?? []
             });
           }
+        }).catch(err => {
+          console.log('get dependents error ---', err);
+          this.setState({ dependents: [] });
         })
         this.setState({
           userRole: loginData.role,
@@ -60,12 +62,16 @@ export default class extends React.Component {
     this.setState({
       visibleEdit: true,
       selectedDependentId: dependentId,
-      note: this.state.dependents?.find(dependent => dependent._id == dependentId)?.notes?.find(note => note.dependent == dependentId)?.note
+      note: '',
     });
   }
 
   onCloseModalEdit = () => {
     this.setState({ visibleEdit: false });
+  }
+
+  onCloseModalDependent = () => {
+    this.setState({ visibleDependent: false });
   }
 
   handleDeleteNote = (dependentId) => {
@@ -80,7 +86,7 @@ export default class extends React.Component {
     const { dependents, selectedDependentId } = this.state;
     const selectedDependent = dependents?.find(dependent => dependent._id == selectedDependentId);
     if (selectedDependent.notes?.find(note => note.dependent == selectedDependentId)) {
-      request.post('providers/delete_private_note', { id: selectedDependent.notes?.find(note => note.dependent == selectedDependentId)?._id }).then((res) => {
+      request.post(deletePrivateNote, { id: selectedDependent.notes?.find(note => note.dependent == selectedDependentId)?._id }).then((res) => {
         if (res.success) {
           this.setState({
             dependents: dependents?.map(dependent => {
@@ -102,50 +108,36 @@ export default class extends React.Component {
     this.setState({ isConfirmModal: false });
   }
 
-  handleUpdateNote = (newnote) => {
+  handleCreateNote = (newnote) => {
     const { selectedDependentId, userId, dependents } = this.state;
-    const selectedDependent = dependents?.find(dependent => dependent._id == selectedDependentId);
     const data = {
       user: userId,
       dependent: selectedDependentId,
       note: newnote,
     }
-    if (selectedDependent?.notes?.[0]) {
-      request.post('providers/update_private_note', data).then(res => {
-        if (res.success) {
-          this.setState({
-            dependents: dependents?.map(dependent => {
-              if (dependent._id == selectedDependentId) {
-                dependent.notes = [res.data];
-              }
-              return dependent;
-            })
+    request.post(createPrivateNote, data).then(res => {
+      if (res.success) {
+        this.setState({
+          dependents: dependents?.map(dependent => {
+            if (dependent._id == selectedDependentId) {
+              dependent.notes.unshift(res.data)
+            }
+            return dependent;
           })
-        }
-      }).catch(err => {
-        console.log('update private note error---', err);
-      })
-    } else {
-      request.post('providers/create_private_note', data).then(res => {
-        if (res.success) {
-          this.setState({
-            dependents: dependents?.map(dependent => {
-              if (dependent._id == selectedDependentId) {
-                dependent.notes.push(res.data)
-              }
-              return dependent;
-            })
-          })
-        }
-      }).catch(err => {
-        console.log('update private note error---', err);
-      })
-    }
+        })
+      }
+    }).catch(err => {
+      console.log('update private note error---', err);
+    })
     this.setState({ visibleEdit: false });
   }
 
+  handleClickRow = (dependent) => {
+    this.setState({ visibleDependent: true, selectedDependent: dependent });
+  }
+
   render() {
-    const { visibleEdit, dependents, isConfirmModal, confirmMessage, note } = this.state;
+    const { visibleEdit, dependents, isConfirmModal, confirmMessage, note, visibleDependent, selectedDependent } = this.state;
     const columns = [
       {
         title: 'Name', key: 'name',
@@ -155,12 +147,10 @@ export default class extends React.Component {
       { title: 'Birthday', dataIndex: 'birthday', key: 'birthday', type: 'datetime', sorter: (a, b) => a.birthday > b.birthday ? 1 : -1, render: (birthday) => new Date(birthday).toLocaleString() },
       { title: 'Parent Email', dataIndex: 'guardianEmail', key: 'guardianEmail', sorter: (a, b) => a.guardianEmail > b.guardianEmail ? 1 : -1 },
       { title: 'Parent Phone', dataIndex: 'guardianPhone', key: 'guardianPhone', sorter: (a, b) => a.guardianPhone > b.guardianPhone ? 1 : -1 },
-      { title: 'Note', key: 'note', render: (dependent) => dependent.notes?.[0]?.note },
       {
         title: 'Action', key: 'action', render: (dependent) => (
           <Space size="middle">
-            <a className='btn-blue' onClick={() => this.onShowModalEdit(dependent._id)}>{dependent.notes?.[0] ? 'Edit' : 'Create'}</a>
-            <a className='btn-red' onClick={() => this.handleDeleteNote(dependent._id)}>{dependent.notes?.[0] ? 'Delete' : ''}</a>
+            <a className='btn-blue action' onClick={() => this.onShowModalEdit(dependent._id)}>Create</a>
           </Space>
         ),
       },
@@ -168,9 +158,15 @@ export default class extends React.Component {
 
     const modalEditNoteProps = {
       visible: visibleEdit,
-      onSubmit: this.handleUpdateNote,
+      onSubmit: this.handleCreateNote,
       onCancel: this.onCloseModalEdit,
       note: note,
+    }
+
+    const modalDependentProps = {
+      visible: visibleDependent,
+      onCancel: this.onCloseModalDependent,
+      dependent: selectedDependent,
     }
 
     const confirmModalProps = {
@@ -183,11 +179,23 @@ export default class extends React.Component {
     return (
       <div className="full-layout page usermanager-page">
         <div className='div-title-admin'>
-          <p className='font-16 font-500'>{intl.formatMessage(messages.privatenotes)}</p>
+          <p className='font-16 font-500'>{intl.formatMessage(msgMainHeader.privateNotes)}</p>
           <Divider />
         </div>
-        <Table bordered size='middle' dataSource={dependents} columns={columns} />
+        <Table
+          bordered
+          size='middle'
+          dataSource={dependents}
+          columns={columns}
+          onRow={(dependent) => {
+            return {
+              onClick: (e) => e.target.className != 'btn-blue action' && this.handleClickRow(dependent),
+              onDoubleClick: (e) => e.target.className != 'btn-blue action' && this.handleClickRow(dependent),
+            }
+          }}
+        />
         {visibleEdit && <ModalEditNote {...modalEditNoteProps} />}
+        {visibleDependent && <ModalDependentDetail {...modalDependentProps} />}
         <ModalConfirm {...confirmModalProps} />
       </div>
     );

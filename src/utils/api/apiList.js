@@ -1,6 +1,10 @@
 
 export const userSignUp = 'users/signup'
 export const checkEmailRegistered = 'users/check_email_registered'
+export const getDependents = 'users/get_dependents'
+export const deletePrivateNote = 'users/delete_private_note'
+export const updatePrivateNote = 'users/update_private_note'
+export const createPrivateNote = 'users/create_private_note'
 
 export const getAppointmentsForAdmin = 'admin/get_appointments'
 export const getAppointmentsInMonthForAdmin = 'admin/get_appointments_in_month'

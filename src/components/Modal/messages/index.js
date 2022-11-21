@@ -5,6 +5,10 @@ export default {
     id: `${scope}.edit`,
     defaultMessage: 'Edit',
   },
+  delete: {
+    id: `${scope}.delete`,
+    defaultMessage: 'Delete',
+  },
   new: {
     id: `${scope}.new`,
     defaultMessage: 'New',
