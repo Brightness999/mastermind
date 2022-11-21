@@ -38,6 +38,8 @@ class ModalNewAppointment extends React.Component {
 		notes: '',
 		providerErrorMessage: '',
 		duration: 30,
+		standardRate: '',
+		subsidizedRate: '',
 	}
 
 	getArrTime = (type, providerIndex) => {
@@ -294,6 +296,7 @@ class ModalNewAppointment extends React.Component {
 		const newArrTime = this.getArrTime(appointmentType, providerIndex);
 		const availableTime = listProvider[providerIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDate.day());
 		let duration = 30;
+
 		if (appointmentType == 1 || appointmentType == 3) {
 			duration = listProvider[providerIndex]?.duration;
 		}
@@ -332,10 +335,21 @@ class ModalNewAppointment extends React.Component {
 			})
 		}
 
+		let standardRate = 0;
+		let subsidizedRate = 0;
+
+		if (selectedDependent) {
+			const currentGrade = this.props.listDependents?.find(dependent => dependent?._id == selectedDependent)?.currentGrade;
+			standardRate = listProvider[providerIndex]?.academicLevel?.find(level => level.level == currentGrade)?.rate;
+			subsidizedRate = listProvider[providerIndex]?.academicLevel?.find(level => level.level == currentGrade)?.subsidizedRate;
+		}
+
 		this.setState({
 			selectedProviderIndex: providerIndex,
 			selectedProvider: listProvider[providerIndex]._id,
 			arrTime: newArrTime,
+			standardRate: standardRate,
+			subsidizedRate: subsidizedRate,
 		});
 	}
 
@@ -400,6 +414,8 @@ class ModalNewAppointment extends React.Component {
 			providerErrorMessage,
 			addressOptions,
 			appointmentType,
+			standardRate,
+			subsidizedRate,
 		} = this.state;
 		const modalProps = {
 			className: 'modal-new',
@@ -561,8 +577,9 @@ class ModalNewAppointment extends React.Component {
 												<p className='font-10'>{listProvider[selectedProviderIndex].serviceAddress}</p>
 											)}
 										</div>
-										<div className='flex-1'>
-
+										<div className='flex-1 font-10'>
+											{standardRate && <div>Rate: ${standardRate}</div>}
+											{subsidizedRate && <div>Subsidized Rate: ${subsidizedRate}</div>}
 										</div>
 									</div>
 									<div className='flex'>
@@ -573,10 +590,7 @@ class ModalNewAppointment extends React.Component {
 										<div className='font-10 flex-1'>
 											<p className='mb-0 text-bold'>Grade level(s)</p>
 											<div>{listProvider[selectedProviderIndex]?.academicLevel?.map((level, i) => (
-												<div key={i} className="flex">
-													<span>{level.level}</span>
-													<span className='ml-10'>${level.rate}</span>
-												</div>
+												<div key={i}>{level.level}</div>
 											))}</div>
 										</div>
 									</div>

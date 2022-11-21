@@ -41,6 +41,8 @@ class ModalCurrentAppointment extends React.Component {
 		isConfirm: false,
 		isPopupConfirm: false,
 		dependents: store.getState().auth.dependents,
+		standardRate: '',
+		subsidizedRate: '',
 	}
 
 	getArrTime = (type, providerIndex) => {
@@ -267,19 +269,23 @@ class ModalCurrentAppointment extends React.Component {
 
 		const newArrTime = this.getArrTime(appointmentType, providerIndex);
 		const availableTime = listProvider[providerIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDate.day());
+		let duration = 30;
+
+		if (appointmentType == 1 || appointmentType == 3) {
+			duration = listProvider[providerIndex]?.duration;
+		}
+		if (appointmentType == 2) {
+			duration = listProvider[providerIndex]?.duration * 1 + listProvider[providerIndex]?.separateEvaluationDuration * 1
+		}
 		if (availableTime) {
 			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 			const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
+			const openTime = selectedDate.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
+			const closeTime = selectedDate.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-duration, 'minutes');
 			newArrTime.map(time => {
 				const { years, months, date } = selectedDate?.toObject();
 				time.value = moment(time.value).set({ years, months, date });
-				if (time.value.isBetween(availableFromDate, availableToDate)
-					&& (
-						(time.value.hour() > availableTime.openHour && time.value.hour() < availableTime.closeHour)
-						|| (time.value.hour() == availableTime.openHour && time.value.minute() >= availableTime.openMin)
-						|| (time.value.hour() == availableTime.closeHour && time.value.minute() <= availableTime.closeMin)
-					)
-				) {
+				if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
 					let flag = true;
 					dependents.find(dependent => dependent._id == selectedDependent)?.appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
 						if (time.value.isSame(moment(appointment.date))) {
@@ -308,10 +314,22 @@ class ModalCurrentAppointment extends React.Component {
 			})
 		}
 
+		let standardRate = 0;
+		let subsidizedRate = 0;
+
+		if (selectedDependent) {
+			const currentGrade = dependents?.find(dependent => dependent?._id == selectedDependent)?.currentGrade;
+			standardRate = listProvider[providerIndex]?.academicLevel?.find(level => level.level == currentGrade)?.rate;
+			subsidizedRate = listProvider[providerIndex]?.academicLevel?.find(level => level.level == currentGrade)?.subsidizedRate;
+		}
+
+
 		this.setState({
 			selectedProviderIndex: providerIndex,
 			selectedProvider: listProvider[providerIndex]._id,
 			arrTime: newArrTime,
+			standardRate: standardRate,
+			subsidizedRate: subsidizedRate,
 		});
 	}
 
@@ -397,7 +415,7 @@ class ModalCurrentAppointment extends React.Component {
 	}
 
 	render() {
-		const { selectedDate, selectedProviderIndex, selectedTimeIndex, listProvider, selectedProvider, skillSet, arrTime, errorMessage, providerErrorMessage, addressOptions, appointmentType, selectedDependent, address, phoneNumber, isConfirm, dependents } = this.state;
+		const { selectedDate, selectedProviderIndex, selectedTimeIndex, listProvider, selectedProvider, skillSet, arrTime, errorMessage, providerErrorMessage, addressOptions, appointmentType, selectedDependent, address, phoneNumber, isConfirm, dependents, standardRate, subsidizedRate } = this.state;
 		const { event } = this.props;
 		const modalProps = {
 			className: 'modal-current',
@@ -604,8 +622,9 @@ class ModalCurrentAppointment extends React.Component {
 												<p className='font-10'>{listProvider[selectedProviderIndex].serviceAddress}</p>
 											)}
 										</div>
-										<div className='flex-1'>
-
+										<div className='flex-1 font-10'>
+											{standardRate && <div>Rate: ${standardRate}</div>}
+											{subsidizedRate && <div>Subsidized Rate: ${subsidizedRate}</div>}
 										</div>
 									</div>
 									<div className='flex'>
@@ -618,10 +637,7 @@ class ModalCurrentAppointment extends React.Component {
 										<div className='font-10 flex-1'>
 											<p className='mb-0 text-bold'>Grade level(s)</p>
 											<div>{listProvider[selectedProviderIndex]?.academicLevel?.map((level, i) => (
-												<div key={i} className="flex">
-													<span>{level.level}</span>
-													<span className='ml-10'>${level.rate}</span>
-												</div>
+												<div key={i}>{level.level}</div>
 											))}</div>
 										</div>
 									</div>
