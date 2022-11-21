@@ -85,4 +85,12 @@ export default {
     id: `${scope}.readMore`,
     defaultMessage: 'read more',
   },
+  leaveFeedback: {
+    id: `${scope}.leaveFeedback`,
+    defaultMessage: 'Leave feedback',
+  },
+  requestFeedback: {
+    id: `${scope}.requestFeedback`,
+    defaultMessage: 'Request feedback',
+  },
 };

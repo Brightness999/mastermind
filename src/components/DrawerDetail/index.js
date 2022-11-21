@@ -14,7 +14,7 @@ import moment from 'moment';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { cancelAppointmentForParent, closeAppointmentForProvider, leaveFeedbackForProvider, requestFeedbackForClient, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
@@ -32,16 +32,8 @@ class DrawerDetail extends Component {
       isModalConfirm: false,
       confirmMessage: '',
       publicFeedback: this.props.event?.publicFeedback ?? '',
+      isLeftFeedback: this.props.event?.publicFeedback,
     };
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.event?.status != this.props.event?.status) {
-      this.setState({ isNotPending: this.props.event.status < 0 });
-    }
-    if (prevProps.event?.notes != this.props.event?.notes) {
-      this.setState({ notes: this.props.event?.notes });
-    }
   }
 
   handleProviderHoverChange = (visible) => {
@@ -166,7 +158,6 @@ class DrawerDetail extends Component {
     return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(duration, 'minutes').format('hh:mm a')}`;
   }
 
-
   handleMarkAsClosed = () => {
     if (this.props.event?._id) {
       const data = {
@@ -178,6 +169,7 @@ class DrawerDetail extends Component {
           this.setState({
             errorMessage: '',
             isNotPending: true,
+            isLeftFeedback: !!this.state.publicFeedback.trim(),
           });
           const userRole = this.props.role;
           store.dispatch(getAppointmentsData({ role: userRole }));
@@ -224,8 +216,39 @@ class DrawerDetail extends Component {
     this.setState({ isModalConfirm: false });
   }
 
+  handleLeaveFeedback = () => {
+    const data = {
+      appointmentId: this.props.event._id,
+      publicFeedback: this.state.publicFeedback,
+    }
+    request.post(leaveFeedbackForProvider, data).then(result => {
+      if (result.success) {
+        this.setState({ errorMessage: '', isLeftFeedback: true });
+      } else {
+        this.setState({ errorMessage: result.data });
+      }
+    }).catch(error => {
+      console.log('closed error---', error);
+      this.setState({ errorMessage: error.message });
+    })
+  }
+
+  handleRequestFeedback = () => {
+    const data = { providerInfoId: this.props.event.provider?._id };
+    request.post(requestFeedbackForClient, data).then(result => {
+      if (result.success) {
+        message.success('The request was sent.');
+      } else {
+        this.setState({ errorMessage: result.data });
+      }
+    }).catch(error => {
+      console.log('closed error---', error);
+      this.setState({ errorMessage: error.message });
+    })
+  }
+
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, confirmMessage, isModalConfirm } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, confirmMessage, isModalConfirm, isLeftFeedback } = this.state;
     const { role, event } = this.props;
 
     const providerProfile = (
@@ -377,35 +400,35 @@ class DrawerDetail extends Component {
             </div>
           )}
         </div>
+        {event?.notes && <Input.TextArea rows={5} disabled={!isShowEditNotes} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />}
         {isShowEditNotes && (
-          <>
-            <Input.TextArea rows={5} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />
-            <div className='flex gap-2 mt-10'>
-              <Button
-                type='primary'
-                block
-                onClick={this.handleUpdateNotes}
-                className='h-30 p-0'
-              >
-                {intl.formatMessage(msgModal.save)}
-              </Button>
-              <Button
-                type='primary'
-                block
-                onClick={this.hideEditNotes}
-                className='h-30 p-0'
-              >
-                {intl.formatMessage(messages.cancel)}
-              </Button>
-            </div>
-          </>
+          <div className='flex gap-2 mt-10'>
+            <Button
+              type='primary'
+              block
+              onClick={this.handleUpdateNotes}
+              className='h-30 p-0'
+            >
+              {intl.formatMessage(msgModal.save)}
+            </Button>
+            <Button
+              type='primary'
+              block
+              onClick={this.hideEditNotes}
+              className='h-30 p-0'
+            >
+              {intl.formatMessage(messages.cancel)}
+            </Button>
+          </div>
         )}
-        {moment(event?.date).isBefore(moment()) && event?.status == 0 && role > 3 && (
-          <>
-            <div className='post-feedback mt-1'>
-              <p className='font-18 font-700 mb-5'>{intl.formatMessage(msgDetailPost.postSessionFeedback)}</p>
-              <Input.TextArea rows={7} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(msgDetailPost.postSessionFeedback)} />
-            </div>
+        {moment(event?.date).isBefore(moment()) && (
+          <div className='post-feedback mt-1'>
+            <p className='font-18 font-700 mb-5'>{intl.formatMessage(msgDetailPost.postSessionFeedback)}</p>
+            <Input.TextArea rows={7} disabled={role == 3 ? true : isLeftFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(msgDetailPost.postSessionFeedback)} />
+          </div>
+        )}
+        <Row gutter={15} className='list-btn-detail'>
+          {moment(event?.date).isBefore(moment()) && event?.status == 0 && role > 3 && (
             <Col span={12}>
               <Button
                 type='primary'
@@ -413,14 +436,24 @@ class DrawerDetail extends Component {
                 block
                 onClick={() => this.openConfirmModal()}
                 disabled={isNotPending}
-                className='flex items-center gap-2 h-30 mt-1'
+                className='flex items-center gap-2 h-30'
               >
                 {intl.formatMessage(msgDetailPost.markClosed)}
               </Button>
             </Col>
-          </>
-        )}
-        <Row gutter={15} className='list-btn-detail'>
+          )}
+          {(moment(event?.date).isBefore(moment()) && event?.status == -1 && !isLeftFeedback) && (
+            <Col span={12}>
+              <Button
+                type='primary'
+                icon={<ImPencil size={12} />}
+                block
+                onClick={role > 3 ? this.handleLeaveFeedback : this.handleRequestFeedback}
+              >
+                {intl.formatMessage(role > 3 ? messages.leaveFeedback : messages.requestFeedback)}
+              </Button>
+            </Col>
+          )}
           {(event?.status == 0 && !isNotPending) && (
             <>
               <Col span={12}>

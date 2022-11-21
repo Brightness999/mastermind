@@ -362,6 +362,8 @@
   "components.drawerdetail.providerProfile": "Provider profile",
   "components.drawerdetail.dependentProfile": "Dependent profile",
   "components.drawerdetail.readMore": "read more",
+  "components.drawerdetail.leaveFeedback": "Leave feedback",
+  "components.drawerdetail.requestFeedback": "Request feedback",
   
   "components.drawerdetailpost.postSessionFeedback": "Post session feedback",
   "components.drawerdetailpost.privateNotes": "Private notes",

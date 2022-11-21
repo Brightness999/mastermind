@@ -1134,13 +1134,13 @@ class Dashboard extends React.Component {
             <img src='../images/call.png' onClick={this.onShowModalReferral} />
           </div>
         </div>
-        <DrawerDetail
+        {userDrawerVisible && <DrawerDetail
           visible={userDrawerVisible}
           onClose={this.onCloseDrawerDetail}
           role={userRole}
           event={selectedEvent}
           calendar={this.calendarRef}
-        />
+        />}
         <DrawerDetailPost
           visible={providerDrawervisible}
           onClose={this.onCloseDrawerDetailPost}
