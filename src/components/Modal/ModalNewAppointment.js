@@ -14,6 +14,7 @@ import '../../assets/styles/login.less';
 import request from '../../utils/api/request'
 import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils/api/apiList';
 import { FaHandHoldingUsd } from 'react-icons/fa';
+import ModalNewScreening from './ModalNewScreening';
 
 const { Paragraph } = Typography;
 moment.locale('en');
@@ -34,12 +35,12 @@ class ModalNewAppointment extends React.Component {
 		skillSet: [],
 		searchKey: '',
 		appointmentType: 3,
-		phoneNumber: '',
 		notes: '',
 		providerErrorMessage: '',
 		duration: 30,
 		standardRate: '',
 		subsidizedRate: '',
+		visibleModalScreening: false,
 	}
 
 	getArrTime = (type, providerIndex) => {
@@ -124,14 +125,14 @@ class ModalNewAppointment extends React.Component {
 		})
 	}
 
-	createAppointment = () => {
-		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, phoneNumber, notes, listProvider, selectedProviderIndex, duration, standardRate, subsidizedRate } = this.state;
+	createAppointment = (data) => {
+		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration, standardRate, subsidizedRate } = this.state;
 		if (selectedProvider == undefined) {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
 			return;
 		}
 		this.setState({ providerErrorMessage: '' });
-		if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
+		if (appointmentType != 1 && (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0)) {
 			this.setState({ errorMessage: 'Please select a date and time' })
 			return;
 		}
@@ -151,20 +152,22 @@ class ModalNewAppointment extends React.Component {
 			}
 		}
 		const { years, months, date } = selectedDate.toObject();
-		const hour = arrTime[selectedTimeIndex].value.clone().set({ years, months, date });
+		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
 		const postData = {
 			skillSet: selectedSkill,
 			dependent: selectedDependent,
 			provider: selectedProvider,
-			date: hour,
+			date: appointmentType == 1 ? undefined : hour,
 			location: appointmentType > 1 ? address : '',
-			phoneNumber: appointmentType == 1 ? phoneNumber : '',
-			notes: notes,
+			phoneNumber: appointmentType == 1 ? data?.phoneNumber : '',
+			notes: appointmentType == 1 ? data?.notes : notes,
 			duration: duration,
 			type: appointmentType,
 			status: 0,
 			rate: appointmentType == 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType == 3 ? standardRate : appointmentType == 5 ? subsidizedRate : 0,
+			screeningTime: appointmentType == 1 ? data.time : '',
 		};
+		this.setState({ visibleModalScreening: false });
 		this.requestCreateAppointment(postData);
 	}
 
@@ -395,11 +398,16 @@ class ModalNewAppointment extends React.Component {
 		this.searchProvider(searchKey, address, skill, selectedDependent);
 	}
 
-	handleChangePhone = (number) => {
-		this.setState({ phoneNumber: number });
-	}
 	handleChangeNote = (notes) => {
 		this.setState({ notes: notes });
+	}
+
+	onOpenModalScreening = () => {
+		this.setState({ visibleModalScreening: true });
+	}
+
+	onCloseModalScreening = () => {
+		this.setState({ visibleModalScreening: false });
 	}
 
 	render() {
@@ -417,6 +425,8 @@ class ModalNewAppointment extends React.Component {
 			appointmentType,
 			standardRate,
 			subsidizedRate,
+			visibleModalScreening,
+			selectedDependent,
 		} = this.state;
 		const modalProps = {
 			className: 'modal-new',
@@ -427,11 +437,19 @@ class ModalNewAppointment extends React.Component {
 			width: 900,
 			footer: []
 		};
+		console.log(selectedDependent, this.props.listDependents)
+		const modalScreeningProps = {
+			visible: visibleModalScreening,
+			onSubmit: this.createAppointment,
+			onCancel: this.onCloseModalScreening,
+			provider: listProvider[selectedProviderIndex],
+			dependent: this.props.listDependents?.find(dependent => dependent._id == selectedDependent),
+		}
 
 		return (
 			<Modal {...modalProps}>
 				<div className='new-appointment'>
-					<Form onFinish={this.createAppointment} onFinishFailed={this.onFinishFailed} layout='vertical'>
+					<Form onFinish={() => appointmentType == 1 ? this.onOpenModalScreening() : this.createAppointment()} onFinishFailed={this.onFinishFailed} layout='vertical'>
 						<div className='flex gap-5 items-center'>
 							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType == 2 && selectedProviderIndex > -1 && (
@@ -451,7 +469,7 @@ class ModalNewAppointment extends React.Component {
 							)}
 						</div>
 						<Row gutter={20}>
-							<Col xs={24} sm={24} md={appointmentType == 1 ? 6 : 8} className='select-small'>
+							<Col xs={24} sm={24} md={8} className='select-small'>
 								<Form.Item
 									name="dependent"
 									label={intl.formatMessage(msgCreateAccount.dependent)}
@@ -471,7 +489,7 @@ class ModalNewAppointment extends React.Component {
 									</Select>
 								</Form.Item>
 							</Col>
-							<Col xs={24} sm={24} md={appointmentType == 1 ? 6 : 8} className='select-small'>
+							<Col xs={24} sm={24} md={8} className='select-small'>
 								<Form.Item
 									name="skill"
 									label={intl.formatMessage(msgCreateAccount.skillsets)}
@@ -490,7 +508,7 @@ class ModalNewAppointment extends React.Component {
 									</Select>
 								</Form.Item>
 							</Col>
-							<Col xs={24} sm={24} md={appointmentType == 1 ? 6 : 8} className='select-small'>
+							<Col xs={24} sm={24} md={8} className='select-small'>
 								<Form.Item
 									name="address"
 									label={intl.formatMessage(msgCreateAccount.location)}
@@ -509,19 +527,6 @@ class ModalNewAppointment extends React.Component {
 									</Select>
 								</Form.Item>
 							</Col>
-							{appointmentType == 1 && (
-								<Col xs={24} sm={24} md={6} className="select-small">
-									<Form.Item
-										name="phoneNumber"
-										label={intl.formatMessage(msgCreateAccount.contactNumber)}
-										rules={[
-											{ required: true, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
-											{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) }
-										]}>
-										<Input type='text' className='w-100' onChange={e => this.handleChangePhone(e.target.value)} placeholder={intl.formatMessage(msgCreateAccount.phoneNumber)} pattern='^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$' required />
-									</Form.Item>
-								</Col>
-							)}
 						</Row>
 						<Row>
 							<Col xs={24}>
@@ -655,6 +660,7 @@ class ModalNewAppointment extends React.Component {
 								</div>
 							</Col>
 						</Row>
+						{visibleModalScreening && <ModalNewScreening {...modalScreeningProps} />}
 						{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
 						<Row className='justify-end gap-2'>
 							<Button key="back" onClick={this.props.onCancel}>

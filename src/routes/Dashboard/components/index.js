@@ -1031,8 +1031,7 @@ class Dashboard extends React.Component {
                             <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                           </div>
                           <div className='ml-auto flex-1'>
-                            <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
-                            <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                            <p className='font-12 mb-0'>{appointment.screeningTime ?? ''}</p>
                           </div>
                         </div>
                       )}
@@ -1050,8 +1049,7 @@ class Dashboard extends React.Component {
                             <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                           </div>
                           <div className='ml-auto flex-1'>
-                            <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
-                            <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                            <p className='font-12 mb-0'>{appointment.screeningTime ?? ''}</p>
                           </div>
                         </div>
                       )}

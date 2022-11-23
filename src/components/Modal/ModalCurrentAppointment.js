@@ -18,6 +18,7 @@ moment.locale('en');
 import { store } from '../../redux/store';
 import { rescheduleAppointmentForParent, searchProvidersForAdmin } from '../../utils/api/apiList';
 import { FaHandHoldingUsd } from 'react-icons/fa';
+import ModalNewScreening from './ModalNewScreening';
 
 class ModalCurrentAppointment extends React.Component {
 	state = {
@@ -35,14 +36,14 @@ class ModalCurrentAppointment extends React.Component {
 		skillSet: store.getState().auth.skillSet,
 		searchKey: '',
 		appointmentType: 3,
-		phoneNumber: '',
 		notes: '',
 		providerErrorMessage: '',
 		isConfirm: false,
-		isPopupConfirm: false,
 		dependents: store.getState().auth.dependents,
 		standardRate: '',
 		subsidizedRate: '',
+		visibleModalScreening: false,
+		screeningData: undefined,
 	}
 
 	getArrTime = (type, providerIndex) => {
@@ -87,7 +88,6 @@ class ModalCurrentAppointment extends React.Component {
 			selectedDependent: event?.dependent?._id,
 			selectedSkillSet: event?.skillSet?._id,
 			address: event?.location ?? undefined,
-			phoneNumber: event?.phoneNumber,
 			appointmentType: event?.type,
 			notes: event?.notes,
 			skillSet: store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.services ?? [],
@@ -125,20 +125,20 @@ class ModalCurrentAppointment extends React.Component {
 		})
 	}
 
-	createAppointment = () => {
-		const { selectedTimeIndex, selectedDate, selectedProvider, arrTime } = this.state;
+	createAppointment = (data) => {
+		const { appointmentType, selectedTimeIndex, selectedDate, selectedProvider, arrTime } = this.state;
 		if (selectedProvider == undefined) {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
 			return;
 		}
-		if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
+		if (appointmentType != 1 && (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0)) {
 			this.setState({ errorMessage: 'Please select a date and time' })
 			return;
 		}
 		this.setState({ errorMessage: '' })
 		const { years, months, date } = selectedDate.toObject();
-		const hour = arrTime[selectedTimeIndex].value.clone().set({ years, months, date });
-		this.setState({ selectedDate: hour });
+		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
+		this.setState({ selectedDate: hour, visibleModalScreening: false, screeningData: data });
 		this.onConfirm();
 	}
 
@@ -373,19 +373,12 @@ class ModalCurrentAppointment extends React.Component {
 		this.searchProvider(searchKey, address, skill, selectedDependent);
 	}
 
-	handleChangePhone = (number) => {
-		this.setState({ phoneNumber: number });
-	}
-
 	handleChangeNote = (notes) => {
 		this.setState({ notes: notes });
 	}
 
 	onConfirm = () => {
-		this.setState({
-			isConfirm: true,
-			isPopupConfirm: true,
-		});
+		this.setState({ isConfirm: true });
 	}
 
 	displayTime = (value) => {
@@ -393,19 +386,20 @@ class ModalCurrentAppointment extends React.Component {
 	}
 
 	handleReschedule = () => {
-		const { appointmentType, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, phoneNumber, notes, standardRate, subsidizedRate } = this.state;
+		const { listProvider, selectedProviderIndex, appointmentType, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, notes, standardRate, subsidizedRate, screeningData } = this.state;
 		const postData = {
 			_id: this.props.event?._id,
 			skillSet: selectedSkillSet,
 			dependent: selectedDependent,
 			provider: selectedProvider,
-			date: selectedDate.valueOf(),
+			date: appointmentType == 1 ? undefined : selectedDate?.valueOf(),
 			location: appointmentType > 1 ? address : '',
-			phoneNumber: appointmentType == 1 ? phoneNumber : '',
-			notes: notes,
+			phoneNumber: appointmentType == 1 ? screeningData?.phoneNumber : '',
+			notes: appointmentType == 1 ? screeningData?.notes : notes,
 			type: appointmentType,
 			status: 0,
 			rate: appointmentType == 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType == 3 ? standardRate : appointmentType == 5 ? subsidizedRate : 0,
+			screeningTime: appointmentType == 1 ? screeningData?.time : '',
 		};
 		this.requestUpdateAppointment(postData);
 	}
@@ -415,8 +409,36 @@ class ModalCurrentAppointment extends React.Component {
 		return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.provider?.duration, 'minutes').format('hh:mm a')}`;
 	}
 
+	onOpenModalScreening = () => {
+		this.setState({ visibleModalScreening: true });
+	}
+
+	onCloseModalScreening = () => {
+		this.setState({ visibleModalScreening: false });
+	}
+
 	render() {
-		const { selectedDate, selectedProviderIndex, selectedTimeIndex, listProvider, selectedProvider, skillSet, arrTime, errorMessage, providerErrorMessage, addressOptions, appointmentType, selectedDependent, address, phoneNumber, isConfirm, dependents, standardRate, subsidizedRate } = this.state;
+		const {
+			selectedDate,
+			selectedProviderIndex,
+			selectedTimeIndex,
+			listProvider,
+			selectedProvider,
+			skillSet,
+			arrTime,
+			errorMessage,
+			providerErrorMessage,
+			addressOptions,
+			appointmentType,
+			selectedDependent,
+			address,
+			isConfirm,
+			dependents,
+			standardRate,
+			subsidizedRate,
+			visibleModalScreening,
+			screeningData
+		} = this.state;
 		const { event } = this.props;
 		const modalProps = {
 			className: 'modal-current',
@@ -427,6 +449,13 @@ class ModalCurrentAppointment extends React.Component {
 			width: 900,
 			footer: []
 		};
+		const modalScreeningProps = {
+			visible: visibleModalScreening,
+			onSubmit: this.createAppointment,
+			onCancel: this.onCloseModalScreening,
+			provider: listProvider[selectedProviderIndex],
+			dependent: dependents?.find(dependent => dependent._id == selectedDependent),
+		}
 
 		const contentConfirm = (
 			<div className='confirm-content'>
@@ -437,7 +466,11 @@ class ModalCurrentAppointment extends React.Component {
 						<div className='current-content'>
 							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</span></p>
 							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
-							{event?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {event?.phoneNumber}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {event?.location}</p>}
+							{event?.type == 1 ? (
+								<p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {event?.phoneNumber}</p>
+							) : (
+								<p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {event?.location}</p>
+							)}
 							<p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(event?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(event?.date)?.toLocaleDateString()}</span></p>
 						</div>
 					</Col>
@@ -446,8 +479,16 @@ class ModalCurrentAppointment extends React.Component {
 						<div className='new-content'>
 							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}</span></p>
 							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${dependents.find(dependent => dependent._id == selectedDependent)?.firstName ?? ''} ${dependents?.find(dependent => dependent._id == selectedDependent)?.lastName ?? ''}`}</p>
-							{appointmentType == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {phoneNumber}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {address}</p>}
-							<p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(selectedDate?.toString())?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(selectedDate?.toString())?.toLocaleDateString()}</span></p>
+							{appointmentType == 1 ? (
+								<p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {screeningData?.phoneNumber}</p>
+							) : (
+								<p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {address}</p>
+							)}
+							{appointmentType == 1 ? (
+								<p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{screeningData?.time ?? ''}</span></p>
+							) : (
+								<p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(selectedDate?.toString())?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(selectedDate?.toString())?.toLocaleDateString()}</span></p>
+							)}
 						</div>
 					</Col>
 				</Row>
@@ -471,12 +512,18 @@ class ModalCurrentAppointment extends React.Component {
 						<Col xs={24} sm={24} md={8}>
 							<p></p>
 							<p className='font-16'>{event?.skillSet?.name ?? ''}</p>
-							<p className='font-16'>{this.displayDuration()}</p>
+							<p className='font-16'>{event?.type == 1 ? event?.screeningTime ?? '' : this.displayDuration()}</p>
 						</Col>
 					</Row>
 				</div>
 				<div className='new-appointment'>
-					<Form name="current-appointment" onFinish={this.createAppointment} onFinishFailed={this.onFinishFailed} layout='vertical' ref={ref => this.form = ref}>
+					<Form
+						name="current-appointment"
+						layout='vertical'
+						onFinish={() => appointmentType == 1 ? this.onOpenModalScreening() : this.createAppointment()}
+						onFinishFailed={this.onFinishFailed}
+						ref={ref => this.form = ref}
+					>
 						<div className='flex gap-5 items-center'>
 							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType == 2 && selectedProviderIndex > -1 && (
@@ -496,7 +543,7 @@ class ModalCurrentAppointment extends React.Component {
 							)}
 						</div>
 						<Row gutter={20}>
-							<Col xs={24} sm={24} md={appointmentType == 1 ? 6 : 8} className='select-small'>
+							<Col xs={24} sm={24} md={8} className='select-small'>
 								<Form.Item
 									name="dependent"
 									label={intl.formatMessage(msgCreateAccount.dependent)}
@@ -516,7 +563,7 @@ class ModalCurrentAppointment extends React.Component {
 									</Select>
 								</Form.Item>
 							</Col>
-							<Col xs={24} sm={24} md={appointmentType == 1 ? 6 : 8} className='select-small'>
+							<Col xs={24} sm={24} md={8} className='select-small'>
 								<Form.Item
 									name="skill"
 									label={intl.formatMessage(msgCreateAccount.skillsets)}
@@ -535,7 +582,7 @@ class ModalCurrentAppointment extends React.Component {
 									</Select>
 								</Form.Item>
 							</Col>
-							<Col xs={24} sm={24} md={appointmentType == 1 ? 6 : 8} className='select-small'>
+							<Col xs={24} sm={24} md={8} className='select-small'>
 								<Form.Item
 									name="address"
 									label={intl.formatMessage(msgCreateAccount.location)}
@@ -554,19 +601,6 @@ class ModalCurrentAppointment extends React.Component {
 									</Select>
 								</Form.Item>
 							</Col>
-							{appointmentType == 1 && (
-								<Col xs={24} sm={24} md={6} className="select-small">
-									<Form.Item
-										name="phoneNumber"
-										label={intl.formatMessage(msgCreateAccount.contactNumber)}
-										rules={[
-											{ required: true, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
-											{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) }
-										]}>
-										<Input type='text' className='w-100' onChange={e => this.handleChangePhone(e.target.value)} placeholder={intl.formatMessage(msgCreateAccount.phoneNumber)} pattern='^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$' required />
-									</Form.Item>
-								</Col>
-							)}
 						</Row>
 						<Row>
 							<Col xs={24}>
@@ -724,6 +758,7 @@ class ModalCurrentAppointment extends React.Component {
 							)}
 						</Row>
 					</Form>
+					{visibleModalScreening && <ModalNewScreening {...modalScreeningProps} />}
 				</div>
 			</Modal>
 		);

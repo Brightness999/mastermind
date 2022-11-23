@@ -30,9 +30,9 @@ class DrawerDetail extends Component {
       isShowEditNotes: false,
       notes: this.props.event?.notes,
       isModalInvoice: false,
-      confirmMessage: '',
       publicFeedback: this.props.event?.publicFeedback ?? '',
       isLeftFeedback: this.props.event?.publicFeedback,
+      userRole: store.getState().auth.user?.role,
     };
   }
 
@@ -167,11 +167,7 @@ class DrawerDetail extends Component {
   }
 
   openConfirmModal = () => {
-    this.setState({
-      isModalInvoice: true,
-      confirmMessage: 'Are you sure you want to mark as closed?',
-      modalType: 'close',
-    });
+    this.setState({ isModalInvoice: true });
   }
 
   onConfirm = () => {
@@ -215,7 +211,7 @@ class DrawerDetail extends Component {
   }
 
   updateAppointments() {
-    const userRole = store.getState().auth.user.role;
+    const { userRole } = this.state;
     store.dispatch(getAppointmentsData({ role: userRole }));
     const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
     const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
@@ -230,8 +226,8 @@ class DrawerDetail extends Component {
   }
 
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, confirmMessage, isModalInvoice, isLeftFeedback } = this.state;
-    const { role, event } = this.props;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole } = this.state;
+    const { event } = this.props;
 
     const providerProfile = (
       <div className='provider-profile'>
@@ -406,11 +402,11 @@ class DrawerDetail extends Component {
         {moment(event?.date).isBefore(moment()) && (
           <div className='post-feedback mt-1'>
             <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.feedback)}</p>
-            <Input.TextArea rows={7} disabled={role == 3 ? true : isLeftFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
+            <Input.TextArea rows={7} disabled={userRole == 3 ? true : isLeftFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
           </div>
         )}
         <Row gutter={15} className='list-btn-detail'>
-          {moment(event?.date).isBefore(moment()) && event?.status == 0 && role > 3 && (
+          {moment(event?.date).isBefore(moment()) && event?.status == 0 && userRole > 3 && (
             <Col span={12}>
               <Button
                 type='primary'
@@ -430,9 +426,9 @@ class DrawerDetail extends Component {
                 type='primary'
                 icon={<ImPencil size={12} />}
                 block
-                onClick={role > 3 ? this.handleLeaveFeedback : this.handleRequestFeedback}
+                onClick={userRole > 3 ? this.handleLeaveFeedback : this.handleRequestFeedback}
               >
-                {intl.formatMessage(role > 3 ? messages.leaveFeedback : messages.requestFeedback)}
+                {intl.formatMessage(userRole > 3 ? messages.leaveFeedback : messages.requestFeedback)}
               </Button>
             </Col>
           )}
@@ -456,12 +452,12 @@ class DrawerDetail extends Component {
                   onClick={this.openModalCancel}
                   disabled={isNotPending}
                 >
-                  {event?.status == 0 ? intl.formatMessage(messages.cancel) : event?.status == -1 ? intl.formatMessage(messages.closed) : event?.status == -2 ? intl.formatMessage(messages.cancelled) : ''}
+                  {userRole == 30 ? intl.formatMessage(msgModal.decline) : intl.formatMessage(msgModal.cancel)}
                 </Button>
               </Col>
             </>
           )}
-          {(role == 3 && [2, 3].includes(event?.type) && event?.status == -1) && (
+          {(userRole == 3 && [2, 3].includes(event?.type) && event?.status == -1) && (
             <Col span={12}>
               <Button
                 type='primary'
