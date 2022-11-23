@@ -125,7 +125,7 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	createAppointment = () => {
-		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, phoneNumber, notes, listProvider, selectedProviderIndex } = this.state;
+		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, phoneNumber, notes, listProvider, selectedProviderIndex, standardRate, subsidizedRate } = this.state;
 		if (selectedProvider == undefined) {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
 			return;
@@ -162,6 +162,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			notes: notes,
 			type: appointmentType,
 			status: 0,
+			rate: appointmentType == 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType == 3 ? standardRate : appointmentType == 5 ? subsidizedRate : 0,
 		};
 		this.requestCreateAppointment(postData);
 	}
@@ -528,7 +529,7 @@ class ModalNewAppointmentForParents extends React.Component {
 						<Row>
 							<Col xs={24}>
 								<Form.Item name="notes" label={intl.formatMessage(msgCreateAccount.notes)}>
-									<Input.TextArea rows={3} onChange={e => this.handleChangeNote(e.target.value)} placeholder={intl.formatMessage(msgCreateAccount.notes) + '(optional)'} />
+									<Input.TextArea rows={3} onChange={e => this.handleChangeNote(e.target.value)} placeholder='Additional information you’d like to share with the provider' />
 								</Form.Item>
 							</Col>
 						</Row>

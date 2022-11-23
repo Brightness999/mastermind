@@ -406,7 +406,6 @@ export default class extends React.Component {
         <DrawerDetail
           visible={visibleDetail}
           onClose={this.onCloseDrawerDetail}
-          role={userRole}
           event={selectedEvent}
           skillSet={skillSet}
         />

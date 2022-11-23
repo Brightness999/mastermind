@@ -573,9 +573,9 @@ class Dashboard extends React.Component {
 
     return (
       <div key={index} className={`text-white item-feed ${status == -2 ? 'line-through' : ''} bg-${status == 0 ? 'active' : eventType.toLowerCase()}`}>
-        <p className='font-700'>{appointment.dependent.firstName} {appointment.dependent.lastName} {status == -2 ? 'Cancelled' : ''}</p>
-        {appointment.provider != undefined && <p>{appointment.provider.name || appointment.provider.referredToAs}</p>}
-        {appointment.school != undefined && <p>{appointment.school.name}</p>}
+        <p className='font-700'>{appointment.dependent?.firstName ?? ''} {appointment.dependent?.lastName ?? ''} {status == -2 ? 'Cancelled' : ''}</p>
+        {appointment.provider != undefined && <p>{`${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>}
+        {appointment.school != undefined && <p>{appointment.school?.name}</p>}
         <p>{appointment.skillSet?.name}</p>
         <p>{appointment.location}</p>
         <p>{moment(appointment.date).format('hh:mm a')}</p>
@@ -1137,7 +1137,6 @@ class Dashboard extends React.Component {
         {userDrawerVisible && <DrawerDetail
           visible={userDrawerVisible}
           onClose={this.onCloseDrawerDetail}
-          role={userRole}
           event={selectedEvent}
           calendar={this.calendarRef}
         />}

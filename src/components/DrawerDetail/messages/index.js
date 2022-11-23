@@ -93,4 +93,8 @@ export default {
     id: `${scope}.requestFeedback`,
     defaultMessage: 'Request feedback',
   },
+  feedback: {
+    id: `${scope}.feedback`,
+    defaultMessage: 'Feedback',
+  },
 };

@@ -17,16 +17,16 @@ export const getAppointmentsData = createAsyncThunk(
 			switch (data.role) {
 				case 999:
 					result = await request.post(url + getAppointmentsForAdmin, {}, data.token);
-					return result.data?.docs;
+					return result.data;
 				case 100:
 					result = await request.post(url + getAppointmentsForConsultant, {}, data.token);
 					return result.data;
 				case 30:
 					result = await request.post(url + getAppointmentsForProvider, {}, data.token);
-					return result.data?.docs;
+					return result.data;
 				case 3:
 					result = await request.post(url + getAppointmentsForParent, {}, data.token);
-					return result.data?.docs;
+					return result.data;
 			}
 		} catch (error) {
 			console.log('get appointments error---', error)

@@ -761,12 +761,20 @@ ol {
   margin-right: 10px !important;
 }
 
+.-mr-1 {
+  margin-right: -1px !important;
+}
+
 .ml-20 {
   margin-left: 20px !important;
 }
 
 .mb-0 {
   margin-bottom: 0px !important;
+}
+
+.-mb-1 {
+  margin-bottom: -1px !important;
 }
 
 .mb-10 {
@@ -1973,4 +1981,44 @@ ol {
   &:focus {
     color: @red350;
   }
+}
+
+.grid {
+  display: grid !important;
+}
+
+.grid-columns-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.grid-columns-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.grid-columns-4 {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.table-fixed {
+  table-layout: fixed;
+}
+
+.border {
+  border: solid;
+}
+
+.border-1 {
+  border-width: 1px;
+}
+
+.border-2 {
+  border-width: 2px;
+}
+
+.border-black {
+  border-color: black;
+}
+
+.vertical-top {
+  vertical-align: top;
 }

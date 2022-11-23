@@ -393,7 +393,7 @@ class ModalCurrentAppointment extends React.Component {
 	}
 
 	handleReschedule = () => {
-		const { appointmentType, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, phoneNumber, notes } = this.state;
+		const { appointmentType, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, phoneNumber, notes, standardRate, subsidizedRate } = this.state;
 		const postData = {
 			_id: this.props.event?._id,
 			skillSet: selectedSkillSet,
@@ -405,6 +405,7 @@ class ModalCurrentAppointment extends React.Component {
 			notes: notes,
 			type: appointmentType,
 			status: 0,
+			rate: appointmentType == 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType == 3 ? standardRate : appointmentType == 5 ? subsidizedRate : 0,
 		};
 		this.requestUpdateAppointment(postData);
 	}
@@ -570,7 +571,7 @@ class ModalCurrentAppointment extends React.Component {
 						<Row>
 							<Col xs={24}>
 								<Form.Item name="notes" label={intl.formatMessage(msgCreateAccount.notes)}>
-									<Input.TextArea rows={3} onChange={e => this.handleChangeNote(e.target.value)} placeholder={intl.formatMessage(msgCreateAccount.notes) + '(optional)'} />
+									<Input.TextArea rows={3} onChange={e => this.handleChangeNote(e.target.value)} placeholder='Additional information you’d like to share with the provider' />
 								</Form.Item>
 							</Col>
 						</Row>

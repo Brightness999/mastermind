@@ -123,7 +123,7 @@ class ModalDependentDetail extends React.Component {
 								placeholder={intl.formatMessage(messages.privateNote)}
 							/>
 							<div className='text-left'>{dependent.notes[selectedNoteIndex]?.user?.role == 999 ? 'Admin' : dependent.notes[selectedNoteIndex]?.user?.username}</div>
-							<div className='text-left'>{new Date(dependent.notes[selectedNoteIndex]?.updatedAt).toLocaleString()}</div>
+							<div className='text-left'>{new Date(dependent.notes[selectedNoteIndex]?.updatedAt).toLocaleDateString()}</div>
 							<div className='flex justify-between'>
 								<GoArrowLeft size={20} onClick={() => selectedNoteIndex > 0 && this.handlePreveNote()} />
 								<GoArrowRight size={20} onClick={() => selectedNoteIndex < dependent.notes?.length - 1 && this.handleNextNote()} />

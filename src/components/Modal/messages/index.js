@@ -313,6 +313,10 @@ export default {
     id: `${scope}.evaluation`,
     defaultMessage: 'Evaluation',
   },
+  subsidizedSession: {
+    id: `${scope}.subsidizedSession`,
+    defaultMessage: 'Subsidized Session',
+  },
   appointment: {
     id: `${scope}.appointment`,
     defaultMessage: 'Appointment',

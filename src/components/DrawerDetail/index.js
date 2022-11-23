@@ -5,7 +5,7 @@ import { BsBell, BsCheckCircle, BsClockHistory, BsXCircle } from 'react-icons/bs
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
-import { ModalCancelAppointment, ModalConfirm, ModalCurrentAppointment } from '../../components/Modal';
+import { ModalCancelAppointment, ModalCurrentAppointment, ModalInvoice } from '../../components/Modal';
 import intl from "react-intl-universal";
 import messages from './messages';
 import msgModal from '../Modal/messages';
@@ -29,7 +29,7 @@ class DrawerDetail extends Component {
       isNotPending: this.props.event?.status < 0,
       isShowEditNotes: false,
       notes: this.props.event?.notes,
-      isModalConfirm: false,
+      isModalInvoice: false,
       confirmMessage: '',
       publicFeedback: this.props.event?.publicFeedback ?? '',
       isLeftFeedback: this.props.event?.publicFeedback,
@@ -66,18 +66,7 @@ class DrawerDetail extends Component {
               errorMessage: '',
               isNotPending: true,
             });
-            const userRole = this.props.role;
-            store.dispatch(getAppointmentsData({ role: userRole }));
-            const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
-            const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
-            const dataFetchAppointMonth = {
-              role: userRole,
-              data: {
-                month: month,
-                year: year,
-              }
-            };
-            store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+            this.updateAppointments();
           } else {
             this.setState({
               errorMessage: result.data,
@@ -97,18 +86,7 @@ class DrawerDetail extends Component {
 
   submitModalCurrent = () => {
     this.setState({ visibleCurrent: false });
-    const userRole = this.props.role;
-    store.dispatch(getAppointmentsData({ role: userRole }));
-    const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
-    const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
-    const dataFetchAppointMonth = {
-      role: userRole,
-      data: {
-        month: month,
-        year: year,
-      }
-    };
-    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+    this.updateAppointments();
   }
 
   closeModalCurrent = () => {
@@ -152,7 +130,7 @@ class DrawerDetail extends Component {
   displayDuration = () => {
     const { event } = this.props;
     let duration = event?.provider?.duration ?? 0;
-    if (event.type == 2) {
+    if (event?.type == 2) {
       duration = duration * 1 + event?.provider?.separateEvaluationDuration * 1;
     }
     return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(duration, 'minutes').format('hh:mm a')}`;
@@ -171,18 +149,7 @@ class DrawerDetail extends Component {
             isNotPending: true,
             isLeftFeedback: !!this.state.publicFeedback.trim(),
           });
-          const userRole = this.props.role;
-          store.dispatch(getAppointmentsData({ role: userRole }));
-          const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
-          const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
-          const dataFetchAppointMonth = {
-            role: userRole,
-            data: {
-              month: month,
-              year: year,
-            }
-          };
-          store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+          this.updateAppointments();
         } else {
           this.setState({
             errorMessage: result.data,
@@ -201,19 +168,19 @@ class DrawerDetail extends Component {
 
   openConfirmModal = () => {
     this.setState({
-      isModalConfirm: true,
+      isModalInvoice: true,
       confirmMessage: 'Are you sure you want to mark as closed?',
       modalType: 'close',
     });
   }
 
   onConfirm = () => {
-    this.setState({ isModalConfirm: false });
+    this.setState({ isModalInvoice: false });
     this.handleMarkAsClosed();
   }
 
   onCancel = () => {
-    this.setState({ isModalConfirm: false });
+    this.setState({ isModalInvoice: false });
   }
 
   handleLeaveFeedback = () => {
@@ -247,8 +214,23 @@ class DrawerDetail extends Component {
     })
   }
 
+  updateAppointments() {
+    const userRole = store.getState().auth.user.role;
+    store.dispatch(getAppointmentsData({ role: userRole }));
+    const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
+    const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
+    const dataFetchAppointMonth = {
+      role: userRole,
+      data: {
+        month: month,
+        year: year
+      }
+    };
+    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+  }
+
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, confirmMessage, isModalConfirm, isLeftFeedback } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, confirmMessage, isModalInvoice, isLeftFeedback } = this.state;
     const { role, event } = this.props;
 
     const providerProfile = (
@@ -322,11 +304,11 @@ class DrawerDetail extends Component {
       onCancel: this.closeModalCurrent,
       event: event,
     };
-    const modalConfirmProps = {
-      visible: isModalConfirm,
+    const modalInvoiceProps = {
+      visible: isModalInvoice,
       onSubmit: this.onConfirm,
       onCancel: this.onCancel,
-      message: confirmMessage,
+      event: event,
     }
 
     return (
@@ -400,7 +382,7 @@ class DrawerDetail extends Component {
             </div>
           )}
         </div>
-        {event?.notes && <Input.TextArea rows={5} disabled={!isShowEditNotes} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />}
+        <Input.TextArea rows={5} disabled={!isShowEditNotes} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />
         {isShowEditNotes && (
           <div className='flex gap-2 mt-10'>
             <Button
@@ -423,8 +405,8 @@ class DrawerDetail extends Component {
         )}
         {moment(event?.date).isBefore(moment()) && (
           <div className='post-feedback mt-1'>
-            <p className='font-18 font-700 mb-5'>{intl.formatMessage(msgDetailPost.postSessionFeedback)}</p>
-            <Input.TextArea rows={7} disabled={role == 3 ? true : isLeftFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(msgDetailPost.postSessionFeedback)} />
+            <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.feedback)}</p>
+            <Input.TextArea rows={7} disabled={role == 3 ? true : isLeftFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
           </div>
         )}
         <Row gutter={15} className='list-btn-detail'>
@@ -434,7 +416,7 @@ class DrawerDetail extends Component {
                 type='primary'
                 icon={<BsCheckCircle size={15} />}
                 block
-                onClick={() => this.openConfirmModal()}
+                onClick={() => event?.type == 1 ? this.handleMarkAsClosed() : this.openConfirmModal()}
                 disabled={isNotPending}
                 className='flex items-center gap-2 h-30'
               >
@@ -490,7 +472,7 @@ class DrawerDetail extends Component {
               </Button>
             </Col>
           )}
-          {(role != 30 && moment(event?.date).isAfter(moment()) && event?.status == 0 && !isNotPending) && (
+          {(event?.status == 0 && !isNotPending) && (
             <Col span={12}>
               <Button
                 type='primary'
@@ -506,7 +488,7 @@ class DrawerDetail extends Component {
         {this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}
         <ModalCancelAppointment {...modalCancelProps} />
         {visibleCurrent && <ModalCurrentAppointment {...modalCurrentProps} />}
-        <ModalConfirm {...modalConfirmProps} />
+        {isModalInvoice && <ModalInvoice {...modalInvoiceProps} />}
       </Drawer>
     );
   }

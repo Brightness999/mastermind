@@ -331,6 +331,7 @@
   "components.Modal.phoneNumberValid": "Phone number is not a valid.",
   "components.Modal.selectProvider": "Select a provider",
   "components.Modal.searchProvider": "Search a provider",
+  "components.Modal.subsidizedSession": "Subsidized Session",
 
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.subsidyManager": "Subsidy Request",
@@ -364,6 +365,7 @@
   "components.drawerdetail.readMore": "read more",
   "components.drawerdetail.leaveFeedback": "Leave feedback",
   "components.drawerdetail.requestFeedback": "Request feedback",
+  "components.drawerdetail.feedback": "Feedback",
   
   "components.drawerdetailpost.postSessionFeedback": "Post session feedback",
   "components.drawerdetailpost.privateNotes": "Private notes",

@@ -125,7 +125,7 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	createAppointment = () => {
-		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, phoneNumber, notes, listProvider, selectedProviderIndex, duration } = this.state;
+		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, phoneNumber, notes, listProvider, selectedProviderIndex, duration, standardRate, subsidizedRate } = this.state;
 		if (selectedProvider == undefined) {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
 			return;
@@ -163,6 +163,7 @@ class ModalNewAppointment extends React.Component {
 			duration: duration,
 			type: appointmentType,
 			status: 0,
+			rate: appointmentType == 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType == 3 ? standardRate : appointmentType == 5 ? subsidizedRate : 0,
 		};
 		this.requestCreateAppointment(postData);
 	}
