@@ -1,7 +1,5 @@
 import React from 'react';
 import { Modal, Button } from 'antd';
-import intl from 'react-intl-universal';
-import messages from './messages';
 import './style/index.less';
 
 class ModalProcessAppointment extends React.Component {
@@ -20,8 +18,8 @@ class ModalProcessAppointment extends React.Component {
     return (
       <Modal {...modalProps} style={{ top: '40vh' }}>
         <div className='flex gap-2'>
-          <Button type='primary' block onClick={() => this.props.onSubmit(false)}>Proceed to evaluation</Button>
-          <Button type='primary' block onClick={() => this.props.onSubmit(true)}>Proceed to standard session</Button>
+          <Button type='primary' block onClick={() => this.props.onSubmit([], false)}>Proceed to evaluation</Button>
+          <Button type='primary' block onClick={() => this.props.onSubmit([], true)}>Proceed to standard session</Button>
         </div>
       </Modal>
     );

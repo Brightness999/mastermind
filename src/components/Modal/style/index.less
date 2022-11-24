@@ -1,4 +1,5 @@
 @import '../../../assets/styles/variables.less';
+
 .antui-modalform.ant-modal {
   //& {
   //  .ant-modal-body {}
@@ -93,21 +94,26 @@
       margin-top: 30px;
     }
   }
+
   .div-cancel-top {
     max-width: 255px;
     margin: auto;
   }
+
   .div-cancel-bottom {
     max-width: 300px;
     margin: auto;
   }
+
   .btn-footer {
     width: 400px;
     margin: 30px auto 0 auto;
+
     .ant-btn {
       width: 47%;
       margin: 0 5px;
     }
+
     .ant-btn-primary {
       color: #fff;
       font-weight: 400;
@@ -115,9 +121,11 @@
       line-height: 1.5;
       height: 38px;
     }
+
     .btn-warning {
       border-color: red;
       color: red;
+
       &:focus,
       &:after,
       &:active {
@@ -139,33 +147,43 @@
     padding: 10px 15px;
     color: @white;
   }
+
   .ant-modal-body {
     padding: 0;
   }
+
   .ant-modal-footer {
     text-align: right;
     background: transparent;
     border-top: 0;
   }
+
   .ant-btn-primary {
     font-weight: 400;
     font-size: 14px;
     height: 38px;
     line-height: 1.5;
   }
-  p { margin-bottom: 5px;}
+
+  p {
+    margin-bottom: 5px;
+  }
+
   .hands-img {
     width: 40px;
     height: 40px;
     object-fit: contain;
     margin-left: 10px;
   }
+
   .new-appointment {
     padding: 10px 15px;
   }
+
   .new-screening {
     padding: 30px;
   }
+
   .provider-profile {
     border: 1px solid @gray250;
     width: 100%;
@@ -177,8 +195,10 @@
     border-color: #d7d7d7;
     height: 24px;
   }
+
   .btn-upload {
-    font-size: 12px!important;
+    font-size: 12px !important;
+
     svg {
       vertical-align: top;
       margin-left: 5px;
@@ -187,39 +207,50 @@
 
   .upload-document {
     overflow: hidden;
-    .ant-upload.ant-upload-select { 
+
+    .ant-upload.ant-upload-select {
       float: left;
       height: 100%;
       display: flex;
       align-items: center;
 
-      .ant-upload { display: inline-block;}
+      .ant-upload {
+        display: inline-block;
+      }
     }
+
     .ant-upload-list {
       display: flex;
       flex-direction: column;
       padding-left: 10px;
+
       &-item {
         margin-top: 0;
       }
+
       &-item-name {
         font-size: 12px;
       }
     }
-    .ant-upload-text-icon { display: none;}
+
+    .ant-upload-text-icon {
+      display: none;
+    }
   }
- 
+
   .doctor-content {
     border: 1px solid @gray250;
     border-radius: 4px;
     padding: 10px;
     margin-bottom: 15px;
+
     .ant-input-suffix {
       color: @gray300;
     }
 
-    
+
   }
+
   .doctor-list {
     display: flex;
     flex-direction: row;
@@ -239,8 +270,9 @@
         border-radius: 10px;
         margin-bottom: 3px;
       }
-     
+
     }
+
     .doctor-unavailable {
       margin-right: 10px;
       position: relative;
@@ -253,8 +285,9 @@
         border-radius: 10px;
         margin-bottom: 3px;
       }
-     
+
     }
+
     .selected-doctor {
       position: absolute;
       top: -4px;
@@ -271,6 +304,7 @@
     }
   }
 }
+
 .modal-no-show,
 .modal-balance,
 .modal-new-group,
@@ -282,17 +316,20 @@
     height: 38px;
     line-height: 1.5;
   }
+
   .div-new-group {
     text-align: center;
     padding: 15px 0;
     border: 1px dashed @gray250;
     border-radius: 6px;
   }
+
   .ant-list-item {
     background-color: #ddecfa;
     margin: 10px 0;
     border-radius: 6px;
   }
+
   .item-drag {
     background-color: #ddecfa;
     margin: 10px 0;
@@ -302,16 +339,19 @@
 
   .detail-item {
     padding: 15px 0;
+
     &:not(:last-child) {
-        border-bottom: 1px solid @gray250;
+      border-bottom: 1px solid @gray250;
     }
 
-    p { margin-bottom: 0}
-    
+    p {
+      margin-bottom: 0
+    }
+
     .title {
-        flex: 0 0 100px;
-        text-align: left;
-        margin-right: 10px;
+      flex: 0 0 100px;
+      text-align: left;
+      margin-right: 10px;
     }
   }
 }
@@ -319,6 +359,7 @@
 .modal-dependent {
   .ant-modal-body {
     padding: 0px;
+
     .header {
       padding: 10px;
     }
@@ -326,17 +367,20 @@
 }
 
 .modal-subsidy-progress {
-  
+
   p {
     margin-bottom: 5px;
   }
+
   .ant-steps {
-    max-width: 450px!important;
-    .ant-steps-item-finish > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title,
-    .ant-steps-item-wait > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title {
+    max-width: 450px !important;
+
+    .ant-steps-item-finish>.ant-steps-item-container>.ant-steps-item-content>.ant-steps-item-title,
+    .ant-steps-item-wait>.ant-steps-item-container>.ant-steps-item-content>.ant-steps-item-title {
       display: block;
     }
   }
+
   .parent-info,
   .school-info,
   .consulation-appoint,
@@ -347,14 +391,15 @@
     margin-bottom: 10px;
 
     .ant-btn-sm {
-      height: 32px!important;
-      font-size: 14px!important;
-      font-weight: 400!important;
+      height: 32px !important;
+      font-size: 14px !important;
+      font-weight: 400 !important;
       border-radius: 6px;
-      padding: 4px 16px!important;
+      padding: 4px 16px !important;
       line-height: 1.5;
     }
   }
+
   .ant-btn-primary {
     font-weight: 400;
     font-size: 14px;
@@ -368,35 +413,67 @@
   box-shadow: 0 0 6px 0 red;
   padding: 10px;
   border-radius: 4px;
+
   .current-content,
   .new-content {
     background-color: @gray250;
     padding: 10px;
-    p, span { margin-bottom: 5px!important;}
+
+    p,
+    span {
+      margin-bottom: 5px !important;
+    }
   }
 }
+
 .ant-popover-placement-topRight {
-  .ant-popover-arrow { display: none;}
+  .ant-popover-arrow {
+    display: none;
+  }
+
   .ant-popover-inner-content {
     padding: 0;
   }
 }
+
 .ant-popover-placement-top {
   padding-bottom: 0px;
-  .ant-popover-arrow { display: none;}
+
+  .ant-popover-arrow {
+    display: none;
+  }
+
   .ant-popover-inner-content {
     padding: 0;
+
     .ant-popover-buttons {
       button {
         font-size: 12px !important;
       }
-  }
-}
-.ant-popover-placement-right {
-  padding-left: 4px;
-  .ant-popover-arrow { display: none;}
-  .ant-popover-inner-content {
-    padding: 0;
     }
   }
+}
+
+.ant-popover-placement-right {
+  padding-left: 4px;
+
+  .ant-popover-arrow {
+    display: none;
+  }
+
+  .ant-popover-inner-content {
+    padding: 0px;
+  }
+}
+
+.item-input.ant-input:disabled {
+  background-color: white;
+  color: @gray300;
+  border-color: transparent;
+}
+
+.item-input.ant-input[type=number]::-webkit-inner-spin-button,
+.item-input.ant-input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }

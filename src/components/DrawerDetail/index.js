@@ -137,12 +137,13 @@ class DrawerDetail extends Component {
     return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(duration, 'minutes').format('hh:mm a')}`;
   }
 
-  handleMarkAsClosed = (skipEvaluation) => {
+  handleMarkAsClosed = (items, skipEvaluation) => {
     if (this.props.event?._id) {
       const data = {
         appointmentId: this.props.event._id,
         publicFeedback: this.state.publicFeedback,
         skipEvaluation: skipEvaluation,
+        items: items,
       }
       request.post(closeAppointmentForProvider, data).then(result => {
         if (result.success) {
@@ -173,9 +174,9 @@ class DrawerDetail extends Component {
     this.setState({ isModalInvoice: true });
   }
 
-  onConfirm = () => {
+  onConfirm = (items) => {
     this.setState({ isModalInvoice: false });
-    this.handleMarkAsClosed();
+    this.handleMarkAsClosed(items, false);
   }
 
   onCancel = () => {
