@@ -1019,7 +1019,7 @@ class Dashboard extends React.Component {
                 <Panel header={intl.formatMessage(messages.screenings)} key="3">
                   <Tabs defaultActiveKey="1" type="card" size='small'>
                     <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                      {listAppointmentsRecent?.filter(a => a.type == 1 && a.status == 0 && moment(a.date).isAfter(new Date()))?.map((appointment, index) =>
+                      {listAppointmentsRecent?.filter(a => a.type == 1 && a.status == 0)?.map((appointment, index) =>
                         <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service flex-1'>
@@ -1037,7 +1037,7 @@ class Dashboard extends React.Component {
                       )}
                     </Tabs.TabPane>
                     <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                      {listAppointmentsRecent?.filter(a => a.type == 1 && moment(a.date).isBefore(new Date()))?.map((appointment, index) =>
+                      {listAppointmentsRecent?.filter(a => a.type == 1 && a.status != 0)?.map((appointment, index) =>
                         <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service flex-1'>

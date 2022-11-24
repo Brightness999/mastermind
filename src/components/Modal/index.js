@@ -18,6 +18,7 @@ import ModalConfirm from './ModalConfirm';
 import ModalEditNote from './ModalEditNote';
 import ModalDependentDetail from './ModalDependentDetail';
 import ModalInvoice from './ModalInvoice';
+import ModalProcessAppointment from './ModalProcessAppointment';
 export {
   ModalCreateDone,
   ModalCancelAppointment,
@@ -38,4 +39,5 @@ export {
   ModalEditNote,
   ModalDependentDetail,
   ModalInvoice,
+  ModalProcessAppointment,
 }

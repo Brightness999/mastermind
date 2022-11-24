@@ -126,7 +126,7 @@ class ModalCurrentAppointment extends React.Component {
 	}
 
 	createAppointment = (data) => {
-		const { appointmentType, selectedTimeIndex, selectedDate, selectedProvider, arrTime } = this.state;
+		const { appointmentType, selectedTimeIndex, selectedDate, selectedProvider, arrTime, selectedProviderIndex, listProvider } = this.state;
 		if (selectedProvider == undefined) {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
 			return;
@@ -136,6 +136,20 @@ class ModalCurrentAppointment extends React.Component {
 			return;
 		}
 		this.setState({ errorMessage: '' })
+		if (appointmentType == 2) {
+			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a._id != this.props.event?._id && a.dependent == selectedDependent && a.type == 2 && a.status == 0);
+			if (appointment) {
+				message.warning("You can't create more evaluation.");
+				return;
+			}
+		}
+		if (appointmentType == 1) {
+			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a._id != this.props.event?._id && a.dependent == selectedDependent && a.type == 1 && a.status == 0);
+			if (appointment) {
+				message.warning("Your screening request is still being processed", 5);
+				return;
+			}
+		}
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
 		this.setState({ selectedDate: hour, visibleModalScreening: false, screeningData: data });
@@ -238,17 +252,21 @@ class ModalCurrentAppointment extends React.Component {
 
 		if (listProvider[providerIndex].isNewClientScreening) {
 			if (listProvider[providerIndex].isSeparateEvaluationRate) {
-				if (appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 1 && appointment.status == -1)) {
-					if (appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 2 && appointment.status == -1)) {
+				if (appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1)) {
+					if (appointments?.find(a => a.dependent == selectedDependent && a.type == 2 && a.status == -1)) {
 						appointmentType = 3;
 					} else {
-						appointmentType = 2;
+						if (appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1 && a.skipEvaluation)) {
+							appointmentType = 3;
+						} else {
+							appointmentType = 2;
+						}
 					}
 				} else {
 					appointmentType = 1;
 				}
 			} else {
-				if (appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 1 && appointment.status == -1)) {
+				if (appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1)) {
 					appointmentType = 3;
 				} else {
 					appointmentType = 1;
@@ -256,7 +274,7 @@ class ModalCurrentAppointment extends React.Component {
 			}
 		} else {
 			if (listProvider[providerIndex].isSeparateEvaluationRate) {
-				if (appointments?.find(appointment => appointment.dependent == selectedDependent && appointment.type == 2 && appointment.status == -1)) {
+				if (appointments?.find(a => a.dependent == selectedDependent && a.type == 2 && a.status == -1)) {
 					appointmentType = 3;
 				} else {
 					appointmentType = 2;

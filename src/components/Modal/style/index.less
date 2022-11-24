@@ -381,9 +381,22 @@
     padding: 0;
   }
 }
-.ant-popover-placement-right {
-  padding-left: 4px;
+.ant-popover-placement-top {
+  padding-bottom: 0px;
+  .ant-popover-arrow { display: none;}
   .ant-popover-inner-content {
     padding: 0;
+    .ant-popover-buttons {
+      button {
+        font-size: 12px !important;
+      }
+  }
+}
+.ant-popover-placement-right {
+  padding-left: 4px;
+  .ant-popover-arrow { display: none;}
+  .ant-popover-inner-content {
+    padding: 0;
+    }
   }
 }
