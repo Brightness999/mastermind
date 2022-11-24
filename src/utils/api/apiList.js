@@ -18,6 +18,7 @@ export const getAppointmentsForConsultant = 'consultants/get_my_appointments'
 export const getAppointmentsInMonthForConsultant = 'consultants/get_my_appointments_in_month'
 
 export const getCommunitiServer = 'schools/get_list_communites'
+export const getSchoolInfos = 'schools/get_school_infos'
 
 export const getAppointmentsForProvider = 'providers/get_my_appointments'
 export const getAppointmentsInMonthForProvider = 'providers/get_my_appointments_in_month'
@@ -29,6 +30,7 @@ export const checkNotificationForProvider = 'providers/check_notification'
 export const closeAppointmentForProvider = 'providers/close_appointment'
 export const leaveFeedbackForProvider = 'providers/leave_feedback'
 export const cancelAppointmentForProvider = 'providers/cancel_appoint'
+export const getMyProviderInfo = 'providers/get_my_provider_info'
 
 export const getAppointmentsForParent = 'clients/get_my_appointments'
 export const getAppointmentsInMonthForParent = 'clients/get_my_appointments_in_month'

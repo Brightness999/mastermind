@@ -59,9 +59,9 @@ class MainHeader extends Component {
         key: '3',
         icon: <Badge size="small" count={6}><BiBell size={18} color='#495057' /></Badge>,
         label: (
-          <a href='#'>
-            Notification
-          </a>
+          <Link to={routerLinks.Notification}>
+            {intl.formatMessage(messages.notification)}
+          </Link>
         ),
       },
       {
