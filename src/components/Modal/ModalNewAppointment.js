@@ -86,6 +86,9 @@ class ModalNewAppointment extends React.Component {
 		if (prevProps.SkillSet != this.props.SkillSet) {
 			this.setState({ skillSet: this.props.SkillSet });
 		}
+		if (prevProps.selectedDate != this.props.selectedDate) {
+			this.setState({ selectedDate: moment(this.props.selectedDate) });
+		}
 	}
 
 	searchProvider(searchKey, address, selectedSkill, dependentId) {
@@ -441,7 +444,6 @@ class ModalNewAppointment extends React.Component {
 			width: 900,
 			footer: []
 		};
-		console.log(selectedDependent, this.props.listDependents)
 		const modalScreeningProps = {
 			visible: visibleModalScreening,
 			onSubmit: this.createAppointment,

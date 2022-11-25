@@ -23,7 +23,7 @@ import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 const { Panel } = Collapse;
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
-import request, { generateSearchStructure } from '../../../utils/api/request'
+import request from '../../../utils/api/request'
 import moment from 'moment';
 import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice'
 import { store } from '../../../redux/store';
@@ -73,6 +73,7 @@ class Dashboard extends React.Component {
       selectedEvent: {},
       selectedEventTypes: [],
       intervalId: 0,
+      selectedDate: undefined,
     };
     this.calendarRef = React.createRef();
   }
@@ -539,6 +540,10 @@ class Dashboard extends React.Component {
       })
   }
 
+  handleClickDate = (date) => {
+    this.setState({ visibleNewAppoint: true, selectedDate: moment(date.date) });
+  }
+
   getMyAppointments(userRole) {
     store.dispatch(getAppointmentsData({ role: userRole }));
   }
@@ -742,6 +747,7 @@ class Dashboard extends React.Component {
       selectedSkills,
       selectedEventTypes,
       visibleNewAppoint,
+      selectedDate,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -810,6 +816,7 @@ class Dashboard extends React.Component {
       onCancel: this.onCloseModalNewAppoint,
       listDependents: listDependents,
       SkillSet: SkillSet,
+      selectedDate: selectedDate,
     };
 
     return (
@@ -959,6 +966,7 @@ class Dashboard extends React.Component {
                 eventClick={this.onShowDrawerDetail}
                 eventChange={this.handleEventChange} // called for drag-n-drop/resize
                 eventRemove={this.handleEventRemove}
+                dateClick={this.handleClickDate}
                 height="calc(100vh - 190px)"
               />
             </div>

@@ -63,6 +63,7 @@ class SchedulingCenter extends React.Component {
       location: '',
       selectedEvent: {},
       selectedEventTypes: [],
+      selectedDate: undefined,
     };
     this.calendarRef = React.createRef();
   }
@@ -353,6 +354,10 @@ class SchedulingCenter extends React.Component {
       })
   }
 
+  handleClickDate = (date) => {
+    this.setState({ visibleNewAppoint: true, selectedDate: moment(date.date) });
+  }
+
   getMyAppointments(userRole) {
     store.dispatch(getAppointmentsData({ role: userRole }));
   }
@@ -471,6 +476,7 @@ class SchedulingCenter extends React.Component {
       selectedSkills,
       selectedEventTypes,
       visibleNewAppoint,
+      selectedDate,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -540,6 +546,7 @@ class SchedulingCenter extends React.Component {
       listDependents: listDependents,
       SkillSet: SkillSet,
       listAppointmentsRecent: listAppointmentsRecent,
+      selectedDate: selectedDate,
     };
 
     return (
@@ -684,6 +691,7 @@ class SchedulingCenter extends React.Component {
                 eventClick={this.onShowDrawerDetail}
                 eventChange={this.handleEventChange} // called for drag-n-drop/resize
                 eventRemove={this.handleEventRemove}
+                dateClick={this.handleClickDate}
                 height="calc(100vh - 230px)"
               />
             </div>
