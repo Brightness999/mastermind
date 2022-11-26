@@ -14,7 +14,7 @@ import moment from 'moment';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, leaveFeedbackForProvider, requestFeedbackForClient, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestFeedbackForClient, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
@@ -146,6 +146,37 @@ class DrawerDetail extends Component {
         items: items,
       }
       request.post(closeAppointmentForProvider, data).then(result => {
+        if (result.success) {
+          this.setState({
+            errorMessage: '',
+            isNotPending: true,
+            isLeftFeedback: !!this.state.publicFeedback.trim(),
+            visisbleProcess: false,
+          });
+          this.updateAppointments();
+        } else {
+          this.setState({
+            errorMessage: result.data,
+            isNotPending: false,
+          });
+        }
+      }).catch(error => {
+        console.log('closed error---', error);
+        this.setState({
+          errorMessage: error.message,
+          isNotPending: false,
+        });
+      })
+    }
+  }
+
+  handleDecline = () => {
+    if (this.props.event?._id) {
+      const data = {
+        appointmentId: this.props.event._id,
+        publicFeedback: this.state.publicFeedback,
+      }
+      request.post(declineAppointmentForProvider, data).then(result => {
         if (result.success) {
           this.setState({
             errorMessage: '',
@@ -308,6 +339,7 @@ class DrawerDetail extends Component {
     };
     const modalProcessProps = {
       visible: visisbleProcess,
+      onDecline: this.handleDecline,
       onSubmit: this.handleMarkAsClosed,
       onCancel: this.closeModalProcess,
     };
@@ -482,7 +514,7 @@ class DrawerDetail extends Component {
                 onClick={this.openModalCancel}
                 disabled={isNotPending}
               >
-                {userRole == 30 ? intl.formatMessage(msgModal.decline) : intl.formatMessage(msgModal.cancel)}
+                {intl.formatMessage(msgModal.cancel)}
               </Button>
             </Col>
           )}

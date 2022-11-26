@@ -1,8 +1,8 @@
 import React from 'react';
-import { Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input, Divider } from 'antd';
-import { FaCalendarAlt } from 'react-icons/fa';
+import { Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input, Divider, Collapse, Tabs, Avatar, Badge } from 'antd';
+import { FaCalendarAlt, FaUser } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
-import { BsFilter, BsX } from 'react-icons/bs';
+import { BsFillDashSquareFill, BsFillFlagFill, BsFillPlusSquareFill, BsFilter, BsX } from 'react-icons/bs';
 import { ModalNewGroup, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalNewAppointment } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
@@ -30,6 +30,7 @@ import { setDependents, setProviders, setSkillSet, setUser } from '../../../redu
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { getDefaultDataForAdmin } from '../../../utils/api/apiList';
+const { Panel } = Collapse;
 
 class SchedulingCenter extends React.Component {
   constructor(props) {
@@ -453,6 +454,10 @@ class SchedulingCenter extends React.Component {
     this.setState({ isFilter: false });
   }
 
+  displayHourMin(value) {
+    return value > 9 ? value : `0${value}`;
+  }
+
   render() {
     const {
       isFilter,
@@ -555,18 +560,18 @@ class SchedulingCenter extends React.Component {
           <p className='font-16 font-500'>{intl.formatMessage(msgSidebar.schedulingCenter)}</p>
           <Divider />
         </div>
-        <div className='btn-appointment mb-10 flex justify-end'>
-          <Button
-            type='primary'
-            block
-            icon={<FaCalendarAlt size={19} />}
-            onClick={() => this.onShowModalNewAppoint()}
-          >
-            <span>{intl.formatMessage(messages.makeAppointment)}</span>
-          </Button>
-        </div>
         <div className='div-content'>
           <section className='div-calendar box-card'>
+            <div className='btn-appointment mb-10 flex justify-end'>
+              <Button
+                type='primary'
+                block
+                icon={<FaCalendarAlt size={19} />}
+                onClick={() => this.onShowModalNewAppoint()}
+              >
+                <span>{intl.formatMessage(messages.makeAppointment)}</span>
+              </Button>
+            </div>
             {isFilter && (
               <div className='calendar-filter w-100'>
                 <CSSAnimate className="animated-shorter">
@@ -695,6 +700,174 @@ class SchedulingCenter extends React.Component {
                 height="calc(100vh - 230px)"
               />
             </div>
+          </section>
+          <section className='div-multi-choice'>
+            <Collapse
+              defaultActiveKey={['1']}
+              expandIcon={({ isActive }) => isActive ? <BsFillDashSquareFill size={18} /> : <BsFillPlusSquareFill size={18} />}
+              expandIconPosition={'end'}
+              onChange={this.onCollapseChange}
+            >
+              <Panel header={intl.formatMessage(messages.referrals)} key="2">
+                <Tabs defaultActiveKey="1" type="card" size='small'>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 4 && appointment.status == 0 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service'>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                          <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
+                        </div>
+                        <div className='text-center ml-auto mr-5'>
+                          <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                          <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                        </div>
+                        <div className='ml-auto'>
+                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
+                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                        </div>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 6 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service'>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                          <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
+                        </div>
+                        <div className='text-center ml-auto mr-5'>
+                          <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                          <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                        </div>
+                        <div className='ml-auto'>
+                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
+                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                        </div>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                </Tabs>
+              </Panel>
+              <Panel header={intl.formatMessage(messages.screenings)} key="3">
+                <Tabs defaultActiveKey="1" type="card" size='small'>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                    {listAppointmentsRecent?.filter(a => a.type == 1 && a.status == 0)?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service flex-1'>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                          <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                        </div>
+                        <div className='text-center ml-auto mr-5 flex-1'>
+                          <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                          <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                        </div>
+                        <div className='ml-auto flex-1'>
+                          <p className='font-12 mb-0'>{appointment.screeningTime ?? ''}</p>
+                        </div>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
+                    {listAppointmentsRecent?.filter(a => a.type == 1 && a.status != 0)?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service flex-1'>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                          <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                        </div>
+                        <div className='text-center ml-auto mr-5 flex-1'>
+                          <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                          <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                        </div>
+                        <div className='ml-auto flex-1'>
+                          <p className='font-12 mb-0'>{appointment.screeningTime ?? ''}</p>
+                        </div>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                </Tabs>
+              </Panel>
+              <Panel header={intl.formatMessage(messages.evaluations)} key="4">
+                <Tabs defaultActiveKey="1" type="card" size='small'>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 2 && appointment.status == 0 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service'>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                          <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                        </div>
+                        <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
+                        <div className='ml-auto'>
+                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
+                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                        </div>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 2 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service'>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                          <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                        </div>
+                        <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
+                        <div className='ml-auto'>
+                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
+                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                        </div>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                </Tabs>
+              </Panel>
+              <Panel
+                header={intl.formatMessage(messages.flags)}
+                key="5"
+                extra={(
+                  <Badge size="small" count={2}>
+                    <BsFillFlagFill
+                      size={18}
+                      onClick={() => { }}
+                    />
+                  </Badge>
+                )}
+              >
+                <Tabs defaultActiveKey="1" type="card" size='small'>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 4 && appointment.status == 0 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service'>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                          <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                        </div>
+                        <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
+                        <p className='font-12 ml-auto mb-0'>Pay Flag</p>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
+                    {listAppointmentsRecent?.filter(appointment => appointment.type == 4 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        <Avatar size={24} icon={<FaUser size={12} />} />
+                        <div className='div-service'>
+                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                          <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                        </div>
+                        <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
+                        <p className='font-12 ml-auto mb-0'>Pay Flag</p>
+                      </div>
+                    )}
+                  </Tabs.TabPane>
+                </Tabs>
+              </Panel>
+            </Collapse>
           </section>
         </div>
         <div className='text-right'>
