@@ -22,7 +22,6 @@ import Changeprofile from './Profile/ChangeProfile';
 import UserManager from './Administrator/UserManager';
 import SubsidyManager from './Administrator/SubsidyManager';
 import SystemSetting from './Administrator/SystemSetting';
-import Appointments from './Administrator/Appointments';
 import SchoolsList from './Administrator/SchoolsList';
 import FlagList from './Administrator/FlagList';
 import ConsultationRequests from './Administrator/ConsultationRequests';
@@ -45,9 +44,8 @@ const routesConfig = app => [
     path: '/administrator',
     title: 'Admin',
     component: AdminLayout,
-    indexRoute: routerLinks['Appointments'],
+    indexRoute: routerLinks['Admin'],
     childRoutes: [
-      Appointments(app),
       SchoolsList(app),
       FlagList(app),
       ConsultationRequests(app),

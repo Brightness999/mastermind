@@ -1,7 +1,7 @@
 import './style/index.less';
 import React, { Component } from 'react'
 import { Menu } from 'antd';
-import { FaUsers, FaFileInvoice, FaRegChartBar, FaHandshake, FaFlag, FaSchool } from 'react-icons/fa';
+import { FaUsers, FaFileInvoice, FaRegChartBar, FaFlag, FaSchool } from 'react-icons/fa';
 import { AiOutlineSchedule } from 'react-icons/ai';
 import { IoSettingsSharp } from 'react-icons/io5';
 import { Link } from 'dva/router';
@@ -13,11 +13,6 @@ import { routerLinks } from '../../routes/constant';
 class SideBar extends Component {
   render() {
     const items = [
-      {
-        label: <Link to={routerLinks['Appointments']}>{intl.formatMessage(messages.appointments)}</Link>,
-        key: routerLinks.Appointments,
-        icon: <FaHandshake size={20} />
-      },
       {
         label: <Link to={routerLinks['UserManager']}>{intl.formatMessage(messages.userManager)}</Link>,
         key: routerLinks.UserManager,

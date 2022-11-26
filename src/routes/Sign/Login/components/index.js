@@ -61,7 +61,7 @@ export default class extends React.Component {
 				store.dispatch(setUser(data.user))
 				store.dispatch(getInfoAuth());
 				store.dispatch(getAppointmentsData({ role: data.user.role, token: data.token }))
-				data.user.role > 900 ? this.props.history.push(routerLinks.Appointments) : this.props.history.push(routerLinks.Dashboard);
+				data.user.role > 900 ? this.props.history.push(routerLinks.Admin) : this.props.history.push(routerLinks.Dashboard);
 			}
 		} catch (error) {
 			console.log(error);

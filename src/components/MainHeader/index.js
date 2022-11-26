@@ -41,7 +41,7 @@ class MainHeader extends Component {
         key: '1',
         icon: <MdOutlineSpaceDashboard size={18} color='#495057' />,
         label: (
-          <Link to={user?.role === 999 ? routerLinks.Appointments : routerLinks.Dashboard}>
+          <Link to={user?.role === 999 ? routerLinks.Admin : routerLinks.Dashboard}>
             {intl.formatMessage(messages.dashboard)}
           </Link>
         ),

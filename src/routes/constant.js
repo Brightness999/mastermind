@@ -8,12 +8,10 @@ export const routerLinks = {
   ResetPass: '/resetpass',
 
   Dashboard: '/account/dashboard',
-  Appointments: '/administrator/appointments',
   SchoolsList: '/administrator/schoolslist',
   FlagList: '/administrator/flaglist',
   ConsultationRequests: '/administrator/consultationrequests',
   Admin: '/administrator/admin',
-  SchedulingCenter: '/administrator/schedulingcenter',
   UserManager: '/administrator/usermanager',
   SystemSetting: '/administrator/systemsetting',
   SubsidyManager: '/administrator/subsidymanager',
