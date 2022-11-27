@@ -37,7 +37,6 @@ export const getMyProviderInfo = 'providers/get_my_provider_info'
 
 export const getAppointmentsForParent = 'clients/get_my_appointments'
 export const getAppointmentsInMonthForParent = 'clients/get_my_appointments_in_month'
-export const searchProvidersForParent = 'clients/search_providers'
 export const createAppointmentForParent = 'clients/create_appoinment'
 export const getAllSchoolsForParent = 'clients/get_all_schools'
 export const getDefaultValueForClient = 'clients/get_default_value_for_client'

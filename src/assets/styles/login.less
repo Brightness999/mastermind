@@ -1022,7 +1022,7 @@
 }
 
 .time-available {
-  color: @primary-color;
+  color: @gray700;
   font-weight: 700;
   padding: 9px 8px;
   border-radius: 4px;
@@ -1050,6 +1050,40 @@
   &.active {
     color: @white;
     background-color: @primary-color;
+    border: 1px solid @primary-color;
+  }
+}
+
+.time-not-available {
+  color: @gray700;
+  font-weight: 700;
+  padding: 9px 8px;
+  border-radius: 4px;
+  border: 1px solid @gray700;
+  margin-bottom: 10px;
+  text-align: center;
+  cursor: pointer;
+
+  svg {
+    &.active {
+      color: @green500;
+    }
+
+    &.inactive {
+      color: @gray250;
+    }
+
+    vertical-align: middle;
+  }
+
+  &:hover {
+    box-shadow: 0 1px 4px 0 #91cffd;
+  }
+
+  &.active {
+    color: @white;
+    background-color: @primary-color;
+    border: 1px solid @primary-color;
   }
 }
 

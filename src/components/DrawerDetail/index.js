@@ -453,13 +453,13 @@ class DrawerDetail extends Component {
           <Input.TextArea rows={7} disabled={userRole == 3 ? true : isLeftFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
         </div>
         <Row gutter={15} className='list-btn-detail'>
-          {event?.type == 1 && event?.status == 0 && userRole > 3 && (
+          {[1, 4].includes(event?.type) && event?.status == 0 && userRole > 3 && (
             <Col span={12}>
               <Button
                 type='primary'
                 icon={<BsCheckCircle size={15} />}
                 block
-                onClick={() => this.openModalProcess()}
+                onClick={() => event.type == 1 ? this.openModalProcess() : this.handleMarkAsClosed()}
                 disabled={isNotPending}
                 className='flex items-center gap-2 h-30'
               >
@@ -467,7 +467,7 @@ class DrawerDetail extends Component {
               </Button>
             </Col>
           )}
-          {event?.type != 1 && moment(event?.date).isBefore(moment()) && event?.status == 0 && userRole > 3 && (
+          {[2, 3, 5].includes(event?.type) && moment(event?.date).isBefore(moment()) && event?.status == 0 && userRole > 3 && (
             <Col span={12}>
               <Button
                 type='primary'

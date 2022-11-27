@@ -34,7 +34,7 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 import { setDependents, setLocations, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { checkNotificationForClient, checkNotificationForProvider, closeNotificationForClient, getDefaultDataForAdmin, getDefaultValueForClient, searchProvidersForParent } from '../../../utils/api/apiList';
+import { checkNotificationForClient, checkNotificationForProvider, closeNotificationForClient, getDefaultDataForAdmin } from '../../../utils/api/apiList';
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -577,7 +577,7 @@ class Dashboard extends React.Component {
     const eventType = type == 1 ? 'Screening' : type == 2 ? 'Evaluation' : type == 4 ? 'Consultation' : 'Session';
 
     return (
-      <div key={index} className={`text-white item-feed ${status == -2 ? 'line-through' : ''} bg-${status == 0 ? 'active' : eventType.toLowerCase()}`}>
+      <div key={index} className={`text-white item-feed ${status != 0 ? 'line-through' : ''} bg-${status == 0 ? 'active' : eventType.toLowerCase()}`}>
         <p className='font-700'>{appointment.dependent?.firstName ?? ''} {appointment.dependent?.lastName ?? ''} {status == -2 ? 'Cancelled' : ''}</p>
         {appointment.provider != undefined && <p>{`${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>}
         {appointment.school != undefined && <p>{appointment.school?.name}</p>}
@@ -984,7 +984,7 @@ class Dashboard extends React.Component {
                   <Panel header={intl.formatMessage(messages.referrals)} key="2">
                     <Tabs defaultActiveKey="1" type="card" size='small'>
                       <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                        {listAppointmentsRecent?.filter(appointment => appointment.type == 4 && appointment.status == 0 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                        {listAppointmentsRecent?.filter(a => a.type == 4 && a.status == 0)?.map((appointment, index) =>
                           <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
@@ -1003,7 +1003,7 @@ class Dashboard extends React.Component {
                         )}
                       </Tabs.TabPane>
                       <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                        {listAppointmentsRecent?.filter(appointment => appointment.type == 6 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
+                        {listAppointmentsRecent?.filter(a => a.type == 4 && a.status != 0)?.map((appointment, index) =>
                           <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
