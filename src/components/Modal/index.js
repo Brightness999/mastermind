@@ -15,7 +15,7 @@ import ModalNewClientScreening from './ModalNewClientScreening';
 import ModalSeparateEvaluation from './ModalSeparateEvaluation';
 import ModalStandardSession from './ModalStandardSession';
 import ModalConfirm from './ModalConfirm';
-import ModalEditNote from './ModalEditNote';
+import ModalCreateNote from './ModalCreateNote';
 import ModalDependentDetail from './ModalDependentDetail';
 import ModalInvoice from './ModalInvoice';
 import ModalProcessAppointment from './ModalProcessAppointment';
@@ -37,7 +37,7 @@ export {
   ModalSeparateEvaluation,
   ModalStandardSession,
   ModalConfirm,
-  ModalEditNote,
+  ModalCreateNote,
   ModalDependentDetail,
   ModalInvoice,
   ModalProcessAppointment,

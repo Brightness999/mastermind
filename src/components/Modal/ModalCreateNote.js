@@ -5,7 +5,7 @@ import messages from './messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
-class ModalEditNote extends React.Component {
+class ModalCreateNote extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -43,4 +43,4 @@ class ModalEditNote extends React.Component {
   }
 };
 
-export default ModalEditNote;
+export default ModalCreateNote;

@@ -1,19 +1,19 @@
 import { Divider, Table, Space } from 'antd';
 import { routerLinks } from '../../constant';
-import { ModalConfirm, ModalEditNote, ModalDependentDetail } from '../../../components/Modal';
+import { ModalConfirm, ModalDependentDetail, ModalCreateNote } from '../../../components/Modal';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
 import msgMainHeader from '../../../components/MainHeader/messages';
 import './index.less';
 import { checkPermission } from '../../../utils/auth/checkPermission';
 import request from '../../../utils/api/request';
-import { createPrivateNote, deletePrivateNote, getDependents, updatePrivateNote } from '../../../utils/api/apiList';
+import { createPrivateNote, deletePrivateNote, getDependents } from '../../../utils/api/apiList';
 
 export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      visibleEdit: false,
+      visibleCreate: false,
       dependents: [],
       userRole: -1,
       isConfirmModal: false,
@@ -60,14 +60,14 @@ export default class extends React.Component {
 
   onShowModalEdit = (dependentId) => {
     this.setState({
-      visibleEdit: true,
+      visibleCreate: true,
       selectedDependentId: dependentId,
       note: '',
     });
   }
 
-  onCloseModalEdit = () => {
-    this.setState({ visibleEdit: false });
+  onCloseModalCreateNote = () => {
+    this.setState({ visibleCreate: false });
   }
 
   onCloseModalDependent = () => {
@@ -129,7 +129,7 @@ export default class extends React.Component {
     }).catch(err => {
       console.log('update private note error---', err);
     })
-    this.setState({ visibleEdit: false });
+    this.setState({ visibleCreate: false });
   }
 
   handleClickRow = (dependent) => {
@@ -137,7 +137,7 @@ export default class extends React.Component {
   }
 
   render() {
-    const { visibleEdit, dependents, isConfirmModal, confirmMessage, note, visibleDependent, selectedDependent } = this.state;
+    const { visibleCreate, dependents, isConfirmModal, confirmMessage, note, visibleDependent, selectedDependent } = this.state;
     const columns = [
       {
         title: 'Name', key: 'name',
@@ -156,10 +156,10 @@ export default class extends React.Component {
       },
     ];
 
-    const modalEditNoteProps = {
-      visible: visibleEdit,
+    const modalCreateNoteProps = {
+      visible: visibleCreate,
       onSubmit: this.handleCreateNote,
-      onCancel: this.onCloseModalEdit,
+      onCancel: this.onCloseModalCreateNote,
       note: note,
     }
 
@@ -194,7 +194,7 @@ export default class extends React.Component {
             }
           }}
         />
-        {visibleEdit && <ModalEditNote {...modalEditNoteProps} />}
+        {visibleCreate && <ModalCreateNote {...modalCreateNoteProps} />}
         {visibleDependent && <ModalDependentDetail {...modalDependentProps} />}
         <ModalConfirm {...confirmModalProps} />
       </div>
