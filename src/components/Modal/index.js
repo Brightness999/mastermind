@@ -19,11 +19,12 @@ import ModalEditNote from './ModalEditNote';
 import ModalDependentDetail from './ModalDependentDetail';
 import ModalInvoice from './ModalInvoice';
 import ModalProcessAppointment from './ModalProcessAppointment';
+import ModalCurrentReferralService from './ModalCurrentReferralService';
 export {
   ModalCreateDone,
   ModalCancelAppointment,
   ModalCurrentAppointment,
-  ModalNewAppointment,ModalNewAppointmentForParents,
+  ModalNewAppointment, ModalNewAppointmentForParents,
   ModalSubsidyProgress,
   ModalNoShow,
   ModalBalance,
@@ -40,4 +41,5 @@ export {
   ModalDependentDetail,
   ModalInvoice,
   ModalProcessAppointment,
+  ModalCurrentReferralService,
 }

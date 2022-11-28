@@ -5,7 +5,7 @@ import { BsBell, BsCheckCircle, BsClockHistory, BsXCircle } from 'react-icons/bs
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
-import { ModalCancelAppointment, ModalCurrentAppointment, ModalInvoice, ModalProcessAppointment } from '../../components/Modal';
+import { ModalCancelAppointment, ModalCurrentAppointment, ModalCurrentReferralService, ModalInvoice, ModalProcessAppointment } from '../../components/Modal';
 import intl from "react-intl-universal";
 import messages from './messages';
 import msgModal from '../Modal/messages';
@@ -34,6 +34,7 @@ class DrawerDetail extends Component {
       isLeftFeedback: !!this.props.event?.publicFeedback,
       userRole: store.getState().auth.user?.role,
       visisbleProcess: false,
+      visibleCurrentReferral: false,
     };
   }
 
@@ -91,11 +92,11 @@ class DrawerDetail extends Component {
   }
 
   closeModalCurrent = () => {
-    this.setState({ visibleCurrent: false });
+    this.props.event?.type == 4 ? this.setState({ visibleCurrentReferral: false }) : this.setState({ visibleCurrent: false });
   }
 
   openModalCurrent = () => {
-    this.setState({ visibleCurrent: true });
+    this.props.event?.type == 4 ? this.setState({ visibleCurrentReferral: true }) : this.setState({ visibleCurrent: true });
   }
 
   showEditNotes = () => {
@@ -269,7 +270,7 @@ class DrawerDetail extends Component {
   }
 
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visisbleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visisbleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral } = this.state;
     const { event } = this.props;
 
     const providerProfile = (
@@ -353,6 +354,12 @@ class DrawerDetail extends Component {
       visible: isModalInvoice,
       onSubmit: this.onConfirm,
       onCancel: this.onCancel,
+      event: event,
+    }
+    const modalCurrentReferralProps = {
+      visible: visibleCurrentReferral,
+      // onSubmit: this.onConfirm,
+      onCancel: this.closeModalCurrent,
       event: event,
     }
 
@@ -546,6 +553,7 @@ class DrawerDetail extends Component {
         <ModalCancelAppointment {...modalCancelProps} />
         <ModalProcessAppointment {...modalProcessProps} />
         {visibleCurrent && <ModalCurrentAppointment {...modalCurrentProps} />}
+        {visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
         {isModalInvoice && <ModalInvoice {...modalInvoiceProps} />}
       </Drawer>
     );
