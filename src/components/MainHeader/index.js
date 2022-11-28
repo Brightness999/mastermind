@@ -69,13 +69,12 @@ class MainHeader extends Component {
         icon: <BiLogOutCircle size={18} color='#495057' />,
         label: (
           <Link to='/' onClick={this.logout}>
-
             {intl.formatMessage(messages.logOut)}
           </Link>
         ),
       },
     ]
-    user.role != 3 && items.splice(3, 0, {
+    user.role != 3 && user.role != 999 && items.splice(3, 0, {
       key: '4',
       icon: <GiNotebook size={18} color='#495057' />,
       label: (

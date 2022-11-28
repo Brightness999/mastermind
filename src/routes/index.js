@@ -26,6 +26,7 @@ import SchoolsList from './Administrator/SchoolsList';
 import FlagList from './Administrator/FlagList';
 import ConsultationRequests from './Administrator/ConsultationRequests';
 import Statistics from './Administrator/Statistics';
+import Private from './Administrator/PrivateNote';
 import PrivateNote from './PrivateNote';
 
 const routesConfig = app => [
@@ -53,6 +54,7 @@ const routesConfig = app => [
       UserManager(app),
       SubsidyManager(app),
       SystemSetting(app),
+      Private(app),
       Statistics(app)
     ]
   },

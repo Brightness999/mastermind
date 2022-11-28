@@ -8,48 +8,55 @@ import { Link } from 'dva/router';
 import intl from "react-intl-universal";
 import { MdContactPhone } from 'react-icons/md';
 import messages from './messages';
+import msgMainHeader from '../MainHeader/messages';
 import { routerLinks } from '../../routes/constant';
+import { GiNotebook } from 'react-icons/gi';
 
 class SideBar extends Component {
   render() {
     const items = [
       {
-        label: <Link to={routerLinks['UserManager']}>{intl.formatMessage(messages.userManager)}</Link>,
+        label: <Link to={routerLinks.UserManager}>{intl.formatMessage(messages.userManager)}</Link>,
         key: routerLinks.UserManager,
         icon: <FaUsers size={20} />
       },
       {
-        label: <Link to={routerLinks['SchoolsList']}>{intl.formatMessage(messages.schoolsList)}</Link>,
+        label: <Link to={routerLinks.SchoolsList}>{intl.formatMessage(messages.schoolsList)}</Link>,
         key: routerLinks.SchoolsList,
         icon: <FaSchool size={20} />
       },
       {
-        label: <Link to={routerLinks['FlagList']}>{intl.formatMessage(messages.flagList)}</Link>,
+        label: <Link to={routerLinks.FlagList}>{intl.formatMessage(messages.flagList)}</Link>,
         key: routerLinks.FlagList,
         icon: <FaFlag size={20} />
       },
       {
-        label: <Link to={routerLinks['ConsultationRequests']}>{intl.formatMessage(messages.consultationRequests)}</Link>,
+        label: <Link to={routerLinks.ConsultationRequests}>{intl.formatMessage(messages.consultationRequests)}</Link>,
         key: routerLinks.ConsultationRequests,
         icon: <MdContactPhone size={20} />
       },
       {
-        label: <Link to={routerLinks['SubsidyManager']}>{intl.formatMessage(messages.subsidyManager)}</Link>,
+        label: <Link to={routerLinks.SubsidyManager}>{intl.formatMessage(messages.subsidyManager)}</Link>,
         key: routerLinks.SubsidyManager,
         icon: <FaFileInvoice size={20} />
       },
       {
-        label: <Link to={routerLinks['Admin']}>{intl.formatMessage(messages.schedulingCenter)}</Link>,
+        label: <Link to={routerLinks.Admin}>{intl.formatMessage(messages.schedulingCenter)}</Link>,
         key: routerLinks.Admin,
         icon: <AiOutlineSchedule size={20} />
       },
       {
-        label: <Link to={routerLinks['SystemSetting']}>{intl.formatMessage(messages.systemSetting)}</Link>,
+        label: <Link to={routerLinks.Private}>{intl.formatMessage(msgMainHeader.privateNotes)}</Link>,
+        key: routerLinks.Private,
+        icon: <GiNotebook size={20} />
+      },
+      {
+        label: <Link to={routerLinks.SystemSetting}>{intl.formatMessage(messages.systemSetting)}</Link>,
         key: routerLinks.SystemSetting,
         icon: <IoSettingsSharp size={20} />
       },
       {
-        label: <Link to={routerLinks['Statistics']}>{intl.formatMessage(messages.statistics)}</Link>,
+        label: <Link to={routerLinks.Statistics}>{intl.formatMessage(messages.statistics)}</Link>,
         key: routerLinks.Statistics,
         icon: <FaRegChartBar size={20} />
       },
