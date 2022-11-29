@@ -11,10 +11,11 @@ import moment from 'moment';
 import 'moment/locale/en-au';
 import './style/index.less';
 import '../../assets/styles/login.less';
-import request from '../../utils/api/request'
+import request from '../../utils/api/request';
 import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils/api/apiList';
 import { FaHandHoldingUsd } from 'react-icons/fa';
 import ModalNewScreening from './ModalNewScreening';
+import { store } from '../../redux/store';
 
 const { Paragraph } = Typography;
 moment.locale('en');
@@ -202,7 +203,7 @@ class ModalNewAppointmentForParents extends React.Component {
 				if (appointmentType == 2) {
 					duration = listProvider[selectedProviderIndex]?.duration * 1 + listProvider[selectedProviderIndex]?.separateEvaluationDuration * 1
 				}
-				if (availableTime) {
+				if (availableTime && !availableTime.isPrivate) {
 					const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 					const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
 					const openTime = newValue.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
@@ -312,7 +313,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		if (appointmentType == 2) {
 			duration = listProvider[providerIndex]?.duration * 1 + listProvider[providerIndex]?.separateEvaluationDuration * 1
 		}
-		if (availableTime) {
+		if (availableTime && !availableTime.isPrivate) {
 			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 			const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
 			const openTime = selectedDate.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
@@ -628,6 +629,25 @@ class ModalNewAppointmentForParents extends React.Component {
 												<Calendar
 													fullscreen={false}
 													value={selectedDate}
+													dateCellRender={date => {
+														const userRole = store.getState().auth.user.role;
+														if (selectedProviderIndex > -1 && userRole > 3) {
+															const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == date.day());
+															if (availableTime) {
+																const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
+																const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
+																if (date.isBetween(availableFromDate, availableToDate) && availableTime.isPrivate) {
+																	return (<div className='absolute top-0 left-0 h-100 w-100 border border-1 border-warning rounded-2'></div>)
+																} else {
+																	return null;
+																}
+															} else {
+																return null;
+															}
+														} else {
+															return null;
+														}
+													}}
 													onSelect={this.onSelectDate}
 													disabledDate={(date) => date.isBefore(new Date())}
 													headerRender={() => (

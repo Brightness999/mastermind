@@ -44,6 +44,7 @@ class ModalCurrentAppointment extends React.Component {
 		subsidizedRate: '',
 		visibleModalScreening: false,
 		screeningData: undefined,
+		userRole: store.getState().auth.user.role,
 	}
 
 	getArrTime = (type, providerIndex) => {
@@ -185,7 +186,7 @@ class ModalCurrentAppointment extends React.Component {
 				if (appointmentType == 2) {
 					duration = listProvider[selectedProviderIndex]?.duration * 1 + listProvider[selectedProviderIndex]?.separateEvaluationDuration * 1
 				}
-				if (availableTime) {
+				if (availableTime && !availableTime.isPrivate) {
 					const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 					const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
 					const openTime = newValue.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
@@ -295,7 +296,7 @@ class ModalCurrentAppointment extends React.Component {
 		if (appointmentType == 2) {
 			duration = listProvider[providerIndex]?.duration * 1 + listProvider[providerIndex]?.separateEvaluationDuration * 1
 		}
-		if (availableTime) {
+		if (availableTime && !availableTime.isPrivate) {
 			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 			const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
 			const openTime = selectedDate.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
@@ -455,7 +456,8 @@ class ModalCurrentAppointment extends React.Component {
 			standardRate,
 			subsidizedRate,
 			visibleModalScreening,
-			screeningData
+			screeningData,
+			userRole,
 		} = this.state;
 		const { event } = this.props;
 		const modalProps = {
@@ -627,35 +629,37 @@ class ModalCurrentAppointment extends React.Component {
 								</Form.Item>
 							</Col>
 						</Row>
-						<div className='choose-doctor'>
-							<p className='font-16 mt-10'>{intl.formatMessage(messages.selectProvider)}<sup>*</sup></p>
-							<div className='doctor-content'>
-								<Row>
-									<Col xs={24} sm={24} md={8} className='select-small'>
-										<Input
-											onChange={e => this.handleSearchProvider(e.target.value)}
-											placeholder={intl.formatMessage(messages.searchProvider)}
-											suffix={<BiSearch size={17} />}
-										/>
-									</Col>
-								</Row>
-								<p className='font-500 mt-1 mb-0'>{intl.formatMessage(messages.availableProviders)}</p>
-								<div className='doctor-list'>
-									{listProvider?.map((provider, index) => (
-										<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
-											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
-											<p className='font-10 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
-											{selectedProvider === provider._id && (
-												<div className='selected-doctor'>
-													<BsCheck size={12} />
-												</div>
-											)}
-										</div>
-									))}
+						{userRole != 30 && (
+							<div className='choose-doctor'>
+								<p className='font-16 mt-10'>{intl.formatMessage(messages.selectProvider)}<sup>*</sup></p>
+								<div className='doctor-content'>
+									<Row>
+										<Col xs={24} sm={24} md={8} className='select-small'>
+											<Input
+												onChange={e => this.handleSearchProvider(e.target.value)}
+												placeholder={intl.formatMessage(messages.searchProvider)}
+												suffix={<BiSearch size={17} />}
+											/>
+										</Col>
+									</Row>
+									<p className='font-500 mt-1 mb-0'>{intl.formatMessage(messages.availableProviders)}</p>
+									<div className='doctor-list'>
+										{listProvider?.map((provider, index) => (
+											<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
+												<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
+												<p className='font-10 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
+												{selectedProvider === provider._id && (
+													<div className='selected-doctor'>
+														<BsCheck size={12} />
+													</div>
+												)}
+											</div>
+										))}
+									</div>
+									{providerErrorMessage.length > 0 && (<p className='text-left text-red mr-5'>{providerErrorMessage}</p>)}
 								</div>
-								{providerErrorMessage.length > 0 && (<p className='text-left text-red mr-5'>{providerErrorMessage}</p>)}
 							</div>
-						</div>
+						)}
 						<Row gutter={10}>
 							<Col xs={24} sm={24} md={8}>
 								<div className='provider-profile'>
@@ -711,6 +715,24 @@ class ModalCurrentAppointment extends React.Component {
 												<Calendar
 													fullscreen={false}
 													value={selectedDate}
+													dateCellRender={date => {
+														if (selectedProviderIndex > -1 && userRole > 3) {
+															const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == date.day());
+															if (availableTime) {
+																const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
+																const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
+																if (date.isBetween(availableFromDate, availableToDate) && availableTime.isPrivate) {
+																	return (<div className='absolute top-0 left-0 h-100 w-100 border border-1 border-warning rounded-2'></div>)
+																} else {
+																	return null;
+																}
+															} else {
+																return null;
+															}
+														} else {
+															return null;
+														}
+													}}
 													onSelect={this.onSelectDate}
 													disabledDate={(date) => date.isBefore(new Date())}
 													headerRender={() => (
