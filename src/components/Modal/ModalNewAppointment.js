@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Form, message } from 'antd';
+import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Form, message, Popover } from 'antd';
 import { BiChevronLeft, BiChevronRight, BiSearch } from 'react-icons/bi';
 import { BsCheck } from 'react-icons/bs';
 import { GoPrimitiveDot } from 'react-icons/go';
@@ -13,7 +13,7 @@ import './style/index.less';
 import '../../assets/styles/login.less';
 import request from '../../utils/api/request'
 import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils/api/apiList';
-import { FaHandHoldingUsd } from 'react-icons/fa';
+import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import ModalNewScreening from './ModalNewScreening';
 
 const { Paragraph } = Typography;
@@ -22,6 +22,7 @@ moment.locale('en');
 class ModalNewAppointment extends React.Component {
 	state = {
 		selectedDate: moment(),
+		selectedPrivateDate: moment(),
 		selectedProviderIndex: -1,
 		selectedTimeIndex: -1,
 		listProvider: [],
@@ -31,6 +32,7 @@ class ModalNewAppointment extends React.Component {
 		selectedDependent: undefined,
 		selectedProvider: undefined,
 		arrTime: [],
+		privateArrTime: [],
 		errorMessage: '',
 		skillSet: [],
 		searchKey: '',
@@ -305,6 +307,7 @@ class ModalNewAppointment extends React.Component {
 		this.setState({ appointmentType: appointmentType });
 
 		const newArrTime = this.getArrTime(appointmentType, providerIndex);
+		const newPrivateArrTime = this.getArrTime(1, providerIndex);
 		const availableTime = listProvider[providerIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDate.day());
 		let duration = 30;
 
@@ -345,6 +348,27 @@ class ModalNewAppointment extends React.Component {
 				return time;
 			})
 		}
+		if (availableTime && availableTime.isPrivate) {
+			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
+			const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
+			const openTime = selectedDate.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
+			const closeTime = selectedDate.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-duration, 'minutes');
+			newPrivateArrTime.map(time => {
+				const { years, months, date } = selectedDate?.toObject();
+				time.value = moment(time.value).set({ years, months, date });
+				if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
+					time.active = true;
+				} else {
+					time.active = false;
+				}
+				return time;
+			})
+		} else {
+			newPrivateArrTime.map(time => {
+				time.active = false;
+				return time;
+			})
+		}
 
 		let standardRate = 0;
 		let subsidizedRate = 0;
@@ -361,6 +385,7 @@ class ModalNewAppointment extends React.Component {
 			arrTime: newArrTime,
 			standardRate: standardRate,
 			subsidizedRate: subsidizedRate,
+			privateArrTime: newPrivateArrTime,
 		});
 	}
 
@@ -415,6 +440,117 @@ class ModalNewAppointment extends React.Component {
 
 	onCloseModalScreening = () => {
 		this.setState({ visibleModalScreening: false });
+	}
+
+	nextPrivateMonth = () => {
+		this.setState({ selectedPrivateDate: moment(this.state.selectedPrivateDate).add(1, 'month') });
+	}
+
+	prevPrivateMonth = () => {
+		this.setState({ selectedPrivateDate: moment(this.state.selectedPrivateDate).add(-1, 'month') });
+	}
+
+	onSelectPrivateDate = (newValue) => {
+		const { listProvider, selectedProviderIndex } = this.state;
+		const newArrTime = this.getArrTime(1, selectedProviderIndex);
+		const selectedDay = newValue.day();
+		const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDay && time.isPrivate);
+		if (availableTime) {
+			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
+			const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
+			const openTime = newValue.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
+			const closeTime = newValue.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-30, 'minutes');
+			newArrTime.map(time => {
+				const { years, months, date } = newValue.toObject();
+				time.value = moment(time.value).set({ years, months, date });
+				if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
+					time.active = true;
+				} else {
+					time.active = false;
+				}
+				return time;
+			})
+		} else {
+			newArrTime.map(time => {
+				time.active = false;
+				return time;
+			})
+		}
+		this.setState({
+			selectedPrivateDate: newValue,
+			privateArrTime: newArrTime,
+		});
+	}
+
+	privateSlot = () => {
+		const { listProvider, selectedProviderIndex, selectedPrivateDate, privateArrTime } = this.state;
+
+		return (
+			<div className='private-calendar'>
+				<p className='font-700'>{intl.formatMessage(msgCreateAccount.privateHMGHAgents)}</p>
+				<Row gutter={15}>
+					<Col xs={24} sm={24} md={12}>
+						<Calendar
+							fullscreen={false}
+							value={selectedPrivateDate}
+							onSelect={this.onSelectPrivateDate}
+							dateCellRender={date => {
+								if (selectedProviderIndex > -1) {
+									const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == date.day());
+									if (availableTime) {
+										const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
+										const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
+										if (date.isBetween(availableFromDate, availableToDate) && availableTime.isPrivate) {
+											return (<div className='absolute top-0 left-0 h-100 w-100 border border-1 border-warning rounded-2'></div>)
+										} else {
+											return null;
+										}
+									} else {
+										return null;
+									}
+								} else {
+									return null;
+								}
+							}}
+							headerRender={() => (
+								<div style={{ marginBottom: 10 }}>
+									<Row gutter={8} justify="space-between" align="middle">
+										<Col>
+											<p className='font-12 mb-0'>{selectedPrivateDate?.format('MMMM YYYY')}</p>
+										</Col>
+										<Col>
+											<Button
+												type='text'
+												className='mr-10 left-btn'
+												icon={<BiChevronLeft size={25} />}
+												onClick={this.prevPrivateMonth}
+											/>
+											<Button
+												type='text'
+												className='right-btn'
+												icon={<BiChevronRight size={25} />}
+												onClick={this.nextPrivateMonth}
+											/>
+										</Col>
+									</Row>
+								</div>
+							)}
+						/>
+					</Col>
+					<Col xs={24} sm={24} md={12}>
+						<Row gutter={15}>
+							{privateArrTime?.map((time, index) => (
+								<Col key={index} span={12}>
+									<div className={`${time.active ? 'time-available' : 'time-not-available'}`}>
+										<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
+									</div>
+								</Col>
+							))}
+						</Row>
+					</Col>
+				</Row>
+			</div>
+		)
 	}
 
 	render() {
@@ -574,19 +710,23 @@ class ModalNewAppointment extends React.Component {
 							<Col xs={24} sm={24} md={8}>
 								<div className='provider-profile'>
 									<div className='flex flex-row items-center'>
-										<p className='font-16 font-700'>{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}{!!listProvider[selectedProviderIndex]?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}</p>
+										<p className='font-16 font-700'>
+											{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}
+											{!!listProvider[selectedProviderIndex]?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
+											{listProvider[selectedProviderIndex]?.manualSchedule?.find(m => m.isPrivate) ? <Popover content={this.privateSlot} trigger="click"><FaCalendarAlt size={16} className="text-green500 cursor" /></Popover> : null}
+										</p>
 										<p className='font-12 font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
 									<div className='flex'>
 										<div className='flex-1'>
 											{listProvider[selectedProviderIndex]?.contactNumber?.map((phone, index) => (
-												<p key={index} className='font-10'>{phone.phoneNumber}</p>
+												<div key={index} className='font-10'>{phone.phoneNumber}</div>
 											))}
 											{listProvider[selectedProviderIndex]?.contactEmail?.map((email, index) => (
-												<p key={index} className='font-10'>{email.email}</p>
+												<div key={index} className='font-10'>{email.email}</div>
 											))}
 											{listProvider[selectedProviderIndex]?.serviceAddress && (
-												<p className='font-10'>{listProvider[selectedProviderIndex].serviceAddress}</p>
+												<div className='font-10'>{listProvider[selectedProviderIndex].serviceAddress}</div>
 											)}
 										</div>
 										<div className='flex-1 font-10'>
@@ -594,19 +734,19 @@ class ModalNewAppointment extends React.Component {
 											{subsidizedRate && <div>Subsidized Rate: ${subsidizedRate}</div>}
 										</div>
 									</div>
-									<div className='flex'>
+									<div className='flex mt-10'>
 										<div className='flex-1'>
-											<p className='font-10 mb-0 text-bold'>Skillset(s):</p>
-											<p className='font-10'>{listProvider[selectedProviderIndex]?.skillSet?.name}</p>
+											<div className='font-10 text-bold'>Skillset(s):</div>
+											<div className='font-10'>{listProvider[selectedProviderIndex]?.skillSet?.name}</div>
 										</div>
 										<div className='font-10 flex-1'>
-											<p className='mb-0 text-bold'>Grade level(s)</p>
+											<div className='text-bold'>Grade level(s)</div>
 											<div>{listProvider[selectedProviderIndex]?.academicLevel?.map((level, i) => (
 												<div key={i}>{level.level}</div>
 											))}</div>
 										</div>
 									</div>
-									<p className='font-10 mb-0 text-bold'>Profile</p>
+									<div className='font-10 text-bold mt-10'>Profile</div>
 									<div className='profile-text'>
 										<Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
 											{listProvider[selectedProviderIndex]?.publicProfile}
