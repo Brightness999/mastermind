@@ -126,8 +126,8 @@ class ModalDependentDetail extends React.Component {
 							<div className='text-left mt-1'>{dependent.notes[selectedNoteIndex]?.user?.role == 999 ? 'Admin' : dependent.notes[selectedNoteIndex]?.user?.username}</div>
 							<div className='text-left'>{new Date(dependent.notes[selectedNoteIndex]?.updatedAt).toLocaleDateString()}</div>
 							<div className='flex justify-between'>
-								<GoArrowLeft size={20} className='cursor' onClick={() => selectedNoteIndex > 0 && this.handlePreveNote()} />
-								<GoArrowRight size={20} className='cursor' onClick={() => selectedNoteIndex < dependent.notes?.length - 1 && this.handleNextNote()} />
+								<GoArrowLeft size={20} className={`cursor ${selectedNoteIndex < 1 ? 'display-none' : ''}`} onClick={() => selectedNoteIndex > 0 && this.handlePreveNote()} />
+								<GoArrowRight size={20} className={`cursor ${selectedNoteIndex == dependent.notes?.length - 1 ? 'display-none' : ''}`} onClick={() => selectedNoteIndex < dependent.notes?.length - 1 && this.handleNextNote()} />
 							</div>
 							<div className='flex justify-end gap-2 p-10'>
 								{isEdit ? (
