@@ -18,6 +18,11 @@ class ModalNewScreening extends React.Component {
     time: undefined,
   }
 
+  componentDidMount() {
+    const { dependent } = this.props;
+    this.form.setFieldsValue({ phoneNumber: dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ? dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber : dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber });
+  }
+
   onFinish = () => {
     const { phoneNumber, notes, time } = this.state;
     this.props.onSubmit({
