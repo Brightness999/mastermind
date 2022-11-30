@@ -75,12 +75,12 @@ class ModalInvoice extends React.Component {
 
 		const modalProps = {
 			className: 'modal-invoice',
-			title: "Invoice",
+			title: (<div className='font-20'>Invoice</div>),
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: this.props.onCancel,
 			closable: false,
-			width: 700,
+			width: 1000,
 			footer: [
 				<Button key="back" onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel)}
@@ -98,42 +98,42 @@ class ModalInvoice extends React.Component {
 						<tr>
 							<td colSpan={2}>
 								<div className='w-100'>
-									<img src="../images/logo.svg" alt="logo" width={80} height={80} />
+									<img src="../images/logo.svg" alt="logo" width={120} height={120} />
 								</div>
 							</td>
 							<td colSpan={5}></td>
 							<td colSpan={5}>
 								<div className='grid grid-columns-2'>
-									<div className='border border-1 border-black -mb-1 -mr-1 text-center'>Date</div>
-									<div className='border border-1 border-black -mb-1 -mr-1 text-center'>Invoice #</div>
-									<div className='border border-1 border-black -mb-1 -mr-1 text-center'>{new Date().toLocaleDateString()}</div>
-									<div className='border border-1 border-black -mb-1 -mr-1 text-center'>{new Date().getTime().toString()}</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>Date</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>Invoice #</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>{new Date().toLocaleDateString()}</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>{new Date().getTime().toString()}</div>
 								</div>
 							</td>
 						</tr>
 						<tr>
 							<td colSpan={3}>
 								<div className='w-100 text-black'>
-									<div>{event?.provider?.billingAddress}</div>
+									<div className='font-16'>{event?.provider?.billingAddress}</div>
 								</div>
 							</td>
 							<td colSpan={9}></td>
 						</tr>
 						<tr>
 							<td colSpan={12}>
-								<div className='w-100 text-black06'>
+								<div className='w-100 text-black06 font-16'>
 									<div>{event?.provider?.contactNumber?.[0]?.phoneNumber}</div>
 									<div>{event?.provider?.contactEmail?.[0]?.email}</div>
 									<div>helpmegethelp.org</div>
 								</div>
 							</td>
 						</tr>
-						<tr><td><br /></td></tr>
+						<tr><td><br /><br /><br /></td></tr>
 						<tr>
 							<td colSpan={6}>
 								<div className='w-100'>
-									<div className='border border-1 border-black -mb-1 -mr-1 px-5'>Bill To:</div>
-									<div className='border border-1 border-black -mb-1 -mr-1 px-5'>
+									<div className='border border-1 border-black -mb-1 -mr-1 p-10 font-16'>Bill To:</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 p-10 font-16'>
 										<div>{event?.parent?.parentInfo?.fatherName ? event?.parent?.parentInfo?.fatherName : event?.parent?.parentInfo?.motherName}</div>
 										<div>C/O {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
 										<div>{event?.parent?.parentInfo?.address}</div>
@@ -142,21 +142,21 @@ class ModalInvoice extends React.Component {
 							</td>
 							<td colSpan={6}></td>
 						</tr>
-						<tr><td><br /></td></tr>
+						<tr><td><br /><br /><br /></td></tr>
 						<tr>
 							<td colSpan={5}></td>
 							<td colSpan={7}>
 								<div className='grid grid-columns-2'>
-									<div className='border border-1 border-black -mb-1 -mr-1 text-center'>Service</div>
-									<div className='border border-1 border-black -mb-1 -mr-1 text-center'>Provider</div>
-									<div className='border border-1 border-black -mb-1 -mr-1 text-center'>{event?.skillSet?.name}</div>
-									<div className='border border-1 border-black -mb-1 -mr-1 text-center'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>Service</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>Provider</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>{event?.skillSet?.name}</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</div>
 								</div>
 							</td>
 						</tr>
 						<tr>
 							<td>
-								<div className='my-10'><Button type='primary' className='h-30 p-0 px-20' onClick={() => this.handleAddItem()}>Add item</Button></div>
+								<div className='my-10'><Button type='primary' className='font-16 px-20' onClick={() => this.handleAddItem()}>Add item</Button></div>
 							</td>
 						</tr>
 						<tr>
@@ -165,59 +165,57 @@ class ModalInvoice extends React.Component {
 									<table className='w-100 table-fixed'>
 										<thead>
 											<tr>
-												<th colSpan={5} className='border border-1 border-black -mb-1 -mr-1'>Type</th>
-												<th colSpan={9} className='border border-1 border-black -mb-1 -mr-1'>Session Date</th>
-												<th colSpan={2} className='border border-1 border-black -mb-1 -mr-1'>Rate</th>
-												<th colSpan={2} className='border border-1 border-black -mb-1 -mr-1'>Amount</th>
+												<th colSpan={5} className='border border-1 border-black -mb-1 -mr-1 font-16 p-10'>Type</th>
+												<th colSpan={9} className='border border-1 border-black -mb-1 -mr-1 font-16 p-10'>Session Date</th>
+												<th colSpan={2} className='border border-1 border-black -mb-1 -mr-1 font-16 p-10'>Rate</th>
+												<th colSpan={2} className='border border-1 border-black -mb-1 -mr-1 font-16 p-10'>Amount</th>
 											</tr>
 										</thead>
 										<tbody>
-											{items.map((item, index) => {
-												return (
-													<Popover key={index} placement='right' content={(
-														<div className='flex flex-col gap-2'>
-															{selectedItemIndex == index ? (
-																<>
-																	<CheckCircleTwoTone twoToneColor='#00ee00' onClick={() => this.onSaveItem()} />
-																	<CloseCircleTwoTone twoToneColor='#ff0000' onClick={() => this.onCancelEdit()} />
-																</>
-															) : (
-																<>
-																	<EditTwoTone onClick={() => this.onEditItem(index)} />
-																	<DeleteTwoTone twoToneColor='#ff0000' onClick={() => this.onDeleteItem(index)} />
-																</>
-															)}
-														</div>
-													)}>
-														<tr key={index}>
-															<td colSpan={5} className='border border-1 border-black -mb-1 -mr-1'>
-																<Input disabled={selectedItemIndex != index} value={item.type} className="text-center item-input" placeholder="Session type" onChange={(e) => this.handleChangeItem('type', e.target.value)} />
-															</td>
-															<td colSpan={9} className='border border-1 border-black -mb-1 -mr-1'>
-																<Input disabled={selectedItemIndex != index} value={item.locationDate} className="text-center item-input" placeholder="date and location" onChange={(e) => this.handleChangeItem('locationDate', e.target.value)} />
-															</td>
-															<td colSpan={2} className='border border-1 border-black -mb-1 -mr-1'>
-																<Input type='number' disabled={selectedItemIndex != index} value={item.rate} className="text-center item-input" placeholder="Rate" onChange={(e) => this.handleChangeItem('rate', e.target.value)} />
-															</td>
-															<td colSpan={2} className='border border-1 border-black -mb-1 -mr-1'>
-																<div className='text-center'>{item.rate}</div>
-															</td>
-														</tr>
-													</Popover>
-												)
-											})}
+											{items.map((item, index) => (
+												<Popover key={index} placement='right' content={(
+													<div className='flex flex-col gap-2'>
+														{selectedItemIndex == index ? (
+															<>
+																<CheckCircleTwoTone twoToneColor='#00ee00' onClick={() => this.onSaveItem()} />
+																<CloseCircleTwoTone twoToneColor='#ff0000' onClick={() => this.onCancelEdit()} />
+															</>
+														) : (
+															<>
+																<EditTwoTone onClick={() => this.onEditItem(index)} />
+																<DeleteTwoTone twoToneColor='#ff0000' onClick={() => this.onDeleteItem(index)} />
+															</>
+														)}
+													</div>
+												)}>
+													<tr key={index}>
+														<td colSpan={5} className='border border-1 border-black -mb-1 -mr-1'>
+															<Input disabled={selectedItemIndex != index} value={item.type} className="text-center item-input font-16 p-10" placeholder="Session type" onChange={(e) => this.handleChangeItem('type', e.target.value)} />
+														</td>
+														<td colSpan={9} className='border border-1 border-black -mb-1 -mr-1'>
+															<Input disabled={selectedItemIndex != index} value={item.locationDate} className="text-center item-input font-16 p-10" placeholder="date and location" onChange={(e) => this.handleChangeItem('locationDate', e.target.value)} />
+														</td>
+														<td colSpan={2} className='border border-1 border-black -mb-1 -mr-1'>
+															<Input type='number' disabled={selectedItemIndex != index} value={item.rate} className="text-center item-input font-16 p-10" placeholder="Rate" onChange={(e) => this.handleChangeItem('rate', e.target.value)} />
+														</td>
+														<td colSpan={2} className='border border-1 border-black -mb-1 -mr-1'>
+															<div className='text-center'>{item.rate}</div>
+														</td>
+													</tr>
+												</Popover>
+											))}
 											<tr>
 												<td colSpan={16} rowSpan={5} className='border border-1 border-black -mb-1 -mr-1 vertical-top'>
-													<div className='px-5'>
+													<div className='p-10 font-16'>
 														<div className='text-right'>Subtotal</div>
 														<div className='text-right'>Tax payments/Credits Amount Due</div>
 													</div>
 												</td>
 											</tr>
-											<tr><td colSpan={2} className='border border-1 border-black -mb-1 -mr-1 text-center'>{subTotal}</td></tr>
-											<tr><td colSpan={2} className='border border-1 border-black -mb-1 -mr-1 text-center'>0.00</td></tr>
-											<tr><td colSpan={2} className='border border-1 border-black -mb-1 -mr-1 text-center'>{subTotal}</td></tr>
-											<tr><td colSpan={2} className='border border-1 border-black -mb-1 -mr-1 text-center'>{subTotal}</td></tr>
+											<tr><td colSpan={2} className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>{subTotal}</td></tr>
+											<tr><td colSpan={2} className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>0.00</td></tr>
+											<tr><td colSpan={2} className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>{subTotal}</td></tr>
+											<tr><td colSpan={2} className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>{subTotal}</td></tr>
 										</tbody>
 									</table>
 								</div>
