@@ -1,7 +1,7 @@
 import './style/index.less';
 import React, { Component } from 'react'
 import { Menu } from 'antd';
-import { FaUsers, FaFileInvoice, FaRegChartBar, FaFlag, FaSchool } from 'react-icons/fa';
+import { FaUsers, FaFileInvoice, FaRegChartBar, FaFlag, FaSchool, FaChild } from 'react-icons/fa';
 import { AiOutlineSchedule } from 'react-icons/ai';
 import { IoSettingsSharp } from 'react-icons/io5';
 import { Link } from 'dva/router';
@@ -10,7 +10,6 @@ import { MdContactPhone } from 'react-icons/md';
 import messages from './messages';
 import msgMainHeader from '../MainHeader/messages';
 import { routerLinks } from '../../routes/constant';
-import { GiNotebook } from 'react-icons/gi';
 
 class SideBar extends Component {
   render() {
@@ -46,9 +45,9 @@ class SideBar extends Component {
         icon: <AiOutlineSchedule size={20} />
       },
       {
-        label: <Link to={routerLinks.Private}>{intl.formatMessage(msgMainHeader.privateNotes)}</Link>,
+        label: <Link to={routerLinks.Private}>{intl.formatMessage(msgMainHeader.dependentList)}</Link>,
         key: routerLinks.Private,
-        icon: <GiNotebook size={20} />
+        icon: <FaChild size={20} />
       },
       {
         label: <Link to={routerLinks.SystemSetting}>{intl.formatMessage(messages.systemSetting)}</Link>,

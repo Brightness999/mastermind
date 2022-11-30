@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'dva/router';
-import { FaUserAlt, FaUserEdit } from 'react-icons/fa';
+import { FaChild, FaUserAlt, FaUserEdit } from 'react-icons/fa';
 import { BiChevronLeft, BiChevronRight, BiLogOutCircle, BiBell } from 'react-icons/bi';
 import { BsSearch } from 'react-icons/bs';
 import { Badge, Avatar, Button, Input, Menu, Dropdown } from 'antd';
@@ -12,7 +12,6 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { removeUser } from '../../redux/features/authSlice';
 import { MdOutlineSpaceDashboard } from 'react-icons/md';
-import { GiNotebook } from 'react-icons/gi';
 const scrollElement = React.createRef();
 
 class MainHeader extends Component {
@@ -76,10 +75,10 @@ class MainHeader extends Component {
     ]
     user.role != 3 && user.role != 999 && items.splice(3, 0, {
       key: '4',
-      icon: <GiNotebook size={18} color='#495057' />,
+      icon: <FaChild size={18} color='#495057' />,
       label: (
         <Link to={routerLinks.PrivateNote}>
-          {intl.formatMessage(messages.privateNotes)}
+          {intl.formatMessage(messages.dependentList)}
         </Link>
       ),
     });
