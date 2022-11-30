@@ -119,6 +119,8 @@ class ModalNewAppointmentForParents extends React.Component {
 				selectedProviderIndex: -1,
 				selectedProvider: undefined,
 				selectedTimeIndex: -1,
+				standardRate: '',
+				subsidizedRate: '',
 			});
 		}).catch(err => {
 			console.log('provider list error-----', err);
@@ -128,6 +130,8 @@ class ModalNewAppointmentForParents extends React.Component {
 				selectedProviderIndex: -1,
 				selectedProvider: undefined,
 				selectedTimeIndex: -1,
+				standardRate: '',
+				subsidizedRate: '',
 			});
 		})
 	}
@@ -583,7 +587,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
-			width: 900,
+			width: 1000,
 			footer: []
 		};
 		const modalScreeningProps = {
@@ -695,12 +699,11 @@ class ModalNewAppointmentForParents extends React.Component {
 										/>
 									</Col>
 								</Row>
-								<p className='font-500 mt-1 mb-0'>{intl.formatMessage(messages.availableProviders)}</p>
 								<div className='doctor-list'>
 									{listProvider?.map((provider, index) => (
 										<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
 											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
-											<p className='font-10 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
+											<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
 											{selectedProvider === provider._id && (
 												<div className='selected-doctor'>
 													<BsCheck size={12} />
@@ -713,7 +716,7 @@ class ModalNewAppointmentForParents extends React.Component {
 							</div>
 						</div>
 						<Row gutter={10}>
-							<Col xs={24} sm={24} md={8}>
+							<Col xs={24} sm={24} md={10}>
 								<div className='provider-profile'>
 									<div className='flex flex-row items-center'>
 										<p className='font-16 font-700'>
@@ -721,40 +724,40 @@ class ModalNewAppointmentForParents extends React.Component {
 											{!!listProvider[selectedProviderIndex]?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
 											{userRole > 3 && listProvider[selectedProviderIndex]?.manualSchedule?.find(m => m.isPrivate) ? <Popover content={this.privateSlot} trigger="click"><FaCalendarAlt size={16} className="text-green500 cursor" /></Popover> : null}
 										</p>
-										<p className='font-12 font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? intl.formatMessage(messages.screeningRequired) : ''}</p>
+										<p className='font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
 									<div className='flex'>
 										<div className='flex-1'>
 											{listProvider[selectedProviderIndex]?.contactNumber?.map((phone, index) => (
-												<div key={index} className='font-10'>{phone.phoneNumber}</div>
+												<p key={index} className='font-12'>{phone.phoneNumber}</p>
 											))}
 											{listProvider[selectedProviderIndex]?.contactEmail?.map((email, index) => (
-												<div key={index} className='font-10'>{email.email}</div>
+												<p key={index} className='font-12'>{email.email}</p>
 											))}
 											{listProvider[selectedProviderIndex]?.serviceAddress && (
-												<div className='font-10'>{listProvider[selectedProviderIndex].serviceAddress}</div>
+												<p className='font-12'>{listProvider[selectedProviderIndex].serviceAddress}</p>
 											)}
 										</div>
-										<div className='flex-1 font-10'>
-											{standardRate && <div>Rate: ${standardRate}</div>}
-											{subsidizedRate && <div>Subsidized Rate: ${subsidizedRate}</div>}
+										<div className='flex-1 font-12'>
+											{standardRate && <p>Rate: ${standardRate}</p>}
+											{subsidizedRate && <p>Subsidized Rate: ${subsidizedRate}</p>}
 										</div>
 									</div>
 									<div className='flex mt-10'>
 										<div className='flex-1'>
-											<div className='font-10 text-bold'>Skillset(s):</div>
+											<p className='text-bold'>Skillset(s):</p>
 											{listProvider[selectedProviderIndex]?.skillSet?.map((skill, index) => (
-												<div key={index} className='font-10'>{skill.name}</div>
+												<p key={index} className='font-12'>{skill.name}</p>
 											))}
 										</div>
-										<div className='font-10 flex-1'>
-											<div className='text-bold'>Grade level(s)</div>
-											<div>{listProvider[selectedProviderIndex]?.academicLevel?.map((level, i) => (
-												<div key={i}>{level.level}</div>
-											))}</div>
+										<div className='flex-1'>
+											<p className='text-bold'>Grade level(s)</p>
+											{listProvider[selectedProviderIndex]?.academicLevel?.map((level, i) => (
+												<p className='font-12' key={i}>{level.level}</p>
+											))}
 										</div>
 									</div>
-									<div className='font-10 text-bold mt-10'>Profile</div>
+									<p className='text-bold mt-10'>Profile</p>
 									<div className='profile-text'>
 										<Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
 											{listProvider[selectedProviderIndex]?.publicProfile}
@@ -762,7 +765,7 @@ class ModalNewAppointmentForParents extends React.Component {
 									</div>
 								</div>
 							</Col>
-							<Col xs={24} sm={24} md={16}>
+							<Col xs={24} sm={24} md={14}>
 								<div className='px-20'>
 									<p className='font-700'>{intl.formatMessage(msgCreateAccount.selectDateTime)}<sup>*</sup></p>
 									<div className='calendar'>
