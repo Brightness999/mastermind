@@ -1,4 +1,4 @@
-import { Divider, Table, Space } from 'antd';
+import { Divider, Table, Space, Input, Button } from 'antd';
 import { routerLinks } from '../../../constant';
 import { ModalConfirm, ModalDependentDetail, ModalCreateNote } from '../../../../components/Modal';
 import React, { createRef } from 'react';
@@ -8,6 +8,7 @@ import './index.less';
 import { checkPermission } from '../../../../utils/auth/checkPermission';
 import request from '../../../../utils/api/request';
 import { createPrivateNote, deletePrivateNote, getDependents } from '../../../../utils/api/apiList';
+import { SearchOutlined } from '@ant-design/icons';
 
 export default class extends React.Component {
   constructor(props) {
@@ -141,8 +142,48 @@ export default class extends React.Component {
     const columns = [
       {
         title: 'Name', key: 'name',
-        sorter: (a, b) => a.firstName > b.firstName ? 1 : a.firstName < b.firstName ? -1 : a.firstName == b.firstName && a.lastName > b.lastName ? 1 : -1,
-        render: (dependent) => `${dependent.firstName} ${dependent.lastName}`,
+        sorter: (a, b) => a.firstName + a.lastName > b.firstName + b.lastName ? 1 : -1,
+        render: (dependent) => `${dependent.firstName ?? ''} ${dependent.lastName ?? ''}`,
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+          <div style={{ padding: 8 }}>
+            <Input
+              ref={this.searchInput}
+              placeholder={`Search Dependent Name`}
+              value={selectedKeys[0]}
+              onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+              onPressEnter={() => confirm()}
+              style={{ marginBottom: 8, display: 'block' }}
+            />
+            <Space>
+              <Button
+                type="primary"
+                onClick={() => confirm()}
+                icon={<SearchOutlined />}
+                size="small"
+                style={{ width: 90 }}
+              >
+                Search
+              </Button>
+              <Button
+                onClick={() => clearFilters()}
+                size="small"
+                style={{ width: 90 }}
+              >
+                Reset
+              </Button>
+            </Space>
+          </div>
+        ),
+        filterIcon: (filtered) => (
+          <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+        ),
+        onFilter: (value, record) =>
+          record['firstName']?.toString()?.toLowerCase()?.includes((value).toLowerCase()) || record['lastName']?.toString()?.toLowerCase()?.includes((value).toLowerCase()),
+        onFilterDropdownOpenChange: visible => {
+          if (visible) {
+            setTimeout(() => this.searchInput.current?.select(), 100);
+          }
+        },
       },
       { title: 'Birthday', dataIndex: 'birthday', key: 'birthday', type: 'datetime', sorter: (a, b) => a.birthday > b.birthday ? 1 : -1, render: (birthday) => new Date(birthday).toLocaleString() },
       { title: 'Parent Email', dataIndex: 'guardianEmail', key: 'guardianEmail', sorter: (a, b) => a.guardianEmail > b.guardianEmail ? 1 : -1 },
