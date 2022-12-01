@@ -78,6 +78,7 @@ export default class extends React.Component {
 			this.state.users.map(user => {
 				if (user._id == this.state.userId) {
 					user.isActive = this.state.userState;
+					user.updatedAt = new Date().toString();
 				}
 				return user;
 			})
@@ -167,6 +168,7 @@ export default class extends React.Component {
 				onFilter: (value, record) => record.role == value,
 			},
 			{ title: 'Active', dataIndex: 'isActive', key: 'isActive', render: (isActive) => isActive ? 'True' : 'False', sorter: (a, b) => a.isActive - b.isActive },
+			{ title: 'Last updated', dataIndex: 'updatedAt', key: 'lastUpdated', render: (updatedAt) => new Date(updatedAt)?.toLocaleDateString(), sorter: (a, b) => new Date(a.updatedAt) > new Date(b.updatedAt) ? 1 : -1 },
 			{
 				title: 'Action', key: 'action', render: (user) => (
 					<Space size="middle">
