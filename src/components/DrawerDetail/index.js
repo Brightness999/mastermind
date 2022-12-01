@@ -32,6 +32,7 @@ class DrawerDetail extends Component {
       isModalInvoice: false,
       publicFeedback: this.props.event?.publicFeedback ?? '',
       isLeftFeedback: !!this.props.event?.publicFeedback,
+      isShowFeedback: false,
       userRole: store.getState().auth.user?.role,
       visisbleProcess: false,
       visibleCurrentReferral: false,
@@ -107,6 +108,14 @@ class DrawerDetail extends Component {
     this.setState({ isShowEditNotes: false });
   }
 
+  showFeedback = () => {
+    this.setState({ isShowFeedback: true });
+  }
+
+  hideFeedback = () => {
+    this.setState({ isShowFeedback: false });
+  }
+
   handleChangeNotes = (value) => {
     this.setState({ notes: value });
   }
@@ -151,7 +160,6 @@ class DrawerDetail extends Component {
           this.setState({
             errorMessage: '',
             isNotPending: true,
-            isLeftFeedback: !!this.state.publicFeedback.trim(),
             visisbleProcess: false,
           });
           this.updateAppointments();
@@ -182,7 +190,6 @@ class DrawerDetail extends Component {
           this.setState({
             errorMessage: '',
             isNotPending: true,
-            isLeftFeedback: !!this.state.publicFeedback.trim(),
             visisbleProcess: false,
           });
           this.updateAppointments();
@@ -222,7 +229,7 @@ class DrawerDetail extends Component {
     }
     request.post(leaveFeedbackForProvider, data).then(result => {
       if (result.success) {
-        this.setState({ errorMessage: '', isLeftFeedback: true });
+        this.setState({ errorMessage: '', isShowFeedback: false });
       } else {
         this.setState({ errorMessage: result.data });
       }
@@ -270,7 +277,7 @@ class DrawerDetail extends Component {
   }
 
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visisbleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visisbleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback } = this.state;
     const { event } = this.props;
 
     const providerProfile = (
@@ -434,7 +441,7 @@ class DrawerDetail extends Component {
             </div>
           )}
         </div>
-        <Input.TextArea rows={5} disabled={!isShowEditNotes} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />
+        <Input.TextArea rows={5} className="appointment-note" disabled={!isShowEditNotes} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />
         {isShowEditNotes && (
           <div className='flex gap-2 mt-10'>
             <Button
@@ -457,7 +464,31 @@ class DrawerDetail extends Component {
         )}
         <div className='post-feedback mt-1'>
           <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.feedback)}</p>
-          <Input.TextArea rows={7} disabled={userRole == 3 ? true : isLeftFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
+          <Input.TextArea rows={7} className="appointment-feedback" disabled={userRole == 3 ? true : !isShowFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
+          {isShowFeedback && (
+            <Row gutter={15} className="mt-10">
+              <Col span={12}>
+                <Button
+                  type='primary'
+                  block
+                  onClick={this.handleLeaveFeedback}
+                  className='h-30 p-0'
+                >
+                  {intl.formatMessage(msgModal.save)}
+                </Button>
+              </Col>
+              <Col span={12}>
+                <Button
+                  type='primary'
+                  block
+                  onClick={this.hideFeedback}
+                  className='h-30 p-0'
+                >
+                  {intl.formatMessage(messages.cancel)}
+                </Button>
+              </Col>
+            </Row>
+          )}
         </div>
         <Row gutter={15} className='list-btn-detail'>
           {[1, 4].includes(event?.type) && event?.status == 0 && userRole > 3 && (
@@ -488,15 +519,27 @@ class DrawerDetail extends Component {
               </Button>
             </Col>
           )}
-          {(event?.status == -1 && !isLeftFeedback) && (
+          {(userRole != 3 && !isShowFeedback) && (
             <Col span={12}>
               <Button
                 type='primary'
                 icon={<ImPencil size={12} />}
                 block
-                onClick={userRole > 3 ? this.handleLeaveFeedback : this.handleRequestFeedback}
+                onClick={this.showFeedback}
               >
-                {intl.formatMessage(userRole > 3 ? messages.leaveFeedback : messages.requestFeedback)}
+                {intl.formatMessage(messages.leaveFeedback)}
+              </Button>
+            </Col>
+          )}
+          {(userRole == 3 && event?.status == -1 && !isLeftFeedback) && (
+            <Col span={12}>
+              <Button
+                type='primary'
+                icon={<ImPencil size={12} />}
+                block
+                onClick={this.handleRequestFeedback}
+              >
+                {intl.formatMessage(messages.requestFeedback)}
               </Button>
             </Col>
           )}

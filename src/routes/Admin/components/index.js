@@ -875,13 +875,15 @@ class SchedulingCenter extends React.Component {
             <img src='../images/call.png' onClick={this.onShowModalReferral} />
           </div>
         </div>
-        <DrawerDetail
-          visible={userDrawerVisible}
-          onClose={this.onCloseDrawerDetail}
-          role={userRole}
-          event={selectedEvent}
-          calendar={this.calendarRef}
-        />
+        {userDrawerVisible &&
+          <DrawerDetail
+            visible={userDrawerVisible}
+            onClose={this.onCloseDrawerDetail}
+            role={userRole}
+            event={selectedEvent}
+            calendar={this.calendarRef}
+          />
+        }
         <ModalNewAppointment {...modalNewAppointProps} />
         {this.renderModalSubsidyDetail()}
         {this.modalCreateAndEditSubsidyRequest()}
