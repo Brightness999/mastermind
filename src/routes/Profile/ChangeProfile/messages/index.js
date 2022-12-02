@@ -106,10 +106,6 @@ export default ({
     id: `${scope}.maritalStatus`,
     defaultMessage: 'Marital status (Optional)',
   },
-  maritalStatus: {
-    id: `${scope}.maritalStatus`,
-    defaultMessage: 'Marital status (Optional)',
-  },
   father: {
     id: `${scope}.father`,
     defaultMessage: 'Father',

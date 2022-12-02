@@ -183,7 +183,7 @@ class InfoChild extends Component {
 													</Col>
 													<Col xs={24} sm={24} md={9}>
 														<Form.Item name={[field.name, "lastName"]} label={intl.formatMessage(messages.lastName)}>
-															<Input value={parentInfo?.fatherName?.split(' ')?.[1]} disabled />
+															<Input defaultValue={parentInfo?.fatherName?.split(' ')?.[1]} disabled />
 														</Form.Item>
 													</Col>
 													<Col xs={24} sm={24} md={6}>

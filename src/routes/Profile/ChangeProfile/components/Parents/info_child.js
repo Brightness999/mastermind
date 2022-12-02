@@ -30,6 +30,7 @@ class InfoChild extends Component {
 				data?.map(item => {
 					item.services = item.services.map(item => item._id);
 					item.birthday = moment(item.birthday);
+					item.lastName = this.props.auth.user?.parentInfo?.fatherName?.split(' ')?.[1];
 					return item;
 				})
 				this.form.setFieldsValue({ children: data });
