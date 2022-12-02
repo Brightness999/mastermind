@@ -50,3 +50,4 @@ export const getConsultationsForDependent = 'clients/get_consultations_for_depen
 export const uploadDocumentForParent = 'clients/upload_document'
 export const createSubsidyRequest = 'clients/create_subsidy_request'
 export const requestFeedbackForClient = 'clients/request_feedback'
+export const getChildProfile = 'clients/get_child_profile'

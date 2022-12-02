@@ -1,126 +1,85 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select, DatePicker, Switch } from 'antd';
+import { Row, Col, Form, Button, Input, Select, DatePicker } from 'antd';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
-import messagesLogin from '../../../../Sign/Login/messages';
+import msgLogin from '../../../../Sign/Login/messages';
+import msgCreateAccount from '../../../../Sign/CreateAccount/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import moment from 'moment';
-import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios';
 import { setInforClientChild, changeInforClientChild } from '../../../../../redux/features/authSlice';
 import { store } from '../../../../../redux/store';
-import { getDefaultValueForClient } from '../../../../../utils/api/apiList';
+import request from '../../../../../utils/api/request';
+import { getChildProfile, getDefaultValueForClient } from '../../../../../utils/api/apiList';
 
 class InfoChild extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			formChild: [
-				{
-					firstName: '',
-					lastName: '',
-					birthday: '',
-					backgroundInfor: '',
-					primaryTeacher: '',
-					currentGrade: '',
-					school: '',
-					services: [],
-				},
-			],
-			dataChange: [],
-			isTypeFull: false,
-			phoneFill: '',
-			emailFill: '',
 			listServices: [],
+			listSchools: [],
+			academicLevels: [],
 		}
 	}
 
 	componentDidMount() {
-		const tokenUser = localStorage.getItem('token');
-		if (tokenUser) {
-			axios.post(url + 'clients/get_child_profile', {}, {
-				headers: {
-					'Authorization': 'Bearer ' + tokenUser
-				}
-			}).then(result => {
-				const { success, data } = result.data;
-				if (success) {
-					data?.map(item => {
-						return {
-							...item,
-							birthday_moment: moment(item.birthday, "YYYY-MM-DD"),
-							services: item.services.map(item => item._id)
-						}
-					})
-					this.form.setFieldsValue({ children: data });
-				}
-			}).catch(err => {
-				console.log(err);
-			})
-		}
+		request.post(getChildProfile).then(result => {
+			const { success, data } = result;
+			if (success) {
+				data?.map(item => {
+					item.services = item.services.map(item => item._id);
+					item.birthday = moment(item.birthday);
+					return item;
+				})
+				this.form.setFieldsValue({ children: data });
+			}
+		}).catch(err => {
+			console.log(err);
+		})
 		this.loadServices();
 	}
 
 	loadServices() {
-		axios.post(url + getDefaultValueForClient).then(result => {
-			const { success, data } = result.data;
+		request.post(getDefaultValueForClient).then(result => {
+			const { success, data } = result;
 			if (success) {
-				this.setState({ listServices: data.listServices });
+				this.setState({
+					listServices: data.SkillSet,
+					listSchools: data.schools,
+					academicLevels: data.AcademicLevel,
+				});
 			} else {
-				this.setState({ listServices: [] });
+				this.setState({
+					listServices: [],
+					listSchools: [],
+					academicLevels: [],
+				});
 			}
 		}).catch(err => {
-			console.log(err);
-			this.setState({ listServices: [] });
+			console.log('getDefaultValueForClient error---', err);
+			this.setState({
+				listServices: [],
+				listSchools: [],
+				academicLevels: [],
+			});
 		})
 	}
 
-	getDefaultChildObj(parentInfo) {
-		const obj = {
-			"firstName": '',
-			"lastName": "",
-			"birthday": "",
-			"guardianPhone": "",
-			"guardianEmail": "",
-			"backgroundInfor": "",
-			"school": "",
-			"primaryTeacher": "",
-			"currentGrade": "",
-			"services": [],
-			"availabilitySchedule": []
-		};
-		return obj;
-	}
-
-	updateReduxValueFor1Depedent(index, fieldName, value) {
-		console.log('updateReduxValueFor1Depedent', index, fieldName, value);
-	}
-
 	getBirthday = (index) => {
-		const { authDataClientChild } = this.props.auth;
-		if (!!authDataClientChild && authDataClientChild[index] != undefined && !!authDataClientChild[index].birthday_moment) {
-			return authDataClientChild[index].birthday_moment;
+		const children = this.form.getFieldsValue()?.children;
+		if (!!children && children[index] != undefined && !!children[index].birthday) {
+			return moment(children[index].birthday);
 		}
 		return moment();
 	}
 
-	onFinish = (values) => { }
-
-	updateProfile = async (index) => {
-		const token = localStorage.getItem('token');
-		const values = await this.form.validateFields();
-		const dataForm = values.children[index];
-		const dataChangeFrom = this.state.dataChange ?? [];
-
+	onFinish = (values) => {
 		try {
-			store.dispatch(setInforClientChild({ data: dataForm, token: token }))
-			if (dataChangeFrom.length != 0) {
-				this.props.changeInforClientChild(dataChangeFrom)
-			}
+			const token = localStorage.getItem('token');
+			store.dispatch(setInforClientChild({ data: values.children, token: token }))
 		} catch (error) {
-			console.log(error, 'error')
+			console.log('update children error ---', error)
 		}
 	}
 
@@ -128,26 +87,21 @@ class InfoChild extends Component {
 		console.log('Failed:', errorInfo);
 	};
 
-	getValueInForm = (allValue, allValueChange) => {
-		this.setState({ dataChange: allValueChange.children })
-	}
-
-	onValueChange() { }
-
 	render() {
+		const { listServices, listSchools, academicLevels } = this.state;
+
 		return (
 			<Row justify="center" className="row-form">
 				<div className='col-form col-info-child'>
 					<div className='div-form-title'>
-						<p className='font-30 text-center mb-10'>{intl.formatMessage(messages.tellYourself)}</p>
-						<p className='font-24 text-center'>{intl.formatMessage(messages.contactInformation)}</p>
+						<p className='font-24 text-center'>{intl.formatMessage(messages.dependentInformation)}</p>
 					</div>
 					<Form
 						name="form_contact"
+						layout='vertical'
 						onFinish={this.onFinish}
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
-						onValuesChange={this.getValueInForm}
 					>
 						<Form.List name="children">
 							{(fields, { add, remove }) => (
@@ -163,35 +117,34 @@ class InfoChild extends Component {
 												<Col xs={24} sm={24} md={9}>
 													<Form.Item
 														name={[field.name, "firstName"]}
-														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.firstName) }]}
+														label={intl.formatMessage(messages.firstName)}
+														className='float-label-item'
+														rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.firstName) }]}
 													>
-														<Input
-															onChange={v => this.updateReduxValueFor1Depedent(index, "firstName", v.target.value)}
-															placeholder={intl.formatMessage(messages.firstName)}
-														/>
+														<Input placeholder={intl.formatMessage(messages.firstName)} />
 													</Form.Item>
 												</Col>
 												<Col xs={24} sm={24} md={9}>
 													<Form.Item
 														name={[field.name, "lastName"]}
-														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.lastName) }]}
+														label={intl.formatMessage(messages.lastName)}
+														className='float-label-item'
+														rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.lastName) }]}
 													>
-														<Input
-															onChange={v => this.updateReduxValueFor1Depedent(index, "lastName", v.target.value)}
-															placeholder={intl.formatMessage(messages.lastName)}
-														/>
+														<Input placeholder={intl.formatMessage(messages.lastName)} />
 													</Form.Item>
 												</Col>
 												<Col xs={24} sm={24} md={6}>
 													<Form.Item
-														name={[field.name, "birthday_moment"]}
-														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.dateBirth) }]}
+														name={[field.name, "birthday"]}
+														label={intl.formatMessage(messages.dateBirth)}
+														className='float-label-item'
+														rules={[{ required: true }]}
 													>
 														<DatePicker
 															format={"YYYY-MM-DD"}
+															defaultValue={this.getBirthday(index)}
 															placeholder={intl.formatMessage(messages.dateBirth)}
-															selected={this.getBirthday(index)}
-															onChange={v => this.updateReduxValueFor1Depedent(index, "birthday", v.valueOf())}
 														/>
 													</Form.Item>
 												</Col>
@@ -201,101 +154,116 @@ class InfoChild extends Component {
 													<Form.Item
 														name={[field.name, "guardianPhone"]}
 														className='float-label-item'
-														label={intl.formatMessage(messages.guardianPhone)}>
-														<Input
-															onChange={v => this.updateReduxValueFor1Depedent(index, "guardianPhone", v.target.value)}
-															placeholder='{PARENTS} AUTOFILL'
-														/>
+														label={intl.formatMessage(messages.guardianPhone)}
+														rules={[{ required: true }]}
+													>
+														<Input placeholder={intl.formatMessage(messages.contactNumber)} />
 													</Form.Item>
 												</Col>
 												<Col xs={24} sm={24} md={12}>
-													<Form.Item className='float-label-item'
+													<Form.Item
 														name={[field.name, "guardianEmail"]}
-														label={intl.formatMessage(messages.guardianEmail)}>
-														<Input
-															onChange={v => this.updateReduxValueFor1Depedent(index, "guardianEmail", v.target.value)}
-															placeholder='{PARENTS} AUTOFILL'
-														/>
+														label={intl.formatMessage(messages.guardianEmail)}
+														className='float-label-item'
+														rules={[{ required: true }]}
+													>
+														<Input placeholder={intl.formatMessage(messages.contactEmail)} />
 													</Form.Item>
 												</Col>
 											</Row>
-											<Form.Item
-												name={[field.name, "backgroundInfor"]}
-												rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.backgroundInformation) }]}
-											>
-												<Input.TextArea
-													onChange={v => this.updateReduxValueFor1Depedent(index, "backgroundInfor", v.target.value)}
-													rows={4}
-													placeholder={intl.formatMessage(messages.backgroundInformation)}
-												/>
-											</Form.Item>
-											<Form.Item
-												name={[field.name, "school"]}
-												rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
-											>
-												<Input
-													onChange={v => this.updateReduxValueFor1Depedent(index, "school", v.target.value)}
-													placeholder={intl.formatMessage(messages.school)}
-												/>
-											</Form.Item>
+											<Row>
+												<Col span={24}>
+													<Form.Item
+														name={[field.name, "school"]}
+														label={intl.formatMessage(messages.school)}
+														className='float-label-item'
+														rules={[{ required: true }]}
+													>
+														<Select
+															showArrow
+															placeholder={intl.formatMessage(messages.school)}
+															optionLabelProp="label"
+														>
+															{listSchools?.map((school, index) => (
+																<Select.Option key={index} label={school.name} value={school._id}>{school.name}</Select.Option>
+															))}
+														</Select>
+													</Form.Item>
+												</Col>
+											</Row>
 											<Row gutter={14}>
 												<Col xs={24} sm={24} md={12}>
 													<Form.Item
 														name={[field.name, "primaryTeacher"]}
-														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
+														label={intl.formatMessage(messages.primaryTeacher)}
+														rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
+														className='float-label-item'
 													>
-														<Input
-															onChange={v => this.updateReduxValueFor1Depedent(index, "primaryTeacher", v.target.value)}
-															placeholder={intl.formatMessage(messages.primaryTeacher)}
-														/>
+														<Input placeholder={intl.formatMessage(messages.primaryTeacher)} />
 													</Form.Item>
 												</Col>
 												<Col xs={24} sm={24} md={12}>
 													<Form.Item
 														name={[field.name, "currentGrade"]}
-														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.currentGrade) }]}
+														label={intl.formatMessage(messages.currentGrade)}
+														rules={[{ required: true }]}
+														className='float-label-item'
 													>
-														<Input
-															onChange={v => this.updateReduxValueFor1Depedent(index, "currentGrade", v.target.value)}
-															placeholder={intl.formatMessage(messages.currentGrade)}
-														/>
+														<Select placeholder={intl.formatMessage(messages.currentGrade)}>
+															{academicLevels?.map((level, index) => (
+																<Select.Option key={index} value={level}>{level}</Select.Option>
+															))}
+														</Select>
 													</Form.Item>
 												</Col>
 											</Row>
-											<div className='flex flex-row'>
-												<Form.Item
-													name={[field.name, 'services']}
-													rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
-													className='add-services bottom-0 flex-1'
-												>
-													<Select
-														mode="multiple"
-														showArrow
-														placeholder={intl.formatMessage(messages.servicesRequired)}
-														optionLabelProp="label"
-														onChange={v => this.updateReduxValueFor1Depedent(index, "services", v)}
+											<Row>
+												<Col span={24}>
+													<Form.Item
+														name={[field.name, 'services']}
+														label={intl.formatMessage(messages.skillsets)}
+														className='add-services flex-1 float-label-item'
+														rules={[{ required: true }]}
 													>
-														{this.state.listServices?.map((service, index) => (
-															<Select.Option key={index} label={service.name} value={service._id}>{service.name}</Select.Option>
-														))}
-													</Select>
-												</Form.Item>
-											</div>
-											<Form.Item className="form-btn continue-btn" >
-												<Button
-													block
-													type="primary"
-													htmlType="submit"
-													onClick={() => this.updateProfile(index)}
-												>
-													{intl.formatMessage(messages.update).toUpperCase()}
-												</Button>
-											</Form.Item>
+														<Select
+															mode="multiple"
+															showArrow
+															placeholder={intl.formatMessage(messages.skillsets)}
+															optionLabelProp="label"
+														>
+															{listServices?.map((service, index) => (
+																<Select.Option key={index} label={service.name} value={service._id}>{service.name}</Select.Option>
+															))}
+														</Select>
+													</Form.Item>
+												</Col>
+											</Row>
+											<Row>
+												<Col span={24}>
+													<Form.Item
+														name={[field.name, "backgroundInfor"]}
+														label={intl.formatMessage(msgCreateAccount.briefProfile)}
+														className='float-label-item'
+														rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(msgCreateAccount.briefProfile) }]}
+													>
+														<Input.TextArea rows={4} placeholder={intl.formatMessage(msgCreateAccount.briefProfile)} />
+													</Form.Item>
+												</Col>
+											</Row>
 										</div>
 									))}
 								</div>
 							)}
 						</Form.List>
+						<Form.Item className="form-btn continue-btn" >
+							<Button
+								block
+								type="primary"
+								htmlType="submit"
+							>
+								{intl.formatMessage(messages.update).toUpperCase()}
+							</Button>
+						</Form.Item>
 					</Form>
 				</div>
 			</Row>
