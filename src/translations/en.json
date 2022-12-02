@@ -53,6 +53,8 @@
   "routes.Createaccount.motherName": "Mother’s name",
   "routes.Createaccount.contactInfo": "Contact info",
   "routes.Createaccount.dependentsInfo": "Dependents info",
+  "routes.Createaccount.dependentInformation": "Dependent Information",
+  "routes.Createaccount.update": "Update",
   "routes.Createaccount.tellYourChild": "Tell us about your child",
   "routes.Createaccount.dependent": "Dependent",
   "routes.Createaccount.dependents": "Dependents",
