@@ -24,6 +24,7 @@ export const getCommunitiServer = 'schools/get_list_communites'
 export const getSchoolInfos = 'schools/get_school_infos'
 export const getMySchoolInfo = 'schools/get_my_school_info'
 export const updateSchoolInfo = 'schools/update_school_info'
+export const updateSchoolAvailability = 'schools/update_school_availability'
 
 export const getAppointmentsForProvider = 'providers/get_my_appointments'
 export const getAppointmentsInMonthForProvider = 'providers/get_my_appointments_in_month'
