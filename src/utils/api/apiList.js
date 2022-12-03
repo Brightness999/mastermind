@@ -22,6 +22,8 @@ export const getAppointmentsInMonthForConsultant = 'consultants/get_my_appointme
 
 export const getCommunitiServer = 'schools/get_list_communites'
 export const getSchoolInfos = 'schools/get_school_infos'
+export const getMySchoolInfo = 'schools/get_my_school_info'
+export const updateSchoolInfo = 'schools/update_school_info'
 
 export const getAppointmentsForProvider = 'providers/get_my_appointments'
 export const getAppointmentsInMonthForProvider = 'providers/get_my_appointments_in_month'
@@ -35,6 +37,7 @@ export const declineAppointmentForProvider = 'providers/decline_appointment'
 export const leaveFeedbackForProvider = 'providers/leave_feedback'
 export const cancelAppointmentForProvider = 'providers/cancel_appoint'
 export const getMyProviderInfo = 'providers/get_my_provider_info'
+export const updateMyProviderProfile = 'providers/update_my_provider_profile'
 
 export const getAppointmentsForParent = 'clients/get_my_appointments'
 export const getAppointmentsInMonthForParent = 'clients/get_my_appointments_in_month'
@@ -53,3 +56,6 @@ export const createSubsidyRequest = 'clients/create_subsidy_request'
 export const requestFeedbackForClient = 'clients/request_feedback'
 export const getChildProfile = 'clients/get_child_profile'
 export const getParentProfile = 'clients/get_parent_profile'
+export const updateChildProfile = 'clients/update_child_profile'
+export const updateChildAvailability = 'clients/update_child_availability'
+export const updateParentProfile = 'clients/update_parent_profile'

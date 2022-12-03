@@ -2,6 +2,7 @@ import { url } from '../../utils/api/baseUrl';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { helper } from '../../utils/auth/helper';
 import request from '../../utils/api/request'
+import { getChildProfile, getMyProviderInfo, getMySchoolInfo, getParentProfile, updateChildAvailability, updateChildProfile, updateMyProviderProfile, updateParentProfile, updateSchoolInfo } from '../../utils/api/apiList';
 
 const initialState = {
 	user: [],
@@ -23,14 +24,14 @@ export const getInfoAuth = createAsyncThunk(
 			let resultChild = {};
 			switch (role) {
 				case 60:
-					result = await request.post(url + 'schools/get_my_school_info', {}, token);
+					result = await request.post(url + getMySchoolInfo, {}, token);
 					return result.data;
 				case 30:
-					result = await request.post(url + 'providers/get_my_provider_info', {}, token);
+					result = await request.post(url + getMyProviderInfo, {}, token);
 					return result.data;
 				case 3:
-					resultParent = await request.post(url + 'clients/get_parent_profile', {}, token);
-					resultChild = await request.post(url + 'clients/get_child_profile', {}, token);
+					resultParent = await request.post(url + getParentProfile, {}, token);
+					resultChild = await request.post(url + getChildProfile, {}, token);
 					return { parent: resultParent.data, child: resultChild.data };
 			}
 		} catch (error) {
@@ -44,7 +45,7 @@ export const setInforClientChild = createAsyncThunk(
 	'auth/setInforClientChild',
 	async (data) => {
 		try {
-			const result = await request.post(url + 'clients/update_child_profile', data.data, data.token);
+			await request.post(url + updateChildProfile, data.data, data.token);
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -56,7 +57,7 @@ export const setAvailabilityClientChild = createAsyncThunk(
 	'auth/setAvailabilityClientChild',
 	async (data) => {
 		try {
-			const result = await request.post(url + 'clients/update_child_availability', data.data, data.token);
+			const result = await request.post(url + updateChildAvailability, data.data, data.token);
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -68,7 +69,7 @@ export const setInforClientParent = createAsyncThunk(
 	'auth/setInforClientParent',
 	async (data) => {
 		try {
-			await request.post(url + 'clients/update_parent_profile', data.data, data.token);
+			await request.post(url + updateParentProfile, data.data, data.token);
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -80,7 +81,7 @@ export const setInforProvider = createAsyncThunk(
 	'auth/setInforProvider',
 	async (data) => {
 		try {
-			await request.post(url + 'providers/update_my_provider_profile', data.data, data.token);
+			await request.post(url + updateMyProviderProfile, data.data, data.token);
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -92,7 +93,7 @@ export const setInforSchool = createAsyncThunk(
 	'auth/setInforSchool',
 	async (data) => {
 		try {
-			await request.post(url + 'schools/update_school_info', data.data, data.token);
+			await request.post(url + updateSchoolInfo, data.data, data.token);
 		} catch (error) {
 			console.log(error, 'error')
 		}

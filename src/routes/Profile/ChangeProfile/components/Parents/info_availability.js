@@ -51,16 +51,6 @@ class DependentAvailability extends Component {
 
 	onSubmit = async () => {
 		const token = localStorage.getItem('token');
-		const dependents = this.state.studentInfos.map(dependent => {
-			dependent.availabilitySchedule.map(t => {
-				delete t._id;
-				delete t.createdAt;
-				delete t.updatedAt;
-				return t;
-			})
-			return dependent;
-		})
-		console.log(dependents)
 		try {
 			store.dispatch(setAvailabilityClientChild({ data: this.state.studentInfos, token: token }));
 		} catch (error) {
