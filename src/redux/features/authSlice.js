@@ -52,6 +52,18 @@ export const setInforClientChild = createAsyncThunk(
 	}
 )
 
+export const setAvailabilityClientChild = createAsyncThunk(
+	'auth/setAvailabilityClientChild',
+	async (data) => {
+		try {
+			const result = await request.post(url + 'clients/update_child_availability', data.data, data.token);
+		} catch (error) {
+			console.log(error, 'error')
+		}
+		return false
+	}
+)
+
 export const setInforClientParent = createAsyncThunk(
 	'auth/setInforClientParent',
 	async (data) => {

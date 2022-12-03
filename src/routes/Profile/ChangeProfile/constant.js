@@ -44,9 +44,9 @@ export const MENU_PARENT = [
         label: 'Info Parent'
     },
     {
-        key: 'Info_progress',
+        key: 'Info_availability',
         icon: '',
-        label: 'Info Progress'
+        label: 'Info Availability'
     },
     {
         key: 'Change_password',

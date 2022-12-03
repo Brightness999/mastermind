@@ -1,17 +1,15 @@
 import React from 'react';
 import { Link } from 'dva/router';
 import './index.less';
-import { Layout, Menu } from 'antd';
-
+import { Menu } from 'antd';
 import InfoProfile from './Provider/info_profile';
 import InfoServices from './Provider/info_services';
 import InfoAvailability from './Provider/info_availability';
 import SubsidyProgram from './Provider/subsidy_program';
 import DayWork from './Provider/day_work';
-
 import InfoChild from './Parents/info_child';
 import InfoParent from './Parents/info_parent';
-import InfoProgress from './Parents/info_progress';
+import DependentAvailability from './Parents/info_availability';
 import InfoSchool from './School/info_school';
 import InfoAvaiSchool from './School/info_availability'
 import ChangePassword from './ChangePassword';
@@ -24,12 +22,10 @@ const user = store.getState().auth.user;
 export default class extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {
       parent: {
         info_child: true,
         info_parent: false,
-        info_progress: false,
         info_availability: false,
         change_password: false
       },
@@ -73,7 +69,7 @@ export default class extends React.Component {
   }
 
   getMenuList = (data) => {
-    const menu = data.map((item, index) => ({
+    const menu = data.map((item) => ({
       key: String(item.key),
       icon: item.icon != '' ? React.createElement(item.icon) : '',
       label: (
@@ -145,8 +141,8 @@ export default class extends React.Component {
           case 'Info_parent':
             this.setState({ parent: { newStateParent, info_parent: true } })
             break;
-          case 'Info_progress':
-            this.setState({ parent: { newStateParent, info_progress: true } })
+          case 'Info_availability':
+            this.setState({ parent: { newStateParent, info_availability: true } })
             break;
           default:
             this.setState({ parent: { newStateParent, change_password: true } })
@@ -192,8 +188,8 @@ export default class extends React.Component {
           return <InfoChild />
         } else if (parent.info_parent) {
           return <InfoParent />
-        } else if (parent.info_progress) {
-          return <InfoProgress />
+        } else if (parent.info_availability) {
+          return <DependentAvailability />
         } else {
           return <ChangePassword />
         }

@@ -7,8 +7,10 @@ import moment from 'moment';
 import messages from '../../messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import shortid from 'shortid';
+import request from '../../../../../utils/api/request';
+import { getChildProfile } from '../../../../../utils/api/apiList';
+import { setAvailabilityClientChild } from '../../../../../redux/features/authSlice';
+import { store } from '../../../../../redux/store';
 
 class DependentAvailability extends Component {
 	constructor(props) {
@@ -22,45 +24,48 @@ class DependentAvailability extends Component {
 	}
 
 	componentDidMount() {
-		const { registerData } = this.props.register;
-		const studentInfos = registerData.studentInfos
-		if (this.state.currentDaySelecting.length == 0) {
-			let arr = []
-			for (let i = 0; i < studentInfos.length; i++) {
-				arr.push(0);
-			}
-			this.setState({ currentDaySelecting: arr });
-		}
-		this.setState({ studentInfos: studentInfos });
-	}
+		const tokenUser = localStorage.getItem('token');
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
+		if (tokenUser) {
+			request.post(getChildProfile).then(result => {
+				const { success, data } = result;
+				if (success) {
+					if (this.state.currentDaySelecting.length == 0) {
+						const arr = []
+						for (let i = 0; i < data.length; i++) {
+							arr.push(0);
+						}
+						this.setState({ currentDaySelecting: arr });
+					}
+					this.setState({ studentInfos: data });
+				}
+			}).catch(err => {
+				console.log('get child profile error---', err);
+			})
+		}
+	}
 
 	onSameAllDependent = () => {
 		this.setState({ isSameAll: !this.state.isSameAll });
 	}
 
 	onSubmit = async () => {
-		const { registerData } = this.props.register;
-		let studentInfos = [...registerData.studentInfos]
-		for (let i = 0; i < this.state.studentInfos.length; i++) {
-			let selectedObj = { ...studentInfos[i] };
-			selectedObj['availabilitySchedule'] = this.state.studentInfos[i].availabilitySchedule;
-			studentInfos[i] = selectedObj;
+		const token = localStorage.getItem('token');
+		const dependents = this.state.studentInfos.map(dependent => {
+			dependent.availabilitySchedule.map(t => {
+				delete t._id;
+				delete t.createdAt;
+				delete t.updatedAt;
+				return t;
+			})
+			return dependent;
+		})
+		console.log(dependents)
+		try {
+			store.dispatch(setAvailabilityClientChild({ data: this.state.studentInfos, token: token }));
+		} catch (error) {
+			console.log(error, 'error')
 		}
-		this.props.setRegisterData({ studentInfos: studentInfos });
-		return this.props.onContinue();
-	}
-
-	updateReduxValueFor1Depedent(index, fieldName, value) {
-		const { registerData } = this.props.register;
-		let studentInfos = [...registerData.studentInfos]
-		let selectedObj = { ...studentInfos[index] };
-		selectedObj[fieldName] = value;
-		studentInfos[index] = selectedObj;
-		this.props.setRegisterData({ studentInfos: studentInfos });
 	}
 
 	defaultTimeRangeItem = (dayInWeek) => {
@@ -74,19 +79,19 @@ class DependentAvailability extends Component {
 	}
 
 	addNewTimeRange = (index, dayInWeek) => {
-		const { studentInfos, isSameAll } = this.state;
+		const { isSameAll, studentInfos } = this.state;
 		const newStu = [...studentInfos];
 		const arr = [...newStu[index].availabilitySchedule];
 		arr.push(this.defaultTimeRangeItem(dayInWeek))
 		if (isSameAll) {
 			this.setState({
-				studentInfos: studentInfos.map((student) => {
+				studentInfos: studentInfos?.map(student => {
 					return { ...student, availabilitySchedule: [...arr] }
 				})
 			});
 		} else {
 			this.setState({
-				studentInfos: studentInfos.map((student, stdIndex) => {
+				studentInfos: studentInfos?.map((student, stdIndex) => {
 					if (stdIndex == index) {
 						return { ...student, availabilitySchedule: arr }
 					}
@@ -98,7 +103,7 @@ class DependentAvailability extends Component {
 
 	copyToFullWeek = (index, dayInWeek) => {
 		const { studentInfos, isSameAll } = this.state;
-		const newStu = [...studentInfos];
+		let newStu = JSON.parse(JSON.stringify(studentInfos));
 		let arr = [];
 
 		// get all field in selected day
@@ -118,13 +123,13 @@ class DependentAvailability extends Component {
 		}
 		if (isSameAll) {
 			this.setState({
-				studentInfos: studentInfos.map((student) => {
-					return { ...student, availabilitySchedule: [...arr] }
+				studentInfos: newStu?.map(student => {
+					return { ...student, availabilitySchedule: arr }
 				})
 			});
 		} else {
 			this.setState({
-				studentInfos: studentInfos.map((student, stdIndex) => {
+				studentInfos: newStu?.map((student, stdIndex) => {
 					if (stdIndex == index) {
 						return { ...student, availabilitySchedule: arr }
 					}
@@ -135,43 +140,41 @@ class DependentAvailability extends Component {
 	}
 
 	onChangeSelectingDay = (index, newDay) => {
-		const { currentDaySelecting, isSameAll } = this.state;
-
-		if (isSameAll) {
+		const { currentDaySelecting } = this.state;
+		if (this.state.isSameAll) {
 			for (let i = 0; i < currentDaySelecting.length; i++) {
 				currentDaySelecting[i] = newDay;
 			}
 		} else {
 			currentDaySelecting[index] = newDay;
 		}
-
-		this.setState({ currentDaySelecting });
+		this.setState({ currentDaySelecting })
 	}
 
-	valueForAvailabilityScheduleOpenHour(dependentIndex, scheduleIndex) {
+	valueForAvailabilityScheduleOpenHour(index, indexOnAvailabilitySchedule) {
 		const { studentInfos } = this.state;
 
-		if (!studentInfos[dependentIndex].availabilitySchedule[scheduleIndex]) {
+		if (!studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule]) {
 			return moment('00:00:00', 'HH:mm:ss');
 		}
 
-		return moment(`${studentInfos[dependentIndex].availabilitySchedule[scheduleIndex].openHour}:${studentInfos[dependentIndex].availabilitySchedule[scheduleIndex].openMin}`, 'HH:mm')
+		return moment(`${studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openHour}:${studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].openMin}:00`, 'HH:mm:ss')
 	}
 
-	valueForAvailabilityScheduleCloseHour(dependentIndex, scheduleIndex) {
+	valueForAvailabilityScheduleCloseHour(index, indexOnAvailabilitySchedule) {
 		const { studentInfos } = this.state;
 
-		if (!studentInfos[dependentIndex].availabilitySchedule[scheduleIndex]) {
+		if (!studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule]) {
 			return moment('00:00:00', 'HH:mm:ss');
 		}
 
-		return moment(`${studentInfos[dependentIndex].availabilitySchedule[scheduleIndex].closeHour}:${studentInfos[dependentIndex].availabilitySchedule[scheduleIndex].closeMin}`, 'HH:mm')
+		return moment(`${studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeHour}:${studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeMin}:00`, 'HH:mm:ss')
 	}
 
 	valueChangeForOpenHour(index, indexOnAvailabilitySchedule, v) {
 		if (!v) return;// moment('00:00:00', 'HH:mm:ss');
 
-		const { studentInfos, isSameAll } = this.state;
+		const { isSameAll, studentInfos } = this.state;
 		const newStu = JSON.parse(JSON.stringify(studentInfos));
 		let arr = [...newStu[index].availabilitySchedule];
 
@@ -180,13 +183,13 @@ class DependentAvailability extends Component {
 
 		if (isSameAll) {
 			this.setState({
-				studentInfos: studentInfos.map((student) => {
+				studentInfos: studentInfos?.map(student => {
 					return { ...student, availabilitySchedule: [...arr] }
 				})
 			});
 		} else {
 			this.setState({
-				studentInfos: studentInfos.map((student, stdIndex) => {
+				studentInfos: studentInfos?.map((student, stdIndex) => {
 					if (stdIndex == index) {
 						return { ...student, availabilitySchedule: arr }
 					}
@@ -208,7 +211,7 @@ class DependentAvailability extends Component {
 	valueChangeForCloseHour(index, indexOnAvailabilitySchedule, v) {
 		if (!v) return;// moment('00:00:00', 'HH:mm:ss');
 
-		const { studentInfos, isSameAll } = this.state;
+		const { isSameAll, studentInfos } = this.state;
 		const newStu = JSON.parse(JSON.stringify(studentInfos));
 		let arr = [...newStu[index].availabilitySchedule];
 
@@ -217,13 +220,13 @@ class DependentAvailability extends Component {
 
 		if (isSameAll) {
 			this.setState({
-				studentInfos: studentInfos.map((student) => {
+				studentInfos: studentInfos?.map(student => {
 					return { ...student, availabilitySchedule: [...arr] }
 				})
 			});
 		} else {
 			this.setState({
-				studentInfos: studentInfos.map((student, stdIndex) => {
+				studentInfos: studentInfos?.map((student, stdIndex) => {
 					if (stdIndex == index) {
 						return { ...student, availabilitySchedule: arr }
 					}
@@ -236,9 +239,9 @@ class DependentAvailability extends Component {
 		const momentClose = moment(`${studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeHour}:${studentInfos[index].availabilitySchedule[indexOnAvailabilitySchedule].closeMin}:00`, 'HH:mm:ss')
 
 		if (momentClose.isBefore(momentOpen)) {
-			this.setState({ hasErrorOnTimeClose: true })
+			this.setState({ hasErrorOnTimeClose: true });
 		} else {
-			this.setState({ hasErrorOnTimeClose: false })
+			this.setState({ hasErrorOnTimeClose: false });
 		}
 	}
 
@@ -284,7 +287,7 @@ class DependentAvailability extends Component {
 		return (
 			<div key={`div${index}`} className='academic-item'>
 				<p className='font-24 mb-10 text-center'>{intl.formatMessage(messages.availability)}</p>
-				<p className='font-16 mr-10 mb-5'>{studentInfos[index].firstName} {studentInfos[index].lastName} </p>
+				<p className='font-16 mr-10 mb-5'>{studentInfos[index]?.firstName ?? ''} {studentInfos[index]?.lastName ?? ''} </p>
 				<div className='div-availability'>
 					<Segmented options={optionsSegments} block={true}
 						value={currentDaySelecting[index]}
@@ -298,9 +301,7 @@ class DependentAvailability extends Component {
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
 												name={`timer_1${scheduleItem.uid}_${indexOnAvailabilitySchedule}`}
-												use12Hours
-												format="h:mm a"
-												placeholder={intl.formatMessage(messages.from)}
+												use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)}
 												value={this.valueForAvailabilityScheduleOpenHour(index, indexOnAvailabilitySchedule)}
 												onChange={v => this.valueChangeForOpenHour(index, indexOnAvailabilitySchedule, v)}
 											/>
@@ -308,12 +309,11 @@ class DependentAvailability extends Component {
 										<Col xs={24} sm={24} md={12} className={indexOnAvailabilitySchedule === 0 ? '' : 'item-remove'}>
 											<TimePicker
 												name={`timer_1${scheduleItem.uid}_${indexOnAvailabilitySchedule}`}
+												onChange={v => this.valueChangeForCloseHour(index, indexOnAvailabilitySchedule, v)}
+												value={this.valueForAvailabilityScheduleCloseHour(index, indexOnAvailabilitySchedule)}
 												use12Hours
 												format="h:mm a"
 												placeholder={intl.formatMessage(messages.to)}
-												value={this.valueForAvailabilityScheduleCloseHour(index, indexOnAvailabilitySchedule)}
-												onChange={v => this.valueChangeForCloseHour(index, indexOnAvailabilitySchedule, v)}
-												disabledTime={(time) => time.isBefore(moment('07:00:00', 'HH:mm:ss'))}
 											/>
 											{indexOnAvailabilitySchedule === 0 ? null : (
 												<BsDashCircle
@@ -327,15 +327,13 @@ class DependentAvailability extends Component {
 								)
 							}
 						})}
-						<div className='flex justify-between'>
-							<div className='div-add-time' onClick={() => this.addNewTimeRange(index, currentDaySelecting[index])}>
-								<BsPlusCircle size={17} className='mr-5 text-primary' />
-								<a className='text-primary'>{intl.formatMessage(messages.addTimeRange)}</a>
-							</div>
-							<div className='text-right div-copy-week' onClick={() => this.copyToFullWeek(index, currentDaySelecting[index])}>
-								<a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
-								<QuestionCircleOutlined className='text-primary' />
-							</div>
+						<div className='div-add-time' onClick={() => this.addNewTimeRange(index, currentDaySelecting[index])}>
+							<BsPlusCircle size={17} className='mr-5 text-primary' />
+							<a className='text-primary'>{intl.formatMessage(messages.addTimeRange)}</a>
+						</div>
+						<div className='text-right div-copy-week' onClick={() => this.copyToFullWeek(index, currentDaySelecting[index])}>
+							<a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
+							<QuestionCircleOutlined className='text-primary' />
 						</div>
 					</div>
 				</div>
@@ -364,7 +362,7 @@ class DependentAvailability extends Component {
 								htmlType="submit"
 								onClick={this.onSubmit}
 							>
-								{intl.formatMessage(messages.continue).toUpperCase()}
+								{intl.formatMessage(messages.update).toUpperCase()}
 							</Button>
 						</div>
 					</div>
@@ -374,8 +372,6 @@ class DependentAvailability extends Component {
 	}
 }
 
-const mapStateToProps = state => ({
-	register: state.register,
-})
+const mapStateToProps = state => ({})
 
-export default compose(connect(mapStateToProps, { setRegisterData }))(DependentAvailability);
+export default compose(connect(mapStateToProps))(DependentAvailability);
