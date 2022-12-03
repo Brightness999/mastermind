@@ -591,9 +591,17 @@ export default ({
     id: `${scope}.passwordOld`,
     defaultMessage: 'Old Password',
   },
+  passwordNew: {
+    id: `${scope}.passwordNew`,
+    defaultMessage: 'New Password',
+  },
+  passwordCurrent: {
+    id: `${scope}.passwordCurrent`,
+    defaultMessage: 'Current Password',
+  },
   passwordConfirm: {
     id: `${scope}.passwordConfirm`,
-    defaultMessage: 'Confirm password ',
+    defaultMessage: 'Confirm Password',
   },
   password: {
     id: `${scope}.password`,

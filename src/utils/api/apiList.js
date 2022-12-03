@@ -5,6 +5,7 @@ export const getDependents = 'users/get_dependents'
 export const deletePrivateNote = 'users/delete_private_note'
 export const updatePrivateNote = 'users/update_private_note'
 export const createPrivateNote = 'users/create_private_note'
+export const changePassword = 'users/change_password'
 
 export const getAppointmentsForAdmin = 'admin/get_appointments'
 export const getAppointmentsInMonthForAdmin = 'admin/get_appointments_in_month'

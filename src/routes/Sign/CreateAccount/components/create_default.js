@@ -303,6 +303,7 @@ class CreateDefault extends Component {
 							>
 								<Input.Password
 									onFocus={() => this.setState({ showValidateBox: true })}
+									onBlur={() => this.setState({ showValidateBox: false })}
 									onChange={this.handleChangePassword}
 									placeholder={intl.formatMessage(messagesLogin.password)}
 									value={this.state.input.password}
