@@ -75,9 +75,6 @@ export default class extends React.Component {
 	}
 
 	render() {
-		const onFinish = (values) => {
-			console.log('Success:', values);
-		};
 		const onFinishFailed = (errorInfo) => {
 			console.log('Failed:', errorInfo);
 		};
@@ -92,7 +89,6 @@ export default class extends React.Component {
 						<div>
 							<Form
 								name="login"
-								onFinish={onFinish}
 								onFinishFailed={onFinishFailed}
 								ref={ref => this.form = ref}
 							>

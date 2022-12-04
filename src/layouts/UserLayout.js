@@ -17,7 +17,6 @@ class UserLayout extends React.PureComponent {
       })
       return;
     }
-    console.log('abc', this.props.location)
   }
 
 

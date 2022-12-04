@@ -6,7 +6,6 @@ import msgLogin from '../../../../Sign/Login/messages';
 import msgCreateAccount from '../../../../Sign/CreateAccount/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import moment from 'moment';
 import { setInforClientChild, changeInforClientChild } from '../../../../../redux/features/authSlice';
 import { store } from '../../../../../redux/store';
@@ -42,7 +41,7 @@ class InfoChild extends Component {
 	}
 
 	loadServices() {
-		request.post(getDefaultValueForClient).then(result => {
+		request.post(getDefaultValueForClient, {cityConnection: this.props.auth.user?.parentInfo?.cityConnection}).then(result => {
 			const { success, data } = result;
 			if (success) {
 				this.setState({
@@ -274,9 +273,8 @@ class InfoChild extends Component {
 
 const mapStateToProps = state => {
 	return ({
-		register: state.register,
 		auth: state.auth
 	})
 }
 
-export default compose(connect(mapStateToProps, { setRegisterData, changeInforClientChild }))(InfoChild);
+export default compose(connect(mapStateToProps, { changeInforClientChild }))(InfoChild);
