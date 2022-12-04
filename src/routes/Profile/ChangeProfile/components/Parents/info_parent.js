@@ -60,7 +60,6 @@ class InfoParent extends Component {
 			store.dispatch(setInforClientParent({ data: dataFrom, token: token }))
 			let user = JSON.parse(JSON.stringify(this.props.auth.user));
 			user.parentInfo = dataFrom;
-			console.log(user);
 			store.dispatch(setUser(user));
 		} catch (error) {
 			console.log(error, 'error')

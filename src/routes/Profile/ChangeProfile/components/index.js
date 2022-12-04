@@ -30,9 +30,11 @@ export default class extends React.Component {
         change_password: false
       },
       provider: {
-        info_profile: true,
+        info_general: true,
         info_availability: false,
-        info_services: false,
+        info_professional: false,
+        info_schduling: false,
+        info_billing: false,
         subsidy_program: false,
         day_work: false,
         change_password: false
@@ -112,11 +114,11 @@ export default class extends React.Component {
       case 30:
         let newStateProvider = { ...this.state.provider };
         switch (val) {
-          case 'Info_profile':
-            this.setState({ provider: { newStateProvider, info_profile: true } })
+          case 'Info_general':
+            this.setState({ provider: { newStateProvider, info_general: true } })
             break;
-          case 'Info_services':
-            this.setState({ provider: { newStateProvider, info_services: true } })
+          case 'Info_professional':
+            this.setState({ provider: { newStateProvider, info_professional: true } })
             break;
           case 'Info_availability':
             this.setState({ provider: { newStateProvider, info_availability: true } })
@@ -170,11 +172,11 @@ export default class extends React.Component {
           return <ChangePassword />
         }
       case 30:
-        if (provider.info_profile) {
+        if (provider.info_general) {
           return <InfoProfile />
         } else if (provider.info_availability) {
           return <InfoAvailability />
-        } else if (provider.info_services) {
+        } else if (provider.info_professional) {
           return <InfoServices />
         } else if (provider.subsidy_program) {
           return <SubsidyProgram />

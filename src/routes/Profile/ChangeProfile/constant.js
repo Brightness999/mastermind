@@ -1,14 +1,14 @@
 
 export const MENU_PROVIDER = [
     {
-        key: 'Info_profile',
+        key: 'Info_general',
         icon: '',
-        label: 'Info Profile'
+        label: 'General Information'
     },
     {
-        key: 'Info_services',
+        key: 'Info_professional',
         icon: '',
-        label: 'Info Services'
+        label: 'Professional Information'
     },
     {
         key: 'Info_availability',

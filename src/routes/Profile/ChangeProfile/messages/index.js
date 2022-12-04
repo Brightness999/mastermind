@@ -622,5 +622,9 @@ export default ({
   generalInformation: {
     id: `${scope}.generalInformation`,
     defaultMessage: 'General Information',
+  },
+  professionalInformation: {
+    id: `${scope}.professionalInformation`,
+    defaultMessage: 'Professional Information',
   }
 });
