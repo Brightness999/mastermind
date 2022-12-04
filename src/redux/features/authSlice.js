@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { helper } from '../../utils/auth/helper';
 import request from '../../utils/api/request'
 import { getChildProfile, getMyProviderInfo, getMySchoolInfo, getParentProfile, updateChildAvailability, updateChildProfile, updateMyProviderProfile, updateParentProfile, updateSchoolInfo } from '../../utils/api/apiList';
+import { message } from 'antd';
 
 const initialState = {
 	user: [],
@@ -45,7 +46,10 @@ export const setInforClientChild = createAsyncThunk(
 	'auth/setInforClientChild',
 	async (data) => {
 		try {
-			await request.post(url + updateChildProfile, data.data, data.token);
+			const result = await request.post(url + updateChildProfile, data.data, data.token);
+			if (result.success) {
+				message.success('Updated successfully');
+			}
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -58,6 +62,9 @@ export const setAvailabilityClientChild = createAsyncThunk(
 	async (data) => {
 		try {
 			const result = await request.post(url + updateChildAvailability, data.data, data.token);
+			if (result.success) {
+				message.success('Updated successfully');
+			}
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -69,7 +76,10 @@ export const setInforClientParent = createAsyncThunk(
 	'auth/setInforClientParent',
 	async (data) => {
 		try {
-			await request.post(url + updateParentProfile, data.data, data.token);
+			const result = await request.post(url + updateParentProfile, data.data, data.token);
+			if (result.success) {
+				message.success('Updated successfully');
+			}
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -81,7 +91,10 @@ export const setInforProvider = createAsyncThunk(
 	'auth/setInforProvider',
 	async (data) => {
 		try {
-			await request.post(url + updateMyProviderProfile, data.data, data.token);
+			const result = await request.post(url + updateMyProviderProfile, data.data, data.token);
+			if (result.success) {
+				message.success('Updated successfully');
+			}
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -93,7 +106,10 @@ export const setInforSchool = createAsyncThunk(
 	'auth/setInforSchool',
 	async (data) => {
 		try {
-			await request.post(url + updateSchoolInfo, data.data, data.token);
+			const result = await request.post(url + updateSchoolInfo, data.data, data.token);
+			if (result.success) {
+				message.success('Updated successfully');
+			}
 		} catch (error) {
 			console.log(error, 'error')
 		}

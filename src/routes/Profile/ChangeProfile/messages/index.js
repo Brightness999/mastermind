@@ -618,6 +618,9 @@ export default ({
   dayWork: {
     id: `${scope}.dayWork`,
     defaultMessage: 'Day work',
+  },
+  generalInformation: {
+    id: `${scope}.generalInformation`,
+    defaultMessage: 'General Information',
   }
-
 });
