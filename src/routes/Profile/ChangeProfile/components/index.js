@@ -5,6 +5,7 @@ import { Menu } from 'antd';
 import InfoProfile from './Provider/info_profile';
 import InfoServices from './Provider/info_services';
 import InfoAvailability from './Provider/info_availability';
+import InfoScheduling from './Provider/info_scheduling';
 import SubsidyProgram from './Provider/subsidy_program';
 import DayWork from './Provider/day_work';
 import InfoChild from './Parents/info_child';
@@ -33,7 +34,7 @@ export default class extends React.Component {
         info_general: true,
         info_availability: false,
         info_professional: false,
-        info_schduling: false,
+        info_scheduling: false,
         info_billing: false,
         subsidy_program: false,
         day_work: false,
@@ -120,6 +121,9 @@ export default class extends React.Component {
           case 'Info_professional':
             this.setState({ provider: { newStateProvider, info_professional: true } })
             break;
+          case 'Info_scheduling':
+            this.setState({ provider: { newStateProvider, info_scheduling: true } })
+            break;
           case 'Info_availability':
             this.setState({ provider: { newStateProvider, info_availability: true } })
             break;
@@ -178,6 +182,8 @@ export default class extends React.Component {
           return <InfoAvailability />
         } else if (provider.info_professional) {
           return <InfoServices />
+        } else if (provider.info_scheduling) {
+          return <InfoScheduling />
         } else if (provider.subsidy_program) {
           return <SubsidyProgram />
         } else if (provider.day_work) {

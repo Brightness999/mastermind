@@ -626,5 +626,29 @@ export default ({
   professionalInformation: {
     id: `${scope}.professionalInformation`,
     defaultMessage: 'Professional Information',
+  },
+  standardSessionDuration: {
+    id: `${scope}.standardSessionDuration`,
+    defaultMessage: 'Standard session duration',
+  },
+  evaluationDuration: {
+    id: `${scope}.evaluationDuration`,
+    defaultMessage: 'Evaluation duration',
+  },
+  duration: {
+    id: `${scope}.duration`,
+    defaultMessage: 'Duration',
+  },
+  newClientScreening: {
+    id: `${scope}.newClientScreening`,
+    defaultMessage: 'New client screening',
+  },
+  newClientEvaluation: {
+    id: `${scope}.newClientEvaluation`,
+    defaultMessage: 'New client evaluation',
+  },
+  scheduling: {
+    id: `${scope}.scheduling`,
+    defaultMessage: 'Scheduling',
   }
 });

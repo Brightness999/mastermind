@@ -11,6 +11,11 @@ export const MENU_PROVIDER = [
         label: 'Professional Information'
     },
     {
+        key: 'Info_scheduling',
+        icon: '',
+        label: 'Scheduling Information'
+    },
+    {
         key: 'Info_availability',
         icon: '',
         label: 'Info Availability'
