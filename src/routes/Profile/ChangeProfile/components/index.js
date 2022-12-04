@@ -211,7 +211,7 @@ export default class extends React.Component {
       <div className="full-layout page admin-page">
         <div className='div-content'>
           <section className='div-activity-feed box-card'>
-            <Menu theme="light" mode="inline" defaultSelectedKeys={[keyActive]} items={listMenu} />
+            <Menu theme="light" mode="inline" defaultSelectedKeys={[keyActive]} rootClassName="height-full" items={listMenu} />
           </section>
           <section className='div-calendar box-card'>
             {this.getScreen()}

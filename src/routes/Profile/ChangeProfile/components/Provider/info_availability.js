@@ -1,535 +1,399 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select, Checkbox, Segmented, TimePicker, Switch } from 'antd';
+import { Row, Col, Form, Button, Select, Segmented, TimePicker, Switch, DatePicker, message, Divider } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
-import moment from 'moment';
 import messages from '../../messages';
-import messagesLogin from '../../../../Sign/Login/messages';
-
+import msgSidebar from '../../../../../components/SideBar/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios';
-import PlacesAutocomplete from 'react-places-autocomplete';
+import request from '../../../../../utils/api/request';
+import { getAllSchoolsForParent, getDefaultValueForProvider, getMyProviderInfo, updateMyProviderAvailability } from '../../../../../utils/api/apiList';
+import moment from 'moment';
+
 const day_week = [
-    intl.formatMessage(messages.sunday),
-    intl.formatMessage(messages.monday),
-    intl.formatMessage(messages.tuesday),
-    intl.formatMessage(messages.wednesday),
-    intl.formatMessage(messages.thursday),
-    intl.formatMessage(messages.friday),
+	intl.formatMessage(messages.sunday),
+	intl.formatMessage(messages.monday),
+	intl.formatMessage(messages.tuesday),
+	intl.formatMessage(messages.wednesday),
+	intl.formatMessage(messages.thursday),
+	intl.formatMessage(messages.friday),
 ]
 
 class InfoAvailability extends Component {
-    constructor(props) {
-        super(props);
+	constructor(props) {
+		super(props);
+		this.state = {
+			currentSelectedDay: day_week[0],
+			isHomeVisit: true,
+			isPrivateOffice: true,
+			isSchools: true,
+			locations: ['Dependent Home', 'Provider Office'],
+			listSchool: [],
+			selectedLocation: '',
+		}
+	}
 
-        console.log(props, 'props')
+	componentDidMount() {
+		request.post(getMyProviderInfo).then(result => {
+			const { success, data } = result;
+			if (success) {
+				this.form?.setFieldsValue(data);
+				day_week.map((day) => {
+					const times = data?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
+					this.form.setFieldValue(day, times.map(t => {
+						t.from_date = moment().set({ years: t.fromYear, months: t.fromMonth, date: t.fromDate });
+						t.to_date = moment().set({ years: t.toYear, months: t.toMonth, date: t.toDate });
+						t.from_time = moment().set({ hours: t.openHour, minutes: t.openMin });
+						t.to_time = moment().set({ hours: t.closeHour, minutes: t.closeMin });
+						return t;
+					}));
+				});
+				this.setState({
+					isHomeVisit: data?.isHomeVisit,
+					isPrivateOffice: data?.privateOffice,
+					isSchools: !!data?.serviceableSchool?.length,
+				})
+			}
+		})
 
-        this.state = {
-            isPrivate: true,
-            CancellationWindow: [],
-            currentSelectedDay: day_week[4],
-            service_address: ''
-        }
-    }
+		this.getDataFromServer();
+		this.loadSchools();
+	}
 
-    async componentDidMount() {
+	getDataFromServer = () => {
+		request.post(getDefaultValueForProvider).then(result => {
+			const { success, data } = result;
+			if (success) {
+				this.setState({ CancellationWindow: data.CancellationWindow });
+			} else {
+				this.setState({ CancellationWindow: [] });
+			}
+		}).catch(err => {
+			console.log(err);
+			this.setState({ CancellationWindow: [] });
+		})
+	}
 
-        // if (authData) {
+	loadSchools() {
+		request.post(getAllSchoolsForParent, { communityServed: this.props.user?.providerInfo?.cityConnection }).then(result => {
+			const { success, data } = result;
+			if (success) {
+				this.setState({ listSchool: data });
+			}
+		}).catch(err => {
+			console.log('get all schools for parent error---', err);
+			this.setState({ listSchool: [] });
+		})
+	}
 
-        // console.log(authData.manualSchedule,'manualSchedule1')
-        //     // this.form.setFieldsValue(this.getDefaultChildObj(authData))
+	onFinish = (values) => {
+		let manualSchedule = [];
+		day_week.map(day => manualSchedule.push(values[day]));
+		values.manualSchedule = manualSchedule.flat();
 
-        //     this.setState({
-        //         isPrivate: authData.isPrivate
-        //     })
-        // }else{
+		request.post(updateMyProviderAvailability, { ...values, _id: this.props.user.providerInfo?._id }).then(result => {
+			const { success } = result;
+			if (success) {
+				message.success('Updated successfully');
+			}
+		}).catch(err => {
+			message.error("Can't update availability");
+			console.log('update provider availability error---', err);
+		})
+	};
 
-        //     day_week.map((day)=>{
-        //         this.form.setFieldValue(day, [''])
-        //     })
-        // }
+	onFinishFailed = (errorInfo) => {
+		console.log('Failed:', errorInfo);
+	};
 
-        console.log(this.props.authData, 'authData')
+	onSelectDay = e => {
+		if (e) {
+			this.setState({
+				currentSelectedDay: e,
+				selectedLocation: '',
+			})
+		}
+	}
 
-        const tokenUser = localStorage.getItem('token');
+	onChangeScheduleValue = () => {
+		this.props.setRegisterData({ availability: this.form.getFieldsValue() });
+	}
 
-        try {
-            const result = await axios.post(url + 'providers/get_my_provider_info', {}, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + tokenUser
-                }
-            })
+	onLocationChange = (location) => {
+		this.props.setRegisterData({ availability: this.form.getFieldsValue() });
+		this.setState({ selectedLocation: location });
+	}
 
-            const { data } = result.data
-            console.log('Infor avaiability', data);
-            this.form.setFieldsValue({
-                ...data
-            })
+	copyToFullWeek = (dayForCopy) => {
+		var arrToCopy = this.form.getFieldValue(dayForCopy);
+		day_week.map((newDay) => {
+			if (newDay != dayForCopy) {
+				this.form.setFieldValue(newDay, arrToCopy);
+			}
+		})
+	}
 
-            console.log(data.manualSchedule, 'data');
+	handleSwitchHome = (state) => {
+		if (state) {
+			this.setState({
+				isHomeVisit: state,
+				locations: ['Dependent Home', ...this.state.locations],
+			});
+		} else {
+			this.setState({
+				isHomeVisit: state,
+				locations: this.state.locations?.filter(location => location != 'Dependent Home'),
+			});
+		}
+	}
 
+	handleSwitchOffice = (state) => {
+		if (state) {
+			this.setState({
+				isPrivateOffice: state,
+				locations: ['Provider Office', ...this.state.locations],
+			});
+		} else {
+			this.setState({
+				isPrivateOffice: state,
+				locations: this.state.locations?.filter(location => location != 'Provider Office'),
+			});
+		}
+	}
 
-            console.log(day_week, 'day_week');
+	handleSwitchSchool = (state) => {
+		if (state) {
+			this.setState({ isSchools: state });
+		} else {
+			this.setState({
+				isSchools: state,
+				locations: this.state.locations?.filter(location => location == 'Provider Office' || location == 'Dependent Home'),
+			});
+		}
+	}
 
-            for (let i = 0; i < day_week.length; i++) {
-                const day = day_week[i];
-                // console.log(day, 'day');
-                // console.log(data.manualSchedule);
-                this.form.setFieldsValue({
-                    day: data.manualSchedule[i]
-                })
-            }
+	handleSelectSchool = (schoolId) => {
+		const { locations, listSchool } = this.state;
+		locations.push(listSchool?.find(school => school._id == schoolId)?.name);
+		this.setState({ locations: locations });
+	}
 
-        } catch (error) {
+	handleDeselectSchool = (schoolId) => {
+		const { locations, listSchool } = this.state;
+		const schoolName = listSchool?.find(school => school._id == schoolId)?.name;
+		this.setState({ locations: locations.filter(location => location != schoolName) });
+	}
 
-        }
+	getDayOfWeekIndex = (day) => {
+		switch (day) {
+			case intl.formatMessage(messages.sunday): return 0;
+			case intl.formatMessage(messages.monday): return 1;
+			case intl.formatMessage(messages.tuesday): return 2;
+			case intl.formatMessage(messages.wednesday): return 3;
+			case intl.formatMessage(messages.thursday): return 4;
+			case intl.formatMessage(messages.friday): return 5;
+			default: return -1;
+		}
+	}
 
-        // axios.post(url + 'providers/get_my_provider_info', {}, {
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'Authorization': 'Bearer ' + tokenUser
-        //     }
-        // }).then(result => {
-        //     const { data } = result.data
-        //     console.log('Infor avaiability', data);
-        //     this.form.setFieldsValue({
-        //         ...data
-        //     })
+	handleSelectTime = (value, type) => {
+		const { selectedLocation, currentSelectedDay, listSchool } = this.state;
+		if (selectedLocation) {
+			const school = listSchool?.find(school => school.name == selectedLocation);
+			if (school) {
+				const idx = this.getDayOfWeekIndex(currentSelectedDay);
+				if (idx > -1) {
+					value = value.set({ seconds: 0, milliseconds: 0 });
+					const inOpenTime = moment().set({ hours: school.sessionsInSchool[idx]?.openHour, minutes: school.sessionsInSchool[idx]?.openMin, seconds: 0, milliseconds: 0 });
+					const inCloseTime = moment().set({ hours: school.sessionsInSchool[idx]?.closeHour, minutes: school.sessionsInSchool[idx]?.closeMin, seconds: 0, milliseconds: 0 });
+					const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[idx]?.openHour, minutes: school.sessionsAfterSchool[idx]?.openMin, seconds: 0, milliseconds: 0 });
+					const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[idx]?.closeHour, minutes: school.sessionsAfterSchool[idx]?.closeMin, seconds: 0, milliseconds: 0 });
+					if (type == 'from' && !((value.isSame(inOpenTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterOpenTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
+						message.warning("The school is not available at that time. Please select another time.", 5);
+					}
+					if (type == 'to' && !((value.isSame(inCloseTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterCloseTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
+						message.warning("The school is not available at that time. Please select another time.", 5);
+					}
+				}
+			}
+		}
+	}
 
-        //     // for (let index = 0; index < day_week.length; index++) {
-        //     //     const element = day_week[index];
-        //     //     console.log(element, 'element')
-        //     // }
+	render() {
+		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool } = this.state;
 
-        //     // console.log('ccc');
-
-
-        // }).catch(err => {
-        //     console.log('load data false');
-        //     console.log(err)
-        // })
-        this.getDataFromServer();
-    }
-
-
-
-    getDefaultChildObj(parentInfo) {
-
-
-        // console.log(obj,'zxcnxzmcnm,zxncxz,m')
-        return obj;
-    }
-    defaultTimeRangeItem = (dayInWeek) => {
-        return {
-            "uid": shortid.generate() + '' + Date.now(),
-            "location": undefined,
-            "dayInWeek": dayInWeek,
-            "openHour": 7,
-            "openMin": 0,
-            "closeHour": 18,
-            "closeMin": 0
-        }
-    }
-
-    getDataFromServer = () => {
-        axios.post(url + 'providers/get_default_values_for_provider'
-        ).then(result => {
-            console.log('get_default_value_for_client', result.data);
-            if (result.data.success) {
-                var data = result.data.data;
-                this.setState({
-                    CancellationWindow: data.CancellationWindow,
-                })
-            } else {
-                this.setState({
-                    CancellationWindow: [],
-                });
-
-            }
-
-        }).catch(err => {
-            console.log(err);
-            this.setState({
-                CancellationWindow: [],
-            });
-        })
-    }
-
-
-    onFinish = (values) => {
-        console.log(values, 'value');
-        return false
-        console.log('Success:', values);
-        this.props.setRegisterData({
-            step4: values
-        });
-        this.props.onContinue();
-    };
-    handleChange = (e) => {
-        console.log(e.target.name, 'e.target.name')
-        console.log(e.target.value, 'e.target.value')
-        return false
-    }
-    onFinishFailed = (errorInfo) => {
-
-        console.log('Failed:', errorInfo);
-    };
-
-    onSelectDay = e => {
-        console.log("selected segment date")
-        if (e) {
-            console.log(e);
-            this.setState({
-                currentSelectedDay: e
-            })
-        }
-    }
-    onSelectTimeForSesssion = (index, value, type) => {
-        const hour = value.hour()
-        const minute = value.minute()
-        console.log(this.form.getFieldsValue());
-    }
-
-    onChangeScheduleValue = (day, value) => {
-        console.log('all values', this.form.getFieldsValue())
-        this.props.setRegisterData({
-            step4: this.form.getFieldsValue()
-        });
-    }
-
-    onLocationChange = (day, value) => {
-        console.log(day, value);
-        this.props.setRegisterData({
-            step4: this.form.getFieldsValue()
-        });
-    }
-
-    onLocationSelected = (day, value, index) => {
-        console.log(day, value, this.form.getFieldValue(day), index);
-        var arr = this.form.getFieldValue(day);
-        if (arr[index] == undefined) arr[index] = {};
-        arr[index].location = value;
-        this.form.setFieldValue(day, arr);
-        this.props.setRegisterData({
-            step4: this.form.getFieldsValue()
-        });
-    }
-
-    copyToFullWeek = (dayForCopy) => {
-        var arrToCopy = this.form.getFieldValue(dayForCopy);
-        day_week.map((newDay) => {
-            if (newDay != dayForCopy) {
-                this.form.setFieldValue(newDay, arrToCopy);
-            }
-        })
-    }
-
-    // renderFormList(day, index) {
-    //     return <Form.List name={day} initialValue={[{ sunday: "Range 1" },]}>
-    //         {(fields, { add, remove }) => {
-    //             return (
-    //                 <div
-    //                     key={day}
-    //                     className='div-time'
-    //                 // style={{
-    //                 //     display: this.state.currentSelectedDay === index ? 'block' : 'none'
-    //                 // }}
-    //                 >
-    //                     {fields.map((field) => {
-    //                         return (
-    //                             <div key={field.key}>
-    //                                 {day_week.map((day, index) => {
-    //                                     <div key={[day, field.key]}
-
-    //                                     >
-    //                                         <Row gutter={14}>
-    //                                             <Col xs={24} sm={24} md={12}>
-
-    //                                                 <Form.Item
-    //                                                     name={[day, field.name, "from_time"]}
-    //                                                     rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
-    //                                                 >
-    //                                                     <TimePicker
-    //                                                         onChange={v => this.onSelectTimeForSesssion(day, v, 'inOpen')}
-    //                                                         use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
-    //                                                 </Form.Item>
-    //                                             </Col>
-    //                                             <Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
-    //                                                 {/* <TimePicker use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} /> */}
-    //                                                 <Form.Item
-    //                                                     name={[day, field.name, "to_time"]}
-
-    //                                                     rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
-
-    //                                                 >
-    //                                                     <TimePicker
-    //                                                         onChange={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
-    //                                                         use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
-    //                                                 </Form.Item>
-    //                                                 {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
-    //                                             </Col>
-    //                                         </Row>
-    //                                         <Form.Item
-    //                                             name={[day, field.name, "location"]}
-
-    //                                             rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
-
-    //                                         >
-
-    //                                             <Input
-    //                                                 onChange={v => { this.onLocationChange(day, v) }}
-    //                                                 placeholder={intl.formatMessage(messages.location)} />
-    //                                         </Form.Item>
-
-    //                                     </div>
-    //                                 })}
-
-    //                             </div>
-    //                         );
-    //                     })}
-    //                     <Row>
-    //                         <Col span={8}>
-    //                             <div className='flex flex-row items-center'>
-    //                                 <Switch size="small" value={this.state.isPrivate} onChange={v => {
-    //                                     console.log('switch changed', v)
-    //                                 }} />
-    //                                 <p className='font-09 ml-10 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
-    //                             </div>
-    //                         </Col>
-    //                         <Col span={8}>
-    //                             <div className='div-add-time justify-center'>
-    //                                 <BsPlusCircle size={17} className='mr-5 text-primary' />
-    //                                 <a className='text-primary' onClick={() => {
-    //                                     add(null)
-    //                                     console.log('added')
-    //                                 }}>{intl.formatMessage(messages.addRange)}</a>
-    //                             </div>
-    //                         </Col>
-    //                         <Col span={8}>
-    //                             <div className='text-right div-copy-week'>
-    //                                 <a className='font-10 underline text-primary' Click={() => {
-    //                                     this.copyToFullWeek(day)
-    //                                 }} >{intl.formatMessage(messages.copyFullWeek)}</a>
-    //                                 <QuestionCircleOutlined className='text-primary' />
-    //                             </div>
-    //                         </Col>
-    //                     </Row>
-    //                 </div>
-    //             );
-    //         }}
-    //     </Form.List>
-
-    // }
-
-    render() {
-
-        console.log(this.props.auth.authData, 'this.props.auth.authData')
-        return (
-            <Row justify="center" className="row-form">
-                <div className='col-form col-availability'>
-                    <div className='div-form-title'>
-                        <p className='font-30 text-center mb-10'>{intl.formatMessage(messages.availability)}</p>
-                    </div>
-                    <Form
-                        name="form_availability"
-                        onFinish={this.onFinish}
-                        onFinishFailed={this.onFinishFailed}
-                        ref={ref => this.form = ref}
-                    >
-                        <p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.autoSyncCalendar)}</p>
-                        <Row gutter={10}>
-                            <Col span={12}>
-                                <div className='div-gg'>
-                                    <img src='../images/gg.png' />
-                                    <p className='font-16 mb-0'>Google</p>
-                                </div>
-                            </Col>
-                            <Col span={12}>
-                                <div className='div-gg'>
-                                    <img src='../images/outlook.png' />
-                                    <p className='font-16 mb-0'>Outlook</p>
-                                </div>
-                            </Col>
-                        </Row>
-
-                        <p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.manualSchedule)}</p>
-                        <div className='div-availability'>
-                            <Segmented options={day_week} block={true} onChange={this.onSelectDay} />
-                            {day_week.map((day, index) => {
-                                console.log(day, 'day');
-                                return <div id={day}
-                                    style={{
-                                        display: this.state.currentSelectedDay === day ? 'block' : 'none'
-                                    }}
-                                >
-                                    <Form.List name={day}>
-                                        {(fields, { add, remove }) => (
-                                            <div className='div-time'>
-                                                {fields.map((field, index) => {
-                                                    return (
-                                                        <div key={field.key}
-                                                        >
-                                                            <Row gutter={14}>
-                                                                <Col xs={24} sm={24} md={12}>
-                                                                    <Form.Item
-                                                                        name={[field.name, "from_time"]}
-                                                                        rules={[{ required: true, message: intl.formatMessage(messages.fromMess) }]}
-                                                                    >
-                                                                        <TimePicker
-                                                                            onChange={v => this.onChangeScheduleValue(day, v)}
-                                                                            use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.from)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
-                                                                    </Form.Item>
-                                                                </Col>
-                                                                <Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
-                                                                    <Form.Item
-                                                                        name={[field.name, "to_time"]}
-
-                                                                        rules={[{ required: true, message: intl.formatMessage(messages.toMess) }]}
-
-                                                                    >
-                                                                        <TimePicker
-                                                                            onChange={v => this.onChangeScheduleValue(day, v)}
-                                                                            use12Hours format="h:mm a" placeholder={intl.formatMessage(messages.to)} defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} />
-                                                                    </Form.Item>
-                                                                    {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
-                                                                </Col>
-                                                            </Row>
-                                                            <Form.Item
-                                                                name={[field.name, "location"]}
-
-                                                                rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.location) }]}
-
-                                                            >
-                                                                <PlacesAutocomplete
-                                                                    onChange={(e) => this.onLocationChange(day, e, "billingAddress")}
-                                                                    onSelect={(e) => this.onLocationSelected(day, e, index)}
-                                                                >
-                                                                    {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-                                                                        <div>
-                                                                            <Input {...getInputProps({
-                                                                                placeholder: intl.formatMessage(messages.location),
-                                                                                className: 'location-search-input',
-                                                                            })} />
-                                                                            <div className="autocomplete-dropdown-container">
-                                                                                {loading && <div>Loading...</div>}
-                                                                                {suggestions.map(suggestion => {
-                                                                                    const className = suggestion.active
-                                                                                        ? 'suggestion-item--active'
-                                                                                        : 'suggestion-item';
-                                                                                    // inline style for demonstration purpose
-                                                                                    const style = suggestion.active
-                                                                                        ? { backgroundColor: '#fafafa', cursor: 'pointer' }
-                                                                                        : { backgroundColor: '#ffffff', cursor: 'pointer' };
-                                                                                    return (
-                                                                                        <div
-                                                                                            {...getSuggestionItemProps(suggestion, {
-                                                                                                className,
-                                                                                                style,
-                                                                                            })}
-                                                                                        >
-                                                                                            <span>{suggestion.description}</span>
-                                                                                        </div>
-                                                                                    );
-                                                                                })}
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-                                                                </PlacesAutocomplete>
-                                                                {/* <Input placeholder={intl.formatMessage(messages.location)}/> */}
-
-                                                            </Form.Item>
-
-                                                        </div>
-                                                    );
-                                                }
-                                                )}
-                                                <Row>
-                                                    <Col span={8}>
-                                                        <div className='flex flex-row items-center'>
-                                                            <Switch size="small"
-
-                                                                checked={this.state.isPrivate}
-                                                                onChange={v => {
-                                                                    console.log('switch changed', v)
-
-                                                                    this.setState({ isPrivate: v })
-                                                                    this.props.setRegisterData({ isPrivate: v })
-                                                                }}
-                                                            />
-                                                            <p className='font-09 ml-10 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
-                                                        </div>
-                                                    </Col>
-                                                    <Col span={8}>
-                                                        <div className='div-add-time justify-center'>
-                                                            <BsPlusCircle size={17} className='mr-5 text-primary' />
-                                                            <a className='text-primary' onClick={() => add()}>{intl.formatMessage(messages.addRange)}</a>
-                                                        </div>
-                                                    </Col>
-                                                    <Col span={8}>
-                                                        <div className='text-right div-copy-week'>
-                                                            <a className='font-10 underline text-primary' onClick={() => this.copyToFullWeek(day)}>{intl.formatMessage(messages.copyFullWeek)}</a>
-                                                            <QuestionCircleOutlined className='text-primary' />
-                                                        </div>
-                                                    </Col>
-                                                </Row>
-                                            </div>
-                                        )}
-                                    </Form.List>
-                                </div>
-                            })}
-                        </div>
-                        <Row gutter={14} style={{ marginLeft: '-22px', marginRight: '-22px' }}>
-                            <Col xs={24} sm={24} md={13}>
-                                <Form.Item
-                                    name="cancellationWindow"
-                                    rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationWindow) }]}
-
-                                >
-                                    <Select placeholder={intl.formatMessage(messages.cancellationWindow)}>
-                                        {this.state.CancellationWindow.map((value, index) => {
-                                            return (<Select.Option value={index}>{value}</Select.Option>)
-                                        })}
-                                    </Select>
-                                </Form.Item>
-                            </Col>
-                            <Col xs={24} sm={24} md={11}>
-                                <Form.Item
-                                    name="cancellationFee"
-                                    rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
-
-                                >
-                                    <Input placeholder={intl.formatMessage(messages.cancellationFee)} />
-                                    {/* <Select placeholder={intl.formatMessage(messages.cancellationFee)}>
-                                        <Select.Option value='st1'>st 1</Select.Option>
-                                        <Select.Option value='st2'>st 2</Select.Option>
-                                    </Select> */}
-                                </Form.Item>
-                            </Col>
-                        </Row>
-                        <Form.Item className="form-btn continue-btn" >
-                            <Button
-                                block
-                                type="primary"
-                                htmlType="submit"
-                                onChange={this.handleChange}
-                            >
-                                {intl.formatMessage(messages.update).toUpperCase()}
-                            </Button>
-                        </Form.Item>
-                    </Form>
-                </div>
-            </Row>
-        );
-    }
+		return (
+			<Row justify="center" className="row-form">
+				<div className='col-form col-availability'>
+					<div className='div-form-title'>
+						<p className='font-30 text-center mb-10'>{intl.formatMessage(messages.availability)}</p>
+					</div>
+					<Form
+						name="form_availability"
+						layout='vertical'
+						onFinish={this.onFinish}
+						onFinishFailed={this.onFinishFailed}
+						ref={ref => this.form = ref}
+					>
+						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.locations)}</p>
+						<div className='mb-10'>
+							<div className='flex flex-row items-center mb-5'>
+								<Form.Item name="privateOffice" className='bottom-0'>
+									<Switch size="small" checkedChildren="ON" unCheckedChildren="OFF" style={{ width: 50 }} checked={isPrivateOffice} onChange={v => this.handleSwitchOffice(v)} />
+								</Form.Item>
+								<p className='ml-10 mb-0'>{intl.formatMessage(messages.privateOffice)}</p>
+							</div>
+							<div className='flex flex-row items-center mb-5'>
+								<Form.Item name="isHomeVisit" className='bottom-0'>
+									<Switch size="small" checkedChildren="ON" unCheckedChildren="OFF" style={{ width: 50 }} checked={isHomeVisit} onChange={v => this.handleSwitchHome(v)} />
+								</Form.Item>
+								<p className='ml-10 mb-0'>{intl.formatMessage(messages.homeVisits)}</p>
+							</div>
+							<div className='flex flex-row items-center mb-5'>
+								<Switch size="small" checkedChildren="ON" unCheckedChildren="OFF" style={{ width: 50 }} checked={isSchools} onChange={v => this.handleSwitchSchool(v)} />
+								<p className='ml-10 mb-0'>{intl.formatMessage(messages.school)}</p>
+							</div>
+							{isSchools && (
+								<Form.Item
+									name="serviceableSchool"
+									label={intl.formatMessage(messages.serviceableSchools)}
+									className="float-label-item mt-10"
+									rules={[{ required: isSchools }]}
+								>
+									<Select
+										mode="multiple"
+										showArrow
+										placeholder={intl.formatMessage(msgSidebar.schoolsList)}
+										optionLabelProp="label"
+										onSelect={(v) => this.handleSelectSchool(v)}
+										onDeselect={(v) => this.handleDeselectSchool(v)}
+									>
+										{listSchool?.map((school, index) => (
+											<Select.Option key={index} label={school.name} value={school._id}>{school.name}</Select.Option>
+										))}
+									</Select>
+								</Form.Item>
+							)}
+						</div>
+						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.manualSchedule)}</p>
+						<div className='div-availability'>
+							<Segmented options={day_week} block={true} onChange={this.onSelectDay} />
+							{day_week.map((day, index) => (
+								<div key={index} id={day} style={{ display: currentSelectedDay === day ? 'block' : 'none' }}>
+									<Form.List name={day}>
+										{(fields, { add, remove }) => (
+											<div className='div-time'>
+												{fields.map((field) => (
+													<div key={field.key}>
+														{field.key != 0 && <Divider className='bg-gray' />}
+														<Form.Item name={[field.name, "location"]}>
+															<Select
+																showArrow
+																placeholder={intl.formatMessage(messages.location)}
+																optionLabelProp="label"
+																onSelect={(v) => this.onLocationChange(v)}
+															>
+																{locations.map((location, index) => (
+																	<Select.Option key={index} label={location} value={location}>{location}</Select.Option>
+																))}
+															</Select>
+														</Form.Item>
+														<Row gutter={14}>
+															<Col xs={24} sm={24} md={12}>
+																<Form.Item name={[field.name, "from_date"]}>
+																	<DatePicker
+																		onChange={() => this.onChangeScheduleValue()}
+																		format='MM/DD/YYYY'
+																		placeholder={intl.formatMessage(messages.from)}
+																	/>
+																</Form.Item>
+															</Col>
+															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
+																<Form.Item name={[field.name, "to_date"]}>
+																	<DatePicker
+																		onChange={() => this.onChangeScheduleValue()}
+																		format='MM/DD/YYY'
+																		placeholder={intl.formatMessage(messages.to)}
+																	/>
+																</Form.Item>
+																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
+															</Col>
+														</Row>
+														<Row gutter={14}>
+															<Col xs={24} sm={24} md={12}>
+																<Form.Item name={[field.name, "from_time"]}>
+																	<TimePicker
+																		onChange={() => this.onChangeScheduleValue()}
+																		use12Hours
+																		format="h:mm a"
+																		placeholder={intl.formatMessage(messages.from)}
+																		onOk={(v) => this.handleSelectTime(v, 'from')}
+																	/>
+																</Form.Item>
+															</Col>
+															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
+																<Form.Item name={[field.name, "to_time"]}>
+																	<TimePicker
+																		onChange={() => this.onChangeScheduleValue()}
+																		use12Hours
+																		format="h:mm a"
+																		placeholder={intl.formatMessage(messages.to)}
+																		onOk={(v) => this.handleSelectTime(v, 'to')}
+																	/>
+																</Form.Item>
+																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
+															</Col>
+														</Row>
+														<div className='flex items-center justify-start gap-2'>
+															<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
+																<Switch size="small" />
+															</Form.Item>
+															<p className='font-12'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
+														</div>
+													</div>
+												))}
+												<Row>
+													<Col span={12}>
+														<div className='div-add-time justify-center'>
+															<BsPlusCircle size={17} className='mr-5 text-primary' />
+															<a className='text-primary' onClick={() => add()}>
+																{intl.formatMessage(messages.addRange)}
+															</a>
+														</div>
+													</Col>
+													<Col span={12}>
+														<div className='text-center div-copy-week'>
+															<a className='font-10 underline text-primary' onClick={() => this.copyToFullWeek(day)}>
+																{intl.formatMessage(messages.copyFullWeek)}
+															</a>
+															<QuestionCircleOutlined className='text-primary' />
+														</div>
+													</Col>
+												</Row>
+											</div>
+										)}
+									</Form.List>
+								</div>
+							))}
+						</div>
+						<Form.Item className="form-btn continue-btn" >
+							<Button
+								block
+								type="primary"
+								htmlType="submit"
+							>
+								{intl.formatMessage(messages.confirm).toUpperCase()}
+							</Button>
+						</Form.Item>
+					</Form >
+				</div >
+			</Row >
+		);
+	}
 }
 
 const mapStateToProps = state => ({
-    register: state.register,
-    auth: state.auth
+	user: state.auth.user
 })
-export default compose(connect(mapStateToProps, { setRegisterData }))(InfoAvailability);
+export default compose(connect(mapStateToProps))(InfoAvailability);

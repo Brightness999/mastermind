@@ -650,5 +650,9 @@ export default ({
   scheduling: {
     id: `${scope}.scheduling`,
     defaultMessage: 'Scheduling',
+  },
+  locations: {
+    id: `${scope}.locations`,
+    defaultMessage: 'Locations',
   }
 });
