@@ -8,6 +8,7 @@ import '../../assets/styles/login.less';
 import { deletePrivateNote, updatePrivateNote } from '../../utils/api/apiList';
 import request from '../../utils/api/request';
 import { GoArrowLeft, GoArrowRight } from 'react-icons/go';
+import { store } from '../../redux/store';
 
 class ModalDependentDetail extends React.Component {
 	constructor(props) {
@@ -146,7 +147,12 @@ class ModalDependentDetail extends React.Component {
 									</>
 								) : (
 									<>
-										<Button key="back" className='w-20' onClick={this.onEdit}>
+										<Button
+											key="back"
+											className='w-20'
+											onClick={this.onEdit}
+											disabled={dependent.notes[selectedNoteIndex]?.user?._id != store.getState().auth.user?._id}
+										>
 											{intl.formatMessage(messages.edit)}
 										</Button>
 										<Button
@@ -154,6 +160,7 @@ class ModalDependentDetail extends React.Component {
 											danger
 											className='w-20'
 											onClick={() => this.onDelete(dependent?.notes[selectedNoteIndex]?._id)}
+											disabled={dependent.notes[selectedNoteIndex]?.user?._id != store.getState().auth.user?._id}
 										>
 											{intl.formatMessage(messages.delete)}
 										</Button>

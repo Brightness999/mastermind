@@ -32,9 +32,10 @@ export default class extends React.Component {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
         request.post(getDependents).then(result => {
-          if (result.success) {
+          const { success, data } = result;
+          if (success) {
             this.setState({
-              dependents: result?.data?.map((user, i) => {
+              dependents: data?.map((user, i) => {
                 user['key'] = i; return user;
               }) ?? []
             });
