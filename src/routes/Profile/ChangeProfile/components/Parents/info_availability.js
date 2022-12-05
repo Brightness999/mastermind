@@ -71,7 +71,7 @@ class DependentAvailability extends Component {
 	addNewTimeRange = (index, dayInWeek) => {
 		const { isSameAll, studentInfos } = this.state;
 		const newStu = [...studentInfos];
-		const arr = [...newStu[index].availabilitySchedule];
+		const arr = newStu[index]?.availabilitySchedule ?? [];
 		arr.push(this.defaultTimeRangeItem(dayInWeek))
 		if (isSameAll) {
 			this.setState({
@@ -83,7 +83,7 @@ class DependentAvailability extends Component {
 			this.setState({
 				studentInfos: studentInfos?.map((student, stdIndex) => {
 					if (stdIndex == index) {
-						return { ...student, availabilitySchedule: arr }
+						student = { ...student, availabilitySchedule: arr }
 					}
 					return student;
 				})
@@ -94,7 +94,7 @@ class DependentAvailability extends Component {
 	copyToFullWeek = (index, dayInWeek) => {
 		const { studentInfos, isSameAll } = this.state;
 		let newStu = JSON.parse(JSON.stringify(studentInfos));
-		let arr = [];
+		const arr = [];
 
 		// get all field in selected day
 		let arrForCopy = [];
@@ -121,7 +121,7 @@ class DependentAvailability extends Component {
 			this.setState({
 				studentInfos: newStu?.map((student, stdIndex) => {
 					if (stdIndex == index) {
-						return { ...student, availabilitySchedule: arr }
+						student = { ...student, availabilitySchedule: arr }
 					}
 					return student;
 				})
