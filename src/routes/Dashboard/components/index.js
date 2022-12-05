@@ -348,18 +348,15 @@ class Dashboard extends React.Component {
   }
 
   modalCreateAndEditSubsidyRequest = () => {
+    const { visibleNewSubsidy, isEditSubsidyRequest } = this.state;
     const modalNewSubsidyProps = {
-      visible: this.state.visibleNewSubsidy,
+      visible: visibleNewSubsidy,
       onSubmit: this.onCloseModalNewSubsidy,
       onCancel: this.onCloseModalNewSubsidy,
-      isEditSubsidyRequest: this.state.isEditSubsidyRequest,
+      isEditSubsidyRequest: isEditSubsidyRequest,
     };
     return <ModalNewSubsidyRequest {...modalNewSubsidyProps}
-      setOpennedEvent={opennedEvent => {
-        this.openNewSubsidyRequest = opennedEvent;
-      }}
-      userRole={this.state.userRole}
-      listDependents={this.state.listDependents}
+      setOpennedEvent={opennedEvent => { this.openNewSubsidyRequest = opennedEvent }}
     />
   }
 
