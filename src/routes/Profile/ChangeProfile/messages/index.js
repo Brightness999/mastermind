@@ -654,5 +654,9 @@ export default ({
   locations: {
     id: `${scope}.locations`,
     defaultMessage: 'Locations',
+  },
+  billingDetails: {
+    id: `${scope}.billingDetails`,
+    defaultMessage: 'Billing Details',
   }
 });

@@ -3,15 +3,16 @@ import { Row, Col, Form, Button, Input, Select, Switch, message, Upload } from '
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
-import messagesRequest from '../../../SubsidyRequest/messages';
+import messagesLogin from '../../../../Sign/Login/messages';
+import messagesRequest from '../../../../Sign/SubsidyRequest/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios';
-import { getDefaultValueForProvider, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
+import { getDefaultValueForProvider, getMyProviderInfo, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
 import PlacesAutocomplete from 'react-places-autocomplete';
+import request from '../../../../../utils/api/request';
+import { url } from '../../../../../utils/api/baseUrl';
+import { store } from '../../../../../redux/store'
+import { setInforProvider } from '../../../../../redux/features/authSlice';
 
 class InfoFinancial extends Component {
 	constructor(props) {
@@ -19,27 +20,28 @@ class InfoFinancial extends Component {
 		this.state = {
 			fileList: [],
 			uploading: false,
-			documentUploaded: [],
 			AcademicLevel: [],
 			sameRateForAllLevel: true,
 			billingAddress: '',
+			W9FormPath: this.props.auth.user?.providerInfo?.W9FormPath,
 		}
 	}
 
 	componentDidMount() {
-		const { registerData } = this.props.register;
-		if (!registerData.financialInfor) {
-			this.props.setRegisterData({ financialInfor: this.getDefaultObj() });
-		}
-		const financialInfor = registerData.financialInfor || this.getDefaultObj();
-		this.form.setFieldsValue(financialInfor);
+		request.post(getMyProviderInfo).then(result => {
+			const { success, data } = result;
+			if (success) {
+				this.form?.setFieldsValue(data);
+			}
+		})
+
 		this.getDataFromServer()
 	}
 
 	getDataFromServer = () => {
-		axios.post(url + getDefaultValueForProvider).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
+		request.post(getDefaultValueForProvider).then(result => {
+			const { success, data } = result;
+			if (success) {
 				this.setState({ AcademicLevel: data.AcademicLevel });
 			} else {
 				this.setState({ AcademicLevel: [] });
@@ -50,23 +52,15 @@ class InfoFinancial extends Component {
 		})
 	}
 
-	getDefaultObj = () => {
-		return {
-			legalName: '',
-			billingAddress: '',
-			academicLevel: [],
-			separateEvaluationRate: "",
-			upload_w_9: "",
-			licenseNumber: '',
-			SSN: '',
-			cancellationFee: '',
-		}
-	}
-
 	onFinish = (values) => {
-		this.props.setRegisterData({ documentUploaded: this.state.documentUploaded });
-		this.props.setRegisterData({ financialInfor: values });
-		this.props.onContinue();
+		const { W9FormPath } = this.state;
+		const token = localStorage.getItem('token');
+
+		try {
+			store.dispatch(setInforProvider({ data: { ...values, W9FormPath, _id: this.props.auth.user?.providerInfo?._id }, token: token }))
+		} catch (error) {
+			console.log(error, 'error')
+		}
 	};
 
 	onFinishFailed = (errorInfo) => {
@@ -79,34 +73,17 @@ class InfoFinancial extends Component {
 		}
 		if (info.file.status === 'done') {
 			message.success(`${info.file.name} file uploaded successfully`);
-			this.form?.setFieldsValue({
-				upload_w_9: info.file.name
-			})
-			this.props.setRegisterData({
-				upload_w_9: info.file.name,
-				uploaded_path: info.file.response.data.toString(),
-			})
-			this.setState(prevState => ({ documentUploaded: [...prevState.documentUploaded, info.file.response.data] }));
+			this.form?.setFieldsValue({ upload_w_9: info.file.name });
+			this.setState({ W9FormPath: info.file.response.data });
 		} else if (info.file.status === 'error') {
 			message.error(`${info.file.name} file upload failed.`);
 			this.setState(prevState => ({ fileList: [...prevState.fileList, info.file] }));
 		}
 	}
 
-	setValueToReduxRegisterData = (fieldName, value) => {
-		const { registerData } = this.props.register;
-		let financialInfor = JSON.parse(JSON.stringify(registerData.financialInfor));
-		financialInfor[fieldName] = value;
-		this.props.setRegisterData({ financialInfor: financialInfor });
-	}
-
-	handleSelectChange = (fieldName, value) => {
-		this.setValueToReduxRegisterData(fieldName, value);
-	}
-
 	render() {
 		const { AcademicLevel, sameRateForAllLevel, billingAddress } = this.state;
-		const { registerData } = this.props.register;
+		const { user } = this.props.auth;
 		const uploadProps = {
 			name: 'file',
 			action: url + uploadTempW9FormForProvider,
@@ -118,7 +95,7 @@ class InfoFinancial extends Component {
 
 		return (
 			<Row justify="center" className="row-form">
-				<div className='col-form col-info-parent'>
+				<div className='col-form col-info-financial'>
 					<div className='div-form-title'>
 						<p className='font-30 text-center mb-10'>{intl.formatMessage(messages.billingDetails)}</p>
 					</div>
@@ -132,22 +109,21 @@ class InfoFinancial extends Component {
 						<Form.Item
 							name="legalName"
 							label={intl.formatMessage(messages.legalName)}
+							className="float-label-item"
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.legalName) }]}
 						>
-							<Input onChange={e => this.setValueToReduxRegisterData("legalName", e.target.value)} placeholder={intl.formatMessage(messages.legalName)} />
+							<Input placeholder={intl.formatMessage(messages.legalName)} />
 						</Form.Item>
 						<Form.Item
 							name="billingAddress"
 							label={intl.formatMessage(messages.billingAddress)}
+							className="float-label-item"
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.billingAddress) }]}
 						>
 							<PlacesAutocomplete
 								value={billingAddress}
-								onChange={value => this.setValueToReduxRegisterData("billingAddress", value)}
-								onSelect={value => {
-									this.setValueToReduxRegisterData("billingAddress", value);
-									this.form.setFieldsValue({ "billingAddress": value });
-								}}
+								onChange={value => this.setState({ billingAddress: value })}
+								onSelect={value => this.form.setFieldsValue({ "billingAddress": value })}
 							>
 								{({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
 									<div key='billingaddress'>
@@ -181,17 +157,19 @@ class InfoFinancial extends Component {
 								<Form.Item
 									name="licenseNumber"
 									label={intl.formatMessage(messages.licenseNumber)}
+									className="float-label-item"
 									rules={[{ required: false }]}
 								>
-									<Input onChange={e => this.setValueToReduxRegisterData("licenseNumber", e.target.value)} placeholder={intl.formatMessage(messages.licenseNumber)} />
+									<Input placeholder={intl.formatMessage(messages.licenseNumber)} />
 								</Form.Item>
 							</Col>
 							<Col xs={24} sm={24} md={12}>
 								<Form.Item
 									name="SSN"
 									label="SSN"
+									className="float-label-item"
 								>
-									<Input onChange={e => this.setValueToReduxRegisterData("SSN", e.target.value)} placeholder='SSN' />
+									<Input placeholder='SSN' />
 								</Form.Item>
 							</Col>
 						</Row>
@@ -206,16 +184,10 @@ class InfoFinancial extends Component {
 														name={[field.name, "level"]}
 														label={intl.formatMessage(messages.level)}
 														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.academicLevel) }]}
-														className='bottom-0'
-														style={{ marginTop: field.key === 0 ? 0 : 14 }}
+														className='bottom-0 float-label-item'
+														style={{ marginTop: 14 }}
 													>
-														<Select
-															onChange={() => {
-																const arr = this.form.getFieldValue('academicLevel')
-																this.setValueToReduxRegisterData('academicLevel', arr);
-															}}
-															placeholder={intl.formatMessage(messages.academicLevel)}
-														>
+														<Select placeholder={intl.formatMessage(messages.academicLevel)}>
 															{AcademicLevel?.map((level, index) => (
 																<Select.Option key={index} value={level}>{level}</Select.Option>
 															))}
@@ -227,8 +199,8 @@ class InfoFinancial extends Component {
 														name={[field.name, "rate"]}
 														label={'Standard ' + intl.formatMessage(messages.rate)}
 														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
-														className='bottom-0'
-														style={{ marginTop: field.key === 0 ? 0 : 14 }}
+														className='bottom-0 float-label-item'
+														style={{ marginTop: 14 }}
 													>
 														<Input
 															placeholder={intl.formatMessage(messages.rate)}
@@ -244,7 +216,6 @@ class InfoFinancial extends Component {
 																	arr[field.key].rate = value;
 																}
 																this.form.setFieldValue('academicLevel', arr);
-																this.setValueToReduxRegisterData('academicLevel', arr);
 															})}
 														/>
 													</Form.Item>
@@ -254,8 +225,8 @@ class InfoFinancial extends Component {
 														name={[field.name, "subsidizedRate"]}
 														label={'Subsidized ' + intl.formatMessage(messages.rate)}
 														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
-														className='bottom-0'
-														style={{ marginTop: field.key === 0 ? 0 : 14 }}
+														className='bottom-0 float-label-item'
+														style={{ marginTop: 14 }}
 													>
 														<Input
 															placeholder={'Subsidized ' + intl.formatMessage(messages.rate)}
@@ -271,7 +242,6 @@ class InfoFinancial extends Component {
 																	arr[field.key].subsidizedRate = value;
 																}
 																this.form.setFieldValue('academicLevel', arr);
-																this.setValueToReduxRegisterData('academicLevel', arr);
 															})}
 														/>
 													</Form.Item>
@@ -292,10 +262,7 @@ class InfoFinancial extends Component {
 										<div className='flex flex-row w-50'>
 											<Switch size="small"
 												checked={sameRateForAllLevel}
-												onChange={v => {
-													this.setState({ sameRateForAllLevel: v })
-													this.setValueToReduxRegisterData('sameRateForAllLevel', v)
-												}}
+												onChange={v => this.setState({ sameRateForAllLevel: v })}
 											/>
 											<p className='ml-10 mb-0'>{intl.formatMessage(messages.sameRateLevels)}</p>
 										</div>
@@ -303,29 +270,32 @@ class InfoFinancial extends Component {
 								</div>
 							)}
 						</Form.List>
-						{registerData?.scheduling?.isSeparateEvaluationRate && (
-							<Form.Item
-								name="separateEvaluationRate"
-								label={'Evaluation ' + intl.formatMessage(messages.rate)}
-								rules={[{ required: registerData?.scheduling?.isNewClientEvaluation, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
-							>
-								<Input
-									onChange={(e) => this.setValueToReduxRegisterData('separateEvaluationRate', e.target.value)}
-									placeholder={intl.formatMessage(messages.rate)}
-								/>
-							</Form.Item>
-						)}
-						<Form.Item
-							name="cancellationFee"
-							label={intl.formatMessage(messages.cancellationFee)}
-							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
-							className='w-100'
-						>
-							<Input placeholder={intl.formatMessage(messages.cancellationFee)} />
-						</Form.Item>
+						<Row gutter={15}>
+							{user?.providerInfo?.isSeparateEvaluationRate && (
+								<Col xs={24} sm={24} md={12}>
+									<Form.Item
+										name="separateEvaluationRate"
+										label={'Evaluation ' + intl.formatMessage(messages.rate)}
+										className="float-label-item"
+										rules={[{ required: user?.providerInfo?.isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
+									>
+										<Input placeholder={intl.formatMessage(messages.rate)} />
+									</Form.Item>
+								</Col>
+							)}
+							<Col xs={24} sm={24} md={12}>
+								<Form.Item
+									name="cancellationFee"
+									label={intl.formatMessage(messages.cancellationFee)}
+									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
+									className='w-100 float-label-item'
+								>
+									<Input placeholder={intl.formatMessage(messages.cancellationFee)} />
+								</Form.Item>
+							</Col>
+						</Row>
 						<Form.Item
 							name="upload_w_9"
-							label={intl.formatMessage(messagesRequest.upload)}
 							className='input-download'
 							rules={[{ required: true, message: intl.formatMessage(messages.uploadMess) }]}
 						>
@@ -345,7 +315,7 @@ class InfoFinancial extends Component {
 								type="primary"
 								htmlType="submit"
 							>
-								{intl.formatMessage(messages.continue).toUpperCase()}
+								{intl.formatMessage(messages.confirm).toUpperCase()}
 							</Button>
 						</Form.Item>
 					</Form>
@@ -356,7 +326,7 @@ class InfoFinancial extends Component {
 }
 
 const mapStateToProps = state => ({
-	register: state.register,
+	auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps, { setRegisterData }))(InfoFinancial);
+export default compose(connect(mapStateToProps))(InfoFinancial);

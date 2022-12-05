@@ -6,8 +6,7 @@ import InfoProfile from './Provider/info_profile';
 import InfoServices from './Provider/info_services';
 import InfoAvailability from './Provider/info_availability';
 import InfoScheduling from './Provider/info_scheduling';
-import SubsidyProgram from './Provider/subsidy_program';
-import DayWork from './Provider/day_work';
+import InfoFinancial from './Provider/info_financial';
 import InfoChild from './Parents/info_child';
 import InfoParent from './Parents/info_parent';
 import DependentAvailability from './Parents/info_availability';
@@ -36,8 +35,6 @@ export default class extends React.Component {
         info_professional: false,
         info_scheduling: false,
         info_billing: false,
-        subsidy_program: false,
-        day_work: false,
         change_password: false
       },
       school: {
@@ -127,11 +124,8 @@ export default class extends React.Component {
           case 'Info_availability':
             this.setState({ provider: { newStateProvider, info_availability: true } })
             break;
-          case 'Subsidy_program':
-            this.setState({ provider: { newStateProvider, subsidy_program: true } })
-            break;
-          case 'Day_work':
-            this.setState({ provider: { newStateProvider, day_work: true } })
+          case 'Info_billing':
+            this.setState({ provider: { newStateProvider, info_billing: true } })
             break;
           default:
             this.setState({ provider: { newStateProvider, change_password: true } })
@@ -184,10 +178,8 @@ export default class extends React.Component {
           return <InfoServices />
         } else if (provider.info_scheduling) {
           return <InfoScheduling />
-        } else if (provider.subsidy_program) {
-          return <SubsidyProgram />
-        } else if (provider.day_work) {
-          return <DayWork />
+        } else if (provider.info_billing) {
+          return <InfoFinancial />
         } else {
           return <ChangePassword />
         }
@@ -210,8 +202,8 @@ export default class extends React.Component {
     return (
       <div className="full-layout page admin-page">
         <div className='div-content'>
-          <section className='div-activity-feed box-card'>
-            <Menu theme="light" mode="inline" defaultSelectedKeys={[keyActive]} rootClassName="height-full" items={listMenu} />
+          <section className='div-activity-feed box-card overflow-y-scroll'>
+            <Menu theme="light" mode="inline" defaultSelectedKeys={[keyActive]} rootClassName="h-100" items={listMenu} />
           </section>
           <section className='div-calendar box-card'>
             {this.getScreen()}

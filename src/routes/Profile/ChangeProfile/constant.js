@@ -21,14 +21,9 @@ export const MENU_PROVIDER = [
         label: 'Info Availability'
     },
     {
-        key: 'Subsidy_program',
+        key: 'Info_billing',
         icon: '',
-        label: 'Subsidy Program'
-    },
-    {
-        key: 'Day_work',
-        icon: '',
-        label: 'Day Work'
+        label: 'Info Billing'
     },
     {
         key: 'Change_password',
