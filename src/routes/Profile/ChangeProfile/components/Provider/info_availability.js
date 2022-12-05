@@ -41,7 +41,7 @@ class InfoAvailability extends Component {
 				this.form?.setFieldsValue(data);
 				day_week.map((day) => {
 					const times = data?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
-					this.form.setFieldValue(day, times.map(t => {
+					this.form.setFieldValue(day, times?.map(t => {
 						t.from_date = moment().set({ years: t.fromYear, months: t.fromMonth, date: t.fromDate });
 						t.to_date = moment().set({ years: t.toYear, months: t.toMonth, date: t.toDate });
 						t.from_time = moment().set({ hours: t.openHour, minutes: t.openMin });
@@ -49,6 +49,10 @@ class InfoAvailability extends Component {
 						return t;
 					}));
 				});
+				let locations = [];
+				data?.isHomeVisit && locations.push('Dependent Home');
+				data?.privateOffice && locations.push('Provider Office');
+				data?.ser
 				this.setState({
 					isHomeVisit: data?.isHomeVisit,
 					isPrivateOffice: data?.privateOffice,
@@ -76,7 +80,7 @@ class InfoAvailability extends Component {
 	}
 
 	loadSchools() {
-		request.post(getAllSchoolsForParent, { communityServed: this.props.user?.providerInfo?.cityConnection }).then(result => {
+		request.post(getAllSchoolsForParent, { communityServed: this.props.auth.user?.providerInfo?.cityConnection }).then(result => {
 			const { success, data } = result;
 			if (success) {
 				this.setState({ listSchool: data });
@@ -89,10 +93,29 @@ class InfoAvailability extends Component {
 
 	onFinish = (values) => {
 		let manualSchedule = [];
-		day_week.map(day => manualSchedule.push(values[day]));
+		day_week.map(day => {
+			values[day]?.forEach(t => {
+				const times = {
+					fromYear: t.from_date?.year() ?? 0,
+					fromMonth: t.from_date?.month() ?? 0,
+					fromDate: t.from_date?.date() ?? 0,
+					toYear: t.to_date?.year() ?? 0,
+					toMonth: t.to_date?.month() ?? 0,
+					toDate: t.to_date?.date() ?? 0,
+					openHour: t.from_time?.hours() ?? 0,
+					openMin: t.from_time?.minutes() ?? 0,
+					closeHour: t.to_time?.hours() ?? 0,
+					closeMin: t.to_time?.minutes() ?? 0,
+					dayInWeek: this.getDayOfWeekIndex(day),
+					isPrivate: t.isPrivate ?? false,
+					location: t.location ?? '',
+				}
+				manualSchedule.push(times);
+			})
+		});
 		values.manualSchedule = manualSchedule.flat();
 
-		request.post(updateMyProviderAvailability, { ...values, _id: this.props.user.providerInfo?._id }).then(result => {
+		request.post(updateMyProviderAvailability, { ...values, _id: this.props.auth.user.providerInfo?._id }).then(result => {
 			const { success } = result;
 			if (success) {
 				message.success('Updated successfully');
@@ -114,15 +137,6 @@ class InfoAvailability extends Component {
 				selectedLocation: '',
 			})
 		}
-	}
-
-	onChangeScheduleValue = () => {
-		this.props.setRegisterData({ availability: this.form.getFieldsValue() });
-	}
-
-	onLocationChange = (location) => {
-		this.props.setRegisterData({ availability: this.form.getFieldsValue() });
-		this.setState({ selectedLocation: location });
 	}
 
 	copyToFullWeek = (dayForCopy) => {
@@ -292,7 +306,6 @@ class InfoAvailability extends Component {
 																showArrow
 																placeholder={intl.formatMessage(messages.location)}
 																optionLabelProp="label"
-																onSelect={(v) => this.onLocationChange(v)}
 															>
 																{locations.map((location, index) => (
 																	<Select.Option key={index} label={location} value={location}>{location}</Select.Option>
@@ -303,7 +316,6 @@ class InfoAvailability extends Component {
 															<Col xs={24} sm={24} md={12}>
 																<Form.Item name={[field.name, "from_date"]}>
 																	<DatePicker
-																		onChange={() => this.onChangeScheduleValue()}
 																		format='MM/DD/YYYY'
 																		placeholder={intl.formatMessage(messages.from)}
 																	/>
@@ -312,7 +324,6 @@ class InfoAvailability extends Component {
 															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
 																<Form.Item name={[field.name, "to_date"]}>
 																	<DatePicker
-																		onChange={() => this.onChangeScheduleValue()}
 																		format='MM/DD/YYY'
 																		placeholder={intl.formatMessage(messages.to)}
 																	/>
@@ -324,7 +335,6 @@ class InfoAvailability extends Component {
 															<Col xs={24} sm={24} md={12}>
 																<Form.Item name={[field.name, "from_time"]}>
 																	<TimePicker
-																		onChange={() => this.onChangeScheduleValue()}
 																		use12Hours
 																		format="h:mm a"
 																		placeholder={intl.formatMessage(messages.from)}
@@ -335,7 +345,6 @@ class InfoAvailability extends Component {
 															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
 																<Form.Item name={[field.name, "to_time"]}>
 																	<TimePicker
-																		onChange={() => this.onChangeScheduleValue()}
 																		use12Hours
 																		format="h:mm a"
 																		placeholder={intl.formatMessage(messages.to)}
@@ -394,6 +403,6 @@ class InfoAvailability extends Component {
 }
 
 const mapStateToProps = state => ({
-	user: state.auth.user
+	auth: state.auth
 })
 export default compose(connect(mapStateToProps))(InfoAvailability);
