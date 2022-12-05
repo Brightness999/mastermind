@@ -349,7 +349,9 @@ class DrawerDetail extends Component {
       visible: visisbleProcess,
       onDecline: this.handleDecline,
       onSubmit: this.handleMarkAsClosed,
+      onConfirm: this.openModalConfirm,
       onCancel: this.closeModalProcess,
+      event: event,
     };
     const modalCurrentProps = {
       visible: visibleCurrent,
@@ -491,13 +493,13 @@ class DrawerDetail extends Component {
           )}
         </div>
         <Row gutter={15} className='list-btn-detail'>
-          {[1, 4].includes(event?.type) && event?.status == 0 && userRole > 3 && (
+          {[1, 2, 4].includes(event?.type) && event?.status == 0 && userRole > 3 && (
             <Col span={12}>
               <Button
                 type='primary'
                 icon={<BsCheckCircle size={15} />}
                 block
-                onClick={() => event.type == 1 ? this.openModalProcess() : this.handleMarkAsClosed()}
+                onClick={() => [1, 2].includes(event.type) ? this.openModalProcess() : this.handleMarkAsClosed()}
                 disabled={isNotPending}
                 className='flex items-center gap-2 h-30'
               >
@@ -505,7 +507,7 @@ class DrawerDetail extends Component {
               </Button>
             </Col>
           )}
-          {[2, 3, 5].includes(event?.type) && moment(event?.date).isBefore(moment()) && event?.status == 0 && userRole > 3 && (
+          {[3, 5].includes(event?.type) && moment(event?.date).isBefore(moment()) && event?.status == 0 && userRole > 3 && (
             <Col span={12}>
               <Button
                 type='primary'

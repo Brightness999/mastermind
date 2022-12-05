@@ -19,8 +19,8 @@ class ModalProcessAppointment extends React.Component {
       <Modal {...modalProps} style={{ top: '40vh' }}>
         <div className='flex gap-2'>
           <Button type='primary' block onClick={() => this.props.onDecline()}>Decline</Button>
-          <Button type='primary' block onClick={() => this.props.onSubmit([], false)}>Proceed to evaluation</Button>
-          <Button type='primary' block onClick={() => this.props.onSubmit([], true)}>Proceed to standard session</Button>
+          {this.props.event?.type == 1 && <Button type='primary' block onClick={() => this.props.onSubmit([], false)}>Proceed to evaluation</Button>}
+          <Button type='primary' block onClick={() => this.props.event?.type == 1 ? this.props.onSubmit([], true) : this.props.onConfirm()}>Proceed to standard session</Button>
         </div>
       </Modal>
     );
