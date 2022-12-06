@@ -40,6 +40,7 @@ export const cancelAppointmentForProvider = 'providers/cancel_appoint'
 export const getMyProviderInfo = 'providers/get_my_provider_info'
 export const updateMyProviderProfile = 'providers/update_my_provider_profile'
 export const updateMyProviderAvailability = 'providers/update_my_provider_availability'
+export const setFlag = 'providers/set_flag'
 
 export const getAppointmentsForParent = 'clients/get_my_appointments'
 export const getAppointmentsInMonthForParent = 'clients/get_my_appointments_in_month'

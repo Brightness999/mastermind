@@ -376,6 +376,9 @@
   "components.drawerdetail.leaveFeedback": "Leave feedback",
   "components.drawerdetail.requestFeedback": "Request feedback",
   "components.drawerdetail.feedback": "Feedback",
+  "components.drawerdetail.pastDueBalance": "Past due balance",
+  "components.drawerdetail.noShow": "No show / cancellation",
+  "components.drawerdetail.flagDependent": "Flag Dependent",
   
   "components.drawerdetailpost.postSessionFeedback": "Post session feedback",
   "components.drawerdetailpost.privateNotes": "Private notes",

@@ -97,4 +97,16 @@ export default {
     id: `${scope}.feedback`,
     defaultMessage: 'Feedback',
   },
+  pastDueBalance: {
+    id: `${scope}.pastDueBalance`,
+    defaultMessage: 'Past due balance',
+  },
+  noShow: {
+    id: `${scope}.noShow`,
+    defaultMessage: 'No show / cancellation',
+  },
+  flagDependent: {
+    id: `${scope}.flagDependent`,
+    defaultMessage: 'Flag Dependent',
+  },
 };

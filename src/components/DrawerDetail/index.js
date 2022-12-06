@@ -1,11 +1,11 @@
 import './style/index.less';
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Typography, Popover, Input, message, Popconfirm } from 'antd';
-import { BsBell, BsCheckCircle, BsClockHistory, BsXCircle } from 'react-icons/bs';
+import { Drawer, Button, Row, Col, Typography, Popover, Input, message, Popconfirm, Menu, Dropdown } from 'antd';
+import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsXCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
-import { ModalCancelAppointment, ModalCurrentAppointment, ModalCurrentReferralService, ModalInvoice, ModalProcessAppointment } from '../../components/Modal';
+import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalCurrentReferralService, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
 import intl from "react-intl-universal";
 import messages from './messages';
 import msgModal from '../Modal/messages';
@@ -14,7 +14,7 @@ import moment from 'moment';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestFeedbackForClient, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestFeedbackForClient, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
@@ -36,6 +36,9 @@ class DrawerDetail extends Component {
       userRole: store.getState().auth.user?.role,
       visisbleProcess: false,
       visibleCurrentReferral: false,
+      visibleNoShow: false,
+      visibleBalance: false,
+      isFlag: this.props.event?.flagType,
     };
   }
 
@@ -276,9 +279,80 @@ class DrawerDetail extends Component {
     this.setState({ visisbleProcess: false });
   }
 
-  render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visisbleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback } = this.state;
+  onShowModalNoShow = () => {
+    this.setState({ visibleNoShow: true });
+  };
+
+  onCloseModalNoShow = () => {
+    this.setState({ visibleNoShow: false });
+  };
+
+  onSubmitFlagNoShow = (values) => {
     const { event } = this.props;
+    const data = {
+      _id: event?._id,
+      flagItems: {
+        ...values,
+        type: event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.standardSession) : event?.type == 4 ? intl.formatMessage(msgModal.subsidizedSession) : '',
+        locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
+      }
+    }
+    request.post(setFlag, data).then(result => {
+      const { success } = result;
+      if (success) {
+        this.setState({ visibleNoShow: false, isFlag: true });
+        this.updateAppointments();
+      }
+    })
+  }
+
+  onShowModalBalance = () => {
+    this.setState({ visibleBalance: true });
+  };
+
+  onCloseModalBalance = () => {
+    this.setState({ visibleBalance: false });
+  };
+
+  onSubmitFlagBalance = (values) => {
+    const { event } = this.props;
+    const data = {
+      _id: event?._id,
+      flagItems: {
+        ...values,
+        type: event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.standardSession) : event?.type == 4 ? intl.formatMessage(msgModal.subsidizedSession) : '',
+        locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
+      }
+    }
+    request.post(setFlag, data).then(result => {
+      const { success } = result;
+      if (success) {
+        this.setState({ visibleBalance: false, isFlag: true });
+        this.updateAppointments();
+      }
+    })
+  }
+
+  render() {
+    const { isProviderHover, isDependentHover, visibleCancel, visisbleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag } = this.state;
+    const { event } = this.props;
+
+    const menu = (
+      <Menu
+        selectable
+        defaultSelectedKeys={['2']}
+        items={[
+          {
+            key: '1',
+            label: (<a target="_blank" rel={intl.formatMessage(messages.pastDueBalance)} onClick={this.onShowModalBalance}>{intl.formatMessage(messages.pastDueBalance)}</a>),
+          },
+          {
+            key: '2',
+            label: (<a target="_blank" rel={intl.formatMessage(messages.noShow)} onClick={this.onShowModalNoShow}>{intl.formatMessage(messages.noShow)}</a>),
+          }
+        ]}
+      />
+    );
 
     const providerProfile = (
       <div className='provider-profile'>
@@ -367,10 +441,21 @@ class DrawerDetail extends Component {
     }
     const modalCurrentReferralProps = {
       visible: visibleCurrentReferral,
-      // onSubmit: this.onConfirm,
       onCancel: this.closeModalCurrent,
       event: event,
     }
+    const modalNoShowProps = {
+      visible: visibleNoShow,
+      onSubmit: this.onSubmitFlagNoShow,
+      onCancel: this.onCloseModalNoShow,
+      event: event,
+    };
+    const modalBalanceProps = {
+      visible: visibleBalance,
+      onSubmit: this.onSubmitFlagBalance,
+      onCancel: this.onCloseModalBalance,
+      event: event,
+    };
 
     return (
       <Drawer
@@ -545,6 +630,19 @@ class DrawerDetail extends Component {
               </Button>
             </Col>
           )}
+          {(!isFlag && userRole > 3 && event?.type > 1 && event?.status == -1 && moment(event?.date).isBefore(moment())) && (
+            <Col span={12}>
+              <Dropdown overlay={menu} placement="bottomRight">
+                <Button
+                  type='primary'
+                  icon={<BsFillFlagFill size={15} />}
+                  block
+                >
+                  {intl.formatMessage(messages.flagDependent)}
+                </Button>
+              </Dropdown>
+            </Col>
+          )}
           {(event?.type != 1 && event?.status == 0 && !isNotPending) && (
             <Col span={12}>
               <Button
@@ -600,6 +698,8 @@ class DrawerDetail extends Component {
         {visibleCurrent && <ModalCurrentAppointment {...modalCurrentProps} />}
         {visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
         {isModalInvoice && <ModalInvoice {...modalInvoiceProps} />}
+        {visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
+        {visibleBalance && <ModalBalance {...modalBalanceProps} />}
       </Drawer>
     );
   }
