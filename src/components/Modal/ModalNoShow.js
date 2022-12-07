@@ -14,7 +14,7 @@ class ModalNoShow extends React.Component {
 	}
 
 	onFinish = (values) => {
-		this.props.onSubmit({ notes: values.notes, rate: values.penalty + values.program });
+		this.props.onSubmit(values);
 	}
 
 	render() {

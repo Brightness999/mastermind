@@ -1,4 +1,4 @@
-// export const url = "https://hmghbackend.herokuapp.com/"
+// export const url = "https://hmghbackend.onrender.com/"
 export const url = "http://localhost:3090/"
 
 export const socketUrl = url + 'api'

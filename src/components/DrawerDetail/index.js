@@ -295,6 +295,8 @@ class DrawerDetail extends Component {
         ...values,
         type: event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.standardSession) : event?.type == 4 ? intl.formatMessage(msgModal.subsidizedSession) : '',
         locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
+        rate: values?.penalty + values?.program,
+        flagType: 2,
       }
     }
     request.post(setFlag, data).then(result => {
@@ -322,6 +324,8 @@ class DrawerDetail extends Component {
         ...values,
         type: event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.standardSession) : event?.type == 4 ? intl.formatMessage(msgModal.subsidizedSession) : '',
         locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
+        rate: values?.late,
+        flagType: 1,
       }
     }
     request.post(setFlag, data).then(result => {

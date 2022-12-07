@@ -38,7 +38,7 @@ class ModalBalance extends React.Component {
 					<div className='flex flex-row items-start mb-5'>
 						<div className='mr-10 flex-1'>
 							<Form.Item
-								name="rate"
+								name="late"
 								label={intl.formatMessage(messages.lateFreeAmount)}
 								className="mb-0"
 								rules={[{
