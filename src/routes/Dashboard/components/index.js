@@ -3,10 +3,9 @@ import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, S
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsFilter, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
-import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview } from '../../../components/Modal';
+import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
-import DrawerDetailPost from '../../../components/DrawerDetailPost';
 import intl from 'react-intl-universal';
 import FullCalendar from '@fullcalendar/react' // must go before plugins
 import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
@@ -35,6 +34,7 @@ import { setDependents, setLocations, setProviders, setSkillSet, setUser } from 
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { checkNotificationForClient, checkNotificationForProvider, closeNotificationForClient, getDefaultDataForAdmin } from '../../../utils/api/apiList';
+import { BiExpand } from 'react-icons/bi';
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -43,7 +43,6 @@ class Dashboard extends React.Component {
     this.state = {
       isFilter: false,
       userDrawerVisible: false,
-      providerDrawervisible: false,
       visibleNewAppoint: false,
       visibleSubsidy: false,
       visiblReferralService: false,
@@ -74,6 +73,7 @@ class Dashboard extends React.Component {
       selectedEventTypes: [],
       intervalId: 0,
       selectedDate: undefined,
+      visibleFlagExpand: false,
     };
     this.calendarRef = React.createRef();
   }
@@ -374,14 +374,6 @@ class Dashboard extends React.Component {
 
   onCloseDrawerDetail = () => {
     this.setState({ userDrawerVisible: false });
-  };
-
-  onShowDrawerDetailPost = () => {
-    this.setState({ providerDrawervisible: true });
-  };
-
-  onCloseDrawerDetailPost = () => {
-    this.setState({ providerDrawervisible: false });
   };
 
   onShowModalNewAppoint = () => {
@@ -720,11 +712,18 @@ class Dashboard extends React.Component {
     return value > 9 ? value : `0${value}`;
   }
 
+  onOpenModalFlagExpand = () => {
+    this.setState({ visibleFlagExpand: true });
+  }
+
+  onCloseModalFlagExpand = () => {
+    this.setState({ visibleFlagExpand: false });
+  }
+
   render() {
     const {
       isFilter,
       userDrawerVisible,
-      providerDrawervisible,
       visiblReferralService,
       isMonth,
       isGridDayView,
@@ -745,6 +744,7 @@ class Dashboard extends React.Component {
       selectedEventTypes,
       visibleNewAppoint,
       selectedDate,
+      visibleFlagExpand,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -793,6 +793,10 @@ class Dashboard extends React.Component {
       visible: visiblReferralService,
       onSubmit: this.onSubmitModalReferral,
       onCancel: this.onCloseModalReferral,
+      SkillSet: SkillSet,
+      listDependents: listDependents,
+      setLoadData: reload => this.loadDataModalReferral = reload,
+      userRole: this.state.userRole,
     };
 
     const modalNewReviewProps = {
@@ -805,6 +809,8 @@ class Dashboard extends React.Component {
       visible: visibleNewGroup,
       onSubmit: this.onCloseModalGroup,
       onCancel: this.onCloseModalGroup,
+      SkillSet: SkillSet,
+      setLoadData: (reload) => this.loadDataModalNewGroup = reload,
     }
 
     const modalNewAppointProps = {
@@ -814,6 +820,20 @@ class Dashboard extends React.Component {
       listDependents: listDependents,
       SkillSet: SkillSet,
       selectedDate: selectedDate,
+    };
+
+    const drawerDetailProps = {
+      visible: userDrawerVisible,
+      onClose: this.onCloseDrawerDetail,
+      event: selectedEvent,
+      calendar: this.calendarRef,
+    };
+
+    const modalFlagExpandProps = {
+      visible: visibleFlagExpand,
+      onSubmit: this.onCloseModalFlagExpand,
+      onCancel: this.onCloseModalFlagExpand,
+      flags: listAppointmentsRecent?.filter(appointment => appointment.flagStatus == 1 || appointment.flagStatus == 2),
     };
 
     return (
@@ -981,7 +1001,7 @@ class Dashboard extends React.Component {
                   <Panel header={intl.formatMessage(messages.referrals)} key="2">
                     <Tabs defaultActiveKey="1" type="card" size='small'>
                       <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                        {listAppointmentsRecent?.filter(a => a.type == 4 && a.status == 0)?.map((appointment, index) =>
+                        {listAppointmentsRecent?.filter(a => a.type == 4 && a.status == 0 && a.flagStatus != 1)?.map((appointment, index) =>
                           <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
@@ -1000,7 +1020,7 @@ class Dashboard extends React.Component {
                         )}
                       </Tabs.TabPane>
                       <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                        {listAppointmentsRecent?.filter(a => a.type == 4 && a.status != 0)?.map((appointment, index) =>
+                        {listAppointmentsRecent?.filter(a => a.type == 4 && a.status != 0 && a.flagStatus != 1)?.map((appointment, index) =>
                           <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
@@ -1024,7 +1044,7 @@ class Dashboard extends React.Component {
                 <Panel header={intl.formatMessage(messages.screenings)} key="3">
                   <Tabs defaultActiveKey="1" type="card" size='small'>
                     <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                      {listAppointmentsRecent?.filter(a => a.type == 1 && a.status == 0)?.map((appointment, index) =>
+                      {listAppointmentsRecent?.filter(a => a.type == 1 && a.status == 0 && a.flagStatus != 1)?.map((appointment, index) =>
                         <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service flex-1'>
@@ -1042,7 +1062,7 @@ class Dashboard extends React.Component {
                       )}
                     </Tabs.TabPane>
                     <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                      {listAppointmentsRecent?.filter(a => a.type == 1 && a.status != 0)?.map((appointment, index) =>
+                      {listAppointmentsRecent?.filter(a => a.type == 1 && a.status != 0 && a.flagStatus != 1)?.map((appointment, index) =>
                         <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service flex-1'>
@@ -1064,7 +1084,7 @@ class Dashboard extends React.Component {
                 <Panel header={intl.formatMessage(messages.evaluations)} key="4">
                   <Tabs defaultActiveKey="1" type="card" size='small'>
                     <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                      {listAppointmentsRecent?.filter(appointment => appointment.type == 2 && appointment.status == 0 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
+                      {listAppointmentsRecent?.filter(a => a.type == 2 && a.status == 0 && moment(a.date).isAfter(new Date()) && a.flagStatus != 1)?.map((appointment, index) =>
                         <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service'>
@@ -1080,7 +1100,7 @@ class Dashboard extends React.Component {
                       )}
                     </Tabs.TabPane>
                     <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                      {listAppointmentsRecent?.filter(appointment => appointment.type == 2 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
+                      {listAppointmentsRecent?.filter(a => a.type == 2 && moment(a.date).isBefore(new Date()) && a.flagStatus != 1)?.map((appointment, index) =>
                         <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service'>
@@ -1097,35 +1117,33 @@ class Dashboard extends React.Component {
                     </Tabs.TabPane>
                   </Tabs>
                 </Panel>
-                <Panel header={intl.formatMessage(messages.flags)} key="5" extra={this.genExtraFlag()}>
-                  <Tabs defaultActiveKey="1" type="card" size='small'>
-                    <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                      {listAppointmentsRecent?.filter(a => a.type != 1 && a.status == 0 && a.isFlag)?.map((appointment, index) =>
-                        <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
-                          <Avatar size={24} icon={<FaUser size={12} />} />
-                          <div className='div-service'>
-                            <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
-                          </div>
-                          <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
-                          <p className='font-12 ml-auto mb-0'>Pay Flag</p>
-                        </div>
-                      )}
-                    </Tabs.TabPane>
-                    <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                      {listAppointmentsRecent?.filter(a => a.type != 1 && a.status != 0 && a.isFlag)?.map((appointment, index) =>
-                        <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
-                          <Avatar size={24} icon={<FaUser size={12} />} />
-                          <div className='div-service'>
-                            <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
-                          </div>
-                          <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
-                          <p className='font-12 ml-auto mb-0'>Pay Flag</p>
-                        </div>
-                      )}
-                    </Tabs.TabPane>
-                  </Tabs>
+                <Panel
+                  header={intl.formatMessage(messages.flags)}
+                  key="5"
+                  extra={
+                    <div className='flex gap-2'>
+                      <BiExpand size={18} onClick={() => this.onOpenModalFlagExpand()} />
+                      <Badge size="small" count={listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.length}>
+                        <BsFillFlagFill size={18} />
+                      </Badge>
+                    </div>
+                  }
+                >
+                  {listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.map((appointment, index) =>
+                    <div key={index} className='list-item padding-item gap-2' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                      <Avatar size={24} icon={<FaUser size={12} />} />
+                      <div className='div-service'>
+                        <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                        <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                      </div>
+                      <Button type='primary' block className='break-spaces font-12 p-0'>
+                        {intl.formatMessage(msgDrawer.requestClearance)}
+                      </Button>
+                      <Button type='primary' block className='break-spaces font-12 p-0'>
+                        {intl.formatMessage(msgDrawer.payFlag)}
+                      </Button>
+                    </div>
+                  )}
                 </Panel>
                 {this.renderPanelSubsidaries()}
               </Collapse>
@@ -1137,32 +1155,13 @@ class Dashboard extends React.Component {
             <img src='../images/call.png' onClick={this.onShowModalReferral} />
           </div>
         </div>
-        {userDrawerVisible && <DrawerDetail
-          visible={userDrawerVisible}
-          onClose={this.onCloseDrawerDetail}
-          event={selectedEvent}
-          calendar={this.calendarRef}
-        />}
-        <DrawerDetailPost
-          visible={providerDrawervisible}
-          onClose={this.onCloseDrawerDetailPost}
-          event={selectedEvent}
-          role={userRole}
-          calendar={this.calendarRef}
-        />
+        {userDrawerVisible && <DrawerDetail {...drawerDetailProps} />}
         <ModalNewAppointmentForParents {...modalNewAppointProps} />
+        {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
         {this.renderModalSubsidyDetail()}
         {this.modalCreateAndEditSubsidyRequest()}
-        <ModalNewGroup {...modalNewGroupProps}
-          SkillSet={SkillSet}
-          setLoadData={reload => this.loadDataModalNewGroup = reload}
-        />
-        <ModalReferralService {...modalReferralServiceProps}
-          SkillSet={SkillSet}
-          listDependents={listDependents}
-          setLoadData={reload => this.loadDataModalReferral = reload}
-          userRole={this.state.userRole}
-        />
+        <ModalNewGroup {...modalNewGroupProps} />
+        <ModalReferralService {...modalReferralServiceProps} />
         <ModalNewSubsidyReview {...modalNewReviewProps} />
       </div>
     );

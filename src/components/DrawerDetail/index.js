@@ -1,6 +1,6 @@
 import './style/index.less';
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Typography, Popover, Input, message, Popconfirm, Menu, Dropdown } from 'antd';
+import { Drawer, Button, Row, Col, Typography, Popover, Input, message, Menu, Dropdown } from 'antd';
 import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsXCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
@@ -38,7 +38,7 @@ class DrawerDetail extends Component {
       visibleCurrentReferral: false,
       visibleNoShow: false,
       visibleBalance: false,
-      isFlag: this.props.event?.flagType,
+      isFlag: this.props.event?.flagStatus,
     };
   }
 
@@ -668,7 +668,7 @@ class DrawerDetail extends Component {
               </Button>
             </Col>
           )}
-          {(userRole == 3 && [2, 3].includes(event?.type) && event?.status == -1) && (
+          {(userRole == 3 && [2, 3].includes(event?.type) && event?.status == -1 && event?.flagStatus == 0) && (
             <Col span={12}>
               <Button
                 type='primary'
@@ -676,6 +676,17 @@ class DrawerDetail extends Component {
                 block
               >
                 {intl.formatMessage(messages.requestInvoice)}
+              </Button>
+            </Col>
+          )}
+          {(userRole == 3 && [2, 3].includes(event?.type) && event?.status == -1 && event?.flagStatus == 1) && (
+            <Col span={12}>
+              <Button
+                type='primary'
+                icon={<FaFileContract size={12} />}
+                block
+              >
+                {intl.formatMessage(messages.requestClearance)}
               </Button>
             </Col>
           )}

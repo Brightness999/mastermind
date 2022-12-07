@@ -20,6 +20,8 @@ import ModalDependentDetail from './ModalDependentDetail';
 import ModalInvoice from './ModalInvoice';
 import ModalProcessAppointment from './ModalProcessAppointment';
 import ModalCurrentReferralService from './ModalCurrentReferralService';
+import ModalFlagExpand from './ModalFlagExpand';
+
 export {
   ModalCreateDone,
   ModalCancelAppointment,
@@ -42,4 +44,5 @@ export {
   ModalInvoice,
   ModalProcessAppointment,
   ModalCurrentReferralService,
+  ModalFlagExpand,
 }

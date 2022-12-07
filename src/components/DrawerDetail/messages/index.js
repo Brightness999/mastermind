@@ -109,4 +109,16 @@ export default {
     id: `${scope}.flagDependent`,
     defaultMessage: 'Flag Dependent',
   },
+  requestClearance: {
+    id: `${scope}.requestClearance`,
+    defaultMessage: 'Request Clearance',
+  },
+  payFlag: {
+    id: `${scope}.payFlag`,
+    defaultMessage: 'Pay Flag',
+  },
+  clearFlag: {
+    id: `${scope}.clearFlag`,
+    defaultMessage: 'Clear Flag',
+  },
 };

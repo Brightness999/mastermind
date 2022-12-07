@@ -324,5 +324,13 @@ export default {
   privateNote: {
     id: `${scope}.privateNote`,
     defaultMessage: 'Internal note',
+  },
+  active: {
+    id: `${scope}.active`,
+    defaultMessage: 'Active',
+  },
+  cleared: {
+    id: `${scope}.cleared`,
+    defaultMessage: 'Cleared',
   }
 };

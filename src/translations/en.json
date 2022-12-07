@@ -342,6 +342,8 @@
   "components.Modal.selectProvider": "Select a provider",
   "components.Modal.searchProvider": "Search a provider",
   "components.Modal.subsidizedSession": "Subsidized Session",
+  "components.Modal.active": "Active",
+  "components.Modal.cleared": "Cleared",
 
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.subsidyManager": "Subsidy Request",
@@ -379,6 +381,9 @@
   "components.drawerdetail.pastDueBalance": "Past due balance",
   "components.drawerdetail.noShow": "No show / cancellation",
   "components.drawerdetail.flagDependent": "Flag Dependent",
+  "components.drawerdetail.requestClearance": "Request Clearance",
+  "components.drawerdetail.payFlag": "Pay Flag",
+  "components.drawerdetail.clearFlag": "Clear Flag",
   
   "components.drawerdetailpost.postSessionFeedback": "Post session feedback",
   "components.drawerdetailpost.privateNotes": "Private notes",
