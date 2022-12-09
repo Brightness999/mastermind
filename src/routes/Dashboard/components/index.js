@@ -3,7 +3,7 @@ import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, S
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsFilter, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
-import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm } from '../../../components/Modal';
+import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
 import intl from 'react-intl-universal';
@@ -54,7 +54,7 @@ class Dashboard extends React.Component {
       canDrop: true,
       calendarWeekends: true,
       calendarEvents: this.props.appointmentsInMonth,
-      userRole: -1,
+      userRole: this.props.user?.role,
       listDependents: [],
       parentInfo: {},
       providerInfo: {},
@@ -77,6 +77,7 @@ class Dashboard extends React.Component {
       modalType: '',
       visibleConfirm: false,
       confirmMessage: '',
+      visibleSessionsNeedToClose: false,
     };
     this.calendarRef = React.createRef();
   }
@@ -104,7 +105,6 @@ class Dashboard extends React.Component {
             this.loadDefaultData();
             break;
         }
-        this.setState({ userRole: loginData.role });
         this.updateCalendarEvents(loginData.role);
         this.getMyAppointments(loginData.role);
         const notifications = setInterval(() => {
@@ -581,17 +581,21 @@ class Dashboard extends React.Component {
     );
   }
 
+  onOpenModalSessionsNeedToClose = () => {
+    this.setState({ visibleSessionsNeedToClose: true });
+  }
+
   renderPanelAppointmentForProvider = () => {
     if (this.state.userRole == 30 || this.state.userRole == 3)
       return (
         <Panel
           key="1"
           header={intl.formatMessage(messages.appointments)}
-          extra={(<BsClockHistory size={18} onClick={() => { }} />)}
+          extra={this.state.userRole > 3 && (<BsClockHistory size={18} onClick={() => this.onOpenModalSessionsNeedToClose()} />)}
           className='appointment-panel'
+          collapsible='header'
         >
           <PanelAppointment
-            userRole={this.state.userRole}
             setReload={reload => this.panelAppoimentsReload = reload}
             onShowDrawerDetail={this.onShowDrawerDetail}
             calendar={this.calendarRef}
@@ -763,6 +767,10 @@ class Dashboard extends React.Component {
     });
   }
 
+  onCloseModalSessionsNeedToClose = () => {
+    this.setState({ visibleSessionsNeedToClose: false });
+  }
+
   render() {
     const {
       isFilter,
@@ -790,6 +798,7 @@ class Dashboard extends React.Component {
       visibleFlagExpand,
       visibleConfirm,
       confirmMessage,
+      visibleSessionsNeedToClose,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -879,6 +888,14 @@ class Dashboard extends React.Component {
       onSubmit: this.onCloseModalFlagExpand,
       onCancel: this.onCloseModalFlagExpand,
       flags: listAppointmentsRecent?.filter(appointment => appointment.flagStatus == 1 || appointment.flagStatus == 2),
+      calendar: this.calendarRef,
+    };
+
+    const modalSessionsNeedToCloseProps = {
+      visible: visibleSessionsNeedToClose,
+      onSubmit: this.onCloseModalSessionsNeedToClose,
+      onCancel: this.onCloseModalSessionsNeedToClose,
+      appointments: listAppointmentsRecent?.filter(appointment => appointment.type == 3 && appointment.status == 0 && moment(appointment.date).isBefore(moment())),
       calendar: this.calendarRef,
     };
 
@@ -1066,7 +1083,7 @@ class Dashboard extends React.Component {
                               <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                             </div>
                             <div className='ml-auto'>
-                              <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm')}</p>
+                              <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
                               <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                             </div>
                           </div>
@@ -1085,7 +1102,7 @@ class Dashboard extends React.Component {
                               <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                             </div>
                             <div className='ml-auto'>
-                              <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm')}</p>
+                              <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
                               <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                             </div>
                           </div>
@@ -1146,7 +1163,7 @@ class Dashboard extends React.Component {
                           </div>
                           <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                           <div className='ml-auto'>
-                            <p className='font-12 mb-0'>{moment(appointment.date).format("hh:mm")}</p>
+                            <p className='font-12 mb-0'>{moment(appointment.date).format("hh:mm a")}</p>
                             <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                           </div>
                         </div>
@@ -1162,7 +1179,7 @@ class Dashboard extends React.Component {
                           </div>
                           <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                           <div className='ml-auto'>
-                            <p className='font-12 mb-0'>{moment(appointment.date).format("hh:mm")}</p>
+                            <p className='font-12 mb-0'>{moment(appointment.date).format("hh:mm a")}</p>
                             <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                           </div>
                         </div>
@@ -1216,7 +1233,7 @@ class Dashboard extends React.Component {
                           </div>
                           <div className='font-12'>{appointment?.type == 2 ? intl.formatMessage(messages.evaluation) : appointment?.type == 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
                           <div className='ml-auto'>
-                            <div className='font-12'>{moment(appointment.date).format("hh:mm")}</div>
+                            <div className='font-12'>{moment(appointment.date).format("hh:mm a")}</div>
                             <div className='font-12 font-700'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
                           </div>
                         </div>
@@ -1236,7 +1253,7 @@ class Dashboard extends React.Component {
           </div>
         </div>
         {userDrawerVisible && <DrawerDetail {...drawerDetailProps} />}
-        <ModalNewAppointmentForParents {...modalNewAppointProps} />
+        {visibleNewAppoint && <ModalNewAppointmentForParents {...modalNewAppointProps} />}
         {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
         {this.renderModalSubsidyDetail()}
         {this.modalCreateAndEditSubsidyRequest()}
@@ -1244,6 +1261,7 @@ class Dashboard extends React.Component {
         <ModalReferralService {...modalReferralServiceProps} />
         <ModalNewSubsidyReview {...modalNewReviewProps} />
         {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
+        {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
       </div>
     );
   }
@@ -1279,6 +1297,7 @@ const mapStateToProps = state => {
   return ({
     appointments: state.appointments.dataAppointments,
     appointmentsInMonth: state.appointments.dataAppointmentsMonth,
+    user: state.auth.user,
   })
 }
 

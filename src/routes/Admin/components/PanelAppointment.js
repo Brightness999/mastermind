@@ -4,7 +4,7 @@ import { FaUser } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
 import { BsEnvelope, BsXCircle, BsFillFlagFill, BsCheckCircleFill } from 'react-icons/bs';
 import intl from 'react-intl-universal';
-import messages from '../messages';
+import msgDashboard from '../../Dashboard/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import './index.less';
@@ -156,7 +156,7 @@ class PanelAppointment extends React.Component {
 
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
-        <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+        <Tabs.TabPane tab={intl.formatMessage(msgDashboard.upcoming)} key="1">
           {appointments?.filter(a => a.type == 3 && a.flagStatus != 1 && [0, -2].includes(a.status) && moment(new Date()).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
@@ -176,7 +176,7 @@ class PanelAppointment extends React.Component {
           <ModalCancelAppointment {...modalCancelProps} />
           {visibleCurrent && <ModalCurrentAppointment {...modalCurrentProps} />}
         </Tabs.TabPane>
-        <Tabs.TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
+        <Tabs.TabPane tab={intl.formatMessage(msgDashboard.unprocessed)} key="2">
           {appointments?.filter(a => a.type == 3 && a.flagStatus != 1 && [0, -1].includes(a.status) && moment(new Date()).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSame(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
@@ -192,7 +192,7 @@ class PanelAppointment extends React.Component {
             </div>
           )}
         </Tabs.TabPane>
-        <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="3">
+        <Tabs.TabPane tab={intl.formatMessage(msgDashboard.past)} key="3">
           {appointments?.filter(a => a.type == 3 && [0, -1, -2].includes(a.status) && a.flagStatus != 1 && moment(new Date()).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}

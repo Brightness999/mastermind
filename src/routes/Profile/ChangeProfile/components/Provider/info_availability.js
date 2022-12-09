@@ -324,7 +324,7 @@ class InfoAvailability extends Component {
 															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
 																<Form.Item name={[field.name, "to_date"]}>
 																	<DatePicker
-																		format='MM/DD/YYY'
+																		format='MM/DD/YYYY'
 																		placeholder={intl.formatMessage(messages.to)}
 																	/>
 																</Form.Item>

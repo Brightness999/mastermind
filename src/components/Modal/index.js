@@ -21,6 +21,7 @@ import ModalInvoice from './ModalInvoice';
 import ModalProcessAppointment from './ModalProcessAppointment';
 import ModalCurrentReferralService from './ModalCurrentReferralService';
 import ModalFlagExpand from './ModalFlagExpand';
+import ModalSessionsNeedToClose from './ModalSessionsNeedToClose';
 
 export {
   ModalCreateDone,
@@ -45,4 +46,5 @@ export {
   ModalProcessAppointment,
   ModalCurrentReferralService,
   ModalFlagExpand,
+  ModalSessionsNeedToClose,
 }

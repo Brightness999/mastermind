@@ -34,7 +34,7 @@ class DrawerDetail extends Component {
       isLeftFeedback: !!this.props.event?.publicFeedback,
       isShowFeedback: false,
       userRole: store.getState().auth.user?.role,
-      visisbleProcess: false,
+      visibleProcess: false,
       visibleCurrentReferral: false,
       visibleNoShow: false,
       visibleBalance: false,
@@ -150,20 +150,21 @@ class DrawerDetail extends Component {
     return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(duration, 'minutes').format('hh:mm a')}`;
   }
 
-  handleMarkAsClosed = (items, skipEvaluation) => {
+  handleMarkAsClosed = (items, skipEvaluation, note, publicFeedback) => {
     if (this.props.event?._id) {
       const data = {
         appointmentId: this.props.event._id,
-        publicFeedback: this.state.publicFeedback,
+        publicFeedback: publicFeedback ? publicFeedback : this.state.publicFeedback,
         skipEvaluation: skipEvaluation,
         items: items,
+        note: note,
       }
       request.post(closeAppointmentForProvider, data).then(result => {
         if (result.success) {
           this.setState({
             errorMessage: '',
             isNotPending: true,
-            visisbleProcess: false,
+            visibleProcess: false,
           });
           this.updateAppointments();
         } else {
@@ -182,18 +183,19 @@ class DrawerDetail extends Component {
     }
   }
 
-  handleDecline = () => {
+  handleDecline = (note, publicFeedback) => {
     if (this.props.event?._id) {
       const data = {
         appointmentId: this.props.event._id,
-        publicFeedback: this.state.publicFeedback,
+        publicFeedback: publicFeedback ? publicFeedback : this.state.publicFeedback,
+        note: note,
       }
       request.post(declineAppointmentForProvider, data).then(result => {
         if (result.success) {
           this.setState({
             errorMessage: '',
             isNotPending: true,
-            visisbleProcess: false,
+            visibleProcess: false,
           });
           this.updateAppointments();
         } else {
@@ -212,8 +214,8 @@ class DrawerDetail extends Component {
     }
   }
 
-  openModalConfirm = () => {
-    this.setState({ isModalInvoice: true });
+  openModalConfirm = (note, publicFeedback) => {
+    this.setState({ isModalInvoice: true, note: note, publicFeedback: publicFeedback });
   }
 
   onConfirm = (items) => {
@@ -272,11 +274,11 @@ class DrawerDetail extends Component {
   }
 
   openModalProcess() {
-    this.setState({ visisbleProcess: true });
+    this.setState({ visibleProcess: true });
   }
 
   closeModalProcess = () => {
-    this.setState({ visisbleProcess: false });
+    this.setState({ visibleProcess: false });
   }
 
   onShowModalNoShow = () => {
@@ -338,7 +340,7 @@ class DrawerDetail extends Component {
   }
 
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visisbleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag } = this.state;
     const { event } = this.props;
 
     const menu = (
@@ -424,7 +426,7 @@ class DrawerDetail extends Component {
       event: event,
     };
     const modalProcessProps = {
-      visible: visisbleProcess,
+      visible: visibleProcess,
       onDecline: this.handleDecline,
       onSubmit: this.handleMarkAsClosed,
       onConfirm: this.openModalConfirm,
@@ -554,8 +556,12 @@ class DrawerDetail extends Component {
           </div>
         )}
         <div className='post-feedback mt-1'>
-          <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.feedback)}</p>
-          <Input.TextArea rows={7} className="appointment-feedback" disabled={userRole == 3 ? true : !isShowFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
+          {event.status != 0 && (
+            <>
+              <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.feedback)}</p>
+              <Input.TextArea rows={7} className="appointment-feedback" disabled={userRole == 3 ? true : !isShowFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
+            </>
+          )}
           {isShowFeedback && (
             <Row gutter={15} className="mt-10">
               <Col span={12}>
@@ -610,7 +616,7 @@ class DrawerDetail extends Component {
               </Button>
             </Col>
           )}
-          {(userRole != 3 && !isShowFeedback) && (
+          {(userRole != 3 && !isShowFeedback && event?.status != 0) && (
             <Col span={12}>
               <Button
                 type='primary'

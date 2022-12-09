@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input, Divider, Collapse, Tabs, Avatar, Badge } from 'antd';
 import { FaCalendarAlt, FaUser } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
-import { BsFillDashSquareFill, BsFillFlagFill, BsFillPlusSquareFill, BsFilter, BsX } from 'react-icons/bs';
+import { BsClockHistory, BsFillDashSquareFill, BsFillFlagFill, BsFillPlusSquareFill, BsFilter, BsX } from 'react-icons/bs';
 import { ModalNewGroup, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalNewAppointment } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
@@ -30,6 +30,8 @@ import { setDependents, setProviders, setSkillSet, setUser } from '../../../redu
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { getDefaultDataForAdmin } from '../../../utils/api/apiList';
+import PanelAppointment from './PanelAppointment';
+
 const { Panel } = Collapse;
 
 class SchedulingCenter extends React.Component {
@@ -454,8 +456,22 @@ class SchedulingCenter extends React.Component {
     this.setState({ isFilter: false });
   }
 
-  displayHourMin(value) {
-    return value > 9 ? value : `0${value}`;
+  renderPanelAppointmentForProvider = () => {
+    return (
+      <Panel
+        key="1"
+        header={intl.formatMessage(messages.appointments)}
+        extra={(<BsClockHistory size={18} onClick={() => this.onOpenModalSessionsNeedToClose()} />)}
+        className='appointment-panel'
+        collapsible='header'
+      >
+        <PanelAppointment
+          setReload={reload => this.panelAppoimentsReload = reload}
+          onShowDrawerDetail={this.onShowDrawerDetail}
+          calendar={this.calendarRef}
+        />
+      </Panel>
+    );
   }
 
   render() {
@@ -708,6 +724,7 @@ class SchedulingCenter extends React.Component {
               expandIconPosition={'end'}
               onChange={this.onCollapseChange}
             >
+              {this.renderPanelAppointmentForProvider()}
               <Panel header={intl.formatMessage(messages.referrals)} key="2">
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
@@ -723,8 +740,8 @@ class SchedulingCenter extends React.Component {
                           <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                         </div>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
-                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm')}</p>
+                          <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM-DD-YYYY')}</p>
                         </div>
                       </div>
                     )}
@@ -742,8 +759,8 @@ class SchedulingCenter extends React.Component {
                           <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                         </div>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
-                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm')}</p>
+                          <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM-DD-YYYY')}</p>
                         </div>
                       </div>
                     )}
@@ -802,8 +819,8 @@ class SchedulingCenter extends React.Component {
                         </div>
                         <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
-                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm')}</p>
+                          <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM-DD-YYYY')}</p>
                         </div>
                       </div>
                     )}
@@ -818,8 +835,8 @@ class SchedulingCenter extends React.Component {
                         </div>
                         <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
-                          <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm')}</p>
+                          <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM-DD-YYYY')}</p>
                         </div>
                       </div>
                     )}
