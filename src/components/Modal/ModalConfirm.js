@@ -8,12 +8,11 @@ import '../../assets/styles/login.less';
 class ModalConfirm extends React.Component {
 	render() {
 		const modalProps = {
-			className: 'modal-balance',
+			className: 'modal-confirm',
 			title: "Confirm",
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
-			onCancel: this.props.onCancel,
-			closable: false,
+			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
 			footer: [
 				<Button key="back" onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel)}

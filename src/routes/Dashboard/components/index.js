@@ -1,9 +1,9 @@
 import React from 'react';
-import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input } from 'antd';
+import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input, Popconfirm } from 'antd';
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsFilter, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
-import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand } from '../../../components/Modal';
+import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
 import intl from 'react-intl-universal';
@@ -33,7 +33,7 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 import { setDependents, setLocations, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { checkNotificationForClient, checkNotificationForProvider, closeNotificationForClient, getDefaultDataForAdmin } from '../../../utils/api/apiList';
+import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payFlag, requestClearance } from '../../../utils/api/apiList';
 import { BiExpand } from 'react-icons/bi';
 
 class Dashboard extends React.Component {
@@ -74,6 +74,9 @@ class Dashboard extends React.Component {
       intervalId: 0,
       selectedDate: undefined,
       visibleFlagExpand: false,
+      modalType: '',
+      visibleConfirm: false,
+      confirmMessage: '',
     };
     this.calendarRef = React.createRef();
   }
@@ -578,15 +581,6 @@ class Dashboard extends React.Component {
     );
   }
 
-  genExtraFlag = () => (
-    <Badge size="small" count={2}>
-      <BsFillFlagFill
-        size={18}
-        onClick={() => { }}
-      />
-    </Badge>
-  );
-
   renderPanelAppointmentForProvider = () => {
     if (this.state.userRole == 30 || this.state.userRole == 3)
       return (
@@ -708,16 +702,65 @@ class Dashboard extends React.Component {
     this.setState({ isFilter: false });
   }
 
-  displayHourMin(value) {
-    return value > 9 ? value : `0${value}`;
-  }
-
   onOpenModalFlagExpand = () => {
     this.setState({ visibleFlagExpand: true });
   }
 
   onCloseModalFlagExpand = () => {
     this.setState({ visibleFlagExpand: false });
+  }
+
+  handleRequestClearance = () => {
+    this.onCloseModalConfirm();
+    request.post(requestClearance, { appointmentId: this.state.selectedEvent?._id }).then(result => {
+      const { success } = result;
+      if (success) {
+        message.success('Sent successfully');
+      }
+    })
+  }
+
+  handlePayFlag = (appointment) => {
+    request.post(payFlag).then(result => {
+      const { success } = result;
+      if (success) {
+        message.success('Paid successfully');
+      }
+    })
+  }
+
+  handleClearFlag = () => {
+    this.onCloseModalConfirm();
+    request.post(clearFlag, { _id: this.state.selectedEvent?._id }).then(result => {
+      const { success } = result;
+      if (success) {
+        message.success('Cleared successfully');
+        this.updateCalendarEvents(this.state.userRole);
+        this.getMyAppointments(this.state.userRole);
+      }
+    })
+  }
+
+  onSubmitModalConfirm = () => {
+    if (this.state.modalType == 'request-clearance') {
+      this.handleRequestClearance();
+    }
+    if (this.state.modalType == 'clear-flag') {
+      this.handleClearFlag();
+    }
+  }
+
+  onCloseModalConfirm = () => {
+    this.setState({ visibleConfirm: false });
+  }
+
+  onOpenModalConfirm = (type, appointment) => {
+    this.setState({
+      visibleConfirm: true,
+      confirmMessage: type == 'request-clearance' ? 'Did you pay for this flag?' : 'Are you sure to clear this flag?',
+      modalType: type,
+      selectedEvent: appointment,
+    });
   }
 
   render() {
@@ -745,6 +788,8 @@ class Dashboard extends React.Component {
       visibleNewAppoint,
       selectedDate,
       visibleFlagExpand,
+      visibleConfirm,
+      confirmMessage,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -834,6 +879,14 @@ class Dashboard extends React.Component {
       onSubmit: this.onCloseModalFlagExpand,
       onCancel: this.onCloseModalFlagExpand,
       flags: listAppointmentsRecent?.filter(appointment => appointment.flagStatus == 1 || appointment.flagStatus == 2),
+      calendar: this.calendarRef,
+    };
+
+    const modalConfirmProps = {
+      visible: visibleConfirm,
+      onSubmit: this.onSubmitModalConfirm,
+      onCancel: this.onCloseModalConfirm,
+      message: confirmMessage,
     };
 
     return (
@@ -1013,8 +1066,8 @@ class Dashboard extends React.Component {
                               <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                             </div>
                             <div className='ml-auto'>
-                              <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
-                              <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                              <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm')}</p>
+                              <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                             </div>
                           </div>
                         )}
@@ -1032,8 +1085,8 @@ class Dashboard extends React.Component {
                               <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                             </div>
                             <div className='ml-auto'>
-                              <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
-                              <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                              <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm')}</p>
+                              <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                             </div>
                           </div>
                         )}
@@ -1093,8 +1146,8 @@ class Dashboard extends React.Component {
                           </div>
                           <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                           <div className='ml-auto'>
-                            <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
-                            <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                            <p className='font-12 mb-0'>{moment(appointment.date).format("hh:mm")}</p>
+                            <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                           </div>
                         </div>
                       )}
@@ -1109,8 +1162,8 @@ class Dashboard extends React.Component {
                           </div>
                           <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                           <div className='ml-auto'>
-                            <p className='font-12 mb-0'>{this.displayHourMin(moment(appointment.date).hour()) + ':' + this.displayHourMin(moment(appointment.date).minute())}</p>
-                            <p className='font-12 font-700 mb-0'>{`${this.displayHourMin(moment(appointment.date).month() + 1)}/${this.displayHourMin(moment(appointment.date).date())}/${this.displayHourMin(moment(appointment.date).year())}`}</p>
+                            <p className='font-12 mb-0'>{moment(appointment.date).format("hh:mm")}</p>
+                            <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                           </div>
                         </div>
                       )}
@@ -1128,22 +1181,49 @@ class Dashboard extends React.Component {
                       </Badge>
                     </div>
                   }
+                  collapsible='header'
                 >
-                  {listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.map((appointment, index) =>
-                    <div key={index} className='list-item padding-item gap-2' onClick={() => this.onShowDrawerDetail(appointment._id)}>
-                      <Avatar size={24} icon={<FaUser size={12} />} />
-                      <div className='div-service'>
-                        <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                        <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
-                      </div>
-                      <Button type='primary' block className='break-spaces font-12 p-0'>
-                        {intl.formatMessage(msgDrawer.requestClearance)}
-                      </Button>
-                      <Button type='primary' block className='break-spaces font-12 p-0'>
-                        {intl.formatMessage(msgDrawer.payFlag)}
-                      </Button>
-                    </div>
-                  )}
+                  <Tabs defaultActiveKey="1" type="card" size='small'>
+                    <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                      {listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.map((appointment, index) =>
+                        <div key={index} className='list-item padding-item gap-2' onClick={(e) => e.target.className != 'font-12 flag-action' && this.onShowDrawerDetail(appointment._id)}>
+                          <Avatar size={24} icon={<FaUser size={12} />} />
+                          <div className='div-service'>
+                            <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                          </div>
+                          {userRole == 3 ? (
+                            <>
+                              <a className='font-12 flag-action' onClick={() => this.onOpenModalConfirm('request-clearance', appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
+                              <a className='font-12 flag-action' onClick={() => this.handlePayFlag(appointment)}>{intl.formatMessage(msgDrawer.payFlag)}</a>
+                            </>
+                          ) : (
+                            <>
+                              <div className='font-12'>{appointment?.type == 2 ? intl.formatMessage(messages.evaluation) : appointment?.type == 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
+                              <a className='font-12 flag-action' onClick={() => this.onOpenModalConfirm('clear-flag', appointment)}>{intl.formatMessage(msgDrawer.clearFlag)}</a>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </Tabs.TabPane>
+                    <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
+                      {listAppointmentsRecent?.filter(a => a.flagStatus == 2)?.map((appointment, index) =>
+                        <div key={index} className='list-item padding-item gap-2' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                          <Avatar size={24} icon={<FaUser size={12} />} />
+                          <div className='div-service'>
+                            <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                          </div>
+                          <div className='font-12'>{appointment?.type == 2 ? intl.formatMessage(messages.evaluation) : appointment?.type == 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
+                          <div className='ml-auto'>
+                            <div className='font-12'>{moment(appointment.date).format("hh:mm")}</div>
+                            <div className='font-12 font-700'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
+                          </div>
+                        </div>
+                      )}
+                    </Tabs.TabPane>
+                  </Tabs>
+
                 </Panel>
                 {this.renderPanelSubsidaries()}
               </Collapse>
@@ -1163,6 +1243,7 @@ class Dashboard extends React.Component {
         <ModalNewGroup {...modalNewGroupProps} />
         <ModalReferralService {...modalReferralServiceProps} />
         <ModalNewSubsidyReview {...modalNewReviewProps} />
+        {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
       </div>
     );
   }

@@ -472,7 +472,11 @@
   border-color: transparent;
 }
 
-.private-note.ant-input:disabled {
+.private-note.ant-input:disabled,
+#flag-balance_late.ant-input:disabled,
+#flag-no-show_penalty.ant-input:disabled,
+#flag-no-show_program.ant-input:disabled,
+.notes.ant-input:disabled {
   background-color: white;
   color: @gray300;
 }
@@ -483,9 +487,17 @@
   margin: 0;
 }
 
-.modal-balance, .modal-no-show {
+.modal-balance,
+.modal-no-show {
   .ant-modal-footer {
     padding: 0px;
     border: none;
   }
+}
+
+.clear-flag-confirm {
+  background: white;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0px 0px 6px grey;
 }

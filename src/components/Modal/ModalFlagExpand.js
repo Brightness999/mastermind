@@ -1,15 +1,20 @@
 import React from 'react';
-import { Modal, Button, Input, Tabs, Table, Space } from 'antd';
+import { Modal, Button, Input, Tabs, Table, Space, Popconfirm, message } from 'antd';
 import intl from 'react-intl-universal';
 import messages from './messages';
 import msgDrawer from '../DrawerDetail/messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
 import request from '../../utils/api/request'
-import { } from '../../utils/api/apiList';
+import { clearFlag, payFlag, requestClearance, setFlag } from '../../utils/api/apiList';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { SearchOutlined } from '@ant-design/icons';
+import ModalBalance from './ModalBalance';
+import ModalNoShow from './ModalNoShow';
+import moment from 'moment';
+import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/features/appointmentsSlice';
+import { store } from '../../redux/store';
 
 class ModalFlagExpand extends React.Component {
 	constructor(props) {
@@ -18,6 +23,9 @@ class ModalFlagExpand extends React.Component {
 			activeFlags: [],
 			clearedFlags: [],
 			skillSet: [],
+			event: {},
+			visibleBalance: false,
+			visibleNoShow: false,
 		}
 		this.searchInput = React.createRef(null);
 	}
@@ -32,8 +40,115 @@ class ModalFlagExpand extends React.Component {
 		})
 	}
 
+	handleRequestClearance = (appointment) => {
+		request.post(requestClearance, { appointmentId: appointment?._id }).then(result => {
+			const { success } = result;
+			if (success) {
+				message.success('Sent successfully');
+			}
+		})
+	}
+
+	handlePayFlag = (appointment) => {
+		request.post(payFlag).then(result => {
+			const { success } = result;
+			if (success) {
+				message.success('Paid successfully');
+			}
+		})
+	}
+
+	handleClearFlag = (appointment) => {
+		request.post(clearFlag, { _id: appointment?._id }).then(result => {
+			const { success } = result;
+			if (success) {
+				const { activeFlags, clearedFlags } = this.state;
+				message.success('Cleared successfully');
+				clearedFlags.push(appointment);
+				const newActiveFlags = activeFlags.filter(a => a._id != appointment?._id);
+				this.setState({
+					clearedFlags: clearedFlags,
+					activeFlags: newActiveFlags,
+				})
+				this.updateAppointments();
+			}
+		})
+	}
+
+	openModalFlag = (appointment) => {
+		if (appointment?.flagItems?.flagType == 1) {
+			this.setState({ visibleBalance: true, event: appointment });
+		}
+		if (appointment?.flagItems?.flagType == 2) {
+			this.setState({ visibleNoShow: true, event: appointment });
+		}
+	}
+
+	onCloseModalNoShow = () => {
+		this.setState({ visibleNoShow: false });
+	};
+
+	onSubmitFlagNoShow = (values) => {
+		const { event } = this.state;
+		const data = {
+			_id: event?._id,
+			flagItems: {
+				...values,
+				type: event?.type == 2 ? intl.formatMessage(messages.evaluation) : event?.type == 3 ? intl.formatMessage(messages.standardSession) : event?.type == 4 ? intl.formatMessage(messages.subsidizedSession) : '',
+				locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
+				rate: values?.penalty * 1 + values?.program * 1,
+				flagType: 2,
+			}
+		}
+		request.post(setFlag, data).then(result => {
+			const { success } = result;
+			if (success) {
+				this.setState({ visibleNoShow: false, isFlag: true });
+			}
+		})
+	}
+
+	onCloseModalBalance = () => {
+		this.setState({ visibleBalance: false });
+	};
+
+	onSubmitFlagBalance = (values) => {
+		const { event } = this.state;
+		const data = {
+			_id: event?._id,
+			flagItems: {
+				...values,
+				type: event?.type == 2 ? intl.formatMessage(messages.evaluation) : event?.type == 3 ? intl.formatMessage(messages.standardSession) : event?.type == 4 ? intl.formatMessage(messages.subsidizedSession) : '',
+				locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
+				rate: values?.late,
+				flagType: 1,
+			}
+		}
+		request.post(setFlag, data).then(result => {
+			const { success } = result;
+			if (success) {
+				this.setState({ visibleBalance: false, isFlag: true });
+			}
+		})
+	}
+
+	updateAppointments() {
+		const { role } = this.props.auth.user;
+		store.dispatch(getAppointmentsData({ role: role }));
+		const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
+		const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
+		const dataFetchAppointMonth = {
+			role: role,
+			data: {
+				month: month,
+				year: year
+			}
+		};
+		store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+	}
+
 	render() {
-		const { activeFlags, clearedFlags, skillSet } = this.state;
+		const { activeFlags, clearedFlags, skillSet, visibleBalance, visibleNoShow, event } = this.state;
 		const { user } = this.props.auth;
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -41,7 +156,7 @@ class ModalFlagExpand extends React.Component {
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
-			width: 900,
+			width: 1000,
 			footer: []
 		};
 		const columns = [
@@ -104,7 +219,7 @@ class ModalFlagExpand extends React.Component {
 				onFilter: (value, record) => record.type == value,
 				render: (type) => type == 2 ? intl.formatMessage(messages.evaluation) : type == 3 ? intl.formatMessage(messages.standardSession) : type == 5 ? intl.formatMessage(messages.subsidizedSession) : '',
 			},
-			{ title: 'Session Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => new Date(date).toLocaleString() },
+			{ title: 'Session Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm a') },
 		];
 
 		if (user.role == 3) {
@@ -116,21 +231,49 @@ class ModalFlagExpand extends React.Component {
 			});
 			columns.splice(5, 0, {
 				title: 'Action', key: 'action', render: (appointment) => (
-					<Space size="middle">
-						<a className='btn-blue request' onClick={() => { }}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
-						<a className='btn-blue pay' onClick={() => { }}>{intl.formatMessage(msgDrawer.payFlag)}</a>
+					<Space size="small">
+						<Popconfirm
+							title="Did you pay for this flag?"
+							onConfirm={() => this.handleRequestClearance(appointment)}
+							okText="Yes"
+							cancelText="No"
+							overlayClassName='clear-flag-confirm'
+						>
+							<a className='btn-blue action'>{intl.formatMessage(msgDrawer.requestClearance)}</a>
+						</Popconfirm>
+						<a className='btn-blue action' onClick={() => this.handlePayFlag(appointment)}>{intl.formatMessage(msgDrawer.payFlag)}</a>
 					</Space>
 				)
 			});
 		} else {
 			columns.splice(4, 0, {
 				title: 'Action', key: 'action', render: (appointment) => (
-					<Space size="middle">
-						<a className='btn-blue clear' onClick={() => { }}>{intl.formatMessage(msgDrawer.clearFlag)}</a>
-					</Space>
+					<Popconfirm
+						title="Are you sure to clear this flag?"
+						onConfirm={() => this.handleClearFlag(appointment)}
+						okText="Yes"
+						cancelText="No"
+						overlayClassName='clear-flag-confirm'
+					>
+						<a className='btn-blue action'>{intl.formatMessage(msgDrawer.clearFlag)}</a>
+					</Popconfirm>
 				)
 			});
 		}
+
+		const modalNoShowProps = {
+			visible: visibleNoShow,
+			onSubmit: this.onSubmitFlagNoShow,
+			onCancel: this.onCloseModalNoShow,
+			event: event,
+		};
+
+		const modalBalanceProps = {
+			visible: visibleBalance,
+			onSubmit: this.onSubmitFlagBalance,
+			onCancel: this.onCloseModalBalance,
+			event: event,
+		};
 
 		return (
 			<Modal {...modalProps}>
@@ -144,8 +287,8 @@ class ModalFlagExpand extends React.Component {
 							className="p-10"
 							onRow={(appointment) => {
 								return {
-									onClick: (e) => { },
-									onDoubleClick: (e) => { },
+									onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalFlag(appointment),
+									onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalFlag(appointment),
 								}
 							}}
 						/>
@@ -159,13 +302,15 @@ class ModalFlagExpand extends React.Component {
 							className="p-10"
 							onRow={(appointment) => {
 								return {
-									onClick: (e) => { },
-									onDoubleClick: (e) => { },
+									onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalFlag(appointment),
+									onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalFlag(appointment),
 								}
 							}}
 						/>
 					</Tabs.TabPane>
 				</Tabs>
+				{visibleBalance && <ModalBalance {...modalBalanceProps} />}
+				{visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
 			</Modal>
 		);
 	}

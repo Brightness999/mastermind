@@ -259,6 +259,7 @@
   "components.mainheader.dpendentList": "Dependent List",
   "components.mainheader.dashboard": "Dashboard",
   "components.mainheader.notification": "Notification",
+  "components.mainheader.dependentList": "Dependent List",
   "components.mainheader.logOut": "Log Out",
 
   "components.Modal.edit": "Edit",

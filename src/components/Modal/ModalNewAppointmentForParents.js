@@ -60,7 +60,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		}
 		this.setState({ duration: duration });
 
-		let hour9AM = moment('2022-10-30 9:00:00');
+		let hour9AM = moment().set({ hours: 9, minutes: 0, seconds: 0, milliseconds: 0 });
 		for (let i = 0; i < 180 / duration; i++) {
 			let newTime = hour9AM.clone();
 			hour9AM = hour9AM.add(duration, 'minutes')
@@ -70,7 +70,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			});
 		}
 
-		let hour2PM = moment('2022-10-30 14:00:00');
+		let hour2PM = moment().set({ hours: 14, minutes: 0, seconds: 0, milliseconds: 0 });
 		for (let i = 0; i < 240 / duration; i++) {
 			let newTime = hour2PM.clone();
 			hour2PM = hour2PM.add(duration, 'minutes')

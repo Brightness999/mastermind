@@ -6,12 +6,18 @@ import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
 import moment from 'moment';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 class ModalBalance extends React.Component {
 	componentDidMount() {
 		const { event } = this.props;
-		const currentBalance = event?.type == 2 ? event?.provider?.separateEvaluationRate : event?.type == 3 ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate : event?.type == 5 ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.subsidizedRate : '';
-		this.form?.setFieldsValue({ rate: currentBalance });
+		if (event?.flagStatus == 0) {
+			const currentBalance = event?.type == 2 ? event?.provider?.separateEvaluationRate : event?.type == 3 ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate : event?.type == 5 ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.subsidizedRate : '';
+			this.form?.setFieldsValue({ late: currentBalance });
+		} else {
+			this.form?.setFieldsValue({ late: event?.flagItems?.late, notes: event?.flagItems?.notes });
+		}
 	}
 
 	onFinish = (values) => {
@@ -20,6 +26,7 @@ class ModalBalance extends React.Component {
 
 	render() {
 		const { event } = this.props;
+		const { user } = this.props.auth;
 		const modalProps = {
 			className: 'modal-balance',
 			title: "",
@@ -49,7 +56,7 @@ class ModalBalance extends React.Component {
 									}
 								}]}
 							>
-								<Input type='number' addonBefore="$" style={{ width: 100 }} className='font-16' />
+								<Input type='number' addonBefore="$" style={{ width: 100 }} className='font-16 late' disabled={user?.role == 3 || event?.flagStatus == 2} />
 							</Form.Item>
 						</div>
 						<div className='mr-10 flex-1'>
@@ -62,13 +69,13 @@ class ModalBalance extends React.Component {
 						</div>
 					</div>
 					<Form.Item name="notes" label={intl.formatMessage(messages.notes)} rules={[{ required: true }]}>
-						<Input.TextArea rows={4} placeholder={intl.formatMessage(msgReview.notes)} />
+						<Input.TextArea rows={4} placeholder={intl.formatMessage(msgReview.notes)} disabled={user?.role == 3 || event?.flagStatus == 2} className="notes" />
 					</Form.Item>
 					<Row className="justify-end gap-2 mt-10">
 						<Button key="back" onClick={this.props.onCancel}>
 							{intl.formatMessage(messages.cancel)}
 						</Button>
-						<Button key="submit" type="primary" htmlType='submit' style={{ padding: '7.5px 30px' }}>
+						<Button key="submit" type="primary" htmlType='submit' disabled={user?.role == 3 || event?.flagStatus == 2}>
 							{intl.formatMessage(messages.submitFlag)}
 						</Button>
 					</Row>
@@ -78,4 +85,10 @@ class ModalBalance extends React.Component {
 	}
 };
 
-export default ModalBalance;
+const mapStateToProps = state => {
+	return ({
+		auth: state.auth,
+	})
+}
+
+export default compose(connect(mapStateToProps))(ModalBalance);
