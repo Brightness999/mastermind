@@ -56,8 +56,8 @@ class PanelAppointment extends React.Component {
         </div>
         <p className='font-11 mb-0 ml-auto mr-5'>{event.location}</p>
         <div className='ml-auto'>
-          <p className='font-12 mb-0'>{moment(event.date).format("HH:mm:ss")}</p>
-          <p className='font-12 font-700 mb-0'>{moment(event.date).format('YYYY-MM-DD')}</p>
+          <p className='font-12 mb-0'>{moment(event.date).format("hh:mm a")}</p>
+          <p className='font-12 font-700 mb-0  whitespace-nowrap'>{moment(event.date).format('MM/DD/YYYY')}</p>
         </div>
       </div>
     );

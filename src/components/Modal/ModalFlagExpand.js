@@ -94,7 +94,7 @@ class ModalFlagExpand extends React.Component {
 			_id: event?._id,
 			flagItems: {
 				...values,
-				type: event?.type == 2 ? intl.formatMessage(messages.evaluation) : event?.type == 3 ? intl.formatMessage(messages.standardSession) : event?.type == 4 ? intl.formatMessage(messages.subsidizedSession) : '',
+				type: event?.type == 2 ? intl.formatMessage(messages.evaluation) : event?.type == 3 ? intl.formatMessage(messages.standardSession) : event?.type == 5 ? intl.formatMessage(messages.subsidizedSession) : '',
 				locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
 				rate: values?.penalty * 1 + values?.program * 1,
 				flagType: 2,
@@ -118,7 +118,7 @@ class ModalFlagExpand extends React.Component {
 			_id: event?._id,
 			flagItems: {
 				...values,
-				type: event?.type == 2 ? intl.formatMessage(messages.evaluation) : event?.type == 3 ? intl.formatMessage(messages.standardSession) : event?.type == 4 ? intl.formatMessage(messages.subsidizedSession) : '',
+				type: event?.type == 2 ? intl.formatMessage(messages.evaluation) : event?.type == 3 ? intl.formatMessage(messages.standardSession) : event?.type == 5 ? intl.formatMessage(messages.subsidizedSession) : '',
 				locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
 				rate: values?.late,
 				flagType: 1,

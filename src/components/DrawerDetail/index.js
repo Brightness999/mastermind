@@ -147,7 +147,7 @@ class DrawerDetail extends Component {
     if (event?.type == 2) {
       duration = duration * 1 + event?.provider?.separateEvaluationDuration * 1;
     }
-    return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(duration, 'minutes').format('hh:mm a')}`;
+    return `${moment(event?.date).format('MM/DD/YYYY hh:mm a')} - ${moment(event?.date).add(duration, 'minutes').format('hh:mm a')}`;
   }
 
   handleMarkAsClosed = (items, skipEvaluation, note, publicFeedback) => {
@@ -235,6 +235,7 @@ class DrawerDetail extends Component {
     request.post(leaveFeedbackForProvider, data).then(result => {
       if (result.success) {
         this.setState({ errorMessage: '', isShowFeedback: false });
+        this.updateAppointments();
       } else {
         this.setState({ errorMessage: result.data });
       }
@@ -295,7 +296,7 @@ class DrawerDetail extends Component {
       _id: event?._id,
       flagItems: {
         ...values,
-        type: event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.standardSession) : event?.type == 4 ? intl.formatMessage(msgModal.subsidizedSession) : '',
+        type: event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.standardSession) : event?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : '',
         locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
         rate: values?.penalty + values?.program,
         flagType: 2,
@@ -324,7 +325,7 @@ class DrawerDetail extends Component {
       _id: event?._id,
       flagItems: {
         ...values,
-        type: event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.standardSession) : event?.type == 4 ? intl.formatMessage(msgModal.subsidizedSession) : '',
+        type: event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.standardSession) : event?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : '',
         locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
         rate: values?.late,
         flagType: 1,
@@ -519,18 +520,18 @@ class DrawerDetail extends Component {
           )}
           <div className='detail-item flex'>
             <p className='font-18 font-700 title'>{intl.formatMessage(messages.when)}</p>
-            <p className='font-18'>{event?.type == 1 ? event?.screeningTime ?? '' : this.displayDuration()}</p>
+            <p className='font-16'>{event?.type == 1 ? event?.screeningTime ?? '' : this.displayDuration()}</p>
           </div>
-          {[2, 3].includes(event?.type) && (
+          {[2, 3, 5].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.where)}</p>
-              <p className='font-16'>{event?.location}</p>
+              <p className='font-18'>{event?.location}</p>
             </div>
           )}
           {[1, 4].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.phonenumber)}</p>
-              <p className='font-16'>{event?.phoneNumber}</p>
+              <p className='font-18'>{event?.phoneNumber}</p>
             </div>
           )}
         </div>
@@ -640,7 +641,7 @@ class DrawerDetail extends Component {
               </Button>
             </Col>
           )}
-          {(!isFlag && userRole > 3 && event?.type > 1 && event?.status == -1 && moment(event?.date).isBefore(moment())) && (
+          {(!isFlag && userRole > 3 && [2, 3, 5].includes(event?.type) && event?.status == -1 && moment(event?.date).isBefore(moment())) && (
             <Col span={12}>
               <Dropdown overlay={menu} placement="bottomRight">
                 <Button
@@ -678,7 +679,7 @@ class DrawerDetail extends Component {
               </Button>
             </Col>
           )}
-          {(userRole == 3 && [2, 3].includes(event?.type) && event?.status == -1 && event?.flagStatus == 0) && (
+          {(userRole == 3 && [2, 3, 5].includes(event?.type) && event?.status == -1 && event?.flagStatus == 0) && (
             <Col span={12}>
               <Button
                 type='primary'
@@ -689,7 +690,7 @@ class DrawerDetail extends Component {
               </Button>
             </Col>
           )}
-          {(userRole == 3 && [2, 3].includes(event?.type) && event?.status == -1 && event?.flagStatus == 1) && (
+          {(userRole == 3 && [2, 3, 5].includes(event?.type) && event?.status == -1 && event?.flagStatus == 1) && (
             <Col span={12}>
               <Button
                 type='primary'

@@ -3,7 +3,7 @@ import { Button, Segmented, Row, Col, Checkbox, Select, message, notification, I
 import { FaCalendarAlt, FaUser } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsClockHistory, BsFillDashSquareFill, BsFillFlagFill, BsFillPlusSquareFill, BsFilter, BsX } from 'react-icons/bs';
-import { ModalNewGroup, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalNewAppointment } from '../../../components/Modal';
+import { ModalNewGroup, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
 import intl from 'react-intl-universal';
@@ -17,6 +17,7 @@ import "@fullcalendar/timegrid/main.css";
 import messages from '../../Dashboard/messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
 import msgSidebar from '../../../components/SideBar/messages';
+import msgDrawer from '../../../components/DrawerDetail/messages';
 import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
@@ -29,8 +30,9 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 import { setDependents, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { getDefaultDataForAdmin } from '../../../utils/api/apiList';
+import { clearFlag, getDefaultDataForAdmin, payFlag, requestClearance } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
+import { BiExpand } from 'react-icons/bi';
 
 const { Panel } = Collapse;
 
@@ -67,6 +69,11 @@ class SchedulingCenter extends React.Component {
       selectedEvent: {},
       selectedEventTypes: [],
       selectedDate: undefined,
+      visibleSessionsNeedToClose: false,
+      visibleFlagExpand: false,
+      modalType: '',
+      visibleConfirm: false,
+      confirmMessage: '',
     };
     this.calendarRef = React.createRef();
   }
@@ -456,6 +463,75 @@ class SchedulingCenter extends React.Component {
     this.setState({ isFilter: false });
   }
 
+  onOpenModalFlagExpand = () => {
+    this.setState({ visibleFlagExpand: true });
+  }
+
+  onCloseModalFlagExpand = () => {
+    this.setState({ visibleFlagExpand: false });
+  }
+
+  handleRequestClearance = () => {
+    this.onCloseModalConfirm();
+    request.post(requestClearance, { appointmentId: this.state.selectedEvent?._id }).then(result => {
+      const { success } = result;
+      if (success) {
+        message.success('Sent successfully');
+      }
+    })
+  }
+
+  handlePayFlag = (appointment) => {
+    request.post(payFlag).then(result => {
+      const { success } = result;
+      if (success) {
+        message.success('Paid successfully');
+      }
+    })
+  }
+
+  handleClearFlag = () => {
+    this.onCloseModalConfirm();
+    request.post(clearFlag, { _id: this.state.selectedEvent?._id }).then(result => {
+      const { success } = result;
+      if (success) {
+        message.success('Cleared successfully');
+        this.updateCalendarEvents(this.state.userRole);
+        this.getMyAppointments(this.state.userRole);
+      }
+    })
+  }
+
+  onSubmitModalConfirm = () => {
+    if (this.state.modalType == 'request-clearance') {
+      this.handleRequestClearance();
+    }
+    if (this.state.modalType == 'clear-flag') {
+      this.handleClearFlag();
+    }
+  }
+
+  onCloseModalConfirm = () => {
+    this.setState({ visibleConfirm: false });
+  }
+
+  onOpenModalConfirm = (type, appointment) => {
+    this.setState({
+      visibleConfirm: true,
+      confirmMessage: type == 'request-clearance' ? 'Did you pay for this flag?' : 'Are you sure to clear this flag?',
+      modalType: type,
+      selectedEvent: appointment,
+    });
+  }
+
+  onOpenModalSessionsNeedToClose = () => {
+    this.setState({ visibleSessionsNeedToClose: true });
+  }
+
+  onCloseModalSessionsNeedToClose = () => {
+    this.setState({ visibleSessionsNeedToClose: false });
+  }
+
   renderPanelAppointmentForProvider = () => {
     return (
       <Panel
@@ -498,6 +574,10 @@ class SchedulingCenter extends React.Component {
       selectedEventTypes,
       visibleNewAppoint,
       selectedDate,
+      visibleSessionsNeedToClose,
+      visibleFlagExpand,
+      visibleConfirm,
+      confirmMessage,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -568,6 +648,36 @@ class SchedulingCenter extends React.Component {
       SkillSet: SkillSet,
       listAppointmentsRecent: listAppointmentsRecent,
       selectedDate: selectedDate,
+    };
+
+    const modalSessionsNeedToCloseProps = {
+      visible: visibleSessionsNeedToClose,
+      onSubmit: this.onCloseModalSessionsNeedToClose,
+      onCancel: this.onCloseModalSessionsNeedToClose,
+      appointments: listAppointmentsRecent?.filter(appointment => appointment.type == 3 && appointment.status == 0 && moment(appointment.date).isBefore(moment())),
+      calendar: this.calendarRef,
+    };
+
+    const drawerDetailProps = {
+      visible: userDrawerVisible,
+      onClose: this.onCloseDrawerDetail,
+      event: selectedEvent,
+      calendar: this.calendarRef,
+    };
+
+    const modalFlagExpandProps = {
+      visible: visibleFlagExpand,
+      onSubmit: this.onCloseModalFlagExpand,
+      onCancel: this.onCloseModalFlagExpand,
+      flags: listAppointmentsRecent?.filter(appointment => appointment.flagStatus == 1 || appointment.flagStatus == 2),
+      calendar: this.calendarRef,
+    };
+
+    const modalConfirmProps = {
+      visible: visibleConfirm,
+      onSubmit: this.onSubmitModalConfirm,
+      onCancel: this.onCloseModalConfirm,
+      message: confirmMessage,
     };
 
     return (
@@ -740,8 +850,8 @@ class SchedulingCenter extends React.Component {
                           <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                         </div>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm')}</p>
-                          <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM-DD-YYYY')}</p>
+                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
+                          <p className='font-12 font-700 mb-0 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                         </div>
                       </div>
                     )}
@@ -759,8 +869,8 @@ class SchedulingCenter extends React.Component {
                           <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                         </div>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm')}</p>
-                          <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM-DD-YYYY')}</p>
+                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
+                          <p className='font-12 font-700 mb-0 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                         </div>
                       </div>
                     )}
@@ -819,8 +929,8 @@ class SchedulingCenter extends React.Component {
                         </div>
                         <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm')}</p>
-                          <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM-DD-YYYY')}</p>
+                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
+                          <p className='font-12 font-700 mb-0 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                         </div>
                       </div>
                     )}
@@ -835,8 +945,8 @@ class SchedulingCenter extends React.Component {
                         </div>
                         <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                         <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm')}</p>
-                          <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM-DD-YYYY')}</p>
+                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
+                          <p className='font-12 font-700 mb-0 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                         </div>
                       </div>
                     )}
@@ -847,38 +957,42 @@ class SchedulingCenter extends React.Component {
                 header={intl.formatMessage(messages.flags)}
                 key="5"
                 extra={(
-                  <Badge size="small" count={2}>
-                    <BsFillFlagFill
-                      size={18}
-                      onClick={() => { }}
-                    />
-                  </Badge>
+                  <div className='flex gap-2'>
+                    <BiExpand size={18} onClick={() => this.onOpenModalFlagExpand()} />
+                    <Badge size="small" count={listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.length}>
+                      <BsFillFlagFill size={18} />
+                    </Badge>
+                  </div>
                 )}
+                collapsible="header"
               >
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {listAppointmentsRecent?.filter(a => a.type != 1 && a.status == 0 && a.isFlag)?.map((appointment, index) =>
-                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                    {listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item justify-between' onClick={(e) => e.target.className != 'font-12 flag-action' && this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
                           <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
                           <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                         </div>
-                        <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
-                        <p className='font-12 ml-auto mb-0'>Pay Flag</p>
+                        <div className='font-12'>{appointment?.type == 2 ? intl.formatMessage(messages.evaluation) : appointment?.type == 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
+                        <a className='font-12 flag-action' onClick={() => this.onOpenModalConfirm('clear-flag', appointment)}>{intl.formatMessage(msgDrawer.clearFlag)}</a>
                       </div>
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                    {listAppointmentsRecent?.filter(a => a.type != 1 && a.status != 0 && a.isFlag)?.map((appointment, index) =>
-                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                    {listAppointmentsRecent?.filter(a => a.flagStatus == 2)?.map((appointment, index) =>
+                      <div key={index} className='list-item padding-item justify-between' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
                           <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
                           <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                         </div>
-                        <p className='font-11 mb-0 ml-auto mr-5'>Request clearance</p>
-                        <p className='font-12 ml-auto mb-0'>Pay Flag</p>
+                        <div className='font-12'>{appointment?.type == 2 ? intl.formatMessage(messages.evaluation) : appointment?.type == 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
+                        <div>
+                          <div className='font-12'>{moment(appointment.date).format("hh:mm a")}</div>
+                          <div className='font-12 font-700 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
+                        </div>
                       </div>
                     )}
                   </Tabs.TabPane>
@@ -892,16 +1006,9 @@ class SchedulingCenter extends React.Component {
             <img src='../images/call.png' onClick={this.onShowModalReferral} />
           </div>
         </div>
-        {userDrawerVisible &&
-          <DrawerDetail
-            visible={userDrawerVisible}
-            onClose={this.onCloseDrawerDetail}
-            role={userRole}
-            event={selectedEvent}
-            calendar={this.calendarRef}
-          />
-        }
-        <ModalNewAppointment {...modalNewAppointProps} />
+        {userDrawerVisible && <DrawerDetail {...drawerDetailProps} />}
+        {visibleNewAppoint && <ModalNewAppointment {...modalNewAppointProps} />}
+        {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
         {this.renderModalSubsidyDetail()}
         {this.modalCreateAndEditSubsidyRequest()}
         <ModalNewGroup {...modalNewGroupProps}
@@ -915,6 +1022,8 @@ class SchedulingCenter extends React.Component {
           userRole={this.state.userRole}
         />
         <ModalNewSubsidyReview {...modalNewReviewProps} />
+        {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
+        {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
       </div>
     );
   }
