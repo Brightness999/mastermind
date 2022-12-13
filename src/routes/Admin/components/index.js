@@ -839,7 +839,7 @@ class SchedulingCenter extends React.Component {
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {listAppointmentsRecent?.filter(a => a.type == 4 && a.status == 0)?.map((appointment, index) =>
-                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                      <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
                           <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
@@ -858,7 +858,7 @@ class SchedulingCenter extends React.Component {
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
                     {listAppointmentsRecent?.filter(a => a.type == 4 && a.status != 0)?.map((appointment, index) =>
-                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                      <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
                           <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
@@ -881,7 +881,7 @@ class SchedulingCenter extends React.Component {
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {listAppointmentsRecent?.filter(a => a.type == 1 && a.status == 0)?.map((appointment, index) =>
-                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                      <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service flex-1'>
                           <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
@@ -899,7 +899,7 @@ class SchedulingCenter extends React.Component {
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
                     {listAppointmentsRecent?.filter(a => a.type == 1 && a.status != 0)?.map((appointment, index) =>
-                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                      <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service flex-1'>
                           <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
@@ -920,8 +920,8 @@ class SchedulingCenter extends React.Component {
               <Panel header={intl.formatMessage(messages.evaluations)} key="4">
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {listAppointmentsRecent?.filter(appointment => appointment.type == 2 && appointment.status == 0 && moment(appointment.date).isAfter(new Date()))?.map((appointment, index) =>
-                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                    {listAppointmentsRecent?.filter(a => a.type == 2 && a.status == 0 && moment(a.date).isAfter(new Date()) && a.flagStatus != 1)?.map((appointment, index) =>
+                      <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
                           <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
@@ -936,8 +936,8 @@ class SchedulingCenter extends React.Component {
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                    {listAppointmentsRecent?.filter(appointment => appointment.type == 2 && moment(appointment.date).isBefore(new Date()))?.map((appointment, index) =>
-                      <div key={index} className='list-item padding-item' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                    {listAppointmentsRecent?.filter(a => a.type == 2 && moment(a.date).isBefore(new Date()) && a.flagStatus != 1)?.map((appointment, index) =>
+                      <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
                           <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>

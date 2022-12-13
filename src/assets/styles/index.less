@@ -1778,6 +1778,7 @@ ol {
     width: 300px;
     border-radius: 6px;
     z-index: 10;
+    height: calc(100vh - 142px);
 
     .list-item {
       display: flex;
@@ -1820,6 +1821,9 @@ ol {
 
     .ant-collapse {
       background-color: transparent;
+      height: 100%;
+      overflow-y: scroll;
+      border: none;
 
       &-item {
         background-color: @white;

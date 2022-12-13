@@ -49,7 +49,7 @@ class PanelAppointment extends React.Component {
 
   renderItemLeft = (event) => {
     return (
-      <div className={`item-left ${event.status == -2 ? 'line-through' : ''}`} onClick={() => this.props.onShowDrawerDetail(event._id)}>
+      <div className={`item-left ${[-2, -3].includes(event.status) ? 'line-through' : ''}`} onClick={() => this.props.onShowDrawerDetail(event._id)}>
         <Avatar size={24} icon={<FaUser size={12} />} />
         <div className='div-service'>
           <p className='font-09 mb-0'>{`${event.provider.firstName ?? ''} ${event.provider.lastName ?? ''}`}{event?.school?.name}</p>
