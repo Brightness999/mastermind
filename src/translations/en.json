@@ -385,6 +385,7 @@
   "components.drawerdetail.requestClearance": "Request Clearance",
   "components.drawerdetail.payFlag": "Pay Flag",
   "components.drawerdetail.clearFlag": "Clear Flag",
+  "components.drawerdetail.viewInvoice": "View Invoice",
   
   "components.drawerdetailpost.postSessionFeedback": "Post session feedback",
   "components.drawerdetailpost.privateNotes": "Private notes",

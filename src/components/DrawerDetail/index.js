@@ -220,7 +220,9 @@ class DrawerDetail extends Component {
 
   onConfirm = (items) => {
     this.setState({ isModalInvoice: false });
-    this.handleMarkAsClosed(items, false);
+    if (this.state.userRole != 3) {
+      this.handleMarkAsClosed(items, false);
+    }
   }
 
   onCancel = () => {
@@ -338,6 +340,10 @@ class DrawerDetail extends Component {
         this.updateAppointments();
       }
     })
+  }
+
+  onOpenModalInvoice = () => {
+    this.setState({ isModalInvoice: true });
   }
 
   render() {
@@ -621,6 +627,18 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
+              {[2, 3, 5].includes(event?.type) && event?.status == -1 && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<ImPencil size={12} />}
+                    block
+                    onClick={this.onOpenModalInvoice}
+                  >
+                    {intl.formatMessage(messages.viewInvoice)}
+                  </Button>
+                </Col>
+              )}
               {(userRole != 3 && !isShowFeedback && event?.status != 0) && (
                 <Col span={12}>
                   <Button
@@ -633,7 +651,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(userRole == 3 && event?.status == -1 && !isLeftFeedback) && (
+              {(userRole == 3 && event?.status != 0 && !isLeftFeedback) && (
                 <Col span={12}>
                   <Button
                     type='primary'

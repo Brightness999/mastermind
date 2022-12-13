@@ -5,6 +5,8 @@ import messages from './messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
 import { CheckCircleTwoTone, CloseCircleTwoTone, DeleteTwoTone, EditTwoTone } from '@ant-design/icons';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 class ModalInvoice extends React.Component {
 	constructor(props) {
@@ -21,12 +23,16 @@ class ModalInvoice extends React.Component {
 
 	componentDidMount() {
 		const { event } = this.props;
-		const initItems = [{
-			type: event?.type == 2 ? intl.formatMessage(messages.evaluation) : event?.type == 3 ? intl.formatMessage(messages.standardSession) : event?.type == 4 ? intl.formatMessage(messages.subsidizedSession) : '',
-			locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
-			rate: event?.rate,
-		}]
-		this.setState({ items: initItems, subTotal: event?.rate });
+		if (event?.items?.length) {
+			this.setState({ items: event.items, subTotal: event.items?.reduce((a, b) => a += b.rate * 1, 0) });
+		} else {
+			const initItems = [{
+				type: event?.type == 2 ? intl.formatMessage(messages.evaluation) : event?.type == 3 ? intl.formatMessage(messages.standardSession) : event?.type == 4 ? intl.formatMessage(messages.subsidizedSession) : '',
+				locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
+				rate: event?.rate,
+			}]
+			this.setState({ items: initItems, subTotal: event?.rate });
+		}
 	}
 
 	handleAddItem = () => {
@@ -173,7 +179,7 @@ class ModalInvoice extends React.Component {
 										</thead>
 										<tbody>
 											{items.map((item, index) => (
-												<Popover key={index} placement='right' content={(
+												<Popover key={index} placement='right' content={this.props.user?.role == 3 ? (<></>) : (
 													<div className='flex flex-col gap-2'>
 														{selectedItemIndex == index ? (
 															<>
@@ -199,7 +205,7 @@ class ModalInvoice extends React.Component {
 															<Input type='number' disabled={selectedItemIndex != index} value={item.rate} className="text-center item-input font-16 p-10" placeholder="Rate" onChange={(e) => this.handleChangeItem('rate', e.target.value)} />
 														</td>
 														<td colSpan={2} className='border border-1 border-black -mb-1 -mr-1'>
-															<div className='text-center'>{item.rate}</div>
+															<div className='text-center font-16'>{item.rate}</div>
 														</td>
 													</tr>
 												</Popover>
@@ -228,4 +234,8 @@ class ModalInvoice extends React.Component {
 	}
 };
 
-export default ModalInvoice;
+const mapStateToProps = state => {
+	return ({ user: state.auth.user });
+}
+
+export default compose(connect(mapStateToProps))(ModalInvoice);

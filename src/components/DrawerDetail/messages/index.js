@@ -121,4 +121,8 @@ export default {
     id: `${scope}.clearFlag`,
     defaultMessage: 'Clear Flag',
   },
+  viewInvoice: {
+    id: `${scope}.viewInvoice`,
+    defaultMessage: 'View Invoice',
+  },
 };
