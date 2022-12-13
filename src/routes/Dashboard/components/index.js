@@ -3,7 +3,7 @@ import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, S
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsFilter, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
-import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose } from '../../../components/Modal';
+import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalPayment } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
 import intl from 'react-intl-universal';
@@ -78,6 +78,7 @@ class Dashboard extends React.Component {
       visibleConfirm: false,
       confirmMessage: '',
       visibleSessionsNeedToClose: false,
+      visiblePayment: false,
     };
     this.calendarRef = React.createRef();
   }
@@ -724,11 +725,12 @@ class Dashboard extends React.Component {
     })
   }
 
-  handlePayFlag = (appointment) => {
-    request.post(payFlag).then(result => {
+  handlePayFlag = (payment) => {
+    request.post(payFlag, { ...payment, _id: this.state.selectedEvent?._id }).then(result => {
       const { success } = result;
       if (success) {
         message.success('Paid successfully');
+        this.setState({ visiblePayment: false });
       }
     })
   }
@@ -771,6 +773,17 @@ class Dashboard extends React.Component {
     this.setState({ visibleSessionsNeedToClose: false });
   }
 
+  onOpenModalPayment = (appointment) => {
+    this.setState({
+      visiblePayment: true,
+      selectedEvent: appointment,
+    });
+  }
+
+  onCloseModalPayment = () => {
+    this.setState({ visiblePayment: false });
+  }
+
   render() {
     const {
       isFilter,
@@ -799,6 +812,7 @@ class Dashboard extends React.Component {
       visibleConfirm,
       confirmMessage,
       visibleSessionsNeedToClose,
+      visiblePayment,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -880,6 +894,7 @@ class Dashboard extends React.Component {
       visible: userDrawerVisible,
       onClose: this.onCloseDrawerDetail,
       event: selectedEvent,
+      listAppointmentsRecent: listAppointmentsRecent,
       calendar: this.calendarRef,
     };
 
@@ -904,6 +919,12 @@ class Dashboard extends React.Component {
       onSubmit: this.onSubmitModalConfirm,
       onCancel: this.onCloseModalConfirm,
       message: confirmMessage,
+    };
+
+    const modalPaymentProps = {
+      visible: visiblePayment,
+      onSubmit: this.handlePayFlag,
+      onCancel: this.onCloseModalPayment,
     };
 
     return (
@@ -1212,7 +1233,7 @@ class Dashboard extends React.Component {
                           {userRole == 3 ? (
                             <>
                               <a className='font-12 flag-action' onClick={() => this.onOpenModalConfirm('request-clearance', appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
-                              <a className='font-12 flag-action' onClick={() => this.handlePayFlag(appointment)}>{intl.formatMessage(msgDrawer.payFlag)}</a>
+                              <a className='font-12 flag-action' onClick={() => this.onOpenModalPayment(appointment)}>{intl.formatMessage(msgDrawer.payFlag)}</a>
                             </>
                           ) : (
                             <>
@@ -1262,6 +1283,7 @@ class Dashboard extends React.Component {
         <ModalNewSubsidyReview {...modalNewReviewProps} />
         {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
         {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
+        {visiblePayment && <ModalPayment {...modalPaymentProps} />}
       </div>
     );
   }

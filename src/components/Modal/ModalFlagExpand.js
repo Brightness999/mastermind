@@ -15,6 +15,7 @@ import ModalNoShow from './ModalNoShow';
 import moment from 'moment';
 import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/features/appointmentsSlice';
 import { store } from '../../redux/store';
+import ModalPayment from './ModalPayment';
 
 class ModalFlagExpand extends React.Component {
 	constructor(props) {
@@ -26,6 +27,7 @@ class ModalFlagExpand extends React.Component {
 			event: {},
 			visibleBalance: false,
 			visibleNoShow: false,
+			visiblePayment: false,
 		}
 		this.searchInput = React.createRef(null);
 	}
@@ -49,11 +51,12 @@ class ModalFlagExpand extends React.Component {
 		})
 	}
 
-	handlePayFlag = (appointment) => {
-		request.post(payFlag).then(result => {
+	handlePayFlag = (payment) => {
+		request.post(payFlag, {...payment, appointmentId: this.state.event?._id}).then(result => {
 			const { success } = result;
 			if (success) {
 				message.success('Paid successfully');
+				this.setState({ visiblePayment: false });
 			}
 		})
 	}
@@ -147,8 +150,19 @@ class ModalFlagExpand extends React.Component {
 		store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
 	}
 
+	onOpenModalPayment = (appointment) => {
+		this.setState({
+			visiblePayment: true,
+			event: appointment,
+		})
+	}
+
+	onCloseModalPayment = () => {
+		this.setState({ visiblePayment: false });
+	}
+
 	render() {
-		const { activeFlags, clearedFlags, skillSet, visibleBalance, visibleNoShow, event } = this.state;
+		const { activeFlags, clearedFlags, skillSet, visibleBalance, visibleNoShow, event, visiblePayment } = this.state;
 		const { user } = this.props.auth;
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -241,7 +255,7 @@ class ModalFlagExpand extends React.Component {
 						>
 							<a className='btn-blue action'>{intl.formatMessage(msgDrawer.requestClearance)}</a>
 						</Popconfirm>
-						<a className='btn-blue action' onClick={() => this.handlePayFlag(appointment)}>{intl.formatMessage(msgDrawer.payFlag)}</a>
+						<a className='btn-blue action' onClick={() => this.onOpenModalPayment(appointment)}>{intl.formatMessage(msgDrawer.payFlag)}</a>
 					</Space>
 				)
 			});
@@ -273,6 +287,12 @@ class ModalFlagExpand extends React.Component {
 			onSubmit: this.onSubmitFlagBalance,
 			onCancel: this.onCloseModalBalance,
 			event: event,
+		};
+
+		const modalPaymentProps = {
+			visible: visiblePayment,
+			onSubmit: this.handlePayFlag,
+			onCancel: this.onCloseModalPayment,
 		};
 
 		return (
@@ -311,6 +331,7 @@ class ModalFlagExpand extends React.Component {
 				</Tabs>
 				{visibleBalance && <ModalBalance {...modalBalanceProps} />}
 				{visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
+				{visiblePayment && <ModalPayment {...modalPaymentProps} />}
 			</Modal>
 		);
 	}

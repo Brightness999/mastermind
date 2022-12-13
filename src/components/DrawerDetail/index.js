@@ -342,7 +342,7 @@ class DrawerDetail extends Component {
 
   render() {
     const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag } = this.state;
-    const { event } = this.props;
+    const { event, listAppointmentsRecent } = this.props;
 
     const menu = (
       <Menu
@@ -535,185 +535,192 @@ class DrawerDetail extends Component {
             </div>
           )}
         </div>
-        <Input.TextArea rows={5} className="appointment-note" disabled={!isShowEditNotes} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />
-        {isShowEditNotes && (
-          <div className='flex gap-2 mt-10'>
-            <Button
-              type='primary'
-              block
-              onClick={this.handleUpdateNotes}
-              className='h-30 p-0'
-            >
-              {intl.formatMessage(msgModal.save)}
-            </Button>
-            <Button
-              type='primary'
-              block
-              onClick={this.hideEditNotes}
-              className='h-30 p-0'
-            >
-              {intl.formatMessage(messages.cancel)}
-            </Button>
-          </div>
-        )}
-        <div className='post-feedback mt-1'>
-          {event.status != 0 && (
-            <>
-              <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.feedback)}</p>
-              <Input.TextArea rows={7} className="appointment-feedback" disabled={userRole == 3 ? true : !isShowFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
-            </>
-          )}
-          {isShowFeedback && (
-            <Row gutter={15} className="mt-10">
-              <Col span={12}>
+        {event?.status == 0 && listAppointmentsRecent.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1) ? (
+          <div className='text-center font-20 mt-2'>Suspending</div>
+        ) : (
+          <>
+            <Input.TextArea rows={5} className="appointment-note" disabled={!isShowEditNotes} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />
+            {isShowEditNotes && (
+              <div className='flex gap-2 mt-10'>
                 <Button
                   type='primary'
                   block
-                  onClick={this.handleLeaveFeedback}
+                  onClick={this.handleUpdateNotes}
                   className='h-30 p-0'
                 >
                   {intl.formatMessage(msgModal.save)}
                 </Button>
-              </Col>
-              <Col span={12}>
                 <Button
                   type='primary'
                   block
-                  onClick={this.hideFeedback}
+                  onClick={this.hideEditNotes}
                   className='h-30 p-0'
                 >
                   {intl.formatMessage(messages.cancel)}
                 </Button>
-              </Col>
+              </div>
+            )}
+            <div className='post-feedback mt-1'>
+              {event.status != 0 && (
+                <>
+                  <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.feedback)}</p>
+                  <Input.TextArea rows={7} className="appointment-feedback" disabled={userRole == 3 ? true : !isShowFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
+                </>
+              )}
+              {isShowFeedback && (
+                <Row gutter={15} className="mt-10">
+                  <Col span={12}>
+                    <Button
+                      type='primary'
+                      block
+                      onClick={this.handleLeaveFeedback}
+                      className='h-30 p-0'
+                    >
+                      {intl.formatMessage(msgModal.save)}
+                    </Button>
+                  </Col>
+                  <Col span={12}>
+                    <Button
+                      type='primary'
+                      block
+                      onClick={this.hideFeedback}
+                      className='h-30 p-0'
+                    >
+                      {intl.formatMessage(messages.cancel)}
+                    </Button>
+                  </Col>
+                </Row>
+              )}
+            </div>
+            <Row gutter={15} className='list-btn-detail'>
+              {[1, 2, 4].includes(event?.type) && event?.status == 0 && userRole > 3 && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<BsCheckCircle size={15} />}
+                    block
+                    onClick={() => [1, 2].includes(event.type) ? this.openModalProcess() : this.handleMarkAsClosed()}
+                    disabled={isNotPending}
+                    className='flex items-center gap-2 h-30'
+                  >
+                    {intl.formatMessage(msgDetailPost.markClosed)}
+                  </Button>
+                </Col>
+              )}
+              {[3, 5].includes(event?.type) && moment(event?.date).isBefore(moment()) && event?.status == 0 && userRole > 3 && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<BsCheckCircle size={15} />}
+                    block
+                    onClick={() => this.openModalConfirm()}
+                    disabled={isNotPending}
+                    className='flex items-center gap-2 h-30'
+                  >
+                    {intl.formatMessage(msgDetailPost.markClosed)}
+                  </Button>
+                </Col>
+              )}
+              {(userRole != 3 && !isShowFeedback && event?.status != 0) && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<ImPencil size={12} />}
+                    block
+                    onClick={this.showFeedback}
+                  >
+                    {intl.formatMessage(messages.leaveFeedback)}
+                  </Button>
+                </Col>
+              )}
+              {(userRole == 3 && event?.status == -1 && !isLeftFeedback) && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<ImPencil size={12} />}
+                    block
+                    onClick={this.handleRequestFeedback}
+                  >
+                    {intl.formatMessage(messages.requestFeedback)}
+                  </Button>
+                </Col>
+              )}
+              {(!isFlag && userRole > 3 && [2, 3, 5].includes(event?.type) && event?.status == -1 && moment(event?.date).isBefore(moment())) && (
+                <Col span={12}>
+                  <Dropdown overlay={menu} placement="bottomRight">
+                    <Button
+                      type='primary'
+                      icon={<BsFillFlagFill size={15} />}
+                      block
+                    >
+                      {intl.formatMessage(messages.flagDependent)}
+                    </Button>
+                  </Dropdown>
+                </Col>
+              )}
+              {(event?.type != 1 && event?.status == 0 && !isNotPending) && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<BsClockHistory size={15} />}
+                    block
+                    onClick={this.openModalCurrent}
+                  >
+                    {intl.formatMessage(messages.reschedule)}
+                  </Button>
+                </Col>
+              )}
+              {(event?.status == 0 && !isNotPending) && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<BsXCircle size={15} />}
+                    block
+                    onClick={this.openModalCancel}
+                    disabled={isNotPending}
+                  >
+                    {intl.formatMessage(msgModal.cancel)}
+                  </Button>
+                </Col>
+              )}
+              {(userRole == 3 && [2, 3, 5].includes(event?.type) && event?.status == -1 && event?.flagStatus == 0) && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<FaFileContract size={12} />}
+                    block
+                  >
+                    {intl.formatMessage(messages.requestInvoice)}
+                  </Button>
+                </Col>
+              )}
+              {(userRole == 3 && [2, 3, 5].includes(event?.type) && event?.status == -1 && event?.flagStatus == 1) && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<FaFileContract size={12} />}
+                    block
+                  >
+                    {intl.formatMessage(messages.requestClearance)}
+                  </Button>
+                </Col>
+              )}
+              {(event?.status == 0 && !isNotPending) && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<ImPencil size={12} />}
+                    block
+                    onClick={this.showEditNotes}
+                  >
+                    {intl.formatMessage(messages.editNotes)}
+                  </Button>
+                </Col>
+              )}
             </Row>
-          )}
-        </div>
-        <Row gutter={15} className='list-btn-detail'>
-          {[1, 2, 4].includes(event?.type) && event?.status == 0 && userRole > 3 && (
-            <Col span={12}>
-              <Button
-                type='primary'
-                icon={<BsCheckCircle size={15} />}
-                block
-                onClick={() => [1, 2].includes(event.type) ? this.openModalProcess() : this.handleMarkAsClosed()}
-                disabled={isNotPending}
-                className='flex items-center gap-2 h-30'
-              >
-                {intl.formatMessage(msgDetailPost.markClosed)}
-              </Button>
-            </Col>
-          )}
-          {[3, 5].includes(event?.type) && moment(event?.date).isBefore(moment()) && event?.status == 0 && userRole > 3 && (
-            <Col span={12}>
-              <Button
-                type='primary'
-                icon={<BsCheckCircle size={15} />}
-                block
-                onClick={() => this.openModalConfirm()}
-                disabled={isNotPending}
-                className='flex items-center gap-2 h-30'
-              >
-                {intl.formatMessage(msgDetailPost.markClosed)}
-              </Button>
-            </Col>
-          )}
-          {(userRole != 3 && !isShowFeedback && event?.status != 0) && (
-            <Col span={12}>
-              <Button
-                type='primary'
-                icon={<ImPencil size={12} />}
-                block
-                onClick={this.showFeedback}
-              >
-                {intl.formatMessage(messages.leaveFeedback)}
-              </Button>
-            </Col>
-          )}
-          {(userRole == 3 && event?.status == -1 && !isLeftFeedback) && (
-            <Col span={12}>
-              <Button
-                type='primary'
-                icon={<ImPencil size={12} />}
-                block
-                onClick={this.handleRequestFeedback}
-              >
-                {intl.formatMessage(messages.requestFeedback)}
-              </Button>
-            </Col>
-          )}
-          {(!isFlag && userRole > 3 && [2, 3, 5].includes(event?.type) && event?.status == -1 && moment(event?.date).isBefore(moment())) && (
-            <Col span={12}>
-              <Dropdown overlay={menu} placement="bottomRight">
-                <Button
-                  type='primary'
-                  icon={<BsFillFlagFill size={15} />}
-                  block
-                >
-                  {intl.formatMessage(messages.flagDependent)}
-                </Button>
-              </Dropdown>
-            </Col>
-          )}
-          {(event?.type != 1 && event?.status == 0 && !isNotPending) && (
-            <Col span={12}>
-              <Button
-                type='primary'
-                icon={<BsClockHistory size={15} />}
-                block
-                onClick={this.openModalCurrent}
-              >
-                {intl.formatMessage(messages.reschedule)}
-              </Button>
-            </Col>
-          )}
-          {(event?.status == 0 && !isNotPending) && (
-            <Col span={12}>
-              <Button
-                type='primary'
-                icon={<BsXCircle size={15} />}
-                block
-                onClick={this.openModalCancel}
-                disabled={isNotPending}
-              >
-                {intl.formatMessage(msgModal.cancel)}
-              </Button>
-            </Col>
-          )}
-          {(userRole == 3 && [2, 3, 5].includes(event?.type) && event?.status == -1 && event?.flagStatus == 0) && (
-            <Col span={12}>
-              <Button
-                type='primary'
-                icon={<FaFileContract size={12} />}
-                block
-              >
-                {intl.formatMessage(messages.requestInvoice)}
-              </Button>
-            </Col>
-          )}
-          {(userRole == 3 && [2, 3, 5].includes(event?.type) && event?.status == -1 && event?.flagStatus == 1) && (
-            <Col span={12}>
-              <Button
-                type='primary'
-                icon={<FaFileContract size={12} />}
-                block
-              >
-                {intl.formatMessage(messages.requestClearance)}
-              </Button>
-            </Col>
-          )}
-          {(event?.status == 0 && !isNotPending) && (
-            <Col span={12}>
-              <Button
-                type='primary'
-                icon={<ImPencil size={12} />}
-                block
-                onClick={this.showEditNotes}
-              >
-                {intl.formatMessage(messages.editNotes)}
-              </Button>
-            </Col>
-          )}
-        </Row>
+          </>
+        )
+        }
         {this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}
         <ModalCancelAppointment {...modalCancelProps} />
         <ModalProcessAppointment {...modalProcessProps} />
@@ -722,7 +729,7 @@ class DrawerDetail extends Component {
         {isModalInvoice && <ModalInvoice {...modalInvoiceProps} />}
         {visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
         {visibleBalance && <ModalBalance {...modalBalanceProps} />}
-      </Drawer>
+      </Drawer >
     );
   }
 }
