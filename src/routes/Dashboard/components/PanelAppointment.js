@@ -28,12 +28,6 @@ class PanelAppointment extends React.Component {
     };
   }
 
-  componentDidUpdate(prevProps) {
-    if (JSON.stringify(prevProps.appointments) != JSON.stringify(this.props.appointments)) {
-      this.setState({ appointments: this.props.appointments });
-    }
-  }
-
   componentDidMount() {
     this.handleTabChange(1)
     this.props.setReload(this.setReloadData);
@@ -56,8 +50,8 @@ class PanelAppointment extends React.Component {
         </div>
         <p className='font-11 mb-0 ml-auto mr-5'>{event.location}</p>
         <div className='ml-auto'>
-          <p className='font-12 mb-0'>{moment(event.date).format("HH:mm:ss")}</p>
-          <p className='font-12 font-700 mb-0'>{moment(event.date).format('YYYY-MM-DD')}</p>
+          <p className='font-12 mb-0'>{moment(event.date).format("hh:mm a")}</p>
+          <p className='font-12 font-700 mb-0'>{moment(event.date).format('MM/DD/YYYY')}</p>
         </div>
       </div>
     );
@@ -139,6 +133,10 @@ class PanelAppointment extends React.Component {
     });
   }
 
+  openModalConfirm = (note, publicFeedback) => {
+    this.setState({ isModalInvoice: true });
+  }
+
   render() {
     const { appointments, visibleCancel, visibleCurrent, event } = this.state;
     const modalCancelProps = {
@@ -161,9 +159,9 @@ class PanelAppointment extends React.Component {
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {data.status == 0 && (
-                <div className='item-right'>
+                <div className='item-right gap-1'>
                   <GiBackwardTime size={19} cursor='pointer' onClick={() => this.openModalCurrent(data)} />
-                  <BsXCircle style={{ marginTop: 4 }} size={15} cursor='pointer' onClick={() => this.openModalCancel(data)} />
+                  <BsXCircle size={15} cursor='pointer' onClick={() => this.openModalCancel(data)} />
                 </div>
               )}
             </div>
@@ -180,9 +178,9 @@ class PanelAppointment extends React.Component {
           {appointments?.filter(a => a.type == 3 && a.flagStatus != 1 && [0, -2].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
-              <div className={`item-right ${data.status == -2 && 'display-none'}`}>
+              <div className={`item-right gap-1 ${data.status == -2 && 'display-none'}`}>
                 <BsFillFlagFill size={15} onClick={() => { }} />
-                <BsCheckCircleFill className='text-green500' style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+                <BsCheckCircleFill className='text-green500' size={15} onClick={() => this.openModalConfirm} />
               </div>
             </div>
           ))}
@@ -196,9 +194,9 @@ class PanelAppointment extends React.Component {
           {appointments?.filter(a => a.type == 3 && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
-              <div className={`item-right ${data?.status == -3 && 'display-none'}`}>
+              <div className={`item-right gap-1 ${data?.status == -3 && 'display-none'}`}>
                 <BsEnvelope size={15} onClick={() => { }} />
-                <BsFillFlagFill style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+                <BsFillFlagFill size={15} onClick={() => { }} />
               </div>
             </div>
           ))}

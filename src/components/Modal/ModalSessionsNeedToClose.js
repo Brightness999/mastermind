@@ -30,7 +30,7 @@ class ModalSessionsNeedToClose extends React.Component {
 	}
 
 	componentDidMount() {
-		const appointments = JSON.parse(JSON.stringify(this.props.appointments));
+		const appointments = JSON.parse(JSON.stringify(this.props.appointments?.filter(appointment => appointment.type == 3 && appointment.status == 0 && moment(appointment.date).isBefore(moment()))));
 		this.setState({ appointments: appointments?.map(a => { a['key'] = a._id; return a; }) });
 	}
 
@@ -107,8 +107,7 @@ class ModalSessionsNeedToClose extends React.Component {
 	}
 
 	updateAppointments() {
-		const { role } = this.props.auth.user;
-		store.dispatch(getAppointmentsData({ role: role }));
+		store.dispatch(getAppointmentsData({ role: this.props.user?.role }));
 		const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
 		const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
 		const dataFetchAppointMonth = {
@@ -123,7 +122,6 @@ class ModalSessionsNeedToClose extends React.Component {
 
 	render() {
 		const { appointments, skillSet, visibleProcess, visibleInvoice, event, errorMessage } = this.state;
-		const { user } = this.props.auth;
 		const modalProps = {
 			className: 'modal-referral-service',
 			title: "Sessions need to close",
@@ -196,18 +194,25 @@ class ModalSessionsNeedToClose extends React.Component {
 			{ title: 'Session Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm a') },
 		];
 
-		if (user.role == 3) {
+		if (this.props.user?.role == 999 || this.props.user?.role == 100) {
 			columns.splice(1, 0, {
 				title: 'Provider',
 				key: 'provider',
 				sorter: (a, b) => a.provider?.firstName + a.provider?.lastName > b.provider?.firstName + b.provider?.lastName ? 1 : -1,
 				render: (appointment) => `${appointment?.provider.firstName ?? ''} ${appointment?.provider.lastName ?? ''}`,
 			});
+			columns.splice(5, 0, {
+				title: 'Action', key: 'action', render: (appointment) => this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus == 1)
+					? (<div>Suspending</div>) : (
+						<a className='btn-blue action' onClick={() => this.handleClose(appointment)}>Close</a>
+					)
+			});
 		} else {
 			columns.splice(4, 0, {
-				title: 'Action', key: 'action', render: (appointment) => (
-					<a className='btn-blue action' onClick={() => this.handleClose(appointment)}>Close</a>
-				)
+				title: 'Action', key: 'action', render: (appointment) => this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus == 1)
+					? (<div>Suspending</div>) : (
+						<a className='btn-blue action' onClick={() => this.handleClose(appointment)}>Close</a>
+					)
 			});
 		}
 
@@ -245,7 +250,8 @@ class ModalSessionsNeedToClose extends React.Component {
 
 const mapStateToProps = state => {
 	return ({
-		auth: state.auth,
+		appointments: state.appointments.dataAppointments,
+		user: state.auth.user,
 	})
 }
 

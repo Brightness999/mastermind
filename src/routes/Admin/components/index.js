@@ -654,7 +654,6 @@ class SchedulingCenter extends React.Component {
       visible: visibleSessionsNeedToClose,
       onSubmit: this.onCloseModalSessionsNeedToClose,
       onCancel: this.onCloseModalSessionsNeedToClose,
-      appointments: listAppointmentsRecent?.filter(appointment => appointment.type == 3 && appointment.status == 0 && moment(appointment.date).isBefore(moment())),
       calendar: this.calendarRef,
     };
 
