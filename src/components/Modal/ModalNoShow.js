@@ -11,7 +11,7 @@ import '../../assets/styles/login.less';
 class ModalNoShow extends React.Component {
 	componentDidMount() {
 		const { event } = this.props;
-		if (event?.flagType == 0) {
+		if (event?.flagStatus == 0) {
 			const currentBalance = event?.type == 2 ? event?.provider?.separateEvaluationRate : event?.type == 3 ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate : event?.type == 5 ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.subsidizedRate : '';
 			this.form?.setFieldsValue({ penalty: currentBalance, program: 5 });
 		} else {

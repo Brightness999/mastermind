@@ -23,6 +23,7 @@ import ModalCurrentReferralService from './ModalCurrentReferralService';
 import ModalFlagExpand from './ModalFlagExpand';
 import ModalSessionsNeedToClose from './ModalSessionsNeedToClose';
 import ModalPayment from './ModalPayment';
+import ModalFeedback from './ModalFeedback';
 
 export {
   ModalCreateDone,
@@ -49,4 +50,5 @@ export {
   ModalFlagExpand,
   ModalSessionsNeedToClose,
   ModalPayment,
+  ModalFeedback,
 }
