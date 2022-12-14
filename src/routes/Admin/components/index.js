@@ -18,6 +18,7 @@ import messages from '../../Dashboard/messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
 import msgSidebar from '../../../components/SideBar/messages';
 import msgDrawer from '../../../components/DrawerDetail/messages';
+import msgModal from '../../../components/Modal/messages';
 import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';

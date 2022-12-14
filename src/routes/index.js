@@ -28,6 +28,7 @@ import ConsultationRequests from './Administrator/ConsultationRequests';
 import Statistics from './Administrator/Statistics';
 import Private from './Administrator/PrivateNote';
 import PrivateNote from './PrivateNote';
+import Notification from './Notifications';
 
 const routesConfig = app => [
   {
@@ -39,6 +40,7 @@ const routesConfig = app => [
       Dashboard(app),
       Changeprofile(app),
       PrivateNote(app),
+      Notification(app),
     ]
   },
   {

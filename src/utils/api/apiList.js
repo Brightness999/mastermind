@@ -7,6 +7,7 @@ export const updatePrivateNote = 'users/update_private_note'
 export const createPrivateNote = 'users/create_private_note'
 export const changePassword = 'users/change_password'
 export const clearFlag = 'users/clear_flag'
+export const updateNotificationSetting = 'users/update_notification_setting'
 
 export const getAppointmentsForAdmin = 'admin/get_appointments'
 export const getAppointmentsInMonthForAdmin = 'admin/get_appointments_in_month'
