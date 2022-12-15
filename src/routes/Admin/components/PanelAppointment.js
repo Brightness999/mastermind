@@ -41,6 +41,12 @@ class PanelAppointment extends React.Component {
     this.props.setReload(this.setReloadData);
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.appointments != this.props.appointments) {
+      this.setState({ appointments: this.props.appointments });
+    }
+  }
+
   setReloadData = () => {
     this.handleTabChange(this.state.currentTab);
   }
