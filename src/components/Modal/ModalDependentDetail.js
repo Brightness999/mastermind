@@ -151,7 +151,7 @@ class ModalDependentDetail extends React.Component {
 											key="back"
 											className='w-20'
 											onClick={this.onEdit}
-											disabled={dependent.notes[selectedNoteIndex]?.user?._id != store.getState().auth.user?._id}
+											disabled={dependent.notes[selectedNoteIndex]?.user?._id != store.getState().auth.user?._id && store.getState().auth.user?.role != 999}
 										>
 											{intl.formatMessage(messages.edit)}
 										</Button>
@@ -160,7 +160,7 @@ class ModalDependentDetail extends React.Component {
 											danger
 											className='w-20'
 											onClick={() => this.onDelete(dependent?.notes[selectedNoteIndex]?._id)}
-											disabled={dependent.notes[selectedNoteIndex]?.user?._id != store.getState().auth.user?._id}
+											disabled={dependent.notes[selectedNoteIndex]?.user?._id != store.getState().auth.user?._id && store.getState().auth.user?.role != 999}
 										>
 											{intl.formatMessage(messages.delete)}
 										</Button>

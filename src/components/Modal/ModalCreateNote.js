@@ -19,7 +19,7 @@ class ModalCreateNote extends React.Component {
 
   render() {
     const modalProps = {
-      className: 'modal-balance',
+      className: 'modal-note',
       title: "",
       open: this.props.visible,
       onOk: this.props.onSubmit,
