@@ -663,6 +663,7 @@ class SchedulingCenter extends React.Component {
       onClose: this.onCloseDrawerDetail,
       event: selectedEvent,
       calendar: this.calendarRef,
+      listAppointmentsRecent: listAppointmentsRecent,
     };
 
     const modalFlagExpandProps = {

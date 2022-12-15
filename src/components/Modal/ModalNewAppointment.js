@@ -43,6 +43,8 @@ class ModalNewAppointment extends React.Component {
 		standardRate: '',
 		subsidizedRate: '',
 		visibleModalScreening: false,
+		subsidyAvailable: false,
+		restSessions: 0,
 	}
 
 	getArrTime = (type, providerIndex) => {
@@ -271,7 +273,7 @@ class ModalNewAppointment extends React.Component {
 
 	onChooseProvider = (providerIndex) => {
 		this.setState({ providerErrorMessage: '' });
-		const { listProvider, selectedDate, selectedDependent, selectedProviderIndex } = this.state;
+		const { listProvider, selectedDate, selectedDependent, selectedProviderIndex, selectedSkill } = this.state;
 		const appointments = listProvider[providerIndex]?.appointments ?? [];
 		let appointmentType = 0;
 
@@ -381,6 +383,13 @@ class ModalNewAppointment extends React.Component {
 			const currentGrade = this.props.listDependents?.find(dependent => dependent?._id == selectedDependent)?.currentGrade;
 			standardRate = listProvider[providerIndex]?.academicLevel?.find(level => level.level == currentGrade)?.rate;
 			subsidizedRate = listProvider[providerIndex]?.academicLevel?.find(level => level.level == currentGrade)?.subsidizedRate;
+
+			if (selectedSkill) {
+				const subsidy = this.props.listDependents?.find(d => d._id == selectedDependent)?.subsidy?.find(s => s.skillSet == selectedSkill);
+				if (subsidy?.status && subsidy?.numberOfSessions) {
+					this.setState({ subsidyAvailable: true, restSessions: subsidy?.numberOfSessions });
+				}
+			}
 		}
 
 		this.setState({
@@ -574,6 +583,8 @@ class ModalNewAppointment extends React.Component {
 			subsidizedRate,
 			visibleModalScreening,
 			selectedDependent,
+			subsidyAvailable,
+			restSessions,
 		} = this.state;
 		const modalProps = {
 			className: 'modal-new',
@@ -607,10 +618,13 @@ class ModalNewAppointment extends React.Component {
 						</div>
 						<div className='flex flex-row items-center mb-10'>
 							<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}<sup>*</sup></p>
-							{appointmentType == 3 && (
-								<div className='flex flex-row items-center ml-20'>
-									<Switch size="small" />
-									<p className='ml-10 mb-0'>{intl.formatMessage(messages.subsidyOnly)}</p>
+							{appointmentType == 3 && subsidyAvailable && (
+								<div className='flex flex-row items-center ml-20 gap-5'>
+									<p className='mb-0'>Number of Sessions: {restSessions}</p>
+									<div className='flex items-center gap-2'>
+										<Switch size="small" />
+										<p className='mb-0'>{intl.formatMessage(messages.subsidyOnly)}</p>
+									</div>
 								</div>
 							)}
 						</div>

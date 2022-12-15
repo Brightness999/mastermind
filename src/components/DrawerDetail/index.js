@@ -541,7 +541,7 @@ class DrawerDetail extends Component {
             </div>
           )}
         </div>
-        {event?.status == 0 && listAppointmentsRecent.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1) ? (
+        {event?.status == 0 && listAppointmentsRecent?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1) ? (
           <div className='text-center font-20 mt-2'>Suspending</div>
         ) : (
           <>

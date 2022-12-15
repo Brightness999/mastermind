@@ -359,8 +359,8 @@ class PanelAppointment extends React.Component {
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className={`item-right gap-1 ${data.status == -2 && 'display-none'}`}>
-                <BsFillFlagFill size={15} onClick={() => { }} />
-                <BsCheckCircleFill className='text-green500' size={15} onClick={() => this.onOpenModalInvoice(data)} />
+                <BsFillFlagFill size={15} onClick={() => this.openModalNoShow(data)} />
+                <BsCheckCircleFill className='text-green500' size={15} onClick={() => this.handleClose(data)} />
               </div>
             </div>
           ))}
@@ -378,8 +378,8 @@ class PanelAppointment extends React.Component {
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className={`item-right gap-1 ${data?.status == -3 && 'display-none'}`}>
-                <BsEnvelope size={15} onClick={() => { }} />
-                <BsFillFlagFill size={15} onClick={() => { }} />
+                <BsEnvelope size={15} onClick={() => this.openModalFeedback(data)} />
+                <BsFillFlagFill size={15} onClick={() => this.openModalBalance(data)} />
               </div>
             </div>
           ))}
