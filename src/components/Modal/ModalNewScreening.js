@@ -12,33 +12,25 @@ import TextArea from 'antd/lib/input/TextArea';
 moment.locale('en');
 
 class ModalNewScreening extends React.Component {
-  state = {
-    phoneNumber: '',
-    notes: '',
-    time: undefined,
-  }
-
   componentDidMount() {
-    const { dependent } = this.props;
-    this.form.setFieldsValue({ phoneNumber: dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ? dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber : dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber });
+    const { dependent, event } = this.props;
+    if (event) {
+      this.form.setFieldsValue({ phoneNumber: event?.phoneNumber, time: event?.screeningTime, notes: event?.notes });
+    } else {
+      this.form.setFieldsValue({ phoneNumber: dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ? dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber : dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber });
+    }
   }
 
-  onFinish = () => {
-    const { phoneNumber, notes, time } = this.state;
+  onFinish = (values) => {
     this.props.onSubmit({
-      phoneNumber: phoneNumber,
-      notes: notes,
-      time: time,
+      phoneNumber: values.phoneNumber,
+      notes: values.notes,
+      time: values.time,
     })
   }
 
   onFinishFailed = (error) => {
     console.log(error);
-  }
-
-  handleChangeFormValue = (value, name) => {
-    this.setState({ [name]: value });
-    this.form.setFieldValue({ [name]: value });
   }
 
   render() {
@@ -74,7 +66,7 @@ class ModalNewScreening extends React.Component {
                     { pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
                   ]}
                 >
-                  <Input className='h-40' onChange={(e) => this.handleChangeFormValue(e.target.value, 'phoneNumber')} placeholder={intl.formatMessage(messages.contactNumber)} />
+                  <Input className='h-40' placeholder={intl.formatMessage(messages.contactNumber)} />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={24} md={12}>
@@ -83,11 +75,7 @@ class ModalNewScreening extends React.Component {
                   label={intl.formatMessage(messages.time)}
                   rules={[{ required: true }]}
                 >
-                  <Select
-                    showArrow
-                    placeholder={intl.formatMessage(messages.time)}
-                    onChange={v => this.handleChangeFormValue(v, 'time')}
-                  >
+                  <Select showArrow placeholder={intl.formatMessage(messages.time)}>
                     <Select.Option value="morning">Morning</Select.Option>
                     <Select.Option value="afternoon">Afternoon</Select.Option>
                     <Select.Option value="evening">Evening</Select.Option>
@@ -103,7 +91,7 @@ class ModalNewScreening extends React.Component {
                   label={intl.formatMessage(messages.notes)}
                   rules={[{ required: true, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.notes) }]}
                 >
-                  <TextArea onChange={(e) => this.handleChangeFormValue(e.target.value, 'notes')} placeholder={intl.formatMessage(messages.notes)} rows={5} />
+                  <TextArea placeholder={intl.formatMessage(messages.notes)} rows={5} />
                 </Form.Item>
               </Col>
             </Row>

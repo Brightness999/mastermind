@@ -96,12 +96,14 @@ class ModalCurrentAppointment extends React.Component {
 			appointmentType: event?.type,
 			notes: event?.notes,
 			skillSet: store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.services ?? [],
+			selectedProvider: event?.provider?._id,
+			selectedDate: moment(event?.date),
 		});
 		this.form?.setFieldsValue({ dependent: event?.dependent?._id, skill: event?.skillSet?._id, address: event?.location, phoneNumber: event?.phoneNumber });
-		this.searchProvider('', event?.location, event?.skillSet?._id, event?.dependent?._id);
+		this.searchProvider('', event?.location, event?.skillSet?._id, event?.dependent?._id, true, event?.provider?._id);
 	}
 
-	searchProvider(searchKey, address, selectedSkillSet, dependentId) {
+	searchProvider(searchKey, address, selectedSkillSet, dependentId, isInitial, providerId) {
 		const data = {
 			search: searchKey,
 			address: address,
@@ -113,15 +115,22 @@ class ModalCurrentAppointment extends React.Component {
 			const { data, success } = result;
 			if (success) {
 				this.setState({ listProvider: data.providers });
+				if (isInitial) {
+					data.providers?.forEach((provider, i) => {
+						if (provider?._id == providerId) {
+							this.setState({ selectedProviderIndex: i }, () => {
+								this.onChooseProvider(i);
+							});
+						}
+					})
+				} else {
+					this.setState({ selectedProviderIndex: -1 });
+				}
 			} else {
 				this.setState({ listProvider: [] });
 			}
-			this.setState({
-				selectedProviderIndex: -1,
-				selectedProvider: undefined,
-				standardRate: '',
-				subsidizedRate: '',
-			});
+			this.setState({ standardRate: '', subsidizedRate: '' });
+			!isInitial && this.setState({ selectedProvider: undefined });
 		}).catch(err => {
 			console.log('provider list error-----', err);
 			this.setState({
@@ -626,6 +635,7 @@ class ModalCurrentAppointment extends React.Component {
 			onCancel: this.onCloseModalScreening,
 			provider: listProvider[selectedProviderIndex],
 			dependent: dependents?.find(dependent => dependent._id == selectedDependent),
+			event: event,
 		}
 
 		const contentConfirm = (
@@ -941,7 +951,7 @@ class ModalCurrentAppointment extends React.Component {
 												<Row gutter={15}>
 													{arrTime?.map((time, index) => (
 														<Col key={index} span={12}>
-															<div className={`${selectedTimeIndex === index ? 'active' : ''} ${time.active ? 'time-available' : 'time-not-available'}`} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
+															<div className={`${selectedTimeIndex === index ? 'active' : ''} ${time.active ? 'time-available' : 'time-not-available'} ${moment(event?.date)?.year() == selectedDate?.year() && moment(event?.date)?.month() == selectedDate?.month() && moment(event?.date)?.date() == selectedDate?.date() && moment(event?.date).hours() == time.value.hours() && moment(event?.date).minutes() == time.value.minutes() ? 'prev-time' : ''}`} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
 																<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
 															</div>
 														</Col>

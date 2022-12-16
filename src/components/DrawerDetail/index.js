@@ -658,6 +658,18 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
+              {(event?.type == 1 && event?.status == 0 && !isNotPending) && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<BsClockHistory size={15} />}
+                    block
+                    onClick={this.openModalCurrent}
+                  >
+                    {intl.formatMessage(messages.reschedule)}
+                  </Button>
+                </Col>
+              )}
               {(!isFlag && userRole > 3 && [2, 3, 5].includes(event?.type) && (event?.status == -1 || event?.status == 0)) && (
                 <Col span={12}>
                   <Button
