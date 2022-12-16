@@ -658,5 +658,9 @@ export default ({
   billingDetails: {
     id: `${scope}.billingDetails`,
     defaultMessage: 'Billing Details',
+  },
+  notificationSetting: {
+    id: `${scope}.notificationSetting`,
+    defaultMessage: 'Notification Setting',
   }
 });

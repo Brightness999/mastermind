@@ -26,6 +26,11 @@ export const MENU_PROVIDER = [
         label: 'Info Billing'
     },
     {
+        key: 'Info_notification',
+        icon: '',
+        label: 'Notification Setting'
+    },
+    {
         key: 'Change_password',
         icon: '',
         label: 'Change password'
@@ -47,6 +52,11 @@ export const MENU_PARENT = [
         key: 'Info_availability',
         icon: '',
         label: 'Info Availability'
+    },
+    {
+        key: 'Info_notification',
+        icon: '',
+        label: 'Notification Setting'
     },
     {
         key: 'Change_password',
@@ -78,6 +88,11 @@ export const MENU_SCHOOL = [
         key: 'Info_availability',
         icon: '',
         label: 'Info Availability'
+    },
+    {
+        key: 'Info_notification',
+        icon: '',
+        label: 'Notification Setting'
     },
     {
         key: 'Change_password',

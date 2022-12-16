@@ -14,6 +14,7 @@ import InfoSchool from './School/info_school';
 import InfoAvaiSchool from './School/info_availability'
 import ChangePassword from './ChangePassword';
 import InfoAdmin from './Admin/info_admin';
+import InfoNotification from './info_notification';
 import { MENU_ADMIN, MENU_PARENT, MENU_PROVIDER, MENU_SCHOOL } from '../constant';
 import { setKeyDefault } from '../service';
 import { store } from '../../../../redux/store';
@@ -27,6 +28,7 @@ export default class extends React.Component {
         info_child: true,
         info_parent: false,
         info_availability: false,
+        info_notification: false,
         change_password: false
       },
       provider: {
@@ -35,11 +37,13 @@ export default class extends React.Component {
         info_professional: false,
         info_scheduling: false,
         info_billing: false,
+        info_notification: false,
         change_password: false
       },
       school: {
         info_school: true,
         info_availability: false,
+        info_notification: false,
         change_password: false
       },
       admin: {
@@ -104,6 +108,9 @@ export default class extends React.Component {
           case 'Info_availability':
             this.setState({ school: { newStateSchool, info_availability: true } })
             break;
+          case 'Info_notification':
+            this.setState({ school: { newStateSchool, info_notification: true } })
+            break;
           default:
             this.setState({ school: { newStateSchool, change_password: true } })
             break;
@@ -127,6 +134,9 @@ export default class extends React.Component {
           case 'Info_billing':
             this.setState({ provider: { newStateProvider, info_billing: true } })
             break;
+          case 'Info_notification':
+            this.setState({ provider: { newStateProvider, info_notification: true } })
+            break;
           default:
             this.setState({ provider: { newStateProvider, change_password: true } })
             break;
@@ -143,6 +153,9 @@ export default class extends React.Component {
             break;
           case 'Info_availability':
             this.setState({ parent: { newStateParent, info_availability: true } })
+            break;
+          case 'Info_notification':
+            this.setState({ parent: { newStateParent, info_notification: true } })
             break;
           default:
             this.setState({ parent: { newStateParent, change_password: true } })
@@ -166,6 +179,8 @@ export default class extends React.Component {
           return <InfoSchool />
         } else if (school.info_availability) {
           return <InfoAvaiSchool />
+        } else if (school.info_notification) {
+          return <InfoNotification />
         } else {
           return <ChangePassword />
         }
@@ -180,6 +195,8 @@ export default class extends React.Component {
           return <InfoScheduling />
         } else if (provider.info_billing) {
           return <InfoFinancial />
+        } else if (provider.info_notification) {
+          return <InfoNotification />
         } else {
           return <ChangePassword />
         }
@@ -190,6 +207,8 @@ export default class extends React.Component {
           return <InfoParent />
         } else if (parent.info_availability) {
           return <DependentAvailability />
+        } else if (parent.info_notification) {
+          return <InfoNotification />
         } else {
           return <ChangePassword />
         }

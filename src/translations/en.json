@@ -180,6 +180,7 @@
   "routes.Createaccount.availabilitySchedule": "Availability schedule",
   "routes.Createaccount.numberSessions": "Number sessions",
   "routes.Createaccount.notes": "Notes",
+  "routes.Createaccount.notificationSetting": "Notification Setting",
   
   
 
