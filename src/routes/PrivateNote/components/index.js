@@ -122,7 +122,7 @@ export default class extends React.Component {
         this.setState({
           dependents: dependents?.map(dependent => {
             if (dependent._id == selectedDependentId) {
-              dependent.notes.unshift(res.data)
+              dependent.notes.push(res.data);
             }
             return dependent;
           })
