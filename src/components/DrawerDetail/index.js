@@ -350,23 +350,6 @@ class DrawerDetail extends Component {
     const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag } = this.state;
     const { event, listAppointmentsRecent } = this.props;
 
-    const menu = (
-      <Menu
-        selectable
-        defaultSelectedKeys={['2']}
-        items={[
-          {
-            key: '1',
-            label: (<a target="_blank" rel={intl.formatMessage(messages.pastDueBalance)} onClick={this.onShowModalBalance}>{intl.formatMessage(messages.pastDueBalance)}</a>),
-          },
-          {
-            key: '2',
-            label: (<a target="_blank" rel={intl.formatMessage(messages.noShow)} onClick={this.onShowModalNoShow}>{intl.formatMessage(messages.noShow)}</a>),
-          }
-        ]}
-      />
-    );
-
     const providerProfile = (
       <div className='provider-profile'>
         <p className='font-16 font-700 mb-10'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
@@ -663,20 +646,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(!isFlag && userRole > 3 && [2, 3, 5].includes(event?.type) && event?.status == -1 && moment(event?.date).isBefore(moment())) && (
-                <Col span={12}>
-                  <Dropdown overlay={menu} placement="bottomRight">
-                    <Button
-                      type='primary'
-                      icon={<BsFillFlagFill size={15} />}
-                      block
-                    >
-                      {intl.formatMessage(messages.flagDependent)}
-                    </Button>
-                  </Dropdown>
-                </Col>
-              )}
-              {(event?.type != 1 && event?.status == 0 && !isNotPending) && (
+              {(event?.type != 1 && event?.status == 0 && !isNotPending && moment().isBefore(moment(event?.date))) && (
                 <Col span={12}>
                   <Button
                     type='primary'
@@ -685,6 +655,22 @@ class DrawerDetail extends Component {
                     onClick={this.openModalCurrent}
                   >
                     {intl.formatMessage(messages.reschedule)}
+                  </Button>
+                </Col>
+              )}
+              {(!isFlag && userRole > 3 && [2, 3, 5].includes(event?.type) && (event?.status == -1 || event?.status == 0)) && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<BsFillFlagFill size={15} />}
+                    block
+                    onClick={() => {
+                      event?.status == 0 && moment().isBefore(moment(event?.date)) && this.onShowModalBalance();
+                      event?.status == 0 && moment().isAfter(moment(event?.date)) && this.onShowModalNoShow();
+                      event?.status == -1 && this.onShowModalBalance();
+                    }}
+                  >
+                    {intl.formatMessage(messages.flagDependent)}
                   </Button>
                 </Col>
               )}
