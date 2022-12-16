@@ -801,7 +801,27 @@ class ModalNewAppointment extends React.Component {
 														}
 													}}
 													onSelect={this.onSelectDate}
-													disabledDate={(date) => date.isBefore(new Date())}
+													disabledDate={(date) => {
+														if (date.isBefore(moment())) {
+															return true;
+														}
+
+														if (date.isAfter(moment()) && date.day() == 6) {
+															return true;
+														}
+
+														if (selectedProviderIndex > -1) {
+															const range = listProvider[selectedProviderIndex]?.manualSchedule?.find(d => d.dayInWeek == date.day() && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate })));
+															if (range) {
+																if (range.isPrivate) {
+																	return true;
+																}
+															} else {
+																return true;
+															}
+														}
+														return false;
+													}}
 													headerRender={() => (
 														<div style={{ marginBottom: 10 }}>
 															<Row gutter={8} justify="space-between" align="middle">
