@@ -47,8 +47,7 @@ export default class extends React.Component {
 	}
 
 	handleNewUser = () => {
-		localStorage.removeItem('token');
-		this.props.history.push(routerLinks.CreateAccount);
+		this.props.history.push(routerLinks.CreateAccountForAdmin);
 	}
 
 	onShowModalEdit = () => {

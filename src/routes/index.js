@@ -29,6 +29,7 @@ import Statistics from './Administrator/Statistics';
 import Private from './Administrator/PrivateNote';
 import PrivateNote from './PrivateNote';
 import Notification from './Notifications';
+import CreateUser from './Administrator/CreateAccount';
 
 const routesConfig = app => [
   {
@@ -57,6 +58,7 @@ const routesConfig = app => [
       SubsidyManager(app),
       SystemSetting(app),
       Private(app),
+      CreateUser(app),
       Statistics(app)
     ]
   },

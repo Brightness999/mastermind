@@ -12,6 +12,7 @@ export const routerLinks = {
   FlagList: '/administrator/flaglist',
   ConsultationRequests: '/administrator/consultationrequests',
   Admin: '/administrator/admin',
+  CreateAccountForAdmin: '/administrator/createaccount',
   UserManager: '/administrator/usermanager',
   SystemSetting: '/administrator/systemsetting',
   SubsidyManager: '/administrator/subsidymanager',
