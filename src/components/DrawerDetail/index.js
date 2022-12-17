@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { Drawer, Button, Row, Col, Typography, Popover, Input, message, Menu, Dropdown } from 'antd';
 import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsXCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
-import { FaFileContract } from 'react-icons/fa';
+import { FaCalendarTimes, FaFileContract } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
 import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalCurrentReferralService, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
 import intl from "react-intl-universal";
@@ -15,6 +15,7 @@ import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
 import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestFeedbackForClient, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { GiPayMoney } from 'react-icons/gi';
 const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
@@ -464,6 +465,12 @@ class DrawerDetail extends Component {
         }
       >
         <div>
+          {event?.flagStatus == 1 && event?.flagItems?.flagType == 1 && (
+            <div className='flex justify-center gap-2'><BsFillFlagFill color="#ff0000" size={24} /> - <GiPayMoney color="#ff0000" size={24} />({intl.formatMessage(messages.pastDueBalance)})</div>
+          )}
+          {event?.flagStatus == 1 && event?.flagItems?.flagType == 2 && (
+            <div className='flex justify-center gap-2'><BsFillFlagFill color="#ff0000" size={24} /> - <FaCalendarTimes color="#ff0000" size={24} />({intl.formatMessage(messages.noShow)})</div>
+          )}
           <div className='detail-item flex'>
             <div className='title'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.what)}</p>
@@ -525,7 +532,18 @@ class DrawerDetail extends Component {
           )}
         </div>
         {event?.status == 0 && listAppointmentsRecent?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1) ? (
-          <div className='text-center font-20 mt-2'>Suspending</div>
+          <div className='text-center font-20 mt-2'>
+            {listAppointmentsRecent?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1).flagItems?.flagType == 1 ? (
+              <div className='flex justify-center gap-2'><BsFillFlagFill color="#ff0000" size={24} /> - <GiPayMoney color="#ff0000" size={24} /></div>
+            ) : (
+              <div className='flex justify-center gap-2'><BsFillFlagFill color="#ff0000" size={24} /> - <FaCalendarTimes color="#ff0000" size={24} /></div>
+            )}
+            {listAppointmentsRecent?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1).flagItems?.flagType == 1 ? (
+              <div>{intl.formatMessage(messages.pastDueBalance)}</div>
+            ) : (
+              <div>{intl.formatMessage(messages.noShow)}</div>
+            )}
+          </div>
         ) : (
           <>
             <Input.TextArea rows={5} className="appointment-note" disabled={!isShowEditNotes} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />
@@ -622,7 +640,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(userRole != 3 && !isShowFeedback && event?.status != 0) && (
+              {(userRole != 3 && !isShowFeedback && ![0, -2].includes(event?.status)) && (
                 <Col span={12}>
                   <Button
                     type='primary'
@@ -634,7 +652,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(userRole == 3 && event?.status != 0 && !isLeftFeedback) && (
+              {(userRole == 3 && ![0, -2].includes(event?.status) && !isLeftFeedback) && (
                 <Col span={12}>
                   <Button
                     type='primary'

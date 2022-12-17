@@ -46,7 +46,7 @@ class ModalNewSubsidyRequest extends React.Component {
 	}
 
 	loadSchools() {
-		request.post(getAllSchoolsForParent, { communityServed: this.props.auth.user?.parentInfo.cityConnection }).then(result => {
+		request.post(getAllSchoolsForParent, { communityServed: this.props.auth.user?.parentInfo?.cityConnection }).then(result => {
 			const { success, data } = result;
 			if (success) {
 				this.setState({ listSchools: data })

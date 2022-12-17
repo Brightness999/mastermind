@@ -1,6 +1,6 @@
 import React from 'react';
 import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input, Popconfirm } from 'antd';
-import { FaUser, FaCalendarAlt } from 'react-icons/fa';
+import { FaUser, FaCalendarAlt, FaCalendarTimes } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsFilter, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
 import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalPayment } from '../../../components/Modal';
@@ -35,6 +35,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payFlag, requestClearance } from '../../../utils/api/apiList';
 import { BiExpand } from 'react-icons/bi';
+import { GiPayMoney } from 'react-icons/gi';
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -1064,7 +1065,7 @@ class Dashboard extends React.Component {
                 weekends={calendarWeekends}
                 datesSet={this.handleDates}
                 events={calendarEvents}
-                eventContent={renderEventContent}
+                eventContent={(info) => renderEventContent(info, listAppointmentsRecent)}
                 eventClick={this.onShowDrawerDetail}
                 eventChange={this.handleEventChange} // called for drag-n-drop/resize
                 eventRemove={this.handleEventRemove}
@@ -1287,14 +1288,14 @@ function reportNetworkError() {
   alert('This action could not be completed')
 }
 
-function renderEventContent(eventInfo) {
+function renderEventContent(eventInfo, appointments) {
   const event = eventInfo.event.extendedProps;
   const type = event?.type;
   const status = event?.status;
   const eventType = type == 1 ? 'Screening' : type == 2 ? 'Evaluation' : type == 4 ? 'Consultation' : 'Session';
 
   return (
-    <div className={`flex flex-col p-3 rounded-2 bg-${status == 0 ? 'active' : eventType.toLowerCase()}`}>
+    <div className={`flex flex-col p-3 rounded-2 relative bg-${status == 0 ? 'active' : status == -1 ? eventType.toLowerCase() : 'cancelled'}`}>
       <div className='flex items-center gap-2'>
         <Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
         {event?.status == -2 && <span className='font-20 text-black'>Cancelled</span>}
@@ -1305,6 +1306,10 @@ function renderEventContent(eventInfo) {
         <b className='mr-3'>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</b>
         <b className='mr-3'>{eventType} with {eventInfo.event.title}</b>
       </div>
+      {event?.flagStatus == 1 && event?.flagItems?.flagType == 1 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><GiPayMoney color="#ff0000" size={15} /></div>}
+      {event?.status == 0 && appointments?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1)?.flagItems?.flagType == 1 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><GiPayMoney color="#ff0000" size={15} /></div>}
+      {event?.flagStatus == 1 && event?.flagItems?.flagType == 2 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><FaCalendarTimes color="#ff0000" size={15} /></div>}
+      {event?.status == 0 && appointments?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1)?.flagItems?.flagType == 2 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><FaCalendarTimes color="#ff0000" size={15} /></div>}
     </div>
   )
 }

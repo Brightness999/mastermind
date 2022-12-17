@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input, Divider, Collapse, Tabs, Avatar, Badge } from 'antd';
-import { FaCalendarAlt, FaUser } from 'react-icons/fa';
+import { FaCalendarAlt, FaUser, FaCalendarTimes } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsClockHistory, BsFillDashSquareFill, BsFillFlagFill, BsFillPlusSquareFill, BsFilter, BsX } from 'react-icons/bs';
 import { ModalNewGroup, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm } from '../../../components/Modal';
@@ -34,6 +34,7 @@ import { compose } from 'redux';
 import { clearFlag, getDefaultDataForAdmin, payFlag, requestClearance } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
 import { BiExpand } from 'react-icons/bi';
+import { GiPayMoney } from 'react-icons/gi';
 
 const { Panel } = Collapse;
 
@@ -810,7 +811,7 @@ class SchedulingCenter extends React.Component {
                 weekends={calendarWeekends}
                 datesSet={this.handleDates}
                 events={calendarEvents}
-                eventContent={renderEventContent}
+                eventContent={(info) => renderEventContent(info, listAppointmentsRecent)}
                 eventClick={this.onShowDrawerDetail}
                 eventChange={this.handleEventChange} // called for drag-n-drop/resize
                 eventRemove={this.handleEventRemove}
@@ -1025,7 +1026,7 @@ function reportNetworkError() {
   alert('This action could not be completed')
 }
 
-function renderEventContent(eventInfo) {
+function renderEventContent(eventInfo, appointments) {
   const event = eventInfo.event.extendedProps;
   const type = event?.type;
   const status = event?.status;
@@ -1046,6 +1047,10 @@ function renderEventContent(eventInfo) {
         <b>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</b>
         {provider()}
       </div>
+      {event?.flagStatus == 1 && event?.flagItems?.flagType == 1 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><GiPayMoney color="#ff0000" size={15} /></div>}
+      {event?.status == 0 && appointments?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1)?.flagItems?.flagType == 1 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><GiPayMoney color="#ff0000" size={15} /></div>}
+      {event?.flagStatus == 1 && event?.flagItems?.flagType == 2 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><FaCalendarTimes color="#ff0000" size={15} /></div>}
+      {event?.status == 0 && appointments?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1)?.flagItems?.flagType == 2 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><FaCalendarTimes color="#ff0000" size={15} /></div>}
     </div>
   )
 }
