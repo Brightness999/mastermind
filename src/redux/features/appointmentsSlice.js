@@ -15,6 +15,9 @@ export const getAppointmentsData = createAsyncThunk(
 		let result = {}
 		try {
 			switch (data.role) {
+				case 1000:
+					result = await request.post(url + getAppointmentsForAdmin, {}, data.token);
+					return result.data;
 				case 999:
 					result = await request.post(url + getAppointmentsForAdmin, {}, data.token);
 					return result.data;
@@ -40,6 +43,9 @@ export const getAppointmentsMonthData = createAsyncThunk(
 		let result = {}
 		try {
 			switch (data.role) {
+				case 1000:
+					result = await request.post(url + getAppointmentsInMonthForAdmin, data.data);
+					break;
 				case 999:
 					result = await request.post(url + getAppointmentsInMonthForAdmin, data.data);
 					break;

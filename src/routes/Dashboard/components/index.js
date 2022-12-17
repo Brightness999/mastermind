@@ -87,7 +87,7 @@ class Dashboard extends React.Component {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
         store.dispatch(setUser(loginData));
-        loginData?.role == 999 && this.props.history.push(routerLinks.Admin)
+        loginData?.role > 900 && this.props.history.push(routerLinks.Admin)
         switch (loginData.role) {
           case 3:
             this.setState({ parentInfo: loginData.parentInfo });

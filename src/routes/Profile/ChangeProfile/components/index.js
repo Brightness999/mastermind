@@ -57,6 +57,9 @@ export default class extends React.Component {
 
   componentDidMount() {
     switch (user.role) {
+      case 1000:
+        this.setState({ listMenu: this.getMenuList(MENU_ADMIN) });
+        break;
       case 999:
         this.setState({ listMenu: this.getMenuList(MENU_ADMIN) });
         break;
@@ -88,6 +91,17 @@ export default class extends React.Component {
   changeMenu = (val) => {
     this.setState({ keyActive: val });
     switch (user.role) {
+      case 1000:
+        let newStateSuperAdmin = { ...this.state.admin };
+        switch (val) {
+          case 'Info_admin':
+            this.setState({ admin: { newStateSuperAdmin, info_admin: true } })
+            break;
+          default:
+            this.setState({ admin: { newStateSuperAdmin, change_password: true } })
+            break;
+        }
+        break;
       case 999:
         let newStateAdmin = { ...this.state.admin };
         switch (val) {
@@ -168,6 +182,12 @@ export default class extends React.Component {
   getScreen = () => {
     const { admin, school, parent, provider } = this.state;
     switch (user.role) {
+      case 1000:
+        if (admin.info_admin) {
+          return <InfoAdmin />
+        } else {
+          return <ChangePassword />
+        }
       case 999:
         if (admin.info_admin) {
           return <InfoAdmin />

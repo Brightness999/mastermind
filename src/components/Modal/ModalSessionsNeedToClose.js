@@ -194,7 +194,7 @@ class ModalSessionsNeedToClose extends React.Component {
 			{ title: 'Session Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm a') },
 		];
 
-		if (this.props.user?.role == 999 || this.props.user?.role == 100) {
+		if (this.props.user?.role > 900 || this.props.user?.role == 100) {
 			columns.splice(1, 0, {
 				title: 'Provider',
 				key: 'provider',

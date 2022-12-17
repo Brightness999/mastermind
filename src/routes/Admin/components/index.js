@@ -83,7 +83,7 @@ class SchedulingCenter extends React.Component {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
         store.dispatch(setUser(loginData));
-        loginData?.role < 999 && this.props.history.push(routerLinks.Dashboard)
+        loginData?.role < 900 && this.props.history.push(routerLinks.Dashboard)
         this.setState({ userRole: loginData.role });
         this.updateCalendarEvents(loginData.role);
         this.getMyAppointments(loginData.role);

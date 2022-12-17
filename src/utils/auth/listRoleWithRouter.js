@@ -16,5 +16,9 @@ export const listRoleWithRouter = [
     {
         role: 999,
         path: routerLinks['Admin'],
+    },
+    {
+        role: 1000,
+        path: routerLinks['Admin'],
     }
 ]

@@ -149,6 +149,7 @@ export default class extends React.Component {
 			{
 				title: 'Role', dataIndex: 'role', key: 'role', render: (role) => {
 					switch (role) {
+						case 1000: return 'Super Admin';
 						case 999: return 'Admin';
 						case 3: return 'Parent';
 						case 30: return 'Provider';
@@ -158,6 +159,7 @@ export default class extends React.Component {
 					}
 				},
 				filters: [
+					{ text: 'Super Admin', value: 1000 },
 					{ text: 'Admin', value: 999 },
 					{ text: 'Parent', value: 3 },
 					{ text: 'Provider', value: 30 },

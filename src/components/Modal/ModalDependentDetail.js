@@ -175,10 +175,10 @@ class ModalDependentDetail extends React.Component {
 											className="private-note"
 										/>
 										<div className='flex items-center gap-5 text-italic'>
-											<div className='text-left'>{note.user?.role == 999 ? 'Admin' : note.user?.username}</div>
+											<div className='text-left'>{note.user?.role > 900 ? 'Admin' : note.user?.username}</div>
 											<div className='text-left'>{moment(note?.updatedAt).format('MM/DD/YYYY hh:mm')}</div>
 										</div>
-										{(this.props.user?.role == 999 || this.props.user?._id == note.user?._id) && (
+										{(this.props.user?.role > 900 || this.props.user?._id == note.user?._id) && (
 											<div className='flex justify-end gap-2'>
 												{selectedNoteId == note._id ? (
 													<>

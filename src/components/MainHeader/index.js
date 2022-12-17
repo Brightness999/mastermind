@@ -40,7 +40,7 @@ class MainHeader extends Component {
         key: '1',
         icon: <MdOutlineSpaceDashboard size={18} color='#495057' />,
         label: (
-          <Link to={user?.role === 999 ? routerLinks.Admin : routerLinks.Dashboard}>
+          <Link to={user?.role > 900 ? routerLinks.Admin : routerLinks.Dashboard}>
             {intl.formatMessage(messages.dashboard)}
           </Link>
         ),
@@ -73,7 +73,7 @@ class MainHeader extends Component {
         ),
       },
     ]
-    user.role != 999 && items.splice(3, 0, {
+    user.role < 900 && items.splice(3, 0, {
       key: '4',
       icon: <FaChild size={18} color='#495057' />,
       label: (
