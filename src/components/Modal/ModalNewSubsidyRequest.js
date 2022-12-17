@@ -17,8 +17,7 @@ class ModalNewSubsidyRequest extends React.Component {
 		super(props);
 		this.state = {
 			documentUploaded: [],
-			uploading: false,
-			SkillSet: [],
+			skillSet: [],
 			listSchools: [],
 			dependents: [],
 			isRequestRav: false,
@@ -26,18 +25,24 @@ class ModalNewSubsidyRequest extends React.Component {
 	}
 
 	componentDidMount = () => {
-		!!this.props.setOpennedEvent && this.props.setOpennedEvent(this.loadData)
-	}
-
-	loadData = () => {
-		this.setState({
-			documentUploaded: [],
-			uploading: false,
-			SkillSet: this.props.auth.skillSet,
-			listSchools: [],
-			dependents: this.props.auth.dependents,
-		})
-		this.loadSchools();
+		const { dependent } = this.props;
+		if (dependent) {
+			this.setState({
+				documentUploaded: [],
+				skillSet: dependent?.services,
+				listSchools: [dependent?.school],
+				dependents: [dependent],
+			})
+			this.form.setFieldsValue({ student: dependent?._id, school: dependent?.school?._id });
+		} else {
+			this.setState({
+				documentUploaded: [],
+				skillSet: this.props.auth.skillSet,
+				listSchools: [],
+				dependents: this.props.auth.dependents,
+			})
+			this.loadSchools();
+		}
 	}
 
 	loadSchools() {
@@ -52,6 +57,15 @@ class ModalNewSubsidyRequest extends React.Component {
 			console.log('get all schools error---', err);
 			this.setState({ listSchools: [] })
 		})
+	}
+
+	handleChangeDependent = (dependentId) => {
+		const { dependents } = this.state;
+		this.setState({
+			skillSet: dependents?.find(d => d._id == dependentId)?.services,
+			listSchools: [dependents?.find(d => d._id == dependentId)?.school],
+		})
+		this.form.setFieldsValue({ school: dependents?.find(d => d._id == dependentId)?.school?._id });
 	}
 
 	onFinish = (values) => {
@@ -85,7 +99,7 @@ class ModalNewSubsidyRequest extends React.Component {
 	}
 
 	render = () => {
-		const { SkillSet, listSchools, dependents, isRequestRav } = this.state;
+		const { skillSet, listSchools, dependents, isRequestRav } = this.state;
 		const modalProps = {
 			className: 'modal-new-subsidy',
 			title: intl.formatMessage(messagesCreateAccount.subsidyRequest),
@@ -121,7 +135,7 @@ class ModalNewSubsidyRequest extends React.Component {
 								className="float-label-item"
 								rules={[{ required: true }]}
 							>
-								<Select placeholder={intl.formatMessage(messagesCreateAccount.dependent)}>
+								<Select placeholder={intl.formatMessage(messagesCreateAccount.dependent)} onChange={v => this.handleChangeDependent(v)}>
 									{dependents?.map((item, index) => <Select.Option key={index} value={item._id}>{item.firstName} {item.lastName}</Select.Option>)}
 								</Select>
 							</Form.Item>
@@ -132,7 +146,7 @@ class ModalNewSubsidyRequest extends React.Component {
 								rules={[{ required: !isRequestRav }]}
 							>
 								<Select placeholder={intl.formatMessage(messagesRequest.skillsetRequested)}>
-									{SkillSet?.map((skill, index) => <Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>)}
+									{skillSet?.map((skill, index) => <Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>)}
 								</Select>
 							</Form.Item>
 							{!isRequestRav && (

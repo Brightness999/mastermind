@@ -73,7 +73,7 @@ class MainHeader extends Component {
         ),
       },
     ]
-    user.role != 3 && user.role != 999 && items.splice(3, 0, {
+    user.role != 999 && items.splice(3, 0, {
       key: '4',
       icon: <FaChild size={18} color='#495057' />,
       label: (

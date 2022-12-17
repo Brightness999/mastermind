@@ -63,7 +63,6 @@ class Dashboard extends React.Component {
       listAppointmentsRecent: this.props.appointments,
       listAppoinmentsFilter: [],
       SkillSet: [],
-      isEditSubsidyRequest: "",
       selectedProviders: [],
       selectedLocations: [],
       selectedSkills: [],
@@ -352,16 +351,13 @@ class Dashboard extends React.Component {
   }
 
   modalCreateAndEditSubsidyRequest = () => {
-    const { visibleNewSubsidy, isEditSubsidyRequest } = this.state;
+    const { visibleNewSubsidy } = this.state;
     const modalNewSubsidyProps = {
       visible: visibleNewSubsidy,
       onSubmit: this.onCloseModalNewSubsidy,
       onCancel: this.onCloseModalNewSubsidy,
-      isEditSubsidyRequest: isEditSubsidyRequest,
     };
-    return <ModalNewSubsidyRequest {...modalNewSubsidyProps}
-      setOpennedEvent={opennedEvent => { this.openNewSubsidyRequest = opennedEvent }}
-    />
+    return <ModalNewSubsidyRequest {...modalNewSubsidyProps} />
   }
 
   onShowFilter = () => {
@@ -442,7 +438,6 @@ class Dashboard extends React.Component {
 
   onShowModalNewSubsidy = () => {
     this.setState({ visibleNewSubsidy: true });
-    this.openNewSubsidyRequest();
   };
 
   onSubmitModalNewSubsidy = () => {

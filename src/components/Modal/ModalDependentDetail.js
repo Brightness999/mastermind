@@ -1,67 +1,72 @@
 import React from 'react';
-import { Modal, Button, Input } from 'antd';
+import { Modal, Input, Divider, Card, Button } from 'antd';
 import intl from 'react-intl-universal';
 import messages from './messages';
-import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
-import { deletePrivateNote, updatePrivateNote } from '../../utils/api/apiList';
+import { createPrivateNote, deletePrivateNote, updatePrivateNote } from '../../utils/api/apiList';
 import request from '../../utils/api/request';
-import { GoArrowLeft, GoArrowRight } from 'react-icons/go';
-import { store } from '../../redux/store';
+import moment from 'moment';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import { CheckCircleTwoTone, CloseCircleTwoTone, DeleteTwoTone, EditTwoTone } from '@ant-design/icons';
+import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
 
 class ModalDependentDetail extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			dependent: this.props.dependent,
-			academicLevels: [],
-			isEdit: false,
-			selectedNoteIndex: 0,
-			note: this.props.dependent?.notes[0]?.note ?? '',
+			selectedNoteId: -1,
+			note: '',
+			isNew: false,
+			visibleNewSubsidy: false,
 		}
 	}
 
-	onEdit = () => {
-		this.setState({ isEdit: true });
+	onEdit = (noteId) => {
+		this.setState({ selectedNoteId: noteId, note: this.state.dependent?.notes?.find(n => n._id == noteId)?.note });
 	}
 
 	onCancel = () => {
-		this.setState({ isEdit: false });
+		this.setState({ selectedNoteId: -1, isNew: false });
 	}
 
 	onSave = (noteId) => {
 		const { dependent, note } = this.state;
-		const data = {
-			_id: noteId,
-			note: note,
-		}
-		request.post(updatePrivateNote, data).then(res => {
-			if (res.success) {
-				dependent.notes = dependent.notes.map(note => note._id == res.data._id ? res.data : note);
-				this.setState({
-					dependent: dependent,
-					isEdit: false,
-				});
+		if (noteId) {
+			const data = {
+				_id: noteId,
+				note: note,
 			}
-		}).catch(err => {
-			console.log('update private note error---', err);
-		})
+			request.post(updatePrivateNote, data).then(res => {
+				const { success, data } = res;
+				if (success) {
+					dependent.notes = dependent.notes.map(note => note._id == data._id ? data : note);
+					this.setState({
+						dependent: dependent,
+						selectedNoteId: -1,
+					});
+				}
+			}).catch(err => {
+				console.log('update private note error---', err);
+			})
+		}
 	}
 
 	onDelete = (noteId) => {
 		request.post(deletePrivateNote, { noteId: noteId }).then((res) => {
 			if (res.success) {
-				const { dependent, selectedNoteIndex } = this.state;
+				const { dependent, selectedNoteId } = this.state;
 				dependent.notes = dependent.notes?.filter((note => note._id != noteId));
 				this.setState({
 					dependent: dependent,
-					note: dependent.notes[selectedNoteIndex]?.note,
+					note: dependent.notes[selectedNoteId]?.note,
 				})
-				if (selectedNoteIndex == dependent.notes.length) {
+				if (selectedNoteId == dependent.notes.length) {
 					this.setState({
-						selectedNoteIndex: selectedNoteIndex - 1,
-						note: dependent.notes[selectedNoteIndex - 1]?.note,
+						selectedNoteId: selectedNoteId - 1,
+						note: dependent.notes[selectedNoteId - 1]?.note,
 					});
 				}
 			}
@@ -70,24 +75,38 @@ class ModalDependentDetail extends React.Component {
 		})
 	}
 
-	handlePreveNote = () => {
-		const { selectedNoteIndex, dependent } = this.state;
-		this.setState({
-			selectedNoteIndex: selectedNoteIndex - 1,
-			note: dependent.notes[selectedNoteIndex - 1]?.note,
-		});
+	onAddComment = () => {
+		this.setState({ note: '', isNew: true });
 	}
 
-	handleNextNote = () => {
-		const { selectedNoteIndex, dependent } = this.state;
-		this.setState({
-			selectedNoteIndex: this.state.selectedNoteIndex + 1,
-			note: dependent.notes[selectedNoteIndex + 1]?.note,
-		});
+	onCreate = () => {
+		const { dependent, note } = this.state;
+		const data = {
+			user: this.props.user?._id,
+			dependent: dependent?._id,
+			note: note,
+		}
+		request.post(createPrivateNote, data).then(res => {
+			const { success, data } = res;
+			if (success) {
+				this.state.dependent.notes?.push(data);
+				this.setState({ dependent: this.state.dependent, isNew: false });
+			}
+		}).catch(err => {
+			console.log('update private note error---', err);
+		})
+	}
+
+	onOpenModalNewSubsidy = () => {
+		this.setState({ visibleNewSubsidy: true });
+	}
+
+	onCloseModalNewSubsidy = () => {
+		this.setState({ visibleNewSubsidy: false });
 	}
 
 	render() {
-		const { dependent, isEdit, selectedNoteIndex, note } = this.state;
+		const { dependent, selectedNoteId, isNew, visibleNewSubsidy } = this.state;
 		const modalProps = {
 			className: 'modal-dependent',
 			title: "",
@@ -98,83 +117,116 @@ class ModalDependentDetail extends React.Component {
 			footer: null,
 		};
 
+		const modalNewSubsidyProps = {
+			visible: visibleNewSubsidy,
+			onSubmit: this.onCloseModalNewSubsidy,
+			onCancel: this.onCloseModalNewSubsidy,
+			dependent: dependent,
+		};
+
 		return (
-			<Modal {...modalProps}>
+			<Modal {...modalProps} bodyStyle={{ overflowY: 'scroll', height: '60vh' }}>
 				<div className='flex bg-primary text-white header'>
-					<div className='flex-1'>
-						<b className='font-20'>{`${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`}</b>
-						<div>{dependent?.currentGrade ?? ''}</div>
-					</div>
-					<div className='flex-1'>
-						<b className='font-16'>{intl.formatMessage(msgCreateAccount.services)}</b>
-						{dependent?.services?.map((service, index) => (
-							<div key={index}>{service.name}</div>
-						))}
-					</div>
+					<b className='font-20'>{`${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`}</b>
 				</div>
-				<div className='content p-10'>
-					{dependent?.notes?.length ? (
-						<div>
-							<Input.TextArea
-								rows={5}
-								defaultValue={dependent.notes[selectedNoteIndex]?.note}
-								value={note}
-								disabled={!isEdit}
-								onChange={e => this.setState({ note: e.target.value })}
-								placeholder={intl.formatMessage(messages.privateNote)}
-								className="private-note"
-							/>
-							<div className='text-left mt-1'>{dependent.notes[selectedNoteIndex]?.user?.role == 999 ? 'Admin' : dependent.notes[selectedNoteIndex]?.user?.username}</div>
-							<div className='text-left'>{new Date(dependent.notes[selectedNoteIndex]?.updatedAt).toLocaleDateString()}</div>
-							<div className='flex justify-between'>
-								<GoArrowLeft size={20} className={`cursor ${selectedNoteIndex < 1 ? 'display-none' : ''}`} onClick={() => selectedNoteIndex > 0 && this.handlePreveNote()} />
-								<GoArrowRight size={20} className={`cursor ${selectedNoteIndex == dependent.notes?.length - 1 ? 'display-none' : ''}`} onClick={() => selectedNoteIndex < dependent.notes?.length - 1 && this.handleNextNote()} />
-							</div>
-							<div className='flex justify-end gap-2 p-10'>
-								{isEdit ? (
-									<>
-										<Button key="back" type='primary' className='w-20' onClick={this.onCancel}>
-											{intl.formatMessage(messages.cancel)}
-										</Button>
-										<Button
-											key="submit"
-											type='primary'
-											className='w-20'
-											onClick={() => this.onSave(dependent?.notes[selectedNoteIndex]?._id)}
-										>
-											{intl.formatMessage(messages.save)}
-										</Button>
-									</>
-								) : (
-									<>
-										<Button
-											key="back"
-											className='w-20'
-											onClick={this.onEdit}
-											disabled={dependent.notes[selectedNoteIndex]?.user?._id != store.getState().auth.user?._id && store.getState().auth.user?.role != 999}
-										>
-											{intl.formatMessage(messages.edit)}
-										</Button>
-										<Button
-											key="submit"
-											danger
-											className='w-20'
-											onClick={() => this.onDelete(dependent?.notes[selectedNoteIndex]?._id)}
-											disabled={dependent.notes[selectedNoteIndex]?.user?._id != store.getState().auth.user?._id && store.getState().auth.user?.role != 999}
-										>
-											{intl.formatMessage(messages.delete)}
-										</Button>
-									</>
-								)}
-							</div>
+				<Card className='bg-white'>
+					<div className='flex'>
+						<div className='flex-1'>
+							<div><span className='text-bold'>Grade:</span> {dependent?.currentGrade ?? ''}</div>
+							<div><span className='text-bold'>Age:</span> {moment().diff(moment(dependent?.birthday), 'years')}</div>
+							<div><span className='text-bold'>School:</span> {dependent?.school?.name}</div>
+							<div><span className='text-bold'>Birthday:</span> {moment(dependent.birthday)?.format('MM/DD/YYYY')}</div>
 						</div>
-					) : (
-						<div className='h-50 text-center'>No internal notes</div>
-					)}
-				</div>
+						<div className='flex-1'>
+							{dependent?.subsidy?.length && <a>Subsidy History</a>}
+							<div><span className='text-bold'>Sessions:</span> {dependent?.appointments?.filter(d => d.status == -1 && d.flagStatus != 1)?.length ?? 0}</div>
+							<div><span className='text-bold'>Flags:</span> {dependent?.appointments?.filter(d => d.flagStatus == 1)?.length ?? 0}</div>
+						</div>
+					</div>
+					<Divider />
+					<div className='flex'>
+						<div className='flex-1'>
+							<div className='text-bold'>Skillsets:</div>
+							{dependent?.services?.map((service, index) => (
+								<div key={index}>{service.name}</div>
+							))}
+							<br />
+							<div className='text-bold'>Providers:</div>
+							{[...new Set(dependent?.appointments?.filter(a => a.type != 4)?.map(a => `${a.provider?.firstName} ${a.provider?.lastName}`))].map((name, index) => (
+								<div key={index}>{name}</div>
+							))}
+						</div>
+						<Card className='flex-1'>
+							<div>{dependent?.backgroundInfor ?? ''}</div>
+						</Card>
+					</div>
+					<Divider />
+					<div className='content'>
+						{dependent?.notes?.length ? (
+							<Card className='note-card'>
+								{dependent?.notes?.map((note, index) => (
+									<div key={index} className="mt-2">
+										<Input.TextArea
+											rows={3}
+											defaultValue={note.note}
+											disabled={selectedNoteId != note._id}
+											onChange={e => this.setState({ note: e.target.value })}
+											placeholder={intl.formatMessage(messages.privateNote)}
+											className="private-note"
+										/>
+										<div className='flex items-center gap-5 text-italic'>
+											<div className='text-left'>{note.user?.role == 999 ? 'Admin' : note.user?.username}</div>
+											<div className='text-left'>{moment(note?.updatedAt).format('MM/DD/YYYY hh:mm')}</div>
+										</div>
+										{(this.props.user?.role == 999 || this.props.user?._id == note.user?._id) && (
+											<div className='flex justify-end gap-2'>
+												{selectedNoteId == note._id ? (
+													<>
+														<CheckCircleTwoTone twoToneColor='#02e06e' onClick={() => this.onSave(note._id)} />
+														<CloseCircleTwoTone twoToneColor='#ff0000' onClick={() => this.onCancel()} />
+													</>
+												) : (
+													<>
+														<EditTwoTone onClick={() => this.onEdit(note._id)} />
+														<DeleteTwoTone twoToneColor='#ff0000' onClick={() => this.onDelete(note._id)} />
+													</>
+												)}
+											</div>
+										)}
+									</div>
+								))}
+							</Card>
+						) : (
+							<div className='h-50 text-center'>No internal notes</div>
+						)}
+						{isNew && (
+							<div className="mt-2">
+								<Input.TextArea
+									rows={3}
+									onChange={e => this.setState({ note: e.target.value })}
+									placeholder={intl.formatMessage(messages.privateNote)}
+									className="private-note"
+								/>
+								<div className='flex justify-end gap-2 mt-10'>
+									<CheckCircleTwoTone twoToneColor='#02e06e' onClick={() => this.onCreate()} />
+									<CloseCircleTwoTone twoToneColor='#ff0000' onClick={() => this.onCancel()} />
+								</div>
+							</div>
+						)}
+					</div>
+					<div className='flex gap-5 mt-2'>
+						<Button type='primary' block className={`${this.props.user?.role == 3 ? '' : 'display-none'}`} onClick={() => this.onOpenModalNewSubsidy()}>Request Subsidy</Button>
+						<Button type='primary' block className={`${this.props.user?.role == 3 ? 'display-none' : ''}`} onClick={() => this.onAddComment()}>Add Comment</Button>
+					</div>
+				</Card>
+				{visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
 			</Modal>
 		);
 	}
 };
 
-export default ModalDependentDetail;
+const mapStateToProps = state => {
+	return ({ user: state.auth.user });
+}
+
+export default compose(connect(mapStateToProps))(ModalDependentDetail);

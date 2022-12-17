@@ -61,7 +61,6 @@ class SchedulingCenter extends React.Component {
       schoolInfo: {},
       listAppointmentsRecent: this.props.appointments,
       SkillSet: [],
-      isEditSubsidyRequest: "",
       selectedProviders: [],
       selectedLocations: [],
       selectedSkills: [],
@@ -209,15 +208,8 @@ class SchedulingCenter extends React.Component {
       visible: this.state.visibleNewSubsidy,
       onSubmit: this.onCloseModalNewSubsidy,
       onCancel: this.onCloseModalNewSubsidy,
-      isEditSubsidyRequest: this.state.isEditSubsidyRequest,
     };
-    return <ModalNewSubsidyRequest {...modalNewSubsidyProps}
-      setOpennedEvent={opennedEvent => {
-        this.openNewSubsidyRequest = opennedEvent;
-      }}
-      userRole={this.state.userRole}
-      listDependents={this.state.listDependents}
-    />
+    return <ModalNewSubsidyRequest {...modalNewSubsidyProps} />
   }
 
   onShowFilter = () => {
@@ -298,7 +290,6 @@ class SchedulingCenter extends React.Component {
 
   onShowModalNewSubsidy = () => {
     this.setState({ visibleNewSubsidy: true });
-    this.openNewSubsidyRequest();
   };
 
   onSubmitModalNewSubsidy = () => {

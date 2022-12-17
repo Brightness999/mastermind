@@ -1,20 +1,20 @@
 import { Divider, Table, Space, Input, Button } from 'antd';
 import { routerLinks } from '../../constant';
-import { ModalConfirm, ModalDependentDetail, ModalCreateNote } from '../../../components/Modal';
+import { ModalConfirm, ModalDependentDetail } from '../../../components/Modal';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
 import msgMainHeader from '../../../components/MainHeader/messages';
 import './index.less';
 import { checkPermission } from '../../../utils/auth/checkPermission';
 import request from '../../../utils/api/request';
-import { createPrivateNote, deletePrivateNote, getDependents } from '../../../utils/api/apiList';
+import { deletePrivateNote, getDependents } from '../../../utils/api/apiList';
 import { SearchOutlined } from '@ant-design/icons';
+import moment from 'moment';
 
 export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      visibleCreate: false,
       dependents: [],
       userRole: -1,
       isConfirmModal: false,
@@ -60,18 +60,6 @@ export default class extends React.Component {
     this.props.history.push(routerLinks.CreateAccount);
   }
 
-  onShowModalEdit = (dependentId) => {
-    this.setState({
-      visibleCreate: true,
-      selectedDependentId: dependentId,
-      note: '',
-    });
-  }
-
-  onCloseModalCreateNote = () => {
-    this.setState({ visibleCreate: false });
-  }
-
   onCloseModalDependent = () => {
     this.setState({ visibleDependent: false });
   }
@@ -110,41 +98,17 @@ export default class extends React.Component {
     this.setState({ isConfirmModal: false });
   }
 
-  handleCreateNote = (newnote) => {
-    const { selectedDependentId, userId, dependents } = this.state;
-    const data = {
-      user: userId,
-      dependent: selectedDependentId,
-      note: newnote,
-    }
-    request.post(createPrivateNote, data).then(res => {
-      if (res.success) {
-        this.setState({
-          dependents: dependents?.map(dependent => {
-            if (dependent._id == selectedDependentId) {
-              dependent.notes.push(res.data);
-            }
-            return dependent;
-          })
-        })
-      }
-    }).catch(err => {
-      console.log('update private note error---', err);
-    })
-    this.setState({ visibleCreate: false });
-  }
-
   handleClickRow = (dependent) => {
     this.setState({ visibleDependent: true, selectedDependent: dependent });
   }
 
   render() {
-    const { visibleCreate, dependents, isConfirmModal, confirmMessage, note, visibleDependent, selectedDependent } = this.state;
+    const { dependents, isConfirmModal, confirmMessage, visibleDependent, selectedDependent } = this.state;
     const columns = [
       {
-        title: 'Name', key: 'name',
+        title: 'Full Name', key: 'name',
         sorter: (a, b) => a.firstName + a.lastName > b.firstName + b.lastName ? 1 : -1,
-        render: (dependent) => `${dependent.firstName ?? ''} ${dependent.lastName ?? ''}`,
+        render: (dependent) => (<a onClick={() => this.handleClickRow(dependent)}>{dependent.firstName ?? ''} {dependent.lastName ?? ''}</a>),
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
@@ -185,24 +149,14 @@ export default class extends React.Component {
           }
         },
       },
-      { title: 'Birthday', dataIndex: 'birthday', key: 'birthday', type: 'datetime', sorter: (a, b) => a.birthday > b.birthday ? 1 : -1, render: (birthday) => new Date(birthday).toLocaleString() },
-      { title: 'Parent Email', dataIndex: 'guardianEmail', key: 'guardianEmail', sorter: (a, b) => a.guardianEmail > b.guardianEmail ? 1 : -1 },
-      { title: 'Parent Phone', dataIndex: 'guardianPhone', key: 'guardianPhone', sorter: (a, b) => a.guardianPhone > b.guardianPhone ? 1 : -1 },
-      {
-        title: 'Action', key: 'action', render: (dependent) => (
-          <Space size="middle">
-            <a className='btn-blue action' onClick={() => this.onShowModalEdit(dependent._id)}>Create</a>
-          </Space>
-        ),
-      },
+      { title: 'Age', dataIndex: 'birthday', key: 'age', sorter: (a, b) => a.birthday > b.birthday ? 1 : -1, render: (birthday) => moment().diff(moment(birthday), 'years') },
+      { title: 'Grade', dataIndex: 'currentGrade', key: 'grade' },
+      { title: 'School', dataIndex: 'school', key: 'school', render: school => school.name },
+      { title: 'Count of Sessions Past', dataIndex: 'appointments', key: 'countOfSessionsPast', render: appointments => appointments?.filter(a => [2, 3].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == -1)?.length },
+      { title: 'Count of Sessions Future', dataIndex: 'appointments', key: 'countOfSessionsFuture', render: appointments => appointments?.filter(a => [2, 3].includes(a.type) && moment().isBefore(moment(a.date)) && a.status == 0)?.length },
+      { title: 'Count of Referrals', dataIndex: 'appointments', key: 'countOfReferrals', render: appointments => appointments?.filter(a => a.type == 4 && moment().isAfter(moment(a.date)) && a.status == -1)?.length },
+      { title: 'Subsidy', dataIndex: 'subsidy', key: 'subsidy', render: subsidy => subsidy?.length ? subsidy.length : 'No Subsidy' },
     ];
-
-    const modalCreateNoteProps = {
-      visible: visibleCreate,
-      onSubmit: this.handleCreateNote,
-      onCancel: this.onCloseModalCreateNote,
-      note: note,
-    }
 
     const modalDependentProps = {
       visible: visibleDependent,
@@ -220,7 +174,7 @@ export default class extends React.Component {
     return (
       <div className="full-layout page usermanager-page">
         <div className='div-title-admin'>
-          <p className='font-16 font-500'>{intl.formatMessage(msgMainHeader.privateNotes)}</p>
+          <p className='font-16 font-500'>{intl.formatMessage(msgMainHeader.dependentList)}</p>
           <Divider />
         </div>
         <Table
@@ -235,7 +189,6 @@ export default class extends React.Component {
             }
           }}
         />
-        {visibleCreate && <ModalCreateNote {...modalCreateNoteProps} />}
         {visibleDependent && <ModalDependentDetail {...modalDependentProps} />}
         <ModalConfirm {...confirmModalProps} />
       </div>
