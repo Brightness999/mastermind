@@ -18,6 +18,12 @@ class AdminLayout extends React.PureComponent {
 		};
 	}
 
+	componentDidMount() {
+		if (!localStorage.getItem('token')) {
+			this.props.history.push('/');
+		}
+	}
+
 	toggleCollapsed = () => {
 		this.setState({ collapsed: !this.state.collapsed });
 	};
