@@ -1,12 +1,13 @@
-import { Divider, Table, Space, Button, Modal, Input } from 'antd';
+import { Divider, Table, Space, Button, Input, message } from 'antd';
 import { routerLinks } from '../../../constant';
 import { ModalConfirm, ModalEditUser } from '../../../../components/Modal';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
 import mgsSidebar from '../../../../components/SideBar/messages';
 import { checkPermission } from '../../../../utils/auth/checkPermission';
-import request, { generateSearchStructure } from '../../../../utils/api/request';
+import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
+import { activateUser, getSchools } from '../../../../utils/api/apiList';
 
 export default class extends React.Component {
 	constructor(props) {
@@ -27,11 +28,11 @@ export default class extends React.Component {
 		if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
 			checkPermission().then(loginData => {
 				loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
-				request.post('admin/get_schools').then(result => {
-					console.log(result.data);
-					if (result.success) {
+				request.post(getSchools).then(result => {
+					const { success, data } = result;
+					if (success) {
 						this.setState({
-							schools: result.data?.map((user, i) => {
+							schools: data?.map((user, i) => {
 								user['key'] = i; return user;
 							}) ?? []
 						});
@@ -46,8 +47,7 @@ export default class extends React.Component {
 	}
 
 	handleNewSchool = () => {
-		localStorage.removeItem('token');
-		this.props.history.push(routerLinks.CreateAccount);
+		this.props.history.push(routerLinks.CreateAccountForAdmin);
 	}
 
 	onShowModalEdit = () => {
@@ -68,20 +68,24 @@ export default class extends React.Component {
 	}
 
 	handleConfirm = () => {
-		request.post('admin/activate_user', { userId: this.state.userId, isActive: this.state.userState }).then(() => {
-			this.state.schools.map(user => {
-				if (user._id == this.state.userId) {
-					user.isActive = this.state.userState;
-				}
-				return user;
-			})
-			this.setState({
-				schools: JSON.parse(JSON.stringify(this.state.schools)),
-				isConfirmModal: false,
-			});
+		const { userId, userState, schools } = this.state;
 
+		request.post(activateUser, { userId: userId, isActive: userState }).then(res => {
+			if (res.success) {
+				schools.map(user => {
+					if (user._id == userId) {
+						user.isActive = userState;
+					}
+					return user;
+				})
+				this.setState({
+					schools: JSON.parse(JSON.stringify(schools)),
+					isConfirmModal: false,
+				});
+			}
 		}).catch(err => {
 			console.log('activate user error---', err);
+			message.error(err.message);
 		})
 	}
 
@@ -173,9 +177,9 @@ export default class extends React.Component {
 					<p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.schoolsList)}</p>
 					<Divider />
 				</div>
-				<div className='text-right mb-20'>
+				{/* <div className='text-right mb-20'>
 					<Button type='primary' onClick={() => this.handleNewSchool()}>Create New School</Button>
-				</div>
+				</div> */}
 				<Table bordered size='middle' dataSource={schools} columns={columns} />
 				<ModalEditUser {...modalEditUserProps} />
 				<ModalConfirm {...confirmModalProps} />
