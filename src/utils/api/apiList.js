@@ -17,6 +17,7 @@ export const getUsers = 'admin/get_users'
 export const activateUser = 'admin/activate_user'
 export const getSettings = 'admin/get_settings'
 export const updateSettings = 'admin/update_settings'
+export const addCommunity = 'admin/add_community'
 
 export const getDefaultValuesForConsultant = 'consultants/get_default_values_for_consultant'
 export const getAppointmentsForConsultant = 'consultants/get_my_appointments'
