@@ -1,6 +1,6 @@
 import './style/index.less';
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Typography, Popover, Input, message, Menu, Dropdown } from 'antd';
+import { Drawer, Button, Row, Col, Typography, Popover, Input, message } from 'antd';
 import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsXCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaCalendarTimes, FaFileContract } from 'react-icons/fa';
@@ -9,7 +9,8 @@ import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalCur
 import intl from "react-intl-universal";
 import messages from './messages';
 import msgModal from '../Modal/messages';
-import msgDetailPost from '../DrawerDetailPost/messages';
+import msgDashboard from '../../routes/Dashboard/messages';
+import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import moment from 'moment';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
@@ -471,6 +472,15 @@ class DrawerDetail extends Component {
           {event?.flagStatus == 1 && event?.flagItems?.flagType == 2 && (
             <div className='flex justify-center gap-2'><BsFillFlagFill color="#ff0000" size={24} /> - <FaCalendarTimes color="#ff0000" size={24} />({intl.formatMessage(messages.noShow)})</div>
           )}
+          {event?.flagStatus != 1 && event?.status == -1 && (
+            <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.accepted)}]</div>
+          )}
+          {event?.flagStatus != 1 && event?.status == -2 && (
+            <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.cancelled)}]</div>
+          )}
+          {event?.flagStatus != 1 && event?.status == -3 && (
+            <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(msgDashboard.declined)}]</div>
+          )}
           <div className='detail-item flex'>
             <div className='title'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.what)}</p>
@@ -522,6 +532,12 @@ class DrawerDetail extends Component {
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.where)}</p>
               <p className='font-18'>{event?.location}</p>
+            </div>
+          )}
+          {[2, 3, 5].includes(event?.type) && (
+            <div className='detail-item flex'>
+              <p className='font-18 font-700 title'>{intl.formatMessage(msgCreateAccount.rate)}</p>
+              <p className={`font-18 text-underline ${!event?.isPaid && 'text-red'}`} onClick={() => this.setState({ isModalInvoice: true })}>${event?.items?.length ? event.items?.reduce((a, b) => a += b.rate * 1, 0) : event?.rate}</p>
             </div>
           )}
           {[1, 4].includes(event?.type) && (
@@ -610,7 +626,7 @@ class DrawerDetail extends Component {
                     disabled={isNotPending}
                     className='flex items-center gap-2 h-30'
                   >
-                    {intl.formatMessage(msgDetailPost.markClosed)}
+                    {intl.formatMessage(messages.markClosed)}
                   </Button>
                 </Col>
               )}
@@ -624,7 +640,7 @@ class DrawerDetail extends Component {
                     disabled={isNotPending}
                     className='flex items-center gap-2 h-30'
                   >
-                    {intl.formatMessage(msgDetailPost.markClosed)}
+                    {intl.formatMessage(messages.markClosed)}
                   </Button>
                 </Col>
               )}

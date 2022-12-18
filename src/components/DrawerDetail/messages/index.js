@@ -57,6 +57,10 @@ export default {
     id: `${scope}.cancelled`,
     defaultMessage: 'Cancelled',
   },
+  accepted: {
+    id: `${scope}.accepted`,
+    defaultMessage: 'Accepted',
+  },
   closed: {
     id: `${scope}.closed`,
     defaultMessage: 'Closed',
@@ -124,5 +128,9 @@ export default {
   viewInvoice: {
     id: `${scope}.viewInvoice`,
     defaultMessage: 'View Invoice',
+  },
+  markClosed: {
+    id: `${scope}.markClosed`,
+    defaultMessage: 'Mark as closed',
   },
 };

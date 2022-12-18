@@ -371,6 +371,8 @@
   "components.drawerdetail.reschedule": "Reschedule",
   "components.drawerdetail.cancel": "Cancel",
   "components.drawerdetail.cancelled": "Cancelled",
+  "components.drawerdetail.accepted": "Accepted",
+  "components.drawerdetail.markClosed": "Mark as closed",
   "components.drawerdetail.closed": "Closed",
   "components.drawerdetail.requestInvoice": "Request Invoice",
   "components.drawerdetail.editNotes": "Edit Notes",
