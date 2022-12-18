@@ -91,8 +91,8 @@ class ModalInvoice extends React.Component {
 				<Button key="back" onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel)}
 				</Button>,
-				<Button key="submit" type="primary" onClick={() => this.props.onSubmit(items)} style={{ padding: '7.5px 30px' }}>
-					{intl.formatMessage(messages.save)}
+				<Button key="submit" type="primary" onClick={() => this.props.onSubmit(items)} style={{ padding: '0px 30px' }}>
+					Ok
 				</Button>
 			]
 		};

@@ -191,6 +191,7 @@ class DrawerDetail extends Component {
         appointmentId: this.props.event._id,
         publicFeedback: publicFeedback ? publicFeedback : this.state.publicFeedback,
         note: note,
+        items: this.state.items,
       }
       request.post(declineAppointmentForProvider, data).then(result => {
         if (result.success) {
@@ -217,14 +218,11 @@ class DrawerDetail extends Component {
   }
 
   openModalConfirm = (note, publicFeedback) => {
-    this.setState({ isModalInvoice: true, note: note, publicFeedback: publicFeedback });
+    this.handleMarkAsClosed(this.state.items, false, note, publicFeedback);
   }
 
   onConfirm = (items) => {
-    this.setState({ isModalInvoice: false });
-    if (this.state.userRole != 3) {
-      this.handleMarkAsClosed(items, false);
-    }
+    this.setState({ isModalInvoice: false, visibleProcess: true, items: items });
   }
 
   onCancel = () => {
@@ -622,7 +620,7 @@ class DrawerDetail extends Component {
                     type='primary'
                     icon={<BsCheckCircle size={15} />}
                     block
-                    onClick={() => [1, 2].includes(event.type) ? this.openModalProcess() : this.handleMarkAsClosed()}
+                    onClick={() => event.type == 1 ? this.openModalProcess() : event.type == 2 ? this.onOpenModalInvoice() : this.handleMarkAsClosed()}
                     disabled={isNotPending}
                     className='flex items-center gap-2 h-30'
                   >
@@ -636,7 +634,7 @@ class DrawerDetail extends Component {
                     type='primary'
                     icon={<BsCheckCircle size={15} />}
                     block
-                    onClick={() => this.openModalConfirm()}
+                    onClick={() => this.onOpenModalInvoice()}
                     disabled={isNotPending}
                     className='flex items-center gap-2 h-30'
                   >
