@@ -1,6 +1,6 @@
 import React from 'react';
 import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input, Popconfirm } from 'antd';
-import { FaUser, FaCalendarAlt, FaCalendarTimes } from 'react-icons/fa';
+import { FaUser, FaCalendarAlt, FaCalendarTimes, FaHandHoldingUsd } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsFilter, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
 import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalPayment } from '../../../components/Modal';
@@ -36,6 +36,7 @@ import { compose } from 'redux';
 import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payFlag, requestClearance } from '../../../utils/api/apiList';
 import { BiExpand } from 'react-icons/bi';
 import { GiPayMoney } from 'react-icons/gi';
+import { GoPrimitiveDot } from 'react-icons/go';
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -1295,17 +1296,14 @@ function renderEventContent(eventInfo, appointments) {
   const eventType = type == 1 ? 'Screening' : type == 2 ? 'Evaluation' : type == 4 ? 'Consultation' : 'Session';
 
   return (
-    <div className={`flex flex-col p-3 rounded-2 relative bg-${status == 0 ? 'active' : status == -1 ? eventType.toLowerCase() : 'cancelled'}`}>
-      <div className='flex items-center gap-2'>
-        <Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
-        {event?.status == -2 && <span className='font-20 text-black'>Cancelled</span>}
-        {event?.status == -1 && <span className='font-20 text-black'>Closed</span>}
+    <div className={`flex flex-col p-3 rounded-2 relative bg-${(status == -2 || status == -3) ? 'cancelled' : eventType.toLowerCase()}`}>
+      <div className="flex flex-col">
+        <div className={`text-bold flex items-center ${(status == -2 || status == -3) && 'text-cancelled'}`}>{(status == -2 || status == -3) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}{event?.skillSet?.name}</div>
+        <div>{moment(eventInfo.event.start).format('hh:mm a')}</div>
+        <div>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
+        <div>{eventType} with {eventInfo.event.title}</div>
       </div>
-      <div className={`flex flex-col text-white ${event?.status == -2 ? 'line-through' : ''}`}>
-        <b className='mr-3'>{moment(eventInfo.event.start).format('hh:mm a')}</b>
-        <b className='mr-3'>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</b>
-        <b className='mr-3'>{eventType} with {eventInfo.event.title}</b>
-      </div>
+      {event?.type == 5 && <FaHandHoldingUsd size={15} className='text-green500 mr-5' />}
       {event?.flagStatus == 1 && event?.flagItems?.flagType == 1 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><GiPayMoney color="#ff0000" size={15} /></div>}
       {event?.status == 0 && appointments?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1)?.flagItems?.flagType == 1 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><GiPayMoney color="#ff0000" size={15} /></div>}
       {event?.flagStatus == 1 && event?.flagItems?.flagType == 2 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><FaCalendarTimes color="#ff0000" size={15} /></div>}
