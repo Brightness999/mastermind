@@ -790,11 +790,11 @@ class SchedulingCenter extends React.Component {
                 }}
                 views={{
                   monthToWeekButton: {
-                    type: isMonth ? 'dayGridMonth' : 'timeGridWeek',
+                    type: (isGridDayView === 'Grid' && isMonth) ? 'dayGridMonth' : (isGridDayView === 'Grid' && !isMonth) ? 'timeGridWeek' : (isGridDayView !== 'Grid' && isMonth) ? 'listMonth' : 'listWeek',
                     buttonText: btnMonthToWeek,
                   },
                   segmentView: {
-                    type: isGridDayView === 'Grid' ? 'dayGridMonth' : 'listWeek',
+                    type: (isGridDayView === 'Grid' && isMonth) ? 'dayGridMonth' : (isGridDayView === 'Grid' && !isMonth) ? 'timeGridWeek' : (isGridDayView !== 'Grid' && isMonth) ? 'listMonth' : 'listWeek',
                     buttonText: btnChangeDayView,
                   },
                   week: { titleFormat: { month: 'numeric', day: 'numeric' } },
@@ -1037,7 +1037,7 @@ function renderEventContent(eventInfo, appointments) {
   const provider = () => type == 4 ? null : (<div>Provider: {`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</div>)
 
   return (
-    <div className={`flex flex-col p-3 rounded-2 bg-${(status == -2 || status == -3) ? 'cancelled' : eventType.toLowerCase()}`}>
+    <div className={`flex flex-col p-3 relative rounded-2 bg-${(status == -2 || status == -3) ? 'cancelled' : eventType.toLowerCase()}`}>
       <div className="flex flex-col">
         <div className={`text-bold flex items-center ${(status == -2 || status == -3) && 'text-cancelled'}`}>{(status == -2 || status == -3) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}{event?.skillSet?.name}</div>
         <div>{moment(eventInfo.event.start).format('hh:mm a')}</div>
