@@ -33,7 +33,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { clearFlag, getDefaultDataForAdmin, payFlag, requestClearance } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
-import { BiExpand } from 'react-icons/bi';
+import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GiPayMoney } from 'react-icons/gi';
 import { GoPrimitiveDot } from 'react-icons/go';
 
@@ -76,8 +76,10 @@ class SchedulingCenter extends React.Component {
       modalType: '',
       visibleConfirm: false,
       confirmMessage: '',
+      selectedDependentId: 0,
     };
     this.calendarRef = React.createRef();
+    this.scrollElement = React.createRef();
   }
 
   componentDidMount() {
@@ -131,6 +133,10 @@ class SchedulingCenter extends React.Component {
     }).catch(err => {
       console.log('get default data error---', err);
     });
+  }
+
+  scrollTrans = (scrollOffset) => {
+    this.scrollElement.current.scrollLeft += scrollOffset;
   }
 
   scriptLoaded = () => {
@@ -364,8 +370,8 @@ class SchedulingCenter extends React.Component {
     this.setState({ visibleNewAppoint: true, selectedDate: moment(date.date) });
   }
 
-  getMyAppointments(userRole) {
-    store.dispatch(getAppointmentsData({ role: userRole }));
+  getMyAppointments(userRole, dependentId) {
+    store.dispatch(getAppointmentsData({ role: userRole, dependentId: dependentId }));
   }
 
   renderModalSubsidyDetail = () => {
@@ -397,7 +403,7 @@ class SchedulingCenter extends React.Component {
     this.updateCalendarEvents(this.state.userRole);
   }
 
-  updateCalendarEvents(role) {
+  updateCalendarEvents(role, dependentId) {
     const calendar = this.calendarRef.current;
     const month = calendar?._calendarApi.getDate().getMonth() + 1;
     const year = calendar?._calendarApi.getDate().getFullYear();
@@ -414,6 +420,7 @@ class SchedulingCenter extends React.Component {
         providers: providers,
         skills: skills,
         types: selectedEventTypes,
+        dependentId: dependentId,
       }
     };
     store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
@@ -546,6 +553,18 @@ class SchedulingCenter extends React.Component {
     );
   }
 
+  handleClickDependent = (id) => {
+    this.setState({ selectedDependentId: id });
+    this.updateCalendarEvents(this.state.userRole, id);
+    this.getMyAppointments(this.state.userRole, id);
+  }
+
+  handleClickAllDependent = () => {
+    this.setState({ selectedDependentId: 0 });
+    this.updateCalendarEvents(this.state.userRole, 0);
+    this.getMyAppointments(this.state.userRole, 0);
+  }
+
   render() {
     const {
       isFilter,
@@ -574,6 +593,7 @@ class SchedulingCenter extends React.Component {
       visibleFlagExpand,
       visibleConfirm,
       confirmMessage,
+      selectedDependentId,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -614,7 +634,7 @@ class SchedulingCenter extends React.Component {
       },
       {
         label: intl.formatMessage(messages.referrals),
-        value: 6,
+        value: 4,
       },
     ];
 
@@ -622,6 +642,8 @@ class SchedulingCenter extends React.Component {
       visible: visiblReferralService,
       onSubmit: this.onSubmitModalReferral,
       onCancel: this.onCloseModalReferral,
+      listDependents: listDependents,
+      setLoadData: reload => { this.loadDataModalReferral = reload },
     };
 
     const modalNewReviewProps = {
@@ -684,15 +706,42 @@ class SchedulingCenter extends React.Component {
         </div>
         <div className='div-content'>
           <section className='div-calendar box-card'>
-            <div className='btn-appointment mb-10 flex justify-end'>
-              <Button
-                type='primary'
-                block
-                icon={<FaCalendarAlt size={19} />}
-                onClick={() => this.onShowModalNewAppoint()}
-              >
-                <span>{intl.formatMessage(messages.makeAppointment)}</span>
-              </Button>
+            <div className='flex justify-end items-center gap-5'>
+              <div className='div-trans flex flex-row'>
+                <Avatar size={36} className='trans-all' onClick={() => this.handleClickAllDependent()}>All</Avatar>
+                <Button
+                  type='text'
+                  className='trans-left' icon={<BiChevronLeft size={35} />}
+                  onClick={() => this.scrollTrans(-42)}
+                />
+                <div className='trans-scroll' ref={this.scrollElement}>
+                  {listDependents?.map((dependent, index) => (
+                    <Avatar
+                      key={index}
+                      size={36}
+                      className={`trans-item ${selectedDependentId == dependent._id ? 'active' : ''}`}
+                      onClick={() => this.handleClickDependent(dependent._id)}
+                    >
+                      {dependent?.firstName?.charAt(0)?.toUpperCase()}{dependent?.lastName?.charAt(0)?.toUpperCase()}
+                    </Avatar>
+                  ))}
+                </div>
+                <Button
+                  type='text'
+                  className='trans-right' icon={<BiChevronRight size={35} />}
+                  onClick={() => this.scrollTrans(42)}
+                />
+              </div>
+              <div className='btn-appointment mb-10 flex justify-end'>
+                <Button
+                  type='primary'
+                  block
+                  icon={<FaCalendarAlt size={19} />}
+                  onClick={() => this.onShowModalNewAppoint()}
+                >
+                  <span>{intl.formatMessage(messages.makeAppointment)}</span>
+                </Button>
+              </div>
             </div>
             {isFilter && (
               <div className='calendar-filter w-100'>
@@ -887,7 +936,7 @@ class SchedulingCenter extends React.Component {
                           <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
                           <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                         </div>
-                        <div className='ml-auto flex-1'>
+                        <div className='ml-auto flex-1 text-center'>
                           <p className='font-12 mb-0'>{appointment.screeningTime ?? ''}</p>
                         </div>
                       </div>
@@ -905,7 +954,7 @@ class SchedulingCenter extends React.Component {
                           <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
                           <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                         </div>
-                        <div className='ml-auto flex-1'>
+                        <div className='ml-auto flex-1 text-center'>
                           <p className='font-12 mb-0'>{appointment.screeningTime ?? ''}</p>
                         </div>
                       </div>
@@ -1011,12 +1060,7 @@ class SchedulingCenter extends React.Component {
           SkillSet={SkillSet}
           setLoadData={reload => this.loadDataModalNewGroup = reload}
         />
-        <ModalReferralService {...modalReferralServiceProps}
-          SkillSet={SkillSet}
-          listDependents={listDependents}
-          setLoadData={reload => this.loadDataModalReferral = reload}
-          userRole={this.state.userRole}
-        />
+        {visiblReferralService && <ModalReferralService {...modalReferralServiceProps} />}
         <ModalNewSubsidyReview {...modalNewReviewProps} />
         {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
         {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}

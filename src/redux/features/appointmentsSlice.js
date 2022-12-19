@@ -1,9 +1,8 @@
 import { url } from '../../utils/api/baseUrl';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { helper } from '../../utils/auth/helper';
-import request, { generateSearchStructure } from '../../utils/api/request'
+import request from '../../utils/api/request'
 import { getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider } from '../../utils/api/apiList';
-const token = localStorage.getItem('token')
+
 const initialState = {
 	dataAppointments: {},
 	dataAppointmentsMonth: []
@@ -16,19 +15,19 @@ export const getAppointmentsData = createAsyncThunk(
 		try {
 			switch (data.role) {
 				case 1000:
-					result = await request.post(url + getAppointmentsForAdmin, {}, data.token);
+					result = await request.post(url + getAppointmentsForAdmin, data, data.token);
 					return result.data;
 				case 999:
-					result = await request.post(url + getAppointmentsForAdmin, {}, data.token);
+					result = await request.post(url + getAppointmentsForAdmin, data, data.token);
 					return result.data;
 				case 100:
-					result = await request.post(url + getAppointmentsForConsultant, {}, data.token);
+					result = await request.post(url + getAppointmentsForConsultant, data, data.token);
 					return result.data;
 				case 30:
-					result = await request.post(url + getAppointmentsForProvider, {}, data.token);
+					result = await request.post(url + getAppointmentsForProvider, data, data.token);
 					return result.data;
 				case 3:
-					result = await request.post(url + getAppointmentsForParent, {}, data.token);
+					result = await request.post(url + getAppointmentsForParent, data, data.token);
 					return result.data;
 			}
 		} catch (error) {

@@ -4,11 +4,14 @@
 .popup-scheduled {
     font-size: 30px;
     margin-top: 80vh;
+
     .ant-message-notice-content {
         padding: 15px 25px;
     }
+
     .anticon {
         color: @green500;
+
         svg {
             width: 30px;
             height: 30px;
@@ -34,4 +37,67 @@
     width: 5px;
     margin: 10px;
     padding: 10px;
+}
+
+.div-calendar {
+    .trans-all {
+        margin: 0 3px;
+        cursor: pointer;
+
+        &.ant-avatar {
+            font-size: 16px !important;
+            background-color: @primary-color-dark;
+        }
+    }
+
+    .trans-scroll {
+        width: 208px;
+        overflow-x: auto;
+        white-space: nowrap;
+        scroll-behavior: smooth;
+        text-align: center;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+
+        .trans-item {
+            margin: 0 3px;
+            cursor: pointer;
+
+            &.ant-avatar {
+                font-size: 14px !important;
+                color: @primary-color-dark;
+                background-color: @white;
+                border: 1px solid @primary-color-dark;
+            }
+
+            &.ant-avatar.active {
+                color: @white;
+                background-color: @primary-color-dark;
+            }
+        }
+    }
+
+    .trans-left,
+    .trans-right {
+        width: 35px;
+        height: 35px;
+        vertical-align: top;
+        color: @primary-color-dark;
+        cursor: pointer;
+
+        &:hover,
+        &:focus,
+        &:active {
+            color: @primary-color;
+        }
+    }
+
+    .trans-new {
+        padding: 4px 5px;
+        margin: 0 3px;
+        border-radius: 4px;
+        background-color: @primary-color-dark;
+    }
 }
