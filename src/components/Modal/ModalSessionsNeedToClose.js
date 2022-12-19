@@ -34,9 +34,10 @@ class ModalSessionsNeedToClose extends React.Component {
 		this.setState({ appointments: appointments?.map(a => { a['key'] = a._id; return a; }) });
 	}
 
-	handleMarkAsClosed = (items) => {
-		const { event, note, publicFeedback } = this.state;
+	handleMarkAsClosed = (note, publicFeedback) => {
+		const { event, items } = this.state;
 		this.setState({ visibleProcess: false });
+
 		if (event?._id) {
 			const data = {
 				appointmentId: event._id,
@@ -61,13 +62,15 @@ class ModalSessionsNeedToClose extends React.Component {
 	}
 
 	handleDecline = (note, publicFeedback) => {
+		const { event, items } = this.state;
 		this.setState({ visibleProcess: false });
-		const { event } = this.state;
+
 		if (event?._id) {
 			const data = {
 				appointmentId: event._id,
 				publicFeedback: publicFeedback,
 				note: note,
+				items: items,
 			}
 
 			request.post(declineAppointmentForProvider, data).then(result => {
@@ -86,20 +89,15 @@ class ModalSessionsNeedToClose extends React.Component {
 	}
 
 	handleClose = (appointment) => {
-		this.setState({ visibleProcess: true, event: appointment });
+		this.setState({ visibleInvoice: true, event: appointment });
 	}
 
 	closeModalProcess = () => {
 		this.setState({ visibleProcess: false });
 	}
 
-	openModalInvoice = (note, publicFeedback) => {
-		this.setState({ visibleProcess: false, visibleInvoice: true, note: note, publicFeedback: publicFeedback });
-	}
-
 	onConfirm = (items) => {
-		this.setState({ visibleInvoice: false });
-		this.handleMarkAsClosed(items, false);
+		this.setState({ visibleInvoice: false, visibleProcess: true, items: items });
 	}
 
 	closeModalInvoice = () => {
