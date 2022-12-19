@@ -29,7 +29,6 @@ class InfoChild extends Component {
 				data?.map(item => {
 					item.services = item.services.map(item => item._id);
 					item.birthday = moment(item.birthday);
-					item.lastName = this.props.auth.user?.parentInfo?.fatherName?.split(' ')?.[1] ? this.props.auth.user?.parentInfo?.fatherName?.split(' ')?.[1] : this.props.auth.user?.parentInfo?.motherName?.split(' ')?.[1];
 					return item;
 				})
 				this.form.setFieldsValue({ children: data });
@@ -41,7 +40,7 @@ class InfoChild extends Component {
 	}
 
 	loadServices() {
-		request.post(getDefaultValueForClient, {cityConnection: this.props.auth.user?.parentInfo?.cityConnection}).then(result => {
+		request.post(getDefaultValueForClient, { cityConnection: this.props.auth.user?.parentInfo?.cityConnection }).then(result => {
 			const { success, data } = result;
 			if (success) {
 				this.setState({

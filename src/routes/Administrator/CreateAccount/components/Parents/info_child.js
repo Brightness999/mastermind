@@ -51,8 +51,8 @@ class InfoChild extends Component {
 
 	loadServices() {
 		axios.post(url + getDefaultValueForClient).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
+			const { success, data } = result.data
+			if (success) {
 				this.setState({
 					listServices: data?.SkillSet,
 					academicLevels: data?.AcademicLevel,
@@ -74,8 +74,8 @@ class InfoChild extends Component {
 
 	loadSchools(parentInfo) {
 		axios.post(url + getAllSchoolsForParent, { communityServed: parentInfo?.cityConnection }).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
+			const { success, data } = result.data;
+			if (success) {
 				this.setState({ listSchools: data })
 			}
 		}).catch(err => {
@@ -86,7 +86,7 @@ class InfoChild extends Component {
 	getDefaultChildObj(parentInfo) {
 		const obj = {
 			"firstName": "",
-			"lastName": parentInfo?.fatherName?.split(' ')?.[1] ? parentInfo?.fatherName?.split(' ')?.[1] : parentInfo?.motherName?.split(' ')?.[1],
+			"lastName": parentInfo?.familyName,
 			"birthday": "",
 			"guardianPhone": parentInfo?.fatherPhoneNumber || parentInfo?.motherPhoneNumber,
 			"guardianEmail": parentInfo?.fatherEmail || parentInfo?.motherEmail,
