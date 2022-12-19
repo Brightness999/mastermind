@@ -28,7 +28,7 @@ import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../..
 import { store } from '../../../redux/store';
 import { routerLinks } from "../../constant";
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { setDependents, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
+import { setAcademicLevels, setDependents, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { clearFlag, getDefaultDataForAdmin, payFlag, requestClearance } from '../../../utils/api/apiList';
@@ -123,6 +123,8 @@ class SchedulingCenter extends React.Component {
         store.dispatch(setDependents(data?.dependents));
         store.dispatch(setProviders(data?.providers));
         store.dispatch(setSkillSet(data?.skillSet));
+        store.dispatch(setSkillSet(data?.skillSet));
+        store.dispatch(setAcademicLevels(data?.academicLevels));
       } else {
         console.log('get default data error---', err);
       }

@@ -1,29 +1,15 @@
 import React from 'react';
 import { Divider, Table, Space, Select, Input, Row, Col, Form, Button } from 'antd';
 import intl from 'react-intl-universal';
-
-import messages from '../messages';
 import mgsSidebar from '../../../../components/SideBar/messages';
 import './index.less';
 import request, { generateSearchStructureWithPopulateSearch } from '../../../../utils/api/request'
-import { switchPathWithRole } from '../../../../utils/api/baseUrl'
-import {
-  ModalNewGroup,
-  ModalNewAppointment,
-  ModalNewAppointmentForParents,
-  ModalSubsidyProgress,
-  ModalReferralService,
-  ModalNewSubsidyRequest,
-  ModalNewSubsidyReview
-} from '../../../../components/Modal';
-const arrMeetSolution = [
-  'Google meet',
-  'Zoom',
-  'Direction',
-]
+import { ModalNewGroup, ModalSubsidyProgress } from '../../../../components/Modal';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import { getSubsidyRequests } from '../../../../utils/api/apiList';
 
-export default class extends React.Component {
-
+class SubsidyManager extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -34,7 +20,7 @@ export default class extends React.Component {
       totalPages: 1,
       visibleSubsidy: false,
       visibleNewGroup: false,
-      SkillSet: [],
+      skillSet: [],
       filterSchool: undefined,
       filterStudent: undefined,
       filterProvider: undefined,
@@ -43,65 +29,57 @@ export default class extends React.Component {
       filterStatus: undefined,
       filterGrade: undefined,
       isApplyFilter: false,
+      academicLevels: [],
     }
   }
 
   componentDidMount = () => {
-    this.loadDefaultData();
+    this.setState({ skillSet: this.props.auth.skillSet, academicLevels: this.props.auth.academicLevels });
     this.getSubsidyPerPage();
   }
 
-  loadDefaultData() {
-    request.post('clients/get_default_value_for_client').then(result => {
-      var data = result.data;
-      console.log('default value', data);
-      this.setState({ SkillSet: data.SkillSet });
-    })
-  }
+  generatePostData = (page = 1) => {
+    const { isApplyFilter, filterSchool, filterStudent, filterProvider, filterStatus, filterGrade } = this.state;
 
-  generatePostData = (page=1) => {
-    var populate = [ {path:'providers'} , {path: 'student' } , {path:'selectedProvider'} ,{ path: 'school'}];
-    var filter = {};
-    console.log(this.state.filterSchool, this.state.filterSchool?.length , this.state.isApplyFilter)
-    if(this.state.isApplyFilter){
-      var postData = {
-        "filter":filter,
-            "page":page,
-            "limit":10,
-            "populate": [ {path: 'school' },{path:'providers'} , {path: 'student' },{path:'selectedProvider'} ]};
-      if(this.state.filterSchool!=undefined&& this.state.filterSchool.length > 0){
-        postData['filterSchool'] = this.state.filterSchool;
-        
-      }
-      if(this.state.filterStudent!=undefined&& this.state.filterStudent.length > 0){
-        postData['filterStudent'] = this.state.filterStudent;
-        
-      }
-      if(this.state.filterProvider!=undefined&& this.state.filterProvider.length > 0){
-        postData['filterProvider'] = this.state.filterProvider;
-        
+    if (isApplyFilter) {
+      let postData = {
+        "filter": {},
+        "page": page,
+        "limit": 10,
+        "populate": [{ path: 'school' }, { path: 'providers' }, { path: 'student' }, { path: 'selectedProvider' }]
+      };
+
+      if (filterSchool != undefined && filterSchool.length > 0) {
+        postData['filterSchool'] = filterSchool;
       }
 
-      if(this.state.filterStatus!=undefined){
-        postData['filterStatus'] = parseInt( this.state.filterStatus );
-        
+      if (filterStudent != undefined && filterStudent.length > 0) {
+        postData['filterStudent'] = filterStudent;
       }
-      if(this.state.filterGrade!=undefined){
-        postData['filterGrade'] = parseInt( this.state.filterGrade );
-        
+
+      if (filterProvider != undefined && filterProvider.length > 0) {
+        postData['filterProvider'] = filterProvider;
       }
-      
+
+      if (filterStatus != undefined) {
+        postData['filterStatus'] = parseInt(filterStatus);
+      }
+
+      if (filterGrade != undefined) {
+        postData['filterGrade'] = parseInt(filterGrade);
+      }
+
       return postData;
     }
-    return generateSearchStructureWithPopulateSearch('',{},page , 10, [ {path: 'school' },{path:'providers'} , {path: 'student' },{path:'selectedProvider'} ]);
+    return generateSearchStructureWithPopulateSearch('', {}, page, 10, [{ path: 'school' }, { path: 'providers' }, { path: 'student' }, { path: 'selectedProvider' }]);
   }
 
   getSubsidyPerPage = (page = 1) => {
-    var postData = this.generatePostData();console.log(postData)
-    request.post(switchPathWithRole(this.state.userRole) + 'get_subsidy_requests',postData ).then(result => {
-      console.log('result', result);
-      if (result.success) {
-        this.setState({ currentPage: page, listSubsidy: result.data.docs, totalPages: result.data.docs });
+    const postData = this.generatePostData();
+    request.post(getSubsidyRequests, postData).then(result => {
+      const { success, data } = result;
+      if (success) {
+        this.setState({ currentPage: page, listSubsidy: data?.docs, totalPages: data?.docs });
       }
     }).catch(err => {
       console.log(err);
@@ -119,7 +97,6 @@ export default class extends React.Component {
       return 'SCHOOL APPROVED';
     }
     return 'PENDING';
-
   }
 
   clearFilter = () => {
@@ -132,30 +109,29 @@ export default class extends React.Component {
       filterStatus: undefined,
       filterGrade: undefined,
       isApplyFilter: false,
-    },this.getSubsidyPerPage);
-    
+    }, this.getSubsidyPerPage);
   }
 
   applyFilter = () => {
-    this.setState({
-      isApplyFilter: true,
-    } , this.getSubsidyPerPage);
-    
+    this.setState({ isApplyFilter: true }, this.getSubsidyPerPage);
   }
 
-
   renderModalSubsidyDetail = () => {
+    const { visibleSubsidy, userRole, skillSet } = this.state;
     const modalSubsidyProps = {
-      visible: this.state.visibleSubsidy,
+      visible: visibleSubsidy,
       onSubmit: this.onCloseModalSubsidy,
       onCancel: this.onCloseModalSubsidy,
     };
-    return (<ModalSubsidyProgress {...modalSubsidyProps}
-      setOpennedEvent={(reload) => { this.reloadModalSubsidyDetail = reload }}
-      userRole={this.state.userRole}
-      SkillSet={this.state.SkillSet}
-      openHierachy={this.openHierachyModal}
-    />)
+
+    return (
+      <ModalSubsidyProgress {...modalSubsidyProps}
+        setOpennedEvent={(reload) => { this.reloadModalSubsidyDetail = reload }}
+        userRole={userRole}
+        skillSet={skillSet}
+        openHierachy={this.openHierachyModal}
+      />
+    );
   }
 
   onCloseModalSubsidy = () => {
@@ -176,13 +152,16 @@ export default class extends React.Component {
   onShowModalGroup = () => {
     this.setState({ visibleNewGroup: true });
   }
+
   onCloseModalGroup = () => {
     this.setState({ visibleNewGroup: false });
   }
 
   render() {
+    const { visibleNewGroup, filterStudent, filterProvider, skillSet, filterSchool, listSubsidy, academicLevels } = this.state;
+
     const modalNewGroupProps = {
-      visible: this.state.visibleNewGroup,
+      visible: visibleNewGroup,
       onSubmit: this.onCloseModalGroup,
       onCancel: this.onCloseModalGroup,
     }
@@ -191,9 +170,8 @@ export default class extends React.Component {
       {
         title: 'Name',
         key: 'name',
-        render: (a) => <span>{a.student.firstName} {a.student.lastName}</span>,
+        render: (a) => <span>{a.student.firstName ?? ''} {a.student.lastName ?? ''}</span>,
         fixed: 'left',
-        
       },
       {
         title: 'Student Grade',
@@ -209,7 +187,7 @@ export default class extends React.Component {
       {
         title: 'Providers',
         key: 'provider',
-        render: (a) => <span>{a.provider?.name}</span>
+        render: (a) => <span>{a.provider?.firstName ?? ''} {a.provider?.lastName ?? ''}</span>
       },
       {
         title: 'Expense per session',
@@ -247,7 +225,6 @@ export default class extends React.Component {
         align: 'center',
         render: (a) => <span>{this.statusType(a)}</span>
       },
-
       {
         title: 'Action',
         key: 'action',
@@ -269,16 +246,17 @@ export default class extends React.Component {
         </div>
         <Row >
           <Col xs={24} sm={24} md={20} lg={18} xl={12} className='col-form col-subsidy-manager'>
-            <Form name="form_subsidy"
-            ref={ref=>{this.form=ref;}}
+            <Form
+              name="form_subsidy"
+              ref={ref => { this.form = ref }}
             >
               <Row gutter={10}>
                 <Col span={12}>
                   <Form.Item name="student_name">
                     <Input
                       placeholder='Student name'
-                      value={this.state.filterStudent}
-                      onChange={v => {console.log(v.target.value); this.setState({ filterStudent: v.target.value }) }}
+                      value={filterStudent}
+                      onChange={v => this.setState({ filterStudent: v.target.value })}
                     />
                   </Form.Item>
                 </Col>
@@ -286,8 +264,8 @@ export default class extends React.Component {
                   <Form.Item name="provider_name">
                     <Input
                       placeholder='Provider name'
-                      value={this.state.filterProvider}
-                      onChange={v => { this.setState({ filterProvider: v.target.value }) }}
+                      value={filterProvider}
+                      onChange={v => this.setState({ filterProvider: v.target.value })}
                     />
                   </Form.Item>
                 </Col>
@@ -297,17 +275,18 @@ export default class extends React.Component {
                   <Form.Item name="school_name">
                     <Input
                       placeholder='School name'
-                      value={this.state.filterSchool}
-                      onChange={v => { this.setState({ filterSchool: v.target.value }) }}
+                      value={filterSchool}
+                      onChange={v => this.setState({ filterSchool: v.target.value })}
                     />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
                   <Form.Item name="grade" >
-                    <Select placeholder='Grade'
-                    onChange={v => { this.setState({ filterGrade: v}) }}
+                    <Select
+                      placeholder='Grade'
+                      onChange={v => { this.setState({ filterGrade: v }) }}
                     >
-                      {[1,2,3,4,5,6,7,8,9,10,11,12].map(item=>(<Select.Option value={item}>{item}</Select.Option>))}
+                      {academicLevels?.map((level, index) => (<Select.Option key={index} value={level}>{level}</Select.Option>))}
                     </Select>
                   </Form.Item>
                 </Col>
@@ -315,32 +294,31 @@ export default class extends React.Component {
               <Row gutter={10}>
                 <Col span={12}>
                   <Form.Item name="skillset" >
-                    <Select placeholder='SkillSet'
-                    onChange={v=>{this.setState({filterSkillSet:v})}}
+                    <Select
+                      placeholder='skillSet'
+                      onChange={v => { this.setState({ filterSkillSet: v }) }}
                     >
-                      {this.state.SkillSet.map((item,index)=>(<Select.Option value={index}>{item}</Select.Option>))}
-                      
+                      {skillSet?.map((skill, index) => (<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>))}
                     </Select>
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                <Form.Item name="status" >
-                <Select placeholder='Status'
-                onChange={v=>{this.setState({filterStatus:v})}}
-                >
-
-                  <Select.Option value='0'>PENDING</Select.Option>
-                  <Select.Option value='-1'>DECLINE</Select.Option>
-                  <Select.Option value='1'>APPROVED</Select.Option>
-                </Select>
-              </Form.Item>
+                  <Form.Item name="status" >
+                    <Select
+                      placeholder='Status'
+                      onChange={v => { this.setState({ filterStatus: v }) }}
+                    >
+                      <Select.Option value='0'>PENDING</Select.Option>
+                      <Select.Option value='-1'>DECLINE</Select.Option>
+                      <Select.Option value='1'>APPROVED</Select.Option>
+                    </Select>
+                  </Form.Item>
                 </Col>
               </Row>
-              
               <Form.Item>
                 <div className="flex flex-row">
-                  <Button onClick={() => { this.clearFilter() }} className='mr-10'>Clear</Button>
-                  <Button type='primary'  onClick={() => { this.applyFilter() }} htmlType="submit">Apply Search</Button>
+                  <Button onClick={() => this.clearFilter()} className='mr-10'>Clear</Button>
+                  <Button type='primary' onClick={() => this.applyFilter()} htmlType="submit">Apply Search</Button>
                 </div>
               </Form.Item>
             </Form>
@@ -349,21 +327,23 @@ export default class extends React.Component {
         <Table
           bordered
           size='middle'
-          dataSource={this.state.listSubsidy}
+          dataSource={listSubsidy}
           columns={columns}
-          scroll={{ x: 1300}}
+          scroll={{ x: 1300 }}
           className='mt-2'
         />
-
         {this.renderModalSubsidyDetail()}
-
         <ModalNewGroup
           {...modalNewGroupProps}
-          setLoadData={reload => {
-            this.loadDataModalNewGroup = reload;
-          }}
+          setLoadData={reload => { this.loadDataModalNewGroup = reload; }}
         />
       </div>
     );
   }
 }
+
+const mapStateToProps = state => {
+  return ({ auth: state.auth });
+}
+
+export default compose(connect(mapStateToProps))(SubsidyManager);
