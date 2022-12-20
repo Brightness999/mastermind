@@ -3,7 +3,7 @@ import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, S
 import { FaUser, FaCalendarAlt, FaCalendarTimes, FaHandHoldingUsd } from 'react-icons/fa';
 import { MdFormatAlignLeft } from 'react-icons/md';
 import { BsFilter, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
-import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalPayment } from '../../../components/Modal';
+import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalPayment, ModalCreateNote } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
 import intl from 'react-intl-universal';
@@ -81,6 +81,7 @@ class Dashboard extends React.Component {
       visibleSessionsNeedToClose: false,
       visiblePayment: false,
       selectedDependentId: 0,
+      visibleCreateNote: false,
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -719,13 +720,12 @@ class Dashboard extends React.Component {
     this.setState({ visibleFlagExpand: false });
   }
 
-  handleRequestClearance = () => {
-    this.onCloseModalConfirm();
-    request.post(requestClearance, { appointmentId: this.state.selectedEvent?._id }).then(result => {
-      const { success } = result;
-      if (success) {
-        message.success('Sent successfully');
-      }
+  handleRequestClearance = (requestMessage) => {
+    this.onCloseModalCreateNote();
+    message.success("You're request has been submitted. Please allow up to 24 hours for the provider to review this.");
+
+    request.post(requestClearance, { appointmentId: this.state.selectedEvent?._id, message: requestMessage }).catch(err => {
+      message.error(err.message);
     })
   }
 
@@ -800,6 +800,14 @@ class Dashboard extends React.Component {
     this.getMyAppointments(this.state.userRole, 0);
   }
 
+  onOpenModalCreateNote = (appointment) => {
+    this.setState({ visibleCreateNote: true, selectedEvent: appointment });
+  }
+
+  onCloseModalCreateNote = () => {
+    this.setState({ visibleCreateNote: false, selectedEvent: {} });
+  }
+
   render() {
     const {
       isFilter,
@@ -830,6 +838,7 @@ class Dashboard extends React.Component {
       visibleSessionsNeedToClose,
       visiblePayment,
       selectedDependentId,
+      visibleCreateNote,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -938,6 +947,13 @@ class Dashboard extends React.Component {
       visible: visiblePayment,
       onSubmit: this.handlePayFlag,
       onCancel: this.onCloseModalPayment,
+    };
+
+    const modalCreateNoteProps = {
+      visible: visibleCreateNote,
+      onSubmit: this.handleRequestClearance,
+      onCancel: this.onCloseModalCreateNote,
+      title: "Request Message"
     };
 
     return (
@@ -1272,7 +1288,7 @@ class Dashboard extends React.Component {
                           </div>
                           {userRole == 3 ? (
                             <>
-                              <a className='font-12 flag-action' onClick={() => this.onOpenModalConfirm('request-clearance', appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
+                              <a className='font-12 flag-action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
                               <a className='font-12 flag-action' onClick={() => this.onOpenModalPayment(appointment)}>{intl.formatMessage(msgDrawer.payFlag)}</a>
                             </>
                           ) : (
@@ -1324,6 +1340,7 @@ class Dashboard extends React.Component {
         {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
         {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
         {visiblePayment && <ModalPayment {...modalPaymentProps} />}
+        {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
       </div>
     );
   }
