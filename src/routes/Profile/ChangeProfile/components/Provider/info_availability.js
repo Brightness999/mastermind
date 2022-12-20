@@ -10,6 +10,8 @@ import { compose } from 'redux'
 import request from '../../../../../utils/api/request';
 import { getAllSchoolsForParent, getDefaultValueForProvider, getMyProviderInfo, updateMyProviderAvailability } from '../../../../../utils/api/apiList';
 import moment from 'moment';
+import { store } from '../../../../../redux/store';
+import { setUser } from '../../../../../redux/features/authSlice';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -28,7 +30,7 @@ class InfoAvailability extends Component {
 			isHomeVisit: true,
 			isPrivateOffice: true,
 			isSchools: true,
-			locations: ['Dependent Home', 'Provider Office'],
+			locations: [],
 			listSchool: [],
 			selectedLocation: '',
 		}
@@ -37,6 +39,7 @@ class InfoAvailability extends Component {
 	componentDidMount() {
 		request.post(getMyProviderInfo).then(result => {
 			const { success, data } = result;
+			const { user } = this.props.auth;
 			if (success) {
 				this.form?.setFieldsValue(data);
 				day_week.map((day) => {
@@ -50,13 +53,15 @@ class InfoAvailability extends Component {
 					}));
 				});
 				let locations = [];
-				data?.isHomeVisit && locations.push('Dependent Home');
-				data?.privateOffice && locations.push('Provider Office');
-				data?.ser
+				user?.providerInfo?.isHomeVisit && locations.push('Dependent Home');
+				user?.providerInfo?.privateOffice && locations.push('Provider Office');
+				user?.providerInfo?.serviceableSchool?.length && user?.providerInfo?.serviceableSchool?.forEach(school => locations.push(school.name));
+
 				this.setState({
-					isHomeVisit: data?.isHomeVisit,
-					isPrivateOffice: data?.privateOffice,
-					isSchools: !!data?.serviceableSchool?.length,
+					isHomeVisit: user?.providerInfo?.isHomeVisit,
+					isPrivateOffice: user?.providerInfo?.privateOffice,
+					isSchools: !!user?.providerInfo?.serviceableSchool?.length,
+					locations: locations,
 				})
 			}
 		})
@@ -92,25 +97,45 @@ class InfoAvailability extends Component {
 	}
 
 	onFinish = (values) => {
+		const { listSchool } = this.state;
 		let manualSchedule = [];
 		day_week.map(day => {
 			values[day]?.forEach(t => {
-				const times = {
-					fromYear: t.from_date?.year() ?? 0,
-					fromMonth: t.from_date?.month() ?? 0,
-					fromDate: t.from_date?.date() ?? 0,
-					toYear: t.to_date?.year() ?? 0,
-					toMonth: t.to_date?.month() ?? 0,
-					toDate: t.to_date?.date() ?? 0,
-					openHour: t.from_time?.hours() ?? 0,
-					openMin: t.from_time?.minutes() ?? 0,
-					closeHour: t.to_time?.hours() ?? 0,
-					closeMin: t.to_time?.minutes() ?? 0,
-					dayInWeek: this.getDayOfWeekIndex(day),
-					isPrivate: t.isPrivate ?? false,
-					location: t.location ?? '',
+				if (t.from_time && t.to_time && t.location) {
+					const times = {
+						fromYear: t.from_date?.year() ?? 1,
+						fromMonth: t.from_date?.month() ?? 0,
+						fromDate: t.from_date?.date() ?? 1,
+						toYear: t.to_date?.year() ?? 10000,
+						toMonth: t.to_date?.month() ?? 0,
+						toDate: t.to_date?.date() ?? 0,
+						openHour: t.from_time?.hours() ?? 0,
+						openMin: t.from_time?.minutes() ?? 0,
+						closeHour: t.to_time?.hours() ?? 0,
+						closeMin: t.to_time?.minutes() ?? 0,
+						dayInWeek: this.getDayOfWeekIndex(day),
+						isPrivate: t.isPrivate ?? false,
+						location: t.location ?? '',
+					}
+					manualSchedule.push(times);
+				} else {
+					const times = {
+						fromYear: t.from_date?.year() ?? 0,
+						fromMonth: t.from_date?.month() ?? 0,
+						fromDate: t.from_date?.date() ?? 0,
+						toYear: t.to_date?.year() ?? 0,
+						toMonth: t.to_date?.month() ?? 0,
+						toDate: t.to_date?.date() ?? 0,
+						openHour: t.from_time?.hours() ?? 0,
+						openMin: t.from_time?.minutes() ?? 0,
+						closeHour: t.to_time?.hours() ?? 0,
+						closeMin: t.to_time?.minutes() ?? 0,
+						dayInWeek: this.getDayOfWeekIndex(day),
+						isPrivate: t.isPrivate ?? false,
+						location: t.location ?? '',
+					}
+					manualSchedule.push(times);
 				}
-				manualSchedule.push(times);
 			})
 		});
 		values.manualSchedule = manualSchedule.flat();
@@ -119,6 +144,16 @@ class InfoAvailability extends Component {
 			const { success } = result;
 			if (success) {
 				message.success('Updated successfully');
+				let newUser = {
+					...this.props.auth.user,
+					providerInfo: {
+						...this.props.auth.user.providerInfo,
+						isHomeVisit: values.isHomeVisit,
+						privateOffice: values.privateOffice,
+						serviceableSchool: listSchool?.filter(school => values.serviceableSchool?.find(id => id == school._id)),
+					}
+				}
+				store.dispatch(setUser(newUser));
 			}
 		}).catch(err => {
 			message.error("Can't update availability");

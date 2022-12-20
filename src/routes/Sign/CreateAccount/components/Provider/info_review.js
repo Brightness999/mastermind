@@ -87,14 +87,14 @@ class InfoReview extends Component {
 		for (let i = 0; i < day_week.length; i++) {
 			for (let j = 0; j < availability['' + day_week[i]].length; j++) {
 				const scheduleItem = availability['' + day_week[i]][j];
-				if (scheduleItem.from_time && scheduleItem.to_time && (scheduleItem.from_date || scheduleItem.to_date) && scheduleItem.location) {
+				if (scheduleItem.from_time && scheduleItem.to_time && scheduleItem.location) {
 					manualSchedule.push({
 						isPrivate: scheduleItem.isPrivate,
 						location: scheduleItem.location,
 						dayInWeek: i,
-						fromYear: scheduleItem.from_date?.year() ?? 0,
+						fromYear: scheduleItem.from_date?.year() ?? 1,
 						fromMonth: scheduleItem.from_date?.month() ?? 0,
-						fromDate: scheduleItem.from_date?.date() ?? 0,
+						fromDate: scheduleItem.from_date?.date() ?? 1,
 						toYear: scheduleItem.to_date?.year() ?? 10000,
 						toMonth: scheduleItem.to_date?.month() ?? 0,
 						toDate: scheduleItem.to_date?.date() ?? 0,
