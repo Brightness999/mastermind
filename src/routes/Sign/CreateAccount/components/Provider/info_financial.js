@@ -54,7 +54,11 @@ class InfoFinancial extends Component {
 		return {
 			legalName: '',
 			billingAddress: '',
-			academicLevel: [],
+			academicLevel: [{
+				level: undefined,
+				rate: "",
+				subsidizedRate: "",
+			}],
 			separateEvaluationRate: "",
 			upload_w_9: "",
 			licenseNumber: '',
@@ -118,7 +122,7 @@ class InfoFinancial extends Component {
 
 		return (
 			<Row justify="center" className="row-form">
-				<div className='col-form col-info-parent'>
+				<div className='col-form col-info-billing'>
 					<div className='div-form-title'>
 						<p className='font-30 text-center mb-10'>{intl.formatMessage(messages.billingDetails)}</p>
 					</div>
@@ -275,7 +279,7 @@ class InfoFinancial extends Component {
 															})}
 														/>
 													</Form.Item>
-													<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
+													{field.key != 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 												</Col>
 											</Row>
 										);
