@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { Drawer, Button, Row, Col, Typography, Popover, Input, message } from 'antd';
 import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsXCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
-import { FaCalendarTimes, FaFileContract } from 'react-icons/fa';
+import { FaFileContract } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
 import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalCurrentReferralService, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
 import intl from "react-intl-universal";
@@ -16,7 +16,7 @@ import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
 import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestFeedbackForClient, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
-import { GiPayMoney } from 'react-icons/gi';
+import { MdOutlineEventBusy, MdOutlineRequestQuote } from 'react-icons/md';
 const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
@@ -465,10 +465,10 @@ class DrawerDetail extends Component {
       >
         <div>
           {event?.flagStatus == 1 && event?.flagItems?.flagType == 1 && (
-            <div className='flex justify-center gap-2'><BsFillFlagFill color="#ff0000" size={24} /> - <GiPayMoney color="#ff0000" size={24} />({intl.formatMessage(messages.pastDueBalance)})</div>
+            <div className='text-center'><MdOutlineRequestQuote color="#ff0000" size={32} /></div>
           )}
           {event?.flagStatus == 1 && event?.flagItems?.flagType == 2 && (
-            <div className='flex justify-center gap-2'><BsFillFlagFill color="#ff0000" size={24} /> - <FaCalendarTimes color="#ff0000" size={24} />({intl.formatMessage(messages.noShow)})</div>
+            <div className='text-center'><MdOutlineEventBusy color="#ff0000" size={32} /></div>
           )}
           {event?.flagStatus != 1 && event?.status == -1 && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.accepted)}]</div>
@@ -548,14 +548,9 @@ class DrawerDetail extends Component {
         {event?.status == 0 && listAppointmentsRecent?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1) ? (
           <div className='text-center font-20 mt-2'>
             {listAppointmentsRecent?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1).flagItems?.flagType == 1 ? (
-              <div className='flex justify-center gap-2'><BsFillFlagFill color="#ff0000" size={24} /> - <GiPayMoney color="#ff0000" size={24} /></div>
+              <MdOutlineRequestQuote color="#ff0000" size={32} />
             ) : (
-              <div className='flex justify-center gap-2'><BsFillFlagFill color="#ff0000" size={24} /> - <FaCalendarTimes color="#ff0000" size={24} /></div>
-            )}
-            {listAppointmentsRecent?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1).flagItems?.flagType == 1 ? (
-              <div>{intl.formatMessage(messages.pastDueBalance)}</div>
-            ) : (
-              <div>{intl.formatMessage(messages.noShow)}</div>
+              <MdOutlineEventBusy color="#ff0000" size={32} />
             )}
           </div>
         ) : (

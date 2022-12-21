@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input, Divider, Collapse, Tabs, Avatar, Badge } from 'antd';
-import { FaCalendarAlt, FaUser, FaCalendarTimes } from 'react-icons/fa';
-import { MdFormatAlignLeft } from 'react-icons/md';
+import { FaCalendarAlt, FaUser } from 'react-icons/fa';
+import { MdFormatAlignLeft, MdOutlineEventBusy, MdOutlineRequestQuote } from 'react-icons/md';
 import { BsClockHistory, BsFillDashSquareFill, BsFillFlagFill, BsFillPlusSquareFill, BsFilter, BsX } from 'react-icons/bs';
 import { ModalNewGroup, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
@@ -34,7 +34,6 @@ import { compose } from 'redux';
 import { clearFlag, getDefaultDataForAdmin, payFlag, requestClearance } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
 import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
-import { GiPayMoney } from 'react-icons/gi';
 import { GoPrimitiveDot } from 'react-icons/go';
 
 const { Panel } = Collapse;
@@ -1081,18 +1080,18 @@ function renderEventContent(eventInfo, appointments) {
   const provider = () => type == 4 ? null : (<div>Provider: {`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</div>)
 
   return (
-    <div className={`flex flex-col p-3 relative rounded-2 bg-${(status == -2 || status == -3) ? 'cancelled' : eventType.toLowerCase()}`}>
+    <div className={`flex flex-col p-3 relative rounded-2 text-white bg-${(status == -2 || status == -3) ? 'cancelled' : eventType.toLowerCase()}`}>
       <div className="flex flex-col">
         <div className={`text-bold flex items-center ${(status == -2 || status == -3) && 'text-cancelled'}`}>{(status == -2 || status == -3) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}{event?.skillSet?.name}</div>
         <div>{moment(eventInfo.event.start).format('hh:mm a')}</div>
         <div>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
         {provider()}
       </div>
-      {event?.type == 5 && <FaHandHoldingUsd size={15} className='text-green500 mr-5' />}
-      {event?.flagStatus == 1 && event?.flagItems?.flagType == 1 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><GiPayMoney color="#ff0000" size={15} /></div>}
-      {event?.status == 0 && appointments?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1)?.flagItems?.flagType == 1 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><GiPayMoney color="#ff0000" size={15} /></div>}
-      {event?.flagStatus == 1 && event?.flagItems?.flagType == 2 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><FaCalendarTimes color="#ff0000" size={15} /></div>}
-      {event?.status == 0 && appointments?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1)?.flagItems?.flagType == 2 && <div className='flag-icons'><BsFillFlagFill color="#ff0000" size={15} /><FaCalendarTimes color="#ff0000" size={15} /></div>}
+      {event?.type == 5 && <FaHandHoldingUsd size={20} className='text-green500 mr-5' />}
+      {event?.flagStatus == 1 && event?.flagItems?.flagType == 1 && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
+      {event?.status == 0 && appointments?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1)?.flagItems?.flagType == 1 && <MdOutlineRequestQuote size={20} className="flag-icons text-white" />}
+      {event?.flagStatus == 1 && event?.flagItems?.flagType == 2 && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
+      {event?.status == 0 && appointments?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1)?.flagItems?.flagType == 2 && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
     </div>
   )
 }
