@@ -15,6 +15,8 @@ import request from '../../utils/api/request'
 import 'moment/locale/en-au';
 import { createAppointmentForParent, getAllConsultantForParent } from '../../utils/api/apiList';
 moment.locale('en');
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 class ModalReferralService extends React.Component {
 	state = {
@@ -30,9 +32,11 @@ class ModalReferralService extends React.Component {
 		arrTime: [],
 		appointments: [],
 		consultants: [],
+		skillSet: this.props.auth.skillSet,
 	}
 
 	componentDidMount = () => {
+		const { user } = this.props.auth;
 		let arrTime = [];
 		let hour9AM = moment().set({ hours: 9, minutes: 0, seconds: 0, milliseconds: 0 });
 		for (let i = 0; i < 6; i++) {
@@ -52,15 +56,17 @@ class ModalReferralService extends React.Component {
 				active: false,
 			});
 		}
-		this.setState({ arrTime: arrTime });
+		this.setState({ arrTime: arrTime, phoneNumber: user?.parentInfo?.fatherPhoneNumber ? user?.parentInfo?.fatherPhoneNumber : user?.parentInfo?.motherPhoneNumber });
+		this.form?.setFieldsValue({ phoneNumber: user?.parentInfo?.fatherPhoneNumber ? user?.parentInfo?.fatherPhoneNumber : user?.parentInfo?.motherPhoneNumber });
 	}
 
 	getConsultationData = (dependentId) => {
 		request.post(getAllConsultantForParent, { dependentId: dependentId }).then(res => {
-			if (res.success) {
+			const { success, data } = res;
+			if (success) {
 				this.setState({
-					consultants: res.data?.consultants,
-					appointments: res.data?.appointments,
+					consultants: data?.consultants,
+					appointments: data?.appointments,
 				});
 			} else {
 				this.setState({ consultants: [], appointments: [] });
@@ -155,9 +161,12 @@ class ModalReferralService extends React.Component {
 		}
 	}
 
-	handleSelectDependent = (value) => {
-		this.setState({ selectedDependent: value });
-		this.getConsultationData(value);
+	handleSelectDependent = (dependentId) => {
+		this.setState({
+			selectedDependent: dependentId,
+			skillSet: this.props.auth.dependents?.find(d => d._id == dependentId)?.services,
+		});
+		this.getConsultationData(dependentId);
 	}
 
 	onSelectDate = (newValue) => {
@@ -203,7 +212,8 @@ class ModalReferralService extends React.Component {
 	}
 
 	render() {
-		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime } = this.state;
+		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, skillSet, consultants, appointments } = this.state;
+		const { dependents } = this.props.auth;
 
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -252,7 +262,7 @@ class ModalReferralService extends React.Component {
 										value={selectedDependent}
 										onChange={v => this.handleSelectDependent(v)}
 									>
-										{this.props.listDependents?.map((dependent, index) => (
+										{dependents?.map((dependent, index) => (
 											<Select.Option key={index} value={dependent._id}>{dependent.firstName} {dependent.lastName}</Select.Option>
 										))}
 									</Select>
@@ -269,7 +279,7 @@ class ModalReferralService extends React.Component {
 										value={selectedSkillSet}
 										onChange={v => this.setState({ selectedSkillSet: v })}
 									>
-										{this.props.SkillSet?.map((skill, index) => (
+										{skillSet?.map((skill, index) => (
 											<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
 										))}
 									</Select>
@@ -328,7 +338,22 @@ class ModalReferralService extends React.Component {
 													fullscreen={false}
 													value={selectedDate}
 													onSelect={this.onSelectDate}
-													disabledDate={(date) => date.isBefore(new Date())}
+													disabledDate={(date) => {
+														if (date.isBefore(moment())) {
+															return true;
+														}
+
+														if (date.isAfter(moment()) && date.day() == 6) {
+															return true;
+														}
+
+														const ranges = consultants?.filter(consultant => consultant?.manualSchedule?.find(d => d.dayInWeek == date.day() && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate }))));
+														if (!ranges?.length) {
+															return true;
+														}
+
+														return false;
+													}}
 													headerRender={() => (
 														<div className='mb-10'>
 															<Row gutter={8} justify="space-between" align="middle">
@@ -386,4 +411,8 @@ class ModalReferralService extends React.Component {
 	}
 };
 
-export default ModalReferralService;
+const mapStateToProps = state => {
+	return ({ auth: state.auth });
+}
+
+export default compose(connect(mapStateToProps))(ModalReferralService);
