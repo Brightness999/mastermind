@@ -18,7 +18,7 @@ class ModalFeedback extends React.Component {
     const { note, publicFeedback } = this.state;
     const modalProps = {
       className: 'modal-cancel',
-      title: "Next Process",
+      title: "Feedback",
       open: this.props.visible,
       onOk: this.props.onSubmit,
       onCancel: this.props.onCancel,
@@ -38,7 +38,7 @@ class ModalFeedback extends React.Component {
             <p className='mb-0 font-12'>Public feedback</p>
             <Input.TextArea rows={3} value={publicFeedback} onChange={e => this.setState({ publicFeedback: e.target.value })} placeholder="Public feedback" />
           </div>
-          <div className='flex gap-2'>
+          <div className='flex gap-2 btn-footer'>
             <Button block onClick={() => this.props.onCancel()}>{intl.formatMessage(messages.cancel)}</Button>
             <Button type='primary' block onClick={() => this.props.onSubmit(note, publicFeedback)}>{intl.formatMessage(msgDrawer.leaveFeedback)}</Button>
           </div>

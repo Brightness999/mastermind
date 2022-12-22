@@ -24,6 +24,7 @@ import ModalFlagExpand from './ModalFlagExpand';
 import ModalSessionsNeedToClose from './ModalSessionsNeedToClose';
 import ModalPayment from './ModalPayment';
 import ModalFeedback from './ModalFeedback';
+import ModalEvaluationProcess from './ModalEvaluationProcess';
 
 export {
   ModalCreateDone,
@@ -51,4 +52,5 @@ export {
   ModalSessionsNeedToClose,
   ModalPayment,
   ModalFeedback,
+  ModalEvaluationProcess,
 }

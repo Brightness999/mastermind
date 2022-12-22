@@ -325,6 +325,10 @@ export default {
     id: `${scope}.privateNote`,
     defaultMessage: 'Internal note',
   },
+  publicFeedback: {
+    id: `${scope}.publicFeedback`,
+    defaultMessage: 'Public feedback',
+  },
   active: {
     id: `${scope}.active`,
     defaultMessage: 'Active',
@@ -332,5 +336,13 @@ export default {
   cleared: {
     id: `${scope}.cleared`,
     defaultMessage: 'Cleared',
+  },
+  toEvaluation: {
+    id: `${scope}.toEvaluation`,
+    defaultMessage: 'Proceed to evaluation',
+  },
+  toStandardSession: {
+    id: `${scope}.toStandardSession`,
+    defaultMessage: 'Proceed to standard session',
   }
 };

@@ -5,7 +5,7 @@ import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsXCircle } from
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
-import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalCurrentReferralService, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
+import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
 import intl from "react-intl-universal";
 import messages from './messages';
 import msgModal from '../Modal/messages';
@@ -41,6 +41,10 @@ class DrawerDetail extends Component {
       visibleNoShow: false,
       visibleBalance: false,
       isFlag: this.props.event?.flagStatus,
+      note: '',
+      publicFeedback: '',
+      visibleEvaluationProcess: false,
+      items: [],
     };
   }
 
@@ -153,6 +157,8 @@ class DrawerDetail extends Component {
   }
 
   handleMarkAsClosed = (items, skipEvaluation, note, publicFeedback) => {
+    this.setState({ visibleProcess: false, isModalInvoice: false });
+
     if (this.props.event?._id) {
       const data = {
         appointmentId: this.props.event._id,
@@ -166,7 +172,6 @@ class DrawerDetail extends Component {
           this.setState({
             errorMessage: '',
             isNotPending: true,
-            visibleProcess: false,
           });
           this.updateAppointments();
         } else {
@@ -186,6 +191,8 @@ class DrawerDetail extends Component {
   }
 
   handleDecline = (note, publicFeedback) => {
+    this.setState({ visibleProcess: false, isModalInvoice: false });
+
     if (this.props.event?._id) {
       const data = {
         appointmentId: this.props.event._id,
@@ -198,7 +205,6 @@ class DrawerDetail extends Component {
           this.setState({
             errorMessage: '',
             isNotPending: true,
-            visibleProcess: false,
           });
           this.updateAppointments();
         } else {
@@ -217,15 +223,23 @@ class DrawerDetail extends Component {
     }
   }
 
-  openModalConfirm = (note, publicFeedback) => {
-    this.handleMarkAsClosed(this.state.items, false, note, publicFeedback);
+  confirmModalProcess = (note, publicFeedback) => {
+    if (this.props.event?.type == 2) {
+      this.setState({ visibleProcess: false, isModalInvoice: true, note: note, publicFeedback: publicFeedback });
+    } else {
+      this.handleMarkAsClosed(this.state.items, false, note, publicFeedback);
+    }
   }
 
-  onConfirm = (items) => {
-    this.setState({ isModalInvoice: false, visibleProcess: true, items: items });
+  confirmModalInvoice = (items) => {
+    if (this.props.event?.type == 2) {
+      this.setState({ isModalInvoice: false, visibleEvaluationProcess: true, items: items });
+    } else {
+      this.setState({ isModalInvoice: false, visibleProcess: true, items: items });
+    }
   }
 
-  onCancel = () => {
+  cancelModalInvoice = () => {
     this.setState({ isModalInvoice: false });
   }
 
@@ -281,7 +295,7 @@ class DrawerDetail extends Component {
   }
 
   closeModalProcess = () => {
-    this.setState({ visibleProcess: false });
+    this.setState({ visibleProcess: false, note: '', publicFeedback: '' });
   }
 
   onShowModalNoShow = () => {
@@ -346,8 +360,24 @@ class DrawerDetail extends Component {
     this.setState({ isModalInvoice: true });
   }
 
+  declineEvaluation = () => {
+    const { note, publicFeedback } = this.state;
+    this.onCloseModalEvaluationProcess();
+    this.handleDecline(note, publicFeedback);
+  }
+
+  closeEvaluation = () => {
+    const { items, note, publicFeedback } = this.state;
+    this.onCloseModalEvaluationProcess();
+    this.handleMarkAsClosed(items, false, note, publicFeedback);
+  }
+
+  onCloseModalEvaluationProcess = () => {
+    this.setState({ visibleEvaluationProcess: false });
+  }
+
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage } = this.state;
     const { event, listAppointmentsRecent } = this.props;
 
     const providerProfile = (
@@ -419,7 +449,7 @@ class DrawerDetail extends Component {
       visible: visibleProcess,
       onDecline: this.handleDecline,
       onSubmit: this.handleMarkAsClosed,
-      onConfirm: this.openModalConfirm,
+      onConfirm: this.confirmModalProcess,
       onCancel: this.closeModalProcess,
       event: event,
     };
@@ -431,8 +461,8 @@ class DrawerDetail extends Component {
     };
     const modalInvoiceProps = {
       visible: isModalInvoice,
-      onSubmit: this.onConfirm,
-      onCancel: this.onCancel,
+      onSubmit: this.confirmModalInvoice,
+      onCancel: this.cancelModalInvoice,
       event: event,
     }
     const modalCurrentReferralProps = {
@@ -451,6 +481,12 @@ class DrawerDetail extends Component {
       onSubmit: this.onSubmitFlagBalance,
       onCancel: this.onCloseModalBalance,
       event: event,
+    };
+    const modalEvaluationProcessProps = {
+      visible: visibleEvaluationProcess,
+      onSubmit: this.closeEvaluation,
+      onDecline: this.declineEvaluation,
+      onCancel: this.onCloseModalEvaluationProcess,
     };
 
     return (
@@ -609,13 +645,27 @@ class DrawerDetail extends Component {
               )}
             </div>
             <Row gutter={15} className='list-btn-detail'>
-              {[1, 2, 4].includes(event?.type) && event?.status == 0 && userRole > 3 && (
+              {event?.type == 1 && event?.status == 0 && userRole > 3 && (
                 <Col span={12}>
                   <Button
                     type='primary'
                     icon={<BsCheckCircle size={15} />}
                     block
-                    onClick={() => event.type == 1 ? this.openModalProcess() : event.type == 2 ? this.onOpenModalInvoice() : this.handleMarkAsClosed()}
+                    onClick={() => this.openModalProcess()}
+                    disabled={isNotPending}
+                    className='flex items-center gap-2 h-30'
+                  >
+                    {intl.formatMessage(messages.markClosed)}
+                  </Button>
+                </Col>
+              )}
+              {[2, 4].includes(event?.type) && moment().isAfter(moment(event?.date)) && event?.status == 0 && userRole > 3 && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<BsCheckCircle size={15} />}
+                    block
+                    onClick={() => event.type == 2 ? this.openModalProcess() : this.handleMarkAsClosed()}
                     disabled={isNotPending}
                     className='flex items-center gap-2 h-30'
                   >
@@ -764,14 +814,15 @@ class DrawerDetail extends Component {
           </>
         )
         }
-        {this.state.errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{this.state.errorMessage}</p>)}
-        <ModalCancelAppointment {...modalCancelProps} />
-        <ModalProcessAppointment {...modalProcessProps} />
+        {errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
+        {visibleCancel && <ModalCancelAppointment {...modalCancelProps} />}
+        {visibleProcess && <ModalProcessAppointment {...modalProcessProps} />}
         {visibleCurrent && <ModalCurrentAppointment {...modalCurrentProps} />}
         {visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
         {isModalInvoice && <ModalInvoice {...modalInvoiceProps} />}
         {visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
         {visibleBalance && <ModalBalance {...modalBalanceProps} />}
+        {visibleEvaluationProcess && <ModalEvaluationProcess {...modalEvaluationProcessProps} />}
       </Drawer >
     );
   }
