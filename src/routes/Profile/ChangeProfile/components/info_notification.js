@@ -38,7 +38,6 @@ class InfoNotification extends React.Component {
 	}
 
 	componentDidMount() {
-		console.log(this.props.user)
 		this.setState({
 			isNewSessionEmail: this.props.user.notificationSetting?.isNewSessionEmail,
 			isNewSessionPush: this.props.user.notificationSetting?.isNewSessionPush,
@@ -156,7 +155,7 @@ class InfoNotification extends React.Component {
 					<p className='font-30 text-center mb-0'>{intl.formatMessage(messages.notificationSetting)}</p>
 				</div>
 				<Row justify="center" className="row-form">
-					<Col xs={24} sm={24} md={12} lg={12} xl={8} xxl={8}>
+					<Col xs={24} sm={24} md={24} lg={16} xl={16} xxl={8}>
 						<Card className='bg-white'>
 							<table className='notification-settings w-100 table-fixed'>
 								<thead>
