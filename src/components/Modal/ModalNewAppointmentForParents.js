@@ -391,7 +391,7 @@ class ModalNewAppointmentForParents extends React.Component {
 
 			if (selectedSkillSet) {
 				const subsidy = this.props.listDependents?.find(d => d._id == selectedDependent)?.subsidy?.find(s => s.skillSet == selectedSkillSet);
-				if (subsidy?.status && subsidy?.numberOfSessions) {
+				if (subsidy?.status && subsidy?.adminApprovalStatus) {
 					this.setState({ subsidyAvailable: true, restSessions: subsidy?.numberOfSessions });
 				}
 			}
