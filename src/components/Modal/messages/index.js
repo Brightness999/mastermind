@@ -17,6 +17,14 @@ export default {
     id: `${scope}.cancel`,
     defaultMessage: 'Cancel',
   },
+  print: {
+    id: `${scope}.print`,
+    defaultMessage: 'Print',
+  },
+  download: {
+    id: `${scope}.download`,
+    defaultMessage: 'Download',
+  },
   determine: {
     id: `${scope}.determine`,
     defaultMessage: 'Determine',

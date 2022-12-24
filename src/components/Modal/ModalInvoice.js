@@ -1,12 +1,14 @@
 import React from 'react';
-import { Modal, Button, Popover, Input } from 'antd';
+import { Modal, Button, Popover, Input, message } from 'antd';
 import intl from 'react-intl-universal';
 import messages from './messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
-import { CheckCircleTwoTone, CloseCircleTwoTone, DeleteTwoTone, EditTwoTone } from '@ant-design/icons';
+import { CheckCircleTwoTone, CloseCircleTwoTone, DeleteTwoTone, DownloadOutlined, EditTwoTone, PrinterTwoTone } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { downloadInvoice } from '../../utils/api/apiList';
+import request from '../../utils/api/request';
 
 class ModalInvoice extends React.Component {
 	constructor(props) {
@@ -18,6 +20,7 @@ class ModalInvoice extends React.Component {
 			locationDate: '',
 			rate: '',
 			subTotal: '',
+			loadingDownload: false,
 		};
 	}
 
@@ -75,9 +78,30 @@ class ModalInvoice extends React.Component {
 		this.setState({ [type]: value, items: this.state.items, subTotal: this.state.subTotal });
 	}
 
+	downloadInvoice = () => {
+		const { event } = this.props;
+		const { items } = this.state;
+
+		this.setState({ loadingDownload: true });
+
+		request.post(downloadInvoice, { appointmentId: event?._id, items: items }).then(res => {
+			this.setState({ loadingDownload: false });
+			const url = window.URL.createObjectURL(new Blob([new Uint8Array(res.data.data)]));
+			const link = document.createElement("a");
+			link.href = url;
+			link.setAttribute("download", "invoice.pdf");
+			document.body.appendChild(link);
+			link.click();
+		}).catch(err => {
+			this.setState({ loadingDownload: false });
+			message.error(err.message);
+			console.log('download invoice error---', err);
+		})
+	}
+
 	render() {
 		const { event } = this.props;
-		const { items, selectedItemIndex, subTotal } = this.state;
+		const { items, selectedItemIndex, subTotal, loadingDownload } = this.state;
 
 		const modalProps = {
 			className: 'modal-invoice',
@@ -87,14 +111,7 @@ class ModalInvoice extends React.Component {
 			onCancel: this.props.onCancel,
 			closable: false,
 			width: 1000,
-			footer: [
-				<Button key="back" onClick={this.props.onCancel}>
-					{intl.formatMessage(messages.cancel)}
-				</Button>,
-				<Button key="submit" type="primary" onClick={() => this.props.onSubmit(items)} style={{ padding: '0px 30px' }}>
-					Ok
-				</Button>
-			]
+			footer: null,
 		};
 
 		return (
@@ -229,6 +246,21 @@ class ModalInvoice extends React.Component {
 						</tr>
 					</tbody>
 				</table>
+				<div className='flex justify-end gap-2 mt-10'>
+					<Button key="back" onClick={this.props.onCancel}>
+						{intl.formatMessage(messages.cancel)}
+					</Button>
+					<Button key="print" onClick={() => this.props.onPrint()}>
+						<PrinterTwoTone />
+						{intl.formatMessage(messages.print)}
+					</Button>
+					<Button key="download" icon={<DownloadOutlined />} loading={loadingDownload} onClick={() => this.downloadInvoice()}>
+						{intl.formatMessage(messages.download)}
+					</Button>
+					<Button key="submit" type="primary" onClick={() => this.props.onSubmit(items)} style={{ padding: '0px 30px' }}>
+						Ok
+					</Button>
+				</div>
 			</Modal>
 		);
 	}

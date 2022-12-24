@@ -349,6 +349,8 @@
   "components.Modal.subsidizedSession": "Subsidized Session",
   "components.Modal.active": "Active",
   "components.Modal.cleared": "Cleared",
+  "components.Modal.print": "Print",
+  "components.Modal.download": "Download",
 
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.subsidyManager": "Subsidy Request",
