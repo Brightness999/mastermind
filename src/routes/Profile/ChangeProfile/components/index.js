@@ -18,6 +18,7 @@ import InfoNotification from './info_notification';
 import { MENU_ADMIN, MENU_PARENT, MENU_PROVIDER, MENU_SCHOOL } from '../constant';
 import { setKeyDefault } from '../service';
 import { store } from '../../../../redux/store';
+import SubsidyProgram from './Provider/subsidy_program';
 
 const user = store.getState().auth.user;
 export default class extends React.Component {
@@ -36,6 +37,7 @@ export default class extends React.Component {
         info_availability: false,
         info_professional: false,
         info_scheduling: false,
+        info_subsidy: false,
         info_billing: false,
         info_notification: false,
         change_password: false
@@ -145,6 +147,9 @@ export default class extends React.Component {
           case 'Info_availability':
             this.setState({ provider: { newStateProvider, info_availability: true } })
             break;
+          case 'Info_subsidy':
+            this.setState({ provider: { newStateProvider, info_subsidy: true } })
+            break;
           case 'Info_billing':
             this.setState({ provider: { newStateProvider, info_billing: true } })
             break;
@@ -213,6 +218,8 @@ export default class extends React.Component {
           return <InfoServices />
         } else if (provider.info_scheduling) {
           return <InfoScheduling />
+        } else if (provider.info_subsidy) {
+          return <SubsidyProgram />
         } else if (provider.info_billing) {
           return <InfoFinancial />
         } else if (provider.info_notification) {

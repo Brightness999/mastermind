@@ -11,6 +11,8 @@ import { setInforClientChild, changeInforClientChild } from '../../../../../redu
 import { store } from '../../../../../redux/store';
 import request from '../../../../../utils/api/request';
 import { getChildProfile, getDefaultValueForClient } from '../../../../../utils/api/apiList';
+import { TbTrash } from 'react-icons/tb';
+import { BsPlusCircle } from 'react-icons/bs';
 
 class InfoChild extends Component {
 	constructor(props) {
@@ -23,8 +25,11 @@ class InfoChild extends Component {
 	}
 
 	componentDidMount() {
+		this.setState({ listServices: this.props.auth.skillSet, academicLevels: this.props.auth.academicLevels });
+
 		request.post(getChildProfile).then(result => {
 			const { success, data } = result;
+
 			if (success) {
 				data?.map(item => {
 					item.services = item.services.map(item => item._id);
@@ -42,26 +47,15 @@ class InfoChild extends Component {
 	loadServices() {
 		request.post(getDefaultValueForClient, { cityConnection: this.props.auth.user?.parentInfo?.cityConnection }).then(result => {
 			const { success, data } = result;
+
 			if (success) {
-				this.setState({
-					listServices: data.SkillSet,
-					listSchools: data.schools,
-					academicLevels: data.AcademicLevel,
-				});
+				this.setState({ listSchools: data.schools });
 			} else {
-				this.setState({
-					listServices: [],
-					listSchools: [],
-					academicLevels: [],
-				});
+				this.setState({ listSchools: [] });
 			}
 		}).catch(err => {
 			console.log('getDefaultValueForClient error---', err);
-			this.setState({
-				listServices: [],
-				listSchools: [],
-				academicLevels: [],
-			});
+			this.setState({ listSchools: [] });
 		})
 	}
 
@@ -85,6 +79,21 @@ class InfoChild extends Component {
 	onFinishFailed = (errorInfo) => {
 		console.log('Failed:', errorInfo);
 	};
+
+	createNewChild = () => {
+		const children = this.form.getFieldsValue()?.children;
+		const { user } = this.props.auth;
+		const newChild = {
+			lastName: user?.parentInfo?.familyName,
+			guardianEmail: user?.parentInfo?.fatherEmail ? user?.parentInfo?.fatherEmail : user?.parentInfo?.motherEmail,
+			guardianPhone: user?.parentInfo?.fatherPhoneNumber ? user?.parentInfo?.fatherPhoneNumber : user?.parentInfo?.motherPhoneNumber,
+		}
+		this.form.setFieldsValue({ children: [...children, newChild] });
+	}
+
+	removeChild = (index) => {
+
+	}
 
 	render() {
 		const { listServices, listSchools, academicLevels } = this.state;
@@ -111,6 +120,17 @@ class InfoChild extends Component {
 												<div className='flex flex-row items-center'>
 													<p className='font-16 mr-10 mb-0'>{intl.formatMessage(messages.dependent)}# {index + 1}</p>
 												</div>
+												<Button
+													type='text'
+													className='remove-btn'
+													icon={<TbTrash size={18} />}
+													onClick={() => {
+														remove(field.name);
+														this.removeChild(index);
+													}}
+												>
+													{intl.formatMessage(messages.remove)}
+												</Button>
 											</div>
 											<Row gutter={14}>
 												<Col xs={24} sm={24} md={9}>
@@ -251,6 +271,16 @@ class InfoChild extends Component {
 											</Row>
 										</div>
 									))}
+									<Form.Item className='text-center'>
+										<Button
+											type="text"
+											className='add-dependent-btn'
+											icon={<BsPlusCircle size={17} className='mr-5' />}
+											onClick={() => this.createNewChild()}
+										>
+											{intl.formatMessage(messages.addDependent)}
+										</Button>
+									</Form.Item>
 								</div>
 							)}
 						</Form.List>
@@ -271,9 +301,7 @@ class InfoChild extends Component {
 }
 
 const mapStateToProps = state => {
-	return ({
-		auth: state.auth
-	})
+	return ({ auth: state.auth });
 }
 
 export default compose(connect(mapStateToProps, { changeInforClientChild }))(InfoChild);
