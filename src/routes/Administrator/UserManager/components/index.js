@@ -30,9 +30,10 @@ export default class extends React.Component {
 			checkPermission().then(loginData => {
 				loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
 				request.post(getUsers).then(result => {
-					if (result.success) {
+					const { success, data } = result;
+					if (success) {
 						this.setState({
-							users: result.data?.map((user, i) => {
+							users: data?.map((user, i) => {
 								user['key'] = i; return user;
 							}) ?? []
 						});
@@ -169,7 +170,7 @@ export default class extends React.Component {
 				onFilter: (value, record) => record.role == value,
 			},
 			{ title: 'Active', dataIndex: 'isActive', key: 'isActive', render: (isActive) => isActive ? 'True' : 'False', sorter: (a, b) => a.isActive - b.isActive },
-			{ title: 'Last updated', dataIndex: 'updatedAt', key: 'lastUpdated', render: (updatedAt) => new Date(updatedAt)?.toLocaleString(), sorter: (a, b) => new Date(a.updatedAt) > new Date(b.updatedAt) ? 1 : -1 },
+			{ title: 'Last Activity', dataIndex: 'activity', key: 'lastActivity', render: (activity) => new Date(activity?.slice(-1)?.[0]?.timeLogin)?.toLocaleString(), sorter: (a, b) => new Date(a?.activity?.slice(-1)?.[0]?.timeLogin) > new Date(b?.activity?.slice(-1)?.[0]?.timeLogin) ? 1 : -1 },
 			{
 				title: 'Action', key: 'action', render: (user) => (
 					<Space size="middle">
