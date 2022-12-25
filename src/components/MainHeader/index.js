@@ -26,7 +26,7 @@ class MainHeader extends Component {
   }
 
   render() {
-    const { user } = this.props;
+    const { user, community } = this.props;
     const items = [
       {
         key: '1',
@@ -89,6 +89,7 @@ class MainHeader extends Component {
           <div className='account-name'>
             <p className='mb-0'>{user?.fullName ?? user?.username}</p>
           </div>
+          <div className='font-16 ml-20'>{community?.community?.name}</div>
         </div>
         <div className='div-search'>
           <BsSearch size={18} />
@@ -99,7 +100,10 @@ class MainHeader extends Component {
   }
 }
 const mapStateToProps = state => {
-  return { user: state.auth.user };
+  return {
+    user: state.auth.user,
+    community: state.auth.currentCommunity,
+  };
 }
 
 export default compose(connect(mapStateToProps, { removeUser }))(MainHeader);

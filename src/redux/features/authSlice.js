@@ -2,7 +2,7 @@ import { url } from '../../utils/api/baseUrl';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { helper } from '../../utils/auth/helper';
 import request from '../../utils/api/request'
-import { getChildProfile, getMyProviderInfo, getMySchoolInfo, getParentProfile, updateChildAvailability, updateChildProfile, updateMyProviderProfile, updateParentProfile, updateSchoolInfo } from '../../utils/api/apiList';
+import { getChildProfile, getCurrentCommunity, getMyProviderInfo, getMySchoolInfo, getParentProfile, getSettings, updateChildAvailability, updateChildProfile, updateMyProviderProfile, updateParentProfile, updateSchoolInfo } from '../../utils/api/apiList';
 import { message } from 'antd';
 
 const initialState = {
@@ -15,6 +15,7 @@ const initialState = {
 	skillSet: [],
 	locations: [],
 	academicLevels: [],
+	currentCommunity: {},
 };
 
 export const getInfoAuth = createAsyncThunk(
@@ -25,6 +26,12 @@ export const getInfoAuth = createAsyncThunk(
 			let resultParent = {};
 			let resultChild = {};
 			switch (role) {
+				case 1000:
+					result = await request.post(url + getSettings, {}, token);
+					return result.data;
+				case 999:
+					result = await request.post(url + getSettings, {}, token);
+					return result.data;
 				case 60:
 					result = await request.post(url + getMySchoolInfo, {}, token);
 					return result.data;
@@ -149,6 +156,9 @@ export const authSlice = createSlice({
 		setAcademicLevels(state, action) {
 			state.academicLevels = action.payload
 		},
+		setCommunity(state, action) {
+			state.currentCommunity = action.payload
+		},
 		logout(state) {
 			localStorage.removeItem('token');
 			helper.history.push('/');
@@ -165,6 +175,8 @@ export const authSlice = createSlice({
 				if (user.role == 3) {
 					state.authDataClientChild = action.payload.child;
 					state.authDataClientParent = action.payload.parent;
+				} else if (user.role > 900) {
+					state.currentCommunity = action.payload;
 				} else {
 					state.authData = action.payload;
 				}
@@ -173,6 +185,6 @@ export const authSlice = createSlice({
 	}
 });
 
-export const { logout, setAuthData, setUser, removeUser, changeInforClientChild, changeInforClientParent, changeInfor, setDependents, setProviders, setSkillSet, setLocations, setAcademicLevels } = authSlice.actions;
+export const { logout, setAuthData, setUser, removeUser, changeInforClientChild, changeInforClientParent, changeInfor, setDependents, setProviders, setSkillSet, setLocations, setAcademicLevels, setCommunity } = authSlice.actions;
 
 export default authSlice.reducer;

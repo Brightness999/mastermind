@@ -4,9 +4,10 @@ import intl from 'react-intl-universal';
 import mgsSidebar from '../../../../components/SideBar/messages';
 import './index.less';
 import request from '../../../../utils/api/request';
-import { addCommunity, getCityConnections, getSettings, updateSettings } from '../../../../utils/api/apiList';
+import { addCommunity, getCityConnections, updateSettings } from '../../../../utils/api/apiList';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
+import { setCommunity } from '../../../../redux/features/authSlice';
 
 class SystemSetting extends React.Component {
 	constructor(props) {
@@ -35,15 +36,8 @@ class SystemSetting extends React.Component {
 			this.setState({ cityConnections: this.props.user?.adminCommunity });
 		}
 
-		request.post(getSettings).then(res => {
-			const { success, data } = res;
-			if (success) {
-				this.setState({ community: data?.community });
-				this.form.setFieldsValue({ community: data?.community })
-			}
-		}).catch(error => {
-			console.log('get settings error---', error);
-		})
+		this.setState({ community: this.props.community?.community?._id });
+		this.form?.setFieldsValue({ community: this.props.community?.community?._id });
 	}
 
 	onFinish = (values) => {
@@ -51,6 +45,10 @@ class SystemSetting extends React.Component {
 			const { success } = res;
 			if (success) {
 				message.success('Successfully updated');
+				this.props.dispatch(setCommunity({
+					...this.props.community,
+					community: this.state.cityConnections?.find(city => city?._id == values?.community),
+				}));
 			}
 		}).catch(error => {
 			console.log('get settings error---', error);
@@ -102,7 +100,6 @@ class SystemSetting extends React.Component {
 						label="Community"
 					>
 						<Select value={community}>
-							{user.role == 1000 && <Select.Option value='all'>All</Select.Option>}
 							{cityConnections.map((city, index) => (
 								<Select.Option key={index} value={city._id}>{city.name}</Select.Option>
 							))}
@@ -119,10 +116,12 @@ class SystemSetting extends React.Component {
 							</div>
 						</Form.Item>
 					)}
-					<Form.Item wrapperCol={{
-						md: { span: 15, offset: 5 },
-						sm: { span: 13, offset: 7 },
-					}}>
+					<Form.Item
+						wrapperCol={{
+							md: { span: 15, offset: 5 },
+							sm: { span: 13, offset: 7 },
+						}}
+					>
 						<Button type="primary" htmlType="submit">
 							Save
 						</Button>
@@ -134,8 +133,9 @@ class SystemSetting extends React.Component {
 }
 
 
-const mapStateToProps = state => {
-	return ({ user: state.auth.user });
-}
+const mapStateToProps = state => ({
+	user: state.auth.user,
+	community: state.auth.currentCommunity,
+});
 
 export default compose(connect(mapStateToProps))(SystemSetting);

@@ -57,9 +57,9 @@ export default class extends React.Component {
 			const { success, data } = response.data;
 			if (success) {
 				localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+				localStorage.setItem('user', JSON.stringify(data.user));
 				store.dispatch(setUser(data.user))
-				store.dispatch(getInfoAuth());
+				store.dispatch(getInfoAuth(data.user.role));
 				store.dispatch(getAppointmentsData({ role: data.user.role, token: data.token }))
 				data.user.role > 900 ? this.props.history.push(routerLinks.Admin) : this.props.history.push(routerLinks.Dashboard);
 			}
