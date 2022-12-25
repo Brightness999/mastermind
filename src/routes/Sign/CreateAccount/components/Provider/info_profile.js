@@ -61,9 +61,9 @@ class InfoProfile extends Component {
 
 	searchCityConnection() {
 		axios.post(url + getCityConnections).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
-				this.setState({ CityConnections: data.docs })
+			const { success, data } = result.data;
+			if (success) {
+				this.setState({ CityConnections: data });
 			} else {
 				this.setState({ CityConnections: [] });
 			}

@@ -67,7 +67,7 @@ class InfoProfile extends Component {
 		request.post(getCityConnections).then(result => {
 			const { success, data } = result;
 			if (success) {
-				this.setState({ CityConnections: data.docs })
+				this.setState({ CityConnections: data });
 			} else {
 				this.setState({ CityConnections: [] });
 			}

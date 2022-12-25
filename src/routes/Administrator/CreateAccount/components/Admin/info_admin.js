@@ -1,39 +1,54 @@
 import React from 'react';
-import { Row, Form, Button, Input } from 'antd';
-import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
+import { Row, Form, Button, Input, Select, message } from 'antd';
 import intl from 'react-intl-universal';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
+import request from '../../../../../utils/api/request';
+import { getCityConnections, userSignUp } from '../../../../../utils/api/apiList';
 
-export default class extends React.Component {
+class AdminInfo extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      admin_details: localStorage.getItem('admin_details') ? JSON.parse(localStorage.getItem('admin_details')) : '',
+      cityConnections: [],
     };
   }
 
-
   componentDidMount() {
-    const data = this.state.admin_details;
-    if (data) {
-      this.form?.setFieldsValue({
-        ...data
+    const { user } = this.props;
+
+    request.post(getCityConnections, { id: user?._id, role: user?.role }).then(result => {
+      const { success, data } = result;
+
+      if (success) {
+        this.setState({ cityConnections: data });
       }
-      )
-    }
+    }).catch(err => {
+      message.error(err.message);
+      this.setState({ cityConnections: [] });
+    })
   }
 
   onFinish = (values) => {
-    console.log('Success:', values);
-    localStorage.setItem('admin_details', JSON.stringify(values));
-    this.window.location.href = "/login";
+    const { registerData } = this.props.register;
+    request.post(userSignUp, { ...values, email: registerData.email, password: registerData.password, username: registerData.username, role: registerData.role }).then(result => {
+      if (result.success) {
+        message.success("Successfully created!");
+      }
+    }).catch(err => {
+      console.log('create admin user error---', err);
+      message.error(err.message);
+    })
   };
 
   onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
+
   render() {
+    const { cityConnections } = this.state;
 
     return (
       <Row justify="center" className="row-form">
@@ -45,74 +60,65 @@ export default class extends React.Component {
             name="form_admin"
             onFinish={this.onFinish}
             onFinishFailed={this.onFinishFailed}
+            layout="vertical"
             ref={ref => this.form = ref}
           >
             <Form.Item
-              name="name"
+              name="fullName"
+              label={intl.formatMessage(messages.name)}
               rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.name) }]}
             >
               <Input placeholder={intl.formatMessage(messages.name)} />
             </Form.Item>
             <Form.Item
-              name="phone"
-              rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.phoneNumber) }]}
+              name="phoneNumber"
+              label={intl.formatMessage(messages.phoneNumber)}
+              rules={[
+                {
+                  required: true,
+                  message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.phoneNumber),
+                },
+                {
+                  pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
+                  message: intl.formatMessage(messages.phoneNumberValid),
+                },
+              ]}
             >
               <Input placeholder={intl.formatMessage(messages.phoneNumber)} />
             </Form.Item>
             <Form.Item
-              name="email"
+              name="adminCommunity"
+              label={intl.formatMessage(messages.cityConnections)}
+              rules={[{ required: true }]}
+            >
+              <Select
+                placeholder={intl.formatMessage(messages.cityConnections)}
+                showSearch
+                optionFilterProp="children"
+                mode="multiple"
+                filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
+              >
+                {cityConnections?.map((value, index) => (
+                  <Select.Option key={index} value={value._id}>{value.name}</Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="contactEmail"
+              label={intl.formatMessage(messages.contactEmail)}
               rules={[
                 {
-                    required: true,
-                    message: intl.formatMessage(messages.emailMessage)
+                  required: true,
+                  message: intl.formatMessage(messages.emailMessage)
                 },
                 {
-                    type: 'email',
-                    message: intl.formatMessage(messagesLogin.emailNotValid)
+                  type: 'email',
+                  message: intl.formatMessage(messagesLogin.emailNotValid)
                 }
               ]}
             >
-              <Input placeholder={intl.formatMessage(messages.email)} />
+              <Input placeholder={intl.formatMessage(messages.contactEmail)} />
             </Form.Item>
-            <Form.List name="contact">
-              {(fields, { add, remove }) => (
-                <div>
-                  {fields.map((field) => {
-                    return (
-                      <div key={field.key} className='item-remove'>
-                        <Form.Item
-                          key={field.key}
-                          name={[field.name, "contact_email"]}
-                          rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactEmail) },
-                            //  {
-                            //     type: 'email',
-                            //     message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesLogin.validEmail)
-                            //  }
-                        ]}
-                        >
-                          <Input placeholder={intl.formatMessage(messages.contactEmail)} />
-                        </Form.Item>
-                        <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
-                      </div>
-                    );
-                  }
-                  )}
-                  <div className='text-center'>
-                    <Button
-                      type="text"
-                      className='add-number-btn mb-10'
-                      icon={<BsPlusCircle size={17} className='mr-5' />}
-                      onClick={() => add(null)}
-                    >
-                      {intl.formatMessage(messages.addContact)}
-                    </Button>
-                  </div>
-                </div>
-
-              )}
-
-            </Form.List>
-
             <Form.Item className="form-btn continue-btn" >
               <Button
                 block
@@ -128,3 +134,8 @@ export default class extends React.Component {
     );
   }
 }
+
+
+const mapStateToProps = state => ({ register: state.register, user: state.auth.user });
+
+export default compose(connect(mapStateToProps))(AdminInfo);

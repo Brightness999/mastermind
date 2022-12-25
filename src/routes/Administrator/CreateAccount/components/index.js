@@ -132,7 +132,7 @@ export default class extends React.Component {
 
   closeModalCreateDone = () => {
     this.setState({ visibleCreateDone: false });
-    this.props.history.push(routerLinks.Login + '/register_success');
+    this.props.history.push(routerLinks.CreateAccountForAdmin);
   }
 
   getStepContentComponent = (currentStep) => {

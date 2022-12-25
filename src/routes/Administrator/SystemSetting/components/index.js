@@ -23,7 +23,7 @@ class SystemSetting extends React.Component {
 			request.post(getCityConnections).then(res => {
 				const { success, data } = res;
 				if (success) {
-					this.setState({ cityConnections: data.docs });
+					this.setState({ cityConnections: data });
 				} else {
 					this.setState({ cityConnections: [] });
 				}
@@ -76,7 +76,7 @@ class SystemSetting extends React.Component {
 	}
 
 	render() {
-		const { community, cityConnections, newCity } = this.state;
+		const { community, cityConnections } = this.state;
 		const { user } = this.props;
 		const layout = {
 			labelCol: {
@@ -102,7 +102,7 @@ class SystemSetting extends React.Component {
 						label="Community"
 					>
 						<Select value={community}>
-							<Select.Option value='all'>All</Select.Option>
+							{user.role == 1000 && <Select.Option value='all'>All</Select.Option>}
 							{cityConnections.map((city, index) => (
 								<Select.Option key={index} value={city._id}>{city.name}</Select.Option>
 							))}

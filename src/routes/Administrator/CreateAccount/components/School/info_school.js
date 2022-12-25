@@ -149,7 +149,7 @@ class InfoSchool extends React.Component {
 		axios.post(url + getCityConnections).then(response => {
 			const { success, data } = response.data;
 			if (success) {
-				this.setState({ listCommunitiServer: data.docs });
+				this.setState({ listCommunitiServer: data });
 			} else {
 				message.error('Cant loading', intl.formatMessage(messages.communitiesServed));
 			}
