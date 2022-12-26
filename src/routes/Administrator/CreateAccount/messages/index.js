@@ -338,6 +338,10 @@ export default ({
     id: `${scope}.parentsInfo`,
     defaultMessage: 'Parents info',
   },
+  parentInformation: {
+    id: `${scope}.parentInformation`,
+    defaultMessage: 'Parent Information',
+  },
   servicesRequested: {
     id: `${scope}.servicesRequested`,
     defaultMessage: 'Services requested',

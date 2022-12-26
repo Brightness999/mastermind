@@ -61,6 +61,7 @@
   "routes.Createaccount.contactInfo": "Contact info",
   "routes.Createaccount.dependentsInfo": "Dependents info",
   "routes.Createaccount.dependentInformation": "Dependent Information",
+  "routes.Createaccount.parentInformation": "Parent Information",
   "routes.Createaccount.update": "Update",
   "routes.Createaccount.tellYourChild": "Tell us about your child",
   "routes.Createaccount.dependent": "Dependent",

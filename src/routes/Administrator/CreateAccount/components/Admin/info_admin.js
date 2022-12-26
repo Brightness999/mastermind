@@ -7,6 +7,7 @@ import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import request from '../../../../../utils/api/request';
 import { getCityConnections, userSignUp } from '../../../../../utils/api/apiList';
+import { removeRegisterData } from '../../../../../redux/features/registerSlice';
 
 class AdminInfo extends React.Component {
   constructor(props) {
@@ -36,6 +37,8 @@ class AdminInfo extends React.Component {
     request.post(userSignUp, { ...values, email: registerData.email, password: registerData.password, username: registerData.username, role: registerData.role }).then(result => {
       if (result.success) {
         message.success("Successfully created!");
+        this.props.removeRegisterData();
+        this.props.onContinue(true);
       }
     }).catch(err => {
       console.log('create admin user error---', err);
@@ -104,7 +107,7 @@ class AdminInfo extends React.Component {
               </Select>
             </Form.Item>
             <Form.Item
-              name="contactEmail"
+              name="adminEmail"
               label={intl.formatMessage(messages.contactEmail)}
               rules={[
                 {

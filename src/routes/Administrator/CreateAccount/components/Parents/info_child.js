@@ -138,8 +138,7 @@ class InfoChild extends Component {
 			<Row justify="center" className="row-form">
 				<div className='col-form col-info-child'>
 					<div className='div-form-title'>
-						<p className='font-30 text-center mb-10'>{intl.formatMessage(messages.tellYourself)}</p>
-						<p className='font-24 text-center'>{intl.formatMessage(messages.dependents)}</p>
+						<p className='font-24 text-center'>{intl.formatMessage(messages.dependentsInfo)}</p>
 					</div>
 					<Form
 						name="form_contact"
@@ -183,7 +182,7 @@ class InfoChild extends Component {
 													</Col>
 													<Col xs={24} sm={24} md={9}>
 														<Form.Item name={[field.name, "lastName"]} label={intl.formatMessage(messages.lastName)}>
-															<Input defaultValue={parentInfo?.fatherName?.split(' ')?.[1] ? parentInfo?.fatherName?.split(' ')?.[1] : parentInfo?.motherName?.split(' ')?.[1]} disabled />
+															<Input disabled />
 														</Form.Item>
 													</Col>
 													<Col xs={24} sm={24} md={6}>

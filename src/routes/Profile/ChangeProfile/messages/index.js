@@ -142,6 +142,10 @@ export default ({
     id: `${scope}.dependentInformation`,
     defaultMessage: 'Dependent Information',
   },
+  parentInformation: {
+    id: `${scope}.parentInformation`,
+    defaultMessage: 'Parent Information',
+  },
   tellYourChild: {
     id: `${scope}.tellYourChild`,
     defaultMessage: 'Tell us about your child',

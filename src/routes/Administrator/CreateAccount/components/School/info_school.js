@@ -8,7 +8,7 @@ import messagesLogin from '../../../../Sign/Login/messages';
 import PlacesAutocomplete from 'react-places-autocomplete';
 import axios from 'axios';
 import { url } from '../../../../../utils/api/baseUrl';
-import { getCityConnections, getDefaultValueForProvider, userSignUp } from '../../../../../utils/api/apiList'
+import { getDefaultValueForProvider, userSignUp } from '../../../../../utils/api/apiList'
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -27,21 +27,18 @@ class InfoSchool extends React.Component {
 	}
 
 	componentDidMount() {
-		this.loadCommunitiServer()
+		this.getDefaultData()
 		const { registerData } = this.props.register;
-		if (!registerData.techContactRef || registerData.techContactRef.length == 0) {
-			this.setReduxForSchool('techContactRef', ['']);
-			this.form.setFieldsValue({ techContactRef: [""] });
-		}
-		if (!registerData.studentContactRef || registerData.studentContactRef.length == 0) {
-			this.setReduxForSchool('studentContactRef', ['']);
-			this.form.setFieldsValue({ studentContactRef: [""] });
-		}
+		const { user } = this.props.auth;
+
+		this.form.setFieldsValue(registerData);
+
+		this.setState({ listCommunitiServer: user?.adminCommunity });
+
 		if (!registerData.contactEmail || registerData.contactEmail.length == 0) {
 			this.setReduxForSchool('contactEmail', [{ email: "", type: 'Personal' }]);
 			this.form.setFieldsValue({ contactEmail: [{ email: "", type: 'Personal' }] });
 		}
-		this.form.setFieldsValue(registerData);
 		if (!registerData.sessionsInSchool || registerData.sessionsInSchool.length == 0) {
 			this.setState({
 				sessionsInSchool: [this.defaultTimeRangeItem(), this.defaultTimeRangeItem(), this.defaultTimeRangeItem()],
@@ -90,22 +87,23 @@ class InfoSchool extends React.Component {
 	onFinish = async () => {
 		const { registerData } = this.props.register;
 		let newRegisterData = JSON.parse(JSON.stringify(registerData));
+		console.log(newRegisterData)
 
 		// update in school - after school
 		newRegisterData.sessionsInSchool = this.arrDayScheduleFormat(this.state.sessionsInSchool);
 		newRegisterData.sessionsAfterSchool = this.arrDayScheduleFormat(this.state.sessionsAfterSchool);
-		newRegisterData.techContactRef = registerData.techContactRef?.map((item) => item.techContactRef);
-		newRegisterData.studentContactRef = registerData.studentContactRef?.map((item) => item.studentContactRef);
 
 		// post to server
-		const response = await axios.post(url + userSignUp, newRegisterData);
-		const { success } = response.data;
-		if (success) {
-			this.props.onContinue(true);
-			this.props.removeRegisterData();
-		} else {
+		axios.post(url + userSignUp, newRegisterData).then(res => {
+			const { success } = res.data;
+			if (success) {
+				this.props.onContinue(true);
+				this.props.removeRegisterData();
+			}
+		}).catch(error => {
+			console.log('creat school error---', error);
 			message.error(error?.response?.data?.data ?? error.message);
-		}
+		})
 	};
 
 	arrDayScheduleFormat = (arr) => {
@@ -145,29 +143,15 @@ class InfoSchool extends React.Component {
 		this.form.setFieldsValue({ valueForContact: school_address });
 	};
 
-	loadCommunitiServer = () => {
-		axios.post(url + getCityConnections).then(response => {
-			const { success, data } = response.data;
-			if (success) {
-				this.setState({ listCommunitiServer: data });
-			} else {
-				message.error('Cant loading', intl.formatMessage(messages.communitiesServed));
-			}
-		}).catch(err => {
-			console.log(err);
-			message.error('Cant loading', intl.formatMessage(messages.communitiesServed));
-		})
-
+	getDefaultData = () => {
 		axios.post(url + getDefaultValueForProvider).then(result => {
 			const { success, data } = result.data;
 			if (success) {
 				this.setState({ emailTypes: data?.EmailType });
-			} else {
-				message.error('Cant loading', intl.formatMessage(messages.communitiesServed));
 			}
 		}).catch(err => {
-			console.log(err);
-			message.error('Cant loading', intl.formatMessage(messages.communitiesServed));
+			message.error(err.message);
+			console.log('get default data for provider error---', err);
 		})
 	}
 
@@ -247,16 +231,6 @@ class InfoSchool extends React.Component {
 	callbackAfterSetState = () => {
 		this.setReduxForSchool('sessionsInSchool', this.state.sessionsInSchool);
 		this.setReduxForSchool('sessionsAfterSchool', this.state.sessionsAfterSchool);
-	}
-
-	onTechContactRefChange = () => {
-		const contactRefs = this.form.getFieldValue('techContactRef');
-		this.setReduxForSchool('techContactRef', contactRefs);
-	}
-
-	onStudentContactRefChange = () => {
-		const contactRefs = this.form.getFieldValue('studentContactRef');
-		this.setReduxForSchool('studentContactRef', contactRefs);
 	}
 
 	render() {
@@ -350,13 +324,6 @@ class InfoSchool extends React.Component {
 								)}
 							</PlacesAutocomplete>
 						</Form.Item>
-						<Form.Item
-							name="legalName"
-							label={intl.formatMessage(messages.legalName)}
-							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.legalName) }]}
-						>
-							<Input onChange={e => this.setReduxForSchool("legalName", e.target.value)} placeholder={intl.formatMessage(messages.legalName)} />
-						</Form.Item>
 						<Form.List name="contactEmail">
 							{(fields, { add, remove }) => (
 								<div>
@@ -380,9 +347,7 @@ class InfoSchool extends React.Component {
 													]}
 												>
 													<Input
-														onChange={() => {
-															this.setReduxForSchool('contactEmail', this.form.getFieldValue('contactEmail'))
-														}}
+														onChange={() => this.setReduxForSchool('contactEmail', this.form.getFieldValue('contactEmail'))}
 														placeholder={intl.formatMessage(messages.contactEmail)}
 													/>
 												</Form.Item>
@@ -395,13 +360,13 @@ class InfoSchool extends React.Component {
 													className='bottom-0'
 													style={{ marginTop: field.key === 0 ? 0 : 14 }}
 												>
-													<Select placeholder={intl.formatMessage(messages.type)}>
+													<Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.setReduxForSchool('contactEmail', this.form.getFieldValue('contactEmail'))}>
 														{emailTypes?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
 													</Select>
 												</Form.Item>
-												{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(name); this.setReduxForSchool('contactEmail', this.form.getFieldValue('contactEmail')); }} />}
+												{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.setReduxForSchool('contactEmail', this.form.getFieldValue('contactEmail')); }} />}
 											</Col>
 										</Row>
 									))}
@@ -415,92 +380,6 @@ class InfoSchool extends React.Component {
 											{intl.formatMessage(messages.addEmail)}
 										</Button>
 									</Form.Item>
-								</div>
-							)}
-						</Form.List>
-						<Form.List name="techContactRef">
-							{(fields, { add, remove }) => (
-								<div>
-									{fields.map((field) => (
-										<div key={field.key} className={field.key !== 0 ? 'item-remove' : ''}>
-											<Form.Item
-												name={[field.name, "techContactRef"]}
-												label={intl.formatMessage(messages.technicalReferralContact)}
-												rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.technicalReferralContact) }]}
-											>
-												<Input
-													onChange={() => this.onTechContactRefChange()}
-													placeholder={intl.formatMessage(messages.technicalReferralContact)}
-												/>
-											</Form.Item>
-											{field.key !== 0 && (
-												<BsDashCircle
-													size={16}
-													className='text-red icon-remove'
-													onClick={() => {
-														remove(field.name)
-														this.onTechContactRefChange();
-													}}
-												/>
-											)}
-										</div>
-									))}
-									<div className='text-center'>
-										<Button
-											type="text"
-											className='add-number-btn mb-10'
-											icon={<BsPlusCircle size={17} className='mr-5' />}
-											onClick={() => {
-												add('');
-												this.onTechContactRefChange();
-											}}
-										>
-											{intl.formatMessage(messages.addContact)}
-										</Button>
-									</div>
-								</div>
-							)}
-						</Form.List>
-						<Form.List name="studentContactRef">
-							{(fields, { add, remove }) => (
-								<div>
-									{fields.map((field) => (
-										<div key={field.key} className={field.key !== 0 ? 'item-remove' : ''}>
-											<Form.Item
-												name={[field.name, "studentContactRef"]}
-												label={intl.formatMessage(messages.studentReferralContact)}
-												rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.studentReferralContact) }]}
-											>
-												<Input
-													onChange={() => this.onStudentContactRefChange()}
-													placeholder={intl.formatMessage(messages.studentReferralContact)}
-												/>
-											</Form.Item>
-											{field.key !== 0 && (
-												<BsDashCircle
-													size={16}
-													className='text-red icon-remove'
-													onClick={() => {
-														remove(field.name)
-														this.onStudentContactRefChange();
-													}}
-												/>
-											)}
-										</div>
-									))}
-									<div className='text-center'>
-										<Button
-											type="text"
-											className='add-number-btn mb-10'
-											icon={<BsPlusCircle size={17} className='mr-5' />}
-											onClick={() => {
-												add(null)
-												this.onStudentContactRefChange();
-											}}
-										>
-											{intl.formatMessage(messages.addContact)}
-										</Button>
-									</div>
 								</div>
 							)}
 						</Form.List>
@@ -566,7 +445,8 @@ class InfoSchool extends React.Component {
 }
 
 const mapStateToProps = state => ({
-	register: state.register
+	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData, removeRegisterData }))(InfoSchool);

@@ -123,11 +123,11 @@ class ReviewAccount extends Component {
 						<div>
 							<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.parentsInfo)}</p>
 							<p className='font-14 underline'>{intl.formatMessage(messages.mother)}</p>
-							<p>Mother + Family name : {registerData?.parentInfo?.motherName}</p>
+							<p>Mother + Family name : {registerData?.parentInfo?.motherName} {registerData?.parentInfo?.familyName}</p>
 							<p>Mother phone : {registerData?.parentInfo?.motherPhoneNumber}</p>
 							<p>Mother email : {registerData?.parentInfo?.motherEmail}</p>
 							<p className='font-14 underline'>{intl.formatMessage(messages.father)}</p>
-							<p>Father + Family name : {registerData?.parentInfo?.familyName} </p>
+							<p>Father + Family name : {registerData?.parentInfo?.familyName} {registerData?.parentInfo?.familyName}</p>
 							<p>Father phone : {registerData?.parentInfo?.fatherPhoneNumber}</p>
 							<p>Father email : {registerData?.parentInfo?.fatherEmail}</p>
 						</div>
@@ -138,7 +138,7 @@ class ReviewAccount extends Component {
 						{registerData?.studentInfos?.map((item, index) => (
 							<div key={index}>
 								<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.dependentsInfo)}</p>
-								<p className='font-14 font-700 mb-10'>Dependent #{++index} {item.firstName} {item.lastName} - {item.birthday}</p>
+								<p className='font-14 font-700 mb-10'>{item.firstName} {item.lastName} - {item.birthday}</p>
 								<p>School : {listSchools?.find(school => school._id == item.school)?.name}</p>
 								<div className='review-item'>
 									<p>Teacher : {item.primaryTeacher} </p>
@@ -146,7 +146,6 @@ class ReviewAccount extends Component {
 								</div>
 								<div className='review-item'>
 									<p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.servicesRequested)}</p>
-									<p>Has an IEP</p>
 								</div>
 								<div className='review-item-3'>
 									{item.services?.map((service, serviceIndex) => (

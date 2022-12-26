@@ -166,6 +166,10 @@ export default ({
     id: `${scope}.dependentsInfo`,
     defaultMessage: 'Dependents info',
   },
+  dependentsInformation: {
+    id: `${scope}.dependentsInformation`,
+    defaultMessage: 'Dependents Information',
+  },
   tellYourChild: {
     id: `${scope}.tellYourChild`,
     defaultMessage: 'Tell us about your child',
@@ -337,6 +341,10 @@ export default ({
   parentsInfo: {
     id: `${scope}.parentsInfo`,
     defaultMessage: 'Parents info',
+  },
+  parentInformation: {
+    id: `${scope}.parentInformation`,
+    defaultMessage: 'Parent Information',
   },
   servicesRequested: {
     id: `${scope}.servicesRequested`,

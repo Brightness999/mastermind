@@ -15,16 +15,19 @@ class InfoConsultant extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      EmailType: [],
-      ContactNumberType: [],
+      emailType: [],
+      contactNumberType: [],
       contactEmail: [],
-      SkillSet: [],
-      CityConnections: [],
+      skillSet: [],
+      cityConnections: [],
     }
   }
 
   componentDidMount() {
     const { registerData } = this.props.register;
+    const { user } = this.props.auth;
+
+    this.setState({ cityConnections: user?.adminCommunity });
     this.getDataFromServer();
     const consultantInfo = registerData.consultantInfo || this.getDefaultObj();
     this.form.setFieldsValue(consultantInfo);
@@ -35,20 +38,21 @@ class InfoConsultant extends Component {
 
   getDataFromServer = () => {
     axios.post(url + getDefaultValuesForConsultant).then(result => {
-      if (result.data.success) {
-        const data = result.data.data;
+      const { success, data } = result.data;
+      if (success) {
         this.setState({
-          ContactNumberType: data.ContactNumberType,
-          EmailType: data.EmailType,
-          SkillSet: data.SkillSet,
-          CityConnections: data.CityConnections,
+          contactNumberType: data?.ContactNumberType,
+          emailType: data?.EmailType,
+          skillSet: data?.SkillSet,
         })
-      } else {
-        this.setState({ checkEmailExist: false });
       }
     }).catch(err => {
-      console.log(err);
-      this.setState({ checkEmailExist: false });
+      console.log('get default data error---', err);
+      this.setState({
+        contactNumberType: [],
+        emailType: [],
+        skillSet: [],
+      })
     })
   }
 
@@ -95,7 +99,7 @@ class InfoConsultant extends Component {
   }
 
   render() {
-    const { CityConnections, SkillSet, EmailType, ContactNumberType } = this.state;
+    const { cityConnections, skillSet, emailType, contactNumberType } = this.state;
 
     return (
       <Row justify="center" className="row-form">
@@ -124,7 +128,7 @@ class InfoConsultant extends Component {
                 optionFilterProp="children"
                 filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
               >
-                {CityConnections?.map((value, index) => (
+                {cityConnections?.map((value, index) => (
                   <Select.Option key={index} value={value._id}>{value.name}</Select.Option>
                 ))}
               </Select>
@@ -140,7 +144,7 @@ class InfoConsultant extends Component {
                 value={0}
                 disabled
               >
-                {SkillSet.map((value, index) => (
+                {skillSet?.map((value, index) => (
                   <Select.Option key={index} value={index}>{value}</Select.Option>
                 ))}
               </Select>
@@ -181,7 +185,7 @@ class InfoConsultant extends Component {
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                         >
                           <Select placeholder={intl.formatMessage(messages.type)}>
-                            {ContactNumberType.map((value, index) => (
+                            {contactNumberType?.map((value, index) => (
                               <Select.Option key={index} value={index}>{value}</Select.Option>
                             ))}
                           </Select>
@@ -239,7 +243,7 @@ class InfoConsultant extends Component {
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                         >
                           <Select placeholder={intl.formatMessage(messages.type)}>
-                            {EmailType.map((value, index) => (
+                            {emailType?.map((value, index) => (
                               <Select.Option key={index} value={index}>{value}</Select.Option>
                             ))}
                           </Select>
@@ -285,6 +289,7 @@ class InfoConsultant extends Component {
 
 const mapStateToProps = state => ({
   register: state.register,
+  auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoConsultant);

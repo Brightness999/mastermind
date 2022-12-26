@@ -29,8 +29,6 @@ class InfoSchool extends React.Component {
 		request.post(getMySchoolInfo).then(result => {
 			const { success, data } = result;
 			if (success) {
-				data.techContactRef = data.techContactRef.map(t => { return { techContactRef: t }; });
-				data.studentContactRef = data.studentContactRef.map(s => { return { studentContactRef: s }; });
 				this.form.setFieldsValue(data);
 			}
 		})
@@ -38,9 +36,8 @@ class InfoSchool extends React.Component {
 
 	onFinish = (values) => {
 		const token = localStorage.getItem('token');
+
 		try {
-			values.techContactRef = values.techContactRef.map(t => t.techContactRef);
-			values.studentContactRef = values.studentContactRef.map(s => s.studentContactRef);
 			store.dispatch(setInforSchool({ data: { ...values, _id: this.props.auth.user.schoolInfo?._id }, token }))
 		} catch (error) {
 			console.log('update school error---', error);
@@ -150,14 +147,6 @@ class InfoSchool extends React.Component {
 								)}
 							</PlacesAutocomplete>
 						</Form.Item>
-						<Form.Item
-							name="legalName"
-							label={intl.formatMessage(messages.legalName)}
-							className="float-label-item"
-							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.legalName) }]}
-						>
-							<Input placeholder={intl.formatMessage(messages.legalName)} />
-						</Form.Item>
 						<Form.List name="contactEmail">
 							{(fields, { add, remove }) => (
 								<div>
@@ -217,88 +206,6 @@ class InfoSchool extends React.Component {
 											{intl.formatMessage(messages.addEmail)}
 										</Button>
 									</Form.Item>
-								</div>
-							)}
-						</Form.List>
-						<Form.List name="techContactRef">
-							{(fields, { add, remove }) => (
-								<div>
-									{fields.map((field) => (
-										<div key={field.key} className={field.key !== 0 ? 'item-remove' : ''}>
-											<Form.Item
-												name={[field.name, "techContactRef"]}
-												label={intl.formatMessage(messages.technicalReferralContact)}
-												className="float-label-item"
-												rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.technicalReferralContact) }]}
-											>
-												<Input placeholder={intl.formatMessage(messages.technicalReferralContact)} />
-											</Form.Item>
-											{field.key !== 0 && (
-												<BsDashCircle
-													size={16}
-													className='text-red icon-remove'
-													onClick={() => {
-														remove(field.name)
-														this.onTechContactRefChange();
-													}}
-												/>
-											)}
-										</div>
-									))}
-									<div className='text-center'>
-										<Button
-											type="text"
-											className='add-number-btn mb-10'
-											icon={<BsPlusCircle size={17} className='mr-5' />}
-											onClick={() => {
-												add('');
-												this.onTechContactRefChange();
-											}}
-										>
-											{intl.formatMessage(messages.addContact)}
-										</Button>
-									</div>
-								</div>
-							)}
-						</Form.List>
-						<Form.List name="studentContactRef">
-							{(fields, { add, remove }) => (
-								<div>
-									{fields.map((field) => (
-										<div key={field.key} className={field.key !== 0 ? 'item-remove' : ''}>
-											<Form.Item
-												name={[field.name, "studentContactRef"]}
-												label={intl.formatMessage(messages.studentReferralContact)}
-												className="float-label-item"
-												rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.studentReferralContact) }]}
-											>
-												<Input placeholder={intl.formatMessage(messages.studentReferralContact)} />
-											</Form.Item>
-											{field.key !== 0 && (
-												<BsDashCircle
-													size={16}
-													className='text-red icon-remove'
-													onClick={() => {
-														remove(field.name)
-														this.onStudentContactRefChange();
-													}}
-												/>
-											)}
-										</div>
-									))}
-									<div className='text-center'>
-										<Button
-											type="text"
-											className='add-number-btn mb-10'
-											icon={<BsPlusCircle size={17} className='mr-5' />}
-											onClick={() => {
-												add(null)
-												this.onStudentContactRefChange();
-											}}
-										>
-											{intl.formatMessage(messages.addContact)}
-										</Button>
-									</div>
 								</div>
 							)}
 						</Form.List>

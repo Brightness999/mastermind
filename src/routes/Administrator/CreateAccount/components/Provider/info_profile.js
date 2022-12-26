@@ -10,25 +10,27 @@ import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
-import { getCityConnections, getDefaultValueForProvider } from '../../../../../utils/api/apiList';
+import { getDefaultValueForProvider } from '../../../../../utils/api/apiList';
 
 class InfoProfile extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			service_address: '',
-			EmailType: [],
-			ContactNumberType: [],
+			emailType: [],
+			contactNumberType: [],
 			contactPhoneNumber: [],
 			contactEmail: [],
-			CityConnections: [],
+			cityConnections: [],
 		}
 	}
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
+		const { user } = this.props.auth;
+
+		this.setState({ cityConnections: user?.adminCommunity });
 		this.getDataFromServer();
-		this.searchCityConnection();
 		const profileInfor = registerData.profileInfor || this.getDefaultObj();
 		this.form.setFieldsValue(profileInfor);
 		if (!registerData.profileInfor) {
@@ -41,35 +43,21 @@ class InfoProfile extends Component {
 			if (result.data.success) {
 				const data = result.data.data;
 				this.setState({
-					ContactNumberType: data?.ContactNumberType ?? [],
-					EmailType: data?.EmailType ?? [],
+					contactNumberType: data?.ContactNumberType ?? [],
+					emailType: data?.EmailType ?? [],
 				});
 			} else {
 				this.setState({
-					ContactNumberType: [],
-					EmailType: [],
+					contactNumberType: [],
+					emailType: [],
 				});
 			}
 		}).catch(err => {
 			console.log('get default values for provider error---', err);
 			this.setState({
-				ContactNumberType: [],
-				EmailType: [],
+				contactNumberType: [],
+				emailType: [],
 			});
-		})
-	}
-
-	searchCityConnection() {
-		axios.post(url + getCityConnections).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
-				this.setState({ CityConnections: data });
-			} else {
-				this.setState({ CityConnections: [] });
-			}
-		}).catch(err => {
-			console.log('get city connections error ---', err);
-			this.setState({ CityConnections: [] });
 		})
 	}
 
@@ -103,7 +91,7 @@ class InfoProfile extends Component {
 	}
 
 	render() {
-		const { service_address, CityConnections, ContactNumberType, EmailType } = this.state;
+		const { service_address, cityConnections, contactNumberType, emailType } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -149,7 +137,7 @@ class InfoProfile extends Component {
 								optionFilterProp="children"
 								filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
 							>
-								{CityConnections?.map((value, index) => (
+								{cityConnections?.map((value, index) => (
 									<Select.Option key={index} value={value._id}>{value.name}</Select.Option>
 								))}
 							</Select>
@@ -237,7 +225,7 @@ class InfoProfile extends Component {
 													style={{ marginTop: key === 0 ? 0 : 14 }}
 												>
 													<Select placeholder={intl.formatMessage(messages.type)}>
-														{ContactNumberType?.map((value, index) => (
+														{contactNumberType?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
 													</Select>
@@ -295,7 +283,7 @@ class InfoProfile extends Component {
 													style={{ marginTop: key === 0 ? 0 : 14 }}
 												>
 													<Select placeholder={intl.formatMessage(messages.type)}>
-														{EmailType?.map((value, index) => (
+														{emailType?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
 													</Select>
@@ -335,6 +323,7 @@ class InfoProfile extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoProfile);

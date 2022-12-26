@@ -20,7 +20,6 @@ import InfoSchool from './School/info_school';
 import InfoAdmin from './Admin/info_admin';
 import InfoConsultant from './Consultant/info_consultant';
 import ConsultantAvailability from './Consultant/info_availability';
-import { routerLinks } from "../../../constant";
 import './index.less';
 import '../../../../assets/styles/login.less';
 const { Step } = Steps;
@@ -131,8 +130,7 @@ export default class extends React.Component {
   }
 
   closeModalCreateDone = () => {
-    this.setState({ visibleCreateDone: false });
-    this.props.history.push(routerLinks.CreateAccountForAdmin);
+    this.setState({ visibleCreateDone: false, currentStep: 0 });
   }
 
   getStepContentComponent = (currentStep) => {
