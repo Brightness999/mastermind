@@ -6,7 +6,6 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { getDefaultValueForProvider, getMyProviderInfo } from '../../../../../utils/api/apiList';
 import request from '../../../../../utils/api/request';
-import { store } from '../../../../../redux/store'
 import { setInforProvider } from '../../../../../redux/features/authSlice';
 
 class InfoScheduling extends Component {
@@ -61,7 +60,7 @@ class InfoScheduling extends Component {
 		const token = localStorage.getItem('token');
 
 		try {
-			store.dispatch(setInforProvider({ data: { ...values, _id: this.props.user?.providerInfo?._id }, token: token }))
+			this.props.dispatch(setInforProvider({ data: { ...values, _id: this.props.user?.providerInfo?._id }, token: token }));
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -123,20 +122,18 @@ class InfoScheduling extends Component {
 								</Row>
 							</Col>
 							<Col xs={24} sm={24} md={12}>
-								{isSeparateEvaluationRate && (
-									<Form.Item
-										name="separateEvaluationDuration"
-										label={intl.formatMessage(messages.evaluationDuration)}
-										className='w-100 float-label-item'
-										rules={[{ required: isSeparateEvaluationRate }]}
-									>
-										<Select placeholder={intl.formatMessage(messages.duration)}>
-											{durations?.map((duration, index) => (
-												<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
-											))}
-										</Select>
-									</Form.Item>
-								)}
+								<Form.Item
+									name="separateEvaluationDuration"
+									label={intl.formatMessage(messages.evaluationDuration)}
+									className={`w-100 float-label-item ${isSeparateEvaluationRate ? '' : 'display-none'}`}
+									rules={[{ required: isSeparateEvaluationRate }]}
+								>
+									<Select placeholder={intl.formatMessage(messages.duration)}>
+										{durations?.map((duration, index) => (
+											<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
+										))}
+									</Select>
+								</Form.Item>
 							</Col>
 						</Row>
 						<Row>

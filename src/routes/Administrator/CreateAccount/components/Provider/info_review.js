@@ -30,19 +30,18 @@ class InfoReview extends Component {
 	}
 
 	componentDidMount() {
+		const { user, skillSet } = this.props.auth;
+		this.setState({ cityConnections: user?.adminCommunity, skillSet: skillSet });
+
 		axios.post(url + getReviewInfoForProvider).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
+			const { success, data } = result.data;
+			if (success) {
 				this.setState({
-					cityConnections: data.cityConnections,
-					skillSet: data.skillSet,
-					listSchools: data.listSchools,
-					durations: data.durations,
+					listSchools: data?.listSchools,
+					durations: data?.durations,
 				})
 			} else {
 				this.setState({
-					cityConnections: [],
-					skillSet: [],
 					listSchools: [],
 					durations: [],
 				});
@@ -50,8 +49,6 @@ class InfoReview extends Component {
 		}).catch(err => {
 			console.log('get default data for provider error---', err);
 			this.setState({
-				cityConnections: [],
-				skillSet: [],
 				listSchools: [],
 				durations: [],
 			});
@@ -89,7 +86,7 @@ class InfoReview extends Component {
 				const scheduleItem = availability['' + day_week[i]][j];
 				if (scheduleItem.from_time && scheduleItem.to_time && scheduleItem.location) {
 					manualSchedule.push({
-						isPrivate: scheduleItem.isPrivate,
+						isPrivate: availability?.isPrivateForHmgh ? true : scheduleItem.isPrivate ?? false,
 						location: scheduleItem.location,
 						dayInWeek: i,
 						fromYear: scheduleItem.from_date?.year() ?? 1,
@@ -125,6 +122,10 @@ class InfoReview extends Component {
 		return {
 			manualSchedule: manualSchedule,
 			serviceableSchool: availability.serviceableSchool,
+			isHomeVisit: availability.isHomeVisit,
+			isPrivateForHmgh: availability.isPrivateForHmgh,
+			isPrivateOffice: availability.isPrivateOffice,
+			isSchools: availability.isSchools,
 		}
 	}
 
@@ -148,27 +149,23 @@ class InfoReview extends Component {
 							<p className='font-26'>{intl.formatMessage(messages.reviewAccountInfo)}</p>
 						</div>
 						<Row gutter={14}>
-							<Col xs={24} sm={24} md={8}>
+							<Col xs={24} sm={24} md={12}>
 								<div>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.usernameEmail)}</p>
 									<div><span className='font-700'>Username:</span> {registerData?.username}</div>
 									<div><span className='font-700'>Email:</span> {registerData?.email}</div>
 								</div>
-								<div>
-									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.providerInfo)}</p>
-									<div><span className='font-700'>Legal Name:</span> {registerData?.profileInfor?.name}</div>
-									<div><span className='font-700'>Referred to As:</span> {registerData?.profileInfor?.referredToAs}</div>
-									<div><span className='font-700'>Service Address:</span> {registerData?.profileInfor?.serviceAddress}</div>
-									<div><span className='font-700'>Billing Address:</span> {registerData?.profileInfor?.billingAddress}</div>
-									<div><span className='font-700'>City Connection:</span> {cityConnections?.find(a => a._id == registerData?.profileInfor?.cityConnection)?.name}</div>
-									<div><span className='font-700'>License Number:</span> {registerData?.profileInfor?.licenseNumber}</div>
-									<div><span className='font-700'>Agency:</span> {registerData?.profileInfor?.agency}</div>
+								<div className='mt-10'>
+									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.generalInformation)}</p>
+									<div><span className='font-700'>Name: </span>{registerData?.profileInfor?.firstName} {registerData?.profileInfor?.lastName}</div>
+									<div><span className='font-700'>City Connection: </span>{cityConnections?.find(a => a._id == registerData?.profileInfor?.cityConnection)?.name}</div>
+									<div><span className='font-700'>Service Address: </span>{registerData?.profileInfor?.serviceAddress}</div>
+									<div><span className='font-700'>Agency: </span> {registerData?.profileInfor?.agency ?? ''}</div>
 									<div className='mb-10'>
 										<div className='font-700'>Contact Number:</div>
 										{registerData?.profileInfor?.contactNumber?.map((number, index) => (
 											<div key={index} className='review-item'>
-												<span>{number.phoneNumber}</span>
-												<span>{number.type}</span>
+												<span>{number.phoneNumber} {number.type}</span>
 											</div>
 										))}
 									</div>
@@ -176,51 +173,81 @@ class InfoReview extends Component {
 										<div className='font-700'>Contact Email:</div>
 										{registerData?.profileInfor?.contactEmail?.map((email, index) => (
 											<div key={index} className='review-item'>
-												<span>{email.email}</span>
-												<span>{email.type}</span>
+												<span>{email.email} {email.type}</span>
 											</div>
 										))}
-									</div>
-									<div className='mb-10'>
-										<div className='font-700'>Professional Experience:</div>
-										<div>{registerData?.profileInfor?.proExp}</div>
 									</div>
 								</div>
-							</Col>
-							<Col xs={24} sm={24} md={8}>
-								<div>
-									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.servicesOffered)}</p>
-									<div><span className='font-700'>Skillset:</span> {skillSet?.find(skill => skill._id == registerData?.serviceInfor?.skillSet)?.name}</div>
-									<div className='review-item'>
-										<div><span className='font-700'>Years of Experience:</span> {registerData?.serviceInfor?.yearExp}</div>
-										<div><span className='font-700'>SSN:</span> {registerData?.serviceInfor?.SSN}</div>
-									</div>
-									<div className='mb-10'>
-										<div className='font-700'>Serviceable Schools:</div>
-										{registerData?.serviceInfor?.serviceableSchool?.map((school, index) => (
-											<div key={index}>{listSchools?.find(s => s._id == school)?.name}</div>
-										))}
-									</div>
-									<div className='mb-10'>
-										<div className='review-item'>
-											<div className='font-700'>Academic Level</div>
-											<div className='font-700'>Rate</div>
-										</div>
-										{registerData?.financialInfor?.academicLevel?.map((academic, index) => (
-											<div key={index} className='review-item'>
-												<div>{academic.level}</div>
-												<div>{academic.rate}</div>
-											</div>
-										))}
-									</div>
-									<p><span className='font-700'>Reference:</span> {registerData?.serviceInfor?.references}</p>
+								<div className='mt-10'>
+									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.professionalInformation)}</p>
+									<div className='flex gap-2'><span className='font-700'>Skillset:</span><div>{registerData?.serviceInfor?.skillSet?.map(id => skillSet?.find(skill => skill._id == id)?.name)}</div></div>
+									<div><span className='font-700'>Years of Experience:</span> {registerData?.serviceInfor?.yearExp}</div>
 									<div className='mb-10'>
 										<div className='font-700'>Public profile:</div>
 										<div>{registerData?.serviceInfor?.publicProfile}</div>
 									</div>
+									<p><span className='font-700'>Reference:</span> {registerData?.serviceInfor?.references}</p>
 								</div>
-								<div>
+								<div className='mt-10'>
+									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.scheduling)}</p>
+									<div><span className='font-700'>Standard duration: </span>{registerData?.scheduling?.duration}min</div>
+									<div><span className='font-700'>New client screening: </span>{registerData?.scheduling?.isNewClientScreening}</div>
+									{registerData?.scheduling?.isSeparateEvaluationRate ? <div><span className='font-700'>Evaluation duration: </span>{registerData?.scheduling?.separateEvaluationDuration}min</div> : null}
+									<div><span className='font-700'>CancellationWindow: </span>{registerData?.scheduling?.cancellationWindow}</div>
+								</div>
+							</Col>
+							<Col xs={24} sm={24} md={12}>
+								<div className='mt-10'>
+									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.billingDetails)}</p>
+									<div><span className='font-700'>Legal Name:</span> {registerData?.financialInfor?.legalName}</div>
+									<div><span className='font-700'>Billing Address:</span> {registerData?.financialInfor?.billingAddress}</div>
+									<div><span className='font-700'>License Number:</span> {registerData?.financialInfor?.licenseNumber ?? ''}</div>
+									<div><span className='font-700'>SSN:</span> {registerData?.financialInfor?.SSN ?? ''}</div>
+									<div><span className='font-700'>Academic Level's Rate:</span></div>
+									<div className='mb-10'>
+										<div className='flex'>
+											<div className='font-700 flex-1'>Level</div>
+											<div className='font-700 flex-1'>Standard Rate</div>
+											<div className='font-700 flex-1'>Subsidized Rate</div>
+										</div>
+										{registerData?.financialInfor?.academicLevel?.map((academic, index) => (
+											<div key={index} className='flex'>
+												<div className='flex-1'>{academic.level}</div>
+												<div className='flex-1'>{academic.rate}</div>
+												<div className='flex-1'>{academic.subsidizedRate}</div>
+											</div>
+										))}
+									</div>
+									{registerData?.scheduling?.isSeparateEvaluationRate ? <div className='mb-10'><span className='font-700'>Evaluation Rate:</span> {registerData?.financialInfor?.separateEvaluationRate ?? ''}</div> : null}
+								</div>
+								<div className='mt-10'>
+									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.subsidyProgram)}</p>
+									{registerData?.subsidy?.isAcceptProBono ? <div><span className='font-700'>{intl.formatMessage(messages.numberSessionsWeek)}:</span> {registerData?.subsidy?.proBonoNumber}</div> : null}
+									{registerData?.subsidy?.isAcceptReduceRate ? <div className='mb-10'>
+										<div className='font-700'>Reduced Academic Levels:</div>
+										<div className='flex'>
+											<div className='font-700 flex-1'>Level</div>
+											<div className='font-700 flex-1'>Subsidized Rate</div>
+											<div className='font-700 flex-1'>Reduced Rate</div>
+										</div>
+										{registerData?.financialInfor?.academicLevel?.map((academic, index) => (
+											<div key={index} className='flex'>
+												<div className='flex-1'>{academic.level}</div>
+												<div className='flex-1'>{academic.subsidizedRate}</div>
+												<div className='flex-1'>{academic.reduced}</div>
+											</div>
+										))}
+									</div> : null}
+									<div><span className='font-700'>Private slots for HMGH:</span> {registerData?.subsidy?.isWillingOpenPrivate ? 'Yes' : 'No'}</div>
+								</div>
+								<div className='mt-10'>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.availability)}</p>
+									<div className='mb-10'>
+										<div className='font-700'>Serviceable Schools:</div>
+										{registerData?.availability?.serviceableSchool?.map((school, index) => (
+											<div key={index}>{listSchools?.find(s => s._id == school)?.name}</div>
+										))}
+									</div>
 									<div className='item-flex'>
 										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.sunday)}</p>
 										{registerData?.availability?.Sunday?.map((data, index) => {
@@ -304,35 +331,6 @@ class InfoReview extends Component {
 									</div>
 								</div>
 							</Col>
-							<Col xs={24} sm={24} md={8}>
-								<div>
-									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.subsidyProgram)}</p>
-									<div><span className='font-700'>{intl.formatMessage(messages.numberSessionsWeek)}:</span> {registerData?.subsidy?.numberSessions}</div>
-									<div className='mb-10'>
-										<div className='font-700'>Reduced Academic Levels:</div>
-										{registerData?.subsidy?.reduceWithAcademic?.map((academic, index) => (
-											<div key={index} className='review-item-3'>
-												<div>Level: {academic.level}</div>
-												<div>Rate: {academic.rate}</div>
-												<div>Reduced: {academic.reduced}</div>
-											</div>
-										))}
-									</div>
-									<div className='mb-10'>
-										<div className='font-700'>Private Calendars:</div>
-										{registerData?.subsidy?.privateCalendars?.map((date, index) => (
-											<div key={index} className='flex'>
-												<div>{`${this.displayHourMin(new Date(date.day)?.getMonth() + 1)}/${this.displayHourMin(new Date(date.day)?.getDate())}/${new Date(date.day)?.getFullYear()}`}</div>
-												<div className='ml-20'>
-													{date.availableHours?.map((time, index) => (
-														<div key={index}>{`${this.displayHourMin(new Date(time)?.getHours())}:${this.displayHourMin(new Date(time)?.getMinutes())}`}</div>
-													))}
-												</div>
-											</div>
-										))}
-									</div>
-								</div>
-							</Col>
 						</Row>
 						<div className="form-btn continue-btn" >
 							<Button
@@ -353,6 +351,7 @@ class InfoReview extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData, removeRegisterData }))(InfoReview);

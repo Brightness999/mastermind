@@ -38,8 +38,8 @@ class InfoFinancial extends Component {
 
 	getDataFromServer = () => {
 		axios.post(url + getDefaultValueForProvider).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
+			const { success, data } = result.data;
+			if (success) {
 				this.setState({ AcademicLevel: data.AcademicLevel });
 			} else {
 				this.setState({ AcademicLevel: [] });
@@ -307,26 +307,32 @@ class InfoFinancial extends Component {
 								</div>
 							)}
 						</Form.List>
-						{registerData?.scheduling?.isSeparateEvaluationRate && (
-							<Form.Item
-								name="separateEvaluationRate"
-								label={'Evaluation ' + intl.formatMessage(messages.rate)}
-								rules={[{ required: registerData?.scheduling?.isNewClientEvaluation, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
-							>
-								<Input
-									onChange={(e) => this.setValueToReduxRegisterData('separateEvaluationRate', e.target.value)}
-									placeholder={intl.formatMessage(messages.rate)}
-								/>
-							</Form.Item>
-						)}
-						<Form.Item
-							name="cancellationFee"
-							label={intl.formatMessage(messages.cancellationFee)}
-							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
-							className='w-100'
-						>
-							<Input placeholder={intl.formatMessage(messages.cancellationFee)} />
-						</Form.Item>
+						<Row gutter={15}>
+							<Col xs={24} sm={24} md={12}>
+								{registerData?.scheduling?.isSeparateEvaluationRate && (
+									<Form.Item
+										name="separateEvaluationRate"
+										label={'Evaluation ' + intl.formatMessage(messages.rate)}
+										rules={[{ required: registerData?.scheduling?.isNewClientEvaluation, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
+									>
+										<Input
+											onChange={(e) => this.setValueToReduxRegisterData('separateEvaluationRate', e.target.value)}
+											placeholder={intl.formatMessage(messages.rate)}
+										/>
+									</Form.Item>
+								)}
+							</Col>
+							<Col xs={24} sm={24} md={12}>
+								<Form.Item
+									name="cancellationFee"
+									label={intl.formatMessage(messages.cancellationFee)}
+									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
+									className='w-100'
+								>
+									<Input placeholder={intl.formatMessage(messages.cancellationFee)} />
+								</Form.Item>
+							</Col>
+						</Row>
 						<Form.Item
 							name="upload_w_9"
 							label={intl.formatMessage(messagesRequest.upload)}

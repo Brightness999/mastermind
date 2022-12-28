@@ -271,18 +271,16 @@ class InfoFinancial extends Component {
 							)}
 						</Form.List>
 						<Row gutter={15}>
-							{user?.providerInfo?.isSeparateEvaluationRate && (
-								<Col xs={24} sm={24} md={12}>
-									<Form.Item
-										name="separateEvaluationRate"
-										label={'Evaluation ' + intl.formatMessage(messages.rate)}
-										className="float-label-item"
-										rules={[{ required: user?.providerInfo?.isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
-									>
-										<Input placeholder={intl.formatMessage(messages.rate)} />
-									</Form.Item>
-								</Col>
-							)}
+							<Col xs={24} sm={24} md={12} className={user?.providerInfo?.isSeparateEvaluationRate ? '' : 'd-none'}>
+								<Form.Item
+									name="separateEvaluationRate"
+									label={'Evaluation ' + intl.formatMessage(messages.rate)}
+									className="float-label-item"
+									rules={[{ required: user?.providerInfo?.isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
+								>
+									<Input placeholder={intl.formatMessage(messages.rate)} />
+								</Form.Item>
+							</Col>
 							<Col xs={24} sm={24} md={12}>
 								<Form.Item
 									name="cancellationFee"

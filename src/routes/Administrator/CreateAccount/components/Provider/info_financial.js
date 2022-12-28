@@ -9,8 +9,7 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios';
-import { getDefaultValueForProvider, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
+import { uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
 import PlacesAutocomplete from 'react-places-autocomplete';
 
 class InfoFinancial extends Component {
@@ -20,7 +19,7 @@ class InfoFinancial extends Component {
 			fileList: [],
 			uploading: false,
 			documentUploaded: [],
-			AcademicLevel: [],
+			academicLevels: [],
 			sameRateForAllLevel: true,
 			billingAddress: '',
 		}
@@ -28,26 +27,13 @@ class InfoFinancial extends Component {
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
+		const { academicLevels } = this.props.auth;
 		if (!registerData.financialInfor) {
 			this.props.setRegisterData({ financialInfor: this.getDefaultObj() });
 		}
 		const financialInfor = registerData.financialInfor || this.getDefaultObj();
 		this.form.setFieldsValue(financialInfor);
-		this.getDataFromServer()
-	}
-
-	getDataFromServer = () => {
-		axios.post(url + getDefaultValueForProvider).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
-				this.setState({ AcademicLevel: data.AcademicLevel });
-			} else {
-				this.setState({ AcademicLevel: [] });
-			}
-		}).catch(err => {
-			console.log('get default data for provider error---', err);
-			this.setState({ AcademicLevel: [] });
-		})
+		this.setState({ academicLevels: academicLevels });
 	}
 
 	getDefaultObj = () => {
@@ -109,7 +95,7 @@ class InfoFinancial extends Component {
 	}
 
 	render() {
-		const { AcademicLevel, sameRateForAllLevel, billingAddress } = this.state;
+		const { academicLevels, sameRateForAllLevel, billingAddress } = this.state;
 		const { registerData } = this.props.register;
 		const uploadProps = {
 			name: 'file',
@@ -220,7 +206,7 @@ class InfoFinancial extends Component {
 															}}
 															placeholder={intl.formatMessage(messages.academicLevel)}
 														>
-															{AcademicLevel?.map((level, index) => (
+															{academicLevels?.map((level, index) => (
 																<Select.Option key={index} value={level}>{level}</Select.Option>
 															))}
 														</Select>
@@ -307,26 +293,32 @@ class InfoFinancial extends Component {
 								</div>
 							)}
 						</Form.List>
-						{registerData?.scheduling?.isSeparateEvaluationRate && (
-							<Form.Item
-								name="separateEvaluationRate"
-								label={'Evaluation ' + intl.formatMessage(messages.rate)}
-								rules={[{ required: registerData?.scheduling?.isNewClientEvaluation, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
-							>
-								<Input
-									onChange={(e) => this.setValueToReduxRegisterData('separateEvaluationRate', e.target.value)}
-									placeholder={intl.formatMessage(messages.rate)}
-								/>
-							</Form.Item>
-						)}
-						<Form.Item
-							name="cancellationFee"
-							label={intl.formatMessage(messages.cancellationFee)}
-							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
-							className='w-100'
-						>
-							<Input placeholder={intl.formatMessage(messages.cancellationFee)} />
-						</Form.Item>
+						<Row gutter={15}>
+							{registerData?.scheduling?.isSeparateEvaluationRate && (
+								<Col xs={24} sm={24} md={12}>
+									<Form.Item
+										name="separateEvaluationRate"
+										label={'Evaluation ' + intl.formatMessage(messages.rate)}
+										rules={[{ required: registerData?.scheduling?.isNewClientEvaluation, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
+									>
+										<Input
+											onChange={(e) => this.setValueToReduxRegisterData('separateEvaluationRate', e.target.value)}
+											placeholder={intl.formatMessage(messages.rate)}
+										/>
+									</Form.Item>
+								</Col>
+							)}
+							<Col xs={24} sm={24} md={12}>
+								<Form.Item
+									name="cancellationFee"
+									label={intl.formatMessage(messages.cancellationFee)}
+									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
+									className='w-100'
+								>
+									<Input placeholder={intl.formatMessage(messages.cancellationFee)} />
+								</Form.Item>
+							</Col>
+						</Row>
 						<Form.Item
 							name="upload_w_9"
 							label={intl.formatMessage(messagesRequest.upload)}
@@ -361,6 +353,7 @@ class InfoFinancial extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoFinancial);

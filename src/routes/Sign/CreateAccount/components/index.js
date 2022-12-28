@@ -50,7 +50,7 @@ export default class extends React.Component {
       this.openModalCreateDone();
       return;
     }
-    if (this.state.currentStep <= 5) {
+    if (this.state.currentStep <= 7) {
       this.nextStep();
     }
   }
@@ -90,14 +90,15 @@ export default class extends React.Component {
         )
       case intl.formatMessage(messages.provider):
         return (
-          <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 450 }}>
+          <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 450 }} className="provider-steps">
             <Step key='default' title={intl.formatMessage(messages.accountInfo)} icon={<p>1</p>} />
             <Step key='info_general' title={intl.formatMessage(messages.generalInformation)} icon={<p>2</p>} />
             <Step key='info_professional' title={intl.formatMessage(messages.professionalInformation)} icon={<p>3</p>} />
             <Step key='info_scheduling' title={intl.formatMessage(messages.scheduling)} icon={<p>4</p>} />
-            <Step key='info_availability' title={intl.formatMessage(messages.availability)} icon={<p>5</p>} />
-            <Step key='info_billing' title={intl.formatMessage(messages.billingDetails)} icon={<p>6</p>} />
-            <Step key='info_review' title={intl.formatMessage(messages.reviewInfo)} icon={<p>7</p>} />
+            <Step key='info_billing' title={intl.formatMessage(messages.billingDetails)} icon={<p>5</p>} />
+            <Step key='info_subsidy' title={intl.formatMessage(messages.subsidy)} icon={<p>6</p>} />
+            <Step key='info_availability' title={intl.formatMessage(messages.availability)} icon={<p>7</p>} />
+            <Step key='info_review' title={intl.formatMessage(messages.reviewInfo)} icon={<p>8</p>} />
           </Steps>
         )
       case intl.formatMessage(messages.consultant):
@@ -173,11 +174,13 @@ export default class extends React.Component {
           case intl.formatMessage(messages.parent):
             return (<ReviewAccount onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
-            return (<InfoAvailability onContinue={this.handleContinue} />)
+            return (<InfoFinancial onContinue={this.handleContinue} />)
         }
       case 5:
-        return (<InfoFinancial onContinue={this.handleContinue} />)
+        return (<SubsidyProgram onContinue={this.handleContinue} />)
       case 6:
+        return (<InfoAvailability onContinue={this.handleContinue} />)
+      case 7:
         return (<InfoReview onContinue={this.handleContinue} onFinishRegister={this.openModalCreateDone} />)
     }
   }

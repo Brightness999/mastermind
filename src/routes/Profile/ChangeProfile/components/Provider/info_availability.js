@@ -33,6 +33,7 @@ class InfoAvailability extends Component {
 			locations: [],
 			listSchool: [],
 			selectedLocation: '',
+			isPrivateForHmgh: false,
 		}
 	}
 
@@ -97,7 +98,7 @@ class InfoAvailability extends Component {
 	}
 
 	onFinish = (values) => {
-		const { listSchool } = this.state;
+		const { listSchool, isPrivateForHmgh } = this.state;
 		let manualSchedule = [];
 		day_week.map(day => {
 			values[day]?.forEach(t => {
@@ -114,25 +115,25 @@ class InfoAvailability extends Component {
 						closeHour: t.to_time?.hours() ?? 0,
 						closeMin: t.to_time?.minutes() ?? 0,
 						dayInWeek: this.getDayOfWeekIndex(day),
-						isPrivate: t.isPrivate ?? false,
+						isPrivate: isPrivateForHmgh ? true : t.isPrivate ?? false,
 						location: t.location ?? '',
 					}
 					manualSchedule.push(times);
 				} else {
 					const times = {
-						fromYear: t.from_date?.year() ?? 0,
-						fromMonth: t.from_date?.month() ?? 0,
-						fromDate: t.from_date?.date() ?? 0,
-						toYear: t.to_date?.year() ?? 0,
-						toMonth: t.to_date?.month() ?? 0,
-						toDate: t.to_date?.date() ?? 0,
-						openHour: t.from_time?.hours() ?? 0,
-						openMin: t.from_time?.minutes() ?? 0,
-						closeHour: t.to_time?.hours() ?? 0,
-						closeMin: t.to_time?.minutes() ?? 0,
+						fromYear: 0,
+						fromMonth: 0,
+						fromDate: 0,
+						toYear: 0,
+						toMonth: 0,
+						toDate: 0,
+						openHour: 0,
+						openMin: 0,
+						closeHour: 0,
+						closeMin: 0,
 						dayInWeek: this.getDayOfWeekIndex(day),
-						isPrivate: t.isPrivate ?? false,
-						location: t.location ?? '',
+						isPrivate: false,
+						location: '',
 					}
 					manualSchedule.push(times);
 				}
@@ -269,8 +270,13 @@ class InfoAvailability extends Component {
 		}
 	}
 
+	handldeChangePrivate = (state) => {
+		this.setState({ isPrivateForHmgh: state });
+	}
+
 	render() {
-		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool } = this.state;
+		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh } = this.state;
+		const { user } = this.props.auth;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -389,7 +395,7 @@ class InfoAvailability extends Component {
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 															</Col>
 														</Row>
-														<div className='flex items-center justify-start gap-2'>
+														<div className={`flex items-center justify-start gap-2 ${isPrivateForHmgh ? 'display-none' : ''}`}>
 															<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
 																<Switch size="small" />
 															</Form.Item>
@@ -420,6 +426,10 @@ class InfoAvailability extends Component {
 									</Form.List>
 								</div>
 							))}
+						</div>
+						<div className={`flex items-center justify-start gap-2 ${user?.providerInfo?.isWillingOpenPrivate ? '' : 'd-none'}`}>
+							<Switch size="small" onChange={(state) => this.handldeChangePrivate(state)} />
+							<p className='font-12 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
 						</div>
 						<Form.Item className="form-btn continue-btn" >
 							<Button

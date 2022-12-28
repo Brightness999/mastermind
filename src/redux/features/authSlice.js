@@ -2,11 +2,11 @@ import { url } from '../../utils/api/baseUrl';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { helper } from '../../utils/auth/helper';
 import request from '../../utils/api/request'
-import { getChildProfile, getCurrentCommunity, getMyProviderInfo, getMySchoolInfo, getParentProfile, getSettings, updateChildAvailability, updateChildProfile, updateMyProviderProfile, updateParentProfile, updateSchoolInfo } from '../../utils/api/apiList';
+import { getChildProfile, getMyProviderInfo, getMySchoolInfo, getParentProfile, getSettings, updateChildAvailability, updateChildProfile, updateMyProviderProfile, updateParentProfile, updateSchoolInfo } from '../../utils/api/apiList';
 import { message } from 'antd';
 
 const initialState = {
-	user: [],
+	user: {},
 	authData: [],
 	authDataClientChild: [],
 	authDataClientParent: [],
@@ -102,6 +102,7 @@ export const setInforProvider = createAsyncThunk(
 			const result = await request.post(url + updateMyProviderProfile, data.data, data.token);
 			if (result.success) {
 				message.success('Updated successfully');
+				return result.data;
 			}
 		} catch (error) {
 			console.log(error, 'error')
@@ -181,6 +182,9 @@ export const authSlice = createSlice({
 					state.authData = action.payload;
 				}
 			}
+		},
+		[setInforProvider.fulfilled]: (state, action) => {
+			state.user = { ...state.user, providerInfo: action.payload };
 		},
 	}
 });

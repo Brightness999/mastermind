@@ -40,8 +40,8 @@ class InfoProfile extends Component {
 
 	getDataFromServer = () => {
 		axios.post(url + getDefaultValueForProvider).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
+			const { success, data } = result;
+			if (success) {
 				this.setState({
 					contactNumberType: data?.ContactNumberType ?? [],
 					emailType: data?.EmailType ?? [],
@@ -230,7 +230,7 @@ class InfoProfile extends Component {
 														))}
 													</Select>
 												</Form.Item>
-												{key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(name)} />}
+												{key !== 0 && <BsDashCircle size={16} className='text-red icon-remove provider-contact-number' onClick={() => remove(name)} />}
 											</Col>
 										</Row>
 									))}
@@ -288,7 +288,7 @@ class InfoProfile extends Component {
 														))}
 													</Select>
 												</Form.Item>
-												{key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(name)} />}
+												{key !== 0 && <BsDashCircle size={16} className='text-red icon-remove provider-contact-email' onClick={() => remove(name)} />}
 											</Col>
 										</Row>
 									))}

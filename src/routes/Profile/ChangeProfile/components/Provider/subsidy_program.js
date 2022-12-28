@@ -19,6 +19,7 @@ class SubsidyProgram extends Component {
 		isAcceptProBono: false,
 		isAcceptReduceRate: false,
 		isSameRate: true,
+		isWillingOpenPrivate: false,
 	}
 
 	componentDidMount() {
@@ -37,6 +38,7 @@ class SubsidyProgram extends Component {
 				this.setState({
 					isAcceptProBono: data.isAcceptProBono,
 					isAcceptReduceRate: data.isAcceptReduceRate,
+					isWillingOpenPrivate: data.isWillingOpenPrivate,
 				})
 			}
 		}).catch(err => {
@@ -47,13 +49,13 @@ class SubsidyProgram extends Component {
 
 	onFinish = async (values) => {
 		const { user } = this.props.auth;
-		const { isAcceptProBono, isAcceptReduceRate } = this.state;
+		const { isAcceptProBono, isAcceptReduceRate, isWillingOpenPrivate } = this.state;
 		const token = localStorage.getItem('token');
-
 		let data = {
 			_id: user?.providerInfo?._id,
 			isAcceptProBono: isAcceptProBono,
 			isAcceptReduceRate: isAcceptReduceRate,
+			isWillingOpenPrivate: isWillingOpenPrivate,
 		};
 
 		if (isAcceptProBono) {
@@ -85,12 +87,12 @@ class SubsidyProgram extends Component {
 	handleChangeReducedRate = (rate) => {
 		if (this.state.isSameRate) {
 			const rates = this.form.getFieldValue('academicLevel');
-			this.form.setFieldsValue({ academicLevel: rates.map(item => ({ ...item, reducedRate: rate })) });
+			this.form.setFieldsValue({ academicLevel: rates?.map(item => ({ ...item, reducedRate: rate })) });
 		}
 	}
 
 	render() {
-		const { academicLevels, isAcceptProBono, isAcceptReduceRate, numberOfSession, reduceList } = this.state;
+		const { academicLevels, isAcceptProBono, isAcceptReduceRate, numberOfSession, reduceList, isWillingOpenPrivate } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -127,14 +129,14 @@ class SubsidyProgram extends Component {
 						<Divider style={{ marginTop: 10, borderColor: '#d7d7d7' }} />
 						<div className='flex flex-row mb-10'>
 							<Checkbox
-								onChange={v => this.setState({ isAcceptReduceRate: v.target.checked })}
+								onChange={e => this.setState({ isAcceptReduceRate: e.target.checked })}
 								checked={isAcceptReduceRate}
 							/>
 							<p className='font-15 font-700 mb-0 ml-10'>{intl.formatMessage(messages.provideSubsidizedCases)}</p>
 						</div>
 						<div className='px-20'>
 							<Form.List name="academicLevel">
-								{(fields, { add, remove }) => (
+								{(fields) => (
 									<div className='div-time'>
 										{fields.map((field) => (
 											<Row key={field.key} gutter={10}>
@@ -146,7 +148,7 @@ class SubsidyProgram extends Component {
 													>
 														<Select placeholder={intl.formatMessage(messages.level)} disabled>
 															{academicLevels?.map((lvl, i) => (
-																<Select.Option key={i} value={i}>{lvl}</Select.Option>
+																<Select.Option key={i} value={lvl}>{lvl}</Select.Option>
 															))}
 														</Select>
 													</Form.Item>
@@ -199,6 +201,14 @@ class SubsidyProgram extends Component {
 									</div>
 								)}
 							</Form.List>
+						</div>
+						<Divider style={{ borderColor: '#d7d7d7' }} />
+						<div className='flex flex-row mb-10'>
+							<Checkbox
+								onChange={e => this.setState({ isWillingOpenPrivate: e.target.checked })}
+								checked={isWillingOpenPrivate}
+							/>
+							<p className='font-15 font-700 mb-0 ml-10'>{intl.formatMessage(messages.openPrivateSlots)}</p>
 						</div>
 						<Form.Item className="form-btn continue-btn" >
 							<Button

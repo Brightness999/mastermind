@@ -1,92 +1,46 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Calendar, Select, Switch, Divider, Input, Checkbox } from 'antd';
-import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
-import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
-import { GoPrimitiveDot } from 'react-icons/go';
+import { Row, Col, Form, Button, Select, Switch, Divider, Input, Checkbox } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import moment from 'moment';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios'
 import 'moment/locale/en-au';
-import { getDefaultValueForProvider } from '../../../../../utils/api/apiList';
-moment.locale('en');
 
 class SubsidyProgram extends Component {
 	state = {
-		valueCalendar: moment(),
-		selectedDay: moment(),
-		isSelectTime: -1,
-		SkillSet: [],
-		AcademicLevel: [],
-		ScreenTime: [],
-		NumberOfSession: [1, 2, 3, 4, 5, 6, 7],
-		Levels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-		ReduceList: [],
-		TimeAvailableList: [],
+		academicLevels: [],
+		numberOfSession: [1, 2, 3, 4, 5, 6, 7],
+		reduceList: [],
 		isAcceptProBono: false,
 		isAcceptReduceRate: false,
 		isWillingOpenPrivate: false,
-		avaiableTime: [],
 		isSameRate: true,
-		privateCalendars: [],
 	}
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
+		const { academicLevels } = this.props.auth;
 		const arrReduce = [];
 		for (let i = 0; i < 100; i++) {
 			arrReduce.push(i);
 		}
-		const arrTime = [];
-		arrTime.push(moment('9:30:00 AM', 'hh:mm:ss A'))
-		arrTime.push(moment('10:00:00 AM', 'hh:mm:ss A'))
-		arrTime.push(moment('10:30:00 AM', 'hh:mm:ss A'))
-		arrTime.push(moment('11:00:00 AM', 'hh:mm:ss A'))
 
-		this.setState({ ReduceList: arrReduce, TimeAvailableList: arrTime });
 		if (registerData.subsidy) {
 			this.form?.setFieldsValue(registerData.subsidy);
 		} else {
-			this.form.setFieldsValue({ reduceWithAcademic: [{}] });
 			this.props.setRegisterData({ subsidy: this.getDefaultObj() });
 		}
+
+		this.form?.setFieldsValue({ academicLevel: registerData?.financialInfor?.academicLevel });
 		this.setState({
 			isAcceptProBono: registerData.isAcceptProBono || false,
 			isAcceptReduceRate: registerData.isAcceptReduceRate || false,
-			isWillingOpenPrivate: registerData.isWillingOpenPrivate || false
-		})
-		this.getDataFromServer();
-	}
-
-	getDataFromServer = () => {
-		axios.post(url + getDefaultValueForProvider).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
-				this.setState({
-					SkillSet: data.SkillSet,
-					AcademicLevel: data.AcademicLevel,
-					ScreenTime: data.SreenTime,
-				})
-			} else {
-				this.setState({
-					SkillSet: [],
-					AcademicLevel: [],
-					ScreenTime: [],
-				});
-			}
-		}).catch(err => {
-			console.log(err);
-			this.setState({
-				SkillSet: [],
-				AcademicLevel: [],
-				ScreenTime: [],
-			});
+			isWillingOpenPrivate: registerData.isWillingOpenPrivate || false,
+			reduceList: arrReduce,
+			academicLevels: academicLevels,
 		})
 	}
 
@@ -97,84 +51,40 @@ class SubsidyProgram extends Component {
 			isWillingOpenPrivate: false,
 			numberSessions: '',
 			level: '',
-			reate: '',
+			subsidizedRate: '',
 			reduced: '',
 			isSameRate: true,
 		}
 	}
 
-	onSelect = (newValue) => {
-		this.setState({
-			valueCalendar: newValue,
-			selectedDay: newValue,
-		});
-	}
-
-	onPanelChange = (newValue) => {
-		this.setState({ valueCalendar: newValue });
-	}
-
 	onFinish = (values) => {
-		const privateCalendars = this.convertCalendarToArray();
-		if (!!this.form.getFieldError('checkAllFields')) {
-			this.form.setFields([
-				{
-					name: 'checkAllFields',
-					errors: [],
-				},
-			])
-		}
-		if (this.state.isWillingOpenPrivate && (!privateCalendars || privateCalendars < 1)) {
-			this.form.setFields([
-				{
-					name: 'checkAllFields',
-					errors: ['Please choose value for calendars'],
-				},
-			])
-			return;
-		}
-		if (this.state.isWillingOpenPrivate) {
-			this.props.setRegisterData({ subsidy: { ...values, privateCalendars: privateCalendars } })
+		const { isAcceptProBono, isAcceptReduceRate, isWillingOpenPrivate } = this.state;
+		const { registerData } = this.props.register;
+		let data = {
+			isAcceptProBono: isAcceptProBono,
+			isAcceptReduceRate: isAcceptReduceRate,
+			isWillingOpenPrivate: isWillingOpenPrivate,
+		};
+
+		if (isAcceptProBono) {
+			data.proBonoNumber = values.proBonoNumber;
 		} else {
-			this.props.setRegisterData({ subsidy: { ...values } })
+			data.proBonoNumber = 0;
 		}
+
+		this.props.setRegisterData({
+			subsidy: { ...data },
+			financialInfor: {
+				...registerData.financialInfor,
+				academicLevel: isAcceptReduceRate ? values.academicLevel : values.academicLevel?.map(level => ({ ...level, rducedRate: 0 })),
+			},
+		})
 		this.props.onContinue();
 	};
-
-	convertCalendarToArray = () => {
-		const arr = [];
-		for (let i = 0; i < this.state.privateCalendars.length; i++) {
-			arr.push({
-				day: this.state.privateCalendars[i].day.valueOf(),
-				availableHours: this.state.privateCalendars[i].availableHours.map((hour) => {
-					return hour.valueOf()
-				})
-			})
-		}
-		return arr;
-	}
 
 	onFinishFailed = (errorInfo) => {
 		console.log('Failed:', errorInfo);
 	};
-
-	nextMonth = () => {
-		this.setState({
-			selectedDay: moment(this.state.selectedDay).add(1, 'month'),
-			valueCalendar: moment(this.state.selectedDay).add(1, 'month')
-		});
-	}
-
-	prevMonth = () => {
-		this.setState({
-			selectedDay: moment(this.state.selectedDay).add(-1, 'month'),
-			valueCalendar: moment(this.state.selectedDay).add(-1, 'month')
-		});
-	}
-
-	onSelectTime = (index) => {
-		this.setState({ isSelectTime: index })
-	}
 
 	changeCheckboxValueOnRedux = (name, value) => {
 		let obj = {};
@@ -186,62 +96,8 @@ class SubsidyProgram extends Component {
 		this.props.setRegisterData({ subsidy: this.form.getFieldsValue() })
 	}
 
-	addOrRemovePrivateCalendar = (day, hour) => {
-		let isExist = -1;
-		const { privateCalendars } = this.state;
-		for (let i = 0; i < privateCalendars.length; i++) {
-			if (privateCalendars[i].day.format('yyyy mm dd') == day.format('yyyy mm dd')) {
-				isExist = i;
-			}
-		}
-
-		let arr = [...privateCalendars];
-		if (isExist >= 0) {
-			if (arr[isExist].availableHours.indexOf(hour) >= 0) { // remove
-				arr[isExist].availableHours.splice(arr[isExist].availableHours.indexOf(hour), 1);
-				if (arr[isExist].availableHours.length == 0) {
-					arr.splice(isExist, 1)
-				}
-			} else {
-				arr[isExist].availableHours.push(hour);
-			}
-		} else {
-			arr.push({ day: day, availableHours: [hour] })
-		}
-		this.setState({ privateCalendars: arr })
-	}
-
-	checkDateExist(day) {
-		for (let i = 0; i < this.state.privateCalendars.length; i++) {
-			if (this.state.privateCalendars[i].day.format('yyyy mm dd') == day.format('yyyy mm dd')) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	checkHourExist(hour) {
-		let isExist = -1;
-		const { selectedDay, privateCalendars } = this.state;
-		for (let i = 0; i < privateCalendars.length; i++) {
-			if (privateCalendars[i].day.format('yyyy mm dd') == selectedDay.format('yyyy mm dd')) {
-				isExist = i; break;
-			}
-		}
-		let arr = privateCalendars;
-		if (isExist >= 0) {
-			if (arr[isExist].availableHours.indexOf(hour) >= 0) { // remove
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
-
 	render() {
-		const { valueCalendar, selectedDay } = this.state;
+		const { isAcceptProBono, isWillingOpenPrivate, numberOfSession, isAcceptReduceRate, academicLevels, isSameRate, reduceList } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -258,7 +114,7 @@ class SubsidyProgram extends Component {
 					>
 						<div className='flex flex-row mb-10'>
 							<Checkbox
-								checked={this.state.isAcceptProBono}
+								checked={isAcceptProBono}
 								onChange={v => {
 									this.setState({ isAcceptProBono: v.target.checked })
 									this.changeCheckboxValueOnRedux('isAcceptProBono', v.target.checked)
@@ -269,16 +125,16 @@ class SubsidyProgram extends Component {
 						<div className='flex flex-row justify-between px-20'>
 							<p className='mb-10'>{intl.formatMessage(messages.numberSessionsWeek)}</p>
 							<Form.Item
-								name="numberSessions"
+								name="proBonoNumber"
 								label="Sessions"
 								className='select-small'
-								rules={[{ required: this.state.isAcceptProBono, message: 'Please select your sessions.' }]}
+								rules={[{ required: isAcceptProBono, message: 'Please select your sessions.' }]}
 							>
 								<Select
-									disabled={!this.state.isAcceptProBono}
+									disabled={!isAcceptProBono}
 									onChange={() => this.handleSelectChange()}
 								>
-									{this.state.NumberOfSession.map((value, index) => (
+									{numberOfSession?.map((value, index) => (
 										<Select.Option key={index} value={value}>{value}</Select.Option>
 									))}
 								</Select>
@@ -291,14 +147,13 @@ class SubsidyProgram extends Component {
 									this.setState({ isAcceptReduceRate: v.target.checked })
 									this.changeCheckboxValueOnRedux('isAcceptReduceRate', v.target.checked)
 								}}
-								checked={this.state.isAcceptReduceRate}
+								checked={isAcceptReduceRate}
 							/>
 							<p className='font-15 font-700 mb-0 ml-10'>{intl.formatMessage(messages.provideSubsidizedCases)}</p>
 						</div>
 						<div className='px-20'>
-							<p className='mb-10'>{intl.formatMessage(messages.academicLevel)}</p>
-							<Form.List name="reduceWithAcademic">
-								{(fields, { add, remove }) => (
+							<Form.List name="academicLevel">
+								{(fields) => (
 									<div className='div-time'>
 										{fields.map((field) => (
 											<Row key={field.key} gutter={10}>
@@ -307,39 +162,28 @@ class SubsidyProgram extends Component {
 														name={[field.name, "level"]}
 														label={intl.formatMessage(messages.level)}
 														className='select-small'
-														rules={[{ required: this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.level) }]}
+														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.level) }]}
 													>
 														<Select
-															disabled={!this.state.isAcceptReduceRate}
-															onChange={() => this.handleSelectChange()}
+															disabled
 															placeholder={intl.formatMessage(messages.level)}
 														>
-															{this.state.Levels.map((lvl, index) => (
-																<Select.Option key={index} value={lvl}>Grade {lvl}</Select.Option>
+															{academicLevels?.map((lvl, index) => (
+																<Select.Option key={index} value={lvl}>{lvl}</Select.Option>
 															))}
 														</Select>
 													</Form.Item>
 												</Col>
 												<Col xs={12} sm={12} md={6}>
 													<Form.Item
-														name={[field.name, "rate"]}
+														name={[field.name, "subsidizedRate"]}
 														label={intl.formatMessage(messages.rate)}
 														className='select-small'
 														style={{ height: "25px !important" }}
-														rules={[{ required: this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
+														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
 													>
 														<Input
-															onChange={v => {
-																if (this.state.isSameRate) {
-																	let arr = JSON.parse(JSON.stringify(this.form.getFieldValue('reduceWithAcademic')));
-																	for (let i = 0; i < arr.length; i++) {
-																		if (arr[i] == undefined) arr[i] = {}
-																		arr[i].rate = v.target.value;
-																	}
-																	this.form.setFieldValue('reduceWithAcademic', arr);
-																}
-															}}
-															disabled={!this.state.isAcceptReduceRate}
+															disabled
 															className='input-with-select-small'
 															placeholder={intl.formatMessage(messages.rate)}
 														/>
@@ -350,44 +194,33 @@ class SubsidyProgram extends Component {
 														name={[field.name, "reduced"]}
 														label={intl.formatMessage(messages.reduced)}
 														className='select-small'
-														rules={[{ required: this.state.isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced) }]}
+														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced) }]}
 													>
 														<Select
-															onChange={() => this.handleSelectChange()}
-															disabled={!this.state.isAcceptReduceRate}
+															onChange={value => {
+																if (isSameRate) {
+																	let arr = JSON.parse(JSON.stringify(this.form.getFieldValue('academicLevel')));
+																	this.form.setFieldValue('academicLevel', arr.map(item => ({ ...item, reduced: value })));
+																}
+																this.handleSelectChange();
+															}}
+															disabled={!isAcceptReduceRate}
 															placeholder={intl.formatMessage(messages.reduced)}
 														>
-															{this.state.ReduceList.map((value, index) => (
+															{reduceList?.map((value, index) => (
 																<Select.Option key={index} value={value}>{value} %</Select.Option>
 															))}
 														</Select>
 													</Form.Item>
-													{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 												</Col>
 											</Row>
 										))}
 										<Row>
-											<Col span={8}>
-												<div className='flex flex-row'>
-													<BsPlusCircle
-														disabled={!this.state.isAcceptReduceRate}
-														size={14}
-														className='mr-5 text-primary'
-													/>
-													<a
-														className='text-primary'
-														disabled={!this.state.isAcceptReduceRate}
-														onClick={() => add()}
-													>
-														{intl.formatMessage(messages.addLevel)}
-													</a>
-												</div>
-											</Col>
 											<Col span={16}>
 												<div className='flex flex-row items-center justify-end'>
 													<Switch
 														onChange={v => this.setState({ isSameRate: v })}
-														disabled={!this.state.isAcceptReduceRate}
+														disabled={!isAcceptReduceRate}
 														size="small" defaultChecked
 													/>
 													<p className='ml-10 mb-0'>{intl.formatMessage(messages.sameRateLevels)}</p>
@@ -399,73 +232,15 @@ class SubsidyProgram extends Component {
 							</Form.List>
 						</div>
 						<Divider style={{ borderColor: '#d7d7d7' }} />
-						<div className='flex flex-row mb-10'>
+						<div className='flex flex-row mb-20'>
 							<Checkbox
 								onChange={v => {
 									this.setState({ isWillingOpenPrivate: v.target.checked })
 									this.changeCheckboxValueOnRedux('isWillingOpenPrivate', v.target.checked)
 								}}
-								checked={this.state.isWillingOpenPrivate}
+								checked={isWillingOpenPrivate}
 							/>
 							<p className='font-15 font-700 mb-0 ml-10'>{intl.formatMessage(messages.openPrivateSlots)}</p>
-						</div>
-						<div className='px-20'>
-							<p className='font-700'>{intl.formatMessage(messages.selectDateTime)}</p>
-							<div className='calendar'>
-								<Row gutter={15}>
-									<Col xs={24} sm={24} md={15}>
-										<Calendar
-											fullscreen={false}
-											value={valueCalendar}
-											onSelect={this.onSelect}
-											onPanelChange={this.onPanelChange}
-											dateCellRender={(date) => {
-												if (this.checkDateExist(date)) {
-													return (<div className='mydaterender'>{date.day}</div>);
-												}
-											}}
-											headerRender={() => (
-												<div style={{ marginBottom: 10 }}>
-													<Row gutter={8} justify="space-between" align="middle">
-														<Col>
-															<p className='font-16 mb-0'>{selectedDay?.format('MMMM YYYY')}</p>
-														</Col>
-														<Col>
-															<Button
-																type='text'
-																className='mr-10 left-btn'
-																icon={<BiChevronLeft size={25} />}
-																onClick={this.prevMonth}
-															/>
-															<Button
-																type='text'
-																className='right-btn'
-																icon={<BiChevronRight size={25} />}
-																onClick={this.nextMonth}
-															/>
-														</Col>
-													</Row>
-												</div>
-											)}
-										/>
-									</Col>
-									<Col xs={24} sm={24} md={9} style={{ height: '200px' }}>
-										<p className='font-16'>{selectedDay?.format('dddd MMMM DD ')}</p>
-										<div className='time-available-title'>
-											<p className='font-12 mb-0'><GoPrimitiveDot size={15} />{intl.formatMessage(messages.timesAvailable)}</p>
-										</div>
-										{this.state.TimeAvailableList.map((timeItem, index) => (
-											<div
-												key={index}
-												className='time-available'
-												onClick={() => this.addOrRemovePrivateCalendar(selectedDay, timeItem)}
-											>
-												<p className='font-12 mb-0'>{this.checkHourExist(timeItem) && <GoPrimitiveDot size={15} />}{timeItem.format('hh:mm A')}</p>
-											</div>
-										))}
-									</Col>
-								</Row>
-							</div>
 						</div>
 						<Button block type="primary" htmlType="submit">
 							{intl.formatMessage(messages.continue).toUpperCase()}
@@ -479,6 +254,7 @@ class SubsidyProgram extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(SubsidyProgram);

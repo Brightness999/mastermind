@@ -16,9 +16,9 @@ export const MENU_PROVIDER = [
         label: 'Scheduling Information'
     },
     {
-        key: 'Info_availability',
+        key: 'Info_billing',
         icon: '',
-        label: 'Info Availability'
+        label: 'Info Billing'
     },
     {
         key: 'Info_subsidy',
@@ -26,9 +26,9 @@ export const MENU_PROVIDER = [
         label: 'Info Subsidy'
     },
     {
-        key: 'Info_billing',
+        key: 'Info_availability',
         icon: '',
-        label: 'Info Billing'
+        label: 'Info Availability'
     },
     {
         key: 'Info_notification',
