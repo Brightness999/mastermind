@@ -100,7 +100,7 @@ class ModalInvoice extends React.Component {
 	}
 
 	render() {
-		const { event } = this.props;
+		const { event, user } = this.props;
 		const { items, selectedItemIndex, subTotal, loadingDownload } = this.state;
 
 		const modalProps = {
@@ -179,7 +179,7 @@ class ModalInvoice extends React.Component {
 						</tr>
 						<tr>
 							<td>
-								<div className='my-10'><Button type='primary' className='font-16 px-20' onClick={() => this.handleAddItem()}>Add item</Button></div>
+								<div className='my-10'><Button type='primary' className={`font-16 px-20 ${user.role > 3 ? '' : 'display-none'}`} onClick={() => this.handleAddItem()}>Add item</Button></div>
 							</td>
 						</tr>
 						<tr>
@@ -196,7 +196,7 @@ class ModalInvoice extends React.Component {
 										</thead>
 										<tbody>
 											{items.map((item, index) => (
-												<Popover key={index} placement='right' content={this.props.user?.role == 3 ? (<></>) : (
+												<Popover key={index} placement='right' content={user?.role == 3 ? (<></>) : (
 													<div className='flex flex-col gap-2'>
 														{selectedItemIndex == index ? (
 															<>
@@ -250,14 +250,14 @@ class ModalInvoice extends React.Component {
 					<Button key="back" onClick={this.props.onCancel}>
 						{intl.formatMessage(messages.cancel)}
 					</Button>
-					<Button key="print" onClick={() => this.props.onPrint()}>
+					<Button key="print" onClick={() => { }}>
 						<PrinterTwoTone />
 						{intl.formatMessage(messages.print)}
 					</Button>
 					<Button key="download" icon={<DownloadOutlined />} loading={loadingDownload} onClick={() => this.downloadInvoice()}>
 						{intl.formatMessage(messages.download)}
 					</Button>
-					<Button key="submit" type="primary" onClick={() => this.props.onSubmit(items)} style={{ padding: '0px 30px' }}>
+					<Button key="submit" type="primary" onClick={() => user.role > 3 ? this.props.onSubmit(items) : this.props.onCancel()} style={{ padding: '0px 30px', height: 38 }}>
 						Ok
 					</Button>
 				</div>
