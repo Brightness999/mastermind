@@ -160,12 +160,11 @@ export default class extends React.Component {
 					}
 				},
 				filters: [
-					{ text: 'Super Admin', value: 1000 },
 					{ text: 'Admin', value: 999 },
-					{ text: 'Parent', value: 3 },
-					{ text: 'Provider', value: 30 },
-					{ text: 'School', value: 60 },
 					{ text: 'Consultant', value: 100 },
+					{ text: 'School', value: 60 },
+					{ text: 'Provider', value: 30 },
+					{ text: 'Parent', value: 3 },
 				],
 				onFilter: (value, record) => record.role == value,
 			},
