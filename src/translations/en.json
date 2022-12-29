@@ -172,6 +172,8 @@
   "routes.Createaccount.schoolAddress": "School address",
   "routes.Createaccount.technicalReferralContact": "Technical Referral Contact",
   "routes.Createaccount.addContact": "Add contact",
+  "routes.Createaccount.addTechContact": "Add Technical Referral Contact",
+  "routes.Createaccount.addStudentContact": "Add Student Referral Contact",
   "routes.Createaccount.studentReferralContact": "Student Referral Contact",
   "routes.Createaccount.inSchoolHours": "In-school session hours",
   "routes.Createaccount.afterSchoolHours": "After-school session hours",

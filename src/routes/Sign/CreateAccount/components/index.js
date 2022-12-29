@@ -17,6 +17,7 @@ import SubsidyProgram from './Provider/subsidy_program';
 import InfoReview from './Provider/info_review';
 import InfoFinancial from './Provider/info_financial';
 import InfoSchool from './School/info_school';
+import SchoolAvailability from './School/school_availability';
 import InfoAdmin from './Admin/info_admin';
 import InfoConsultant from './Consultant/info_consultant';
 import ConsultantAvailability from './Consultant/info_availability';
@@ -109,6 +110,14 @@ export default class extends React.Component {
             <Step key='consultant_availability' title={intl.formatMessage(messages.availabilityInfo)} icon={<p>3</p>} />
           </Steps>
         )
+      case intl.formatMessage(messages.school):
+        return (
+          <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 450 }}>
+            <Step key='default' title={intl.formatMessage(messages.accountInfo)} icon={<p>1</p>} />
+            <Step key='info_school' title={intl.formatMessage(messages.schoolDetails)} icon={<p>2</p>} />
+            <Step key='school_availability' title={intl.formatMessage(messages.availabilityInfo)} icon={<p>3</p>} />
+          </Steps>
+        )
     }
   }
 
@@ -161,6 +170,8 @@ export default class extends React.Component {
             return (<InfoServices onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.consultant):
             return (<ConsultantAvailability onContinue={this.handleContinue} />)
+          case intl.formatMessage(messages.school):
+            return (<SchoolAvailability onContinue={this.handleContinue} />)
         }
       case 3:
         switch (this.state.accountType) {

@@ -610,6 +610,14 @@ export default ({
     id: `${scope}.addContact`,
     defaultMessage: 'Add contact',
   },
+  addTechContact: {
+    id: `${scope}.addTechContact`,
+    defaultMessage: 'Add Technical Referral Contact',
+  },
+  addStudentContact: {
+    id: `${scope}.addStudentContact`,
+    defaultMessage: 'Add Student Referral Contact',
+  },
   studentReferralContact: {
     id: `${scope}.studentReferralContact`,
     defaultMessage: 'Student Referral Contact',

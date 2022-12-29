@@ -209,6 +209,127 @@ class InfoSchool extends React.Component {
 								</div>
 							)}
 						</Form.List>
+						<Form.List name="techContactRef">
+							{(fields, { add, remove }) => (
+								<div>
+									{fields.map((field) => (
+										<div key={field.key}>
+											<div className='font-16 text-center '>{intl.formatMessage(messages.technicalReferralContact)}</div>
+											<div className="item-remove">
+												<Form.Item
+													name={[field.name, "name"]}
+													label={intl.formatMessage(messages.name)}
+													className="float-label-item"
+												>
+													<Input placeholder={intl.formatMessage(messages.name)} />
+												</Form.Item>
+												<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
+											</div>
+											<div className="item-remove">
+												<Form.Item
+													name={[field.name, "phoneNumber"]}
+													label={intl.formatMessage(messages.contactNumber)}
+													className="float-label-item"
+													rules={[
+														{
+															pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
+															message: intl.formatMessage(messages.phoneNumberValid)
+														},
+													]}
+												>
+													<Input placeholder={intl.formatMessage(messages.contactNumber)} />
+												</Form.Item>
+												<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
+											</div>
+											<div className="item-remove">
+												<Form.Item
+													name={[field.name, "email"]}
+													label={intl.formatMessage(messages.contactEmail)}
+													className="float-label-item"
+													rules={[
+														{
+															type: 'email',
+															message: intl.formatMessage(messagesLogin.emailNotValid)
+														}
+													]}
+												>
+													<Input placeholder={intl.formatMessage(messages.contactEmail)} />
+												</Form.Item>
+												<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
+											</div>
+										</div>
+									))}
+									<div className='text-center'>
+										<Button type="text" className='add-number-btn mb-10' icon={<BsPlusCircle size={17} className='mr-5' />} onClick={() => add()}>
+											{intl.formatMessage(messages.addTechContact)}
+										</Button>
+									</div>
+								</div>
+							)}
+						</Form.List>
+						<Form.List name="studentContactRef">
+							{(fields, { add, remove }) => (
+								<div>
+									{fields.map((field) => (
+										<div key={field.key}>
+											<div className='font-16 text-center '>{intl.formatMessage(messages.studentReferralContact)}</div>
+											<div className="item-remove">
+												<Form.Item
+													name={[field.name, "name"]}
+													label={intl.formatMessage(messages.name)}
+													className="float-label-item"
+												>
+													<Input placeholder={intl.formatMessage(messages.name)} />
+												</Form.Item>
+												<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
+											</div>
+											<div className="item-remove">
+												<Form.Item
+													name={[field.name, "phoneNumber"]}
+													label={intl.formatMessage(messages.contactNumber)}
+													className="float-label-item"
+													rules={[
+														{
+															pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
+															message: intl.formatMessage(messages.phoneNumberValid)
+														},
+													]}
+												>
+													<Input placeholder={intl.formatMessage(messages.contactNumber)} />
+												</Form.Item>
+												<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
+											</div>
+											<div className="item-remove">
+												<Form.Item
+													name={[field.name, "email"]}
+													label={intl.formatMessage(messages.contactEmail)}
+													className="float-label-item"
+													rules={[
+														{
+															type: 'email',
+															message: intl.formatMessage(messagesLogin.emailNotValid)
+														}
+													]}
+												>
+													<Input placeholder={intl.formatMessage(messages.contactEmail)} />
+												</Form.Item>
+												<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
+											</div>
+										</div>
+									))}
+									<div className='text-center'>
+										<Button
+											type="text"
+											className='add-number-btn mb-10'
+											icon={<BsPlusCircle size={17} className='mr-5' />}
+											onClick={() => add()}
+										>
+											{intl.formatMessage(messages.addStudentContact)}
+										</Button>
+									</div>
+								</div>
+							)}
+						</Form.List>
 						<Form.Item className="form-btn continue-btn" >
 							<Button
 								block
@@ -225,12 +346,9 @@ class InfoSchool extends React.Component {
 	}
 }
 
-const mapStateToProps = state => {
-	return {
-		register: state.register,
-		auth: state.auth
-	}
-}
-
+const mapStateToProps = state => ({
+	register: state.register,
+	auth: state.auth
+})
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoSchool);
