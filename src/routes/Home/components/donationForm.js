@@ -24,7 +24,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
   
   //paypal events
   const onPayPalButtonClick = (data, actions) => {
-    if (!isFormValid || paymentAmount < 0) {
+    if (!isFormValid) {
       toast.error("The form is not valid.")
       return actions.reject();
     }
