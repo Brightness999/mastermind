@@ -14,6 +14,10 @@ import CreateAccount from './Sign/CreateAccount';
 import SubsidyRequest from './Sign/SubsidyRequest';
 import SubsidyReview from './Sign/SubsidyReview';
 import Dashboard from './Dashboard';
+import Home from './Home/index';
+import Donate from './Home/donate';
+import Referrals from './Home/referrals';
+import Opportunities from './Home/opportunities';
 import ForgotPass from './Sign/ForgotPass';
 import ResetPass from './Sign/ResetPass';
 import Admin from './Admin';
@@ -57,6 +61,26 @@ const routesConfig = app => [
       SystemSetting(app),
       Statistics(app)
     ]
+  },
+  {
+    path: '/Home',
+    title: 'Home',
+    component: Home
+  },
+  {
+    path: '/donate',
+    title: 'Donate',
+    component: Donate
+  },
+  {
+    path: '/referrals',
+    title: 'Referrals',
+    component: Referrals
+  },
+  {
+    path: '/opportunities',
+    title: 'Opportunities',
+    component: Opportunities
   },
   {
     path: '/',

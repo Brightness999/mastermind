@@ -24,5 +24,8 @@ export const routerLinks = {
   Pages404: '/widget/404',
   Pages500: '/widget/500',
   Blank: '/widget/blank',
-  Home: '/home/home',
+  Home: '/home',
+  Donate: '/donate',
+  Referrals: '/referrals',
+  Opportunities: '/opportunities',
 };
