@@ -721,7 +721,7 @@ class Dashboard extends React.Component {
 
   handleRequestClearance = (requestMessage) => {
     this.onCloseModalCreateNote();
-    message.success("You're request has been submitted. Please allow up to 24 hours for the provider to review this.");
+    message.success("Your request has been submitted. Please allow up to 24 hours for the provider to review this.");
 
     request.post(requestClearance, { appointmentId: this.state.selectedEvent?._id, message: requestMessage }).catch(err => {
       message.error(err.message);
@@ -1279,7 +1279,7 @@ class Dashboard extends React.Component {
                   <Tabs defaultActiveKey="1" type="card" size='small'>
                     <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                       {listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.map((appointment, index) =>
-                        <div key={index} className='list-item padding-item gap-2' onClick={(e) => e.target.className != 'font-12 flag-action' && this.onShowDrawerDetail(appointment._id)}>
+                        <div key={index} className='list-item padding-item gap-2' onClick={(e) => !e.target.className.includes('font-12 flag-action') && this.onShowDrawerDetail(appointment._id)}>
                           <Avatar size={24} icon={<FaUser size={12} />} />
                           <div className='div-service'>
                             <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
@@ -1288,7 +1288,23 @@ class Dashboard extends React.Component {
                           {userRole == 3 ? (
                             <>
                               <a className='font-12 flag-action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
-                              <a className='font-12 flag-action' onClick={() => this.onOpenModalPayment(appointment)}>{intl.formatMessage(msgDrawer.payFlag)}</a>
+                              <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                                <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+                                <input type="hidden" name="business" value="office@helpmegethelp.org" />
+                                <input type="hidden" name="cmd" value="_donations" />
+                                <input type="hidden" name="item_name" value="Help Me Get Help" />
+                                <input type="hidden" name="item_number" />
+                                <input type="hidden" name="amount" value="1.00" data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                                <input type="hidden" name="shipping" value="0.00" />
+                                <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+                                <input type="hidden" name="rm" value="2" />
+                                <input type="hidden" name="return" value="https://hmghbackend.onrender.com/clients/pay_flag" />
+                                <input type="hidden" name="cancel_return" value={window.location.href} />
+                                <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+                                <button className='font-12 flag-action pay-flag-button'>
+                                  {intl.formatMessage(msgDrawer.payFlag)}
+                                </button>
+                              </form>
                             </>
                           ) : (
                             <>

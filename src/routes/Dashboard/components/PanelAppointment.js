@@ -26,8 +26,8 @@ class PanelAppointment extends React.Component {
       visibleCancel: false,
       visibleCurrent: false,
       event: {},
-      visibleProcess: false,
       visibleInvoice: false,
+      visibleProcess: false,
       note: '',
       publicFeedback: '',
       visibleBalance: false,
@@ -57,7 +57,7 @@ class PanelAppointment extends React.Component {
 
   renderItemLeft = (event) => {
     return (
-      <div className={`item-left ${event.status == -2 ? 'line-through' : ''}`} onClick={() => this.props.onShowDrawerDetail(event._id)}>
+      <div className={`item-left ${[-2, -3].includes(event.status) ? 'line-through' : ''}`} onClick={() => this.props.onShowDrawerDetail(event._id)}>
         <Avatar size={24} icon={<FaUser size={12} />} />
         <div className='div-service'>
           <p className='font-09 mb-0'>{`${event.provider.firstName ?? ''} ${event.provider.lastName ?? ''}`}{event?.school?.name}</p>
@@ -65,7 +65,7 @@ class PanelAppointment extends React.Component {
         <p className='font-11 mb-0 ml-auto mr-5'>{event.location}</p>
         <div className='ml-auto'>
           <p className='font-12 mb-0'>{moment(event.date).format("hh:mm a")}</p>
-          <p className='font-12 font-700 mb-0'>{moment(event.date).format('MM/DD/YYYY')}</p>
+          <p className='font-12 font-700 mb-0 whitespace-nowrap'>{moment(event.date).format('MM/DD/YYYY')}</p>
         </div>
       </div>
     );
@@ -112,7 +112,7 @@ class PanelAppointment extends React.Component {
   }
 
   handleClose = (appointment) => {
-    this.setState({ visibleProcess: true, event: appointment });
+    this.setState({ visibleInvoice: true, event: appointment });
   }
 
   closeModalProcess = () => {
@@ -284,7 +284,7 @@ class PanelAppointment extends React.Component {
   }
 
   render() {
-    const { appointments, visibleCancel, visibleCurrent, event, visibleInvoice, visibleProcess, visibleBalance, visibleNoShow, visibleFeedback } = this.state;
+    const { appointments, visibleCancel, visibleCurrent, event, visibleInvoice, visibleProcess, visibleBalance, visibleFeedback, visibleNoShow } = this.state;
 
     const modalCancelProps = {
       visible: visibleCancel,
@@ -362,12 +362,12 @@ class PanelAppointment extends React.Component {
           {appointments?.filter(a => a.type == 3 && a.flagStatus != 1 && [0, -2].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
-              {this.props.user?.role > 3 && (
+              {this.props.user?.role > 3 ? (
                 <div className={`item-right gap-1 ${(data.status == -2 || appointments.find(a => a.dependent?._id == data?.dependent?._id && a.provider?._id == data?.provider?._id && a.flagStatus == 1)) && 'display-none'}`}>
                   <BsFillFlagFill size={15} onClick={() => this.openModalNoShow(data)} />
                   <BsCheckCircleFill className='text-green500' size={15} onClick={() => this.handleClose(data)} />
                 </div>
-              )}
+              ) : null}
             </div>
           ))}
           {(appointments?.filter(a => a.type == 3 && [0, -2].includes(a.status) && a.flagStatus != 1 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
@@ -383,12 +383,12 @@ class PanelAppointment extends React.Component {
           {appointments?.filter(a => a.type == 3 && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
-              {this.props.user?.role > 3 && (
+              {this.props.user?.role > 3 ? (
                 <div className={`item-right gap-1 ${data?.status == -3 && 'display-none'}`}>
                   <BsEnvelope size={15} onClick={() => this.openModalFeedback(data)} />
                   <BsFillFlagFill size={15} onClick={() => this.openModalBalance(data)} />
                 </div>
-              )}
+              ) : null}
             </div>
           ))}
           {(appointments?.filter(a => a.type == 3 && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
