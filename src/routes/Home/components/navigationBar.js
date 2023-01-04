@@ -43,11 +43,11 @@ const NavigationBar = () => {
       <Logo />
       <Box id="buttons" display="flex" gap="20px">
         <LoginButton>
-          <Link to={routerLinks['Login']} style={{
+          {/* <Link to={routerLinks['Login']} style={{
             color: 'inherit'
-          }}>
+          }}> */}
             Login/Register
-          </Link>
+          {/* </Link> */}
         </LoginButton>
         <DonationButton style={{
             background: "#35735C",

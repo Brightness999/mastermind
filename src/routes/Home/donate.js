@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Grid, Box, ButtonGroup, Typography, Chip, Switch, FormControlLabel } from '@mui/material';
+import { Grid, Box, ButtonGroup, Typography, Chip, Switch, FormControlLabel, TextField } from '@mui/material';
 import { ReactComponent as ManFilled } from './images/man_filled.svg';
 import { ReactComponent as ManUnfilled } from './images/man_unfilled.svg';
 import { styled } from '@mui/material/styles';
 import { BsBook } from 'react-icons/bs';
 import { SlSpeech } from 'react-icons/sl';
 import { CiBasketball } from 'react-icons/ci';
-import { BiCaretUp, BiCaretDown } from 'react-icons/bi';
+import { BiCaretUp, BiCaretDown, BiCaretLeft, BiCaretRight } from 'react-icons/bi';
 import NavigationBar from './components/navigationBar';
 import FirstDonateSection from './components/firstDonateSection';
 import DonationForm from './components/donationForm';
@@ -56,13 +56,13 @@ const StyledSwitch = styled(Switch)({
 })
 
 const Donate = () => {
-  const [donateMonthly, setDonateMonthly] = useState(false)
+  const [donateMonthly, setDonateMonthly] = useState(true)
   const [sponsoredChildren, setSponsoredChildren] = useState(0)
-  const [packageSelected, setPackageSelected] = useState(0)
+  const [packageSelected, setPackageSelected] = useState({})
   const [amount, setAmount] = useState(0);
 
   useEffect(() => {
-    setAmount(packageSelected * sponsoredChildren)
+    setAmount(packageSelected.amount * sponsoredChildren)
   }, [packageSelected, sponsoredChildren])
   
   const onManClick = (index) => {
@@ -78,6 +78,36 @@ const Donate = () => {
   const handleDecrement = () => {
     setSponsoredChildren((previousValue) => previousValue - 1)
   }
+  const package_plans = [
+    {
+      name: 'Specialized Tutoring Plan',
+      amount: 600,
+      sessions: 8,
+      planId: 'P-93K62384A78529137MOWRNIA',
+      icon: <BsBook size="36px" />
+    },
+    {
+      name: 'Speech Therapy Plan',
+      amount: 280,
+      sessions: 8,
+      planId: 'P-90X28329VS5128505MOWRTKQ',
+      icon: <SlSpeech size="36px" />
+    },
+    {
+      name: 'Occupational Therapy Plan',
+      amount: 320,
+      sessions: 4,
+      planId: 'P-68T89259UE970873HMOWRXQQ',
+      icon: <CiBasketball size="36px" />
+    },
+    {
+      name: 'Vision Therapy',
+      amount: 320,
+      sessions: 4,
+      planId: '',
+      icon: <CiBasketball size="36px" />
+    }
+  ]
   return (
     <>
       <Box style={{
@@ -145,32 +175,26 @@ const Donate = () => {
             textTransform: "uppercase",
             color: "#B5E6D3"
           }}>
-            <StyledBoxGreen onClick={() => setPackageSelected(220)}>
-              <BsBook size="36px" />
+            {package_plans.map((p) => (
+              <StyledBoxGreen onClick={() => setPackageSelected(p)}>
+              {p.icon}
               <Typography>
-                Homework / Tutoring
+                {p.name}
                 <br/>
-                8 Sessions
+                {p.sessions} Sessions
               </Typography>
-              <Chip label="$220" />
-            </StyledBoxGreen>
-            <StyledBoxGreen onClick={() => setPackageSelected(400)}>
-              <SlSpeech size="36px" />
+              <Chip label={`$${p.amount}`} />
+              </StyledBoxGreen>
+            ))}
+            <StyledBoxGreen>
+              <TextField
+                type="number"
+                onChange={(e) => setAmount(e.target.value)}
+                variant="outlined"
+              />
               <Typography>
-                Speech Therapy
-                <br/>
-                8 Sessions
+                Custom Amount
               </Typography>
-              <Chip label="$400" />
-            </StyledBoxGreen>
-            <StyledBoxGreen onClick={() => setPackageSelected(650)}>
-              <CiBasketball size="36px" />
-              <Typography>
-                Occupational Therapy
-                <br/>
-                8 Sessions
-              </Typography>
-              <Chip label="$650" />
             </StyledBoxGreen>
           </Box>
         </Grid>
@@ -192,55 +216,59 @@ const Donate = () => {
           </Typography>
           <Box display="flex">
             <Box>
-              <StyledBoxTan>
-                <ButtonGroup style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center"
-                }}>
-                  <BiCaretUp onClick={handleIncrement} style={{
-                    fontSize: "65px",
-                    cursor: "pointer"
-                  }} />
-                  <Typography style={{
-                    fontSize: "65px",
-                    lineHeight: '0.4'
+              <Box display="flex">
+                <StyledBoxTan>
+                  <ButtonGroup style={{
+                    display: "flex",
+                    alignItems: "center"
                   }}>
-                    {sponsoredChildren}
-                  </Typography>                
-                  <BiCaretDown onClick={handleDecrement} style={{
-                    fontSize: "65px",
-                    cursor: "pointer"
-                  }} />
-                </ButtonGroup>
-              </StyledBoxTan>
-              <StyledBoxTan mt="18px">
-                <FormControlLabel 
-                  control={<StyledSwitch
-                    checked={donateMonthly}
-                    onChange={(event) => setDonateMonthly(event.target.checked)}
-                  />}
-                  label={donateMonthly ? "monthly" : "once"}
-                  labelPlacement="bottom"
-                  sx={{
-                    paddingBottom: "15px",
-                    '& .MuiFormControlLabel-label': {
-                      lineHeight: '.15'
-                    }
-                  }}
-                />
-              </StyledBoxTan>
+                    <BiCaretLeft onClick={handleDecrement} style={{
+                      fontSize: "65px",
+                      cursor: "pointer"
+                    }} />
+                    <Typography style={{
+                      fontSize: "65px",
+                      lineHeight: '1.15'
+                    }}>
+                      {sponsoredChildren}
+                    </Typography>                
+                    <BiCaretRight onClick={handleIncrement} style={{
+                      fontSize: "65px",
+                      cursor: "pointer"
+                    }} />
+                  </ButtonGroup>
+                </StyledBoxTan>
+                <StyledBoxTan mt="18px">
+                  <FormControlLabel 
+                    control={<StyledSwitch
+                      checked={donateMonthly}
+                      onChange={(event) => setDonateMonthly(event.target.checked)}
+                    />}
+                    label={donateMonthly ? "monthly" : "once"}
+                    labelPlacement="bottom"
+                    sx={{
+                      paddingBottom: "15px",
+                      '& .MuiFormControlLabel-label': {
+                        lineHeight: '.15'
+                      }
+                    }}
+                  />
+                </StyledBoxTan>
+              </Box>
+              <Box display="flex" gap="20px" flexGrow={3} style={{
+                flexFlow: "row wrap",
+                alignItems: "center",
+                marginLeft: "30px"
+              }}>
+                {drawMen()}
+              </Box>
             </Box>
-            <Box display="flex" gap="20px" style={{
-              flexFlow: "row wrap",
-              alignItems: "center",
-              marginLeft: "30px"
-            }}>
-              {drawMen()}
+            <Box>
+              <DonationForm paymentAmount={amount} frequency={donateMonthly ? "monthly" : "once"} sponsoredChildren={sponsoredChildren} packageSelected={packageSelected} />
             </Box>
           </Box>
         </Grid>
-        <Grid item xs={12} style={{
+        {/* <Grid item xs={12} style={{
           padding: "50px",
           display: "flex",
           alignItems: "top",
@@ -251,7 +279,7 @@ const Donate = () => {
           margin: "auto"
         }}>
           <DonationForm paymentAmount={amount} frequency={donateMonthly ? "monthly" : "once"} sponsoredChildren={sponsoredChildren} packageSelected={packageSelected} />
-        </Grid>
+        </Grid> */}
         <Grid item xs={12} style={{
           padding: "50px",
           display: "flex",

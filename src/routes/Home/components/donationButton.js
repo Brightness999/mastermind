@@ -11,6 +11,11 @@ const useStyles = makeStyles({
     color: 'white',
     backgroundColor: "#8445C0",
     boxShadow: 'none',
+    padding: 0,
+    width: 'max-content'
+  },
+  link: {
+    color: 'inherit',
     padding: '13px 51px',
   }
 });
@@ -19,9 +24,7 @@ const DonationButton = ({...rest}) => {
   const classes = useStyles()
   return (
     <Button className={classes.text} {...rest}>
-      <Link to={routerLinks['Donate']} style={{
-        color: 'inherit'
-      }}>
+      <Link to={routerLinks['Donate']} className={classes.link}>
         Donate Now
       </Link>
     </Button>
