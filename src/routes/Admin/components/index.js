@@ -31,7 +31,7 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 import { setAcademicLevels, setDependents, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { clearFlag, getDefaultDataForAdmin, payFlag, requestClearance } from '../../../utils/api/apiList';
+import { clearFlag, getDefaultDataForAdmin, requestClearance } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
 import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
@@ -479,15 +479,6 @@ class SchedulingCenter extends React.Component {
       const { success } = result;
       if (success) {
         message.success('Sent successfully');
-      }
-    })
-  }
-
-  handlePayFlag = (appointment) => {
-    request.post(payFlag).then(result => {
-      const { success } = result;
-      if (success) {
-        message.success('Paid successfully');
       }
     })
   }

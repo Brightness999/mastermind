@@ -6,7 +6,7 @@ import msgDrawer from '../DrawerDetail/messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
 import request from '../../utils/api/request'
-import { clearFlag, payFlag, requestClearance, setFlag } from '../../utils/api/apiList';
+import { clearFlag, requestClearance, setFlag } from '../../utils/api/apiList';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { SearchOutlined } from '@ant-design/icons';
@@ -15,7 +15,6 @@ import ModalNoShow from './ModalNoShow';
 import moment from 'moment';
 import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/features/appointmentsSlice';
 import { store } from '../../redux/store';
-import ModalPayment from './ModalPayment';
 
 class ModalFlagExpand extends React.Component {
 	constructor(props) {
@@ -27,7 +26,6 @@ class ModalFlagExpand extends React.Component {
 			event: {},
 			visibleBalance: false,
 			visibleNoShow: false,
-			visiblePayment: false,
 		}
 		this.searchInput = React.createRef(null);
 	}
@@ -47,16 +45,6 @@ class ModalFlagExpand extends React.Component {
 			const { success } = result;
 			if (success) {
 				message.success('Sent successfully');
-			}
-		})
-	}
-
-	handlePayFlag = (payment) => {
-		request.post(payFlag, {...payment, appointmentId: this.state.event?._id}).then(result => {
-			const { success } = result;
-			if (success) {
-				message.success('Paid successfully');
-				this.setState({ visiblePayment: false });
 			}
 		})
 	}
@@ -150,19 +138,8 @@ class ModalFlagExpand extends React.Component {
 		store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
 	}
 
-	onOpenModalPayment = (appointment) => {
-		this.setState({
-			visiblePayment: true,
-			event: appointment,
-		})
-	}
-
-	onCloseModalPayment = () => {
-		this.setState({ visiblePayment: false });
-	}
-
 	render() {
-		const { activeFlags, clearedFlags, skillSet, visibleBalance, visibleNoShow, event, visiblePayment } = this.state;
+		const { activeFlags, clearedFlags, skillSet, visibleBalance, visibleNoShow, event } = this.state;
 		const { user } = this.props.auth;
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -255,7 +232,25 @@ class ModalFlagExpand extends React.Component {
 						>
 							<a className='btn-blue action'>{intl.formatMessage(msgDrawer.requestClearance)}</a>
 						</Popconfirm>
-						<a className='btn-blue action' onClick={() => this.onOpenModalPayment(appointment)}>{intl.formatMessage(msgDrawer.payFlag)}</a>
+						{appointment?.isPaid ? 'Paid' : (
+							<form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+								<input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+								<input type="hidden" name="business" value="office@helpmegethelp.org" />
+								<input type="hidden" name="cmd" value="_donations" />
+								<input type="hidden" name="item_name" value="Help Me Get Help" />
+								<input type="hidden" name="item_number" />
+								<input type="hidden" name="amount" value={appointment?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+								<input type="hidden" name="shipping" value="0.00" />
+								<input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+								<input type="hidden" name="rm" value="0" />
+								<input type="hidden" name="return" value={`${window.location.href}?success=true&id=${appointment?._id}`} />
+								<input type="hidden" name="cancel_return" value={window.location.href} />
+								<input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+								<button className='font-12 flag-action pay-flag-button'>
+									{intl.formatMessage(msgDrawer.payFlag)}
+								</button>
+							</form>
+						)}
 					</Space>
 				)
 			});
@@ -287,12 +282,6 @@ class ModalFlagExpand extends React.Component {
 			onSubmit: this.onSubmitFlagBalance,
 			onCancel: this.onCloseModalBalance,
 			event: event,
-		};
-
-		const modalPaymentProps = {
-			visible: visiblePayment,
-			onSubmit: this.handlePayFlag,
-			onCancel: this.onCloseModalPayment,
 		};
 
 		return (
@@ -331,7 +320,6 @@ class ModalFlagExpand extends React.Component {
 				</Tabs>
 				{visibleBalance && <ModalBalance {...modalBalanceProps} />}
 				{visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
-				{visiblePayment && <ModalPayment {...modalPaymentProps} />}
 			</Modal>
 		);
 	}

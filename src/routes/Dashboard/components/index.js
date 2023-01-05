@@ -25,7 +25,6 @@ import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
 import moment from 'moment';
 import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice'
-import { store } from '../../../redux/store';
 import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
@@ -33,7 +32,7 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 import { setDependents, setLocations, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payFlag, requestClearance } from '../../../utils/api/apiList';
+import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 
@@ -78,7 +77,6 @@ class Dashboard extends React.Component {
       visibleConfirm: false,
       confirmMessage: '',
       visibleSessionsNeedToClose: false,
-      visiblePayment: false,
       selectedDependentId: 0,
       visibleCreateNote: false,
     };
@@ -89,7 +87,21 @@ class Dashboard extends React.Component {
   componentDidMount() {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
-        store.dispatch(setUser(loginData));
+        this.props.dispatch(setUser(loginData));
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('success') === 'true' && params.get('id')) {
+          const appointmentId = params.get('id');
+          request.post(payInvoice, { id: appointmentId }).then(res => {
+            const { success } = res;
+            if (success) {
+              message.success('Paid successfully');
+              window.location.search = '';
+            }
+          }).catch(err => {
+            console.log('pay flag error---', err);
+            message.error(err.message);
+          });
+        }
         loginData?.role > 900 && this.props.history.push(routerLinks.Admin)
         switch (loginData.role) {
           case 3:
@@ -237,10 +249,10 @@ class Dashboard extends React.Component {
           SkillSet: data?.skillSet,
           listDependents: data?.dependents,
         });
-        store.dispatch(setDependents(data?.dependents));
-        store.dispatch(setProviders(data?.providers));
-        store.dispatch(setSkillSet(data?.skillSet));
-        store.dispatch(setLocations(data?.locations));
+        this.props.dispatch(setDependents(data?.dependents));
+        this.props.dispatch(setProviders(data?.providers));
+        this.props.dispatch(setSkillSet(data?.skillSet));
+        this.props.dispatch(setLocations(data?.locations));
       } else {
         this.setState({
           listProvider: [],
@@ -525,7 +537,7 @@ class Dashboard extends React.Component {
         date: new Date(obj.start).getTime()
       }
     }
-    store.dispatch(changeTime(data))
+    this.props.dispatch(changeTime(data))
   }
 
   handleEventRemove = (removeInfo) => {
@@ -541,7 +553,7 @@ class Dashboard extends React.Component {
   }
 
   getMyAppointments(userRole, dependentId) {
-    store.dispatch(getAppointmentsData({ role: userRole, dependentId: dependentId }));
+    this.props.dispatch(getAppointmentsData({ role: userRole, dependentId: dependentId }));
   }
 
   onCollapseChange = (v => {
@@ -668,7 +680,7 @@ class Dashboard extends React.Component {
         dependentId: dependentId,
       }
     };
-    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+    this.props.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
   }
 
   handleSelectProvider = (name) => {
@@ -728,16 +740,6 @@ class Dashboard extends React.Component {
     })
   }
 
-  handlePayFlag = (payment) => {
-    request.post(payFlag, { ...payment, _id: this.state.selectedEvent?._id }).then(result => {
-      const { success } = result;
-      if (success) {
-        message.success('Paid successfully');
-        this.setState({ visiblePayment: false });
-      }
-    })
-  }
-
   handleClearFlag = () => {
     this.onCloseModalConfirm();
     request.post(clearFlag, { _id: this.state.selectedEvent?._id }).then(result => {
@@ -774,17 +776,6 @@ class Dashboard extends React.Component {
 
   onCloseModalSessionsNeedToClose = () => {
     this.setState({ visibleSessionsNeedToClose: false });
-  }
-
-  onOpenModalPayment = (appointment) => {
-    this.setState({
-      visiblePayment: true,
-      selectedEvent: appointment,
-    });
-  }
-
-  onCloseModalPayment = () => {
-    this.setState({ visiblePayment: false });
   }
 
   handleClickDependent = (id) => {
@@ -835,7 +826,6 @@ class Dashboard extends React.Component {
       visibleConfirm,
       confirmMessage,
       visibleSessionsNeedToClose,
-      visiblePayment,
       selectedDependentId,
       visibleCreateNote,
     } = this.state;
@@ -940,12 +930,6 @@ class Dashboard extends React.Component {
       onSubmit: this.onSubmitModalConfirm,
       onCancel: this.onCloseModalConfirm,
       message: confirmMessage,
-    };
-
-    const modalPaymentProps = {
-      visible: visiblePayment,
-      onSubmit: this.handlePayFlag,
-      onCancel: this.onCloseModalPayment,
     };
 
     const modalCreateNoteProps = {
@@ -1288,23 +1272,25 @@ class Dashboard extends React.Component {
                           {userRole == 3 ? (
                             <>
                               <a className='font-12 flag-action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
-                              <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                                <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-                                <input type="hidden" name="business" value="office@helpmegethelp.org" />
-                                <input type="hidden" name="cmd" value="_donations" />
-                                <input type="hidden" name="item_name" value="Help Me Get Help" />
-                                <input type="hidden" name="item_number" />
-                                <input type="hidden" name="amount" value="1.00" data-aid="PAYMENT_HIDDEN_AMOUNT" />
-                                <input type="hidden" name="shipping" value="0.00" />
-                                <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-                                <input type="hidden" name="rm" value="2" />
-                                <input type="hidden" name="return" value="https://hmghbackend.onrender.com/clients/pay_flag" />
-                                <input type="hidden" name="cancel_return" value={window.location.href} />
-                                <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                                <button className='font-12 flag-action pay-flag-button'>
-                                  {intl.formatMessage(msgDrawer.payFlag)}
-                                </button>
-                              </form>
+                              {appointment?.isPaid ? 'Paid' : (
+                                <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                                  <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+                                  <input type="hidden" name="business" value="office@helpmegethelp.org" />
+                                  <input type="hidden" name="cmd" value="_donations" />
+                                  <input type="hidden" name="item_name" value="Help Me Get Help" />
+                                  <input type="hidden" name="item_number" />
+                                  <input type="hidden" name="amount" value={appointment?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                                  <input type="hidden" name="shipping" value="0.00" />
+                                  <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+                                  <input type="hidden" name="rm" value="0" />
+                                  <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${appointment?._id}`} />
+                                  <input type="hidden" name="cancel_return" value={window.location.href} />
+                                  <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+                                  <button className='font-12 flag-action pay-flag-button'>
+                                    {intl.formatMessage(msgDrawer.payFlag)}
+                                  </button>
+                                </form>
+                              )}
                             </>
                           ) : (
                             <>
@@ -1354,7 +1340,6 @@ class Dashboard extends React.Component {
         <ModalNewSubsidyReview {...modalNewReviewProps} />
         {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
         {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
-        {visiblePayment && <ModalPayment {...modalPaymentProps} />}
         {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
       </div>
     );

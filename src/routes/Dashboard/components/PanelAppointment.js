@@ -2,7 +2,7 @@ import React from 'react';
 import { Avatar, message, Tabs } from 'antd';
 import { FaUser } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
-import { BsEnvelope, BsXCircle, BsFillFlagFill, BsCheckCircleFill } from 'react-icons/bs';
+import { BsEnvelope, BsXCircle, BsFillFlagFill, BsCheckCircleFill, BsPaypal } from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import messages from '../messages';
 import msgModal from '../../../components/Modal/messages';
@@ -285,6 +285,7 @@ class PanelAppointment extends React.Component {
 
   render() {
     const { appointments, visibleCancel, visibleCurrent, event, visibleInvoice, visibleProcess, visibleBalance, visibleFeedback, visibleNoShow } = this.state;
+    console.log(appointments)
 
     const modalCancelProps = {
       visible: visibleCancel,
@@ -383,6 +384,27 @@ class PanelAppointment extends React.Component {
           {appointments?.filter(a => a.type == 3 && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
+              {(this.props.user?.role == 3 && !data?.isPaid) ? (
+                <div className={`item-right cursor gap-1 ${data?.status == -3 && 'display-none'}`}>
+                  <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                    <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+                    <input type="hidden" name="business" value="office@helpmegethelp.org" />
+                    <input type="hidden" name="cmd" value="_donations" />
+                    <input type="hidden" name="item_name" value="Help Me Get Help" />
+                    <input type="hidden" name="item_number" />
+                    <input type="hidden" name="amount" value={data?.items?.reduce((a, b) => a += b.rate * 1, 0)} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                    <input type="hidden" name="shipping" value="0.00" />
+                    <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+                    <input type="hidden" name="rm" value="0" />
+                    <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${data?._id}`} />
+                    <input type="hidden" name="cancel_return" value={window.location.href} />
+                    <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+                    <button className='flag-action pay-flag-button'>
+                      <BsPaypal size={15} color="#1976D2" />
+                    </button>
+                  </form>
+                </div>
+              ) : null}
               {this.props.user?.role > 3 ? (
                 <div className={`item-right gap-1 ${data?.status == -3 && 'display-none'}`}>
                   <BsEnvelope size={15} onClick={() => this.openModalFeedback(data)} />
