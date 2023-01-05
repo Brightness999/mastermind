@@ -215,8 +215,8 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
         // style={{ width: '36%', height: 'min-content', display: "flex", gap: "30px", flexDirection: "column" }}
       >
         <Toaster />
-        <Header style={{ fontSize: '52px' }} text="Donation Total:" />
-        <Header style={{ fontSize: '41px' }} text={`${formatter.format(paymentAmount || 0)} / ${frequency}`} />
+        <Header style={{ fontSize: '52px', whiteSpace: 'noWrap' }} text="Donation Total:" />
+        <Header style={{ fontSize: '41px', paddingBottom: '20px' }} text={`${formatter.format(paymentAmount || 0)} / ${frequency}`} />
           <Box display={frequency === 'once' ? 'block' : 'none'}>
             <PayPalScriptProvider
               options={{
@@ -277,7 +277,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
             rel="noopener noreferrer">
             Donate with The Donors Fund
           </Button>
-        <SubHeader text="Help Me Get Help is a project of the Association for Torah Advancement (AFTA). AFTA is a nonprofit organization. All donations are tax deductible." />
+        <SubHeader style={{ paddingTop: '20px', textAlign: 'justify' }} text="Help Me Get Help is a project of the Association for Torah Advancement (AFTA). AFTA is a nonprofit organization. All donations are tax deductible." />
       </StyledBoxTan>
     // </Form>
   )

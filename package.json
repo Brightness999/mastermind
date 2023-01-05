@@ -5,7 +5,7 @@
   "homepage": "/",
   "license": "MIT",
   "scripts": {
-    "start": "react-app-rewired",
+    "start": "react-app-rewired --openssl-legacy-provider start",
     "build": "react-app-rewired build",
     "generate": "plop --plopfile ./generators/index.js"
   },

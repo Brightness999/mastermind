@@ -215,7 +215,7 @@ const Donate = () => {
               {"Amount of children you'd like to sponsor"}
           </Typography>
           <Box display="flex">
-            <Box>
+            <Box flexGrow={6}>
               <Box display="flex">
                 <StyledBoxTan>
                   <ButtonGroup style={{
@@ -238,7 +238,7 @@ const Donate = () => {
                     }} />
                   </ButtonGroup>
                 </StyledBoxTan>
-                <StyledBoxTan mt="18px">
+                <StyledBoxTan ml="18px" style={{ display: "flex", alignItems: "center" }}>
                   <FormControlLabel 
                     control={<StyledSwitch
                       checked={donateMonthly}
@@ -258,12 +258,13 @@ const Donate = () => {
               <Box display="flex" gap="20px" flexGrow={3} style={{
                 flexFlow: "row wrap",
                 alignItems: "center",
-                marginLeft: "30px"
+                marginTop: "30px",
+                marginRight: "30px",
               }}>
                 {drawMen()}
               </Box>
             </Box>
-            <Box>
+            <Box style={{ width: "min-content" }}>
               <DonationForm paymentAmount={amount} frequency={donateMonthly ? "monthly" : "once"} sponsoredChildren={sponsoredChildren} packageSelected={packageSelected} />
             </Box>
           </Box>
