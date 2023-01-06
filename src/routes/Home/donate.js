@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Grid, Box, ButtonGroup, Typography, Chip, Switch, FormControlLabel, TextField } from '@mui/material';
+import { Grid, Box, ButtonGroup, Typography, Chip, Switch, FormControlLabel, TextField, InputAdornment } from '@mui/material';
 import { ReactComponent as ManFilled } from './images/man_filled.svg';
 import { ReactComponent as ManUnfilled } from './images/man_unfilled.svg';
 import { styled } from '@mui/material/styles';
 import { BsBook } from 'react-icons/bs';
 import { SlSpeech } from 'react-icons/sl';
 import { CiBasketball } from 'react-icons/ci';
+import { AiOutlineEye } from 'react-icons/ai';
 import { BiCaretUp, BiCaretDown, BiCaretLeft, BiCaretRight } from 'react-icons/bi';
 import NavigationBar from './components/navigationBar';
 import FirstDonateSection from './components/firstDonateSection';
@@ -18,7 +19,7 @@ const StyledBoxGreen = styled(Box)({
   fontWeight: "700px",
   width: "279px",
   height: "220px",
-  backgroundColor: "#B5E6D3",
+  // backgroundColor: "#B5E6D3",
   border: "thin solid #35735C",
   borderRadius: "7px",
   display: "flex",
@@ -28,6 +29,7 @@ const StyledBoxGreen = styled(Box)({
   justifyContent: "center",
   textAlign: "center",
   color: "#35735C",
+  margin: "20px",
   '&:hover': {
     backgroundColor: '#35735C',
     color: "white",
@@ -58,26 +60,6 @@ const StyledSwitch = styled(Switch)({
 const Donate = () => {
   const [donateMonthly, setDonateMonthly] = useState(true)
   const [sponsoredChildren, setSponsoredChildren] = useState(0)
-  const [packageSelected, setPackageSelected] = useState({})
-  const [amount, setAmount] = useState(0);
-
-  useEffect(() => {
-    setAmount(packageSelected.amount * sponsoredChildren)
-  }, [packageSelected, sponsoredChildren])
-  
-  const onManClick = (index) => {
-    setSponsoredChildren(index + 1)
-    drawMen()
-  }
-  
-  const drawMen = () => ([...Array(28)].map((item, index) => sponsoredChildren >= (index + 1) ? <ManFilled onClick={() => onManClick(index)} style={{ cursor: "pointer" }} /> : <ManUnfilled onClick={() => onManClick(index)} style={{ cursor: "pointer" }} />))
-  
-  const handleIncrement = () => {
-    setSponsoredChildren((previousValue) => previousValue + 1)
-  }
-  const handleDecrement = () => {
-    setSponsoredChildren((previousValue) => previousValue - 1)
-  }
   const package_plans = [
     {
       name: 'Specialized Tutoring Plan',
@@ -104,10 +86,30 @@ const Donate = () => {
       name: 'Vision Therapy',
       amount: 320,
       sessions: 4,
-      planId: '',
-      icon: <CiBasketball size="36px" />
+      planId: 'P-8MA84179XW564704LMO2OMCI',
+      icon: <AiOutlineEye size="36px" />
     }
   ]
+  const [packageSelected, setPackageSelected] = useState(package_plans[0])
+  const [amount, setAmount] = useState(0);
+
+  useEffect(() => {
+    setAmount(packageSelected.amount * sponsoredChildren)
+  }, [packageSelected, sponsoredChildren])
+  
+  const onManClick = (index) => {
+    setSponsoredChildren(index + 1)
+    drawMen()
+  }
+  
+  const drawMen = () => ([...Array(10)].map((item, index) => sponsoredChildren >= (index + 1) ? <ManFilled onClick={() => onManClick(index)} style={{ cursor: "pointer" }} /> : <ManUnfilled onClick={() => onManClick(index)} style={{ cursor: "pointer" }} />))
+  
+  const handleIncrement = () => {
+    setSponsoredChildren((previousValue) => previousValue + 1)
+  }
+  const handleDecrement = () => {
+    setSponsoredChildren((previousValue) => previousValue - 1)
+  }
   return (
     <>
       <Box style={{
@@ -169,14 +171,18 @@ const Donate = () => {
           </Radio.Group> */}
           <Box style={{
             display: "flex",
-            justifyContent: "space-evenly",
+            flexFlow: "wrap",
+            justifyContent: "center",
             fontFamily: "ProximaNova",
             fontSize: "17px",
             textTransform: "uppercase",
             color: "#B5E6D3"
           }}>
             {package_plans.map((p) => (
-              <StyledBoxGreen onClick={() => setPackageSelected(p)}>
+              <StyledBoxGreen onClick={() => setPackageSelected(p)} sx={{
+                backgroundColor: packageSelected.name === p.name ? '#35735C' : '#B5E6D3',
+                color: packageSelected.name === p.name ? 'white' : '#35735C'
+              }}>
               {p.icon}
               <Typography>
                 {p.name}
@@ -186,11 +192,17 @@ const Donate = () => {
               <Chip label={`$${p.amount}`} />
               </StyledBoxGreen>
             ))}
-            <StyledBoxGreen>
+            <StyledBoxGreen sx={{
+                backgroundColor: '#B5E6D3',
+                color: '#35735C'
+              }}>
               <TextField
                 type="number"
                 onChange={(e) => setAmount(e.target.value)}
                 variant="outlined"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                }}
               />
               <Typography>
                 Custom Amount

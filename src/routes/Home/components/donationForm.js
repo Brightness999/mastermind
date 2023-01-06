@@ -38,7 +38,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
   
   const createSubscription = (data, actions) => {
     return actions.subscription.create({
-      plan_id: 'P-27U32078NC629723CMOXRP7Y', // packageSelected.planId,
+      plan_id: packageSelected.planId,
       quantity: sponsoredChildren || 1
     });
   }
