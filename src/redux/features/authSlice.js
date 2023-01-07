@@ -58,6 +58,7 @@ export const setInforClientChild = createAsyncThunk(
 			if (result.success) {
 				message.success('Updated successfully');
 			}
+			return result;
 		} catch (error) {
 			console.log(error, 'error')
 		}

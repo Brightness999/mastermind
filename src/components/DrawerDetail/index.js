@@ -379,7 +379,6 @@ class DrawerDetail extends Component {
   render() {
     const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage } = this.state;
     const { event, listAppointmentsRecent } = this.props;
-    console.log(event)
 
     const providerProfile = (
       <div className='provider-profile'>

@@ -285,7 +285,6 @@ class PanelAppointment extends React.Component {
 
   render() {
     const { appointments, visibleCancel, visibleCurrent, event, visibleInvoice, visibleProcess, visibleBalance, visibleFeedback, visibleNoShow } = this.state;
-    console.log(appointments)
 
     const modalCancelProps = {
       visible: visibleCancel,

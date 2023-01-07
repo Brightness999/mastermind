@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select, DatePicker } from 'antd';
+import { Row, Col, Form, Button, Input, Select, DatePicker, Popconfirm } from 'antd';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
 import msgLogin from '../../../../Sign/Login/messages';
@@ -21,6 +21,7 @@ class InfoChild extends Component {
 			listServices: [],
 			listSchools: [],
 			academicLevels: [],
+			children: [],
 		}
 	}
 
@@ -31,6 +32,7 @@ class InfoChild extends Component {
 			const { success, data } = result;
 
 			if (success) {
+				this.setState({ children: data });
 				data?.map(item => {
 					item.services = item.services.map(item => item._id);
 					item.birthday = moment(item.birthday);
@@ -67,10 +69,16 @@ class InfoChild extends Component {
 		return moment();
 	}
 
-	onFinish = (values) => {
+	onFinish = async (values) => {
 		try {
 			const token = localStorage.getItem('token');
-			store.dispatch(setInforClientChild({ data: values.children, token: token }))
+			const { children } = this.state;
+			const additionalChildren = values.children?.filter(child => !child._id);
+			const updateChildren = values.children?.filter(child => child._id);
+			const removedChildren = children.filter(child => !values.children?.find(item => item._id == child._id))?.map(child => ({ ...child, isRemoved: true }));
+
+			const result = await store.dispatch(setInforClientChild({ data: { additionalChildren: additionalChildren, updateChildren: updateChildren, removedChildren: removedChildren }, token: token }))
+			this.form.setFieldsValue({ children: result.payload.data?.map(item => ({ ...item, birthday: moment(item.birthday) })) });
 		} catch (error) {
 			console.log('update children error ---', error)
 		}
@@ -80,23 +88,9 @@ class InfoChild extends Component {
 		console.log('Failed:', errorInfo);
 	};
 
-	createNewChild = () => {
-		const children = this.form.getFieldsValue()?.children;
-		const { user } = this.props.auth;
-		const newChild = {
-			lastName: user?.parentInfo?.familyName,
-			guardianEmail: user?.parentInfo?.fatherEmail ? user?.parentInfo?.fatherEmail : user?.parentInfo?.motherEmail,
-			guardianPhone: user?.parentInfo?.fatherPhoneNumber ? user?.parentInfo?.fatherPhoneNumber : user?.parentInfo?.motherPhoneNumber,
-		}
-		this.form.setFieldsValue({ children: [...children, newChild] });
-	}
-
-	removeChild = (index) => {
-
-	}
-
 	render() {
 		const { listServices, listSchools, academicLevels } = this.state;
+		const { user } = this.props.auth;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -120,17 +114,17 @@ class InfoChild extends Component {
 												<div className='flex flex-row items-center'>
 													<p className='font-16 mr-10 mb-0'>{intl.formatMessage(messages.dependent)}# {index + 1}</p>
 												</div>
-												<Button
-													type='text'
-													className='remove-btn'
-													icon={<TbTrash size={18} />}
-													onClick={() => {
-														remove(field.name);
-														this.removeChild(index);
-													}}
+												<Popconfirm
+													title={<div className='text-center'><div>Are you sure to remove your child?</div><div>This cannot be undone & you may lose your slots & won't get them back.</div></div>}
+													onConfirm={() => remove(field.name)}
+													okText="Yes"
+													cancelText="No"
+													overlayClassName='remove-child-confirm'
 												>
-													{intl.formatMessage(messages.remove)}
-												</Button>
+													<div className='flex items-center gap-1 text-red cursor'>
+														<TbTrash size={18} /><span>{intl.formatMessage(messages.remove)}</span>
+													</div>
+												</Popconfirm>
 											</div>
 											<Row gutter={14}>
 												<Col xs={24} sm={24} md={9}>
@@ -276,7 +270,11 @@ class InfoChild extends Component {
 											type="text"
 											className='add-dependent-btn'
 											icon={<BsPlusCircle size={17} className='mr-5' />}
-											onClick={() => this.createNewChild()}
+											onClick={() => add({
+												lastName: user?.parentInfo?.familyName,
+												guardianEmail: user?.parentInfo?.fatherEmail ? user?.parentInfo?.fatherEmail : user?.parentInfo?.motherEmail,
+												guardianPhone: user?.parentInfo?.fatherPhoneNumber ? user?.parentInfo?.fatherPhoneNumber : user?.parentInfo?.motherPhoneNumber,
+											})}
 										>
 											{intl.formatMessage(messages.addDependent)}
 										</Button>
