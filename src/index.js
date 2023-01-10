@@ -15,7 +15,10 @@ import LanguageProvider from './components/LanguageProvider';
 import {persistor, store} from './redux/store';
 import { Provider } from 'react-redux';
 import { helper } from './utils/auth/helper';
-import {PersistGate} from 'redux-persist/integration/react';
+import { PersistGate } from 'redux-persist/integration/react';
+// import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+// import { PAYPAL_CLIENT_ID } from './utils';
+
 // -> initialization
 const application = dva({
   history: createBrowserHistory({
@@ -50,7 +53,9 @@ application.router(({ history, app }) => {
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
     <LanguageProvider>
-      <Router history={history}  >{createRoutes(app)}</Router>
+      {/* <PayPalScriptProvider options= {{"client-id": PAYPAL_CLIENT_ID.clientId }}> */}
+        <Router history={history}  >{createRoutes(app)}</Router>
+      {/* </PayPalScriptProvider> */}
     </LanguageProvider>
     </PersistGate>
   </Provider>
