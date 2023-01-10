@@ -66,10 +66,10 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
     if (frequency === 'monthly') {
       sendRequestMonthlyCustomAmount(paymentAmount, sponsoredChildren, packageSelected)
     }
+    toast.success("Your payment has been processed! Thank you for your donation!")
     return actions.order.capture().then(function (details) {
       const {payer} = details;
       setBillingDetails(payer);
-      toast.success("Your payment has been processed!")
     })
   };
 
