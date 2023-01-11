@@ -236,7 +236,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
         <Toaster />
         <Header style={{ fontSize: '52px', whiteSpace: 'noWrap' }} text="Donation Total:" />
         <Header style={{ fontSize: '41px', paddingBottom: '20px' }} text={`${formatter.format(paymentAmount || 0)} / ${frequency}`} />
-        <Button onClick={() => sendDonationReceipt(paymentAmount)}>Send Receipt</Button>
+        {/* <Button onClick={() => sendDonationReceipt(paymentAmount)}>Send Receipt</Button> */}
           <Box display={frequency === 'once' ? 'block' : 'none'}>
             <PayPalScriptProvider
               options={{
