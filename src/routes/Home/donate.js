@@ -59,7 +59,7 @@ const StyledSwitch = styled(Switch)({
 
 const Donate = () => {
   const [donateMonthly, setDonateMonthly] = useState(true)
-  const [sponsoredChildren, setSponsoredChildren] = useState(0)
+  const [sponsoredChildren, setSponsoredChildren] = useState(1)
   const package_plans = [
     {
       name: 'Specialized Tutoring Plan',
@@ -91,7 +91,7 @@ const Donate = () => {
     }
   ]
   const [packageSelected, setPackageSelected] = useState(package_plans[0])
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState(packageSelected.amount * sponsoredChildren);
 
   useEffect(() => {
     setAmount(packageSelected.amount * sponsoredChildren)

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Grid, Box, Button } from '@mui/material';
+import { Grid, Box, Button, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Header from './header';
 import SubHeader from './subHeader';
@@ -67,6 +67,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
       sendRequestMonthlyCustomAmount(paymentAmount, sponsoredChildren, packageSelected)
     }
     toast.success("Your payment has been processed! Thank you for your donation!")
+    sendDonationReceipt(paymentAmount)
     return actions.order.capture().then(function (details) {
       const {payer} = details;
       setBillingDetails(payer);
@@ -77,7 +78,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
     toast.error("Something went wrong with your payment")
   };
 
-  //email event
+  //email events
   const sendRequestMonthlyCustomAmount = (paymentAmount, sponsoredChildren, packageSelected) => {
     axios.post(url + 'donations/monthly_custom_amount', { paymentAmount, sponsoredChildren, packageSelected }
         ).then(result => {
@@ -92,6 +93,24 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
 
         }).catch(err=>{
           console.log('error trying to send email')
+        })
+  }
+
+  const sendDonationReceipt = (money) => {
+    axios.post(url + 'donations/donation_receipt', { money }
+        ).then(result => {
+            console.log('donation_receipt', result.data);
+            console.log(result.data)
+            if (result.data.success) {
+                var data = result.data.data;
+                this.setState({isSent:true})
+            } else {
+              console.log('error sending email')
+            }
+
+        }).catch(err=>{
+          console.log(err)
+          console.log('error trying to generate or send donation receipt')
         })
   }
 
@@ -217,6 +236,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
         <Toaster />
         <Header style={{ fontSize: '52px', whiteSpace: 'noWrap' }} text="Donation Total:" />
         <Header style={{ fontSize: '41px', paddingBottom: '20px' }} text={`${formatter.format(paymentAmount || 0)} / ${frequency}`} />
+        <Button onClick={() => sendDonationReceipt(paymentAmount)}>Send Receipt</Button>
           <Box display={frequency === 'once' ? 'block' : 'none'}>
             <PayPalScriptProvider
               options={{
@@ -227,7 +247,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
             >
               <PayPalButtons
                 style={{
-                  color: "silver",
+                  color: "black",
                   shape: "rect",
                   label: "paypal",
                   layout: "horizontal",
@@ -235,7 +255,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
                 onClick={onPayPalButtonClick}
                 createOrder={createOrder}
                 onApprove={onApprove}
-                fundingSource="paypal"
+                fundingSource="card"
                 // disabled={!isFormValid}
                 disabled={paymentAmount < 1}
                 forceReRender={[paymentAmount, frequency]}
@@ -253,7 +273,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
             >
               <PayPalButtons
                 style={{
-                  color: "silver",
+                  color: "black",
                   shape: "rect",
                   label: "paypal",
                   layout: "horizontal",
@@ -261,7 +281,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
                 onClick={onPayPalButtonClick}
                 createSubscription={createSubscription}
                 onApprove={onApprove}
-                fundingSource="paypal"
+                fundingSource="card"
                 // disabled={!isFormValid}
                 disabled={paymentAmount < 1}
                 forceReRender={[paymentAmount, frequency]}
@@ -269,6 +289,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
               />
             </PayPalScriptProvider>
           </Box>
+          <SubHeader style={{ textAlign: 'center' }} text="or" />
           <Button
             style={{ backgroundColor: "#eee", width: "100%", padding: "10px", marginTop: "10px" }}
             component="a"
@@ -277,6 +298,11 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
             rel="noopener noreferrer">
             Donate with The Donors Fund
           </Button>
+          <Box width="100%" textAlign="center">
+            <Typography variant="caption">
+              {"Please search for Tax ID: 36-6116829 (Association For Torah Advancement) from the available charities listed."}
+            </Typography>
+          </Box>
         <SubHeader style={{ paddingTop: '20px', textAlign: 'justify' }} text="Help Me Get Help is a project of the Association for Torah Advancement (AFTA). AFTA is a nonprofit organization. All donations are tax deductible." />
       </StyledBoxTan>
     // </Form>
