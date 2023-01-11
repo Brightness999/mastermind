@@ -59,7 +59,7 @@ const StyledSwitch = styled(Switch)({
 
 const Donate = () => {
   const [donateMonthly, setDonateMonthly] = useState(true)
-  const [sponsoredChildren, setSponsoredChildren] = useState(0)
+  const [sponsoredChildren, setSponsoredChildren] = useState(1)
   const package_plans = [
     {
       name: 'Specialized Tutoring Plan',
@@ -91,7 +91,7 @@ const Donate = () => {
     }
   ]
   const [packageSelected, setPackageSelected] = useState(package_plans[0])
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState(packageSelected.amount * sponsoredChildren);
 
   useEffect(() => {
     setAmount(packageSelected.amount * sponsoredChildren)
@@ -102,7 +102,7 @@ const Donate = () => {
     drawMen()
   }
   
-  const drawMen = () => ([...Array(10)].map((item, index) => sponsoredChildren >= (index + 1) ? <ManFilled onClick={() => onManClick(index)} style={{ cursor: "pointer" }} /> : <ManUnfilled onClick={() => onManClick(index)} style={{ cursor: "pointer" }} />))
+  const drawMen = () => ([...Array(12)].map((item, index) => sponsoredChildren >= (index + 1) ? <ManFilled onClick={() => onManClick(index)} style={{ cursor: "pointer" }} /> : <ManUnfilled onClick={() => onManClick(index)} style={{ cursor: "pointer" }} />))
   
   const handleIncrement = () => {
     setSponsoredChildren((previousValue) => previousValue + 1)
@@ -222,35 +222,37 @@ const Donate = () => {
               fontSize: '52px',
               color: '#35735C',
               lineHeight: 1,
-              paddingBottom: "30px"
+              paddingBottom: "30px",
+              textAlign: "center"
             }}>
               {"Amount of children you'd like to sponsor"}
           </Typography>
-          <Box display="flex">
-            <Box flexGrow={6}>
-              <Box display="flex">
+          <Box display="flex" flexDirection="column" gap="20px" alignItems="center">
+            <Box display="flex">
+              <Box>
                 <StyledBoxTan>
                   <ButtonGroup style={{
                     display: "flex",
-                    alignItems: "center"
+                    alignItems: "center",
+                    flexDirection: "column"
                   }}>
-                    <BiCaretLeft onClick={handleDecrement} style={{
+                    <BiCaretUp onClick={handleIncrement} style={{
                       fontSize: "65px",
                       cursor: "pointer"
                     }} />
                     <Typography style={{
                       fontSize: "65px",
-                      lineHeight: '1.15'
+                      lineHeight: '.5'
                     }}>
                       {sponsoredChildren}
                     </Typography>                
-                    <BiCaretRight onClick={handleIncrement} style={{
+                    <BiCaretDown onClick={handleDecrement} style={{
                       fontSize: "65px",
                       cursor: "pointer"
                     }} />
                   </ButtonGroup>
                 </StyledBoxTan>
-                <StyledBoxTan ml="18px" style={{ display: "flex", alignItems: "center" }}>
+                <StyledBoxTan style={{ display: "flex", alignItems: "center" }}>
                   <FormControlLabel 
                     control={<StyledSwitch
                       checked={donateMonthly}
@@ -267,11 +269,10 @@ const Donate = () => {
                   />
                 </StyledBoxTan>
               </Box>
-              <Box display="flex" gap="20px" flexGrow={3} style={{
+              <Box display="flex" gap="17px" pl="17px" style={{
                 flexFlow: "row wrap",
                 alignItems: "center",
-                marginTop: "30px",
-                marginRight: "30px",
+                maxWidth: "310px"
               }}>
                 {drawMen()}
               </Box>

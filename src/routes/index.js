@@ -66,11 +66,6 @@ const routesConfig = app => [
       Statistics(app)
     ]
   },
-  // {
-  //   path: '/Home',
-  //   title: 'Home',
-  //   component: Home
-  // },
   {
     path: '/donate',
     title: 'Donate',

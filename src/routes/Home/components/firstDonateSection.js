@@ -3,7 +3,7 @@ import { Grid, Box, Typography,  } from '@mui/material';
 import DonationButton from './donationButton';
 import Header from './header';
 import SubHeader from './subHeader'
-import Image5 from '../images/image5.svg';
+import Image5 from '../images/image_5.png';
 
 const FirstDonateSection = () => {
   return (
