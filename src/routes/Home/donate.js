@@ -60,8 +60,6 @@ const StyledSwitch = styled(Switch)({
 const Donate = () => {
   const [donateMonthly, setDonateMonthly] = useState(true)
   const [sponsoredChildren, setSponsoredChildren] = useState(1)
-  const [donorEmail, setDonorEmail] = useState(null)
-  const [sendReceipt, setSendReceipt] = useState(false)
 
   const package_plans = [
     {
@@ -280,26 +278,12 @@ const Donate = () => {
                 {drawMen()}
               </Box>
             </Box>
-            <Box display="flex" style={{ maxWidth: "430px", width: "100%" }}>
-              <FormControlLabel
-                control={<Checkbox checked={sendReceipt} onChange={(e) => setSendReceipt(e.target.checked)} />}
-                label="Receipt"
-              />
-              <TextField
-                label="Email Address"
-                fullWidth
-                value={donorEmail}
-                onChange={(e) => setDonorEmail(e.target.value)}
-                variant="outlined"
-              />
-            </Box>
             <Box style={{ width: "min-content" }}>
               <DonationForm
                 paymentAmount={amount}
                 frequency={donateMonthly ? "monthly" : "once"}
                 sponsoredChildren={sponsoredChildren}
                 packageSelected={packageSelected}
-                donorEmail={donorEmail}
               />
             </Box>
           </Box>
