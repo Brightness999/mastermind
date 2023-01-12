@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Grid, Box, ButtonGroup, Typography, Chip, Switch, FormControlLabel, TextField, InputAdornment } from '@mui/material';
+import { Checkbox, Grid, Box, ButtonGroup, Typography, Chip, Switch, FormControlLabel, TextField, InputAdornment } from '@mui/material';
 import { ReactComponent as ManFilled } from './images/man_filled.svg';
 import { ReactComponent as ManUnfilled } from './images/man_unfilled.svg';
 import { styled } from '@mui/material/styles';
@@ -60,6 +60,7 @@ const StyledSwitch = styled(Switch)({
 const Donate = () => {
   const [donateMonthly, setDonateMonthly] = useState(true)
   const [sponsoredChildren, setSponsoredChildren] = useState(1)
+
   const package_plans = [
     {
       name: 'Specialized Tutoring Plan',
@@ -278,7 +279,12 @@ const Donate = () => {
               </Box>
             </Box>
             <Box style={{ width: "min-content" }}>
-              <DonationForm paymentAmount={amount} frequency={donateMonthly ? "monthly" : "once"} sponsoredChildren={sponsoredChildren} packageSelected={packageSelected} />
+              <DonationForm
+                paymentAmount={amount}
+                frequency={donateMonthly ? "monthly" : "once"}
+                sponsoredChildren={sponsoredChildren}
+                packageSelected={packageSelected}
+              />
             </Box>
           </Box>
         </Grid>

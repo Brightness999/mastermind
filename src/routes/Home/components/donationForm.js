@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Grid, Box, Button, Typography } from '@mui/material';
+import { Grid, Box, Button, Typography, FormControlLabel, TextField, Checkbox } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Header from './header';
 import SubHeader from './subHeader';
@@ -23,7 +23,9 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
   const [orderID, setOrderID] = useState(false);
   const [billingDetails, setBillingDetails] = useState("");
   // const [isFormValid, setIsFormValid] = useState(false);
-  
+  const [donorEmail, setDonorEmail] = useState(null)
+  const [sendReceipt, setSendReceipt] = useState(false)
+
   //paypal events
   const onPayPalButtonClick = (data, actions) => {
     // if (!isFormValid) {
@@ -67,7 +69,9 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
       sendRequestMonthlyCustomAmount(paymentAmount, sponsoredChildren, packageSelected)
     }
     toast.success("Your payment has been processed! Thank you for your donation!")
-    sendDonationReceipt(paymentAmount)
+    if (sendReceipt && donorEmail != null) {
+      sendDonationReceipt(paymentAmount, donorEmail)
+    }
     return actions.order.capture().then(function (details) {
       const {payer} = details;
       setBillingDetails(payer);
@@ -96,8 +100,8 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
         })
   }
 
-  const sendDonationReceipt = (money) => {
-    axios.post(url + 'donations/donation_receipt', { money }
+  const sendDonationReceipt = (money, email) => {
+    axios.post(url + 'donations/donation_receipt', { money, email }
         ).then(result => {
             console.log('donation_receipt', result.data);
             console.log(result.data)
@@ -236,6 +240,20 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
         <Toaster />
         <Header style={{ fontSize: '52px', whiteSpace: 'noWrap' }} text="Donation Total:" />
         <Header style={{ fontSize: '41px', paddingBottom: '20px' }} text={`${formatter.format(paymentAmount || 0)} / ${frequency}`} />
+        <Box mb="20px">
+          <FormControlLabel
+            control={<Checkbox checked={sendReceipt} onChange={(e) => setSendReceipt(e.target.checked)} />}
+            label="Send Me A Receipt"
+          />
+          <TextField
+            label="Email Address"
+            fullWidth
+            value={donorEmail}
+            onChange={(e) => setDonorEmail(e.target.value)}
+            variant="outlined"
+            hidden={!sendReceipt}
+          />
+        </Box>
         {/* <Button onClick={() => sendDonationReceipt(paymentAmount)}>Send Receipt</Button> */}
           <Box display={frequency === 'once' ? 'block' : 'none'}>
             <PayPalScriptProvider
