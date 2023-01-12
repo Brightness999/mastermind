@@ -18,7 +18,7 @@ const StyledBoxTan = styled(Box)({
   gap: "30px"
 });
 
-const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSelected }) => {
+const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSelected, donorEmail }) => {
   // const [form] = Form.useForm();
   const [orderID, setOrderID] = useState(false);
   const [billingDetails, setBillingDetails] = useState("");
@@ -67,7 +67,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
       sendRequestMonthlyCustomAmount(paymentAmount, sponsoredChildren, packageSelected)
     }
     toast.success("Your payment has been processed! Thank you for your donation!")
-    sendDonationReceipt(paymentAmount)
+    sendDonationReceipt(paymentAmount, donorEmail)
     return actions.order.capture().then(function (details) {
       const {payer} = details;
       setBillingDetails(payer);
@@ -96,8 +96,8 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
         })
   }
 
-  const sendDonationReceipt = (money) => {
-    axios.post(url + 'donations/donation_receipt', { money }
+  const sendDonationReceipt = (money, email) => {
+    axios.post(url + 'donations/donation_receipt', { money, email }
         ).then(result => {
             console.log('donation_receipt', result.data);
             console.log(result.data)

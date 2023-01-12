@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Grid, Box, ButtonGroup, Typography, Chip, Switch, FormControlLabel, TextField, InputAdornment } from '@mui/material';
+import { Checkbox, Grid, Box, ButtonGroup, Typography, Chip, Switch, FormControlLabel, TextField, InputAdornment } from '@mui/material';
 import { ReactComponent as ManFilled } from './images/man_filled.svg';
 import { ReactComponent as ManUnfilled } from './images/man_unfilled.svg';
 import { styled } from '@mui/material/styles';
@@ -60,6 +60,9 @@ const StyledSwitch = styled(Switch)({
 const Donate = () => {
   const [donateMonthly, setDonateMonthly] = useState(true)
   const [sponsoredChildren, setSponsoredChildren] = useState(1)
+  const [donorEmail, setDonorEmail] = useState(null)
+  const [sendReceipt, setSendReceipt] = useState(false)
+
   const package_plans = [
     {
       name: 'Specialized Tutoring Plan',
@@ -277,8 +280,27 @@ const Donate = () => {
                 {drawMen()}
               </Box>
             </Box>
+            <Box display="flex" style={{ maxWidth: "430px", width: "100%" }}>
+              <FormControlLabel
+                control={<Checkbox checked={sendReceipt} onChange={(e) => setSendReceipt(e.target.checked)} />}
+                label="Receipt"
+              />
+              <TextField
+                label="Email Address"
+                fullWidth
+                value={donorEmail}
+                onChange={(e) => setDonorEmail(e.target.value)}
+                variant="outlined"
+              />
+            </Box>
             <Box style={{ width: "min-content" }}>
-              <DonationForm paymentAmount={amount} frequency={donateMonthly ? "monthly" : "once"} sponsoredChildren={sponsoredChildren} packageSelected={packageSelected} />
+              <DonationForm
+                paymentAmount={amount}
+                frequency={donateMonthly ? "monthly" : "once"}
+                sponsoredChildren={sponsoredChildren}
+                packageSelected={packageSelected}
+                donorEmail={donorEmail}
+              />
             </Box>
           </Box>
         </Grid>
