@@ -103,7 +103,7 @@ const Donate = () => {
     drawMen()
   }
   
-  const drawMen = () => ([...Array(12)].map((item, index) => sponsoredChildren >= (index + 1) ? <ManFilled onClick={() => onManClick(index)} style={{ cursor: "pointer" }} /> : <ManUnfilled onClick={() => onManClick(index)} style={{ cursor: "pointer" }} />))
+  const drawMen = () => ([...Array(12)].map((item, index) => sponsoredChildren >= (index + 1) ? <ManFilled key={index} onClick={() => onManClick(index)} style={{ cursor: "pointer" }} /> : <ManUnfilled key={index} onClick={() => onManClick(index)} style={{ cursor: "pointer" }} />))
   
   const handleIncrement = () => {
     setSponsoredChildren((previousValue) => previousValue + 1)
@@ -179,8 +179,8 @@ const Donate = () => {
             textTransform: "uppercase",
             color: "#B5E6D3"
           }}>
-            {package_plans.map((p) => (
-              <StyledBoxGreen onClick={() => setPackageSelected(p)} sx={{
+            {package_plans.map((p, index) => (
+              <StyledBoxGreen key={index} onClick={() => setPackageSelected(p)} sx={{
                 backgroundColor: packageSelected.name === p.name ? '#35735C' : '#B5E6D3',
                 color: packageSelected.name === p.name ? 'white' : '#35735C'
               }}>

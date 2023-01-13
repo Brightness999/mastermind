@@ -23,7 +23,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
   const [orderID, setOrderID] = useState(false);
   const [billingDetails, setBillingDetails] = useState("");
   // const [isFormValid, setIsFormValid] = useState(false);
-  const [donorEmail, setDonorEmail] = useState(null)
+  const [donorEmail, setDonorEmail] = useState(undefined)
   const [sendReceipt, setSendReceipt] = useState(false)
 
   //paypal events
@@ -69,7 +69,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
       sendRequestMonthlyCustomAmount(paymentAmount, sponsoredChildren, packageSelected)
     }
     toast.success("Your payment has been processed! Thank you for your donation!")
-    if (sendReceipt && donorEmail != null) {
+    if (sendReceipt && donorEmail) {
       sendDonationReceipt(paymentAmount, donorEmail)
     }
     return actions.order.capture().then(function (details) {
@@ -248,6 +248,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
           <TextField
             label="Email Address"
             fullWidth
+            type="email"
             value={donorEmail}
             onChange={(e) => setDonorEmail(e.target.value)}
             variant="outlined"
