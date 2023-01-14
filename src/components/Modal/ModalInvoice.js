@@ -179,7 +179,7 @@ class ModalInvoice extends React.Component {
 						</tr>
 						<tr>
 							<td>
-								<div className='my-10'><Button type='primary' className={`font-16 px-20 ${user.role > 3 ? '' : 'display-none'}`} onClick={() => this.handleAddItem()}>Add item</Button></div>
+								<div className='my-10'><Button type='primary' className={`font-16 add-item px-20 ${user.role > 3 ? '' : 'display-none'}`} onClick={() => this.handleAddItem()}>Add item</Button></div>
 							</td>
 						</tr>
 						<tr>
@@ -246,11 +246,17 @@ class ModalInvoice extends React.Component {
 						</tr>
 					</tbody>
 				</table>
-				<div className='flex justify-end gap-2 mt-10'>
+				<div className='flex justify-end gap-2 mt-10 actions'>
 					<Button key="back" onClick={this.props.onCancel}>
 						{intl.formatMessage(messages.cancel)}
 					</Button>
-					<Button key="print" onClick={() => { }}>
+					<Button key="print" onClick={() => {
+						document.querySelector(".add-item").style.display = 'none';
+						document.querySelector(".actions").style.display = 'none';
+						window.print();
+						document.querySelector(".actions").style.display = '';
+						document.querySelector(".add-item").style.display = '';
+					}}>
 						<PrinterTwoTone />
 						{intl.formatMessage(messages.print)}
 					</Button>
