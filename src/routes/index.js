@@ -16,6 +16,7 @@ import SubsidyReview from './Sign/SubsidyReview';
 import Dashboard from './Dashboard';
 import Home from './Home';
 import Donate from './Home/donate';
+import CalendarOauth from './Home/calendaroauth';
 import Referrals from './Home/referrals';
 import Opportunities from './Home/opportunities';
 import ForgotPass from './Sign/ForgotPass';
@@ -65,6 +66,11 @@ const routesConfig = app => [
       CreateUser(app),
       Statistics(app)
     ]
+  },
+  {
+    path: '/oauth2callback',
+    title: 'Calendar Oauth',
+    component: CalendarOauth
   },
   {
     path: '/donate',

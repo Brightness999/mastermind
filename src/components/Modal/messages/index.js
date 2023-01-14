@@ -352,5 +352,9 @@ export default {
   toStandardSession: {
     id: `${scope}.toStandardSession`,
     defaultMessage: 'Proceed to standard session',
+  },
+  meetingLink: {
+    id: `${scope}.meetingLink`,
+    defaultMessage: 'Meeting Link',
   }
 };

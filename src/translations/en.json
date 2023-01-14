@@ -354,6 +354,7 @@
   "components.Modal.cleared": "Cleared",
   "components.Modal.print": "Print",
   "components.Modal.download": "Download",
+  "components.Modal.meetingLink": "Meeting Link",
 
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.subsidyManager": "Subsidy Request",

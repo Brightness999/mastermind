@@ -13,7 +13,7 @@ import '../../assets/styles/login.less';
 import { url } from '../../utils/api/baseUrl'
 import request from '../../utils/api/request'
 import 'moment/locale/en-au';
-import { createAppointmentForParent, getAllConsultantForParent } from '../../utils/api/apiList';
+import { createAppointmentForParent, createGoogleMeet, getAllConsultantForParent } from '../../utils/api/apiList';
 moment.locale('en');
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -79,6 +79,7 @@ class ModalReferralService extends React.Component {
 
 	createConsulation = () => {
 		const { selectedDependent, selectedSkillSet, phoneNumber, fileList, note, selectedTimeIndex, selectedDate, arrTime, isGoogleMeet } = this.state;
+		const meetingLink = this.form.getFieldValue("meetingLink");
 
 		if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
 			this.setState({ errorMessage: 'Please select a date and time' });
@@ -93,6 +94,7 @@ class ModalReferralService extends React.Component {
 			skillSet: selectedSkillSet,
 			date: selectedTime,
 			phoneNumber: isGoogleMeet ? undefined : phoneNumber,
+			meetingLink: isGoogleMeet ? meetingLink : undefined,
 			addtionalDocuments: fileList.length > 0 ? [fileList[0].response.data] : [],
 			notes: note,
 			type: 4,
@@ -140,7 +142,40 @@ class ModalReferralService extends React.Component {
 	}
 
 	changeMeetingType = (status) => {
-		this.setState({ isGoogleMeet: status });
+		const { selectedDependent, selectedTimeIndex, selectedDate, arrTime } = this.state;
+		const meetingLink = this.form.getFieldValue('meetingLink');
+		if (status && !meetingLink) {
+
+			/* Checking if the user has selected a dependent, date and time. If not, it will display a warning
+			message. */
+			if (!selectedDependent) {
+				message.warning('Please select your dependent.');
+				this.setState({ isGoogleMeet: false });
+				return;
+			}
+
+			if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
+				message.warning('Please select date and time.');
+				this.setState({ isGoogleMeet: false });
+				return;
+			}
+
+			/* Setting the state of the isGoogleMeet variable to the status variable. */
+			this.setState({ isGoogleMeet: status });
+
+			/* Creating a Google Meet link. */
+			const { years, months, date } = selectedDate.toObject();
+			const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
+
+			request.post(createGoogleMeet, { startTime: selectedTime.format('YYYY-MM-DDTHH:mm:ssZ'), endTime: selectedTime.clone().add(30, 'minute').format('YYYY-MM-DDTHH:mm:ssZ') }).then(res => {
+				const { success, data } = res;
+				if (success) {
+					this.form.setFieldsValue({ meetingLink: data });
+				}
+			})
+		} else {
+			this.setState({ isGoogleMeet: status });
+		}
 	}
 
 	prevMonth = () => {
@@ -212,7 +247,7 @@ class ModalReferralService extends React.Component {
 	}
 
 	render() {
-		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, skillSet, consultants, appointments } = this.state;
+		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, skillSet, consultants } = this.state;
 		const { dependents } = this.props.auth;
 
 		const modalProps = {
@@ -298,13 +333,21 @@ class ModalReferralService extends React.Component {
 										{ required: !isGoogleMeet, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
 										{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
 									]}
+									className={`${isGoogleMeet ? 'd-none' : ''}`}
 								>
 									<Input
 										placeholder={intl.formatMessage(msgCreateAccount.contactNumber)}
 										value={phoneNumber}
 										onChange={v => this.setState({ phoneNumber: v.target.value })}
-										className={`${isGoogleMeet ? 'display-none' : ''}`}
 									/>
+								</Form.Item>
+								<Form.Item
+									name='meetingLink'
+									label={intl.formatMessage(messages.meetingLink)}
+									rules={[{ required: isGoogleMeet }]}
+									className={`${isGoogleMeet ? '' : 'd-none'}`}
+								>
+									<Input className='meeting-link' disabled />
 								</Form.Item>
 							</Col>
 						</Row>
