@@ -942,7 +942,7 @@ class Dashboard extends React.Component {
     return (
       <div className="full-layout page dashboard-page">
         <div className='div-content'>
-          <section className='div-activity-feed box-card'>
+          <section className='div-activity-feed box-card overflow-y-scroll'>
             <div className='div-title-feed text-center'>
               <p className='font-16 text-white mb-0'>{intl.formatMessage(messages.activityFeed)}</p>
             </div>

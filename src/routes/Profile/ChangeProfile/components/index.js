@@ -248,10 +248,10 @@ export default class extends React.Component {
     return (
       <div className="full-layout page admin-page">
         <div className='div-content'>
-          <section className='div-activity-feed box-card overflow-y-scroll'>
-            <Menu theme="light" mode="inline" defaultSelectedKeys={[keyActive]} rootClassName="h-100" items={listMenu} />
+          <section className='div-activity-feed box-card'>
+            <Menu theme="light" mode="inline" defaultSelectedKeys={[keyActive]} rootClassName="h-100 overflow-y-scroll" items={listMenu} />
           </section>
-          <section className='div-calendar box-card'>
+          <section className='div-calendar box-card overflow-y-scroll'>
             {this.getScreen()}
           </section>
         </div>

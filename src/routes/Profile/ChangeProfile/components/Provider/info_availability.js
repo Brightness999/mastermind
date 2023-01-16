@@ -12,6 +12,8 @@ import { getAllSchoolsForParent, getDefaultValueForProvider, getMyProviderInfo, 
 import moment from 'moment';
 import { store } from '../../../../../redux/store';
 import { setUser } from '../../../../../redux/features/authSlice';
+import * as MultiDatePicker from "react-multi-date-picker";
+import DatePanel from "react-multi-date-picker/plugins/date_panel"
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -42,6 +44,7 @@ class InfoAvailability extends Component {
 			const { success, data } = result;
 			const { user } = this.props.auth;
 			if (success) {
+				console.log(data);
 				this.form?.setFieldsValue(data);
 				day_week.map((day) => {
 					const times = data?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
@@ -140,6 +143,7 @@ class InfoAvailability extends Component {
 			})
 		});
 		values.manualSchedule = manualSchedule.flat();
+		values.blackoutDates = values.blackoutDates?.map(date => date.toString());
 
 		request.post(updateMyProviderAvailability, { ...values, _id: this.props.auth.user.providerInfo?._id }).then(result => {
 			const { success } = result;
@@ -274,6 +278,25 @@ class InfoAvailability extends Component {
 		this.setState({ isPrivateForHmgh: state });
 	}
 
+	handleClickGoogleCalendar = () => {
+		const BASE_CALENDAR_URL = "https://www.googleapis.com/calendar/v3/calendars";
+		const BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY = "holiday@group.v.calendar.google.com";
+		const API_KEY = "AIzaSyA77lKHRvtdisK7_UhwalO8Hzgd4P_kaDk";
+		const CALENDAR_REGION = "en.usa";
+
+		const url = `${BASE_CALENDAR_URL}/${CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${API_KEY}`
+
+		fetch(url).then(response => response.json()).then(data => {
+			const holidays = [...new Set(data.items?.map(item => [item.start.date, item.end.date]).flat())]?.map(date => new Date(date));
+			const dates = this.form.getFieldValue("blackoutDates");
+			this.form.setFieldsValue({ blackoutDates: [...dates, ...holidays] })
+		})
+	}
+
+	handleUpdateBlackoutDates = (dates) => {
+		this.form.setFieldsValue({ blackoutDates: dates });
+	}
+
 	render() {
 		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh } = this.state;
 		const { user } = this.props.auth;
@@ -292,14 +315,6 @@ class InfoAvailability extends Component {
 						ref={ref => this.form = ref}
 					>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.autoSyncCalendar)}</p>
-						<Row gutter={10}>
-							<Col span={12}>
-								<div className='div-gg'>
-									<img src='../images/gg.png' />
-									<p className='font-16 mb-0'>Google</p>
-								</div>
-							</Col>
-						</Row>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.locations)}</p>
 						<div className='mb-10'>
 							<div className='flex flex-row items-center mb-5'>
@@ -364,7 +379,7 @@ class InfoAvailability extends Component {
 														</Form.Item>
 														<Row gutter={14}>
 															<Col xs={24} sm={24} md={12}>
-																<Form.Item name={[field.name, "from_date"]}>
+																<Form.Item name={[field.name, "from_date"]} label={intl.formatMessage(messages.from)} className='float-label-item'>
 																	<DatePicker
 																		format='MM/DD/YYYY'
 																		placeholder={intl.formatMessage(messages.from)}
@@ -372,7 +387,7 @@ class InfoAvailability extends Component {
 																</Form.Item>
 															</Col>
 															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
-																<Form.Item name={[field.name, "to_date"]}>
+																<Form.Item name={[field.name, "to_date"]} label={intl.formatMessage(messages.to)} className='float-label-item'>
 																	<DatePicker
 																		format='MM/DD/YYYY'
 																		placeholder={intl.formatMessage(messages.to)}
@@ -383,7 +398,7 @@ class InfoAvailability extends Component {
 														</Row>
 														<Row gutter={14}>
 															<Col xs={24} sm={24} md={12}>
-																<Form.Item name={[field.name, "from_time"]}>
+																<Form.Item name={[field.name, "from_time"]} label={intl.formatMessage(messages.from)} className='float-label-item'>
 																	<TimePicker
 																		use12Hours
 																		format="h:mm a"
@@ -393,7 +408,7 @@ class InfoAvailability extends Component {
 																</Form.Item>
 															</Col>
 															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
-																<Form.Item name={[field.name, "to_time"]}>
+																<Form.Item name={[field.name, "to_time"]} label={intl.formatMessage(messages.to)} className='float-label-item'>
 																	<TimePicker
 																		use12Hours
 																		format="h:mm a"
@@ -436,10 +451,24 @@ class InfoAvailability extends Component {
 								</div>
 							))}
 						</div>
-						<div className={`flex items-center justify-start gap-2 ${user?.providerInfo?.isWillingOpenPrivate ? '' : 'd-none'}`}>
+						<div className={`flex items-center justify-start gap-2 mb-10 ${user?.providerInfo?.isWillingOpenPrivate ? '' : 'd-none'}`}>
 							<Switch size="small" onChange={(state) => this.handldeChangePrivate(state)} />
 							<p className='font-12 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
 						</div>
+						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
+						<div className='flex items-center justify-center gap-2 cursor mb-10' onClick={() => this.handleClickGoogleCalendar()}>
+							<img src='../images/gg.png' className='h-30' />
+							<p className='font-16 mb-0'>Google</p>
+						</div>
+						<Form.Item name="blackoutDates">
+							<MultiDatePicker.Calendar
+								multiple
+								sort
+								className='m-auto'
+								onChange={dates => this.handleUpdateBlackoutDates(dates)}
+								plugins={[<DatePanel />]}
+							/>
+						</Form.Item>
 						<Form.Item className="form-btn continue-btn" >
 							<Button
 								block

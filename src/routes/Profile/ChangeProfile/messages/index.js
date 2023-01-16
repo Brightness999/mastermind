@@ -430,6 +430,10 @@ export default ({
     id: `${scope}.manualSchedule`,
     defaultMessage: 'Manual schedule',
   },
+  blackoutDates: {
+    id: `${scope}.blackoutDates`,
+    defaultMessage: 'Blackout Dates',
+  },
   location: {
     id: `${scope}.location`,
     defaultMessage: 'Location',

@@ -144,6 +144,7 @@
   "routes.Createaccount.publicProfile": "Public profile",
   "routes.Createaccount.autoSyncCalendar": "Auto sync calendar",
   "routes.Createaccount.manualSchedule": "Manual schedule",
+  "routes.Createaccount.blackoutDates": "Blackout Dates",
   "routes.Createaccount.location": "Location",
   "routes.Createaccount.locations": "Locations",
   "routes.Createaccount.privateHMGHAgents": "Private for HMGH agents only",

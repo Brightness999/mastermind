@@ -1625,6 +1625,7 @@ ol {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    height: calc(100vh - 90px);
   }
 
   .div-activity-feed {
@@ -1644,9 +1645,6 @@ ol {
     }
 
     .div-list-feed {
-      height: calc(100vh - 204px);
-      overflow: auto;
-
       .item-feed {
         padding: 10px;
 
@@ -2199,7 +2197,7 @@ table.notification-settings {
 }
 
 .remove-child-confirm {
-  .ant-popover-message > .anticon {
+  .ant-popover-message>.anticon {
     display: none;
   }
 }
