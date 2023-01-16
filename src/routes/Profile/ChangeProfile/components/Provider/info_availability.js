@@ -46,6 +46,7 @@ class InfoAvailability extends Component {
 			if (success) {
 				console.log(data);
 				this.form?.setFieldsValue(data);
+				this.form?.setFieldsValue({ blackoutDates: data.blackoutDates?.map(date => new Date(date)) });
 				day_week.map((day) => {
 					const times = data?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
 					this.form.setFieldValue(day, times?.map(t => {
