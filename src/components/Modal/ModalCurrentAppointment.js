@@ -919,7 +919,11 @@ class ModalCurrentAppointment extends React.Component {
 															} else {
 																return true;
 															}
+															if (listProvider[selectedProviderIndex]?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() == date.year() && moment(blackoutDate).month() == date.month() && moment(blackoutDate).date() == date.date())) {
+																return true;
+															}
 														}
+
 														return false;
 													}}
 													headerRender={() => (
