@@ -89,13 +89,16 @@ const Donate = () => {
       sessions: 4,
       planId: 'P-8MA84179XW564704LMO2OMCI',
       icon: <AiOutlineEye size="36px" />
+    },
+    {
+      name: 'Custom'
     }
   ]
   const [packageSelected, setPackageSelected] = useState(package_plans[0])
   const [amount, setAmount] = useState(packageSelected.amount * sponsoredChildren);
 
   useEffect(() => {
-    setAmount(packageSelected.amount * sponsoredChildren)
+    if (packageSelected?.amount) setAmount(packageSelected.amount * sponsoredChildren)
   }, [packageSelected, sponsoredChildren])
   
   const onManClick = (index) => {
@@ -184,31 +187,32 @@ const Donate = () => {
                 backgroundColor: packageSelected.name === p.name ? '#35735C' : '#B5E6D3',
                 color: packageSelected.name === p.name ? 'white' : '#35735C'
               }}>
-              {p.icon}
-              <Typography>
-                {p.name}
-                <br/>
-                {p.sessions} Sessions
-              </Typography>
-              <Chip label={`$${p.amount}`} />
-              </StyledBoxGreen>
+                {p.name === "Custom" ? 
+                  <>
+                    <TextField
+                      type="number"
+                      onChange={(e) => setAmount(e.target.value)}
+                      variant="outlined"
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                      }}
+                    />
+                    <Typography>
+                      Custom Amount
+                    </Typography>
+                  </> :
+                  <>
+                    {p.icon}
+                    <Typography>
+                      {p.name}
+                      <br/>
+                      {p.sessions} Sessions
+                    </Typography>
+                    <Chip label={`$${p.amount}`} />
+                  </>
+                  }
+                </StyledBoxGreen>
             ))}
-            <StyledBoxGreen sx={{
-                backgroundColor: '#B5E6D3',
-                color: '#35735C'
-              }}>
-              <TextField
-                type="number"
-                onChange={(e) => setAmount(e.target.value)}
-                variant="outlined"
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                }}
-              />
-              <Typography>
-                Custom Amount
-              </Typography>
-            </StyledBoxGreen>
           </Box>
         </Grid>
         <Grid item xs={12} style={{
