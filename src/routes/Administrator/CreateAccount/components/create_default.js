@@ -51,6 +51,7 @@ class CreateDefault extends Component {
 				password: defaultPassword
 			})
 		}
+		this.props.onHandleChangeRoleRegister(registerData.account_type || intl.formatMessage(messages.parent));
 	}
 
 	onSubmit = async () => {

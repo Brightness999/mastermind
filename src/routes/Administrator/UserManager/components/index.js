@@ -9,6 +9,7 @@ import { checkPermission } from '../../../../utils/auth/checkPermission';
 import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
 import { activateUser, getUsers } from '../../../../utils/api/apiList';
+import PageLoading from '../../../../components/Loading/PageLoading';
 
 export default class extends React.Component {
 	constructor(props) {
@@ -21,6 +22,7 @@ export default class extends React.Component {
 			confirmMessage: '',
 			userId: '',
 			userState: 1,
+			loading: false,
 		};
 		this.searchInput = createRef(null);
 	}
@@ -28,6 +30,7 @@ export default class extends React.Component {
 	componentDidMount() {
 		if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
 			checkPermission().then(loginData => {
+				this.setState({ loading: true });
 				loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
 				request.post(getUsers).then(result => {
 					const { success, data } = result;
@@ -38,6 +41,7 @@ export default class extends React.Component {
 							}) ?? []
 						});
 					}
+					this.setState({ loading: false });
 				})
 				this.setState({ userRole: loginData.role });
 			}).catch(err => {
@@ -97,7 +101,7 @@ export default class extends React.Component {
 	}
 
 	render() {
-		const { visibleEdit, users, isConfirmModal, confirmMessage } = this.state;
+		const { visibleEdit, users, isConfirmModal, confirmMessage, loading } = this.state;
 		const columns = [
 			{
 				title: 'UserName', dataIndex: 'username', key: 'name',
@@ -205,6 +209,7 @@ export default class extends React.Component {
 				<Table bordered size='middle' dataSource={users} columns={columns} />
 				<ModalEditUser {...modalEditUserProps} />
 				<ModalConfirm {...confirmModalProps} />
+				<PageLoading loading={loading} />
 			</div>
 		);
 	}
