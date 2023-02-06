@@ -7,7 +7,7 @@ import messagesLogin from '../../../../Sign/Login/messages';
 import messagesRequest from '../../../../Sign/SubsidyRequest/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { getDefaultValueForProvider, getMyProviderInfo, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
+import { getMyProviderInfo, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
 import PlacesAutocomplete from 'react-places-autocomplete';
 import request from '../../../../../utils/api/request';
 import { url } from '../../../../../utils/api/baseUrl';
@@ -20,7 +20,7 @@ class InfoFinancial extends Component {
 		this.state = {
 			fileList: [],
 			uploading: false,
-			AcademicLevel: [],
+			academicLevels: [],
 			sameRateForAllLevel: true,
 			billingAddress: '',
 			W9FormPath: this.props.auth.user?.providerInfo?.W9FormPath,
@@ -28,27 +28,17 @@ class InfoFinancial extends Component {
 	}
 
 	componentDidMount() {
+		const { academicLevels } = this.props.auth;
 		request.post(getMyProviderInfo).then(result => {
 			const { success, data } = result;
 			if (success) {
 				this.form?.setFieldsValue(data);
-			}
-		})
-
-		this.getDataFromServer()
-	}
-
-	getDataFromServer = () => {
-		request.post(getDefaultValueForProvider).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ AcademicLevel: data.AcademicLevel });
-			} else {
-				this.setState({ AcademicLevel: [] });
+				const selectedLevels = data.academicLevel?.map(item => item.level);
+				this.setState({ academicLevels: academicLevels?.filter(level => !selectedLevels?.find(l => l == level)) });
 			}
 		}).catch(err => {
-			console.log('get default data for provider error---', err);
-			this.setState({ AcademicLevel: [] });
+			console.log('get provider info error ---', err);
+			this.setState({ academicLevels: academicLevels });
 		})
 	}
 
@@ -82,7 +72,7 @@ class InfoFinancial extends Component {
 	}
 
 	render() {
-		const { AcademicLevel, sameRateForAllLevel, billingAddress } = this.state;
+		const { academicLevels, sameRateForAllLevel, billingAddress } = this.state;
 		const { user } = this.props.auth;
 		const uploadProps = {
 			name: 'file',
@@ -187,8 +177,15 @@ class InfoFinancial extends Component {
 														className='bottom-0 float-label-item'
 														style={{ marginTop: 14 }}
 													>
-														<Select placeholder={intl.formatMessage(messages.academicLevel)}>
-															{AcademicLevel?.map((level, index) => (
+														<Select
+															placeholder={intl.formatMessage(messages.academicLevel)}
+															onChange={() => {
+																const arr = this.form.getFieldValue('academicLevel');
+																const selectedLevels = arr?.map(item => item.level);
+																this.setState({ academicLevels: this.props.auth.academicLevels?.filter(level => !selectedLevels?.find(l => l == level)) });
+															}}
+														>
+															{academicLevels?.map((level, index) => (
 																<Select.Option key={index} value={level}>{level}</Select.Option>
 															))}
 														</Select>

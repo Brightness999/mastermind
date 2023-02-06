@@ -21,6 +21,7 @@ class InfoFinancial extends Component {
 			uploading: false,
 			documentUploaded: [],
 			AcademicLevel: [],
+			academicLevels: [],
 			sameRateForAllLevel: true,
 			billingAddress: '',
 		}
@@ -40,13 +41,13 @@ class InfoFinancial extends Component {
 		axios.post(url + getDefaultValueForProvider).then(result => {
 			const { success, data } = result.data;
 			if (success) {
-				this.setState({ AcademicLevel: data.AcademicLevel });
+				this.setState({ AcademicLevel: data.AcademicLevel, academicLevels: data.AcademicLevel });
 			} else {
-				this.setState({ AcademicLevel: [] });
+				this.setState({ AcademicLevel: [], academicLevels: [] });
 			}
 		}).catch(err => {
 			console.log('get default data for provider error---', err);
-			this.setState({ AcademicLevel: [] });
+			this.setState({ AcademicLevel: [], academicLevels: [] });
 		})
 	}
 
@@ -109,7 +110,7 @@ class InfoFinancial extends Component {
 	}
 
 	render() {
-		const { AcademicLevel, sameRateForAllLevel, billingAddress } = this.state;
+		const { AcademicLevel, sameRateForAllLevel, billingAddress, academicLevels } = this.state;
 		const { registerData } = this.props.register;
 		const uploadProps = {
 			name: 'file',
@@ -217,10 +218,12 @@ class InfoFinancial extends Component {
 															onChange={() => {
 																const arr = this.form.getFieldValue('academicLevel')
 																this.setValueToReduxRegisterData('academicLevel', arr);
+																const selectedLevels = arr?.map(item => item.level);
+																this.setState({ academicLevels: AcademicLevel?.filter(level => !selectedLevels?.find(l => l == level)) });
 															}}
 															placeholder={intl.formatMessage(messages.academicLevel)}
 														>
-															{AcademicLevel?.map((level, index) => (
+															{academicLevels?.map((level, index) => (
 																<Select.Option key={index} value={level}>{level}</Select.Option>
 															))}
 														</Select>

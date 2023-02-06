@@ -203,6 +203,8 @@ class InfoFinancial extends Component {
 															onChange={() => {
 																const arr = this.form.getFieldValue('academicLevel')
 																this.setValueToReduxRegisterData('academicLevel', arr);
+																const selectedLevels = arr?.map(item => item.level);
+																this.setState({ academicLevels: this.props.auth.academicLevels?.filter(level => !selectedLevels?.find(l => l == level)) });
 															}}
 															placeholder={intl.formatMessage(messages.academicLevel)}
 														>
