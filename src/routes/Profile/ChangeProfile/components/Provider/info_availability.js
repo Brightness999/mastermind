@@ -315,7 +315,6 @@ class InfoAvailability extends Component {
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
-						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.autoSyncCalendar)}</p>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.locations)}</p>
 						<div className='mb-10'>
 							<div className='flex flex-row items-center mb-5'>

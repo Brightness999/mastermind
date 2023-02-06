@@ -168,7 +168,7 @@ class ConsultantAvailability extends Component {
                               <Col xs={24} sm={24} md={12}>
                                 <Form.Item name={[field.name, "from_date"]}>
                                   <DatePicker
-                                    format="MM/DD/YYY"
+                                    format="MM/DD/YYYY"
                                     placeholder={intl.formatMessage(messages.from)}
                                     onChange={() => this.onChangeScheduleValue()}
                                   />

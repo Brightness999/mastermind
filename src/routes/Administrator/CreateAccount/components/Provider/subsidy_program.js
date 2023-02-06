@@ -52,7 +52,7 @@ class SubsidyProgram extends Component {
 			numberSessions: '',
 			level: '',
 			subsidizedRate: '',
-			reduced: '',
+			reducedRate: '',
 			isSameRate: true,
 		}
 	}
@@ -191,7 +191,7 @@ class SubsidyProgram extends Component {
 												</Col>
 												<Col xs={12} sm={12} md={6} className={field.key !== 0 && 'item-remove'}>
 													<Form.Item
-														name={[field.name, "reduced"]}
+														name={[field.name, "reducedRate"]}
 														label={intl.formatMessage(messages.reduced)}
 														className='select-small'
 														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced) }]}
@@ -200,7 +200,7 @@ class SubsidyProgram extends Component {
 															onChange={value => {
 																if (isSameRate) {
 																	let arr = JSON.parse(JSON.stringify(this.form.getFieldValue('academicLevel')));
-																	this.form.setFieldValue('academicLevel', arr.map(item => ({ ...item, reduced: value })));
+																	this.form.setFieldValue('academicLevel', arr.map(item => ({ ...item, reducedRate: value })));
 																}
 																this.handleSelectChange();
 															}}

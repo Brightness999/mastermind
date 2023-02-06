@@ -276,7 +276,7 @@ class InfoAvailability extends Component {
 																<Form.Item name={[field.name, "to_date"]}>
 																	<DatePicker
 																		onChange={() => this.onChangeScheduleValue()}
-																		format='MM/DD/YYY'
+																		format='MM/DD/YYYY'
 																		placeholder={intl.formatMessage(messages.to)}
 																	/>
 																</Form.Item>

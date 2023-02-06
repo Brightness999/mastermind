@@ -234,7 +234,7 @@ class InfoReview extends Component {
 											<div key={index} className='flex'>
 												<div className='flex-1'>{academic.level}</div>
 												<div className='flex-1'>{academic.subsidizedRate}</div>
-												<div className='flex-1'>{academic.reduced}</div>
+												<div className='flex-1'>{academic.reducedRate}</div>
 											</div>
 										))}
 									</div> : null}
