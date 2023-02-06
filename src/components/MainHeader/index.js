@@ -3,7 +3,7 @@ import { Link } from 'dva/router';
 import { FaChild, FaUserAlt, FaUserEdit } from 'react-icons/fa';
 import { BiLogOutCircle, BiBell } from 'react-icons/bi';
 import { BsSearch } from 'react-icons/bs';
-import { Badge, Avatar, Input, Menu, Dropdown } from 'antd';
+import { Badge, Avatar, Input, Dropdown } from 'antd';
 import intl from "react-intl-universal";
 import messages from './messages';
 import './style/index.less';
@@ -74,13 +74,12 @@ class MainHeader extends Component {
         </Link>
       ),
     });
-    const menu = (<Menu items={items} />);
 
     return (
       <div className='component-mainheader'>
         <div className='div-account'>
           <div className='account-icon'>
-            <Dropdown overlay={menu} placement="bottomLeft">
+            <Dropdown menu={{ items }} placement="bottomLeft">
               <Badge size="small" count={6}>
                 <Avatar icon={<FaUserAlt size={17} className='text-white' />} />
               </Badge>

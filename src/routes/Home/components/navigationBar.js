@@ -37,7 +37,7 @@ const NavigationBar = () => {
       <Logo />
       <Box id="buttons" display="flex" gap="20px">
         <LoginButton>
-          <Link to={routerLinks['Login']} style={{ color: 'inherit' }}>
+          <Link to={routerLinks['Login']} style={{ color: 'inherit', padding: '13px 20px' }}>
             Login/Register
           </Link>
         </LoginButton>
