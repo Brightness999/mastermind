@@ -179,21 +179,19 @@ class ModalReferralService extends React.Component {
 	}
 
 	prevMonth = () => {
-		if (moment(this.state.selectedDate).add(-1, 'month').isAfter(new Date())) {
-			this.setState({
-				selectedDate: moment(this.state.selectedDate).add(-1, 'month'),
-				selectedTimeIndex: -1,
-			});
-		}
+		this.setState({
+			selectedDate: moment(this.state.selectedDate).add(-1, 'month'),
+			selectedTimeIndex: -1,
+		});
+		this.onSelectDate(moment(this.state.selectedDate).add(-1, 'month'));
 	}
 
 	nextMonth = () => {
-		if (moment(this.state.selectedDate).add(1, 'month').isAfter(new Date())) {
-			this.setState({
-				selectedDate: moment(this.state.selectedDate).add(1, 'month'),
-				selectedTimeIndex: -1,
-			});
-		}
+		this.setState({
+			selectedDate: moment(this.state.selectedDate).add(1, 'month'),
+			selectedTimeIndex: -1,
+		});
+		this.onSelectDate(moment(this.state.selectedDate).add(1, 'month'));
 	}
 
 	handleSelectDependent = (dependentId) => {
@@ -205,11 +203,11 @@ class ModalReferralService extends React.Component {
 	}
 
 	onSelectDate = (newValue) => {
+		this.setState({
+			selectedDate: newValue,
+			selectedTimeIndex: -1,
+		});
 		if (newValue.isSameOrAfter(new Date())) {
-			this.setState({
-				selectedDate: newValue,
-				selectedTimeIndex: -1,
-			});
 			const { appointments, consultants, arrTime, selectedDependent } = this.state;
 			const { years, months, date } = newValue.toObject();
 			const dayInWeek = newValue.day();
@@ -243,6 +241,8 @@ class ModalReferralService extends React.Component {
 				return time;
 			})
 			this.setState({ arrTime: newArrTime });
+		} else {
+			this.setState({ arrTime: this.state.arrTime?.map(time => ({ ...time, active: false })) });
 		}
 	}
 
