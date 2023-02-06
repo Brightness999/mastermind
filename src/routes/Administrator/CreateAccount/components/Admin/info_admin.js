@@ -141,4 +141,4 @@ class AdminInfo extends React.Component {
 
 const mapStateToProps = state => ({ register: state.register, user: state.auth.user });
 
-export default compose(connect(mapStateToProps))(AdminInfo);
+export default compose(connect(mapStateToProps, { removeRegisterData }))(AdminInfo);
