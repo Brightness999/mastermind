@@ -15,6 +15,7 @@ import ModalNoShow from './ModalNoShow';
 import moment from 'moment';
 import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/features/appointmentsSlice';
 import { store } from '../../redux/store';
+import ModalCreateNote from './ModalCreateNote';
 
 class ModalFlagExpand extends React.Component {
 	constructor(props) {
@@ -26,6 +27,7 @@ class ModalFlagExpand extends React.Component {
 			event: {},
 			visibleBalance: false,
 			visibleNoShow: false,
+			visibleCreateNote: false,
 		}
 		this.searchInput = React.createRef(null);
 	}
@@ -40,12 +42,12 @@ class ModalFlagExpand extends React.Component {
 		})
 	}
 
-	handleRequestClearance = (appointment) => {
-		request.post(requestClearance, { appointmentId: appointment?._id }).then(result => {
-			const { success } = result;
-			if (success) {
-				message.success('Sent successfully');
-			}
+	handleRequestClearance = (requestMessage) => {
+		this.onCloseModalCreateNote();
+		message.success("Your request has been submitted. Please allow up to 24 hours for the provider to review this.");
+
+		request.post(requestClearance, { appointmentId: this.state.event?._id, message: requestMessage }).catch(err => {
+			message.error(err.message);
 		})
 	}
 
@@ -138,8 +140,16 @@ class ModalFlagExpand extends React.Component {
 		store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
 	}
 
+	onOpenModalCreateNote = (appointment) => {
+		this.setState({ visibleCreateNote: true, event: appointment });
+	}
+
+	onCloseModalCreateNote = () => {
+		this.setState({ visibleCreateNote: false, event: {} });
+	}
+
 	render() {
-		const { activeFlags, clearedFlags, skillSet, visibleBalance, visibleNoShow, event } = this.state;
+		const { activeFlags, clearedFlags, skillSet, visibleBalance, visibleNoShow, event, visibleCreateNote } = this.state;
 		const { user } = this.props.auth;
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -210,7 +220,7 @@ class ModalFlagExpand extends React.Component {
 				onFilter: (value, record) => record.type == value,
 				render: (type) => type == 2 ? intl.formatMessage(messages.evaluation) : type == 3 ? intl.formatMessage(messages.standardSession) : type == 5 ? intl.formatMessage(messages.subsidizedSession) : '',
 			},
-			{ title: 'Session Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm a') },
+			{ title: 'Session Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm A') },
 		];
 
 		if (user.role == 3) {
@@ -223,16 +233,8 @@ class ModalFlagExpand extends React.Component {
 			columns.splice(5, 0, {
 				title: 'Action', key: 'action', render: (appointment) => (
 					<Space size="small">
-						<Popconfirm
-							title="Did you pay for this flag?"
-							onConfirm={() => this.handleRequestClearance(appointment)}
-							okText="Yes"
-							cancelText="No"
-							overlayClassName='clear-flag-confirm'
-						>
-							<a className='btn-blue action'>{intl.formatMessage(msgDrawer.requestClearance)}</a>
-						</Popconfirm>
-						{appointment?.isPaid ? 'Paid' : (
+						<a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
+						{appointment?.isPaid ? 'Paid' : appointment?.flagItems?.rate == 0 ? null : (
 							<form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
 								<input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
 								<input type="hidden" name="business" value="office@helpmegethelp.org" />
@@ -246,7 +248,7 @@ class ModalFlagExpand extends React.Component {
 								<input type="hidden" name="return" value={`${window.location.href}?success=true&id=${appointment?._id}`} />
 								<input type="hidden" name="cancel_return" value={window.location.href} />
 								<input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-								<button className='font-12 flag-action pay-flag-button'>
+								<button className='flag-action pay-flag-button'>
 									{intl.formatMessage(msgDrawer.payFlag)}
 								</button>
 							</form>
@@ -282,6 +284,13 @@ class ModalFlagExpand extends React.Component {
 			onSubmit: this.onSubmitFlagBalance,
 			onCancel: this.onCloseModalBalance,
 			event: event,
+		};
+
+		const modalCreateNoteProps = {
+			visible: visibleCreateNote,
+			onSubmit: this.handleRequestClearance,
+			onCancel: this.onCloseModalCreateNote,
+			title: "Request Message"
 		};
 
 		return (
@@ -320,6 +329,7 @@ class ModalFlagExpand extends React.Component {
 				</Tabs>
 				{visibleBalance && <ModalBalance {...modalBalanceProps} />}
 				{visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
+				{visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
 			</Modal>
 		);
 	}

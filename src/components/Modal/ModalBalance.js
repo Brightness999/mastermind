@@ -75,9 +75,13 @@ class ModalBalance extends React.Component {
 						<Button key="back" onClick={this.props.onCancel}>
 							{intl.formatMessage(messages.cancel)}
 						</Button>
-						<Button key="submit" type="primary" htmlType='submit' disabled={user?.role == 3 || event?.flagStatus == 2}>
-							{intl.formatMessage(messages.submitFlag)}
-						</Button>
+						{user?.role == 3 || event?.flagStatus == 2 ? (
+							<Button key="submit" type="primary" onClick={this.props.onCancel} className="px-20">OK</Button>
+						) : (
+							<Button key="submit" type="primary" htmlType='submit'>
+								{intl.formatMessage(messages.submitFlag)}
+							</Button>
+						)}
 					</Row>
 				</Form>
 			</Modal>
