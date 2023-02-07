@@ -44,7 +44,6 @@ class InfoAvailability extends Component {
 			const { success, data } = result;
 			const { user } = this.props.auth;
 			if (success) {
-				console.log(data);
 				this.form?.setFieldsValue(data);
 				this.form?.setFieldsValue({ blackoutDates: data.blackoutDates?.map(date => new Date(date)) });
 				day_week.map((day) => {
@@ -90,7 +89,7 @@ class InfoAvailability extends Component {
 	}
 
 	loadSchools() {
-		request.post(getAllSchoolsForParent, { communityServed: this.props.auth.user?.providerInfo?.cityConnection }).then(result => {
+		request.post(getAllSchoolsForParent, { communityServed: this.props.auth.user?.providerInfo?.cityConnection?._id }).then(result => {
 			const { success, data } = result;
 			if (success) {
 				this.setState({ listSchool: data });
