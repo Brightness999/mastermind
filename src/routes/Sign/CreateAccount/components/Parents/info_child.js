@@ -182,7 +182,10 @@ class InfoChild extends Component {
 													</Col>
 													<Col xs={24} sm={24} md={9}>
 														<Form.Item name={[field.name, "lastName"]} label={intl.formatMessage(messages.lastName)}>
-															<Input disabled />
+															<Input
+																onChange={v => this.updateReduxValueForDepedent(index, "lastName", v.target.value)}
+																placeholder={intl.formatMessage(messages.lastName)}
+															/>
 														</Form.Item>
 													</Col>
 													<Col xs={24} sm={24} md={6}>
