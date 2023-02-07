@@ -33,7 +33,6 @@ class InfoAvailability extends Component {
 			locations: ['Dependent Home', 'Provider Office'],
 			listSchool: [],
 			selectedLocation: '',
-			isPrivateForHmgh: false,
 		}
 	}
 
@@ -65,8 +64,8 @@ class InfoAvailability extends Component {
 	}
 
 	onFinish = (values) => {
-		const { isHomeVisit, isSchools, isPrivateOffice, isPrivateForHmgh } = this.state;
-		this.props.setRegisterData({ availability: { ...values, isHomeVisit, isSchools, isPrivateOffice, isPrivateForHmgh } });
+		const { isHomeVisit, isSchools, isPrivateOffice } = this.state;
+		this.props.setRegisterData({ availability: { ...values, isHomeVisit, isSchools, isPrivateOffice } });
 		this.props.onContinue();
 	};
 
@@ -188,7 +187,7 @@ class InfoAvailability extends Component {
 	}
 
 	render() {
-		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh } = this.state;
+		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool } = this.state;
 		const { registerData } = this.props.register;
 
 		return (
@@ -308,12 +307,14 @@ class InfoAvailability extends Component {
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 															</Col>
 														</Row>
-														<div className={`flex items-center justify-start gap-2 ${isPrivateForHmgh ? 'display-none' : ''}`}>
-															<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
-																<Switch size="small" />
-															</Form.Item>
-															<p className='font-09'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
-														</div>
+														{registerData?.subsidy?.isWillingOpenPrivate ? (
+															<div className="flex items-center justify-start gap-2">
+																<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
+																	<Switch size="small" />
+																</Form.Item>
+																<p className='font-09'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
+															</div>
+														) : null}
 													</div>
 												))}
 												<Row>
@@ -339,10 +340,6 @@ class InfoAvailability extends Component {
 									</Form.List>
 								</div>
 							))}
-						</div>
-						<div className={`flex items-center justify-start gap-2 ${registerData?.subsidy?.isWillingOpenPrivate ? '' : 'd-none'}`}>
-							<Switch size="small" onChange={(state) => this.setState({ isPrivateForHmgh: state })} />
-							<p className='font-09'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
 						</div>
 						<Form.Item className="form-btn continue-btn" >
 							<Button

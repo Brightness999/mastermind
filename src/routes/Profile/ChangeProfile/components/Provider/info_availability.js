@@ -35,7 +35,6 @@ class InfoAvailability extends Component {
 			locations: [],
 			listSchool: [],
 			selectedLocation: '',
-			isPrivateForHmgh: false,
 		}
 	}
 
@@ -43,6 +42,7 @@ class InfoAvailability extends Component {
 		request.post(getMyProviderInfo).then(result => {
 			const { success, data } = result;
 			const { user } = this.props.auth;
+			console.log(user)
 			if (success) {
 				this.form?.setFieldsValue(data);
 				this.form?.setFieldsValue({ blackoutDates: data.blackoutDates?.map(date => new Date(date)) });
@@ -89,7 +89,8 @@ class InfoAvailability extends Component {
 	}
 
 	loadSchools() {
-		request.post(getAllSchoolsForParent, { communityServed: this.props.auth.user?.providerInfo?.cityConnection?._id }).then(result => {
+		const { user } = this.props.auth;
+		request.post(getAllSchoolsForParent, { communityServed: user?.providerInfo?.cityConnection?._id ? user?.providerInfo?.cityConnection?._id : user?.providerInfo?.cityConnection }).then(result => {
 			const { success, data } = result;
 			if (success) {
 				this.setState({ listSchool: data });
@@ -101,7 +102,7 @@ class InfoAvailability extends Component {
 	}
 
 	onFinish = (values) => {
-		const { listSchool, isPrivateForHmgh } = this.state;
+		const { listSchool } = this.state;
 		let manualSchedule = [];
 		day_week.map(day => {
 			values[day]?.forEach(t => {
@@ -118,7 +119,7 @@ class InfoAvailability extends Component {
 						closeHour: t.to_time?.hours() ?? 0,
 						closeMin: t.to_time?.minutes() ?? 0,
 						dayInWeek: this.getDayOfWeekIndex(day),
-						isPrivate: isPrivateForHmgh ? true : t.isPrivate ?? false,
+						isPrivate: t.isPrivate ?? false,
 						location: t.location ?? '',
 					}
 					manualSchedule.push(times);
@@ -274,10 +275,6 @@ class InfoAvailability extends Component {
 		}
 	}
 
-	handldeChangePrivate = (state) => {
-		this.setState({ isPrivateForHmgh: state });
-	}
-
 	handleClickGoogleCalendar = () => {
 		const BASE_CALENDAR_URL = "https://www.googleapis.com/calendar/v3/calendars";
 		const BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY = "holiday@group.v.calendar.google.com";
@@ -298,7 +295,7 @@ class InfoAvailability extends Component {
 	}
 
 	render() {
-		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh } = this.state;
+		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool } = this.state;
 		const { user } = this.props.auth;
 
 		return (
@@ -418,12 +415,14 @@ class InfoAvailability extends Component {
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 															</Col>
 														</Row>
-														<div className={`flex items-center justify-start gap-2 ${isPrivateForHmgh ? 'display-none' : ''}`}>
-															<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
-																<Switch size="small" />
-															</Form.Item>
-															<p className='font-12'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
-														</div>
+														{user?.providerInfo?.isWillingOpenPrivate ? (
+															<div className="flex items-center justify-start gap-2">
+																<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
+																	<Switch size="small" />
+																</Form.Item>
+																<p className='font-12'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
+															</div>
+														) : null}
 													</div>
 												))}
 												<Row>
@@ -449,10 +448,6 @@ class InfoAvailability extends Component {
 									</Form.List>
 								</div>
 							))}
-						</div>
-						<div className={`flex items-center justify-start gap-2 mb-10 ${user?.providerInfo?.isWillingOpenPrivate ? '' : 'd-none'}`}>
-							<Switch size="small" onChange={(state) => this.handldeChangePrivate(state)} />
-							<p className='font-12 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
 						</div>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
 						<div className='flex items-center justify-center gap-2 cursor mb-10' onClick={() => this.handleClickGoogleCalendar()}>

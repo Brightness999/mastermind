@@ -308,12 +308,14 @@ class InfoAvailability extends Component {
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 															</Col>
 														</Row>
-														<div className={`flex items-center justify-start gap-2 ${isPrivateForHmgh ? 'display-none' : ''}`}>
-															<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
-																<Switch size="small" />
-															</Form.Item>
-															<p className='font-09'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
-														</div>
+														{registerData?.subsidy?.isWillingOpenPrivate ? (
+															<div className={`flex items-center justify-start gap-2 ${isPrivateForHmgh ? 'display-none' : ''}`}>
+																<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
+																	<Switch size="small" />
+																</Form.Item>
+																<p className='font-09'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
+															</div>
+														) : null}
 													</div>
 												))}
 												<Row>
@@ -340,7 +342,7 @@ class InfoAvailability extends Component {
 								</div>
 							))}
 						</div>
-						<div className={`flex items-center justify-start gap-2 ${registerData?.subsidy?.isWillingOpenPrivate ? '' : 'd-none'}`}>
+						<div className="flex items-center justify-start gap-2">
 							<Switch size="small" onChange={(state) => this.setState({ isPrivateForHmgh: state })} />
 							<p className='font-12 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
 						</div>
