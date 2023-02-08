@@ -139,13 +139,17 @@ export const removeAppoint = createAsyncThunk(
 		}
 	}
 )
+
 export const appointmentsSlice = createSlice({
 	name: 'appointments',
 	initialState,
 	reducers: {
 		setAppointMonth(state, action) {
-			state.user = action.payload
-		}
+			state.dataAppointments = action.payload;
+		},
+		setSubsidyRequests(state, action) {
+			state.dataSubsidyRequests = action.payload;
+		},
 	},
 	extraReducers: {
 		[getAppointmentsData.fulfilled]: (state, action) => {
@@ -164,6 +168,6 @@ export const appointmentsSlice = createSlice({
 	}
 });
 
-export const { getDatadAppointments, setAppointMonth } = appointmentsSlice.actions;
+export const { getDatadAppointments, setAppointMonth, setSubsidyRequests } = appointmentsSlice.actions;
 
 export default appointmentsSlice.reducer;

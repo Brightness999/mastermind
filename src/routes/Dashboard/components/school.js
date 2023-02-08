@@ -1,21 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Space, Table, Tabs } from "antd";
+import { message, Popconfirm, Space, Table, Tabs } from "antd";
 import update from 'immutability-helper';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { store } from "../../../redux/store";
 import request from "../../../utils/api/request";
-import { getAllProviderInSchool } from "../../../utils/api/apiList";
+import { denySubsidyRequest, getAllProviderInSchool } from "../../../utils/api/apiList";
+import { setSubsidyRequests } from "../../../redux/features/appointmentsSlice";
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 
-const Subsidaries = () => {
+const Subsidaries = (props) => {
   const type = 'DraggableBodyRow';
-  const user = store.getState().auth.user;
-  const [pendingList, setPendingList] = useState([]);
-  const [shoolApprovedList, setSchoolApprovedList] = useState([]);
-  const [schoolDeclinedList, setSchoolDeclinedList] = useState([]);
-  const [adminPreApprovedList, setAdminPreApprovedList] = useState([]);
-  const [adminDeclinedList, setAdminDeclinedList] = useState([]);
-  const [adminApprovedList, setAdminApprovedList] = useState([]);
+  const { user } = props.auth;
+  const [requests, setRequests] = useState(props.listSubsidaries?.filter(s => s.status == 0));
+  const [status, setStatus] = useState(0);
   const [providers, setProviders] = useState([]);
 
   const DraggableBodyRow = ({ index, moveRow, className, style, ...restProps }) => {
@@ -60,14 +58,33 @@ const Subsidaries = () => {
   };
 
   const DeclineSubsidy = (subsidy) => {
-    
+    request.post(denySubsidyRequest, { subsidyId: subsidy?._id, status: subsidy?.status, student: subsidy?.student?._id }).then(res => {
+      const { success, data } = res;
+      if (success) {
+        const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidaries));
+        props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
+          if (s._id == subsidy._id) {
+            s.status = data.status;
+          }
+          return s;
+        })));
+      }
+    }).catch(err => {
+      console.log('decline subsidy request error---', err);
+      message.error(err.message);
+    })
   }
+
+  useEffect(() => {
+    setRequests(props.listSubsidaries?.filter(s => s.status == status));
+  }, [props.listSubsidaries]);
 
   const pendingColumns = [
     {
       title: 'Name',
       key: 'name',
       align: 'center',
+      fixed: 'left',
       render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
     },
     {
@@ -105,8 +122,10 @@ const Subsidaries = () => {
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => SchoolApproveSubsidy(subsidy)}>Approve</a>
-          <a className='btn-blue' onClick={() => DeclineSubsidy(subsidy)}>Decline</a>
+          <a className='btn-blue' onClick={() => { }}>Approve</a>
+          <Popconfirm trigger="click" overlayClassName="subsidy-decline" title="Are you sure to decline this request?" onConfirm={() => DeclineSubsidy(subsidy)}>
+            <a className='btn-blue'>Decline</a>
+          </Popconfirm>
         </Space>
       ),
       align: 'center',
@@ -119,6 +138,7 @@ const Subsidaries = () => {
       title: 'Name',
       key: 'name',
       align: 'center',
+      fixed: 'left',
       render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
     },
     {
@@ -170,6 +190,7 @@ const Subsidaries = () => {
       title: 'Name',
       key: 'name',
       align: 'center',
+      fixed: 'left',
       render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
     },
     {
@@ -201,18 +222,6 @@ const Subsidaries = () => {
           ))}
         </div>
       )
-    },
-    {
-      title: 'Action',
-      key: 'action',
-      render: (a) => (
-        <Space size="middle">
-          <a className='btn-blue' onClick={() => { }}>Approve</a>
-          <a className='btn-blue' onClick={() => { }}>Decline</a>
-        </Space>
-      ),
-      align: 'center',
-      fixed: 'right',
     },
   ];
 
@@ -221,6 +230,7 @@ const Subsidaries = () => {
       title: 'Name',
       key: 'name',
       align: 'center',
+      fixed: 'left',
       render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
     },
     {
@@ -252,18 +262,6 @@ const Subsidaries = () => {
           ))}
         </div>
       )
-    },
-    {
-      title: 'Action',
-      key: 'action',
-      render: (a) => (
-        <Space size="middle">
-          <a className='btn-blue' onClick={() => { }}>Approve</a>
-          <a className='btn-blue' onClick={() => { }}>Decline</a>
-        </Space>
-      ),
-      align: 'center',
-      fixed: 'right',
     },
   ];
 
@@ -272,6 +270,7 @@ const Subsidaries = () => {
       title: 'Name',
       key: 'name',
       align: 'center',
+      fixed: 'left',
       render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
     },
     {
@@ -303,18 +302,6 @@ const Subsidaries = () => {
           ))}
         </div>
       )
-    },
-    {
-      title: 'Action',
-      key: 'action',
-      render: (a) => (
-        <Space size="middle">
-          <a className='btn-blue' onClick={() => { }}>Approve</a>
-          <a className='btn-blue' onClick={() => { }}>Decline</a>
-        </Space>
-      ),
-      align: 'center',
-      fixed: 'right',
     },
   ];
 
@@ -323,6 +310,7 @@ const Subsidaries = () => {
       title: 'Name',
       key: 'name',
       align: 'center',
+      fixed: 'left',
       render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
     },
     {
@@ -354,18 +342,6 @@ const Subsidaries = () => {
           ))}
         </div>
       )
-    },
-    {
-      title: 'Action',
-      key: 'action',
-      render: (a) => (
-        <Space size="middle">
-          <a className='btn-blue' onClick={() => { }}>Approve</a>
-          <a className='btn-blue' onClick={() => { }}>Decline</a>
-        </Space>
-      ),
-      align: 'center',
-      fixed: 'right',
     },
   ];
 
@@ -377,10 +353,9 @@ const Subsidaries = () => {
 
   const moveRow = useCallback(
     (dragIndex, hoverIndex) => {
-      const dragRow = pendingList[dragIndex];
-      console.log(pendingList)
-      setPendingList(
-        update(pendingList, {
+      const dragRow = requests[dragIndex];
+      setRequests(
+        update(requests, {
           $splice: [
             [dragIndex, 1],
             [hoverIndex, 0, dragRow],
@@ -388,7 +363,7 @@ const Subsidaries = () => {
         }),
       );
     },
-    [pendingList],
+    [requests],
   );
 
   const items = [
@@ -399,7 +374,7 @@ const Subsidaries = () => {
         <Table
           bordered
           size='middle'
-          dataSource={pendingList?.map((s, index) => ({ ...s, key: index }))}
+          dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={pendingColumns}
           scroll={{ x: 1300 }}
           className='mt-2'
@@ -416,7 +391,7 @@ const Subsidaries = () => {
             <Table
               bordered
               size='middle'
-              dataSource={shoolApprovedList?.map((s, index) => ({ ...s, key: index }))}
+              dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
               columns={schoolApprovedColumns}
               components={components}
               onRow={(_, index) => {
@@ -441,7 +416,7 @@ const Subsidaries = () => {
         <Table
           bordered
           size='middle'
-          dataSource={schoolDeclinedList?.map((s, index) => ({ ...s, key: index }))}
+          dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={schoolDeclinedColumns}
           scroll={{ x: 1300 }}
           className='mt-2'
@@ -456,7 +431,7 @@ const Subsidaries = () => {
         <Table
           bordered
           size='middle'
-          dataSource={adminPreApprovedList?.map((s, index) => ({ ...s, key: index }))}
+          dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={adminPreApprovedColumns}
           scroll={{ x: 1300 }}
           className='mt-2'
@@ -471,7 +446,7 @@ const Subsidaries = () => {
         <Table
           bordered
           size='middle'
-          dataSource={adminDeclinedList?.map((s, index) => ({ ...s, key: index }))}
+          dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={adminDeclinedColumns}
           scroll={{ x: 1300 }}
           className='mt-2'
@@ -486,7 +461,7 @@ const Subsidaries = () => {
         <Table
           bordered
           size='middle'
-          dataSource={adminApprovedList?.map((s, index) => ({ ...s, key: index }))}
+          dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={adminApprovedColumns}
           scroll={{ x: 1300 }}
           className='mt-2'
@@ -496,15 +471,12 @@ const Subsidaries = () => {
     }
   ];
 
-  useEffect(() => {
-    const listSubsidaries = store.getState().appointments.dataSubsidyRequests;
-    setPendingList(listSubsidaries?.filter(s => s.status == 0));
-    setSchoolApprovedList(listSubsidaries?.filter(s => s.status == 1));
-    setSchoolDeclinedList(listSubsidaries?.filter(s => s.status == 2));
-    setAdminPreApprovedList(listSubsidaries?.filter(s => s.status == 3));
-    setAdminDeclinedList(listSubsidaries?.filter(s => s.status == 4));
-    setAdminApprovedList(listSubsidaries?.filter(s => s.status == 5));
+  const handleChangeTab = v => {
+    setRequests(props.listSubsidaries?.filter(s => s.status == v - 1));
+    setStatus(v - 1);
+  }
 
+  useEffect(() => {
     request.post(getAllProviderInSchool, { schoolId: user?.schoolInfo?._id }).then(res => {
       const { success, data } = res;
       if (success) {
@@ -526,10 +498,17 @@ const Subsidaries = () => {
         size='small'
         items={items}
         className="bg-white p-10 h-100 overflow-y-scroll overflow-x-hidden"
+        onChange={(v) => handleChangeTab(v)}
       >
       </Tabs>
     </div>
   );
 }
 
-export default Subsidaries;
+
+const mapStateToProps = state => ({
+  listSubsidaries: state.appointments.dataSubsidyRequests,
+  auth: state.auth,
+})
+
+export default compose(connect(mapStateToProps))(Subsidaries);
