@@ -88,7 +88,7 @@ class MainHeader extends Component {
           <div className='account-name'>
             <p className='mb-0'>{user?.fullName ?? user?.username}</p>
           </div>
-          <div className='font-16 ml-20'>{community?.community?.name}</div>
+          {user?.role > 900 ? <div className='font-16 ml-20'>{community?.community?.name}</div> : null}
         </div>
         <div className='div-search'>
           <BsSearch size={18} />
