@@ -35,6 +35,7 @@ import { compose } from 'redux';
 import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
+import Subsidaries from './school';
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -909,230 +910,310 @@ class Dashboard extends React.Component {
       onCancel: this.onCloseModalNewSubsidy,
     };
 
-    return (
-      <div className="full-layout page dashboard-page">
-        <div className='div-content'>
-          <section className='div-activity-feed box-card overflow-y-scroll'>
-            <div className='div-title-feed text-center'>
-              <p className='font-16 text-white mb-0'>{intl.formatMessage(messages.activityFeed)}</p>
-            </div>
-            <div className='div-list-feed'>
-              {listAppointmentsRecent && listAppointmentsRecent?.filter((appointment) => moment(appointment.date).isAfter(new Date().setHours(0, 0, 0)))?.map((appoinment, index) => this.renderListAppoinmentsRecent(appoinment, index))}
-            </div>
-          </section>
-          <section className='div-calendar box-card'>
-            <div className='flex justify-end items-center gap-5'>
-              <div className='div-trans flex flex-row'>
-                <Avatar size={36} className='trans-all' onClick={() => this.handleClickAllDependent()}>All</Avatar>
-                <Button
-                  type='text'
-                  className='trans-left' icon={<BiChevronLeft size={35} />}
-                  onClick={() => this.scrollTrans(-42)}
-                />
-                <div className='trans-scroll' ref={this.scrollElement}>
-                  {listDependents?.map((dependent, index) => (
-                    <Avatar
-                      key={index}
-                      size={36}
-                      className={`trans-item ${selectedDependentId == dependent._id ? 'active' : ''}`}
-                      onClick={() => this.handleClickDependent(dependent._id)}
-                    >
-                      {dependent?.firstName?.charAt(0)?.toUpperCase()}{dependent?.lastName?.charAt(0)?.toUpperCase()}
-                    </Avatar>
-                  ))}
+    if (userRole == 60) {
+      return <Subsidaries />
+    } else {
+      return (
+        <div className="full-layout page dashboard-page">
+          <div className='div-content'>
+            <section className='div-activity-feed box-card overflow-y-scroll'>
+              <div className='div-title-feed text-center'>
+                <p className='font-16 text-white mb-0'>{intl.formatMessage(messages.activityFeed)}</p>
+              </div>
+              <div className='div-list-feed'>
+                {listAppointmentsRecent && listAppointmentsRecent?.filter((appointment) => moment(appointment.date).isAfter(new Date().setHours(0, 0, 0)))?.map((appoinment, index) => this.renderListAppoinmentsRecent(appoinment, index))}
+              </div>
+            </section>
+            <section className='div-calendar box-card'>
+              <div className='flex justify-end items-center gap-5'>
+                <div className='div-trans flex flex-row'>
+                  <Avatar size={36} className='trans-all' onClick={() => this.handleClickAllDependent()}>All</Avatar>
+                  <Button
+                    type='text'
+                    className='trans-left' icon={<BiChevronLeft size={35} />}
+                    onClick={() => this.scrollTrans(-42)}
+                  />
+                  <div className='trans-scroll' ref={this.scrollElement}>
+                    {listDependents?.map((dependent, index) => (
+                      <Avatar
+                        key={index}
+                        size={36}
+                        className={`trans-item ${selectedDependentId == dependent._id ? 'active' : ''}`}
+                        onClick={() => this.handleClickDependent(dependent._id)}
+                      >
+                        {dependent?.firstName?.charAt(0)?.toUpperCase()}{dependent?.lastName?.charAt(0)?.toUpperCase()}
+                      </Avatar>
+                    ))}
+                  </div>
+                  <Button
+                    type='text'
+                    className='trans-right' icon={<BiChevronRight size={35} />}
+                    onClick={() => this.scrollTrans(42)}
+                  />
                 </div>
-                <Button
-                  type='text'
-                  className='trans-right' icon={<BiChevronRight size={35} />}
-                  onClick={() => this.scrollTrans(42)}
-                />
+                <div className='btn-appointment'>
+                  <Button
+                    type='primary'
+                    block
+                    icon={<FaCalendarAlt size={19} />}
+                    disabled={userRole == 30 || userRole == 60}
+                    onClick={() => (userRole == 3 || userRole == 100) && this.onShowModalNewAppoint()}
+                  >
+                    {intl.formatMessage(messages.makeAppointment)}
+                  </Button>
+                </div>
               </div>
-              <div className='btn-appointment'>
-                <Button
-                  type='primary'
-                  block
-                  icon={<FaCalendarAlt size={19} />}
-                  disabled={userRole == 30 || userRole == 60}
-                  onClick={() => (userRole == 3 || userRole == 100) && this.onShowModalNewAppoint()}
-                >
-                  {intl.formatMessage(messages.makeAppointment)}
-                </Button>
-              </div>
-            </div>
-            {isFilter && (
-              <div className='calendar-filter w-100'>
-                <CSSAnimate className="animated-shorter">
-                  <Row gutter={10}>
-                    <Col xs={12} sm={12} md={4}>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
-                      <Checkbox.Group options={optionsEvent} value={selectedEventTypes} onChange={(v) => this.handleSelectEventType(v)} className="flex flex-col" />
-                    </Col>
-                    <Col xs={12} sm={12} md={8} className='skillset-checkbox'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
-                      <Checkbox.Group options={SkillSet.map(skill => skill.name)} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
-                    </Col>
-                    {userRole != 30 && (
+              {isFilter && (
+                <div className='calendar-filter w-100'>
+                  <CSSAnimate className="animated-shorter">
+                    <Row gutter={10}>
+                      <Col xs={12} sm={12} md={4}>
+                        <p className='font-10 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
+                        <Checkbox.Group options={optionsEvent} value={selectedEventTypes} onChange={(v) => this.handleSelectEventType(v)} className="flex flex-col" />
+                      </Col>
+                      <Col xs={12} sm={12} md={8} className='skillset-checkbox'>
+                        <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
+                        <Checkbox.Group options={SkillSet.map(skill => skill.name)} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
+                      </Col>
+                      {userRole != 30 && (
+                        <Col xs={12} sm={12} md={6} className='select-small'>
+                          <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
+                          <Select
+                            showSearch
+                            placeholder={intl.formatMessage(messages.startTypingProvider)}
+                            value=''
+                            optionFilterProp='children'
+                            filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                            onChange={(v) => this.handleSelectProvider(v)}
+                          >
+                            {listProvider?.map((provider, i) => (
+                              <Select.Option key={i} value={provider.name}>{provider.name}</Select.Option>
+                            ))}
+                          </Select>
+                          <div className='div-chip'>
+                            {selectedProviders?.map((name, i) => (
+                              <div key={i} className='chip'>
+                                {name}
+                                <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
+                            ))}
+                          </div>
+                        </Col>
+                      )}
                       <Col xs={12} sm={12} md={6} className='select-small'>
-                        <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
-                        <Select
-                          showSearch
-                          placeholder={intl.formatMessage(messages.startTypingProvider)}
-                          value=''
-                          optionFilterProp='children'
-                          filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-                          onChange={(v) => this.handleSelectProvider(v)}
+                        <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
+                        <PlacesAutocomplete
+                          value={location}
+                          onChange={(value) => this.handelChangeLocation(value)}
+                          onSelect={(value) => this.handleSelectLocation(value)}
                         >
-                          {listProvider?.map((provider, i) => (
-                            <Select.Option key={i} value={provider.name}>{provider.name}</Select.Option>
-                          ))}
-                        </Select>
+                          {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+                            <div>
+                              <Input {...getInputProps({
+                                placeholder: 'Service Address',
+                                className: 'location-search-input',
+                              })} />
+                              <div className="autocomplete-dropdown-container">
+                                {loading && <div>Loading...</div>}
+                                {suggestions.map(suggestion => {
+                                  const className = suggestion.active
+                                    ? 'suggestion-item--active'
+                                    : 'suggestion-item';
+                                  // inline style for demonstration purpose
+                                  const style = suggestion.active
+                                    ? { backgroundColor: '#fafafa', cursor: 'pointer' }
+                                    : { backgroundColor: '#ffffff', cursor: 'pointer' };
+                                  return (
+                                    <div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
+                                      <span>{suggestion.description}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </PlacesAutocomplete>
                         <div className='div-chip'>
-                          {selectedProviders?.map((name, i) => (
+                          {selectedLocations?.map((location, i) => (
                             <div key={i} className='chip'>
-                              {name}
-                              <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
+                              {location}
+                              <BsX size={16} onClick={() => this.handleRemoveLocation(i)} />
+                            </div>
                           ))}
                         </div>
                       </Col>
-                    )}
-                    <Col xs={12} sm={12} md={6} className='select-small'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
-                      <PlacesAutocomplete
-                        value={location}
-                        onChange={(value) => this.handelChangeLocation(value)}
-                        onSelect={(value) => this.handleSelectLocation(value)}
-                      >
-                        {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-                          <div>
-                            <Input {...getInputProps({
-                              placeholder: 'Service Address',
-                              className: 'location-search-input',
-                            })} />
-                            <div className="autocomplete-dropdown-container">
-                              {loading && <div>Loading...</div>}
-                              {suggestions.map(suggestion => {
-                                const className = suggestion.active
-                                  ? 'suggestion-item--active'
-                                  : 'suggestion-item';
-                                // inline style for demonstration purpose
-                                const style = suggestion.active
-                                  ? { backgroundColor: '#fafafa', cursor: 'pointer' }
-                                  : { backgroundColor: '#ffffff', cursor: 'pointer' };
-                                return (
-                                  <div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
-                                    <span>{suggestion.description}</span>
-                                  </div>
-                                );
-                              })}
+                    </Row>
+                    <div className='text-right'>
+                      <Button size='small' type='primary' onClick={this.handleApplyFilter}>{intl.formatMessage(messages.apply).toUpperCase()}</Button>
+                    </div>
+                  </CSSAnimate>
+                </div>
+              )}
+              <div className='calendar-content'>
+                <FullCalendar
+                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                  ref={this.calendarRef}
+                  headerToolbar={{
+                    left: "filterButton",
+                    center: "prev,title,next",
+                    right: "monthToWeekButton,segmentView"
+                  }}
+                  views={{
+                    monthToWeekButton: {
+                      type: (isGridDayView === 'Grid' && isMonth) ? 'dayGridMonth' : (isGridDayView === 'Grid' && !isMonth) ? 'timeGridWeek' : (isGridDayView !== 'Grid' && isMonth) ? 'listMonth' : 'listWeek',
+                      buttonText: btnMonthToWeek,
+                    },
+                    segmentView: {
+                      type: (isGridDayView === 'Grid' && isMonth) ? 'dayGridMonth' : (isGridDayView === 'Grid' && !isMonth) ? 'timeGridWeek' : (isGridDayView !== 'Grid' && isMonth) ? 'listMonth' : 'listWeek',
+                      buttonText: btnChangeDayView,
+                    },
+                    week: { titleFormat: { month: 'numeric', day: 'numeric' } },
+                  }}
+                  customButtons={{
+                    filterButton: { text: btnFilter },
+                    prev: { click: () => this.handleClickPrevMonth() },
+                    next: { click: () => this.handleClickNextMonth() },
+                  }}
+                  initialView='dayGridMonth'
+                  eventColor='transparent'
+                  eventDisplay='block'
+                  editable={true}
+                  selectable={true}
+                  selectMirror={true}
+                  dayMaxEvents={true}
+                  weekends={calendarWeekends}
+                  datesSet={this.handleDates}
+                  events={calendarEvents}
+                  eventContent={(info) => renderEventContent(info, listAppointmentsRecent)}
+                  eventClick={this.onShowDrawerDetail}
+                  eventChange={this.handleEventChange} // called for drag-n-drop/resize
+                  eventRemove={this.handleEventRemove}
+                  dateClick={this.handleClickDate}
+                  height="calc(100vh - 190px)"
+                />
+              </div>
+            </section>
+            {[3, 30].includes(userRole) && (
+              <section className='div-multi-choice'>
+                <Collapse
+                  defaultActiveKey={['1']}
+                  expandIcon={({ isActive }) => isActive ? <BsFillDashSquareFill size={18} /> : <BsFillPlusSquareFill size={18} />}
+                  expandIconPosition={'end'}
+                  onChange={this.onCollapseChange}
+                >
+                  {this.renderPanelAppointmentForProvider()}
+                  {userRole == 3 && (
+                    <Panel header={intl.formatMessage(messages.referrals)} key="2">
+                      <Tabs defaultActiveKey="1" type="card" size='small'>
+                        <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                          {listAppointmentsRecent?.filter(a => a.type == 4 && a.status == 0 && a.flagStatus != 1)?.map((appointment, index) =>
+                            <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                              <Avatar size={24} icon={<FaUser size={12} />} />
+                              <div className='div-service'>
+                                <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                                <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
+                              </div>
+                              <div className='text-center ml-auto mr-5'>
+                                <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                                <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                              </div>
+                              <div className='ml-auto'>
+                                <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
+                                <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
+                              </div>
+                            </div>
+                          )}
+                        </Tabs.TabPane>
+                        <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
+                          {listAppointmentsRecent?.filter(a => a.type == 4 && a.status != 0 && a.flagStatus != 1)?.map((appointment, index) =>
+                            <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                              <Avatar size={24} icon={<FaUser size={12} />} />
+                              <div className='div-service'>
+                                <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                                <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
+                              </div>
+                              <div className='text-center ml-auto mr-5'>
+                                <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                                <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                              </div>
+                              <div className='ml-auto'>
+                                <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
+                                <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
+                              </div>
+                            </div>
+                          )}
+                        </Tabs.TabPane>
+                      </Tabs>
+                    </Panel>
+                  )}
+                  <Panel header={intl.formatMessage(messages.screenings)} key="3">
+                    <Tabs defaultActiveKey="1" type="card" size='small'>
+                      <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                        {listAppointmentsRecent?.filter(a => a.type == 1 && a.status == 0 && a.flagStatus != 1)?.map((appointment, index) =>
+                          <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                            <Avatar size={24} icon={<FaUser size={12} />} />
+                            <div className='div-service flex-1'>
+                              <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                              <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                            </div>
+                            <div className='text-center ml-auto mr-5 flex-1'>
+                              <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                              <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                            </div>
+                            <div className='ml-auto flex-1 text-center'>
+                              <p className='font-12 mb-0'>{appointment.screeningTime ?? ''}</p>
                             </div>
                           </div>
                         )}
-                      </PlacesAutocomplete>
-                      <div className='div-chip'>
-                        {selectedLocations?.map((location, i) => (
-                          <div key={i} className='chip'>
-                            {location}
-                            <BsX size={16} onClick={() => this.handleRemoveLocation(i)} />
+                      </Tabs.TabPane>
+                      <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
+                        {listAppointmentsRecent?.filter(a => a.type == 1 && a.status != 0 && a.flagStatus != 1)?.map((appointment, index) =>
+                          <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                            <Avatar size={24} icon={<FaUser size={12} />} />
+                            <div className='div-service flex-1'>
+                              <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                              <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                            </div>
+                            <div className='text-center ml-auto mr-5 flex-1'>
+                              <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                              <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                            </div>
+                            <div className='ml-auto flex-1 text-center'>
+                              <p className='font-12 mb-0'>{appointment.screeningTime ?? ''}</p>
+                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </Col>
-                  </Row>
-                  <div className='text-right'>
-                    <Button size='small' type='primary' onClick={this.handleApplyFilter}>{intl.formatMessage(messages.apply).toUpperCase()}</Button>
-                  </div>
-                </CSSAnimate>
-              </div>
-            )}
-            <div className='calendar-content'>
-              <FullCalendar
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-                ref={this.calendarRef}
-                headerToolbar={{
-                  left: "filterButton",
-                  center: "prev,title,next",
-                  right: "monthToWeekButton,segmentView"
-                }}
-                views={{
-                  monthToWeekButton: {
-                    type: (isGridDayView === 'Grid' && isMonth) ? 'dayGridMonth' : (isGridDayView === 'Grid' && !isMonth) ? 'timeGridWeek' : (isGridDayView !== 'Grid' && isMonth) ? 'listMonth' : 'listWeek',
-                    buttonText: btnMonthToWeek,
-                  },
-                  segmentView: {
-                    type: (isGridDayView === 'Grid' && isMonth) ? 'dayGridMonth' : (isGridDayView === 'Grid' && !isMonth) ? 'timeGridWeek' : (isGridDayView !== 'Grid' && isMonth) ? 'listMonth' : 'listWeek',
-                    buttonText: btnChangeDayView,
-                  },
-                  week: { titleFormat: { month: 'numeric', day: 'numeric' } },
-                }}
-                customButtons={{
-                  filterButton: { text: btnFilter },
-                  prev: { click: () => this.handleClickPrevMonth() },
-                  next: { click: () => this.handleClickNextMonth() },
-                }}
-                initialView='dayGridMonth'
-                eventColor='transparent'
-                eventDisplay='block'
-                editable={true}
-                selectable={true}
-                selectMirror={true}
-                dayMaxEvents={true}
-                weekends={calendarWeekends}
-                datesSet={this.handleDates}
-                events={calendarEvents}
-                eventContent={(info) => renderEventContent(info, listAppointmentsRecent)}
-                eventClick={this.onShowDrawerDetail}
-                eventChange={this.handleEventChange} // called for drag-n-drop/resize
-                eventRemove={this.handleEventRemove}
-                dateClick={this.handleClickDate}
-                height="calc(100vh - 190px)"
-              />
-            </div>
-          </section>
-          {[3, 30].includes(userRole) && (
-            <section className='div-multi-choice'>
-              <Collapse
-                defaultActiveKey={['1']}
-                expandIcon={({ isActive }) => isActive ? <BsFillDashSquareFill size={18} /> : <BsFillPlusSquareFill size={18} />}
-                expandIconPosition={'end'}
-                onChange={this.onCollapseChange}
-              >
-                {this.renderPanelAppointmentForProvider()}
-                {userRole == 3 && (
-                  <Panel header={intl.formatMessage(messages.referrals)} key="2">
+                        )}
+                      </Tabs.TabPane>
+                    </Tabs>
+                  </Panel>
+                  <Panel header={intl.formatMessage(messages.evaluations)} key="4">
                     <Tabs defaultActiveKey="1" type="card" size='small'>
                       <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                        {listAppointmentsRecent?.filter(a => a.type == 4 && a.status == 0 && a.flagStatus != 1)?.map((appointment, index) =>
+                        {listAppointmentsRecent?.filter(a => a.type == 2 && a.status == 0 && moment(a.date).isAfter(new Date()) && a.flagStatus != 1)?.map((appointment, index) =>
                           <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
                               <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                              <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
+                              <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                             </div>
-                            <div className='text-center ml-auto mr-5'>
-                              <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
-                              <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
-                            </div>
+                            <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                             <div className='ml-auto'>
-                              <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
+                              <p className='font-12 mb-0'>{moment(appointment.date).format("hh:mm a")}</p>
                               <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                             </div>
                           </div>
                         )}
                       </Tabs.TabPane>
                       <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                        {listAppointmentsRecent?.filter(a => a.type == 4 && a.status != 0 && a.flagStatus != 1)?.map((appointment, index) =>
+                        {listAppointmentsRecent?.filter(a => a.type == 2 && moment(a.date).isBefore(new Date()) && a.flagStatus != 1)?.map((appointment, index) =>
                           <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
                               <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                              <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
+                              <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                             </div>
-                            <div className='text-center ml-auto mr-5'>
-                              <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
-                              <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
-                            </div>
+                            <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                             <div className='ml-auto'>
-                              <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
+                              <p className='font-12 mb-0'>{moment(appointment.date).format("hh:mm a")}</p>
                               <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
                             </div>
                           </div>
@@ -1140,201 +1221,126 @@ class Dashboard extends React.Component {
                       </Tabs.TabPane>
                     </Tabs>
                   </Panel>
-                )}
-                <Panel header={intl.formatMessage(messages.screenings)} key="3">
-                  <Tabs defaultActiveKey="1" type="card" size='small'>
-                    <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                      {listAppointmentsRecent?.filter(a => a.type == 1 && a.status == 0 && a.flagStatus != 1)?.map((appointment, index) =>
-                        <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
-                          <Avatar size={24} icon={<FaUser size={12} />} />
-                          <div className='div-service flex-1'>
-                            <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                  <Panel
+                    header={intl.formatMessage(messages.flags)}
+                    key="5"
+                    extra={
+                      <div className='flex gap-2'>
+                        <BiExpand size={18} onClick={() => this.onOpenModalFlagExpand()} />
+                        <Badge size="small" count={listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.length}>
+                          <BsFillFlagFill size={18} />
+                        </Badge>
+                      </div>
+                    }
+                    collapsible='header'
+                  >
+                    <Tabs defaultActiveKey="1" type="card" size='small'>
+                      <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
+                        {listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.map((appointment, index) =>
+                          <div key={index} className='list-item padding-item gap-2' onClick={(e) => !e.target.className.includes('font-12 flag-action') && this.onShowDrawerDetail(appointment._id)}>
+                            <Avatar size={24} icon={<FaUser size={12} />} />
+                            <div className='div-service'>
+                              <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                              <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                            </div>
+                            {userRole == 3 ? (
+                              <>
+                                <a className='font-12 flag-action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
+                                {appointment?.isPaid ? 'Paid' : appointment?.flagItems?.rate == 0 ? null : (
+                                  <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                                    <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+                                    <input type="hidden" name="business" value="office@helpmegethelp.org" />
+                                    <input type="hidden" name="cmd" value="_donations" />
+                                    <input type="hidden" name="item_name" value="Help Me Get Help" />
+                                    <input type="hidden" name="item_number" />
+                                    <input type="hidden" name="amount" value={appointment?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                                    <input type="hidden" name="shipping" value="0.00" />
+                                    <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+                                    <input type="hidden" name="rm" value="0" />
+                                    <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${appointment?._id}`} />
+                                    <input type="hidden" name="cancel_return" value={window.location.href} />
+                                    <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+                                    <button className='font-12 flag-action pay-flag-button'>
+                                      {intl.formatMessage(msgDrawer.payFlag)}
+                                    </button>
+                                  </form>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <div className='font-12'>{appointment?.type == 2 ? intl.formatMessage(messages.evaluation) : appointment?.type == 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
+                                <a className='font-12 flag-action' onClick={() => this.onOpenModalConfirm('clear-flag', appointment)}>{intl.formatMessage(msgDrawer.clearFlag)}</a>
+                              </>
+                            )}
                           </div>
-                          <div className='text-center ml-auto mr-5 flex-1'>
-                            <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
-                            <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
+                        )}
+                      </Tabs.TabPane>
+                      <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
+                        {listAppointmentsRecent?.filter(a => a.flagStatus == 2)?.map((appointment, index) =>
+                          <div key={index} className='list-item padding-item gap-2' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                            <Avatar size={24} icon={<FaUser size={12} />} />
+                            <div className='div-service'>
+                              <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
+                              <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                            </div>
+                            <div className='font-12'>{appointment?.type == 2 ? intl.formatMessage(messages.evaluation) : appointment?.type == 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
+                            <div className='ml-auto'>
+                              <div className='font-12'>{moment(appointment.date).format("hh:mm a")}</div>
+                              <div className='font-12 font-700'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
+                            </div>
                           </div>
-                          <div className='ml-auto flex-1 text-center'>
-                            <p className='font-12 mb-0'>{appointment.screeningTime ?? ''}</p>
-                          </div>
-                        </div>
-                      )}
-                    </Tabs.TabPane>
-                    <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                      {listAppointmentsRecent?.filter(a => a.type == 1 && a.status != 0 && a.flagStatus != 1)?.map((appointment, index) =>
-                        <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
-                          <Avatar size={24} icon={<FaUser size={12} />} />
-                          <div className='div-service flex-1'>
-                            <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
-                          </div>
-                          <div className='text-center ml-auto mr-5 flex-1'>
-                            <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
-                            <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
-                          </div>
-                          <div className='ml-auto flex-1 text-center'>
-                            <p className='font-12 mb-0'>{appointment.screeningTime ?? ''}</p>
-                          </div>
-                        </div>
-                      )}
-                    </Tabs.TabPane>
-                  </Tabs>
-                </Panel>
-                <Panel header={intl.formatMessage(messages.evaluations)} key="4">
-                  <Tabs defaultActiveKey="1" type="card" size='small'>
-                    <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                      {listAppointmentsRecent?.filter(a => a.type == 2 && a.status == 0 && moment(a.date).isAfter(new Date()) && a.flagStatus != 1)?.map((appointment, index) =>
-                        <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
-                          <Avatar size={24} icon={<FaUser size={12} />} />
-                          <div className='div-service'>
-                            <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
-                          </div>
-                          <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
-                          <div className='ml-auto'>
-                            <p className='font-12 mb-0'>{moment(appointment.date).format("hh:mm a")}</p>
-                            <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
-                          </div>
-                        </div>
-                      )}
-                    </Tabs.TabPane>
-                    <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                      {listAppointmentsRecent?.filter(a => a.type == 2 && moment(a.date).isBefore(new Date()) && a.flagStatus != 1)?.map((appointment, index) =>
-                        <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
-                          <Avatar size={24} icon={<FaUser size={12} />} />
-                          <div className='div-service'>
-                            <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
-                          </div>
-                          <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
-                          <div className='ml-auto'>
-                            <p className='font-12 mb-0'>{moment(appointment.date).format("hh:mm a")}</p>
-                            <p className='font-12 font-700 mb-0'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
-                          </div>
-                        </div>
-                      )}
-                    </Tabs.TabPane>
-                  </Tabs>
-                </Panel>
-                <Panel
-                  header={intl.formatMessage(messages.flags)}
-                  key="5"
-                  extra={
-                    <div className='flex gap-2'>
-                      <BiExpand size={18} onClick={() => this.onOpenModalFlagExpand()} />
-                      <Badge size="small" count={listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.length}>
-                        <BsFillFlagFill size={18} />
-                      </Badge>
-                    </div>
-                  }
-                  collapsible='header'
-                >
-                  <Tabs defaultActiveKey="1" type="card" size='small'>
-                    <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                      {listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.map((appointment, index) =>
-                        <div key={index} className='list-item padding-item gap-2' onClick={(e) => !e.target.className.includes('font-12 flag-action') && this.onShowDrawerDetail(appointment._id)}>
-                          <Avatar size={24} icon={<FaUser size={12} />} />
-                          <div className='div-service'>
-                            <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
-                          </div>
-                          {userRole == 3 ? (
-                            <>
-                              <a className='font-12 flag-action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
-                              {appointment?.isPaid ? 'Paid' : appointment?.flagItems?.rate == 0 ? null : (
-                                <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                                  <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-                                  <input type="hidden" name="business" value="office@helpmegethelp.org" />
-                                  <input type="hidden" name="cmd" value="_donations" />
-                                  <input type="hidden" name="item_name" value="Help Me Get Help" />
-                                  <input type="hidden" name="item_number" />
-                                  <input type="hidden" name="amount" value={appointment?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-                                  <input type="hidden" name="shipping" value="0.00" />
-                                  <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-                                  <input type="hidden" name="rm" value="0" />
-                                  <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${appointment?._id}`} />
-                                  <input type="hidden" name="cancel_return" value={window.location.href} />
-                                  <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                                  <button className='font-12 flag-action pay-flag-button'>
-                                    {intl.formatMessage(msgDrawer.payFlag)}
-                                  </button>
-                                </form>
-                              )}
-                            </>
-                          ) : (
-                            <>
-                              <div className='font-12'>{appointment?.type == 2 ? intl.formatMessage(messages.evaluation) : appointment?.type == 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
-                              <a className='font-12 flag-action' onClick={() => this.onOpenModalConfirm('clear-flag', appointment)}>{intl.formatMessage(msgDrawer.clearFlag)}</a>
-                            </>
+                        )}
+                      </Tabs.TabPane>
+                    </Tabs>
+                  </Panel>
+                  {(userRole == 3 || userRole == 60) ? (
+                    <Panel
+                      key="6"
+                      header={intl.formatMessage(messages.subsidaries)}
+                      extra={(
+                        <div className='flex flex-row justify-between'>
+                          {userRole == 3 && (
+                            <Button type='primary' size='small' onClick={this.onShowModalNewSubsidy}>
+                              {intl.formatMessage(messages.requestNewSubsidy).toUpperCase()}
+                            </Button>
                           )}
                         </div>
                       )}
-                    </Tabs.TabPane>
-                    <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                      {listAppointmentsRecent?.filter(a => a.flagStatus == 2)?.map((appointment, index) =>
-                        <div key={index} className='list-item padding-item gap-2' onClick={() => this.onShowDrawerDetail(appointment._id)}>
-                          <Avatar size={24} icon={<FaUser size={12} />} />
-                          <div className='div-service'>
-                            <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                            <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
-                          </div>
-                          <div className='font-12'>{appointment?.type == 2 ? intl.formatMessage(messages.evaluation) : appointment?.type == 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
-                          <div className='ml-auto'>
-                            <div className='font-12'>{moment(appointment.date).format("hh:mm a")}</div>
-                            <div className='font-12 font-700'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
-                          </div>
-                        </div>
-                      )}
-                    </Tabs.TabPane>
-                  </Tabs>
-                </Panel>
-                {(userRole == 3 || userRole == 60) ? (
-                  <Panel
-                    key="6"
-                    header={(
-                      <div className='flex flex-row justify-between'>
-                        <p className='mb-0'>{intl.formatMessage(messages.subsidaries)}</p>
-                        {userRole == 3 && (
-                          <Button type='primary' size='small' onClick={this.onShowModalNewSubsidy}>
-                            {intl.formatMessage(messages.requestNewSubsidy).toUpperCase()}
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                    className='subsidaries-panel'
-                  >
-                    <PanelSubsidaries
-                      setReload={reload => this.panelSubsidariesReload = reload}
-                      userRole={userRole}
-                      SkillSet={SkillSet}
-                      onShowModalSubsidyDetail={this.onShowModalSubsidy}
-                      onCancelSubsidy={this.onCancelSubsidy}
-                    />
-                  </Panel>
-                ) : null}
-              </Collapse>
-            </section>
-          )}
-        </div>
-        <div className='text-right'>
-          <div className='btn-call'>
-            <img src='../images/call.png' onClick={this.onShowModalReferral} />
+                      className='subsidaries-panel'
+                      collapsible='header'
+                    >
+                      <PanelSubsidaries
+                        setReload={reload => this.panelSubsidariesReload = reload}
+                        userRole={userRole}
+                        SkillSet={SkillSet}
+                        onShowModalSubsidyDetail={this.onShowModalSubsidy}
+                        onCancelSubsidy={this.onCancelSubsidy}
+                      />
+                    </Panel>
+                  ) : null}
+                </Collapse>
+              </section>
+            )}
           </div>
+          <div className='text-right'>
+            <div className='btn-call'>
+              <img src='../images/call.png' onClick={this.onShowModalReferral} />
+            </div>
+          </div>
+          {userDrawerVisible && <DrawerDetail {...drawerDetailProps} />}
+          {visibleNewAppoint && <ModalNewAppointmentForParents {...modalNewAppointProps} />}
+          {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
+          {this.renderModalSubsidyDetail()}
+          {visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
+          <ModalNewGroup {...modalNewGroupProps} />
+          {visiblReferralService && <ModalReferralService {...modalReferralServiceProps} />}
+          <ModalNewSubsidyReview {...modalNewReviewProps} />
+          {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
+          {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
+          {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
         </div>
-        {userDrawerVisible && <DrawerDetail {...drawerDetailProps} />}
-        {visibleNewAppoint && <ModalNewAppointmentForParents {...modalNewAppointProps} />}
-        {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
-        {this.renderModalSubsidyDetail()}
-        {visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
-        <ModalNewGroup {...modalNewGroupProps} />
-        {visiblReferralService && <ModalReferralService {...modalReferralServiceProps} />}
-        <ModalNewSubsidyReview {...modalNewReviewProps} />
-        {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
-        {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
-        {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
-      </div>
-    );
+      );
+    }
   }
 }
 

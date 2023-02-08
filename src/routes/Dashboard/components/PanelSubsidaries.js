@@ -37,37 +37,21 @@ class PanelSubsidaries extends React.Component {
   renderStatus(status) {
     let value = parseInt(status)
     switch (value) {
-      case 0: return 'PENDING';
-      case 1: return 'APPROVED';
-      case -1: return 'DECLINE';
-      case 2: return 'CANCELLED';
+      case 0: case 1: case 3: return 'PENDING';
+      case 2: case 4: return 'DECLINED';
+      case 5: return 'APPROVED';
+      case -1: return 'CANCELLED';
     }
     return '';
   }
 
-  getSkillSetName(value) {
-    return this.props.SkillSet[value];
-  }
-
   renderLeftContent(subsidy) {
-    if (this.props.userRole == 30) {
-      return (
-        <div className='item-left'>
-          <Avatar size={24} icon={<FaUser size={12} />} />
-          <div className='div-service'>
-            <p className='font-11 mb-0'>{this.getSkillSetName(subsidy.skillSet)}</p>
-            <p className='font-09 mb-0'>{subsidy.student.firstName} {subsidy.student.lastName}</p>
-          </div>
-          <p className='font-12 ml-auto mb-0'>{this.renderStatus(subsidy.status)}</p>
-        </div>
-      );
-    }
     return (
       <div className='item-left'>
         <Avatar size={24} icon={<FaUser size={12} />} />
         <div className='div-service' >
-          <p className='font-11 mb-0'>{this.getSkillSetName(subsidy.skillSet)}</p>
-          <p className='font-09 mb-0'>{subsidy.school.name}</p>
+          <p className='font-11 mb-0'>{subsidy?.skillSet?.name}</p>
+          <p className='font-09 mb-0'>{subsidy?.school?.name}</p>
         </div>
         <p className='font-12 ml-auto mb-0'>{this.renderStatus(subsidy.status)}</p>
       </div>
