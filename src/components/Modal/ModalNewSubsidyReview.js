@@ -54,7 +54,7 @@ class ModalNewSubsidyReview extends React.Component {
 						</div>
 						<Divider style={{ marginTop: 15, marginBottom: 15, borderColor: '#d7d7d7' }} />
 						<div>
-							<p className='font-16 font-700 mb-10'>{intl.formatMessage(messagesReview.otherCcontacts)}</p>
+							<p className='font-16 font-700 mb-10'>{intl.formatMessage(messagesReview.otherContacts)}</p>
 							<div className='review-item'>
 								<p>Raw name</p>
 								<p>Rav phone</p>

@@ -8,7 +8,6 @@ import messages from '../messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import './index.less';
-import request from '../../../utils/api/request'
 
 class PanelSubsidaries extends React.Component {
   constructor(props) {
@@ -20,49 +19,23 @@ class PanelSubsidaries extends React.Component {
   }
 
   componentDidMount = () => {
-    this.props.setReload(this.requestLoadDataFromMainView)
-    this.loadSubsidaryWithStatus();
-  }
-
-  requestLoadDataFromMainView = (isForceReload) => {
-    if (this.state.listSubsidaries.length == 0 || isForceReload) {
-      this.loadSubsidaryWithStatus(this.state.status);
-    }
-  }
-
-  loadSubsidaryWithStatus(status = 0) {
-    var url = 'clients/get_my_subsidy_requests';
-    if (this.props.userRole === 30) {
-      url = 'providers/get_my_subsidy_requests'
-      return;
-    }
-    if (this.props.userRole === 60) {
-      url = 'schools/get_my_subsidy_requests'
-    }
-    this.setState({ listSubsidaries: [] });
-    request.post(url, {
-      filter: { status: parseInt(status) }
-    }).then(result => {
-      if (result.success) {
-        var data = result.data;
-        this.setState({ listSubsidaries: data.docs });
-      } else {
-        this.setState({ listSubsidaries: [] });
-      }
-
-    })
+    this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status == this.state.status) });
   }
 
   handleTabChange = (v) => {
-    var status = 0;
-    if (v == 1) status = 0;
-    if (v == 2) status = -1;
-    if (v == 3) status = 1;
-    this.loadSubsidaryWithStatus(status);
+    switch (v) {
+      case "1":
+        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status == 0) }); break;
+      case "2":
+        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status == -1) }); break;
+      case "3":
+        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status == 1) }); break;
+      default: break;
+    }
   }
 
   renderStatus(status) {
-    var value = parseInt(status)
+    let value = parseInt(status)
     switch (value) {
       case 0: return 'PENDING';
       case 1: return 'APPROVED';
@@ -124,23 +97,25 @@ class PanelSubsidaries extends React.Component {
   }
 
   render() {
+    const { listSubsidaries } = this.state;
+
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
         <Tabs.TabPane tab={intl.formatMessage(messages.pending)} key="1">
-          {this.state.listSubsidaries.length > 0 && this.state.listSubsidaries.map((subsidy, index) => (
+          {listSubsidaries.length > 0 && listSubsidaries.map((subsidy, index) => (
             <div key={index} className='list-item'>
               {this.renderLeftContent(subsidy)}
               {this.renderRighContent(0, subsidy)}
             </div>
           ))}
-          {this.state.listSubsidaries.length == 0 && (
-            <div key={1} className='list-item'>
-              <p style={{ padding: "10px" }}>No pending subisdy</p>
+          {listSubsidaries.length == 0 && (
+            <div key={1} className='list-item p-10 justify-center'>
+              <span>No pending subisdy</span>
             </div>
           )}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.declined)} key="2">
-          {this.state.listSubsidaries.length > 0 && this.state.listSubsidaries.map((subsidy, index) => (
+          {listSubsidaries.length > 0 && listSubsidaries.map((subsidy, index) => (
             <div key={index} className='list-item'>
               {this.renderLeftContent(subsidy)}
               <div className='item-right'>
@@ -149,23 +124,23 @@ class PanelSubsidaries extends React.Component {
             </div>
           )
           )}
-          {this.state.listSubsidaries.length == 0 && (
-            <div key={2} className='list-item'>
-              <p style={{ padding: "10px" }}>No declined subisdy</p>
+          {listSubsidaries.length == 0 && (
+            <div key={2} className='list-item p-10 justify-center'>
+              <span>No declined subisdy</span>
             </div>
           )}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.approved)} key="3">
-          {this.state.listSubsidaries.length > 0 && this.state.listSubsidaries.map((subsidy, index) => (
+          {listSubsidaries.length > 0 && listSubsidaries.map((subsidy, index) => (
             <div key={index} className='list-item'>
               {this.renderLeftContent(subsidy)}
               {this.renderRighContent(2, subsidy)}
             </div>
           )
           )}
-          {this.state.listSubsidaries.length == 0 && (
-            <div key={3} className='list-item'>
-              <p style={{ padding: "10px" }}>No approved subisdy</p>
+          {listSubsidaries.length == 0 && (
+            <div key={3} className='list-item p-10 justify-center'>
+              <span>No approved subisdy</span>
             </div>
           )}
         </Tabs.TabPane>
@@ -173,8 +148,9 @@ class PanelSubsidaries extends React.Component {
     )
   }
 }
-const mapStateToProps = state => {
-  return ({})
-}
+
+const mapStateToProps = state => ({
+  listSubsidaries: state.appointments.dataSubsidyRequests
+})
 
 export default compose(connect(mapStateToProps))(PanelSubsidaries);

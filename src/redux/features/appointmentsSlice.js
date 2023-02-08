@@ -1,10 +1,11 @@
 import { url } from '../../utils/api/baseUrl';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import request from '../../utils/api/request'
-import { getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider } from '../../utils/api/apiList';
+import { getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getParentSubsidyRequests, getSchoolSubsidyRequests } from '../../utils/api/apiList';
 
 const initialState = {
 	dataAppointments: {},
+	dataSubsidyRequests: [],
 	dataAppointmentsMonth: []
 };
 
@@ -32,6 +33,31 @@ export const getAppointmentsData = createAsyncThunk(
 			}
 		} catch (error) {
 			console.log('get appointments error---', error)
+		}
+	}
+)
+
+export const getSubsidyRequests = createAsyncThunk(
+	'auth/getSubsidyRequests',
+	async (data) => {
+		let result = {}
+		try {
+			switch (data.role) {
+				case 1000:
+					result = await request.post(url + getAdminSubsidyRequests, data, data.token);
+					return result.data.docs;
+				case 999:
+					result = await request.post(url + getAdminSubsidyRequests, data, data.token);
+					return result.data.docs;
+				case 60:
+					result = await request.post(url + getSchoolSubsidyRequests, data, data.token);
+					return result.data.docs;
+				case 3:
+					result = await request.post(url + getParentSubsidyRequests, data, data.token);
+					return result.data.docs;
+			}
+		} catch (error) {
+			console.log('get subsidy requests error---', error);
 		}
 	}
 )
@@ -128,6 +154,10 @@ export const appointmentsSlice = createSlice({
 
 		[getAppointmentsMonthData.fulfilled]: (state, action) => {
 			state.dataAppointmentsMonth = action.payload
+		},
+
+		[getSubsidyRequests.fulfilled]: (state, action) => {
+			state.dataSubsidyRequests = action.payload
 		},
 
 		[changeTime.fulfilled]: (state, action) => { },

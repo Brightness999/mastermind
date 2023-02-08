@@ -208,7 +208,7 @@
 
   "routes.Subsidyreview.reviewSubsidyRequest": "Review subsidy request info",
   "routes.Subsidyreview.dependentInfo": "Dependent info",
-  "routes.Subsidyreview.otherCcontacts": "Other contacts",
+  "routes.Subsidyreview.otherContacts": "Other contacts",
   "routes.Subsidyreview.notes": "Notes",
   "routes.Subsidyreview.submit": "Submit",
   "routes.Subsidyreview.goBack": "go back",

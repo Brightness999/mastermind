@@ -24,7 +24,7 @@ const { Panel } = Collapse;
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
 import moment from 'moment';
-import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice'
+import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
 import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
@@ -123,6 +123,7 @@ class Dashboard extends React.Component {
         }
         this.updateCalendarEvents(loginData.role);
         this.getMyAppointments(loginData.role);
+        this.props.dispatch(getSubsidyRequests({ role: loginData.role }));
         const notifications = setInterval(() => {
           if (loginData.role == 3) {
             request.post(checkNotificationForClient).then(res => {
@@ -370,16 +371,6 @@ class Dashboard extends React.Component {
     this.socket.emit('join_room', roomId);
   }
 
-  modalCreateAndEditSubsidyRequest = () => {
-    const { visibleNewSubsidy } = this.state;
-    const modalNewSubsidyProps = {
-      visible: visibleNewSubsidy,
-      onSubmit: this.onCloseModalNewSubsidy,
-      onCancel: this.onCloseModalNewSubsidy,
-    };
-    return <ModalNewSubsidyRequest {...modalNewSubsidyProps} />
-  }
-
   onShowFilter = () => {
     this.setState({ isFilter: !this.state.isFilter });
   }
@@ -462,7 +453,7 @@ class Dashboard extends React.Component {
 
   onSubmitModalNewSubsidy = () => {
     this.setState({ visibleNewSubsidy: false });
-    this.setState({ visibleNewReview: true });
+    this.props.dispatch(getSubsidyRequests({ role: this.state.userRole }));
   };
 
   onCloseModalNewSubsidy = (isNeedReload) => {
@@ -618,34 +609,6 @@ class Dashboard extends React.Component {
           />
         </Panel>
       );
-  }
-
-  renderPanelSubsidaries = () => {
-    if (this.state.userRole == 60 || this.state.userRole == 3)
-      return (
-        <Panel
-          key="6"
-          header={(
-            <div className='flex flex-row justify-between'>
-              <p className='mb-0'>{intl.formatMessage(messages.subsidaries)}</p>
-              {this.state.userRole == 3 && (
-                <Button type='primary' size='small' onClick={this.onShowModalNewSubsidy}>
-                  {intl.formatMessage(messages.requestNewSubsidy).toUpperCase()}
-                </Button>
-              )}
-            </div>
-          )}
-          className='subsidaries-panel'
-        >
-          <PanelSubsidaries
-            setReload={reload => this.panelSubsidariesReload = reload}
-            userRole={this.state.userRole}
-            SkillSet={this.state.SkillSet}
-            onShowModalSubsidyDetail={this.onShowModalSubsidy}
-            onCancelSubsidy={this.onCancelSubsidy}
-          />
-        </Panel>
-      )
   }
 
   handleClickPrevMonth = () => {
@@ -828,6 +791,7 @@ class Dashboard extends React.Component {
       visibleSessionsNeedToClose,
       selectedDependentId,
       visibleCreateNote,
+      visibleNewSubsidy,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -937,6 +901,12 @@ class Dashboard extends React.Component {
       onSubmit: this.handleRequestClearance,
       onCancel: this.onCloseModalCreateNote,
       title: "Request Message"
+    };
+
+    const modalNewSubsidyProps = {
+      visible: visibleNewSubsidy,
+      onSubmit: this.onSubmitModalNewSubsidy,
+      onCancel: this.onCloseModalNewSubsidy,
     };
 
     return (
@@ -1318,9 +1288,31 @@ class Dashboard extends React.Component {
                       )}
                     </Tabs.TabPane>
                   </Tabs>
-
                 </Panel>
-                {this.renderPanelSubsidaries()}
+                {(userRole == 3 || userRole == 60) ? (
+                  <Panel
+                    key="6"
+                    header={(
+                      <div className='flex flex-row justify-between'>
+                        <p className='mb-0'>{intl.formatMessage(messages.subsidaries)}</p>
+                        {userRole == 3 && (
+                          <Button type='primary' size='small' onClick={this.onShowModalNewSubsidy}>
+                            {intl.formatMessage(messages.requestNewSubsidy).toUpperCase()}
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                    className='subsidaries-panel'
+                  >
+                    <PanelSubsidaries
+                      setReload={reload => this.panelSubsidariesReload = reload}
+                      userRole={userRole}
+                      SkillSet={SkillSet}
+                      onShowModalSubsidyDetail={this.onShowModalSubsidy}
+                      onCancelSubsidy={this.onCancelSubsidy}
+                    />
+                  </Panel>
+                ) : null}
               </Collapse>
             </section>
           )}
@@ -1334,7 +1326,7 @@ class Dashboard extends React.Component {
         {visibleNewAppoint && <ModalNewAppointmentForParents {...modalNewAppointProps} />}
         {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
         {this.renderModalSubsidyDetail()}
-        {this.modalCreateAndEditSubsidyRequest()}
+        {visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
         <ModalNewGroup {...modalNewGroupProps} />
         {visiblReferralService && <ModalReferralService {...modalReferralServiceProps} />}
         <ModalNewSubsidyReview {...modalNewReviewProps} />

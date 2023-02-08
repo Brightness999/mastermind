@@ -14,8 +14,8 @@ export default ({
     id: `${scope}.dependentInfo`,
     defaultMessage: 'Dependent info',
   },
-  otherCcontacts: {
-    id: `${scope}.otherCcontacts`,
+  otherContacts: {
+    id: `${scope}.otherContacts`,
     defaultMessage: 'Other contacts',
   },
   notes: {

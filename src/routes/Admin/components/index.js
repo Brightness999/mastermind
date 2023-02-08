@@ -213,12 +213,8 @@ class SchedulingCenter extends React.Component {
   }
 
   modalCreateAndEditSubsidyRequest = () => {
-    const modalNewSubsidyProps = {
-      visible: this.state.visibleNewSubsidy,
-      onSubmit: this.onCloseModalNewSubsidy,
-      onCancel: this.onCloseModalNewSubsidy,
-    };
-    return <ModalNewSubsidyRequest {...modalNewSubsidyProps} />
+
+    return
   }
 
   onShowFilter = () => {
@@ -584,6 +580,7 @@ class SchedulingCenter extends React.Component {
       visibleConfirm,
       confirmMessage,
       selectedDependentId,
+      visibleNewSubsidy,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -686,6 +683,12 @@ class SchedulingCenter extends React.Component {
       onSubmit: this.onSubmitModalConfirm,
       onCancel: this.onCloseModalConfirm,
       message: confirmMessage,
+    };
+
+    const modalNewSubsidyProps = {
+      visible: visibleNewSubsidy,
+      onSubmit: this.onCloseModalNewSubsidy,
+      onCancel: this.onCloseModalNewSubsidy,
     };
 
     return (
@@ -1045,7 +1048,7 @@ class SchedulingCenter extends React.Component {
         {visibleNewAppoint && <ModalNewAppointment {...modalNewAppointProps} />}
         {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
         {this.renderModalSubsidyDetail()}
-        {this.modalCreateAndEditSubsidyRequest()}
+        {visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
         <ModalNewGroup {...modalNewGroupProps}
           SkillSet={SkillSet}
           setLoadData={reload => this.loadDataModalNewGroup = reload}

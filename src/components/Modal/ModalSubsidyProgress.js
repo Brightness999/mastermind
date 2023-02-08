@@ -12,6 +12,7 @@ import '../../assets/styles/login.less';
 import request from '../../utils/api/request'
 import { url, switchPathWithRole } from '../../utils/api/baseUrl'
 import moment from 'moment';
+import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getAllProviderInSchool, getLastConsulation } from '../../utils/api/apiList';
 
 const { Step } = Steps;
 
@@ -62,22 +63,18 @@ class ModalSubsidyProgress extends React.Component {
 			if (result.success) {
 				this.setState({ subsidy: result.data });
 				if (!!result.data.providers && result.data.providers.length > 0) {
-					console.log(result.data.providers)
 					this.setState({ selectedProviders: result.data.providers });
 				}
 				if (!!result.data.decisionExplanation && result.data.decisionExplanation.length > 0) {
-					console.log(result.data.decisionExplanation)
 					this.setState({ decisionExplanation: result.data.decisionExplanation });
 				}
 
 				// set consulation
 				// if(!!result.data.consulation){
-				//     console.log('consulation',result.data.consulation)
 				//     var consulation= result.data.consulation;
 				//     var _moment = moment( consulation.date);
 				//     var date = _moment.clone();
 				//     var hour = _moment.format('HH:mm');
-				//     console.log(date, hour)
 				//     this.setState({
 				//         consulationName:consulation.name,
 				//         meetSolution:consulation.typeForAppointLocation,
@@ -114,7 +111,7 @@ class ModalSubsidyProgress extends React.Component {
 
 	loadProvidersInSchool = (schoolId) => {
 		this.setState({ providers: [] });
-		request.post('schools/get_all_provider_in_school', { schoolId: schoolId }).then(result => {
+		request.post(getAllProviderInSchool, { schoolId: schoolId }).then(result => {
 			if (result.success) {
 				this.setState({ providers: result.data });
 			} else {
@@ -127,8 +124,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	loadLastReferral = () => {
-		this.setState({ referral: {} });
-		request.post('schools/get_last_consulation', { subsidyId: this.state.subsidy._id }).then(result => {
+		request.post(getLastConsulation, { subsidyId: this.state.subsidy._id }).then(result => {
 			if (result.success) {
 				this.setState({ referral: result.data });
 			} else {
@@ -163,7 +159,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	schoolDenySubsidy(subsidy) {
-		request.post('schools/deny_subsidy_request', { subsidyId: subsidy._id }).then(result => {
+		request.post(denySubsidyRequest, { subsidyId: subsidy._id }).then(result => {
 			if (result.success) {
 				this.loadSubsidyData(subsidy._id, false);
 			}
@@ -183,16 +179,18 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	schoolAcceptSubsidy(subsidy) {
-		if (this.state.selectedProviders.length == 0 || this.state.decisionExplanation.length == 0) {
+		const { selectedProviders, decisionExplanation } = this.state;
+
+		if (selectedProviders.length == 0 || decisionExplanation.length == 0) {
 			this.setState({ parentWarning: 'Please suggest a provider and fill in decision explaintion' })
 			return;
 		}
 		this.setState({ parentWarning: '' })
-		request.post('schools/accept_subsidy_request', {
+		request.post(acceptSubsidyRequest, {
 			"subsidyId": subsidy._id,
 			"student": subsidy.student._id,
-			"providers": this.state.selectedProviders,
-			"decisionExplanation": this.state.decisionExplanation,
+			"providers": selectedProviders,
+			"decisionExplanation": decisionExplanation,
 		}).then(result => {
 			message.success('Approved successfully');
 			if (result.success) {
@@ -215,7 +213,6 @@ class ModalSubsidyProgress extends React.Component {
 	//         this.editConsulation(subsidy);return;
 	//     }
 	//     var str = this.state.selectedDate.format("DD/MM/YYYY")+ " " + this.state.selectedHour;
-	//     // console.log(str)
 	//     var _selectedDay = moment(str , 'DD/MM/YYYY hh:mm' ).valueOf();
 	//     var postData = {
 	//         "subsidyId":subsidy._id ,
@@ -229,9 +226,7 @@ class ModalSubsidyProgress extends React.Component {
 	//         "phoneNumber": this.state.consulationPhoneNumber,
 	//     };
 
-	//     // console.log(postData);return;
 	//     request.post(switchPathWithRole(this.props.userRole)+'create_consulation_to_subsidy',postData).then(result=>{
-	//         console.log('create_consulation_to_subsidy' , result)
 	//         if(result.success){
 	//             this.loadSubsidyData(subsidy._id , false);
 	//             this.setState({isScheduling:false , consulationWarning:''});
@@ -252,7 +247,6 @@ class ModalSubsidyProgress extends React.Component {
 	//         return;
 	//     }
 	//     var str = this.state.selectedDate.format("DD/MM/YYYY")+ " " + this.state.selectedHour;
-	//     // console.log(str)
 	//     var _selectedDay = moment(str , 'DD/MM/YYYY hh:mm' ).valueOf();
 	//     var postData = {
 	//         "consulationId": subsidy.consulation._id,
@@ -262,9 +256,7 @@ class ModalSubsidyProgress extends React.Component {
 	//         "date":_selectedDay,
 	//         "phoneNumber": this.state.consulationPhoneNumber,
 	//     }
-	//     console.log(postData);
 	//     request.post(switchPathWithRole(this.props.userRole)+'change_consulation',postData).then(result=>{
-	//         console.log('change_consulation' , result)
 	//         if(result.success){
 	//             this.loadSubsidyData(subsidy._id , false);
 	//             this.setState({isScheduling:false, consulationWarning:''});
@@ -277,15 +269,16 @@ class ModalSubsidyProgress extends React.Component {
 	// }
 
 	submitSubsidyFromAdmin = (subsidy) => {
-		var postData = {
-			"selectedProvider": this.state.selectProviderFromAdmin,
-			"numberOfSessions": this.state.numberOfSessions,
-			"priceForSession": this.state.priceForSession,
+		const { selectProviderFromAdmin, numberOfSessions, priceForSession } = this.state;
+		const postData = {
+			"selectedProvider": selectProviderFromAdmin,
+			"numberOfSessions": numberOfSessions,
+			"priceForSession": priceForSession,
 			"subsidyId": subsidy._id,
 			"student": subsidy.student._id,
 			"school": subsidy.school._id,
 		}
-		if (!this.state.selectProviderFromAdmin || !this.state.numberOfSessions || !this.state.priceForSession) {
+		if (!selectProviderFromAdmin || !numberOfSessions || !priceForSession) {
 			message.error('please fill all reuired field');
 			return;
 		}
@@ -300,8 +293,8 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	appealSubsidy = () => {
-		var postData = { subsidyId: this.state.subsidy._id };
-		request.post('clients/appeal_subsidy', postData).then(result => {
+		const postData = { subsidyId: this.state.subsidy._id };
+		request.post(appealSubsidy, postData).then(result => {
 			message.success('Your appeal has been sent successfully');
 			if (result.success) {
 				this.loadSubsidyData(subsidy._id, false);
@@ -332,12 +325,12 @@ class ModalSubsidyProgress extends React.Component {
 
 	nextStep = () => {
 		this.setState({ currentStep: this.state.currentStep + 1 });
-		console.log("Step", this.state.currentStep)
 	};
 
 	prevStep = () => {
 		this.setState({ currentStep: this.state.currentStep - 1 });
 	};
+
 	handleContinue = () => {
 		if (this.state.currentStep <= 4) {
 			this.nextStep();
@@ -357,10 +350,8 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	denyAppeal = (subsidy) => {
-		var postData = {
-			subsidyId: this.state.subsidy._id
-		}
-		request.post('schools/deny_appeal_subsidy', postData).then(result => {
+		const postData = { subsidyId: this.state.subsidy._id };
+		request.post(denyAppealSubsidy, postData).then(result => {
 			message.success('Denied successfully');
 			if (result.success) {
 				this.loadSubsidyData(subsidy._id, false);
@@ -380,24 +371,17 @@ class ModalSubsidyProgress extends React.Component {
 					<div className='count-2'>
 						<p className='font-12'>Dependent:<b>{student.firstName} {student.lastName}</b></p>
 						<p className='font-12'>School: {student.school.name}</p>
-						<p className='font-12'>Skillset(s): {this.getSkillSetName(subsidy.skillSet)} </p>
-						<div className='count-2'>
-							<p className='font-12'>Age: {moment().diff(student.birthday, 'years', false)}</p>
-							<p className='font-12'>Grade: {student.currentGrade}</p>
-						</div>
+						<p className='font-12'>Skillset: {subsidy?.skillSet?.name}</p>
+						<p className='font-12'>Age: {moment().diff(student.birthday, 'years', false)}</p>
+						<p className='font-12'>Grade: {student.currentGrade}</p>
 						<p className='font-12'>Teacher: {student.primaryTeacher}</p>
 					</div>
 				</Col>
 				<Col xs={24} sm={24} md={12}>
-					<p className='font-700'>{intl.formatMessage(msgReview.otherCcontacts)}</p>
-					<div className='count-2'>
-						<p className='font-12'>Rav name: {subsidy.ravName}</p>
-						<p className='font-12'>Rav phone: {subsidy.ravPhone}</p>
-						<p className='font-12'>Rav email: {subsidy.ravEmail}</p>
-						<p className='font-12'>Therapist name: {subsidy.therapistContact}</p>
-						<p className='font-12'>Therapist phone: {subsidy.therapistPhone}</p>
-						<p className='font-12'>Therapist email: {subsidy.therapistEmail}</p>
-					</div>
+					<p className='font-700'>{intl.formatMessage(msgReview.otherContacts)}</p>
+					<p className='font-12'>Rav name: {subsidy.ravName}</p>
+					<p className='font-12'>Rav phone: {subsidy.ravPhone}</p>
+					<p className='font-12'>Rav email: {subsidy.ravEmail}</p>
 				</Col>
 			</Row>
 			<Divider style={{ margin: '12px 0', borderColor: '#d7d7d7' }} />
@@ -444,13 +428,14 @@ class ModalSubsidyProgress extends React.Component {
 				</div>
 			)
 		}
+
 		return (
 			<div>
-				{this.state.parentWarning.length > 0 && (
+				{this.state.parentWarning.length > 0 ? (
 					<div className='flex flex-row items-center'>
 						<p>{this.state.parentWarning}</p>
 					</div>
-				)}
+				) : null}
 				<div className='flex flex-row items-center'>
 					{subsidy.status == 0 && (
 						<Button onClick={() => { this.schoolDenySubsidy(subsidy) }} size='small' className='mr-10'>
@@ -462,7 +447,7 @@ class ModalSubsidyProgress extends React.Component {
 							{intl.formatMessage(messages.approve).toUpperCase()}
 						</Button>
 					)}
-					{subsidy.status == 1 && this.props.userRole < 61 && subsidy.adminApprovalStatus == 0 && (
+					{subsidy.status == 1 && this.props.userRole < 100 && subsidy.adminApprovalStatus == 0 && (
 						<Button onClick={() => { this.openHierachy(subsidy) }} size='small' type='primary'>
 							{'Hierachi'.toUpperCase()}
 						</Button>
@@ -488,7 +473,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderButtonsForDecision(subsidy) {
-		if (this.props.userRole > 800) {
+		if (this.props.userRole > 900) {
 			return (
 				<div className='flex flex-row items-center'>
 					<Button
@@ -502,12 +487,14 @@ class ModalSubsidyProgress extends React.Component {
 		}
 	}
 
-	renderSchoolInfo = (subsidy) => {
+	renderSchoolInfo = (data) => {
+		const { selectedProviders, subsidy, providers, decisionExplanation } = this.state;
+
 		return (
 			<div className='school-info'>
 				<div className='flex flex-row justify-between'>
 					<p className='font-20 font-700'>{intl.formatMessage(messages.schoolInformation)}</p>
-					{this.renderButtonsForSchoolInfo(subsidy)}
+					{this.renderButtonsForSchoolInfo(data)}
 				</div>
 				<Row gutter={15}>
 					<Col xs={24} sm={24} md={8}>
@@ -516,8 +503,8 @@ class ModalSubsidyProgress extends React.Component {
 							{[0, 1, 2].map((_, index) => (
 								<Select
 									key={index}
-									value={this.state.selectedProviders[index]}
-									disabled={this.state.subsidy.status == 1 || this.state.subsidy.status == -1}
+									value={selectedProviders[index]}
+									disabled={subsidy.status == 1 || subsidy.status == -1}
 									onChange={v => {
 										const { selectedProviders } = this.state;
 										selectedProviders[index] = v;
@@ -526,7 +513,7 @@ class ModalSubsidyProgress extends React.Component {
 									className='mb-10'
 									placeholder={intl.formatMessage(msgCreateAccount.provider)}
 								>
-									{this.state.providers.map((provider) => (
+									{providers.map((provider) => (
 										<Select.Option key={provider._id} value={provider._id}>{provider.name || provider.referredToAs}</Select.Option>
 									))}
 								</Select>
@@ -536,8 +523,8 @@ class ModalSubsidyProgress extends React.Component {
 					<Col xs={24} sm={24} md={16}>
 						<p className='font-700 mb-10'>{intl.formatMessage(messages.decisionExplanation)}</p>
 						<Input.TextArea
-							value={this.state.decisionExplanation}
-							disabled={this.state.subsidy.status == 1 || this.state.subsidy.status == -1}
+							value={decisionExplanation}
+							disabled={subsidy.status == 1 || subsidy.status == -1}
 							onChange={v => {
 								this.setState({ decisionExplanation: v.target.value });
 							}}
@@ -548,16 +535,16 @@ class ModalSubsidyProgress extends React.Component {
 		)
 	}
 
-	renderConsulation = (subsidy) => {
-		const { referral } = this.state;
+	renderConsulation = (data) => {
+		const { referral, subsidy } = this.state;
 
-		if (subsidy.status == 1) {
+		if (data.status == 1) {
 			if (referral.typeForAppointLocation == undefined || referral.location == undefined) {
 				return (
 					<div className='consulation-appoint'>
 						<div className='flex flex-row justify-between'>
 							<p className='font-20 font-700 mb-10'>{intl.formatMessage(messages.consulationAppointment)}</p>
-							{this.renderButtonsForConsulation(subsidy)}
+							{this.renderButtonsForConsulation(data)}
 						</div>
 					</div>
 				);
@@ -577,7 +564,7 @@ class ModalSubsidyProgress extends React.Component {
 							<div className='flex flex-row items-center'>
 								<a className='text-primary'
 									onClick={() => {
-										!!this.props.openReferral && this.props.openReferral(this.state.subsidy, this.loadLastReferral);
+										!!this.props.openReferral && this.props.openReferral(subsidy, this.loadLastReferral);
 									}}
 								><FaRegCalendarAlt />{intl.formatMessage(messages.reSchedule)}</a>
 							</div>
@@ -593,7 +580,8 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderDecision(subsidy) {
-		var isNotAdmin = this.props.userRole < 800
+		const { selectProviderFromAdmin, providers, numberOfSessions, priceForSession } = this.state;
+		const isNotAdmin = this.props.userRole < 999;
 		if (isNotAdmin && subsidy.adminApprovalStatus != 1) {
 			return;
 		}
@@ -609,14 +597,14 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-700'>{intl.formatMessage(msgCreateAccount.provider)}:</p>
 						<Select
 							disabled={isNotAdmin}
-							value={this.state.selectProviderFromAdmin}
+							value={selectProviderFromAdmin}
 							onChange={v => {
 								this.setState({ selectProviderFromAdmin: v });
 							}}
 							className='mb-10'
 							placeholder={intl.formatMessage(msgCreateAccount.provider)}
 						>
-							{this.state.providers.map((provider) => (
+							{providers.map((provider) => (
 								<Select.Option key={provider._id} value={provider._id}>{provider.name || provider.referredToAs}</Select.Option>
 							))}
 						</Select>
@@ -625,7 +613,7 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-700'>{intl.formatMessage(messages.numberApprovedSessions)}:</p>
 						<Input
 							disabled={isNotAdmin}
-							value={this.state.numberOfSessions}
+							value={numberOfSessions}
 							type="number"
 							onChange={v => { this.setState({ numberOfSessions: v.target.value }) }}
 						/>
@@ -633,7 +621,7 @@ class ModalSubsidyProgress extends React.Component {
 					<Col xs={24} sm={24} md={8}>
 						<p className='font-700'>{intl.formatMessage(messages.totalRemaining)}:</p>
 						<Input
-							value={this.state.priceForSession}
+							value={priceForSession}
 							type="number"
 							onChange={v => { this.setState({ priceForSession: v.target.value }) }}
 							disabled={isNotAdmin}
@@ -672,13 +660,15 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	footerButton() {
-		if ((this.state.subsidy.status == -1 || this.state.subsidy.adminApprovalStatus == -1) && this.props.userRole == 3) {
+		const { subsidy } = this.state;
+
+		if ((subsidy.status == -1 || subsidy.adminApprovalStatus == -1) && this.props.userRole == 3) {
 			return [
 				<Button key="back" onClick={this.props.onCancel}>
 					CLOSE
 				</Button>,
 				<Button
-					disabled={this.state.subsidy.isAppeal != 0}
+					disabled={subsidy.isAppeal != 0}
 					key="submit" type="primary" onClick={this.appealSubsidy} style={{ padding: '7.5px 30px' }}>
 					{intl.formatMessage(messages.appeal).toUpperCase()}
 				</Button>
@@ -703,15 +693,15 @@ class ModalSubsidyProgress extends React.Component {
 		return (
 			<Modal {...modalProps}>
 				<div className='flex flex-row mb-20'>
-					<div style={{ width: 110 }} />
 					<div className='flex-1 text-center'>
 						<p className='font-30 font-30-sm'>{intl.formatMessage(messages.subsidyProgress)}</p>
 					</div>
-					{subsidy.status != 0 && <div style={{ width: 110, textAlign: 'right' }}>
-						{subsidy.status == 1 && subsidy.adminApprovalStatus != -1 && <p className='text-green500 font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.approved)}</p>}
-						{(subsidy.status == -1 || subsidy.adminApprovalStatus == -1) && <p className='text-red font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.declined)}</p>}
-
-					</div>}
+					{subsidy.status != 0 && (
+						<div style={{ width: 110, textAlign: 'right' }}>
+							{subsidy.status == 1 && subsidy.adminApprovalStatus != -1 && <p className='text-green500 font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.approved)}</p>}
+							{(subsidy.status == -1 || subsidy.adminApprovalStatus == -1) && <p className='text-red font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.declined)}</p>}
+						</div>
+					)}
 				</div>
 				<div className={subsidy.status != -2 ? '' : 'step-declined'}>
 					<Steps current={this.checkCurrentStep(subsidy)} responsive={false} style={{ maxWidth: 600 }}>

@@ -351,8 +351,8 @@ class PanelAppointment extends React.Component {
             </div>
           ))}
           {(appointments?.filter(a => a.type == 3 && a.flagStatus != 1 && a.status == 0 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
-            <div key={1} className='list-item'>
-              <p className='p-10'>No upcoming appoiment</p>
+            <div key={1} className='list-item p-10 justify-center'>
+              <span>No upcoming appoiment</span>
             </div>
           )}
           {visibleCancel && <ModalCancelAppointment {...modalCancelProps} />}
@@ -371,8 +371,8 @@ class PanelAppointment extends React.Component {
             </div>
           ))}
           {(appointments?.filter(a => a.type == 3 && [0, -2].includes(a.status) && a.flagStatus != 1 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
-            <div key={1} className='list-item'>
-              <p className='p-10'>No unprocess appoiment</p>
+            <div key={1} className='list-item p-10 justify-center'>
+              <span>No unprocess appoiment</span>
             </div>
           )}
           {visibleProcess && <ModalProcessAppointment {...modalProcessProps} />}
@@ -413,8 +413,8 @@ class PanelAppointment extends React.Component {
             </div>
           ))}
           {(appointments?.filter(a => a.type == 3 && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
-            <div key={1} className='list-item'>
-              <p className='p-10'>No past appoiment</p>
+            <div key={1} className='list-item p-10 justify-center'>
+              <span>No past appoiment</span>
             </div>
           )}
           {visibleFeedback && <ModalFeedback {...modalFeedbackProps} />}
@@ -425,11 +425,9 @@ class PanelAppointment extends React.Component {
   }
 }
 
-const mapStateToProps = state => {
-  return ({
-    appointments: state.appointments.dataAppointments,
-    user: state.auth.user,
-  })
-}
+const mapStateToProps = state => ({
+  appointments: state.appointments.dataAppointments,
+  user: state.auth.user,
+})
 
 export default compose(connect(mapStateToProps))(PanelAppointment);
