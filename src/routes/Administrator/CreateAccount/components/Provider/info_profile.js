@@ -62,13 +62,14 @@ class InfoProfile extends Component {
 	}
 
 	getDefaultObj = () => {
+		const { registerData } = this.props.register;
 		return {
 			firstName: "",
 			lastName: "",
 			agency: "",
 			cityConnection: undefined,
 			serviceAddress: "",
-			contactEmail: [{ email: "", type: 'Personal' }],
+			contactEmail: [{ email: registerData?.email, type: 'Work' }],
 			contactNumber: [{ phoneNumber: "", type: 'Home' }],
 		};
 	}

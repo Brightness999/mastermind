@@ -53,9 +53,8 @@ class CreateDefault extends Component {
 		}
 	}
 
-	onSubmit = async () => {
+	onFinish = async (values) => {
 		try {
-			const values = await this.form.validateFields();
 			const { email, username } = values;
 			const emailExits = await axios.post(url + checkEmailRegistered, { searchData: { email } })
 			if (emailExits.data.data > 0) {
@@ -70,10 +69,6 @@ class CreateDefault extends Component {
 			console.log(error);
 		}
 	}
-
-	onFinish = values => {
-		console.log('Success:', values);
-	};
 
 	onFinishFailed = errorInfo => {
 		console.log('Failed:', errorInfo);
@@ -342,7 +337,7 @@ class CreateDefault extends Component {
 							</Select>
 						</Form.Item>
 						<Form.Item className="form-btn continue-btn">
-							<Button block type="primary" htmlType="submit" onClick={this.onSubmit}>
+							<Button block type="primary" htmlType="submit">
 								{intl.formatMessage(messages.continue).toUpperCase()}
 							</Button>
 						</Form.Item>
