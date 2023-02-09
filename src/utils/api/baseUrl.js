@@ -10,5 +10,6 @@ export const switchPathWithRole = (role) => {
     if (role == 60) return 'schools/';
     if (role == 100) return 'consultants/';
     if (role == 999) return 'admin/'
+    if (role == 1000) return 'admin/'
     return '';
 }
