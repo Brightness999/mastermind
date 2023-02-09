@@ -42,7 +42,6 @@ class InfoAvailability extends Component {
 		request.post(getMyProviderInfo).then(result => {
 			const { success, data } = result;
 			const { user } = this.props.auth;
-			console.log(user)
 			if (success) {
 				this.form?.setFieldsValue(data);
 				this.form?.setFieldsValue({ blackoutDates: data.blackoutDates?.map(date => new Date(date)) });
@@ -279,14 +278,19 @@ class InfoAvailability extends Component {
 		const BASE_CALENDAR_URL = "https://www.googleapis.com/calendar/v3/calendars";
 		const BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY = "holiday@group.v.calendar.google.com";
 		const API_KEY = "AIzaSyA77lKHRvtdisK7_UhwalO8Hzgd4P_kaDk";
-		const CALENDAR_REGION = "en.usa";
+		const USA_CALENDAR_REGION = "en.usa";
+		const JEWISH_CALENDAR_REGION = "en.jewish";
 
-		const url = `${BASE_CALENDAR_URL}/${CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${API_KEY}`
+		const usa_url = `${BASE_CALENDAR_URL}/${USA_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${API_KEY}`
+		const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${API_KEY}`
 
-		fetch(url).then(response => response.json()).then(data => {
-			const holidays = [...new Set(data.items?.map(item => [item.start.date, item.end.date]).flat())]?.map(date => new Date(date));
-			const dates = this.form.getFieldValue("blackoutDates");
-			this.form.setFieldsValue({ blackoutDates: [...dates, ...holidays] })
+		fetch(usa_url).then(response => response.json()).then(data => {
+			const holidays = [...new Set(data.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
+			fetch(jewish_url).then(response => response.json()).then(data1 => {
+				const holidays1 = [...new Set(data1.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
+				const dates = this.form.getFieldValue("blackoutDates");
+				this.form.setFieldsValue({ blackoutDates: [...dates, ...holidays, ...holidays1] });
+			})
 		})
 	}
 
