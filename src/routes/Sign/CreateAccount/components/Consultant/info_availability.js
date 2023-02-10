@@ -6,10 +6,13 @@ import intl from 'react-intl-universal';
 import messages from '../../messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
+import * as MultiDatePicker from "react-multi-date-picker";
+import DatePanel from "react-multi-date-picker/plugins/date_panel"
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
 import { userSignUp } from '../../../../../utils/api/apiList';
+import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 
 const day_week = [
   intl.formatMessage(messages.sunday),
@@ -32,9 +35,8 @@ class ConsultantAvailability extends Component {
   componentDidMount() {
     let { registerData } = this.props.register;
     if (!!registerData.step2) {
-      this.form?.setFieldsValue({
-        ...registerData.step2
-      })
+      this.form?.setFieldsValue({ ...registerData.step2 });
+      this.form?.setFieldValue('blackoutDates', registerData?.step2?.blackoutDates?.map(date => new Date(date)));
     } else {
       day_week.map((day) => {
         this.form.setFieldValue(day, [''])
@@ -73,7 +75,6 @@ class ConsultantAvailability extends Component {
             })
           } else {
             manualSchedule.push({
-              "location": '',
               "dayInWeek": i,
               "fromYear": 0,
               "fromMonth": 0,
@@ -95,6 +96,7 @@ class ConsultantAvailability extends Component {
         role: registerData.role,
         username: registerData.username,
         manualSchedule: manualSchedule,
+        blackoutDates: values?.blackoutDates?.map(d => d.toString()),
         ...registerData.consultantInfo
       }
 
@@ -117,17 +119,11 @@ class ConsultantAvailability extends Component {
   };
 
   onSelectDay = e => {
-    if (e) {
-      this.setState({
-        currentSelectedDay: e
-      })
-    }
+    e && this.setState({ currentSelectedDay: e });
   }
 
   onChangeScheduleValue = () => {
-    this.props.setRegisterData({
-      step2: this.form.getFieldsValue()
-    });
+    this.props.setRegisterData({ step2: this.form.getFieldsValue() });
   }
 
   copyToFullWeek = (dayForCopy) => {
@@ -137,6 +133,32 @@ class ConsultantAvailability extends Component {
         this.form.setFieldValue(newDay, arrToCopy);
       }
     })
+  }
+
+  handleClickGoogleCalendar = () => {
+    const usa_url = `${BASE_CALENDAR_URL}/${USA_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+    const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+
+    fetch(usa_url).then(response => response.json()).then(data => {
+      const holidays = [...new Set(data.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
+      fetch(jewish_url).then(response => response.json()).then(data1 => {
+        const holidays1 = [...new Set(data1.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
+        const dates = this.form.getFieldValue("blackoutDates");
+        let uniqueDates = [];
+        [...dates ?? [], ...holidays ?? [], ...holidays1 ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+          if (!uniqueDates.find(d => d.toString() == c.toString())) {
+            uniqueDates.push(c);
+          }
+        })
+        this.form.setFieldsValue({ blackoutDates: uniqueDates });
+        this.onChangeScheduleValue();
+      })
+    })
+  }
+
+  handleUpdateBlackoutDates = (dates) => {
+    this.form.setFieldsValue({ blackoutDates: dates });
+    this.onChangeScheduleValue();
   }
 
   render() {
@@ -189,9 +211,14 @@ class ConsultantAvailability extends Component {
                               <Col xs={24} sm={24} md={12}>
                                 <Form.Item name={[field.name, "from_time"]}>
                                   <TimePicker
-                                    onChange={() => this.onChangeScheduleValue()}
+                                    onSelect={(time) => {
+                                      this.onChangeScheduleValue();
+                                      const dayTime = this.form.getFieldValue(day);
+                                      this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: time }) : d));
+                                    }}
                                     use12Hours
                                     format="h:mm a"
+                                    popupClassName='timepicker'
                                     placeholder={intl.formatMessage(messages.from)}
                                   />
                                 </Form.Item>
@@ -199,9 +226,14 @@ class ConsultantAvailability extends Component {
                               <Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
                                 <Form.Item name={[field.name, "to_time"]}>
                                   <TimePicker
-                                    onChange={() => this.onChangeScheduleValue()}
+                                    onSelect={(time) => {
+                                      this.onChangeScheduleValue();
+                                      const dayTime = this.form.getFieldValue(day);
+                                      this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, to_time: time }) : d));
+                                    }}
                                     use12Hours
                                     format="h:mm a"
+                                    popupClassName='timepicker'
                                     placeholder={intl.formatMessage(messages.to)}
                                   />
                                 </Form.Item>
@@ -230,6 +262,20 @@ class ConsultantAvailability extends Component {
                 </div>
               ))}
             </div>
+            <p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
+            <div className='flex items-center justify-center gap-2 cursor mb-10' onClick={() => this.handleClickGoogleCalendar()}>
+              <img src='../images/gg.png' className='h-30' />
+              <p className='font-16 mb-0'>Google</p>
+            </div>
+            <Form.Item name="blackoutDates">
+              <MultiDatePicker.Calendar
+                multiple
+                sort
+                className='m-auto'
+                onChange={dates => this.handleUpdateBlackoutDates(dates)}
+                plugins={[<DatePanel />]}
+              />
+            </Form.Item>
             {errorMessage.length > 0 && (<p className='text-left text-red'>{errorMessage}</p>)}
             <Form.Item className="form-btn continue-btn" >
               <Button

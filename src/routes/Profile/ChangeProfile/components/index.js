@@ -12,10 +12,12 @@ import InfoParent from './Parents/info_parent';
 import DependentAvailability from './Parents/info_availability';
 import InfoSchool from './School/info_school';
 import InfoAvaiSchool from './School/info_availability'
+import InfoConsultant from './Consultant/info_consultant';
+import ConsultantAvailability from './Consultant/info_availability';
 import ChangePassword from './ChangePassword';
 import InfoAdmin from './Admin/info_admin';
 import InfoNotification from './info_notification';
-import { MENU_ADMIN, MENU_PARENT, MENU_PROVIDER, MENU_SCHOOL } from '../constant';
+import { MENU_ADMIN, MENU_CONSULTANT, MENU_PARENT, MENU_PROVIDER, MENU_SCHOOL } from '../constant';
 import { setKeyDefault } from '../service';
 import { store } from '../../../../redux/store';
 import SubsidyProgram from './Provider/subsidy_program';
@@ -48,6 +50,12 @@ export default class extends React.Component {
         info_notification: false,
         change_password: false
       },
+      consultant: {
+        info_consultant: true,
+        info_availability: false,
+        info_notification: false,
+        change_password: false
+      },
       admin: {
         info_admin: true,
         change_password: false
@@ -64,6 +72,9 @@ export default class extends React.Component {
         break;
       case 999:
         this.setState({ listMenu: this.getMenuList(MENU_ADMIN) });
+        break;
+      case 100:
+        this.setState({ listMenu: this.getMenuList(MENU_CONSULTANT) });
         break;
       case 60:
         this.setState({ listMenu: this.getMenuList(MENU_SCHOOL) });
@@ -112,6 +123,23 @@ export default class extends React.Component {
             break;
           default:
             this.setState({ admin: { newStateAdmin, change_password: true } })
+            break;
+        }
+        break;
+      case 100:
+        let newStateConsultant = { ...this.state.consultant }
+        switch (val) {
+          case 'Info_consultant':
+            this.setState({ consultant: { newStateConsultant, info_consultant: true } })
+            break;
+          case 'Info_availability':
+            this.setState({ consultant: { newStateConsultant, info_availability: true } })
+            break;
+          case 'Info_notification':
+            this.setState({ consultant: { newStateConsultant, info_notification: true } })
+            break;
+          default:
+            this.setState({ consultant: { newStateConsultant, change_password: true } })
             break;
         }
         break;
@@ -185,7 +213,7 @@ export default class extends React.Component {
   }
 
   getScreen = () => {
-    const { admin, school, parent, provider } = this.state;
+    const { admin, school, parent, provider, consultant } = this.state;
     switch (user.role) {
       case 1000:
         if (admin.info_admin) {
@@ -196,6 +224,16 @@ export default class extends React.Component {
       case 999:
         if (admin.info_admin) {
           return <InfoAdmin />
+        } else {
+          return <ChangePassword />
+        }
+      case 100:
+        if (consultant.info_consultant) {
+          return <InfoConsultant />
+        } else if (consultant.info_availability) {
+          return <ConsultantAvailability />
+        } else if (consultant.info_notification) {
+          return <InfoNotification />
         } else {
           return <ChangePassword />
         }

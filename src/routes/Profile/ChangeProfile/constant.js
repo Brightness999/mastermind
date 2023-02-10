@@ -38,7 +38,7 @@ export const MENU_PROVIDER = [
     {
         key: 'Change_password',
         icon: '',
-        label: 'Change password'
+        label: 'Change Password'
     }
 ];
 
@@ -66,7 +66,7 @@ export const MENU_PARENT = [
     {
         key: 'Change_password',
         icon: '',
-        label: 'Change password'
+        label: 'Change Password'
     }
 ];
 
@@ -79,7 +79,30 @@ export const MENU_ADMIN = [
     {
         key: 'Change_password',
         icon: '',
-        label: 'Change password'
+        label: 'Change Password'
+    }
+];
+
+export const MENU_CONSULTANT = [
+    {
+        key: 'Info_consultant',
+        icon: '',
+        label: 'Info Consultant'
+    },
+    {
+        key: 'Info_availability',
+        icon: '',
+        label: 'Info Availability'
+    },
+    {
+        key: 'Info_notification',
+        icon: '',
+        label: 'Notification Setting'
+    },
+    {
+        key: 'Change_password',
+        icon: '',
+        label: 'Change Password'
     }
 ];
 
@@ -102,6 +125,6 @@ export const MENU_SCHOOL = [
     {
         key: 'Change_password',
         icon: '',
-        label: 'Change password'
+        label: 'Change Password'
     }
 ];

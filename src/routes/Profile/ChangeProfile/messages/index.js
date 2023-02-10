@@ -678,5 +678,9 @@ export default ({
   notificationSetting: {
     id: `${scope}.notificationSetting`,
     defaultMessage: 'Notification Setting',
+  },
+  notes: {
+    id: `${scope}.notes`,
+    defaultMessage: 'Notes',
   }
 });

@@ -1,25 +1,10 @@
-import { routerLinks } from "../../routes/constant";
-import { listRoleWithRouter } from './listRoleWithRouter'
-
 import { url } from '../../utils/api/baseUrl';
 import axios from 'axios';
-export const checkPermission = () => {
-    const routes = listRoleWithRouter
-
+export const checkPermission = async () => {
     const token = localStorage.getItem('token');
-    console.log('token',token)
     const headers = {
         Authorization: 'Bearer ' + token
     };
-    return axios.post(url+'users/check_login' , {},{headers:headers}).then(result=>{
-        return result.data.data;
-    })
-    // if (user) {
-    //     const { role } = user;
-    //     const route = routes.find(item => item.role === role);
-    //     return route.path;
-    // }
-    // else {
-    //     return routerLinks['Login'];
-    // }
+    const result = await axios.post(url + 'users/check_login', {}, { headers: headers });
+    return result.data.data;
 }
