@@ -16,8 +16,6 @@ class SubsidyProgram extends Component {
 	state = {
 		academicLevels: [],
 		numberOfSession: [1, 2, 3, 4, 5, 6, 7],
-		Levels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-		ReduceList: [],
 		isAcceptProBono: false,
 		isAcceptReduceRate: false,
 		isWillingOpenPrivate: false,
@@ -26,10 +24,6 @@ class SubsidyProgram extends Component {
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
-		const arrReduce = [];
-		for (let i = 0; i < 100; i++) {
-			arrReduce.push(i);
-		}
 
 		if (registerData.subsidy) {
 			this.form?.setFieldsValue(registerData.subsidy);
@@ -43,7 +37,6 @@ class SubsidyProgram extends Component {
 			isAcceptProBono: registerData.isAcceptProBono || false,
 			isAcceptReduceRate: registerData.isAcceptReduceRate || false,
 			isWillingOpenPrivate: registerData.isWillingOpenPrivate || false,
-			ReduceList: arrReduce,
 		})
 		this.getDataFromServer();
 	}
@@ -70,7 +63,7 @@ class SubsidyProgram extends Component {
 			numberSessions: '',
 			level: '',
 			subsidizedRate: '',
-			reducedRate: '',
+			rate: '',
 			isSameRate: true,
 		}
 	}
@@ -95,7 +88,7 @@ class SubsidyProgram extends Component {
 			subsidy: { ...data },
 			financialInfor: {
 				...registerData.financialInfor,
-				academicLevel: isAcceptReduceRate ? values.academicLevel : values.academicLevel?.map(level => ({ ...level, rducedRate: 0 })),
+				academicLevel: isAcceptReduceRate ? values.academicLevel : values.academicLevel?.map(level => ({ ...level, subsidizedRate: level?.rate })),
 			},
 		})
 		this.props.onContinue();
@@ -116,7 +109,7 @@ class SubsidyProgram extends Component {
 	}
 
 	render() {
-		const { isAcceptProBono, isAcceptReduceRate, isWillingOpenPrivate, ReduceList, academicLevels, Levels, isSameRate, numberOfSession } = this.state;
+		const { isAcceptProBono, isAcceptReduceRate, isWillingOpenPrivate, academicLevels, isSameRate, numberOfSession } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -196,8 +189,8 @@ class SubsidyProgram extends Component {
 												</Col>
 												<Col xs={12} sm={12} md={6}>
 													<Form.Item
-														name={[field.name, "subsidizedRate"]}
-														label={intl.formatMessage(messages.rate)}
+														name={[field.name, "rate"]}
+														label={'Standard ' + intl.formatMessage(messages.rate)}
 														className='select-small'
 														style={{ height: "25px !important" }}
 														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
@@ -211,26 +204,32 @@ class SubsidyProgram extends Component {
 												</Col>
 												<Col xs={12} sm={12} md={6} className={field.key !== 0 && 'item-remove'}>
 													<Form.Item
-														name={[field.name, "reducedRate"]}
-														label={intl.formatMessage(messages.reduced)}
+														name={[field.name, "subsidizedRate"]}
+														label={'Subsidized' + intl.formatMessage(messages.rate)}
 														className='select-small'
-														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced) }]}
+														rules={[{
+															required: isAcceptReduceRate,
+															message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced),
+															validator: (_, value) => {
+																if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
+																return Promise.resolve();
+															},
+														}]}
 													>
-														<Select
-															onChange={value => {
+														<Input
+															type="number"
+															min={0}
+															onChange={e => {
 																if (isSameRate) {
 																	let arr = JSON.parse(JSON.stringify(this.form.getFieldValue('academicLevel')));
-																	this.form.setFieldValue('academicLevel', arr.map(item => ({ ...item, reducedRate: value })));
+																	this.form.setFieldValue('academicLevel', arr?.map(item => ({ ...item, subsidizedRate: e.target.value })));
 																}
-																this.handleSelectChange()
+																this.handleSelectChange();
 															}}
 															disabled={!isAcceptReduceRate}
-															placeholder={intl.formatMessage(messages.reduced)}
-														>
-															{ReduceList?.map((value, index) => (
-																<Select.Option key={index} value={value}>{value} %</Select.Option>
-															))}
-														</Select>
+															className='input-with-select-small'
+															placeholder={intl.formatMessage(messages.rate)}
+														/>
 													</Form.Item>
 												</Col>
 											</Row>

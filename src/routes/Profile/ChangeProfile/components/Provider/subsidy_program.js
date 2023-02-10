@@ -15,7 +15,6 @@ class SubsidyProgram extends Component {
 	state = {
 		academicLevels: [],
 		numberOfSession: [1, 2, 3, 4, 5, 6, 7],
-		reduceList: [],
 		isAcceptProBono: false,
 		isAcceptReduceRate: false,
 		isSameRate: true,
@@ -28,7 +27,7 @@ class SubsidyProgram extends Component {
 			arrReduce.push(i);
 		}
 
-		this.setState({ reduceList: arrReduce, academicLevels: this.props.auth?.academicLevels });
+		this.setState({ academicLevels: this.props.auth?.academicLevels });
 
 		request.post(getMyProviderInfo).then(result => {
 			const { success, data } = result;
@@ -67,10 +66,7 @@ class SubsidyProgram extends Component {
 		if (isAcceptReduceRate) {
 			data.academicLevel = values.academicLevel;
 		} else {
-			data.academicLevel = values.academicLevel?.map(level => {
-				level.reducedRate = 0;
-				return level;
-			});
+			data.academicLevel = values.academicLevel?.map(level => ({ ...level, subsidizedRate: level?.rate }));
 		}
 
 		try {
@@ -84,15 +80,8 @@ class SubsidyProgram extends Component {
 		console.log('Failed:', errorInfo);
 	};
 
-	handleChangeReducedRate = (rate) => {
-		if (this.state.isSameRate) {
-			const rates = this.form.getFieldValue('academicLevel');
-			this.form.setFieldsValue({ academicLevel: rates?.map(item => ({ ...item, reducedRate: rate })) });
-		}
-	}
-
 	render() {
-		const { academicLevels, isAcceptProBono, isAcceptReduceRate, numberOfSession, reduceList, isWillingOpenPrivate } = this.state;
+		const { academicLevels, isAcceptProBono, isAcceptReduceRate, numberOfSession, isWillingOpenPrivate, isSameRate } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -102,6 +91,7 @@ class SubsidyProgram extends Component {
 					</div>
 					<Form
 						name="form_subsidy_program"
+						layout="vertical"
 						onFinish={this.onFinish}
 						onFinishFailed={this.onFinishFailed}
 						ref={(ref) => { this.form = ref }}
@@ -144,7 +134,6 @@ class SubsidyProgram extends Component {
 													<Form.Item
 														name={[field.name, "level"]}
 														label={intl.formatMessage(messages.level)}
-														className='float-label-item'
 													>
 														<Select placeholder={intl.formatMessage(messages.level)} disabled>
 															{academicLevels?.map((lvl, i) => (
@@ -155,9 +144,8 @@ class SubsidyProgram extends Component {
 												</Col>
 												<Col xs={12} sm={12} md={6}>
 													<Form.Item
-														name={[field.name, "subsidizedRate"]}
-														label={intl.formatMessage(messages.rate)}
-														className='float-label-item'
+														name={[field.name, "rate"]}
+														label={'Standard' + intl.formatMessage(messages.rate)}
 													>
 														<Input
 															placeholder={intl.formatMessage(messages.rate)}
@@ -167,20 +155,29 @@ class SubsidyProgram extends Component {
 												</Col>
 												<Col xs={12} sm={12} md={6} className='item-remove'>
 													<Form.Item
-														name={[field.name, "reducedRate"]}
-														label={intl.formatMessage(messages.reduced)}
-														className='float-label-item'
-														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced) }]}
+														name={[field.name, "subsidizedRate"]}
+														label={'Subsidized' + intl.formatMessage(messages.rate)}
+														rules={[{
+															required: isAcceptReduceRate,
+															message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced),
+															validator: (_, value) => {
+																if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
+																return Promise.resolve();
+															},
+														}]}
 													>
-														<Select
-															placeholder={intl.formatMessage(messages.reduced)}
-															onChange={(value) => this.handleChangeReducedRate(value)}
+														<Input
+															type="number"
+															min={0}
+															onChange={e => {
+																if (isSameRate) {
+																	let arr = JSON.parse(JSON.stringify(this.form.getFieldValue('academicLevel')));
+																	this.form.setFieldValue('academicLevel', arr?.map(item => ({ ...item, subsidizedRate: e.target.value })));
+																}
+															}}
 															disabled={!isAcceptReduceRate}
-														>
-															{reduceList?.map((value, index) => (
-																<Select.Option key={index} value={value}>{value} %</Select.Option>
-															))}
-														</Select>
+															placeholder={intl.formatMessage(messages.rate)}
+														/>
 													</Form.Item>
 												</Col>
 											</Row>

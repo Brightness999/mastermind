@@ -43,7 +43,6 @@ class InfoFinancial extends Component {
 			academicLevel: [{
 				level: undefined,
 				rate: "",
-				subsidizedRate: "",
 			}],
 			separateEvaluationRate: "",
 			upload_w_9: "",
@@ -168,19 +167,12 @@ class InfoFinancial extends Component {
 						</Form.Item>
 						<Row gutter={14}>
 							<Col xs={24} sm={24} md={12}>
-								<Form.Item
-									name="licenseNumber"
-									label={intl.formatMessage(messages.licenseNumber)}
-									rules={[{ required: false }]}
-								>
+								<Form.Item name="licenseNumber" label={intl.formatMessage(messages.licenseNumber)}>
 									<Input onChange={e => this.setValueToReduxRegisterData("licenseNumber", e.target.value)} placeholder={intl.formatMessage(messages.licenseNumber)} />
 								</Form.Item>
 							</Col>
 							<Col xs={24} sm={24} md={12}>
-								<Form.Item
-									name="SSN"
-									label="SSN"
-								>
+								<Form.Item name="SSN" label="SSN">
 									<Input onChange={e => this.setValueToReduxRegisterData("SSN", e.target.value)} placeholder='SSN' />
 								</Form.Item>
 							</Col>
@@ -191,19 +183,19 @@ class InfoFinancial extends Component {
 									{fields.map((field) => {
 										return (
 											<Row gutter={14} key={field.key}>
-												<Col xs={8} sm={8} md={8}>
+												<Col xs={12} sm={12} md={12}>
 													<Form.Item
 														name={[field.name, "level"]}
 														label={intl.formatMessage(messages.level)}
 														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.academicLevel) }]}
 														className='bottom-0'
-														style={{ marginTop: field.key === 0 ? 0 : 14 }}
+														style={{ marginTop: 14 }}
 													>
 														<Select
 															onChange={() => {
 																const arr = this.form.getFieldValue('academicLevel')
 																this.setValueToReduxRegisterData('academicLevel', arr);
-																const selectedLevels = arr?.map(item => item.level);
+																const selectedLevels = arr?.map(item => item?.level);
 																this.setState({ academicLevels: this.props.auth.academicLevels?.filter(level => !selectedLevels?.find(l => l == level)) });
 															}}
 															placeholder={intl.formatMessage(messages.academicLevel)}
@@ -214,16 +206,25 @@ class InfoFinancial extends Component {
 														</Select>
 													</Form.Item>
 												</Col>
-												<Col xs={8} sm={8} md={8} className={field.key !== 0 && 'item-remove'}>
+												<Col xs={12} sm={12} md={12} className='item-remove'>
 													<Form.Item
 														name={[field.name, "rate"]}
 														label={'Standard ' + intl.formatMessage(messages.rate)}
-														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
+														rules={[{
+															required: true,
+															message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
+															validator: (_, value) => {
+																if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
+																return Promise.resolve();
+															},
+														}]}
 														className='bottom-0'
-														style={{ marginTop: field.key === 0 ? 0 : 14 }}
+														style={{ marginTop: 14 }}
 													>
 														<Input
 															placeholder={intl.formatMessage(messages.rate)}
+															type="number"
+															min={0}
 															onChange={(event => {
 																const value = event.target.value;
 																let arr = JSON.parse(JSON.stringify(this.form.getFieldValue('academicLevel')));
@@ -240,34 +241,7 @@ class InfoFinancial extends Component {
 															})}
 														/>
 													</Form.Item>
-												</Col>
-												<Col xs={8} sm={8} md={8} className='item-remove'>
-													<Form.Item
-														name={[field.name, "subsidizedRate"]}
-														label={'Subsidized ' + intl.formatMessage(messages.rate)}
-														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
-														className='bottom-0'
-														style={{ marginTop: field.key === 0 ? 0 : 14 }}
-													>
-														<Input
-															placeholder={'Subsidized ' + intl.formatMessage(messages.rate)}
-															onChange={(event => {
-																const value = event.target.value;
-																let arr = JSON.parse(JSON.stringify(this.form.getFieldValue('academicLevel')));
-																if (sameRateForAllLevel) {
-																	for (let i = 0; i < arr.length; i++) {
-																		if (arr[i] == undefined) arr[i] = {};
-																		arr[i].subsidizedRate = value;
-																	}
-																} else {
-																	arr[field.key].subsidizedRate = value;
-																}
-																this.form.setFieldValue('academicLevel', arr);
-																this.setValueToReduxRegisterData('academicLevel', arr);
-															})}
-														/>
-													</Form.Item>
-													{field.key != 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
+													<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
 												</Col>
 											</Row>
 										);

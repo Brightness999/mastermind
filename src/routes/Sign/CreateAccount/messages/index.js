@@ -486,6 +486,10 @@ export default ({
     id: `${scope}.references`,
     defaultMessage: 'References (optional)',
   },
+  addReference: {
+    id: `${scope}.addReference`,
+    defaultMessage: 'Add Reference',
+  },
   publicProfile: {
     id: `${scope}.publicProfile`,
     defaultMessage: 'Public profile',

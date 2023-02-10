@@ -3,6 +3,8 @@ import { routerLinks } from '../../../constant';
 import { ModalConfirm, ModalEditUser } from '../../../../components/Modal';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
+import { connect } from 'react-redux'
+import { compose } from 'redux'
 import mgsSidebar from '../../../../components/SideBar/messages';
 import './index.less';
 import { checkPermission } from '../../../../utils/auth/checkPermission';
@@ -10,8 +12,9 @@ import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
 import { activateUser, getUsers } from '../../../../utils/api/apiList';
 import PageLoading from '../../../../components/Loading/PageLoading';
+import { removeRegisterData } from '../../../../redux/features/registerSlice';
 
-export default class extends React.Component {
+class UserManager extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -52,6 +55,7 @@ export default class extends React.Component {
 	}
 
 	handleNewUser = () => {
+		this.props.removeRegisterData();
 		this.props.history.push(routerLinks.CreateAccountForAdmin);
 	}
 
@@ -214,3 +218,7 @@ export default class extends React.Component {
 		);
 	}
 }
+
+const mapStateToProps = state => ({})
+
+export default compose(connect(mapStateToProps, { removeRegisterData }))(UserManager);

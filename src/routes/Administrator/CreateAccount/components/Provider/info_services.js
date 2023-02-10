@@ -9,6 +9,7 @@ import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
 import { getDefaultValueForProvider } from '../../../../../utils/api/apiList';
+import { BsDashCircle, BsPlusCircle } from 'react-icons/bs';
 
 class InfoServices extends Component {
 	constructor(props) {
@@ -45,7 +46,6 @@ class InfoServices extends Component {
 	getDefaultObj = () => {
 		return {
 			publicProfile: "",
-			references: "",
 			skillSet: undefined,
 			yearExp: '',
 		}
@@ -105,13 +105,36 @@ class InfoServices extends Component {
 						>
 							<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.publicProfile)} />
 						</Form.Item>
-						<Form.Item
-							name="references"
-							label={intl.formatMessage(messages.references)}
-							rules={[{ required: false }]}
-						>
-							<Input placeholder={intl.formatMessage(messages.references)} />
-						</Form.Item>
+						<Form.List name="references">
+							{(fields, { add, remove }) => (
+								<div>
+									{fields.map((field) => (
+										<div key={field.key}>
+											<div className={`font-16 ${field.key != 0 && 'd-none'}`}>{intl.formatMessage(messages.references)}</div>
+											<div className="item-remove">
+												<Form.Item
+													name={[field.name, 'name']}
+													rules={[{ required: false }]}
+												>
+													<Input placeholder={intl.formatMessage(messages.references)} />
+												</Form.Item>
+												<BsDashCircle size={16} className='text-red icon-remove provider-admin-reference' onClick={() => remove(field.name)} />
+											</div>
+										</div>
+									))}
+									<div className='text-center'>
+										<Button
+											type="text"
+											className='add-number-btn mb-10'
+											icon={<BsPlusCircle size={17} className='mr-5' />}
+											onClick={() => add()}
+										>
+											{intl.formatMessage(messages.addReference)}
+										</Button>
+									</div>
+								</div>
+							)}
+						</Form.List>
 						<Form.Item className="form-btn continue-btn" >
 							<Button
 								block

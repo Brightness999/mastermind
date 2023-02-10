@@ -149,7 +149,7 @@ class InfoReview extends Component {
 							<p className='font-26'>{intl.formatMessage(messages.reviewAccountInfo)}</p>
 						</div>
 						<Row gutter={14}>
-							<Col xs={24} sm={24} md={12}>
+							<Col xs={24} sm={24} md={8}>
 								<div>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.usernameEmail)}</p>
 									<div><span className='font-700'>Username:</span> {registerData?.username}</div>
@@ -164,17 +164,13 @@ class InfoReview extends Component {
 									<div className='mb-10'>
 										<div className='font-700'>Contact Number:</div>
 										{registerData?.profileInfor?.contactNumber?.map((number, index) => (
-											<div key={index} className='review-item'>
-												<span>{number.phoneNumber} {number.type}</span>
-											</div>
+											<div key={index}>{number.phoneNumber} {number.type}</div>
 										))}
 									</div>
 									<div className='mb-10'>
 										<div className='font-700'>Contact Email:</div>
 										{registerData?.profileInfor?.contactEmail?.map((email, index) => (
-											<div key={index} className='review-item'>
-												<span>{email.email} {email.type}</span>
-											</div>
+											<div key={index}>{email.email} {email.type}</div>
 										))}
 									</div>
 								</div>
@@ -186,8 +182,15 @@ class InfoReview extends Component {
 										<div className='font-700'>Public profile:</div>
 										<div>{registerData?.serviceInfor?.publicProfile}</div>
 									</div>
-									<p><span className='font-700'>Reference:</span> {registerData?.serviceInfor?.references}</p>
+									<div className='flex gap-1'>
+										<div className='font-700'>Reference:</div>
+										<div>
+											{registerData?.serviceInfor?.references?.map((data, index) => (<div key={index}>{data.name}</div>))}
+										</div>
+									</div>
 								</div>
+							</Col>
+							<Col xs={24} sm={24} md={8}>
 								<div className='mt-10'>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.scheduling)}</p>
 									<div><span className='font-700'>Standard duration: </span>{registerData?.scheduling?.duration}min</div>
@@ -195,8 +198,6 @@ class InfoReview extends Component {
 									{registerData?.scheduling?.isSeparateEvaluationRate ? <div><span className='font-700'>Evaluation duration: </span>{registerData?.scheduling?.separateEvaluationDuration}min</div> : null}
 									<div><span className='font-700'>CancellationWindow: </span>{registerData?.scheduling?.cancellationWindow}</div>
 								</div>
-							</Col>
-							<Col xs={24} sm={24} md={12}>
 								<div className='mt-10'>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.billingDetails)}</p>
 									<div><span className='font-700'>Legal Name:</span> {registerData?.financialInfor?.legalName}</div>
@@ -208,13 +209,13 @@ class InfoReview extends Component {
 										<div className='flex'>
 											<div className='font-700 flex-1'>Level</div>
 											<div className='font-700 flex-1'>Standard Rate</div>
-											<div className='font-700 flex-1'>Subsidized Rate</div>
+											{registerData?.subsidy?.isAcceptReduceRate ? <div className='font-700 flex-1'>Subsidized Rate</div> : null}
 										</div>
 										{registerData?.financialInfor?.academicLevel?.map((academic, index) => (
 											<div key={index} className='flex'>
 												<div className='flex-1'>{academic.level}</div>
-												<div className='flex-1'>{academic.rate}</div>
-												<div className='flex-1'>{academic.subsidizedRate}</div>
+												<div className='flex-1'>${academic.rate}</div>
+												{registerData?.subsidy?.isAcceptReduceRate ? <div className='flex-1'>${academic.subsidizedRate}</div> : null}
 											</div>
 										))}
 									</div>
@@ -223,23 +224,10 @@ class InfoReview extends Component {
 								<div className='mt-10'>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.subsidyProgram)}</p>
 									{registerData?.subsidy?.isAcceptProBono ? <div><span className='font-700'>{intl.formatMessage(messages.numberSessionsWeek)}:</span> {registerData?.subsidy?.proBonoNumber}</div> : null}
-									{registerData?.subsidy?.isAcceptReduceRate ? <div className='mb-10'>
-										<div className='font-700'>Reduced Academic Levels:</div>
-										<div className='flex'>
-											<div className='font-700 flex-1'>Level</div>
-											<div className='font-700 flex-1'>Subsidized Rate</div>
-											<div className='font-700 flex-1'>Reduced Rate</div>
-										</div>
-										{registerData?.financialInfor?.academicLevel?.map((academic, index) => (
-											<div key={index} className='flex'>
-												<div className='flex-1'>{academic.level}</div>
-												<div className='flex-1'>{academic.subsidizedRate}</div>
-												<div className='flex-1'>{academic.reducedRate}</div>
-											</div>
-										))}
-									</div> : null}
 									<div><span className='font-700'>Private slots for HMGH:</span> {registerData?.subsidy?.isWillingOpenPrivate ? 'Yes' : 'No'}</div>
 								</div>
+							</Col>
+							<Col xs={24} sm={24} md={8}>
 								<div className='mt-10'>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.availability)}</p>
 									<div className='mb-10'>

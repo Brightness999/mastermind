@@ -141,6 +141,7 @@
   "routes.Createaccount.newClientEvaluation": "New client evaluation",
   "routes.Createaccount.screeningTime": "Screening time",
   "routes.Createaccount.references": "References (optional)",
+  "routes.Createaccount.addReference": "Add Reference",
   "routes.Createaccount.publicProfile": "Public profile",
   "routes.Createaccount.autoSyncCalendar": "Auto sync calendar",
   "routes.Createaccount.manualSchedule": "Manual schedule",
