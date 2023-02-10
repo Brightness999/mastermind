@@ -216,6 +216,7 @@ class InfoFinancial extends Component {
 															})}
 														/>
 													</Form.Item>
+													<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
 												</Col>
 											</Row>
 										);

@@ -8,7 +8,7 @@ import { compose } from 'redux';
 import { url } from '../../../../../utils/api/baseUrl'
 import axios from 'axios';
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
-import { getAllSchoolsForParent, getDefaultValueForClient } from '../../../../../utils/api/apiList';
+import { getAllSchoolsForParent, getDefaultValueForClient, userSignUp } from '../../../../../utils/api/apiList';
 
 class ReviewAccount extends Component {
 	constructor(props) {
@@ -45,10 +45,10 @@ class ReviewAccount extends Component {
 	}
 
 	loadSchools() {
-		axios.post(url + getAllSchoolsForParent).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
-				this.setState({ listSchools: data })
+		axios.post(url + getAllSchoolsForParent, { communityServed: this.props.register.registerData.parentInfo.cityConnection }).then(result => {
+			const { success, data } = result.data;
+			if (success) {
+				this.setState({ listSchools: data });
 			}
 		}).catch(err => {
 			console.log(err);
@@ -63,7 +63,7 @@ class ReviewAccount extends Component {
 				customData.studentInfos[i].subsidyRequest.documents = customData.studentInfos[i].subsidyRequest.documentUploaded;
 			}
 		}
-		const response = await axios.post(url + 'users/signup', customData);
+		const response = await axios.post(url + userSignUp, customData);
 		const { success } = response.data;
 		if (success) {
 			this.props.removeRegisterData();
@@ -127,7 +127,7 @@ class ReviewAccount extends Component {
 							<p>Mother phone : {registerData?.parentInfo?.motherPhoneNumber}</p>
 							<p>Mother email : {registerData?.parentInfo?.motherEmail}</p>
 							<p className='font-14 underline'>{intl.formatMessage(messages.father)}</p>
-							<p>Father + Family name : {registerData?.parentInfo?.familyName} {registerData?.parentInfo?.familyName}</p>
+							<p>Father + Family name : {registerData?.parentInfo?.fatherName} {registerData?.parentInfo?.familyName}</p>
 							<p>Father phone : {registerData?.parentInfo?.fatherPhoneNumber}</p>
 							<p>Father email : {registerData?.parentInfo?.fatherEmail}</p>
 						</div>
@@ -138,21 +138,21 @@ class ReviewAccount extends Component {
 						{registerData?.studentInfos?.map((item, index) => (
 							<div key={index}>
 								<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.dependentsInfo)}</p>
-								<p className='font-14 font-700 mb-10'>{item.firstName} {item.lastName} - {item.birthday}</p>
+								<p className='font-14 font-700 mb-10'>{item.firstName} {item.lastName} - {new Date(item.birthday).toDateString()}</p>
 								<p>School : {listSchools?.find(school => school._id == item.school)?.name}</p>
 								<div className='review-item'>
 									<p>Teacher : {item.primaryTeacher} </p>
 									<p>Grade : {item.currentGrade}</p>
 								</div>
-								<div className='review-item'>
+								<div className='flex gap-2'>
 									<p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.servicesRequested)}</p>
+									<div>
+										{item.services?.map((service, index) => (
+											<div key={index}>{listServices?.find(skill => skill._id == service)?.name}</div>
+										))}
+									</div>
 								</div>
-								<div className='review-item-3'>
-									{item.services?.map((service, serviceIndex) => (
-										<p key={serviceIndex}>{listServices?.find(skill => skill._id == service)?.name}</p>
-									))}
-								</div>
-								<div>
+								{/* <div>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.availability)}</p>
 									<div className='review-item-flex'>
 										{day_week.map((dayInWeek, dayInWeekIndex) => {
@@ -168,7 +168,7 @@ class ReviewAccount extends Component {
 											}
 										})}
 									</div>
-								</div>
+								</div> */}
 							</div>
 						))}
 						<div className="form-btn continue-btn" >

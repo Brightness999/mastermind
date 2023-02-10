@@ -84,8 +84,8 @@ export default class extends React.Component {
             <Step key='default' title={intl.formatMessage(messages.accountInfo)} icon={<p>1</p>} />
             <Step key='info_parent' title={intl.formatMessage(messages.contactInfo)} icon={<p>2</p>} />
             <Step key='info_child' title={intl.formatMessage(messages.dependentsInfo)} icon={<p>3</p>} />
-            <Step key='dependent_availability' title={intl.formatMessage(messages.dependentAvailability)} icon={<p>4</p>} />
-            <Step key='review_info' title={intl.formatMessage(messages.reviewInfo)} icon={<p>5</p>} />
+            {/* <Step key='dependent_availability' title={intl.formatMessage(messages.dependentAvailability)} icon={<p>4</p>} /> */}
+            <Step key='review_info' title={intl.formatMessage(messages.reviewInfo)} icon={<p>4</p>} />
           </Steps>
         )
       case intl.formatMessage(messages.provider):
@@ -174,14 +174,15 @@ export default class extends React.Component {
       case 3:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<DependentAvailability onContinue={this.handleContinue} />)
+            return (<ReviewAccount onContinue={this.handleContinue} />)
+          // return (<DependentAvailability onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoScheduling onContinue={this.handleContinue} />)
         }
       case 4:
         switch (this.state.accountType) {
-          case intl.formatMessage(messages.parent):
-            return (<ReviewAccount onContinue={this.handleContinue} />)
+          // case intl.formatMessage(messages.parent):
+          //   return (<ReviewAccount onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoFinancial onContinue={this.handleContinue} />)
         }

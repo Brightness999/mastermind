@@ -25,7 +25,6 @@ import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
 import moment from 'moment';
 import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice'
-import { store } from '../../../redux/store';
 import { routerLinks } from "../../constant";
 import PlacesAutocomplete from 'react-places-autocomplete';
 import { setAcademicLevels, setDependents, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
@@ -84,7 +83,7 @@ class SchedulingCenter extends React.Component {
   componentDidMount() {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
-        store.dispatch(setUser(loginData));
+        this.props.dispatch(setUser(loginData));
         loginData?.role < 900 && this.props.history.push(routerLinks.Dashboard)
         this.setState({ userRole: loginData.role });
         this.updateCalendarEvents(loginData.role);
@@ -121,11 +120,10 @@ class SchedulingCenter extends React.Component {
           listProvider: data?.providers,
           listDependents: data?.dependents,
         });
-        store.dispatch(setDependents(data?.dependents));
-        store.dispatch(setProviders(data?.providers));
-        store.dispatch(setSkillSet(data?.skillSet));
-        store.dispatch(setSkillSet(data?.skillSet));
-        store.dispatch(setAcademicLevels(data?.academicLevels));
+        this.props.dispatch(setDependents(data?.dependents));
+        this.props.dispatch(setProviders(data?.providers));
+        this.props.dispatch(setSkillSet(data?.skillSet));
+        this.props.dispatch(setAcademicLevels(data?.academicLevels));
       } else {
         console.log('get default data error---', err);
       }
@@ -350,7 +348,7 @@ class SchedulingCenter extends React.Component {
         date: new Date(obj.start).getTime()
       }
     }
-    store.dispatch(changeTime(data))
+    this.props.dispatch(changeTime(data))
   }
 
   handleEventRemove = (removeInfo) => {
@@ -366,7 +364,7 @@ class SchedulingCenter extends React.Component {
   }
 
   getMyAppointments(userRole, dependentId) {
-    store.dispatch(getAppointmentsData({ role: userRole, dependentId: dependentId }));
+    this.props.dispatch(getAppointmentsData({ role: userRole, dependentId: dependentId }));
   }
 
   renderModalSubsidyDetail = () => {
@@ -418,7 +416,7 @@ class SchedulingCenter extends React.Component {
         dependentId: dependentId,
       }
     };
-    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+    this.props.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
   }
 
   handleSelectProvider = (name) => {

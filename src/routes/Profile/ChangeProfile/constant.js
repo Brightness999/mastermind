@@ -1,4 +1,3 @@
-
 export const MENU_PROVIDER = [
     {
         key: 'Info_general',
@@ -52,11 +51,6 @@ export const MENU_PARENT = [
         key: 'Info_parent',
         icon: '',
         label: 'Info Parent'
-    },
-    {
-        key: 'Info_availability',
-        icon: '',
-        label: 'Info Availability'
     },
     {
         key: 'Info_notification',
