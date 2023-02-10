@@ -3,12 +3,15 @@ import React from 'react';
 import { Row, Col, Form, Button, Segmented, TimePicker, message } from 'antd';
 import moment from 'moment';
 import intl from 'react-intl-universal';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import * as MultiDatePicker from "react-multi-date-picker";
+import DatePanel from "react-multi-date-picker/plugins/date_panel"
 import messages from '../../messages';
 import { getMySchoolInfo, updateSchoolAvailability } from '../../../../../utils/api/apiList'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
 import request from '../../../../../utils/api/request';
+import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 
 class InfoAvailability extends React.Component {
 	constructor(props) {
@@ -24,7 +27,8 @@ class InfoAvailability extends React.Component {
 		request.post(getMySchoolInfo).then(result => {
 			const { success, data } = result;
 			if (success) {
-				this.form.setFieldsValue(data)
+				this.form?.setFieldsValue(data);
+				this.form?.setFieldsValue({ blackoutDates: data.blackoutDates?.map(date => new Date(date)) });
 				this.setState({
 					sessionsInSchool: data.sessionsInSchool,
 					sessionsAfterSchool: data.sessionsAfterSchool,
@@ -47,10 +51,11 @@ class InfoAvailability extends React.Component {
 		return moment(`${array[index].closeHour}:${array[index].closeMin}:00`, 'HH:mm:ss')
 	}
 
-	onFinish = () => {
+	onFinish = (values) => {
 		const { sessionsInSchool, sessionsAfterSchool } = this.state
+		const { blackoutDates } = values;
 
-		request.post(updateSchoolAvailability, { sessionsAfterSchool, sessionsInSchool }).then(res => {
+		request.post(updateSchoolAvailability, { sessionsAfterSchool, sessionsInSchool, blackoutDates: blackoutDates?.map(date => date.toString()) }).then(res => {
 			if (res.success) {
 				message.success('Updated successfully');
 			}
@@ -120,6 +125,30 @@ class InfoAvailability extends React.Component {
 		}
 	}
 
+	handleClickGoogleCalendar = () => {
+		const usa_url = `${BASE_CALENDAR_URL}/${USA_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+		const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+
+		fetch(usa_url).then(response => response.json()).then(data => {
+			const holidays = [...new Set(data.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
+			fetch(jewish_url).then(response => response.json()).then(data1 => {
+				const holidays1 = [...new Set(data1.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
+				const dates = this.form.getFieldValue("blackoutDates");
+				let uniqueDates = [];
+				[...dates ?? [], ...holidays ?? [], ...holidays1 ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+					if (!uniqueDates.find(d => d.toString() == c.toString())) {
+						uniqueDates.push(c);
+					}
+				})
+				this.form.setFieldsValue({ blackoutDates: uniqueDates });
+			})
+		})
+	}
+
+	handleUpdateBlackoutDates = (dates) => {
+		this.form.setFieldsValue({ blackoutDates: dates });
+	}
+
 	render() {
 		const { sessionsAfterSchool, sessionsInSchool, dayIsSelected } = this.state;
 		const day_week = [
@@ -157,7 +186,8 @@ class InfoAvailability extends React.Component {
 									<Row gutter={14}>
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
-												onChange={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
+												onSelect={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
+												popupClassName="timepicker"
 												use12Hours
 												format="h:mm a"
 												placeholder={intl.formatMessage(messages.from)}
@@ -166,7 +196,8 @@ class InfoAvailability extends React.Component {
 										</Col>
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
-												onChange={v => this.onSelectTimeForSesssion(index, v, 'inClose')}
+												onSelect={v => this.onSelectTimeForSesssion(index, v, 'inClose')}
+												popupClassName="timepicker"
 												use12Hours
 												format="h:mm a"
 												value={this.valueForAvailabilityScheduleForCloseHour(sessionsInSchool, index)}
@@ -178,7 +209,8 @@ class InfoAvailability extends React.Component {
 									<Row gutter={14}>
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
-												onChange={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')}
+												onSelect={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')}
+												popupClassName="timepicker"
 												use12Hours
 												format="h:mm a"
 												value={this.valueForAvailabilityScheduleForOpenHour(sessionsAfterSchool, index)}
@@ -187,7 +219,8 @@ class InfoAvailability extends React.Component {
 										</Col>
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
-												onChange={v => this.onSelectTimeForSesssion(index, v, 'afterClose')}
+												onSelect={v => this.onSelectTimeForSesssion(index, v, 'afterClose')}
+												popupClassName="timepicker"
 												use12Hours
 												format="h:mm a"
 												value={this.valueForAvailabilityScheduleForCloseHour(sessionsAfterSchool, index)}
@@ -198,6 +231,20 @@ class InfoAvailability extends React.Component {
 								</div>
 							))}
 						</div>
+						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
+						<div className='flex items-center justify-center gap-2 cursor mb-10' onClick={() => this.handleClickGoogleCalendar()}>
+							<img src='../images/gg.png' className='h-30' />
+							<p className='font-16 mb-0'>Google</p>
+						</div>
+						<Form.Item name="blackoutDates">
+							<MultiDatePicker.Calendar
+								multiple
+								sort
+								className='m-auto'
+								onChange={dates => this.handleUpdateBlackoutDates(dates)}
+								plugins={[<DatePanel />]}
+							/>
+						</Form.Item>
 						<Form.Item className="form-btn continue-btn" >
 							<Button
 								block

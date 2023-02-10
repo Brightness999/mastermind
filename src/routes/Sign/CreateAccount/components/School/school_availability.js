@@ -2,13 +2,16 @@ import React from 'react';
 import { Row, Col, Form, Button, Segmented, TimePicker, message } from 'antd';
 import moment from 'moment';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import axios from 'axios';
-import { url } from '../../../../../utils/api/baseUrl';
-import { userSignUp } from '../../../../../utils/api/apiList'
-import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import axios from 'axios';
+import * as MultiDatePicker from "react-multi-date-picker";
+import DatePanel from "react-multi-date-picker/plugins/date_panel"
+import messages from '../../messages';
+import { url } from '../../../../../utils/api/baseUrl';
+import { userSignUp } from '../../../../../utils/api/apiList'
+import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
+import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 
 class SchoolAvailability extends React.Component {
 	constructor(props) {
@@ -22,7 +25,7 @@ class SchoolAvailability extends React.Component {
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
-		
+
 		this.form.setFieldsValue(registerData);
 		if (!registerData.sessionsInSchool || registerData.sessionsInSchool.length == 0) {
 			this.setState({
@@ -125,23 +128,23 @@ class SchoolAvailability extends React.Component {
 	onSelectTimeForSesssion(index, value, type) {
 		const hour = value ? value.hour() : 0;
 		const minute = value ? value.minute() : 0;
+		const { sessionsAfterSchool, sessionsInSchool } = this.state;
 
 		switch (type) {
 			case 'inOpen':
 				this.setState({
-					sessionsInSchool: this.state.sessionsInSchool.map((session, sessIndex) => {
+					sessionsInSchool: sessionsInSchool.map((session, sessIndex) => {
 						if (sessIndex == index) {
 							return { ...session, openHour: hour, minute: minute }
 						}
 						return session;
 					}),
 					fromInSchool: value,
-				},
-					this.callbackAfterSetState)
+				}, this.callbackAfterSetState)
 				break;
 			case 'inClose':
 				this.setState({
-					sessionsInSchool: this.state.sessionsInSchool.map((session, sessIndex) => {
+					sessionsInSchool: sessionsInSchool.map((session, sessIndex) => {
 						if (sessIndex == index) {
 							return {
 								...session, "closeHour": hour,
@@ -151,12 +154,11 @@ class SchoolAvailability extends React.Component {
 						return session;
 					}),
 					toInSchool: value,
-				},
-					this.callbackAfterSetState)
+				}, this.callbackAfterSetState)
 				break;
 			case 'afterOpen':
 				this.setState({
-					sessionsAfterSchool: this.state.sessionsAfterSchool.map((session, sessIndex) => {
+					sessionsAfterSchool: sessionsAfterSchool.map((session, sessIndex) => {
 						if (sessIndex == index) {
 							return {
 								...session, "openHour": hour,
@@ -166,12 +168,11 @@ class SchoolAvailability extends React.Component {
 						return session;
 					}),
 					fromAfterSchool: value,
-				},
-					this.callbackAfterSetState)
+				}, this.callbackAfterSetState)
 				break;
 			case 'afterClose':
 				this.setState({
-					sessionsAfterSchool: this.state.sessionsAfterSchool.map((session, sessIndex) => {
+					sessionsAfterSchool: sessionsAfterSchool.map((session, sessIndex) => {
 						if (sessIndex == index) {
 							return {
 								...session, "closeHour": hour,
@@ -181,8 +182,7 @@ class SchoolAvailability extends React.Component {
 						return session;
 					}),
 					toAfterSchool: value,
-				},
-					this.callbackAfterSetState)
+				}, this.callbackAfterSetState)
 				break;
 			default:
 				break;
@@ -192,6 +192,32 @@ class SchoolAvailability extends React.Component {
 	callbackAfterSetState = () => {
 		this.setReduxForSchool('sessionsInSchool', this.state.sessionsInSchool);
 		this.setReduxForSchool('sessionsAfterSchool', this.state.sessionsAfterSchool);
+	}
+
+	handleClickGoogleCalendar = () => {
+		const usa_url = `${BASE_CALENDAR_URL}/${USA_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+		const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+
+		fetch(usa_url).then(response => response.json()).then(data => {
+			const holidays = [...new Set(data.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
+			fetch(jewish_url).then(response => response.json()).then(data1 => {
+				const holidays1 = [...new Set(data1.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
+				const dates = this.form.getFieldValue("blackoutDates");
+				let uniqueDates = [];
+				[...dates ?? [], ...holidays ?? [], ...holidays1 ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+					if (!uniqueDates.find(d => d.toString() == c.toString())) {
+						uniqueDates.push(c);
+					}
+				})
+				this.form.setFieldsValue({ blackoutDates: uniqueDates });
+				this.setReduxForSchool('blackoutDates', uniqueDates?.map(date => date.toString()));
+			})
+		})
+	}
+
+	handleUpdateBlackoutDates = (dates) => {
+		this.form.setFieldsValue({ blackoutDates: dates });
+		this.setReduxForSchool('blackoutDates', dates?.map(date => date.toString()));
 	}
 
 	render() {
@@ -232,19 +258,21 @@ class SchoolAvailability extends React.Component {
 									<Row gutter={14}>
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
-												onChange={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
+												onSelect={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
 												use12Hours
 												format="h:mm a"
 												placeholder={intl.formatMessage(messages.from)}
+												popupClassName="timepicker"
 												value={this.valueForAvailabilityScheduleForOpenHour(sessionsInSchool, index)}
 											/>
 										</Col>
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
-												onChange={v => this.onSelectTimeForSesssion(index, v, 'inClose')}
+												onSelect={v => this.onSelectTimeForSesssion(index, v, 'inClose')}
 												value={this.valueForAvailabilityScheduleForCloseHour(sessionsInSchool, index)}
 												use12Hours
 												format="h:mm a"
+												popupClassName="timepicker"
 												placeholder={intl.formatMessage(messages.to)}
 											/>
 										</Col>
@@ -253,22 +281,42 @@ class SchoolAvailability extends React.Component {
 									<Row gutter={14}>
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
-												onChange={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')} use12Hours
+												onSelect={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')}
+												use12Hours
 												value={this.valueForAvailabilityScheduleForOpenHour(sessionsAfterSchool, index)}
-												format="h:mm a" placeholder={intl.formatMessage(messages.from)}
+												format="h:mm a"
+												popupClassName="timepicker"
+												placeholder={intl.formatMessage(messages.from)}
 											/>
 										</Col>
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
-												onChange={v => this.onSelectTimeForSesssion(index, v, 'afterClose')} use12Hours
+												onSelect={v => this.onSelectTimeForSesssion(index, v, 'afterClose')}
+												use12Hours
 												value={this.valueForAvailabilityScheduleForCloseHour(sessionsAfterSchool, index)}
-												format="h:mm a" placeholder={intl.formatMessage(messages.to)}
+												format="h:mm a"
+												popupClassName="timepicker"
+												placeholder={intl.formatMessage(messages.to)}
 											/>
 										</Col>
 									</Row>
 								</div>
 							))}
 						</div>
+						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
+						<div className='flex items-center justify-center gap-2 cursor mb-10' onClick={() => this.handleClickGoogleCalendar()}>
+							<img src='../images/gg.png' className='h-30' />
+							<p className='font-16 mb-0'>Google</p>
+						</div>
+						<Form.Item name="blackoutDates">
+							<MultiDatePicker.Calendar
+								multiple
+								sort
+								className='m-auto'
+								onChange={dates => this.handleUpdateBlackoutDates(dates)}
+								plugins={[<DatePanel />]}
+							/>
+						</Form.Item>
 						<Form.Item className="form-btn continue-btn" >
 							<Button
 								block

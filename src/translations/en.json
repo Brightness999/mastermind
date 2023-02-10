@@ -168,6 +168,7 @@
   "routes.Createaccount.subsidyOptions": "Subsidy options",
   "routes.Createaccount.confirm": "Confirm",
   "routes.Createaccount.schoolDetails": "School details",
+  "routes.Createaccount.schoolAvailability": "School availability",
   "routes.Createaccount.nameSchool": "Name of school",
   "routes.Createaccount.communitiesServedNote": "Communities served",
   "routes.Createaccount.communitiesServed": "Communities served",

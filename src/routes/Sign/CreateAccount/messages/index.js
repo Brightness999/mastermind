@@ -562,7 +562,7 @@ export default ({
     id: `${scope}.selectDateTime`,
     defaultMessage: 'Select a Date & Time',
   },
-  timesAvailable : {
+  timesAvailable: {
     id: `${scope}.timesAvailable`,
     defaultMessage: 'times you\'re available',
   },
@@ -661,6 +661,9 @@ export default ({
   uploadSuccess: {
     id: `${scope}.uploadSuccess`,
     defaultMessage: 'Upload success',
-  }
-  
+  },
+  blackoutDates: {
+    id: `${scope}.blackoutDates`,
+    defaultMessage: 'Blackout Dates',
+  },
 });

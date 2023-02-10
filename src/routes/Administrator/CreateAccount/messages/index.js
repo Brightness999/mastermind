@@ -654,6 +654,10 @@ export default ({
     id: `${scope}.numberSessions`,
     defaultMessage: 'Number sessions',
   },
+  blackoutDates: {
+    id: `${scope}.blackoutDates`,
+    defaultMessage: 'Blackout Dates',
+  },
   uploadSuccess: {
     id: `${scope}.uploadSuccess`,
     defaultMessage: 'Upload success',
