@@ -32,8 +32,8 @@ class InfoSchool extends React.Component {
 		this.setState({ listCommunitiServer: user?.adminCommunity });
 
 		if (!registerData.contactEmail || registerData.contactEmail.length == 0) {
-			this.setReduxForSchool('contactEmail', [{ email: "", type: 'Personal' }]);
-			this.form.setFieldsValue({ contactEmail: [{ email: "", type: 'Personal' }] });
+			this.setReduxForSchool('contactEmail', [{ email: registerData?.email, type: 'Work' }]);
+			this.form.setFieldsValue({ contactEmail: [{ email: registerData?.email, type: 'Work' }] });
 		}
 	}
 

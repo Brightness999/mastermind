@@ -53,16 +53,12 @@ class InfoConsultant extends Component {
   }
 
   getDefaultObj = () => {
+    const { registerData } = this.props.register;
     return {
       notes: "",
       referredToAs: "",
-      contactEmail: [{
-        email: "",
-        type: 0
-      }],
-      contactNumber: [{
-        phoneNumber: "", type: 0
-      }],
+      contactEmail: [{ email: registerData?.email, type: "Work" }],
+      contactNumber: [{ phoneNumber: "", type: "Home" }],
       cityConnection: undefined,
       skillSet: 0,
     };
