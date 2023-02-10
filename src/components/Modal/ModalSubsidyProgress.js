@@ -2,6 +2,9 @@ import React from 'react';
 import { Modal, Button, Divider, Steps, Row, Col, Select, Input, message } from 'antd';
 import { FaRegCalendarAlt } from 'react-icons/fa';
 import intl from 'react-intl-universal';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import moment from 'moment';
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import msgDashboard from '../../routes/Dashboard/messages';
@@ -11,8 +14,8 @@ import './style/index.less';
 import '../../assets/styles/login.less';
 import request from '../../utils/api/request'
 import { url, switchPathWithRole } from '../../utils/api/baseUrl'
-import moment from 'moment';
 import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getAllProviderInSchool, getLastConsulation } from '../../utils/api/apiList';
+import { setSubsidyRequests } from '../../redux/features/appointmentsSlice';
 
 const { Step } = Steps;
 
@@ -50,16 +53,12 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	componentDidMount = () => {
-		this.props.setOpennedEvent(this.loadData)
-	}
-
-	loadData = (subsidyId) => {
 		this.clearData();
-		this.loadSubsidyData(subsidyId);
+		this.loadSubsidyData(this.props.subsidyId);
 	}
 
 	loadSubsidyData = (subsidyId, isNeedLoadSchool = true) => {
-		request.post(switchPathWithRole(this.props.userRole) + 'get_subsidy_detail', { subsidyId: subsidyId }).then(result => {
+		request.post(switchPathWithRole(this.props.auth.user?.role) + 'get_subsidy_detail', { subsidyId: subsidyId }).then(result => {
 			if (result.success) {
 				this.setState({ subsidy: result.data });
 				if (!!result.data.providers && result.data.providers.length > 0) {
@@ -160,8 +159,16 @@ class ModalSubsidyProgress extends React.Component {
 
 	schoolDenySubsidy(subsidy) {
 		request.post(denySubsidyRequest, { subsidyId: subsidy._id }).then(result => {
-			if (result.success) {
+			const { success, data } = result;
+			if (success) {
 				this.loadSubsidyData(subsidy._id, false);
+				const newSubsidyRequests = JSON.parse(JSON.stringify(this.props.listSubsidaries));
+				this.props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
+					if (s._id == subsidy._id) {
+						s.status = data.status;
+					}
+					return s;
+				})));
 			}
 		}).catch(err => {
 			console.log('deny_subsidy_request---', err);
@@ -169,7 +176,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	adminDenySubsidy(subsidy) {
-		request.post(switchPathWithRole(this.props.userRole) + 'deny_subsidy_request', { subsidyId: subsidy._id }).then(result => {
+		request.post(switchPathWithRole(this.props.auth.user?.role) + 'deny_subsidy_request', { subsidyId: subsidy._id }).then(result => {
 			if (result.success) {
 				this.loadSubsidyData(subsidy._id, false);
 			}
@@ -226,7 +233,7 @@ class ModalSubsidyProgress extends React.Component {
 	//         "phoneNumber": this.state.consulationPhoneNumber,
 	//     };
 
-	//     request.post(switchPathWithRole(this.props.userRole)+'create_consulation_to_subsidy',postData).then(result=>{
+	//     request.post(switchPathWithRole(this.props.auth.user?.role)+'create_consulation_to_subsidy',postData).then(result=>{
 	//         if(result.success){
 	//             this.loadSubsidyData(subsidy._id , false);
 	//             this.setState({isScheduling:false , consulationWarning:''});
@@ -256,7 +263,7 @@ class ModalSubsidyProgress extends React.Component {
 	//         "date":_selectedDay,
 	//         "phoneNumber": this.state.consulationPhoneNumber,
 	//     }
-	//     request.post(switchPathWithRole(this.props.userRole)+'change_consulation',postData).then(result=>{
+	//     request.post(switchPathWithRole(this.props.auth.user?.role)+'change_consulation',postData).then(result=>{
 	//         if(result.success){
 	//             this.loadSubsidyData(subsidy._id , false);
 	//             this.setState({isScheduling:false, consulationWarning:''});
@@ -282,7 +289,7 @@ class ModalSubsidyProgress extends React.Component {
 			message.error('please fill all reuired field');
 			return;
 		}
-		request.post(switchPathWithRole(this.props.userRole) + 'select_final_provider_for_subsidy', postData).then(result => {
+		request.post(switchPathWithRole(this.props.auth.user?.role) + 'select_final_provider_for_subsidy', postData).then(result => {
 			if (result.success) {
 				this.loadSubsidyData(subsidy._id, false);
 				this.setState({ isScheduling: false });
@@ -337,10 +344,6 @@ class ModalSubsidyProgress extends React.Component {
 		}
 	}
 
-	getSkillSetName(value) {
-		return this.props.SkillSet[value];
-	}
-
 	getFileName(path) {
 		return path.replace(/^.*[\\\/]/, '')
 	}
@@ -369,7 +372,7 @@ class ModalSubsidyProgress extends React.Component {
 				<Col xs={24} sm={24} md={12}>
 					<p className='font-700'>{intl.formatMessage(msgReview.dependentInfo)}</p>
 					<div className='count-2'>
-						<p className='font-12'>Dependent:<b>{student.firstName} {student.lastName}</b></p>
+						<p className='font-12'>Dependent: <b>{student.firstName} {student.lastName}</b></p>
 						<p className='font-12'>School: {student.school.name}</p>
 						<p className='font-12'>Skillset: {subsidy?.skillSet?.name}</p>
 						<p className='font-12'>Age: {moment().diff(student.birthday, 'years', false)}</p>
@@ -408,7 +411,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderButtonsForSchoolInfo(subsidy) {
-		if (this.props.userRole == 3) {
+		if (this.props.auth.user?.role == 3) {
 			return;
 		}
 		if (subsidy.isAppeal && (subsidy.status == -1 || subsidy.adminApprovalStatus == -1)) {
@@ -447,7 +450,7 @@ class ModalSubsidyProgress extends React.Component {
 							{intl.formatMessage(messages.approve).toUpperCase()}
 						</Button>
 					)}
-					{subsidy.status == 1 && this.props.userRole < 100 && subsidy.adminApprovalStatus == 0 && (
+					{subsidy.status == 1 && this.props.auth.user?.role < 100 && subsidy.adminApprovalStatus == 0 && (
 						<Button onClick={() => { this.openHierachy(subsidy) }} size='small' type='primary'>
 							{'Hierachi'.toUpperCase()}
 						</Button>
@@ -473,15 +476,15 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderButtonsForDecision(subsidy) {
-		if (this.props.userRole > 900) {
+		if (this.props.auth.user?.role > 900) {
 			return (
 				<div className='flex flex-row items-center'>
 					<Button
 						onClick={() => { this.adminDenySubsidy(subsidy) }}
-						size='small' className='mr-10'>DECLINE</Button>
+						size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button>
 					<Button
 						onClick={() => { this.submitSubsidyFromAdmin(subsidy) }}
-						size='small' type='primary'>APPROVE</Button>
+						size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>
 				</div>
 			)
 		}
@@ -489,6 +492,11 @@ class ModalSubsidyProgress extends React.Component {
 
 	renderSchoolInfo = (data) => {
 		const { selectedProviders, subsidy, providers, decisionExplanation } = this.state;
+		const { user } = this.props.auth;
+
+		if (user?.role == 3 && subsidy.status == 0) {
+			return null;
+		}
 
 		return (
 			<div className='school-info'>
@@ -500,24 +508,16 @@ class ModalSubsidyProgress extends React.Component {
 					<Col xs={24} sm={24} md={8}>
 						<p className='font-700 mb-10'>{intl.formatMessage(messages.recommendedProviders)}</p>
 						<div className='select-md'>
-							{[0, 1, 2].map((_, index) => (
-								<Select
-									key={index}
-									value={selectedProviders[index]}
-									disabled={subsidy.status == 1 || subsidy.status == -1}
-									onChange={v => {
-										const { selectedProviders } = this.state;
-										selectedProviders[index] = v;
-										this.setState({ selectedProviders: selectedProviders });
-									}}
-									className='mb-10'
-									placeholder={intl.formatMessage(msgCreateAccount.provider)}
-								>
-									{providers.map((provider) => (
-										<Select.Option key={provider._id} value={provider._id}>{provider.name || provider.referredToAs}</Select.Option>
-									))}
-								</Select>
-							))}
+							<Select
+								disabled={user.role == 3 || !(subsidy.status == 0 || subsidy.status == 1)}
+								onChange={v => { }}
+								className='mb-10'
+								placeholder={intl.formatMessage(msgCreateAccount.provider)}
+							>
+								{providers.map((provider) => (
+									<Select.Option key={provider._id} value={provider._id}>{`${provider.firstName} ${provider.lastName}` || provider.referredToAs}</Select.Option>
+								))}
+							</Select>
 						</div>
 					</Col>
 					<Col xs={24} sm={24} md={16}>
@@ -581,7 +581,7 @@ class ModalSubsidyProgress extends React.Component {
 
 	renderDecision(subsidy) {
 		const { selectProviderFromAdmin, providers, numberOfSessions, priceForSession } = this.state;
-		const isNotAdmin = this.props.userRole < 999;
+		const isNotAdmin = this.props.auth.user?.role < 999;
 		if (isNotAdmin && subsidy.adminApprovalStatus != 1) {
 			return;
 		}
@@ -662,7 +662,7 @@ class ModalSubsidyProgress extends React.Component {
 	footerButton() {
 		const { subsidy } = this.state;
 
-		if ((subsidy.status == -1 || subsidy.adminApprovalStatus == -1) && this.props.userRole == 3) {
+		if ((subsidy.status == -1 || subsidy.adminApprovalStatus == -1) && this.props.auth.user?.role == 3) {
 			return [
 				<Button key="back" onClick={this.props.onCancel}>
 					CLOSE
@@ -717,4 +717,9 @@ class ModalSubsidyProgress extends React.Component {
 	}
 };
 
-export default ModalSubsidyProgress;
+const mapStateToProps = state => ({
+	listSubsidaries: state.appointments.dataSubsidyRequests,
+	auth: state.auth,
+})
+
+export default compose(connect(mapStateToProps))(ModalSubsidyProgress);

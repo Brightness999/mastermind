@@ -29,7 +29,7 @@ import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { setDependents, setLocations, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
+import { setAcademicLevels, setDependents, setLocations, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
@@ -80,6 +80,7 @@ class Dashboard extends React.Component {
       visibleSessionsNeedToClose: false,
       selectedDependentId: 0,
       visibleCreateNote: false,
+      subsidyId: '',
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -255,6 +256,7 @@ class Dashboard extends React.Component {
         this.props.dispatch(setProviders(data?.providers));
         this.props.dispatch(setSkillSet(data?.skillSet));
         this.props.dispatch(setLocations(data?.locations));
+        this.props.dispatch(setAcademicLevels(data?.academicLevels));
       } else {
         this.setState({
           listProvider: [],
@@ -407,14 +409,13 @@ class Dashboard extends React.Component {
   };
 
   onShowModalSubsidy = (subsidyId) => {
-    this.setState({ visibleSubsidy: true });
-    this.reloadModalSubsidyDetail(subsidyId);
+    this.setState({ visibleSubsidy: true, subsidyId: subsidyId });
   };
 
   onCancelSubsidy = () => { }
 
   onCloseModalSubsidy = () => {
-    this.setState({ visibleSubsidy: false });
+    this.setState({ visibleSubsidy: false, subsidyId: '' });
   };
 
   onSubmitModalSubsidy = () => {
@@ -553,23 +554,6 @@ class Dashboard extends React.Component {
       this.panelSubsidariesReload && this.panelSubsidariesReload();
     }
   })
-
-  renderModalSubsidyDetail = () => {
-    const modalSubsidyProps = {
-      visible: this.state.visibleSubsidy,
-      onSubmit: this.onCloseModalSubsidy,
-      onCancel: this.onCloseModalSubsidy,
-    };
-    return (
-      <ModalSubsidyProgress {...modalSubsidyProps}
-        setOpennedEvent={(reload) => { this.reloadModalSubsidyDetail = reload }}
-        userRole={this.state.userRole}
-        SkillSet={this.state.SkillSet}
-        openReferral={this.onShowModalReferral}
-        openHierachy={this.openHierachyModal}
-      />
-    );
-  }
 
   renderListAppoinmentsRecent = (appointment, index) => {
     const type = appointment?.type;
@@ -793,6 +777,8 @@ class Dashboard extends React.Component {
       selectedDependentId,
       visibleCreateNote,
       visibleNewSubsidy,
+      visibleSubsidy,
+      subsidyId,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -909,6 +895,15 @@ class Dashboard extends React.Component {
       onSubmit: this.onSubmitModalNewSubsidy,
       onCancel: this.onCloseModalNewSubsidy,
     };
+
+    const modalSubsidyProps = {
+      visible: visibleSubsidy,
+      subsidyId: subsidyId,
+      onSubmit: this.onCloseModalSubsidy,
+      onCancel: this.onCloseModalSubsidy,
+      openReferral: this.onShowModalReferral,
+      openHierachy: this.openHierachyModal,
+    }
 
     if (userRole == 60) {
       return <Subsidaries />
@@ -1330,7 +1325,7 @@ class Dashboard extends React.Component {
           {userDrawerVisible && <DrawerDetail {...drawerDetailProps} />}
           {visibleNewAppoint && <ModalNewAppointmentForParents {...modalNewAppointProps} />}
           {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
-          {this.renderModalSubsidyDetail()}
+          {visibleSubsidy && <ModalSubsidyProgress {...modalSubsidyProps} />}
           {visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
           <ModalNewGroup {...modalNewGroupProps} />
           {visiblReferralService && <ModalReferralService {...modalReferralServiceProps} />}

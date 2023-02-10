@@ -16,7 +16,6 @@ class SubsidyManager extends React.Component {
       listSubsidy: [],
       currentPage: 0,
       limit: 10,
-      userRole: 901,
       totalPages: 1,
       visibleSubsidy: false,
       visibleNewGroup: false,
@@ -30,11 +29,17 @@ class SubsidyManager extends React.Component {
       filterGrade: undefined,
       isApplyFilter: false,
       academicLevels: [],
+      subsidyId: '',
     }
   }
 
   componentDidMount = () => {
-    this.setState({ skillSet: this.props.auth.skillSet, academicLevels: this.props.auth.academicLevels });
+    const { skillSet, academicLevels } = this.props.auth;
+
+    this.setState({
+      skillSet: skillSet,
+      academicLevels: academicLevels,
+    });
     this.getSubsidyPerPage();
   }
 
@@ -116,32 +121,12 @@ class SubsidyManager extends React.Component {
     this.setState({ isApplyFilter: true }, this.getSubsidyPerPage);
   }
 
-  renderModalSubsidyDetail = () => {
-    const { visibleSubsidy, userRole, skillSet } = this.state;
-    const modalSubsidyProps = {
-      visible: visibleSubsidy,
-      onSubmit: this.onCloseModalSubsidy,
-      onCancel: this.onCloseModalSubsidy,
-    };
-
-    return (
-      <ModalSubsidyProgress {...modalSubsidyProps}
-        setOpennedEvent={(reload) => { this.reloadModalSubsidyDetail = reload }}
-        userRole={userRole}
-        skillSet={skillSet}
-        openHierachy={this.openHierachyModal}
-      />
-    );
-  }
-
   onCloseModalSubsidy = () => {
-    this.setState({ visibleSubsidy: false });
-
+    this.setState({ visibleSubsidy: false, subsidyId: '' });
   };
 
   onShowModalSubsidy = (subsidyId) => {
-    this.setState({ visibleSubsidy: true });
-    this.reloadModalSubsidyDetail(subsidyId);
+    this.setState({ visibleSubsidy: true, subsidyId: subsidyId });
   };
 
   openHierachyModal = (subsidy, callbackAfterChanged) => {
@@ -158,12 +143,20 @@ class SubsidyManager extends React.Component {
   }
 
   render() {
-    const { visibleNewGroup, filterStudent, filterProvider, skillSet, filterSchool, listSubsidy, academicLevels } = this.state;
+    const { visibleNewGroup, filterStudent, filterProvider, skillSet, filterSchool, listSubsidy, academicLevels, visibleSubsidy, subsidyId } = this.state;
 
     const modalNewGroupProps = {
       visible: visibleNewGroup,
       onSubmit: this.onCloseModalGroup,
       onCancel: this.onCloseModalGroup,
+    }
+
+    const modalSubsidyProps = {
+      visible: visibleSubsidy,
+      subsidyId: subsidyId,
+      onSubmit: this.onCloseModalSubsidy,
+      onCancel: this.onCloseModalSubsidy,
+      openHierachy: this.openHierachyModal
     }
 
     const columns = [
@@ -238,6 +231,7 @@ class SubsidyManager extends React.Component {
         fixed: 'right',
       },
     ];
+
     return (
       <div className="full-layout page subsidymanager-page">
         <div className='div-title-admin'>
@@ -332,7 +326,7 @@ class SubsidyManager extends React.Component {
           scroll={{ x: 1300 }}
           className='mt-2'
         />
-        {this.renderModalSubsidyDetail()}
+        {visibleSubsidy && <ModalSubsidyProgress {...modalSubsidyProps} />}
         <ModalNewGroup
           {...modalNewGroupProps}
           setLoadData={reload => { this.loadDataModalNewGroup = reload; }}
@@ -342,8 +336,6 @@ class SubsidyManager extends React.Component {
   }
 }
 
-const mapStateToProps = state => {
-  return ({ auth: state.auth });
-}
+const mapStateToProps = state => ({ auth: state.auth });
 
 export default compose(connect(mapStateToProps))(SubsidyManager);

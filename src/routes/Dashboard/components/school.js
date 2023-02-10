@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { message, Popconfirm, Space, Table, Tabs } from "antd";
+import { Space, Table, Tabs } from "antd";
 import update from 'immutability-helper';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import request from "../../../utils/api/request";
-import { denySubsidyRequest, getAllProviderInSchool } from "../../../utils/api/apiList";
-import { setSubsidyRequests } from "../../../redux/features/appointmentsSlice";
+import { getAllProviderInSchool } from "../../../utils/api/apiList";
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { ModalSubsidyProgress } from "../../../components/Modal";
 
 const Subsidaries = (props) => {
   const type = 'DraggableBodyRow';
@@ -15,6 +15,8 @@ const Subsidaries = (props) => {
   const [requests, setRequests] = useState(props.listSubsidaries?.filter(s => s.status == 0));
   const [status, setStatus] = useState(0);
   const [providers, setProviders] = useState([]);
+  const [selectedSubsidy, setSelectedSubsidy] = useState({});
+  const [visibleSubsidy, setVisibleSubsidy] = useState(false);
 
   const DraggableBodyRow = ({ index, moveRow, className, style, ...restProps }) => {
     const ref = useRef(null);
@@ -57,22 +59,9 @@ const Subsidaries = (props) => {
     );
   };
 
-  const DeclineSubsidy = (subsidy) => {
-    request.post(denySubsidyRequest, { subsidyId: subsidy?._id, status: subsidy?.status, student: subsidy?.student?._id }).then(res => {
-      const { success, data } = res;
-      if (success) {
-        const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidaries));
-        props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
-          if (s._id == subsidy._id) {
-            s.status = data.status;
-          }
-          return s;
-        })));
-      }
-    }).catch(err => {
-      console.log('decline subsidy request error---', err);
-      message.error(err.message);
-    })
+  const onShowModalSubsidy = (subsidy) => {
+    setSelectedSubsidy(subsidy);
+    setVisibleSubsidy(true);
   }
 
   useEffect(() => {
@@ -122,10 +111,7 @@ const Subsidaries = (props) => {
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => { }}>Approve</a>
-          <Popconfirm trigger="click" overlayClassName="subsidy-decline" title="Are you sure to decline this request?" onConfirm={() => DeclineSubsidy(subsidy)}>
-            <a className='btn-blue'>Decline</a>
-          </Popconfirm>
+          <a className='btn-blue' onClick={() => onShowModalSubsidy(subsidy)}>Edit</a>
         </Space>
       ),
       align: 'center',
@@ -176,8 +162,7 @@ const Subsidaries = (props) => {
       key: 'action',
       render: (a) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => { }}>Approve</a>
-          <a className='btn-blue' onClick={() => { }}>Decline</a>
+          <a className='btn-blue' onClick={() => onShowModalSubsidy(subsidy)}>Edit</a>
         </Space>
       ),
       align: 'center',
@@ -476,6 +461,14 @@ const Subsidaries = (props) => {
     setStatus(v - 1);
   }
 
+  const onCloseModalSubsidy = () => {
+    setVisibleSubsidy(false);
+  }
+
+  const onShowModalReferral = () => { }
+
+  const openHierachyModal = () => { }
+
   useEffect(() => {
     request.post(getAllProviderInSchool, { schoolId: user?.schoolInfo?._id }).then(res => {
       const { success, data } = res;
@@ -490,6 +483,15 @@ const Subsidaries = (props) => {
     })
   }, []);
 
+  const modalSubsidyProps = {
+    visible: visibleSubsidy,
+    onSubmit: onCloseModalSubsidy,
+    onCancel: onCloseModalSubsidy,
+    subsidyId: selectedSubsidy?._id,
+    openReferral: onShowModalReferral,
+    openHierachy: openHierachyModal,
+  }
+
   return (
     <div className="full-layout page school-dashboard h-100">
       <Tabs
@@ -501,6 +503,7 @@ const Subsidaries = (props) => {
         onChange={(v) => handleChangeTab(v)}
       >
       </Tabs>
+      {visibleSubsidy && <ModalSubsidyProgress {...modalSubsidyProps} />}
     </div>
   );
 }

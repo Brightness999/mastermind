@@ -75,6 +75,7 @@ class SchedulingCenter extends React.Component {
       visibleConfirm: false,
       confirmMessage: '',
       selectedDependentId: 0,
+      subsidyId: '',
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -250,14 +251,13 @@ class SchedulingCenter extends React.Component {
   };
 
   onShowModalSubsidy = (subsidyId) => {
-    this.setState({ visibleSubsidy: true });
-    this.reloadModalSubsidyDetail(subsidyId);
+    this.setState({ visibleSubsidy: true, subsidyId: subsidyId });
   };
 
   onCancelSubsidy = () => { }
 
   onCloseModalSubsidy = () => {
-    this.setState({ visibleSubsidy: false });
+    this.setState({ visibleSubsidy: false, subsidyId: '' });
   };
 
   onSubmitModalSubsidy = () => {
@@ -365,23 +365,6 @@ class SchedulingCenter extends React.Component {
 
   getMyAppointments(userRole, dependentId) {
     this.props.dispatch(getAppointmentsData({ role: userRole, dependentId: dependentId }));
-  }
-
-  renderModalSubsidyDetail = () => {
-    const modalSubsidyProps = {
-      visible: this.state.visibleSubsidy,
-      onSubmit: this.onCloseModalSubsidy,
-      onCancel: this.onCloseModalSubsidy,
-    };
-    return (
-      <ModalSubsidyProgress {...modalSubsidyProps}
-        setOpennedEvent={(reload) => { this.reloadModalSubsidyDetail = reload }}
-        userRole={this.state.userRole}
-        SkillSet={this.state.SkillSet}
-        openReferral={this.onShowModalReferral}
-        openHierachy={this.openHierachyModal}
-      />
-    );
   }
 
   handleClickPrevMonth = () => {
@@ -579,6 +562,8 @@ class SchedulingCenter extends React.Component {
       confirmMessage,
       selectedDependentId,
       visibleNewSubsidy,
+      visibleSubsidy,
+      subsidyId,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -688,6 +673,15 @@ class SchedulingCenter extends React.Component {
       onSubmit: this.onCloseModalNewSubsidy,
       onCancel: this.onCloseModalNewSubsidy,
     };
+
+    const modalSubsidyProps = {
+      visible: visibleSubsidy,
+      subsidyId: subsidyId,
+      onSubmit: this.onCloseModalSubsidy,
+      onCancel: this.onCloseModalSubsidy,
+      openReferral: this.onShowModalReferral,
+      openHierachy: this.openHierachyModal,
+    }
 
     return (
       <div className="full-layout page admin-page">
@@ -1045,7 +1039,7 @@ class SchedulingCenter extends React.Component {
         {userDrawerVisible && <DrawerDetail {...drawerDetailProps} />}
         {visibleNewAppoint && <ModalNewAppointment {...modalNewAppointProps} />}
         {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
-        {this.renderModalSubsidyDetail()}
+        {visibleSubsidy && <ModalSubsidyProgress {...modalSubsidyProps} />}
         {visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
         <ModalNewGroup {...modalNewGroupProps}
           SkillSet={SkillSet}
