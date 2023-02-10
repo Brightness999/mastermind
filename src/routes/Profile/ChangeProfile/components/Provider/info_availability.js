@@ -14,6 +14,7 @@ import { store } from '../../../../../redux/store';
 import { setUser } from '../../../../../redux/features/authSlice';
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
+import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -35,6 +36,7 @@ class InfoAvailability extends Component {
 			locations: [],
 			listSchool: [],
 			selectedLocation: '',
+			isPrivateForHmgh: false,
 		}
 	}
 
@@ -64,6 +66,7 @@ class InfoAvailability extends Component {
 					isHomeVisit: user?.providerInfo?.isHomeVisit,
 					isPrivateOffice: user?.providerInfo?.privateOffice,
 					isSchools: !!user?.providerInfo?.serviceableSchool?.length,
+					isPrivateForHmgh: user?.providerInfo?.isPrivateForHmgh,
 					locations: locations,
 				})
 			}
@@ -101,7 +104,7 @@ class InfoAvailability extends Component {
 	}
 
 	onFinish = (values) => {
-		const { listSchool } = this.state;
+		const { listSchool, isPrivateForHmgh } = this.state;
 		let manualSchedule = [];
 		day_week.map(day => {
 			values[day]?.forEach(t => {
@@ -118,7 +121,7 @@ class InfoAvailability extends Component {
 						closeHour: t.to_time?.hours() ?? 0,
 						closeMin: t.to_time?.minutes() ?? 0,
 						dayInWeek: this.getDayOfWeekIndex(day),
-						isPrivate: t.isPrivate ?? false,
+						isPrivate: isPrivateForHmgh ? true : t.isPrivate ?? false,
 						location: t.location ?? '',
 					}
 					manualSchedule.push(times);
@@ -143,6 +146,7 @@ class InfoAvailability extends Component {
 			})
 		});
 		values.manualSchedule = manualSchedule.flat();
+		values.isPrivateForHmgh = isPrivateForHmgh;
 		values.blackoutDates = values.blackoutDates?.map(date => date.toString());
 
 		request.post(updateMyProviderAvailability, { ...values, _id: this.props.auth.user.providerInfo?._id }).then(result => {
@@ -155,6 +159,7 @@ class InfoAvailability extends Component {
 						...this.props.auth.user.providerInfo,
 						isHomeVisit: values.isHomeVisit,
 						privateOffice: values.privateOffice,
+						isPrivateForHmgh: isPrivateForHmgh,
 						serviceableSchool: listSchool?.filter(school => values.serviceableSchool?.find(id => id == school._id)),
 					}
 				}
@@ -251,45 +256,58 @@ class InfoAvailability extends Component {
 		}
 	}
 
-	handleSelectTime = (value, type) => {
+	handleSelectTime = (value, type, day, index) => {
 		const { selectedLocation, currentSelectedDay, listSchool } = this.state;
+		const dayTime = this.form.getFieldValue(day);
 		if (selectedLocation) {
 			const school = listSchool?.find(school => school.name == selectedLocation);
 			if (school) {
-				const idx = this.getDayOfWeekIndex(currentSelectedDay);
-				if (idx > -1) {
+				const dayIndex = this.getDayOfWeekIndex(currentSelectedDay);
+				if (dayIndex > -1) {
 					value = value.set({ seconds: 0, milliseconds: 0 });
-					const inOpenTime = moment().set({ hours: school.sessionsInSchool[idx]?.openHour, minutes: school.sessionsInSchool[idx]?.openMin, seconds: 0, milliseconds: 0 });
-					const inCloseTime = moment().set({ hours: school.sessionsInSchool[idx]?.closeHour, minutes: school.sessionsInSchool[idx]?.closeMin, seconds: 0, milliseconds: 0 });
-					const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[idx]?.openHour, minutes: school.sessionsAfterSchool[idx]?.openMin, seconds: 0, milliseconds: 0 });
-					const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[idx]?.closeHour, minutes: school.sessionsAfterSchool[idx]?.closeMin, seconds: 0, milliseconds: 0 });
-					if (type == 'from' && !((value.isSame(inOpenTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterOpenTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
-						message.warning("The school is not available at that time. Please select another time.", 5);
+					const inOpenTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.openHour, minutes: school.sessionsInSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
+					const inCloseTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.closeHour, minutes: school.sessionsInSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
+					const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.openHour, minutes: school.sessionsAfterSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
+					const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.closeHour, minutes: school.sessionsAfterSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
+					if (type == 'from_time') {
+						if (!((value.isSame(inOpenTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterOpenTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
+							message.warning("The school is not available at that time. Please select another time.", 5);
+						} else {
+							this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: value }) : d));
+						}
 					}
-					if (type == 'to' && !((value.isSame(inCloseTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterCloseTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
-						message.warning("The school is not available at that time. Please select another time.", 5);
+					if (type == 'to_time') {
+						if (!((value.isSame(inCloseTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterCloseTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
+							message.warning("The school is not available at that time. Please select another time.", 5);
+						} else {
+							this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, to_time: value }) : d));
+						}
 					}
 				}
+			} else {
+				this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: value }) : d));
 			}
+		} else {
+			this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: value }) : d));
 		}
 	}
 
 	handleClickGoogleCalendar = () => {
-		const BASE_CALENDAR_URL = "https://www.googleapis.com/calendar/v3/calendars";
-		const BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY = "holiday@group.v.calendar.google.com";
-		const API_KEY = "AIzaSyA77lKHRvtdisK7_UhwalO8Hzgd4P_kaDk";
-		const USA_CALENDAR_REGION = "en.usa";
-		const JEWISH_CALENDAR_REGION = "en.jewish";
-
-		const usa_url = `${BASE_CALENDAR_URL}/${USA_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${API_KEY}`
-		const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${API_KEY}`
+		const usa_url = `${BASE_CALENDAR_URL}/${USA_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+		const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
 
 		fetch(usa_url).then(response => response.json()).then(data => {
 			const holidays = [...new Set(data.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
 			fetch(jewish_url).then(response => response.json()).then(data1 => {
 				const holidays1 = [...new Set(data1.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
 				const dates = this.form.getFieldValue("blackoutDates");
-				this.form.setFieldsValue({ blackoutDates: [...dates, ...holidays, ...holidays1] });
+				let uniqueDates = [];
+				[...dates ?? [], ...holidays ?? [], ...holidays1 ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+					if (!uniqueDates.find(d => d.toString() == c.toString())) {
+						uniqueDates.push(c);
+					}
+				})
+				this.form.setFieldsValue({ blackoutDates: uniqueDates });
 			})
 		})
 	}
@@ -299,7 +317,7 @@ class InfoAvailability extends Component {
 	}
 
 	render() {
-		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool } = this.state;
+		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh } = this.state;
 		const { user } = this.props.auth;
 
 		return (
@@ -371,6 +389,7 @@ class InfoAvailability extends Component {
 																showArrow
 																placeholder={intl.formatMessage(messages.location)}
 																optionLabelProp="label"
+																onChange={v => this.setState({ selectedLocation: v })}
 															>
 																{locations.map((location, index) => (
 																	<Select.Option key={index} label={location} value={location}>{location}</Select.Option>
@@ -402,8 +421,9 @@ class InfoAvailability extends Component {
 																	<TimePicker
 																		use12Hours
 																		format="h:mm a"
+																		popupClassName="timepicker"
 																		placeholder={intl.formatMessage(messages.from)}
-																		onOk={(v) => this.handleSelectTime(v, 'from')}
+																		onSelect={(v) => this.handleSelectTime(v, 'from_time', day, field.key)}
 																	/>
 																</Form.Item>
 															</Col>
@@ -412,15 +432,16 @@ class InfoAvailability extends Component {
 																	<TimePicker
 																		use12Hours
 																		format="h:mm a"
+																		popupClassName="timepicker"
 																		placeholder={intl.formatMessage(messages.to)}
-																		onOk={(v) => this.handleSelectTime(v, 'to')}
+																		onSelect={(v) => this.handleSelectTime(v, 'to_time', day, field.key)}
 																	/>
 																</Form.Item>
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 															</Col>
 														</Row>
 														{user?.providerInfo?.isWillingOpenPrivate ? (
-															<div className="flex items-center justify-start gap-2">
+															<div className={`flex items-center justify-start gap-2 ${isPrivateForHmgh ? 'd-none' : ''}`}>
 																<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
 																	<Switch size="small" />
 																</Form.Item>
@@ -452,6 +473,10 @@ class InfoAvailability extends Component {
 									</Form.List>
 								</div>
 							))}
+						</div>
+						<div className="flex items-center justify-start gap-2">
+							<Switch size="small" checked={isPrivateForHmgh} onChange={(state) => this.setState({ isPrivateForHmgh: state })} />
+							<p className='font-12 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
 						</div>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
 						<div className='flex items-center justify-center gap-2 cursor mb-10' onClick={() => this.handleClickGoogleCalendar()}>

@@ -126,6 +126,7 @@ class InfoReview extends Component {
 			isPrivateForHmgh: availability.isPrivateForHmgh,
 			isPrivateOffice: availability.isPrivateOffice,
 			isSchools: availability.isSchools,
+			blackoutDates: availability.blackoutDates?.map(date => date.toString()),
 		}
 	}
 

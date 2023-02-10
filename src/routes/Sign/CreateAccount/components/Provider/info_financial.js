@@ -290,9 +290,18 @@ class InfoFinancial extends Component {
 									<Form.Item
 										name="separateEvaluationRate"
 										label={'Evaluation ' + intl.formatMessage(messages.rate)}
-										rules={[{ required: registerData?.scheduling?.isNewClientEvaluation, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
+										rules={[{
+											required: registerData?.scheduling?.isNewClientEvaluation,
+											message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
+											validator: (_, value) => {
+												if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
+												return Promise.resolve();
+											},
+										}]}
 									>
 										<Input
+											type='number'
+											min={0}
 											onChange={(e) => this.setValueToReduxRegisterData('separateEvaluationRate', e.target.value)}
 											placeholder={intl.formatMessage(messages.rate)}
 										/>
@@ -303,10 +312,22 @@ class InfoFinancial extends Component {
 								<Form.Item
 									name="cancellationFee"
 									label={intl.formatMessage(messages.cancellationFee)}
-									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
+									rules={[{
+										required: true,
+										message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee),
+										validator: (_, value) => {
+											if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
+											return Promise.resolve();
+										},
+									}]}
 									className='w-100'
 								>
-									<Input placeholder={intl.formatMessage(messages.cancellationFee)} />
+									<Input
+										type='number'
+										min={0}
+										onChange={(e) => this.setValueToReduxRegisterData('cancellationFee', e.target.value)}
+										placeholder={intl.formatMessage(messages.cancellationFee)}
+									/>
 								</Form.Item>
 							</Col>
 						</Row>

@@ -143,12 +143,12 @@ class InfoFinancial extends Component {
 							</PlacesAutocomplete>
 						</Form.Item>
 						<Row gutter={14}>
-							<Col xs={24} sm={24} md={12}>
+							<Col xs={16} sm={16} md={16}>
 								<Form.Item name="licenseNumber" label={intl.formatMessage(messages.licenseNumber)} className="float-label-item">
 									<Input placeholder={intl.formatMessage(messages.licenseNumber)} />
 								</Form.Item>
 							</Col>
-							<Col xs={24} sm={24} md={12}>
+							<Col xs={8} sm={8} md={8}>
 								<Form.Item name="SSN" label="SSN" className="float-label-item">
 									<Input placeholder='SSN' />
 								</Form.Item>
@@ -160,7 +160,7 @@ class InfoFinancial extends Component {
 									{fields.map((field) => {
 										return (
 											<Row gutter={14} key={field.key}>
-												<Col xs={12} sm={12} md={12}>
+												<Col xs={16} sm={16} md={16}>
 													<Form.Item
 														name={[field.name, "level"]}
 														label={intl.formatMessage(messages.level)}
@@ -182,10 +182,10 @@ class InfoFinancial extends Component {
 														</Select>
 													</Form.Item>
 												</Col>
-												<Col xs={12} sm={12} md={12} className='item-remove'>
+												<Col xs={8} sm={8} md={8} className='item-remove'>
 													<Form.Item
 														name={[field.name, "rate"]}
-														label={'Standard ' + intl.formatMessage(messages.rate)}
+														label={intl.formatMessage(messages.rate)}
 														rules={[{
 															required: true,
 															message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
@@ -247,19 +247,33 @@ class InfoFinancial extends Component {
 									name="separateEvaluationRate"
 									label={'Evaluation ' + intl.formatMessage(messages.rate)}
 									className="float-label-item"
-									rules={[{ required: user?.providerInfo?.isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
+									rules={[{
+										required: user?.providerInfo?.isSeparateEvaluationRate,
+										message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
+										validator: (_, value) => {
+											if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
+											return Promise.resolve();
+										},
+									}]}
 								>
-									<Input placeholder={intl.formatMessage(messages.rate)} />
+									<Input type='number' min={0} placeholder={intl.formatMessage(messages.rate)} />
 								</Form.Item>
 							</Col>
 							<Col xs={24} sm={24} md={12}>
 								<Form.Item
 									name="cancellationFee"
 									label={intl.formatMessage(messages.cancellationFee)}
-									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
+									rules={[{
+										required: true,
+										message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee),
+										validator: (_, value) => {
+											if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
+											return Promise.resolve();
+										},
+									}]}
 									className='w-100 float-label-item'
 								>
-									<Input placeholder={intl.formatMessage(messages.cancellationFee)} />
+									<Input type='number' min={0} placeholder={intl.formatMessage(messages.cancellationFee)} />
 								</Form.Item>
 							</Col>
 						</Row>

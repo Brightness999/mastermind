@@ -3,15 +3,18 @@ import { Row, Col, Form, Button, Select, Segmented, TimePicker, Switch, DatePick
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import msgSidebar from '../../../../../components/SideBar/messages';
-import { connect } from 'react-redux'
-import { compose } from 'redux'
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { url } from '../../../../../utils/api/baseUrl';
 import axios from 'axios';
 import moment from 'moment';
+import { connect } from 'react-redux'
+import { compose } from 'redux'
+import * as MultiDatePicker from "react-multi-date-picker";
+import DatePanel from "react-multi-date-picker/plugins/date_panel"
+import messages from '../../messages';
+import msgSidebar from '../../../../../components/SideBar/messages';
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import { url } from '../../../../../utils/api/baseUrl';
 import { getAllSchoolsForParent } from '../../../../../utils/api/apiList';
+import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -163,27 +166,65 @@ class InfoAvailability extends Component {
 		}
 	}
 
-	handleSelectTime = (value, type) => {
+	handleSelectTime = (value, type, day, index) => {
 		const { selectedLocation, currentSelectedDay, listSchool } = this.state;
+		const dayTime = this.form.getFieldValue(day);
 		if (selectedLocation) {
 			const school = listSchool?.find(school => school.name == selectedLocation);
 			if (school) {
-				const idx = this.getDayOfWeekIndex(currentSelectedDay);
-				if (idx > -1) {
+				const dayIndex = this.getDayOfWeekIndex(currentSelectedDay);
+				if (dayIndex > -1) {
 					value = value.set({ seconds: 0, milliseconds: 0 });
-					const inOpenTime = moment().set({ hours: school.sessionsInSchool[idx]?.openHour, minutes: school.sessionsInSchool[idx]?.openMin, seconds: 0, milliseconds: 0 });
-					const inCloseTime = moment().set({ hours: school.sessionsInSchool[idx]?.closeHour, minutes: school.sessionsInSchool[idx]?.closeMin, seconds: 0, milliseconds: 0 });
-					const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[idx]?.openHour, minutes: school.sessionsAfterSchool[idx]?.openMin, seconds: 0, milliseconds: 0 });
-					const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[idx]?.closeHour, minutes: school.sessionsAfterSchool[idx]?.closeMin, seconds: 0, milliseconds: 0 });
-					if (type == 'from' && !((value.isSame(inOpenTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterOpenTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
-						message.warning("The school is not available at that time. Please select another time.", 5);
+					const inOpenTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.openHour, minutes: school.sessionsInSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
+					const inCloseTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.closeHour, minutes: school.sessionsInSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
+					const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.openHour, minutes: school.sessionsAfterSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
+					const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.closeHour, minutes: school.sessionsAfterSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
+					if (type == 'from_time') {
+						if (!((value.isSame(inOpenTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterOpenTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
+							message.warning("The school is not available at that time. Please select another time.", 5);
+						} else {
+							this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: value }) : d));
+						}
 					}
-					if (type == 'to' && !((value.isSame(inCloseTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterCloseTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
-						message.warning("The school is not available at that time. Please select another time.", 5);
+					if (type == 'to_time') {
+						if (!((value.isSame(inCloseTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterCloseTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
+							message.warning("The school is not available at that time. Please select another time.", 5);
+						} else {
+							this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, to_time: value }) : d));
+						}
 					}
 				}
+			} else {
+				this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: value }) : d));
 			}
+		} else {
+			this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: value }) : d));
 		}
+		this.onChangeScheduleValue();
+	}
+
+	handleClickGoogleCalendar = () => {
+		const usa_url = `${BASE_CALENDAR_URL}/${USA_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+		const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+
+		fetch(usa_url).then(response => response.json()).then(data => {
+			const holidays = [...new Set(data.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
+			fetch(jewish_url).then(response => response.json()).then(data1 => {
+				const holidays1 = [...new Set(data1.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
+				const dates = this.form.getFieldValue("blackoutDates");
+				let uniqueDates = [];
+				[...dates ?? [], ...holidays ?? [], ...holidays1 ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+					if (!uniqueDates.find(d => d.toString() == c.toString())) {
+						uniqueDates.push(c);
+					}
+				})
+				this.form.setFieldsValue({ blackoutDates: uniqueDates });
+			})
+		})
+	}
+
+	handleUpdateBlackoutDates = (dates) => {
+		this.form.setFieldsValue({ blackoutDates: dates });
 	}
 
 	render() {
@@ -289,8 +330,9 @@ class InfoAvailability extends Component {
 																		onChange={() => this.onChangeScheduleValue()}
 																		use12Hours
 																		format="h:mm a"
+																		popupClassName='timepicker'
 																		placeholder={intl.formatMessage(messages.from)}
-																		onOk={(v) => this.handleSelectTime(v, 'from')}
+																		onSelect={(v) => this.handleSelectTime(v, 'from_time', day, field.key)}
 																	/>
 																</Form.Item>
 															</Col>
@@ -300,8 +342,9 @@ class InfoAvailability extends Component {
 																		onChange={() => this.onChangeScheduleValue()}
 																		use12Hours
 																		format="h:mm a"
+																		popupClassName='timepicker'
 																		placeholder={intl.formatMessage(messages.to)}
-																		onOk={(v) => this.handleSelectTime(v, 'to')}
+																		onSelect={(v) => this.handleSelectTime(v, 'to_time', day, field.key)}
 																	/>
 																</Form.Item>
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
@@ -341,6 +384,20 @@ class InfoAvailability extends Component {
 								</div>
 							))}
 						</div>
+						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
+						<div className='flex items-center justify-center gap-2 cursor mb-10' onClick={() => this.handleClickGoogleCalendar()}>
+							<img src='../images/gg.png' className='h-30' />
+							<p className='font-16 mb-0'>Google</p>
+						</div>
+						<Form.Item name="blackoutDates">
+							<MultiDatePicker.Calendar
+								multiple
+								sort
+								className='m-auto'
+								onChange={dates => this.handleUpdateBlackoutDates(dates)}
+								plugins={[<DatePanel />]}
+							/>
+						</Form.Item>
 						<Form.Item className="form-btn continue-btn" >
 							<Button
 								block

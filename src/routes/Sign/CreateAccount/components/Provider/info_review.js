@@ -128,6 +128,7 @@ class InfoReview extends Component {
 			isHomeVisit: availability.isHomeVisit,
 			privateOffice: availability.isPrivateOffice,
 			isSchools: availability.isSchools,
+			blackoutDates: availability.blackoutDates?.map(date => date.toString()),
 		}
 	}
 

@@ -92,9 +92,16 @@ class InfoServices extends Component {
 								<Form.Item
 									name="yearExp"
 									label={intl.formatMessage(messages.yearsExperience)}
-									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.yearsExperience) }]}
+									rules={[{
+										required: true,
+										message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.yearsExperience),
+										validator: (_, value) => {
+											if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
+											return Promise.resolve();
+										},
+									}]}
 								>
-									<Input placeholder={intl.formatMessage(messages.yearsExperience)} />
+									<Input type='number' min={0} placeholder={intl.formatMessage(messages.yearsExperience)} />
 								</Form.Item>
 							</Col>
 						</Row>

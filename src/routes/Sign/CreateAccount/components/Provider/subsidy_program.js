@@ -69,7 +69,6 @@ class SubsidyProgram extends Component {
 	}
 
 	onFinish = (values) => {
-		console.log(values)
 		const { isAcceptProBono, isAcceptReduceRate, isWillingOpenPrivate } = this.state;
 		const { registerData } = this.props.register;
 		let data = {
