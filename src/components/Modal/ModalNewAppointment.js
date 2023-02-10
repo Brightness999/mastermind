@@ -100,15 +100,9 @@ class ModalNewAppointment extends React.Component {
 		request.post(searchProvidersForAdmin, params).then(result => {
 			const { data, success } = result;
 			if (success) {
-				this.setState({
-					listProvider: data?.providers,
-					addressOptions: data?.locations,
-				});
+				this.setState({ listProvider: data?.providers });
 			} else {
-				this.setState({
-					listProvider: [],
-					addressOptions: [],
-				});
+				this.setState({ listProvider: [] });
 			}
 			this.setState({
 				selectedProviderIndex: -1,
@@ -121,7 +115,6 @@ class ModalNewAppointment extends React.Component {
 			console.log('provider list error-----', err);
 			this.setState({
 				listProvider: [],
-				addressOptions: [],
 				selectedProviderIndex: -1,
 				selectedProvider: undefined,
 				selectedTimeIndex: -1,
@@ -420,6 +413,7 @@ class ModalNewAppointment extends React.Component {
 		this.setState({
 			selectedDependent: dependentId,
 			skillSet: dependents?.find(dependent => dependent._id == dependentId)?.services,
+			addressOptions: ['Dependent Home', 'Provider Office', dependents?.find(dependent => dependent._id == dependentId)?.school?.name],
 		});
 		this.searchProvider(searchKey, address, selectedSkill, dependentId);
 	}

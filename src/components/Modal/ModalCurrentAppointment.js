@@ -98,6 +98,7 @@ class ModalCurrentAppointment extends React.Component {
 			skillSet: store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.services ?? [],
 			selectedProvider: event?.provider?._id,
 			selectedDate: moment(event?.date),
+			addressOptions: ['Dependent Home', 'Provider Office', store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.school?.name],
 		});
 		this.form?.setFieldsValue({ dependent: event?.dependent?._id, skill: event?.skillSet?._id, address: event?.location, phoneNumber: event?.phoneNumber });
 		this.searchProvider('', event?.location, event?.skillSet?._id, event?.dependent?._id, true, event?.provider?._id);
@@ -428,6 +429,7 @@ class ModalCurrentAppointment extends React.Component {
 		this.setState({
 			selectedDependent: dependentId,
 			skillSet: dependents?.find(dependent => dependent._id == dependentId)?.services,
+			addressOptions: ['Dependent Home', 'Provider Office', dependents?.find(dependent => dependent._id == dependentId)?.school?.name],
 		});
 		this.searchProvider(searchKey, address, selectedSkillSet, dependentId);
 	}
