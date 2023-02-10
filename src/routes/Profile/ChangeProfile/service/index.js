@@ -1,4 +1,4 @@
-import { MENU_ADMIN, MENU_SCHOOL, MENU_PROVIDER, MENU_PARENT } from "../constant";
+import { MENU_ADMIN, MENU_SCHOOL, MENU_PROVIDER, MENU_PARENT, MENU_CONSULTANT } from "../constant";
 
 export const setKeyDefault = (role) => {
     switch (role) {
@@ -6,6 +6,8 @@ export const setKeyDefault = (role) => {
             return MENU_ADMIN[0].key;
         case 999:
             return MENU_ADMIN[0].key;
+        case 100:
+            return MENU_CONSULTANT[0].key;
         case 60:
             return MENU_SCHOOL[0].key;
         case 30:
