@@ -798,7 +798,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(event?.status == 0 && !isNotPending) && (
+              {((userRole == 3 || userRole > 900) && event?.status == 0 && !isNotPending) && (
                 <Col span={12}>
                   <Button
                     type='primary'
