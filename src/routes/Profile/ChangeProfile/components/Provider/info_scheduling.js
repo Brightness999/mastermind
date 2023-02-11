@@ -22,7 +22,7 @@ class InfoScheduling extends Component {
 		this.setState({ loading: true });
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
-				this.setState({ loading: true });
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data?.providerInfo);
@@ -33,11 +33,11 @@ class InfoScheduling extends Component {
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
-				this.setState({ loading: true });
+				this.setState({ loading: false });
 			})
 		} else {
 			request.post(getMyProviderInfo).then(result => {
-				this.setState({ loading: true });
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data);
@@ -48,7 +48,7 @@ class InfoScheduling extends Component {
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
-				this.setState({ loading: true });
+				this.setState({ loading: false });
 			})
 		}
 		this.getDataFromServer();

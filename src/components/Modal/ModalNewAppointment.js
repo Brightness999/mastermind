@@ -116,8 +116,8 @@ class ModalNewAppointment extends React.Component {
 			});
 		}).catch(err => {
 			message.error(err.message);
-			this.setState({ loading: false });
 			this.setState({
+				loading: false,
 				listProvider: [],
 				selectedProviderIndex: -1,
 				selectedProvider: undefined,
@@ -694,18 +694,17 @@ class ModalNewAppointment extends React.Component {
 									</Col>
 								</Row>
 								<div className='doctor-list'>
-									{loading ? <Spin tip="Loading" spinning={loading} /> :
-										listProvider?.length > 0 ? listProvider?.map((provider, index) => (
-											<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
-												<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
-												<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
-												{selectedProvider === provider._id && (
-													<div className='selected-doctor'>
-														<BsCheck size={12} />
-													</div>
-												)}
-											</div>
-										)) : "No matching providers found. Please update the options to find an available provider."}
+									{loading ? <Spin spinning={loading} /> : listProvider?.length > 0 ? listProvider?.map((provider, index) => (
+										<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
+											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
+											<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
+											{selectedProvider === provider._id && (
+												<div className='selected-doctor'>
+													<BsCheck size={12} />
+												</div>
+											)}
+										</div>
+									)) : "No matching providers found. Please update the options to find an available provider."}
 								</div>
 								{providerErrorMessage.length > 0 && (<p className='text-left text-red mr-5'>{providerErrorMessage}</p>)}
 							</div>

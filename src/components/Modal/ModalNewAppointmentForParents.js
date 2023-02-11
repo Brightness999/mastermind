@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Form, message, Popover } from 'antd';
+import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Form, message, Popover, Spin } from 'antd';
 import { BiChevronLeft, BiChevronRight, BiSearch } from 'react-icons/bi';
 import { BsCheck } from 'react-icons/bs';
 import { GoPrimitiveDot } from 'react-icons/go';
@@ -47,6 +47,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		userRole: store.getState().auth.user.role,
 		subsidyAvailable: false,
 		restSessions: 0,
+		loading: false,
 	}
 
 	getArrTime = (type, providerIndex) => {
@@ -99,7 +100,9 @@ class ModalNewAppointmentForParents extends React.Component {
 			skill: selectedSkillSet,
 			dependentId: dependentId,
 		};
+		this.setState({ loading: true });
 		request.post(searchProvidersForAdmin, data).then(result => {
+			this.setState({ loading: false });
 			const { data, success } = result;
 			if (success) {
 				this.setState({ listProvider: data?.providers });
@@ -116,6 +119,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		}).catch(err => {
 			console.log('provider list error-----', err);
 			this.setState({
+				loading: false,
 				listProvider: [],
 				selectedProviderIndex: -1,
 				selectedProvider: undefined,
@@ -579,6 +583,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			userRole,
 			subsidyAvailable,
 			restSessions,
+			loading,
 		} = this.state;
 		const modalProps = {
 			className: 'modal-new',
@@ -702,7 +707,7 @@ class ModalNewAppointmentForParents extends React.Component {
 									</Col>
 								</Row>
 								<div className='doctor-list'>
-									{listProvider?.length > 0 ? listProvider?.map((provider, index) => (
+									{loading ? <Spin spinning={loading} /> : listProvider?.length > 0 ? listProvider?.map((provider, index) => (
 										<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
 											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
 											<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
