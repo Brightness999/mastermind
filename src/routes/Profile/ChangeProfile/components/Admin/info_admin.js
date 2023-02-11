@@ -1,39 +1,54 @@
 import React from 'react';
-import { Row, Form, Button, Input } from 'antd';
-import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
+import { Row, Form, Button, Input, Select, message } from 'antd';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
+import request from '../../../../../utils/api/request';
+import { getAdminInfo, updateAdminInfo } from '../../../../../utils/api/apiList';
 
 export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       admin_details: localStorage.getItem('admin_details') ? JSON.parse(localStorage.getItem('admin_details')) : '',
+      locations: [],
     };
   }
 
 
   componentDidMount() {
-    const data = this.state.admin_details;
-    if (data) {
-      this.form?.setFieldsValue({
-        ...data
+    request.post(getAdminInfo).then(res => {
+      const { success, data } = res;
+      if (success) {
+        this.form?.setFieldsValue(data?.admin);
+        if (data?.admin?.role == 1000) {
+          this.form?.setFieldValue('adminCommunity', data?.locations?.map(a => a._id));
+        }
+        this.setState({ locations: data?.locations });
       }
-      )
-    }
+    })
   }
 
   onFinish = (values) => {
-    console.log('Success:', values);
-    localStorage.setItem('admin_details', JSON.stringify(values));
-    this.window.location.href = "/login";
+    if (values) {
+      request.post(updateAdminInfo, values).then(res => {
+        if (res.success) {
+          message.success('Updated successfully');
+        }
+      }).catch(err => {
+        message.error(err.message);
+      })
+    } else {
+      message.warning('No enough data');
+    }
   };
 
   onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
+
   render() {
+    const { locations } = this.state;
 
     return (
       <Row justify="center" className="row-form">
@@ -43,76 +58,60 @@ export default class extends React.Component {
           </div>
           <Form
             name="form_admin"
+            layout="vertical"
             onFinish={this.onFinish}
             onFinishFailed={this.onFinishFailed}
             ref={ref => this.form = ref}
           >
             <Form.Item
-              name="name"
+              name="fullName"
+              label="fullName"
+              className='float-label-item'
               rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.name) }]}
             >
               <Input placeholder={intl.formatMessage(messages.name)} />
             </Form.Item>
             <Form.Item
-              name="phone"
-              rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.phoneNumber) }]}
+              name="phoneNumber"
+              label="phoneNumber"
+              className='float-label-item'
+              rules={[
+                { required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.phoneNumber) },
+                { pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
+              ]}
             >
               <Input placeholder={intl.formatMessage(messages.phoneNumber)} />
             </Form.Item>
             <Form.Item
-              name="email"
+              name="adminCommunity"
+              label={intl.formatMessage(messages.cityConnections)}
+              className='float-label-item'
+              rules={[{ required: true }]}
+            >
+              <Select
+                placeholder={intl.formatMessage(messages.cityConnections)}
+                showSearch
+                disabled
+                optionFilterProp="children"
+                mode="multiple"
+                filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
+              >
+                {locations?.map((value, index) => (
+                  <Select.Option key={index} value={value._id}>{value.name}</Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="adminEmail"
+              label="adminEmail"
+              className='float-label-item'
               rules={[
-                {
-                    required: true,
-                    message: intl.formatMessage(messages.emailMessage)
-                },
-                {
-                    type: 'email',
-                    message: intl.formatMessage(messagesLogin.emailNotValid)
-                }
+                { required: true, message: intl.formatMessage(messages.emailMessage) },
+                { type: 'email', message: intl.formatMessage(messagesLogin.emailNotValid) }
               ]}
             >
               <Input placeholder={intl.formatMessage(messages.email)} />
             </Form.Item>
-            <Form.List name="contact">
-              {(fields, { add, remove }) => (
-                <div>
-                  {fields.map((field) => {
-                    return (
-                      <div key={field.key} className='item-remove'>
-                        <Form.Item
-                          key={field.key}
-                          name={[field.name, "contact_email"]}
-                          rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactEmail) },
-                            //  {
-                            //     type: 'email',
-                            //     message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messagesLogin.validEmail)
-                            //  }
-                        ]}
-                        >
-                          <Input placeholder={intl.formatMessage(messages.contactEmail)} />
-                        </Form.Item>
-                        <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
-                      </div>
-                    );
-                  }
-                  )}
-                  <div className='text-center'>
-                    <Button
-                      type="text"
-                      className='add-number-btn mb-10'
-                      icon={<BsPlusCircle size={17} className='mr-5' />}
-                      onClick={() => add(null)}
-                    >
-                      {intl.formatMessage(messages.addContact)}
-                    </Button>
-                  </div>
-                </div>
-
-              )}
-
-            </Form.List>
-
             <Form.Item className="form-btn continue-btn" >
               <Button
                 block

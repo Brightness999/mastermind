@@ -25,6 +25,8 @@ export const getFlagList = 'admin/get_flag_list'
 export const getConsultationList = 'admin/get_consultation_list'
 export const getSubsidyRequests = 'admin/get_subsidy_requests'
 export const getAdminSubsidyRequests = 'admin/get_my_subsidy_requests'
+export const getAdminInfo = 'admin/get_admin_info'
+export const updateAdminInfo = 'admin/update_admin_info'
 
 export const getDefaultValuesForConsultant = 'consultants/get_default_values_for_consultant'
 export const getAppointmentsForConsultant = 'consultants/get_my_appointments'
