@@ -13,6 +13,7 @@ import { activateUser, clearFlag, getFlagList } from '../../../../utils/api/apiL
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import moment from 'moment';
+import PageLoading from '../../../../components/Loading/PageLoading';
 
 class FlagList extends React.Component {
   constructor(props) {
@@ -26,6 +27,7 @@ class FlagList extends React.Component {
       userState: 1,
       flags: [],
       skillSet: [],
+      loading: false,
     };
     this.searchInput = createRef(null);
   }
@@ -35,9 +37,10 @@ class FlagList extends React.Component {
       checkPermission().then(loginData => {
         loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
         const skillSet = JSON.parse(JSON.stringify(this.props.auth.skillSet));
-        this.setState({ skillSet: skillSet?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; }) });
+        this.setState({ loading: true, skillSet: skillSet?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; }) });
         request.post(getFlagList).then(result => {
           const { success, data } = result;
+          this.setState({ loading: false });
           if (success) {
             this.setState({
               flags: data?.map((flag, i) => {
@@ -45,6 +48,9 @@ class FlagList extends React.Component {
               }) ?? []
             });
           }
+        }).catch(err => {
+          message.error(err.message);
+          this.setState({ loading: false });
         })
       }).catch(err => {
         console.log(err);
@@ -113,7 +119,7 @@ class FlagList extends React.Component {
   }
 
   render() {
-    const { visibleEdit, flags, isConfirmModal, confirmMessage, skillSet } = this.state;
+    const { visibleEdit, flags, isConfirmModal, confirmMessage, skillSet, loading } = this.state;
     const columns = [
       {
         title: 'Dependent', key: 'dependent',
@@ -218,13 +224,12 @@ class FlagList extends React.Component {
         <Table bordered size='middle' dataSource={flags} columns={columns} />
         <ModalEditUser {...modalEditUserProps} />
         <ModalConfirm {...confirmModalProps} />
+        <PageLoading loading={loading} isBackground={true} />
       </div>
     );
   }
 }
 
-const mapStateToProps = state => {
-  return ({ auth: state.auth });
-}
+const mapStateToProps = state => ({ auth: state.auth });
 
 export default compose(connect(mapStateToProps))(FlagList);

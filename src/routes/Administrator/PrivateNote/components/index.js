@@ -1,4 +1,4 @@
-import { Divider, Table, Space, Input, Button } from 'antd';
+import { Divider, Table, Space, Input, Button, message } from 'antd';
 import { routerLinks } from '../../../constant';
 import { ModalConfirm, ModalDependentDetail } from '../../../../components/Modal';
 import React, { createRef } from 'react';
@@ -10,6 +10,7 @@ import request from '../../../../utils/api/request';
 import { deletePrivateNote, getDependents } from '../../../../utils/api/apiList';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
+import PageLoading from '../../../../components/Loading/PageLoading';
 
 export default class extends React.Component {
   constructor(props) {
@@ -24,6 +25,7 @@ export default class extends React.Component {
       note: '',
       visibleDependent: false,
       selectedDependent: {},
+      loading: false,
     };
     this.searchInput = createRef(null);
   }
@@ -31,7 +33,9 @@ export default class extends React.Component {
   componentDidMount() {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
+        this.setState({ loading: true });
         request.post(getDependents).then(result => {
+          this.setState({ loading: false });
           const { success, data } = result;
           if (success) {
             this.setState({
@@ -41,8 +45,8 @@ export default class extends React.Component {
             });
           }
         }).catch(err => {
-          console.log('get dependents error ---', err);
-          this.setState({ dependents: [] });
+          message.error(err.message);
+          this.setState({ dependents: [], loading: false });
         })
         this.setState({
           userRole: loginData.role,
@@ -103,7 +107,7 @@ export default class extends React.Component {
   }
 
   render() {
-    const { dependents, isConfirmModal, confirmMessage, visibleDependent, selectedDependent } = this.state;
+    const { dependents, isConfirmModal, confirmMessage, visibleDependent, selectedDependent, loading } = this.state;
     const columns = [
       {
         title: 'Full Name', key: 'name',
@@ -192,6 +196,7 @@ export default class extends React.Component {
         />
         {visibleDependent && <ModalDependentDetail {...modalDependentProps} />}
         <ModalConfirm {...confirmModalProps} />
+        <PageLoading loading={loading} isBackground={true} />
       </div>
     );
   }

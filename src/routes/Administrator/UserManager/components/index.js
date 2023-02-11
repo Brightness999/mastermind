@@ -14,6 +14,7 @@ import { activateUser, getUsers } from '../../../../utils/api/apiList';
 import { removeRegisterData } from '../../../../redux/features/registerSlice';
 import { setSelectedUser } from '../../../../redux/features/authSlice';
 import { store } from '../../../../redux/store';
+import PageLoading from '../../../../components/Loading/PageLoading';
 
 class UserManager extends React.Component {
 	constructor(props) {
@@ -27,6 +28,7 @@ class UserManager extends React.Component {
 			userId: '',
 			userState: 1,
 			selectedUser: {},
+			loading: false,
 		};
 		this.searchInput = createRef(null);
 	}
@@ -35,8 +37,10 @@ class UserManager extends React.Component {
 		if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
 			checkPermission().then(loginData => {
 				loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
+				this.setState({ loading: true, userRole: loginData.role });
 				request.post(getUsers).then(result => {
 					const { success, data } = result;
+					this.setState({ loading: false });
 					if (success) {
 						this.setState({
 							users: data?.map((user, i) => {
@@ -44,10 +48,11 @@ class UserManager extends React.Component {
 							}) ?? []
 						});
 					}
+				}).catch(err => {
+					this.setState({ loading: false });
+					message.error(err.message);
 				})
-				this.setState({ userRole: loginData.role });
 			}).catch(err => {
-				console.log(err);
 				this.props.history.push('/');
 			})
 		}
@@ -103,7 +108,6 @@ class UserManager extends React.Component {
 				users: JSON.parse(JSON.stringify(this.state.users)),
 				isConfirmModal: false,
 			});
-
 		}).catch(err => {
 			console.log('activate user error---', err);
 		})
@@ -114,7 +118,7 @@ class UserManager extends React.Component {
 	}
 
 	render() {
-		const { visibleInputCode, users, isConfirmModal, confirmMessage } = this.state;
+		const { visibleInputCode, users, isConfirmModal, confirmMessage, loading } = this.state;
 		const columns = [
 			{
 				title: 'UserName', dataIndex: 'username', key: 'name',
@@ -222,6 +226,7 @@ class UserManager extends React.Component {
 				<Table bordered size='middle' dataSource={users} columns={columns} />
 				<ModalInputCode {...modalInputCodeProps} />
 				<ModalConfirm {...confirmModalProps} />
+				<PageLoading loading={loading} isBackground={true} />
 			</div>
 		);
 	}

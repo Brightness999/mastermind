@@ -3,8 +3,13 @@
 @spin-duration: 1s;
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-spinner {
@@ -30,4 +35,14 @@
   height: @base-line-height*2;
   margin: -@base-line-height 0 0 -@base-line-height;
   width: @base-line-height*2;
+}
+
+.loading-spinner-background {
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  background: white;
+  opacity: 0.4;
+  top: 0;
+  left: 0;
 }

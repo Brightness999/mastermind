@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 /**
  * Loading effect example
  */
-const PageLoading = ({loading, style = 'style1'}) =>
+const PageLoading = ({ loading, style = 'style1', isBackground = false }) =>
   loading ? <div className={`loading-spinner loading-spinner-${style}`} /> : null;
 
 PageLoading.propTypes = {

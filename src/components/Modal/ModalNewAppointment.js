@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Form, message, Popover } from 'antd';
+import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Form, message, Popover, Spin } from 'antd';
 import { BiChevronLeft, BiChevronRight, BiSearch } from 'react-icons/bi';
 import { BsCheck } from 'react-icons/bs';
 import { GoPrimitiveDot } from 'react-icons/go';
@@ -45,6 +45,7 @@ class ModalNewAppointment extends React.Component {
 		visibleModalScreening: false,
 		subsidyAvailable: false,
 		restSessions: 0,
+		loading: false,
 	}
 
 	getArrTime = (type, providerIndex) => {
@@ -97,7 +98,9 @@ class ModalNewAppointment extends React.Component {
 			skill: selectedSkill,
 			dependentId: dependentId,
 		};
+		this.setState({ loading: true });
 		request.post(searchProvidersForAdmin, params).then(result => {
+			this.setState({ loading: false });
 			const { data, success } = result;
 			if (success) {
 				this.setState({ listProvider: data?.providers });
@@ -112,7 +115,8 @@ class ModalNewAppointment extends React.Component {
 				subsidizedRate: '',
 			});
 		}).catch(err => {
-			console.log('provider list error-----', err);
+			message.error(err.message);
+			this.setState({ loading: false });
 			this.setState({
 				listProvider: [],
 				selectedProviderIndex: -1,
@@ -566,6 +570,7 @@ class ModalNewAppointment extends React.Component {
 			selectedDependent,
 			subsidyAvailable,
 			restSessions,
+			loading,
 		} = this.state;
 		const modalProps = {
 			className: 'modal-new',
@@ -689,17 +694,18 @@ class ModalNewAppointment extends React.Component {
 									</Col>
 								</Row>
 								<div className='doctor-list'>
-									{listProvider?.length > 0 ? listProvider?.map((provider, index) => (
-										<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
-											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
-											<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
-											{selectedProvider === provider._id && (
-												<div className='selected-doctor'>
-													<BsCheck size={12} />
-												</div>
-											)}
-										</div>
-									)) : "No matching providers found. Please update the options to find an available provider."}
+									{loading ? <Spin tip="Loading" spinning={loading} /> :
+										listProvider?.length > 0 ? listProvider?.map((provider, index) => (
+											<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
+												<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
+												<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
+												{selectedProvider === provider._id && (
+													<div className='selected-doctor'>
+														<BsCheck size={12} />
+													</div>
+												)}
+											</div>
+										)) : "No matching providers found. Please update the options to find an available provider."}
 								</div>
 								{providerErrorMessage.length > 0 && (<p className='text-left text-red mr-5'>{providerErrorMessage}</p>)}
 							</div>

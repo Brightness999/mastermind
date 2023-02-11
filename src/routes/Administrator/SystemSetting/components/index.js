@@ -8,6 +8,7 @@ import { addCommunity, getCityConnections, updateSettings } from '../../../../ut
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { setCommunity } from '../../../../redux/features/authSlice';
+import PageLoading from '../../../../components/Loading/PageLoading';
 
 class SystemSetting extends React.Component {
 	constructor(props) {
@@ -16,19 +17,23 @@ class SystemSetting extends React.Component {
 			community: undefined,
 			cityConnections: [],
 			newCity: '',
+			loading: false,
 		}
 	}
 
 	componentDidMount() {
 		if (this.props.user?.role === 1000) {
+			this.setState({ loading: true });
 			request.post(getCityConnections).then(res => {
 				const { success, data } = res;
+				this.setState({ loading: false });
 				if (success) {
 					this.setState({ cityConnections: data });
 				} else {
 					this.setState({ cityConnections: [] });
 				}
 			}).catch(error => {
+				this.setState({ loading: false });
 				console.log('get cityConnections error---', error);
 				this.setState({ cityConnections: [] });
 			})
@@ -74,7 +79,7 @@ class SystemSetting extends React.Component {
 	}
 
 	render() {
-		const { community, cityConnections } = this.state;
+		const { community, cityConnections, loading } = this.state;
 		const { user } = this.props;
 		const layout = {
 			labelCol: {
@@ -127,6 +132,7 @@ class SystemSetting extends React.Component {
 						</Button>
 					</Form.Item>
 				</Form>
+				<PageLoading loading={loading} isBackground={true} />
 			</div>
 		);
 	}

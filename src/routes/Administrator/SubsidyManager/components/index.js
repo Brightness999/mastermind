@@ -1,5 +1,5 @@
 import React from 'react';
-import { Divider, Table, Space, Select, Input, Row, Col, Form, Button } from 'antd';
+import { Divider, Table, Space, Select, Input, Row, Col, Form, Button, message } from 'antd';
 import intl from 'react-intl-universal';
 import mgsSidebar from '../../../../components/SideBar/messages';
 import './index.less';
@@ -8,6 +8,7 @@ import { ModalNewGroup, ModalSubsidyProgress } from '../../../../components/Moda
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { getSubsidyRequests } from '../../../../utils/api/apiList';
+import PageLoading from '../../../../components/Loading/PageLoading';
 
 class SubsidyManager extends React.Component {
   constructor(props) {
@@ -30,6 +31,7 @@ class SubsidyManager extends React.Component {
       isApplyFilter: false,
       academicLevels: [],
       subsidyId: '',
+      loading: false,
     }
   }
 
@@ -81,13 +83,16 @@ class SubsidyManager extends React.Component {
 
   getSubsidyPerPage = (page = 1) => {
     const postData = this.generatePostData();
+    this.setState({ loading: true });
     request.post(getSubsidyRequests, postData).then(result => {
+      this.setState({ loading: false });
       const { success, data } = result;
       if (success) {
         this.setState({ currentPage: page, listSubsidy: data?.docs, totalPages: data?.docs });
       }
     }).catch(err => {
-      console.log(err);
+      this.setState({ loading: false });
+      message.error(err.message);
     });
   }
 
@@ -143,7 +148,7 @@ class SubsidyManager extends React.Component {
   }
 
   render() {
-    const { visibleNewGroup, filterStudent, filterProvider, skillSet, filterSchool, listSubsidy, academicLevels, visibleSubsidy, subsidyId } = this.state;
+    const { visibleNewGroup, filterStudent, filterProvider, skillSet, filterSchool, listSubsidy, academicLevels, visibleSubsidy, subsidyId, loading } = this.state;
 
     const modalNewGroupProps = {
       visible: visibleNewGroup,
@@ -331,6 +336,7 @@ class SubsidyManager extends React.Component {
           {...modalNewGroupProps}
           setLoadData={reload => { this.loadDataModalNewGroup = reload; }}
         />
+        <PageLoading loading={loading} isBackground={true} />
       </div>
     );
   }

@@ -8,6 +8,7 @@ import { checkPermission } from '../../../../utils/auth/checkPermission';
 import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
 import { activateUser, getSchools } from '../../../../utils/api/apiList';
+import PageLoading from '../../../../components/Loading/PageLoading';
 
 export default class extends React.Component {
 	constructor(props) {
@@ -20,6 +21,7 @@ export default class extends React.Component {
 			confirmMessage: '',
 			userId: '',
 			userState: 1,
+			loading: false,
 		};
 		this.searchInput = createRef(null);
 	}
@@ -28,7 +30,9 @@ export default class extends React.Component {
 		if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
 			checkPermission().then(loginData => {
 				loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
+				this.setState({ loading: true });
 				request.post(getSchools).then(result => {
+					this.setState({ loading: false });
 					const { success, data } = result;
 					if (success) {
 						this.setState({
@@ -37,6 +41,9 @@ export default class extends React.Component {
 							}) ?? []
 						});
 					}
+				}).catch(err => {
+					message.error(err.message);
+					this.setState({ loading: false });
 				})
 				this.setState({ userRole: loginData.role });
 			}).catch(err => {
@@ -94,7 +101,7 @@ export default class extends React.Component {
 	}
 
 	render() {
-		const { visibleEdit, schools, isConfirmModal, confirmMessage } = this.state;
+		const { visibleEdit, schools, isConfirmModal, confirmMessage, loading } = this.state;
 		const columns = [
 			{ title: 'User Name', dataIndex: 'username', key: 'username', sorter: (a, b) => a.username > b.username ? 1 : -1 },
 			{ title: 'Email', dataIndex: 'email', key: 'email', sorter: (a, b) => a.email > b.email ? 1 : -1 },
@@ -183,6 +190,7 @@ export default class extends React.Component {
 				<Table bordered size='middle' dataSource={schools} columns={columns} />
 				<ModalEditUser {...modalEditUserProps} />
 				<ModalConfirm {...confirmModalProps} />
+				<PageLoading loading={loading} isBackground={true} />
 			</div>
 		);
 	}
