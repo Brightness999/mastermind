@@ -689,7 +689,7 @@ class ModalNewAppointment extends React.Component {
 									</Col>
 								</Row>
 								<div className='doctor-list'>
-									{listProvider?.map((provider, index) => (
+									{listProvider?.length > 0 ? listProvider?.map((provider, index) => (
 										<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
 											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
 											<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
@@ -699,7 +699,7 @@ class ModalNewAppointment extends React.Component {
 												</div>
 											)}
 										</div>
-									))}
+									)) : "No matching providers found. Please update the options to find an available provider."}
 								</div>
 								{providerErrorMessage.length > 0 && (<p className='text-left text-red mr-5'>{providerErrorMessage}</p>)}
 							</div>
