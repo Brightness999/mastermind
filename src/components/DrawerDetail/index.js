@@ -571,7 +571,7 @@ class DrawerDetail extends Component {
           {[2, 3, 5].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(msgCreateAccount.rate)}</p>
-              <p className={`font-18 text-underline ${!event?.isPaid && 'text-red'}`} onClick={() => this.setState({ isModalInvoice: true })}>${event?.items?.length ? event.items?.reduce((a, b) => a += b.rate * 1, 0) : event?.rate}</p>
+              <p className={`font-18 text-underline ${!event?.isPaid && 'text-red'}`} onClick={() => (event?.flagStatus == 1 || event?.flagStatus == 2 || (event?.flagStatus == 0 && event?.status == -1)) && this.setState({ isModalInvoice: true })}>${event?.items?.length ? event.items?.reduce((a, b) => a += b.rate * 1, 0) : event?.rate}</p>
             </div>
           )}
           {[1, 4].includes(event?.type) && (
