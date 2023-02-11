@@ -34,10 +34,6 @@ export default ({
     id: `${scope}.provider`,
     defaultMessage: 'Provider',
   },
-  consultant: {
-    id: `${scope}.consultant`,
-    defaultMessage: 'Consultant',
-  },
   school: {
     id: `${scope}.school`,
     defaultMessage: 'School',
@@ -94,29 +90,9 @@ export default ({
     id: `${scope}.tellYourself`,
     defaultMessage: 'Tell us about yourself',
   },
-  generalInformation: {
-    id: `${scope}.generalInformation`,
-    defaultMessage: 'General Information',
-  },
-  professionalInformation: {
-    id: `${scope}.professionalInformation`,
-    defaultMessage: 'Professional Information',
-  },
-  scheduling: {
-    id: `${scope}.scheduling`,
-    defaultMessage: 'Scheduling',
-  },
-  billingDetails: {
-    id: `${scope}.billingDetails`,
-    defaultMessage: 'Billing Details',
-  },
   contactInformation: {
     id: `${scope}.contactInformation`,
     defaultMessage: 'Contact information',
-  },
-  family: {
-    id: `${scope}.family`,
-    defaultMessage: 'Family',
   },
   familyName: {
     id: `${scope}.familyName`,
@@ -125,10 +101,6 @@ export default ({
   address: {
     id: `${scope}.address`,
     defaultMessage: 'Address',
-  },
-  maritalStatus: {
-    id: `${scope}.maritalStatus`,
-    defaultMessage: 'Marital status (Optional)',
   },
   maritalStatus: {
     id: `${scope}.maritalStatus`,
@@ -166,6 +138,14 @@ export default ({
     id: `${scope}.dependentsInfo`,
     defaultMessage: 'Dependents info',
   },
+  dependentInformation: {
+    id: `${scope}.dependentInformation`,
+    defaultMessage: 'Dependent Information',
+  },
+  parentInformation: {
+    id: `${scope}.parentInformation`,
+    defaultMessage: 'Parent Information',
+  },
   tellYourChild: {
     id: `${scope}.tellYourChild`,
     defaultMessage: 'Tell us about your child',
@@ -174,17 +154,13 @@ export default ({
     id: `${scope}.dependent`,
     defaultMessage: 'Dependent',
   },
-  dependents: {
-    id: `${scope}.dependents`,
-    defaultMessage: 'Dependents',
-  },
   hasIEP: {
     id: `${scope}.hasIEP`,
     defaultMessage: 'Has an IEP?',
   },
   firstName: {
     id: `${scope}.firstName`,
-    defaultMessage: 'First name',
+    defaultMessage: 'First namev',
   },
   lastName: {
     id: `${scope}.lastName`,
@@ -206,10 +182,6 @@ export default ({
     id: `${scope}.backgroundInformation`,
     defaultMessage: 'Background information',
   },
-  briefProfile: {
-    id: `${scope}.briefProfile`,
-    defaultMessage: 'Brief Profile',
-  },
   primaryTeacher: {
     id: `${scope}.primaryTeacher`,
     defaultMessage: 'Primary teacher',
@@ -217,10 +189,6 @@ export default ({
   currentGrade: {
     id: `${scope}.currentGrade`,
     defaultMessage: 'Current grade',
-  },
-  services: {
-    id: `${scope}.services`,
-    defaultMessage: 'Services',
   },
   servicesRequired: {
     id: `${scope}.servicesRequired`,
@@ -306,10 +274,6 @@ export default ({
     id: `${scope}.progessInfo`,
     defaultMessage: 'Progess info',
   },
-  dependentAvailability: {
-    id: `${scope}.dependentAvailability`,
-    defaultMessage: 'Dependent Availability',
-  },
   selectType: {
     id: `${scope}.selectType`,
     defaultMessage: 'Select account type',
@@ -321,10 +285,6 @@ export default ({
   reviewInfo: {
     id: `${scope}.reviewInfo`,
     defaultMessage: 'Review info',
-  },
-  financialInfo: {
-    id: `${scope}.financialInfo`,
-    defaultMessage: 'Financial info',
   },
   reviewAccountInfo: {
     id: `${scope}.reviewAccountInfo`,
@@ -338,10 +298,6 @@ export default ({
     id: `${scope}.parentsInfo`,
     defaultMessage: 'Parents info',
   },
-  parentInformation: {
-    id: `${scope}.parentInformation`,
-    defaultMessage: 'Parent Information',
-  },
   servicesRequested: {
     id: `${scope}.servicesRequested`,
     defaultMessage: 'Services requested',
@@ -352,7 +308,7 @@ export default ({
   },
   referredAs: {
     id: `${scope}.referredAs`,
-    defaultMessage: 'Referred to as',
+    defaultMessage: 'Referred to as (optional)',
   },
   serviceAddress: {
     id: `${scope}.serviceAddress`,
@@ -398,10 +354,6 @@ export default ({
     id: `${scope}.professionalExperience`,
     defaultMessage: 'Professional experience',
   },
-  notes: {
-    id: `${scope}.notes`,
-    defaultMessage: 'Notes',
-  },
   profileInfo: {
     id: `${scope}.profileInfo`,
     defaultMessage: 'Profile Info',
@@ -430,21 +382,9 @@ export default ({
     id: `${scope}.rate`,
     defaultMessage: 'Rate',
   },
-  standardSessionDuration: {
-    id: `${scope}.standardSessionDuration`,
-    defaultMessage: 'Standard session duration',
-  },
-  evaluationDuration: {
-    id: `${scope}.evaluationDuration`,
-    defaultMessage: 'Evaluation duration',
-  },
-  duration: {
-    id: `${scope}.duration`,
-    defaultMessage: 'Duration',
-  },
   addLevel: {
     id: `${scope}.addLevel`,
-    defaultMessage: 'Add level rate',
+    defaultMessage: 'Add level',
   },
   sameRateLevels: {
     id: `${scope}.sameRateLevels`,
@@ -466,13 +406,9 @@ export default ({
     id: `${scope}.receiptsRequest`,
     defaultMessage: 'Receipts provided for insurance upon request',
   },
-  newClientScreening: {
-    id: `${scope}.newClientScreening`,
+  newClient: {
+    id: `${scope}.newClient`,
     defaultMessage: 'New client screening',
-  },
-  newClientEvaluation: {
-    id: `${scope}.newClientEvaluation`,
-    defaultMessage: 'New client evaluation',
   },
   screeningTime: {
     id: `${scope}.screeningTime`,
@@ -481,10 +417,6 @@ export default ({
   references: {
     id: `${scope}.references`,
     defaultMessage: 'References (optional)',
-  },
-  addReference: {
-    id: `${scope}.addReference`,
-    defaultMessage: 'Add Reference',
   },
   publicProfile: {
     id: `${scope}.publicProfile`,
@@ -498,13 +430,13 @@ export default ({
     id: `${scope}.manualSchedule`,
     defaultMessage: 'Manual schedule',
   },
+  blackoutDates: {
+    id: `${scope}.blackoutDates`,
+    defaultMessage: 'Blackout Dates',
+  },
   location: {
     id: `${scope}.location`,
     defaultMessage: 'Location',
-  },
-  locations: {
-    id: `${scope}.locations`,
-    defaultMessage: 'Locations',
   },
   privateHMGHAgents: {
     id: `${scope}.privateHMGHAgents`,
@@ -534,6 +466,7 @@ export default ({
     id: `${scope}.subsidyProgram`,
     defaultMessage: 'Subsidy Program',
   },
+
   offeringVolunteer: {
     id: `${scope}.offeringVolunteer`,
     defaultMessage: 'I’m offering pro bono/volunteer sessions',
@@ -558,7 +491,7 @@ export default ({
     id: `${scope}.selectDateTime`,
     defaultMessage: 'Select a Date & Time',
   },
-  timesAvailable : {
+  timesAvailable: {
     id: `${scope}.timesAvailable`,
     defaultMessage: 'times you\'re available',
   },
@@ -586,13 +519,17 @@ export default ({
     id: `${scope}.confirm`,
     defaultMessage: 'Confirm',
   },
-  submit: {
-    id: `${scope}.submit`,
-    defaultMessage: 'Submit',
+  update: {
+    id: `${scope}.update`,
+    defaultMessage: 'Update',
   },
   schoolDetails: {
     id: `${scope}.schoolDetails`,
     defaultMessage: 'School details',
+  },
+  schoolAvailability: {
+    id: `${scope}.schoolAvailability`,
+    defaultMessage: 'School availability',
   },
   nameSchool: {
     id: `${scope}.nameSchool`,
@@ -600,7 +537,7 @@ export default ({
   },
   communitiesServedNote: {
     id: `${scope}.communitiesServedNote`,
-    defaultMessage: 'Communities served',
+    defaultMessage: 'Communities served (select all that apply)',
   },
   communitiesServed: {
     id: `${scope}.communitiesServed`,
@@ -658,13 +595,92 @@ export default ({
     id: `${scope}.numberSessions`,
     defaultMessage: 'Number sessions',
   },
-  blackoutDates: {
-    id: `${scope}.blackoutDates`,
-    defaultMessage: 'Blackout Dates',
-  },
   uploadSuccess: {
     id: `${scope}.uploadSuccess`,
     defaultMessage: 'Upload success',
+  },
+  titleChangePassword: {
+    id: `${scope}.titleChangePassword`,
+    defaultMessage: 'Change Password',
+  },
+  passwordOld: {
+    id: `${scope}.passwordOld`,
+    defaultMessage: 'Old Password',
+  },
+  passwordNew: {
+    id: `${scope}.passwordNew`,
+    defaultMessage: 'New Password',
+  },
+  passwordCurrent: {
+    id: `${scope}.passwordCurrent`,
+    defaultMessage: 'Current Password',
+  },
+  passwordConfirm: {
+    id: `${scope}.passwordConfirm`,
+    defaultMessage: 'Confirm Password',
+  },
+  password: {
+    id: `${scope}.password`,
+    defaultMessage: 'Password',
+  },
+  passwordValidMessage: {
+    id: `${scope}.passwordValidMessage`,
+    defaultMessage: 'Your password is not valid',
+  },
+  passwordMessage: {
+    id: `${scope}.passwordMessage`,
+    defaultMessage: 'Please enter your password.',
+  },
+  dayWork: {
+    id: `${scope}.dayWork`,
+    defaultMessage: 'Day work',
+  },
+  generalInformation: {
+    id: `${scope}.generalInformation`,
+    defaultMessage: 'General Information',
+  },
+  professionalInformation: {
+    id: `${scope}.professionalInformation`,
+    defaultMessage: 'Professional Information',
+  },
+  standardSessionDuration: {
+    id: `${scope}.standardSessionDuration`,
+    defaultMessage: 'Standard session duration',
+  },
+  evaluationDuration: {
+    id: `${scope}.evaluationDuration`,
+    defaultMessage: 'Evaluation duration',
+  },
+  duration: {
+    id: `${scope}.duration`,
+    defaultMessage: 'Duration',
+  },
+  newClientScreening: {
+    id: `${scope}.newClientScreening`,
+    defaultMessage: 'New client screening',
+  },
+  newClientEvaluation: {
+    id: `${scope}.newClientEvaluation`,
+    defaultMessage: 'New client evaluation',
+  },
+  scheduling: {
+    id: `${scope}.scheduling`,
+    defaultMessage: 'Scheduling',
+  },
+  locations: {
+    id: `${scope}.locations`,
+    defaultMessage: 'Locations',
+  },
+  billingDetails: {
+    id: `${scope}.billingDetails`,
+    defaultMessage: 'Billing Details',
+  },
+  notificationSetting: {
+    id: `${scope}.notificationSetting`,
+    defaultMessage: 'Notification Setting',
+  },
+  notes: {
+    id: `${scope}.notes`,
+    defaultMessage: 'Notes',
   }
-  
 });

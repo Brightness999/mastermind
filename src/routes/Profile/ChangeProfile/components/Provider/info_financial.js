@@ -7,7 +7,7 @@ import messagesLogin from '../../../../Sign/Login/messages';
 import messagesRequest from '../../../../Sign/SubsidyRequest/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { getMyProviderInfo, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
+import { getMyProviderInfo, getUserProfile, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
 import PlacesAutocomplete from 'react-places-autocomplete';
 import request from '../../../../../utils/api/request';
 import { url } from '../../../../../utils/api/baseUrl';
@@ -29,17 +29,32 @@ class InfoFinancial extends Component {
 
 	componentDidMount() {
 		const { academicLevels } = this.props.auth;
-		request.post(getMyProviderInfo).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.form?.setFieldsValue(data);
-				const selectedLevels = data.academicLevel?.map(item => item.level);
-				this.setState({ academicLevels: academicLevels?.filter(level => !selectedLevels?.find(l => l == level)) });
-			}
-		}).catch(err => {
-			console.log('get provider info error ---', err);
-			this.setState({ academicLevels: academicLevels });
-		})
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form?.setFieldsValue(data?.providerInfo);
+					const selectedLevels = data?.providerInfo.academicLevel?.map(item => item.level);
+					this.setState({ academicLevels: academicLevels?.filter(level => !selectedLevels?.find(l => l == level)) });
+				}
+			}).catch(err => {
+				console.log('get provider info error ---', err);
+				this.setState({ academicLevels: academicLevels });
+			})
+		} else {
+			request.post(getMyProviderInfo).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form?.setFieldsValue(data);
+					const selectedLevels = data.academicLevel?.map(item => item.level);
+					this.setState({ academicLevels: academicLevels?.filter(level => !selectedLevels?.find(l => l == level)) });
+				}
+			}).catch(err => {
+				console.log('get provider info error ---', err);
+				this.setState({ academicLevels: academicLevels });
+			})
+
+		}
 	}
 
 	onFinish = (values) => {
@@ -47,7 +62,11 @@ class InfoFinancial extends Component {
 		const token = localStorage.getItem('token');
 
 		try {
-			store.dispatch(setInforProvider({ data: { ...values, W9FormPath, _id: this.props.auth.user?.providerInfo?._id }, token: token }))
+			if (window.location.pathname?.includes('changeuserprofile')) {
+				store.dispatch(setInforProvider({ data: { ...values, W9FormPath, _id: this.props.auth.selectedUser?.providerInfo?._id }, token: token }))
+			} else {
+				store.dispatch(setInforProvider({ data: { ...values, W9FormPath, _id: this.props.auth.user?.providerInfo?._id }, token: token }))
+			}
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -298,7 +317,7 @@ class InfoFinancial extends Component {
 								type="primary"
 								htmlType="submit"
 							>
-								{intl.formatMessage(messages.confirm).toUpperCase()}
+								{intl.formatMessage(messages.update).toUpperCase()}
 							</Button>
 						</Form.Item>
 					</Form>

@@ -590,6 +590,10 @@ export default ({
     id: `${scope}.confirm`,
     defaultMessage: 'Confirm',
   },
+  submit: {
+    id: `${scope}.submit`,
+    defaultMessage: 'Submit',
+  },
   schoolDetails: {
     id: `${scope}.schoolDetails`,
     defaultMessage: 'School details',

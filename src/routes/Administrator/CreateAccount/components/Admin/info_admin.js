@@ -128,7 +128,7 @@ class AdminInfo extends React.Component {
                 type="primary"
                 htmlType="submit"
               >
-                {intl.formatMessage(messages.confirm).toUpperCase()}
+                {intl.formatMessage(messages.submit).toUpperCase()}
               </Button>
             </Form.Item>
           </Form>

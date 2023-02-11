@@ -328,7 +328,7 @@ class InfoReview extends Component {
 								htmlType="submit"
 								onClick={this.onSubmit}
 							>
-								{intl.formatMessage(messages.confirm).toUpperCase()}
+								{intl.formatMessage(messages.submit).toUpperCase()}
 							</Button>
 						</div>
 					</div>

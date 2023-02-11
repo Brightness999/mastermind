@@ -5,7 +5,7 @@ import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { getCommunitiServer, getDefaultValueForProvider, getMySchoolInfo } from '../../../../../utils/api/apiList'
+import { getCommunitiServer, getDefaultValueForProvider, getMySchoolInfo, getUserProfile } from '../../../../../utils/api/apiList'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { setInforSchool } from '../../../../../redux/features/authSlice';
 import { store } from '../../../../../redux/store'
@@ -24,21 +24,29 @@ class InfoSchool extends React.Component {
 	}
 
 	componentDidMount() {
-		this.loadCommunitiServer()
-
-		request.post(getMySchoolInfo).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.form.setFieldsValue(data);
-			}
-		})
+		this.loadCommunitiServer();
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldsValue(data?.schoolInfo);
+				}
+			})
+		} else {
+			request.post(getMySchoolInfo).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldsValue(data);
+				}
+			})
+		}
 	}
 
 	onFinish = (values) => {
 		const token = localStorage.getItem('token');
 
 		try {
-			store.dispatch(setInforSchool({ data: { ...values, _id: this.props.auth.user.schoolInfo?._id }, token }))
+			store.dispatch(setInforSchool({ data: { ...values, _id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.schoolInfo?._id : this.props.auth.user?.schoolInfo?._id }, token }))
 		} catch (error) {
 			console.log('update school error---', error);
 		}
@@ -336,7 +344,7 @@ class InfoSchool extends React.Component {
 								type="primary"
 								htmlType="submit"
 							>
-								{intl.formatMessage(messages.confirm).toUpperCase()}
+								{intl.formatMessage(messages.update).toUpperCase()}
 							</Button>
 						</Form.Item>
 					</Form>

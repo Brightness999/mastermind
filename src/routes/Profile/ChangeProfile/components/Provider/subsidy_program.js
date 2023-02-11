@@ -9,7 +9,7 @@ import { compose } from 'redux'
 import { setInforProvider } from '../../../../../redux/features/authSlice';
 import { store } from '../../../../../redux/store'
 import request from '../../../../../utils/api/request';
-import { getMyProviderInfo } from '../../../../../utils/api/apiList';
+import { getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
 
 class SubsidyProgram extends Component {
 	state = {
@@ -28,30 +28,45 @@ class SubsidyProgram extends Component {
 		}
 
 		this.setState({ academicLevels: this.props.auth?.academicLevels });
-
-		request.post(getMyProviderInfo).then(result => {
-			const { success, data } = result;
-
-			if (success) {
-				this.form.setFieldsValue({ ...data, numberSessions: '1' });
-				this.setState({
-					isAcceptProBono: data.isAcceptProBono,
-					isAcceptReduceRate: data.isAcceptReduceRate,
-					isWillingOpenPrivate: data.isWillingOpenPrivate,
-				})
-			}
-		}).catch(err => {
-			console.log('get provider info error---', err);
-			message.error(err.message);
-		})
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldsValue({ ...data?.providerInfo, numberSessions: '1' });
+					this.setState({
+						isAcceptProBono: data?.providerInfo?.isAcceptProBono,
+						isAcceptReduceRate: data?.providerInfo?.isAcceptReduceRate,
+						isWillingOpenPrivate: data?.providerInfo?.isWillingOpenPrivate,
+					})
+				}
+			}).catch(err => {
+				console.log('get provider info error---', err);
+				message.error(err.message);
+			})
+		} else {
+			request.post(getMyProviderInfo).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldsValue({ ...data, numberSessions: '1' });
+					this.setState({
+						isAcceptProBono: data.isAcceptProBono,
+						isAcceptReduceRate: data.isAcceptReduceRate,
+						isWillingOpenPrivate: data.isWillingOpenPrivate,
+					})
+				}
+			}).catch(err => {
+				console.log('get provider info error---', err);
+				message.error(err.message);
+			})
+		}
 	}
 
 	onFinish = async (values) => {
-		const { user } = this.props.auth;
+		const { user, selectedUser } = this.props.auth;
 		const { isAcceptProBono, isAcceptReduceRate, isWillingOpenPrivate } = this.state;
 		const token = localStorage.getItem('token');
 		let data = {
-			_id: user?.providerInfo?._id,
+			_id: window.location.pathname?.includes('changeuserprofile') ? selectedUser?.providerInfo?._id : user?.providerInfo?._id,
 			isAcceptProBono: isAcceptProBono,
 			isAcceptReduceRate: isAcceptReduceRate,
 			isWillingOpenPrivate: isWillingOpenPrivate,

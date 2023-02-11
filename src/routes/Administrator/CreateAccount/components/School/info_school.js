@@ -333,7 +333,7 @@ class InfoSchool extends React.Component {
 								type="primary"
 								htmlType="submit"
 							>
-								{intl.formatMessage(messages.confirm).toUpperCase()}
+								{intl.formatMessage(messages.continue).toUpperCase()}
 							</Button>
 						</Form.Item>
 					</Form>

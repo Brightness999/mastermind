@@ -13,6 +13,7 @@ export const routerLinks = {
   ConsultationRequests: '/administrator/consultationrequests',
   Admin: '/administrator/admin',
   CreateAccountForAdmin: '/administrator/createaccount',
+  ChangeUserProfile: '/administrator/changeuserprofile',
   UserManager: '/administrator/usermanager',
   SystemSetting: '/administrator/systemsetting',
   SubsidyManager: '/administrator/subsidymanager',

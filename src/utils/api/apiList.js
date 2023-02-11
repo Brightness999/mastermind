@@ -10,6 +10,7 @@ export const clearFlag = 'users/clear_flag'
 export const updateNotificationSetting = 'users/update_notification_setting'
 export const downloadInvoice = 'users/download_invoice'
 export const printInvoice = 'users/print_invoice'
+export const getUserProfile = 'users/get_user_profile'
 
 export const getAppointmentsForAdmin = 'admin/get_appointments'
 export const getAppointmentsInMonthForAdmin = 'admin/get_appointments_in_month'

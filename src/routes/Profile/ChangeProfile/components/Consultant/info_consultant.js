@@ -7,7 +7,7 @@ import { compose } from 'redux'
 import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import request from '../../../../../utils/api/request';
-import { getDefaultValuesForConsultant, getMyConsultantInfo, updateConsultantInfo } from '../../../../../utils/api/apiList';
+import { getDefaultValuesForConsultant, getMyConsultantInfo, getUserProfile, updateConsultantInfo } from '../../../../../utils/api/apiList';
 
 class InfoConsultant extends Component {
 	constructor(props) {
@@ -23,12 +23,21 @@ class InfoConsultant extends Component {
 
 	componentDidMount() {
 		this.getDataFromServer();
-		request.post(getMyConsultantInfo).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.form.setFieldsValue(data);
-			}
-		})
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldsValue(data?.consultantInfo);
+				}
+			})
+		} else {
+			request.post(getMyConsultantInfo).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldsValue(data);
+				}
+			})
+		}
 	}
 
 	getDataFromServer = () => {
@@ -48,15 +57,19 @@ class InfoConsultant extends Component {
 	}
 
 	onFinish = async (values) => {
-		request.post(updateConsultantInfo, { ...values, _id: this.props.auth.user?.consultantInfo }).then(res => {
-			const { success } = res;
-			if (success) {
-				message.success('Updated successfully');
-			}
-		}).catch(err => {
-			console.log(err)
-			message.error(err.message);
-		})
+		if (values) {
+			request.post(updateConsultantInfo, { ...values, _id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.consultantInfo : this.props.auth.user?.consultantInfo }).then(res => {
+				const { success } = res;
+				if (success) {
+					message.success('Updated successfully');
+				}
+			}).catch(err => {
+				console.log(err)
+				message.error(err.message);
+			})
+		} else {
+			message.warning('Not enough data.');
+		}
 	};
 
 	onFinishFailed = (errorInfo) => {
@@ -248,7 +261,7 @@ class InfoConsultant extends Component {
 								type="primary"
 								htmlType="submit"
 							>
-								{intl.formatMessage(messages.continue).toUpperCase()}
+								{intl.formatMessage(messages.update).toUpperCase()}
 							</Button>
 						</Form.Item>
 					</Form>

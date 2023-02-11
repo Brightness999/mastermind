@@ -1,6 +1,6 @@
-import { Divider, Table, Space, Button, Input } from 'antd';
+import { Divider, Table, Space, Button, Input, message } from 'antd';
 import { routerLinks } from '../../../constant';
-import { ModalConfirm, ModalEditUser } from '../../../../components/Modal';
+import { ModalConfirm, ModalInputCode } from '../../../../components/Modal';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux'
@@ -12,18 +12,21 @@ import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
 import { activateUser, getUsers } from '../../../../utils/api/apiList';
 import { removeRegisterData } from '../../../../redux/features/registerSlice';
+import { setSelectedUser } from '../../../../redux/features/authSlice';
+import { store } from '../../../../redux/store';
 
 class UserManager extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			visibleEdit: false,
+			visibleInputCode: false,
 			users: [],
 			userRole: -1,
 			isConfirmModal: false,
 			confirmMessage: '',
 			userId: '',
 			userState: 1,
+			selectedUser: {},
 		};
 		this.searchInput = createRef(null);
 	}
@@ -55,12 +58,22 @@ class UserManager extends React.Component {
 		this.props.history.push(routerLinks.CreateAccountForAdmin);
 	}
 
-	onShowModalEdit = () => {
-		this.setState({ visibleEdit: true })
+	onShowModalInputCode = (user) => {
+		this.setState({ visibleInputCode: true, selectedUser: user });
 	}
 
-	onCloseModalEdit = () => {
-		this.setState({ visibleEdit: false })
+	onCloseModalInputCode = () => {
+		this.setState({ visibleInputCode: false });
+	}
+
+	verifyCode = (code) => {
+		if (code == 613) {
+			this.onCloseModalInputCode();
+			store.dispatch(setSelectedUser(this.state.selectedUser));
+			this.props.history.push(routerLinks.ChangeUserProfile);
+		} else {
+			message.warning('Invalid code. Try again.');
+		}
 	}
 
 	handleActivate = (id, state) => {
@@ -101,7 +114,7 @@ class UserManager extends React.Component {
 	}
 
 	render() {
-		const { visibleEdit, users, isConfirmModal, confirmMessage } = this.state;
+		const { visibleInputCode, users, isConfirmModal, confirmMessage } = this.state;
 		const columns = [
 			{
 				title: 'UserName', dataIndex: 'username', key: 'name',
@@ -177,17 +190,17 @@ class UserManager extends React.Component {
 			{
 				title: 'Action', key: 'action', render: (user) => (
 					<Space size="middle">
-						<a className='btn-blue' onClick={() => this.onShowModalEdit()}>Edit</a>
+						<a className='btn-blue' onClick={() => this.onShowModalInputCode(user)}>Edit</a>
 						<a className='btn-red' onClick={() => this.handleActivate(user._id, user.isActive ? 0 : 1)}>{user.isActive ? 'Deactivate' : 'Activate'}</a>
 					</Space>
 				),
 			},
 		];
 
-		const modalEditUserProps = {
-			visible: visibleEdit,
-			onSubmit: this.onCloseModalEdit,
-			onCancel: this.onCloseModalEdit,
+		const modalInputCodeProps = {
+			visible: visibleInputCode,
+			onSubmit: this.verifyCode,
+			onCancel: this.onCloseModalInputCode,
 		}
 
 		const confirmModalProps = {
@@ -207,7 +220,7 @@ class UserManager extends React.Component {
 					<Button type='primary' onClick={() => this.handleNewUser()}>Create New User</Button>
 				</div>
 				<Table bordered size='middle' dataSource={users} columns={columns} />
-				<ModalEditUser {...modalEditUserProps} />
+				<ModalInputCode {...modalInputCodeProps} />
 				<ModalConfirm {...confirmModalProps} />
 			</div>
 		);

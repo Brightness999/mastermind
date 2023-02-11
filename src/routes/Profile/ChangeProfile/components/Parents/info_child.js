@@ -10,7 +10,7 @@ import moment from 'moment';
 import { setInforClientChild, changeInforClientChild } from '../../../../../redux/features/authSlice';
 import { store } from '../../../../../redux/store';
 import request from '../../../../../utils/api/request';
-import { getChildProfile, getDefaultValueForClient } from '../../../../../utils/api/apiList';
+import { getChildProfile, getDefaultValueForClient, getUserProfile } from '../../../../../utils/api/apiList';
 import { TbTrash } from 'react-icons/tb';
 import { BsPlusCircle } from 'react-icons/bs';
 
@@ -27,27 +27,42 @@ class InfoChild extends Component {
 
 	componentDidMount() {
 		this.setState({ listServices: this.props.auth.skillSet, academicLevels: this.props.auth.academicLevels });
-
-		request.post(getChildProfile).then(result => {
-			const { success, data } = result;
-
-			if (success) {
-				this.setState({ children: data });
-				data?.map(item => {
-					item.services = item.services.map(item => item._id);
-					item.birthday = moment(item.birthday);
-					return item;
-				})
-				this.form.setFieldsValue({ children: data });
-			}
-		}).catch(err => {
-			console.log(err);
-		})
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.setState({ children: data?.studentInfos?.filter(s => !s.isRemoved) });
+					data?.studentInfos?.map(item => {
+						item.services = item.services.map(item => item._id);
+						item.birthday = moment(item.birthday);
+						return item;
+					})
+					this.form.setFieldsValue({ children: data?.studentInfos?.filter(s => !s.isRemoved) });
+				}
+			}).catch(err => {
+				console.log(err);
+			})
+		} else {
+			request.post(getChildProfile).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.setState({ children: data });
+					data?.map(item => {
+						item.services = item.services.map(item => item._id);
+						item.birthday = moment(item.birthday);
+						return item;
+					})
+					this.form.setFieldsValue({ children: data });
+				}
+			}).catch(err => {
+				console.log(err);
+			})
+		}
 		this.loadServices();
 	}
 
 	loadServices() {
-		request.post(getDefaultValueForClient, { cityConnection: this.props.auth.user?.parentInfo?.cityConnection }).then(result => {
+		request.post(getDefaultValueForClient, { cityConnection: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.parentInfo?.cityConnection : this.props.auth.user?.parentInfo?.cityConnection }).then(result => {
 			const { success, data } = result;
 
 			if (success) {
@@ -76,8 +91,15 @@ class InfoChild extends Component {
 			const additionalChildren = values.children?.filter(child => !child._id);
 			const updateChildren = values.children?.filter(child => child._id);
 			const removedChildren = children.filter(child => !values.children?.find(item => item._id == child._id))?.map(child => ({ ...child, isRemoved: true }));
+			const params = {
+				additionalChildren: additionalChildren,
+				updateChildren: updateChildren,
+				removedChildren: removedChildren,
+				id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?._id : this.props.auth.user?._id,
+				studentInfos: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.studentInfos : this.props.auth.user?.studentInfos,
+			};
 
-			const result = await store.dispatch(setInforClientChild({ data: { additionalChildren: additionalChildren, updateChildren: updateChildren, removedChildren: removedChildren }, token: token }))
+			const result = await store.dispatch(setInforClientChild({ data: params, token: token }))
 			this.form.setFieldsValue({ children: result.payload.data?.map(item => ({ ...item, birthday: moment(item.birthday) })) });
 		} catch (error) {
 			console.log('update children error ---', error)
@@ -298,8 +320,6 @@ class InfoChild extends Component {
 	}
 }
 
-const mapStateToProps = state => {
-	return ({ auth: state.auth });
-}
+const mapStateToProps = state => ({ auth: state.auth });
 
 export default compose(connect(mapStateToProps, { changeInforClientChild }))(InfoChild);

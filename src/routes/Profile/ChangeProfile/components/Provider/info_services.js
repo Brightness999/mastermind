@@ -7,8 +7,9 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { store } from '../../../../../redux/store';
 import { setInforProvider } from '../../../../../redux/features/authSlice';
-import { getDefaultValueForProvider, getMyProviderInfo } from '../../../../../utils/api/apiList';
+import { getDefaultValueForProvider, getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
 import request from '../../../../../utils/api/request';
+import { BsDashCircle, BsPlusCircle } from 'react-icons/bs';
 
 class InfoServices extends Component {
 	constructor(props) {
@@ -19,12 +20,23 @@ class InfoServices extends Component {
 	}
 
 	componentDidMount() {
-		request.post(getMyProviderInfo).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.form?.setFieldsValue({ ...data, 'upload_w_9': data.W9FormPath });
-			}
-		})
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldsValue(data?.providerInfo);
+				}
+			}).catch(err => {
+				console.log('get provider info error---', err);
+			})
+		} else {
+			request.post(getMyProviderInfo).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form?.setFieldsValue(data);
+				}
+			})
+		}
 		this.getDataFromServer()
 	}
 
@@ -46,7 +58,11 @@ class InfoServices extends Component {
 		const token = localStorage.getItem('token');
 
 		try {
-			store.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.user?.providerInfo?._id }, token: token }));
+			if (window.location.pathname?.includes('changeuserprofile')) {
+				store.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.selectedUser?.providerInfo?._id }, token: token }));
+			} else {
+				store.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.user?.providerInfo?._id }, token: token }));
+			}
 		} catch (error) {
 			console.log('updating provider error---', error);
 		}
@@ -111,21 +127,43 @@ class InfoServices extends Component {
 						>
 							<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.publicProfile)} />
 						</Form.Item>
-						<Form.Item
-							name="references"
-							label={intl.formatMessage(messages.references)}
-							className="float-label-item"
-							rules={[{ required: false }]}
-						>
-							<Input placeholder={intl.formatMessage(messages.references)} />
-						</Form.Item>
+						<Form.List name="references">
+							{(fields, { add, remove }) => (
+								<div>
+									{fields.map((field) => (
+										<div key={field.key}>
+											<div className={`font-16 ${field.key != 0 && 'd-none'}`}>{intl.formatMessage(messages.references)}</div>
+											<div className="item-remove">
+												<Form.Item
+													name={[field.name, 'name']}
+													rules={[{ required: false }]}
+												>
+													<Input placeholder={intl.formatMessage(messages.references)} />
+												</Form.Item>
+												<BsDashCircle size={16} className='text-red icon-remove provider-admin-reference' onClick={() => remove(field.name)} />
+											</div>
+										</div>
+									))}
+									<div className='text-center'>
+										<Button
+											type="text"
+											className='add-number-btn mb-10'
+											icon={<BsPlusCircle size={17} className='mr-5' />}
+											onClick={() => add()}
+										>
+											{intl.formatMessage(messages.addReference)}
+										</Button>
+									</div>
+								</div>
+							)}
+						</Form.List>
 						<Form.Item className="form-btn continue-btn" >
 							<Button
 								block
 								type="primary"
 								htmlType="submit"
 							>
-								{intl.formatMessage(messages.continue).toUpperCase()}
+								{intl.formatMessage(messages.update).toUpperCase()}
 							</Button>
 						</Form.Item>
 					</Form>

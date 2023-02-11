@@ -27,6 +27,7 @@ import Changeprofile from './Profile/ChangeProfile';
 import UserManager from './Administrator/UserManager';
 import SubsidyManager from './Administrator/SubsidyManager';
 import SystemSetting from './Administrator/SystemSetting';
+import ChangeUserProfile from './Administrator/ChangeProfile';
 import SchoolsList from './Administrator/SchoolsList';
 import FlagList from './Administrator/FlagList';
 import ConsultationRequests from './Administrator/ConsultationRequests';
@@ -63,8 +64,9 @@ const routesConfig = app => [
       SubsidyManager(app),
       SystemSetting(app),
       Private(app),
+      ChangeUserProfile(app),
       CreateUser(app),
-      Statistics(app)
+      Statistics(app),
     ]
   },
   {

@@ -10,7 +10,7 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 import { setInforProvider } from '../../../../../redux/features/authSlice';
 import { store } from '../../../../../redux/store'
 import request from '../../../../../utils/api/request';
-import { getMyProviderInfo, getDefaultValueForProvider, getCityConnections } from '../../../../../utils/api/apiList';
+import { getMyProviderInfo, getDefaultValueForProvider, getCityConnections, getUserProfile } from '../../../../../utils/api/apiList';
 
 class InfoProfile extends Component {
 	constructor(props) {
@@ -28,16 +28,26 @@ class InfoProfile extends Component {
 
 	componentDidMount() {
 		this.getDataFromServer();
-		this.searchCityConnection('');
-
-		request.post(getMyProviderInfo).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.form.setFieldsValue(data);
-			}
-		}).catch(err => {
-			console.log('get provider info error---', err);
-		})
+		this.searchCityConnection();
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldsValue(data?.providerInfo);
+				}
+			}).catch(err => {
+				console.log('get provider info error---', err);
+			})
+		} else {
+			request.post(getMyProviderInfo).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldsValue(data);
+				}
+			}).catch(err => {
+				console.log('get provider info error---', err);
+			})
+		}
 	}
 
 	getDataFromServer = () => {
@@ -81,7 +91,11 @@ class InfoProfile extends Component {
 		const token = localStorage.getItem('token');
 
 		try {
-			store.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.user?.providerInfo?._id }, token: token }))
+			if (window.location.pathname?.includes('changeuserprofile')) {
+				store.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.selectedUser?.providerInfo?._id }, token: token }))
+			} else {
+				store.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.user?.providerInfo?._id }, token: token }))
+			}
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -313,7 +327,7 @@ class InfoProfile extends Component {
 								type="primary"
 								htmlType="submit"
 							>
-								{intl.formatMessage(messages.confirm).toUpperCase()}
+								{intl.formatMessage(messages.update).toUpperCase()}
 							</Button>
 						</Form.Item>
 					</Form>

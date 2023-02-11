@@ -11,7 +11,7 @@ import moment from 'moment';
 import messages from '../../messages';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 import request from '../../../../../utils/api/request';
-import { getMyConsultantInfo, updateConsultantAvailability } from '../../../../../utils/api/apiList';
+import { getMyConsultantInfo, getUserProfile, updateConsultantAvailability } from '../../../../../utils/api/apiList';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -32,22 +32,42 @@ class ConsultantAvailability extends Component {
 	}
 
 	componentDidMount() {
-		request.post(getMyConsultantInfo).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.form.setFieldValue('blackoutDates', data?.blackoutDates?.map(date => new Date(date)));
-				day_week.map((day) => {
-					const times = data?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
-					this.form.setFieldValue(day, times?.map(t => {
-						t.from_date = moment().set({ years: t.fromYear, months: t.fromMonth, date: t.fromDate });
-						t.to_date = moment().set({ years: t.toYear, months: t.toMonth, date: t.toDate });
-						t.from_time = moment().set({ hours: t.openHour, minutes: t.openMin });
-						t.to_time = moment().set({ hours: t.closeHour, minutes: t.closeMin });
-						return t;
-					}));
-				});
-			}
-		})
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldValue('blackoutDates', data?.consultantInfo?.blackoutDates?.map(date => new Date(date)));
+					day_week.map((day) => {
+						const times = data?.consultantInfo?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
+						this.form.setFieldValue(day, times?.map(t => {
+							t.from_date = moment().set({ years: t.fromYear, months: t.fromMonth, date: t.fromDate });
+							t.to_date = moment().set({ years: t.toYear, months: t.toMonth, date: t.toDate });
+							t.from_time = moment().set({ hours: t.openHour, minutes: t.openMin });
+							t.to_time = moment().set({ hours: t.closeHour, minutes: t.closeMin });
+							return t;
+						}));
+					});
+				}
+			})
+		} else {
+			request.post(getMyConsultantInfo).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldValue('blackoutDates', data?.blackoutDates?.map(date => new Date(date)));
+					day_week.map((day) => {
+						const times = data?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
+						this.form.setFieldValue(day, times?.map(t => {
+							t.from_date = moment().set({ years: t.fromYear, months: t.fromMonth, date: t.fromDate });
+							t.to_date = moment().set({ years: t.toYear, months: t.toMonth, date: t.toDate });
+							t.from_time = moment().set({ hours: t.openHour, minutes: t.openMin });
+							t.to_time = moment().set({ hours: t.closeHour, minutes: t.closeMin });
+							return t;
+						}));
+					});
+				}
+			})
+
+		}
 	}
 
 	getDayOfWeekIndex = (day) => {
@@ -101,7 +121,7 @@ class ConsultantAvailability extends Component {
 		});
 		values.manualSchedule = manualSchedule.flat();
 		values.blackoutDates = values.blackoutDates?.map(date => date.toString());
-		request.post(updateConsultantAvailability, { ...values, _id: this.props.auth.user?.consultantInfo }).then(res => {
+		request.post(updateConsultantAvailability, { ...values, _id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.consultantInfo?._id : this.props.auth.user?.consultantInfo }).then(res => {
 			if (res.success) {
 				message.success('Updated successfully');
 			}
@@ -269,7 +289,7 @@ class ConsultantAvailability extends Component {
 								type="primary"
 								htmlType="submit"
 							>
-								{intl.formatMessage(messages.confirm).toUpperCase()}
+								{intl.formatMessage(messages.update).toUpperCase()}
 							</Button>
 						</Form.Item>
 					</Form>

@@ -11,6 +11,7 @@ import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
 import ModalNewGroup from './ModaNewGroup';
 import ModalNewSubsidyReview from './ModalNewSubsidyReview';
 import ModalEditUser from './ModalEditUser';
+import ModalInputCode from './ModalInputCode';
 import ModalNewClientScreening from './ModalNewClientScreening';
 import ModalSeparateEvaluation from './ModalSeparateEvaluation';
 import ModalStandardSession from './ModalStandardSession';
@@ -38,6 +39,7 @@ export {
   ModalNewSubsidyRequest,
   ModalNewGroup,
   ModalNewSubsidyReview,
+  ModalInputCode,
   ModalEditUser,
   ModalNewClientScreening,
   ModalSeparateEvaluation,

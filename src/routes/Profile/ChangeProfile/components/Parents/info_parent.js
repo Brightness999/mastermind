@@ -1,16 +1,15 @@
 import React, { Component } from 'react';
-import { Row, Form, Button, Input, Select } from 'antd';
+import { Row, Form, Button, Input, Select, message } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
 import request from '../../../../../utils/api/request';
 import { setInforClientParent, changeInforClientParent, setUser } from '../../../../../redux/features/authSlice';
 import { store } from '../../../../../redux/store'
-import { getDefaultValueForClient } from '../../../../../utils/api/apiList';
+import { getDefaultValueForClient, getUserProfile } from '../../../../../utils/api/apiList';
 
 class InfoParent extends Component {
 	constructor(props) {
@@ -25,8 +24,19 @@ class InfoParent extends Component {
 	componentDidMount() {
 		const tokenUser = localStorage.getItem('token');
 		if (tokenUser) {
-			const parentInfo = this.props.auth.user.parentInfo;
-			this.form.setFieldsValue(parentInfo);
+			if (window.location.pathname?.includes('changeuserprofile')) {
+				request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+					const { success, data } = result;
+					if (success) {
+						this.form.setFieldsValue(data?.parentInfo);
+					}
+				}).catch(err => {
+					console.log(err);
+				})
+			} else {
+				const parentInfo = this.props.auth.user.parentInfo;
+				this.form.setFieldsValue(parentInfo);
+			}
 
 			request.post(getDefaultValueForClient).then(result => {
 				const { success, data } = result;
@@ -52,17 +62,24 @@ class InfoParent extends Component {
 	}
 
 	onFinish = (values) => {
-		const { parentInfo } = this.props.auth.user;
-		const token = localStorage.getItem('token');
-		const dataFrom = { ...values, _id: parentInfo._id }
-
-		try {
-			store.dispatch(setInforClientParent({ data: dataFrom, token: token }))
-			let user = JSON.parse(JSON.stringify(this.props.auth.user));
-			user.parentInfo = dataFrom;
-			store.dispatch(setUser(user));
-		} catch (error) {
-			console.log(error, 'error')
+		if (values) {
+			try {
+				const token = localStorage.getItem('token');
+				if (window.location.pathname?.includes('changeuserprofile')) {
+					store.dispatch(setInforClientParent({ data: { ...values, _id: this.props.auth.selectedUser?.parentInfo?._id }, token: token }));
+				} else {
+					const { parentInfo } = this.props.auth.user;
+					const dataFrom = { ...values, _id: parentInfo._id }
+					store.dispatch(setInforClientParent({ data: dataFrom, token: token }));
+					let user = JSON.parse(JSON.stringify(this.props.auth.user));
+					user.parentInfo = dataFrom;
+					store.dispatch(setUser(user));
+				}
+			} catch (error) {
+				message.error(error.message);
+			}
+		} else {
+			message.warning('Not enough data');
 		}
 	};
 
@@ -126,12 +143,7 @@ class InfoParent extends Component {
 													? { backgroundColor: '#fafafa', cursor: 'pointer' }
 													: { backgroundColor: '#ffffff', cursor: 'pointer' };
 												return (
-													<div
-														{...getSuggestionItemProps(suggestion, {
-															className,
-															style,
-														})}
-													>
+													<div {...getSuggestionItemProps(suggestion, { className, style, })} key={suggestion.index}>
 														<span>{suggestion.description}</span>
 													</div>
 												);
@@ -274,11 +286,6 @@ class InfoParent extends Component {
 	}
 }
 
-const mapStateToProps = (state) => {
-	return {
-		register: state.register,
-		auth: state.auth
-	};
-}
+const mapStateToProps = (state) => ({ auth: state.auth });
 
-export default compose(connect(mapStateToProps, { setRegisterData, changeInforClientParent }))(InfoParent);
+export default compose(connect(mapStateToProps, { changeInforClientParent }))(InfoParent);

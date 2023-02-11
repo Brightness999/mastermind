@@ -8,8 +8,7 @@ import { compose } from 'redux';
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
 import messages from '../../messages';
-import { getMySchoolInfo, updateSchoolAvailability } from '../../../../../utils/api/apiList'
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import { getMySchoolInfo, getUserProfile, updateSchoolAvailability } from '../../../../../utils/api/apiList'
 import request from '../../../../../utils/api/request';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 
@@ -24,28 +23,59 @@ class InfoAvailability extends React.Component {
 	}
 
 	componentDidMount() {
-		request.post(getMySchoolInfo).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.form?.setFieldsValue(data);
-				this.form?.setFieldsValue({ blackoutDates: data.blackoutDates?.map(date => new Date(date)) });
-				this.setState({
-					sessionsInSchool: data.sessionsInSchool,
-					sessionsAfterSchool: data.sessionsAfterSchool,
-				})
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form?.setFieldsValue(data?.schoolInfo);
+					this.form?.setFieldsValue({ blackoutDates: data?.schoolInfo?.blackoutDates?.map(date => new Date(date)) });
+					this.setState({
+						sessionsInSchool: data?.schoolInfo?.sessionsInSchool ?? [this.defaultTimeRangeItem(), this.defaultTimeRangeItem(), this.defaultTimeRangeItem()],
+						sessionsAfterSchool: data?.schoolInfo?.sessionsAfterSchool ?? [this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false)],
+					})
+				}
+			})
+		} else {
+			request.post(getMySchoolInfo).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form?.setFieldsValue(data);
+					this.form?.setFieldsValue({ blackoutDates: data.blackoutDates?.map(date => new Date(date)) });
+					this.setState({
+						sessionsInSchool: data.sessionsInSchool ?? [this.defaultTimeRangeItem(), this.defaultTimeRangeItem(), this.defaultTimeRangeItem()],
+						sessionsAfterSchool: data.sessionsAfterSchool ?? [this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false)],
+					})
+				}
+			})
+		}
+	}
+
+	defaultTimeRangeItem = (isInSchool = true) => {
+		if (!isInSchool) {
+			return {
+				"openHour": 0,
+				"openMin": 0,
+				"closeHour": 0,
+				"closeMin": 0
 			}
-		})
+		}
+		return {
+			"openHour": 0,
+			"openMin": 0,
+			"closeHour": 0,
+			"closeMin": 0
+		}
 	}
 
 	valueForAvailabilityScheduleForOpenHour = (array, index) => {
-		if (array.length - 1 < index) {
+		if (array?.length - 1 < index) {
 			return moment('00:00:00', 'HH:mm:ss')
 		}
 		return moment(`${array[index].openHour}:${array[index].openMin}:00`, 'HH:mm:ss')
 	}
 
 	valueForAvailabilityScheduleForCloseHour = (array, index) => {
-		if (array.length - 1 < index) {
+		if (array?.length - 1 < index) {
 			return moment('00:00:00', 'HH:mm:ss')
 		}
 		return moment(`${array[index].closeHour}:${array[index].closeMin}:00`, 'HH:mm:ss')
@@ -54,8 +84,14 @@ class InfoAvailability extends React.Component {
 	onFinish = (values) => {
 		const { sessionsInSchool, sessionsAfterSchool } = this.state
 		const { blackoutDates } = values;
+		const params = {
+			sessionsAfterSchool,
+			sessionsInSchool,
+			blackoutDates: blackoutDates?.map(date => date.toString()),
+			_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.schoolInfo?._id : this.props.auth.user?.schoolInfo?._id,
+		}
 
-		request.post(updateSchoolAvailability, { sessionsAfterSchool, sessionsInSchool, blackoutDates: blackoutDates?.map(date => date.toString()) }).then(res => {
+		request.post(updateSchoolAvailability, params).then(res => {
 			if (res.success) {
 				message.success('Updated successfully');
 			}
@@ -69,9 +105,7 @@ class InfoAvailability extends React.Component {
 	};
 
 	onSelectDay = e => {
-		if (e) {
-			this.setState({ dayIsSelected: e });
-		}
+		e && this.setState({ dayIsSelected: e });
 	}
 
 	onSelectTimeForSesssion(index, value, type) {
@@ -263,9 +297,8 @@ class InfoAvailability extends React.Component {
 
 const mapStateToProps = state => {
 	return {
-		register: state.register,
 		auth: state.auth
 	}
 }
 
-export default compose(connect(mapStateToProps, { setRegisterData }))(InfoAvailability);
+export default compose(connect(mapStateToProps))(InfoAvailability);

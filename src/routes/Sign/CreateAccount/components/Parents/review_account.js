@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Row, Button, message } from 'antd';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
-import messagesReview from '../../../SubsidyReview/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { url } from '../../../../../utils/api/baseUrl'
@@ -178,7 +177,7 @@ class ReviewAccount extends Component {
 								htmlType="submit"
 								onClick={this.onSubmit}
 							>
-								{intl.formatMessage(messagesReview.submit).toUpperCase()}
+								{intl.formatMessage(messages.submit).toUpperCase()}
 							</Button>
 						</div>
 					</div>

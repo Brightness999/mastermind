@@ -1,12 +1,14 @@
 import React from 'react';
 import { Row, Form, Button, Input, Select, message } from 'antd';
 import intl from 'react-intl-universal';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import request from '../../../../../utils/api/request';
-import { getAdminInfo, updateAdminInfo } from '../../../../../utils/api/apiList';
+import { getAdminInfo, getCityConnections, getUserProfile, updateAdminInfo } from '../../../../../utils/api/apiList';
 
-export default class extends React.Component {
+class InfoAdmin extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -15,23 +17,40 @@ export default class extends React.Component {
     };
   }
 
-
   componentDidMount() {
-    request.post(getAdminInfo).then(res => {
-      const { success, data } = res;
-      if (success) {
-        this.form?.setFieldsValue(data?.admin);
-        if (data?.admin?.role == 1000) {
-          this.form?.setFieldValue('adminCommunity', data?.locations?.map(a => a._id));
+    if (window.location.pathname?.includes('changeuserprofile')) {
+      request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+        const { success, data } = result;
+        if (success) {
+          this.form?.setFieldsValue(data);
         }
-        this.setState({ locations: data?.locations });
-      }
-    })
+      })
+
+      request.post(getCityConnections).then(result => {
+        const { success, data } = result;
+        if (success) {
+          this.setState({ locations: data });
+        }
+      }).catch(err => {
+        this.setState({ CityConnections: [] });
+      })
+    } else {
+      request.post(getAdminInfo).then(res => {
+        const { success, data } = res;
+        if (success) {
+          this.form?.setFieldsValue(data?.admin);
+          if (data?.admin?.role == 1000) {
+            this.form?.setFieldValue('adminCommunity', data?.locations?.map(a => a._id));
+          }
+          this.setState({ locations: data?.locations });
+        }
+      })
+    }
   }
 
   onFinish = (values) => {
     if (values) {
-      request.post(updateAdminInfo, values).then(res => {
+      request.post(updateAdminInfo, { ...values, _id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?._id : this.props.auth.user?._id }).then(res => {
         if (res.success) {
           message.success('Updated successfully');
         }
@@ -127,3 +146,7 @@ export default class extends React.Component {
     );
   }
 }
+
+const mapStateToProps = (state) => ({ auth: state.auth });
+
+export default compose(connect(mapStateToProps))(InfoAdmin);

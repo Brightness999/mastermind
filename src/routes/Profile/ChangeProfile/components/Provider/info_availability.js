@@ -8,7 +8,7 @@ import msgSidebar from '../../../../../components/SideBar/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import request from '../../../../../utils/api/request';
-import { getAllSchoolsForParent, getDefaultValueForProvider, getMyProviderInfo, updateMyProviderAvailability } from '../../../../../utils/api/apiList';
+import { getAllSchoolsForParent, getDefaultValueForProvider, getMyProviderInfo, getUserProfile, updateMyProviderAvailability } from '../../../../../utils/api/apiList';
 import moment from 'moment';
 import { store } from '../../../../../redux/store';
 import { setUser } from '../../../../../redux/features/authSlice';
@@ -41,36 +41,69 @@ class InfoAvailability extends Component {
 	}
 
 	componentDidMount() {
-		request.post(getMyProviderInfo).then(result => {
-			const { success, data } = result;
-			const { user } = this.props.auth;
-			if (success) {
-				this.form?.setFieldsValue(data);
-				this.form?.setFieldsValue({ blackoutDates: data.blackoutDates?.map(date => new Date(date)) });
-				day_week.map((day) => {
-					const times = data?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
-					this.form.setFieldValue(day, times?.map(t => {
-						t.from_date = moment().set({ years: t.fromYear, months: t.fromMonth, date: t.fromDate });
-						t.to_date = moment().set({ years: t.toYear, months: t.toMonth, date: t.toDate });
-						t.from_time = moment().set({ hours: t.openHour, minutes: t.openMin });
-						t.to_time = moment().set({ hours: t.closeHour, minutes: t.closeMin });
-						return t;
-					}));
-				});
-				let locations = [];
-				user?.providerInfo?.isHomeVisit && locations.push('Dependent Home');
-				user?.providerInfo?.privateOffice && locations.push('Provider Office');
-				user?.providerInfo?.serviceableSchool?.length && user?.providerInfo?.serviceableSchool?.forEach(school => locations.push(school.name));
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				const { success, data } = result;
+				console.log(data)
+				if (success) {
+					this.form?.setFieldsValue(data?.providerInfo);
+					this.form?.setFieldsValue({ blackoutDates: data?.providerInfo?.blackoutDates?.map(date => new Date(date)) });
+					day_week.map((day) => {
+						const times = data?.providerInfo?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
+						this.form.setFieldValue(day, times?.map(t => {
+							t.from_date = moment().set({ years: t.fromYear, months: t.fromMonth, date: t.fromDate });
+							t.to_date = moment().set({ years: t.toYear, months: t.toMonth, date: t.toDate });
+							t.from_time = moment().set({ hours: t.openHour, minutes: t.openMin });
+							t.to_time = moment().set({ hours: t.closeHour, minutes: t.closeMin });
+							return t;
+						}));
+					});
+					let locations = [];
+					data?.providerInfo?.isHomeVisit && locations.push('Dependent Home');
+					data?.providerInfo?.privateOffice && locations.push('Provider Office');
+					data?.providerInfo?.serviceableSchool?.length && data?.providerInfo?.serviceableSchool?.forEach(school => locations.push(school.name));
 
-				this.setState({
-					isHomeVisit: user?.providerInfo?.isHomeVisit,
-					isPrivateOffice: user?.providerInfo?.privateOffice,
-					isSchools: !!user?.providerInfo?.serviceableSchool?.length,
-					isPrivateForHmgh: user?.providerInfo?.isPrivateForHmgh,
-					locations: locations,
-				})
-			}
-		})
+					this.setState({
+						isHomeVisit: data?.providerInfo?.isHomeVisit,
+						isPrivateOffice: data?.providerInfo?.privateOffice,
+						isSchools: !!data?.providerInfo?.serviceableSchool?.length,
+						isPrivateForHmgh: data?.providerInfo?.isPrivateForHmgh,
+						locations: locations,
+					})
+				}
+			})
+		} else {
+			request.post(getMyProviderInfo).then(result => {
+				const { success, data } = result;
+				const { user } = this.props.auth;
+				if (success) {
+					this.form?.setFieldsValue(data);
+					this.form?.setFieldsValue({ blackoutDates: data.blackoutDates?.map(date => new Date(date)) });
+					day_week.map((day) => {
+						const times = data?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
+						this.form.setFieldValue(day, times?.map(t => {
+							t.from_date = moment().set({ years: t.fromYear, months: t.fromMonth, date: t.fromDate });
+							t.to_date = moment().set({ years: t.toYear, months: t.toMonth, date: t.toDate });
+							t.from_time = moment().set({ hours: t.openHour, minutes: t.openMin });
+							t.to_time = moment().set({ hours: t.closeHour, minutes: t.closeMin });
+							return t;
+						}));
+					});
+					let locations = [];
+					user?.providerInfo?.isHomeVisit && locations.push('Dependent Home');
+					user?.providerInfo?.privateOffice && locations.push('Provider Office');
+					user?.providerInfo?.serviceableSchool?.length && user?.providerInfo?.serviceableSchool?.forEach(school => locations.push(school.name));
+
+					this.setState({
+						isHomeVisit: user?.providerInfo?.isHomeVisit,
+						isPrivateOffice: user?.providerInfo?.privateOffice,
+						isSchools: !!user?.providerInfo?.serviceableSchool?.length,
+						isPrivateForHmgh: user?.providerInfo?.isPrivateForHmgh,
+						locations: locations,
+					})
+				}
+			})
+		}
 
 		this.getDataFromServer();
 		this.loadSchools();
@@ -91,16 +124,28 @@ class InfoAvailability extends Component {
 	}
 
 	loadSchools() {
-		const { user } = this.props.auth;
-		request.post(getAllSchoolsForParent, { communityServed: user?.providerInfo?.cityConnection?._id ? user?.providerInfo?.cityConnection?._id : user?.providerInfo?.cityConnection }).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ listSchool: data });
-			}
-		}).catch(err => {
-			console.log('get all schools for parent error---', err);
-			this.setState({ listSchool: [] });
-		})
+		const { user, selectedUser } = this.props.auth;
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getAllSchoolsForParent, { communityServed: selectedUser?.providerInfo?.cityConnection }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.setState({ listSchool: data });
+				}
+			}).catch(err => {
+				console.log('get all schools for parent error---', err);
+				this.setState({ listSchool: [] });
+			})
+		} else {
+			request.post(getAllSchoolsForParent, { communityServed: user?.providerInfo?.cityConnection?._id ? user?.providerInfo?.cityConnection?._id : user?.providerInfo?.cityConnection }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.setState({ listSchool: data });
+				}
+			}).catch(err => {
+				console.log('get all schools for parent error---', err);
+				this.setState({ listSchool: [] });
+			})
+		}
 	}
 
 	onFinish = (values) => {
@@ -148,27 +193,38 @@ class InfoAvailability extends Component {
 		values.manualSchedule = manualSchedule.flat();
 		values.isPrivateForHmgh = isPrivateForHmgh;
 		values.blackoutDates = values.blackoutDates?.map(date => date.toString());
-
-		request.post(updateMyProviderAvailability, { ...values, _id: this.props.auth.user.providerInfo?._id }).then(result => {
-			const { success } = result;
-			if (success) {
-				message.success('Updated successfully');
-				let newUser = {
-					...this.props.auth.user,
-					providerInfo: {
-						...this.props.auth.user.providerInfo,
-						isHomeVisit: values.isHomeVisit,
-						privateOffice: values.privateOffice,
-						isPrivateForHmgh: isPrivateForHmgh,
-						serviceableSchool: listSchool?.filter(school => values.serviceableSchool?.find(id => id == school._id)),
-					}
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(updateMyProviderAvailability, { ...values, _id: this.props.auth.selectedUser?.providerInfo?._id }).then(result => {
+				const { success } = result;
+				if (success) {
+					message.success('Updated successfully');
 				}
-				store.dispatch(setUser(newUser));
-			}
-		}).catch(err => {
-			message.error("Can't update availability");
-			console.log('update provider availability error---', err);
-		})
+			}).catch(err => {
+				message.error("Can't update availability");
+				console.log('update provider availability error---', err);
+			})
+		} else {
+			request.post(updateMyProviderAvailability, { ...values, _id: this.props.auth.user.providerInfo?._id }).then(result => {
+				const { success } = result;
+				if (success) {
+					message.success('Updated successfully');
+					let newUser = {
+						...this.props.auth.user,
+						providerInfo: {
+							...this.props.auth.user.providerInfo,
+							isHomeVisit: values.isHomeVisit,
+							privateOffice: values.privateOffice,
+							isPrivateForHmgh: isPrivateForHmgh,
+							serviceableSchool: listSchool?.filter(school => values.serviceableSchool?.find(id => id == school._id)),
+						}
+					}
+					store.dispatch(setUser(newUser));
+				}
+			}).catch(err => {
+				message.error("Can't update availability");
+				console.log('update provider availability error---', err);
+			})
+		}
 	};
 
 	onFinishFailed = (errorInfo) => {
@@ -498,7 +554,7 @@ class InfoAvailability extends Component {
 								type="primary"
 								htmlType="submit"
 							>
-								{intl.formatMessage(messages.confirm).toUpperCase()}
+								{intl.formatMessage(messages.update).toUpperCase()}
 							</Button>
 						</Form.Item>
 					</Form >

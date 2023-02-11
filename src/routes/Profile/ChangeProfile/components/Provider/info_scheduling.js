@@ -4,7 +4,7 @@ import intl from 'react-intl-universal';
 import messages from '../../messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { getDefaultValueForProvider, getMyProviderInfo } from '../../../../../utils/api/apiList';
+import { getDefaultValueForProvider, getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
 import request from '../../../../../utils/api/request';
 import { setInforProvider } from '../../../../../redux/features/authSlice';
 
@@ -17,18 +17,33 @@ class InfoScheduling extends Component {
 	}
 
 	componentDidMount() {
-		request.post(getMyProviderInfo).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.form.setFieldsValue(data);
-				this.setState({
-					isNewClientScreening: data?.isNewClientScreening,
-					isSeparateEvaluationRate: data?.isSeparateEvaluationRate,
-				})
-			}
-		}).catch(err => {
-			console.log('get provider info error---', err);
-		})
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldsValue(data?.providerInfo);
+					this.setState({
+						isNewClientScreening: data?.providerInfo?.isNewClientScreening,
+						isSeparateEvaluationRate: data?.providerInfo?.isSeparateEvaluationRate,
+					})
+				}
+			}).catch(err => {
+				console.log('get provider info error---', err);
+			})
+		} else {
+			request.post(getMyProviderInfo).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.form.setFieldsValue(data);
+					this.setState({
+						isNewClientScreening: data?.isNewClientScreening,
+						isSeparateEvaluationRate: data?.isSeparateEvaluationRate,
+					})
+				}
+			}).catch(err => {
+				console.log('get provider info error---', err);
+			})
+		}
 
 		this.getDataFromServer();
 	}
@@ -60,7 +75,11 @@ class InfoScheduling extends Component {
 		const token = localStorage.getItem('token');
 
 		try {
-			this.props.dispatch(setInforProvider({ data: { ...values, _id: this.props.user?.providerInfo?._id }, token: token }));
+			if (window.location.pathname?.includes('changeuserprofile')) {
+				this.props.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.selectedUser?.providerInfo?._id }, token: token }));
+			} else {
+				this.props.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.user?.providerInfo?._id }, token: token }));
+			}
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -152,7 +171,7 @@ class InfoScheduling extends Component {
 						</Row>
 						<Form.Item className="form-btn continue-btn" >
 							<Button block type="primary" htmlType="submit">
-								{intl.formatMessage(messages.confirm).toUpperCase()}
+								{intl.formatMessage(messages.update).toUpperCase()}
 							</Button>
 						</Form.Item>
 					</Form>
@@ -163,7 +182,7 @@ class InfoScheduling extends Component {
 }
 
 const mapStateToProps = state => ({
-	user: state.auth.user,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps))(InfoScheduling);

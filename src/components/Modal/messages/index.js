@@ -297,6 +297,14 @@ export default {
     id: `${scope}.save`,
     defaultMessage: 'Save',
   },
+  verify: {
+    id: `${scope}.verify`,
+    defaultMessage: 'Verify',
+  },
+  verificationCode: {
+    id: `${scope}.verificationCode`,
+    defaultMessage: 'Verification Code',
+  },
   accept: {
     id: `${scope}.accept`,
     defaultMessage: 'Accept',
