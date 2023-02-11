@@ -10,6 +10,7 @@ import request from '../../../../../utils/api/request';
 import { setInforClientParent, changeInforClientParent, setUser } from '../../../../../redux/features/authSlice';
 import { store } from '../../../../../redux/store'
 import { getDefaultValueForClient, getUserProfile } from '../../../../../utils/api/apiList';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class InfoParent extends Component {
 	constructor(props) {
@@ -18,12 +19,14 @@ class InfoParent extends Component {
 			address: '',
 			cityConnections: [],
 			maritialTypes: [],
+			loading: false,
 		};
 	}
 
 	componentDidMount() {
 		const tokenUser = localStorage.getItem('token');
 		if (tokenUser) {
+			this.setState({ loading: true });
 			if (window.location.pathname?.includes('changeuserprofile')) {
 				request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
 					const { success, data } = result;
@@ -39,6 +42,7 @@ class InfoParent extends Component {
 			}
 
 			request.post(getDefaultValueForClient).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.setState({
@@ -53,6 +57,7 @@ class InfoParent extends Component {
 				}
 			}).catch(err => {
 				console.log('get default data for client error---', err);
+				this.setState({ loading: false });
 				this.setState({
 					cityConnections: [],
 					maritialTypes: [],
@@ -93,7 +98,7 @@ class InfoParent extends Component {
 	};
 
 	render() {
-		const { address, cityConnections, maritialTypes } = this.state;
+		const { address, cityConnections, maritialTypes, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -281,6 +286,7 @@ class InfoParent extends Component {
 						</Form.Item>
 					</Form>
 				</div>
+				<PageLoading loading={loading} isBackground={true} />
 			</Row>
 		);
 	}

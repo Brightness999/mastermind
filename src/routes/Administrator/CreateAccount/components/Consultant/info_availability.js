@@ -29,6 +29,7 @@ class ConsultantAvailability extends Component {
     this.state = {
       currentSelectedDay: day_week[0],
       errorMessage: '',
+      isSubmit: false,
     }
   }
 
@@ -101,7 +102,9 @@ class ConsultantAvailability extends Component {
       }
 
       // post to server
+      this.setState({ isSubmit: true });
       const response = await axios.post(url + userSignUp, newRegisterData);
+      this.setState({ isSubmit: false });
       const { success } = response.data;
       if (success) {
         this.props.removeRegisterData();
@@ -162,7 +165,7 @@ class ConsultantAvailability extends Component {
   }
 
   render() {
-    const { errorMessage, currentSelectedDay } = this.state;
+    const { errorMessage, currentSelectedDay, isSubmit } = this.state;
 
     return (
       <Row justify="center" className="row-form">
@@ -282,6 +285,8 @@ class ConsultantAvailability extends Component {
                 block
                 type="primary"
                 htmlType="submit"
+                loading={isSubmit}
+                disabled={isSubmit}
               >
                 {intl.formatMessage(messages.submit).toUpperCase()}
               </Button>

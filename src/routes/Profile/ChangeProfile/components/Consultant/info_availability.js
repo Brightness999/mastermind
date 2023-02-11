@@ -12,6 +12,7 @@ import messages from '../../messages';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 import request from '../../../../../utils/api/request';
 import { getMyConsultantInfo, getUserProfile, updateConsultantAvailability } from '../../../../../utils/api/apiList';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -28,12 +29,15 @@ class ConsultantAvailability extends Component {
 		this.state = {
 			currentSelectedDay: day_week[0],
 			errorMessage: '',
+			loading: false,
 		}
 	}
 
 	componentDidMount() {
+		this.setState({ loading: true });
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldValue('blackoutDates', data?.consultantInfo?.blackoutDates?.map(date => new Date(date)));
@@ -48,9 +52,13 @@ class ConsultantAvailability extends Component {
 						}));
 					});
 				}
+			}).catch(err => {
+				message.error(err.message);
+				this.setState({ loading: false });
 			})
 		} else {
 			request.post(getMyConsultantInfo).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldValue('blackoutDates', data?.blackoutDates?.map(date => new Date(date)));
@@ -65,8 +73,10 @@ class ConsultantAvailability extends Component {
 						}));
 					});
 				}
+			}).catch(err => {
+				message.error(err.message);
+				this.setState({ loading: false });
 			})
-
 		}
 	}
 
@@ -172,7 +182,7 @@ class ConsultantAvailability extends Component {
 	}
 
 	render() {
-		const { errorMessage, currentSelectedDay } = this.state;
+		const { errorMessage, currentSelectedDay, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -294,6 +304,7 @@ class ConsultantAvailability extends Component {
 						</Form.Item>
 					</Form>
 				</div>
+				<PageLoading loading={loading} isBackground={true} />
 			</Row>
 		);
 	}

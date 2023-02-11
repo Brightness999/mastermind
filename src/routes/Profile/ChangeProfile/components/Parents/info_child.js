@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select, DatePicker, Popconfirm } from 'antd';
+import { Row, Col, Form, Button, Input, Select, DatePicker, Popconfirm, message } from 'antd';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
 import msgLogin from '../../../../Sign/Login/messages';
@@ -13,6 +13,7 @@ import request from '../../../../../utils/api/request';
 import { getChildProfile, getDefaultValueForClient, getUserProfile } from '../../../../../utils/api/apiList';
 import { TbTrash } from 'react-icons/tb';
 import { BsPlusCircle } from 'react-icons/bs';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class InfoChild extends Component {
 	constructor(props) {
@@ -22,13 +23,15 @@ class InfoChild extends Component {
 			listSchools: [],
 			academicLevels: [],
 			children: [],
+			loading: false,
 		}
 	}
 
 	componentDidMount() {
-		this.setState({ listServices: this.props.auth.skillSet, academicLevels: this.props.auth.academicLevels });
+		this.setState({ loading: true, listServices: this.props.auth.skillSet, academicLevels: this.props.auth.academicLevels });
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.setState({ children: data?.studentInfos?.filter(s => !s.isRemoved) });
@@ -40,10 +43,12 @@ class InfoChild extends Component {
 					this.form.setFieldsValue({ children: data?.studentInfos?.filter(s => !s.isRemoved) });
 				}
 			}).catch(err => {
-				console.log(err);
+				message.error(err.message);
+				this.setState({ loading: false });
 			})
 		} else {
 			request.post(getChildProfile).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.setState({ children: data });
@@ -55,7 +60,8 @@ class InfoChild extends Component {
 					this.form.setFieldsValue({ children: data });
 				}
 			}).catch(err => {
-				console.log(err);
+				message.error(err.message);
+				this.setState({ loading: false });
 			})
 		}
 		this.loadServices();
@@ -111,7 +117,7 @@ class InfoChild extends Component {
 	};
 
 	render() {
-		const { listServices, listSchools, academicLevels } = this.state;
+		const { listServices, listSchools, academicLevels, loading } = this.state;
 		const { user } = this.props.auth;
 
 		return (
@@ -315,6 +321,7 @@ class InfoChild extends Component {
 						</Form.Item>
 					</Form>
 				</div>
+				<PageLoading loading={loading} isBackground={true} />
 			</Row>
 		);
 	}

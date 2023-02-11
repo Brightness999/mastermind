@@ -15,6 +15,7 @@ import { setUser } from '../../../../../redux/features/authSlice';
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -37,14 +38,16 @@ class InfoAvailability extends Component {
 			listSchool: [],
 			selectedLocation: '',
 			isPrivateForHmgh: false,
+			loading: false,
 		}
 	}
 
 	componentDidMount() {
+		this.setState({ loading: true });
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
-				console.log(data)
 				if (success) {
 					this.form?.setFieldsValue(data?.providerInfo);
 					this.form?.setFieldsValue({ blackoutDates: data?.providerInfo?.blackoutDates?.map(date => new Date(date)) });
@@ -71,9 +74,13 @@ class InfoAvailability extends Component {
 						locations: locations,
 					})
 				}
+			}).catch(err => {
+				this.setState({ loading: false });
+				message.error(err.message);
 			})
 		} else {
 			request.post(getMyProviderInfo).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				const { user } = this.props.auth;
 				if (success) {
@@ -102,6 +109,9 @@ class InfoAvailability extends Component {
 						locations: locations,
 					})
 				}
+			}).catch(err => {
+				this.setState({ loading: false });
+				message.error(err.message);
 			})
 		}
 
@@ -373,7 +383,7 @@ class InfoAvailability extends Component {
 	}
 
 	render() {
-		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh } = this.state;
+		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh, loading } = this.state;
 		const { user } = this.props.auth;
 
 		return (
@@ -559,6 +569,7 @@ class InfoAvailability extends Component {
 						</Form.Item>
 					</Form >
 				</div >
+				<PageLoading loading={loading} isBackground={true} />
 			</Row >
 		);
 	}

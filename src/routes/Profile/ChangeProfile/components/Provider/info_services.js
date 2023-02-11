@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select } from 'antd';
+import { Row, Col, Form, Button, Input, Select, message } from 'antd';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
@@ -10,34 +10,43 @@ import { setInforProvider } from '../../../../../redux/features/authSlice';
 import { getDefaultValueForProvider, getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
 import request from '../../../../../utils/api/request';
 import { BsDashCircle, BsPlusCircle } from 'react-icons/bs';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class InfoServices extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			SkillSet: [],
+			loading: false,
 		}
 	}
 
 	componentDidMount() {
+		this.setState({ loading: true });
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data?.providerInfo);
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
+				this.setState({ loading: false });
 			})
 		} else {
 			request.post(getMyProviderInfo).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form?.setFieldsValue(data);
 				}
+			}).catch(err => {
+				message.error(err.message);
+				this.setState({ loading: false });
 			})
 		}
-		this.getDataFromServer()
+		this.getDataFromServer();
 	}
 
 	getDataFromServer = () => {
@@ -73,7 +82,7 @@ class InfoServices extends Component {
 	};
 
 	render() {
-		const { SkillSet } = this.state;
+		const { SkillSet, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -168,6 +177,7 @@ class InfoServices extends Component {
 						</Form.Item>
 					</Form>
 				</div>
+				<PageLoading loading={loading} isBackground={true} />
 			</Row>
 		);
 	}

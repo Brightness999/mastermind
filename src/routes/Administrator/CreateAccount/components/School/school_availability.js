@@ -20,6 +20,7 @@ class SchoolAvailability extends React.Component {
 			dayIsSelected: 1,
 			sessionsInSchool: [],
 			sessionsAfterSchool: [],
+			isSubmit: false,
 		}
 	}
 
@@ -81,7 +82,9 @@ class SchoolAvailability extends React.Component {
 		newRegisterData.sessionsAfterSchool = this.arrDayScheduleFormat(this.state.sessionsAfterSchool);
 
 		// post to server
+		this.setState({ isSubmit: true });
 		axios.post(url + userSignUp, newRegisterData).then(res => {
+			this.setState({ isSubmit: false });
 			const { success } = res.data;
 			if (success) {
 				this.props.onContinue(true);
@@ -89,6 +92,7 @@ class SchoolAvailability extends React.Component {
 			}
 		}).catch(error => {
 			console.log('creat school error---', error);
+			this.setState({ isSubmit: false });
 			message.error(error?.response?.data?.data ?? error.message);
 		})
 	};
@@ -223,7 +227,7 @@ class SchoolAvailability extends React.Component {
 	}
 
 	render() {
-		const { dayIsSelected, sessionsInSchool, sessionsAfterSchool } = this.state;
+		const { dayIsSelected, sessionsInSchool, sessionsAfterSchool, isSubmit } = this.state;
 		const day_week = [
 			{
 				label: intl.formatMessage(messages.sunday),
@@ -324,6 +328,8 @@ class SchoolAvailability extends React.Component {
 								block
 								type="primary"
 								htmlType="submit"
+								loading={isSubmit}
+								disabled={isSubmit}
 							>
 								{intl.formatMessage(messages.submit).toUpperCase()}
 							</Button>

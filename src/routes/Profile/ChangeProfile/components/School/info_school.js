@@ -12,6 +12,7 @@ import { store } from '../../../../../redux/store'
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import request from '../../../../../utils/api/request';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class InfoSchool extends React.Component {
 	constructor(props) {
@@ -20,24 +21,34 @@ class InfoSchool extends React.Component {
 			school_address: '',
 			listCommunitiServer: [],
 			emailTypes: [],
+			loading: false,
 		}
 	}
 
 	componentDidMount() {
+		this.setState({ loading: true });
 		this.loadCommunitiServer();
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data?.schoolInfo);
 				}
+			}).catch(err => {
+				message.error(err.message);
+				this.setState({ loading: false });
 			})
 		} else {
 			request.post(getMySchoolInfo).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data);
 				}
+			}).catch(err => {
+				message.error(err.message);
+				this.setState({ loading: false });
 			})
 		}
 	}
@@ -83,7 +94,7 @@ class InfoSchool extends React.Component {
 	}
 
 	render() {
-		const { listCommunitiServer, school_address, emailTypes } = this.state;
+		const { listCommunitiServer, school_address, emailTypes, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -349,6 +360,7 @@ class InfoSchool extends React.Component {
 						</Form.Item>
 					</Form>
 				</div>
+				<PageLoading loading={loading} isBackground={true} />
 			</Row>
 		);
 	}

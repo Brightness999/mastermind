@@ -11,6 +11,7 @@ import messages from '../../messages';
 import { getMySchoolInfo, getUserProfile, updateSchoolAvailability } from '../../../../../utils/api/apiList'
 import request from '../../../../../utils/api/request';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class InfoAvailability extends React.Component {
 	constructor(props) {
@@ -19,12 +20,15 @@ class InfoAvailability extends React.Component {
 			dayIsSelected: 1,
 			sessionsInSchool: [],
 			sessionsAfterSchool: [],
+			loading: false,
 		}
 	}
 
 	componentDidMount() {
+		this.setState({ loading: true });
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form?.setFieldsValue(data?.schoolInfo);
@@ -34,9 +38,13 @@ class InfoAvailability extends React.Component {
 						sessionsAfterSchool: data?.schoolInfo?.sessionsAfterSchool ?? [this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false)],
 					})
 				}
+			}).catch(err => {
+				message.error(err.message);
+				this.setState({ loading: false });
 			})
 		} else {
 			request.post(getMySchoolInfo).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form?.setFieldsValue(data);
@@ -46,6 +54,9 @@ class InfoAvailability extends React.Component {
 						sessionsAfterSchool: data.sessionsAfterSchool ?? [this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false)],
 					})
 				}
+			}).catch(err => {
+				message.error(err.message);
+				this.setState({ loading: false });
 			})
 		}
 	}
@@ -184,7 +195,7 @@ class InfoAvailability extends React.Component {
 	}
 
 	render() {
-		const { sessionsAfterSchool, sessionsInSchool, dayIsSelected } = this.state;
+		const { sessionsAfterSchool, sessionsInSchool, dayIsSelected, loading } = this.state;
 		const day_week = [
 			{
 				label: intl.formatMessage(messages.sunday),
@@ -290,15 +301,14 @@ class InfoAvailability extends React.Component {
 						</Form.Item>
 					</Form>
 				</div>
+				<PageLoading loading={loading} isBackground={true} />
 			</Row>
 		);
 	}
 }
 
-const mapStateToProps = state => {
-	return {
-		auth: state.auth
-	}
-}
+const mapStateToProps = state => ({
+	auth: state.auth
+})
 
 export default compose(connect(mapStateToProps))(InfoAvailability);

@@ -19,6 +19,7 @@ class ReviewAccount extends Component {
 			},
 			listServices: [],
 			listSchools: [],
+			isSubmit: false,
 		}
 	}
 
@@ -62,7 +63,9 @@ class ReviewAccount extends Component {
 				customData.studentInfos[i].subsidyRequest.documents = customData.studentInfos[i].subsidyRequest.documentUploaded;
 			}
 		}
+		this.setState({ isSubmit: true });
 		const response = await axios.post(url + userSignUp, customData);
+		this.setState({ isSubmit: false });
 		const { success } = response.data;
 		if (success) {
 			this.props.removeRegisterData();
@@ -105,7 +108,7 @@ class ReviewAccount extends Component {
 			intl.formatMessage(messages.thursday),
 			intl.formatMessage(messages.friday),
 		]
-		const { registerData, listSchools, listServices } = this.state;
+		const { registerData, listSchools, listServices, isSubmit } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -176,6 +179,8 @@ class ReviewAccount extends Component {
 								type="primary"
 								htmlType="submit"
 								onClick={this.onSubmit}
+								loading={isSubmit}
+								disabled={isSubmit}
 							>
 								{intl.formatMessage(messages.submit).toUpperCase()}
 							</Button>
@@ -190,6 +195,5 @@ class ReviewAccount extends Component {
 const mapStateToProps = state => ({
 	register: state.register
 })
-
 
 export default compose(connect(mapStateToProps, { setRegisterData, removeRegisterData }))(ReviewAccount);

@@ -11,6 +11,7 @@ import { setInforProvider } from '../../../../../redux/features/authSlice';
 import { store } from '../../../../../redux/store'
 import request from '../../../../../utils/api/request';
 import { getMyProviderInfo, getDefaultValueForProvider, getCityConnections, getUserProfile } from '../../../../../utils/api/apiList';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class InfoProfile extends Component {
 	constructor(props) {
@@ -23,29 +24,35 @@ class InfoProfile extends Component {
 			contactPhoneNumber: [],
 			contactEmail: [],
 			CityConnections: [],
+			loading: false,
 		}
 	}
 
 	componentDidMount() {
 		this.getDataFromServer();
 		this.searchCityConnection();
+		this.setState({ loading: true });
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data?.providerInfo);
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
+				this.setState({ loading: false });
 			})
 		} else {
 			request.post(getMyProviderInfo).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data);
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
+				this.setState({ loading: false });
 			})
 		}
 	}
@@ -106,7 +113,7 @@ class InfoProfile extends Component {
 	};
 
 	render() {
-		const { service_address, CityConnections, ContactNumberType, EmailType } = this.state;
+		const { service_address, CityConnections, ContactNumberType, EmailType, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -332,6 +339,7 @@ class InfoProfile extends Component {
 						</Form.Item>
 					</Form>
 				</div>
+				<PageLoading loading={loading} isBackground={true} />
 			</Row>
 		);
 	}

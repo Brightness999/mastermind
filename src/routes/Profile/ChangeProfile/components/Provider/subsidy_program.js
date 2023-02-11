@@ -10,6 +10,7 @@ import { setInforProvider } from '../../../../../redux/features/authSlice';
 import { store } from '../../../../../redux/store'
 import request from '../../../../../utils/api/request';
 import { getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class SubsidyProgram extends Component {
 	state = {
@@ -19,6 +20,7 @@ class SubsidyProgram extends Component {
 		isAcceptReduceRate: false,
 		isSameRate: true,
 		isWillingOpenPrivate: false,
+		loading: false,
 	}
 
 	componentDidMount() {
@@ -27,9 +29,10 @@ class SubsidyProgram extends Component {
 			arrReduce.push(i);
 		}
 
-		this.setState({ academicLevels: this.props.auth?.academicLevels });
+		this.setState({ loading: true, academicLevels: this.props.auth?.academicLevels });
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue({ ...data?.providerInfo, numberSessions: '1' });
@@ -42,9 +45,11 @@ class SubsidyProgram extends Component {
 			}).catch(err => {
 				console.log('get provider info error---', err);
 				message.error(err.message);
+				this.setState({ loading: false });
 			})
 		} else {
 			request.post(getMyProviderInfo).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue({ ...data, numberSessions: '1' });
@@ -57,6 +62,7 @@ class SubsidyProgram extends Component {
 			}).catch(err => {
 				console.log('get provider info error---', err);
 				message.error(err.message);
+				this.setState({ loading: false });
 			})
 		}
 	}
@@ -96,7 +102,7 @@ class SubsidyProgram extends Component {
 	};
 
 	render() {
-		const { academicLevels, isAcceptProBono, isAcceptReduceRate, numberOfSession, isWillingOpenPrivate, isSameRate } = this.state;
+		const { academicLevels, isAcceptProBono, isAcceptReduceRate, numberOfSession, isWillingOpenPrivate, isSameRate, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -233,10 +239,12 @@ class SubsidyProgram extends Component {
 						</Form.Item>
 					</Form>
 				</div>
+				<PageLoading loading={loading} isBackground={true} />
 			</Row>
 		);
 	}
 }
 
 const mapStateToProps = state => ({ auth: state.auth });
+
 export default compose(connect(mapStateToProps))(SubsidyProgram);

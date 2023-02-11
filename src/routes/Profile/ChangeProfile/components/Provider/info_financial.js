@@ -13,6 +13,7 @@ import request from '../../../../../utils/api/request';
 import { url } from '../../../../../utils/api/baseUrl';
 import { store } from '../../../../../redux/store'
 import { setInforProvider } from '../../../../../redux/features/authSlice';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class InfoFinancial extends Component {
 	constructor(props) {
@@ -24,13 +25,16 @@ class InfoFinancial extends Component {
 			sameRateForAllLevel: true,
 			billingAddress: '',
 			W9FormPath: this.props.auth.user?.providerInfo?.W9FormPath,
+			loading: false,
 		}
 	}
 
 	componentDidMount() {
 		const { academicLevels } = this.props.auth;
+		this.setState({ loading: true });
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form?.setFieldsValue(data?.providerInfo);
@@ -39,10 +43,11 @@ class InfoFinancial extends Component {
 				}
 			}).catch(err => {
 				console.log('get provider info error ---', err);
-				this.setState({ academicLevels: academicLevels });
+				this.setState({ academicLevels: academicLevels, loading: false });
 			})
 		} else {
 			request.post(getMyProviderInfo).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form?.setFieldsValue(data);
@@ -51,7 +56,7 @@ class InfoFinancial extends Component {
 				}
 			}).catch(err => {
 				console.log('get provider info error ---', err);
-				this.setState({ academicLevels: academicLevels });
+				this.setState({ academicLevels: academicLevels, loading: false });
 			})
 
 		}
@@ -91,7 +96,7 @@ class InfoFinancial extends Component {
 	}
 
 	render() {
-		const { academicLevels, sameRateForAllLevel, billingAddress } = this.state;
+		const { academicLevels, sameRateForAllLevel, billingAddress, loading } = this.state;
 		const { user } = this.props.auth;
 		const uploadProps = {
 			name: 'file',
@@ -322,6 +327,7 @@ class InfoFinancial extends Component {
 						</Form.Item>
 					</Form>
 				</div>
+				<PageLoading loading={loading} isBackground={true} />
 			</Row>
 		);
 	}

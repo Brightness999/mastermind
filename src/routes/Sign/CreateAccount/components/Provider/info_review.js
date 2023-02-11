@@ -26,6 +26,7 @@ class InfoReview extends Component {
 			listSchools: [],
 			skillSet: [],
 			durations: [],
+			isSubmit: false,
 		}
 	}
 
@@ -61,7 +62,9 @@ class InfoReview extends Component {
 	onSubmit = async () => {
 		const { registerData } = this.props.register;
 		const postData = this.copyField(registerData);
+		this.setState({ isSubmit: true });
 		const response = await axios.post(url + userSignUp, postData);
+		this.setState({ isSubmit: false });
 		const { success } = response.data;
 		if (success) {
 			this.props.removeRegisterData();
@@ -141,7 +144,7 @@ class InfoReview extends Component {
 	}
 
 	render() {
-		const { registerData } = this.props.register;
+		const { registerData, isSubmit } = this.props.register;
 		const { listSchools, cityConnections, skillSet } = this.state;
 
 		return (
@@ -329,6 +332,8 @@ class InfoReview extends Component {
 								type="primary"
 								htmlType="submit"
 								onClick={this.onSubmit}
+								loading={isSubmit}
+								disabled={isSubmit}
 							>
 								{intl.formatMessage(messages.submit).toUpperCase()}
 							</Button>

@@ -7,6 +7,7 @@ import { compose } from 'redux'
 import { getDefaultValueForProvider, getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
 import request from '../../../../../utils/api/request';
 import { setInforProvider } from '../../../../../redux/features/authSlice';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class InfoScheduling extends Component {
 	state = {
@@ -14,11 +15,14 @@ class InfoScheduling extends Component {
 		cancellationWindow: [],
 		isNewClientScreening: true,
 		isSeparateEvaluationRate: true,
+		loading: false,
 	}
 
 	componentDidMount() {
+		this.setState({ loading: true });
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				this.setState({ loading: true });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data?.providerInfo);
@@ -29,9 +33,11 @@ class InfoScheduling extends Component {
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
+				this.setState({ loading: true });
 			})
 		} else {
 			request.post(getMyProviderInfo).then(result => {
+				this.setState({ loading: true });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data);
@@ -42,9 +48,9 @@ class InfoScheduling extends Component {
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
+				this.setState({ loading: true });
 			})
 		}
-
 		this.getDataFromServer();
 	}
 
@@ -90,7 +96,7 @@ class InfoScheduling extends Component {
 	};
 
 	render() {
-		const { durations, cancellationWindow, isSeparateEvaluationRate, isNewClientScreening } = this.state;
+		const { durations, cancellationWindow, isSeparateEvaluationRate, isNewClientScreening, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -176,6 +182,7 @@ class InfoScheduling extends Component {
 						</Form.Item>
 					</Form>
 				</div>
+				<PageLoading loading={loading} isBackground={true} />
 			</Row >
 		);
 	}

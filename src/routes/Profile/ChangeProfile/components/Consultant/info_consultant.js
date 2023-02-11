@@ -8,6 +8,7 @@ import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import request from '../../../../../utils/api/request';
 import { getDefaultValuesForConsultant, getMyConsultantInfo, getUserProfile, updateConsultantInfo } from '../../../../../utils/api/apiList';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class InfoConsultant extends Component {
 	constructor(props) {
@@ -18,24 +19,34 @@ class InfoConsultant extends Component {
 			contactEmail: [],
 			SkillSet: [],
 			CityConnections: [],
+			loading: false,
 		}
 	}
 
 	componentDidMount() {
 		this.getDataFromServer();
+		this.setState({ loading: true });
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data?.consultantInfo);
 				}
+			}).catch(err => {
+				message.error(err.message);
+				this.setState({ loading: false });
 			})
 		} else {
 			request.post(getMyConsultantInfo).then(result => {
+				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data);
 				}
+			}).catch(err => {
+				message.error(err.message);
+				this.setState({ loading: false });
 			})
 		}
 	}
@@ -77,7 +88,7 @@ class InfoConsultant extends Component {
 	};
 
 	render() {
-		const { CityConnections, SkillSet, EmailType, ContactNumberType } = this.state;
+		const { CityConnections, SkillSet, EmailType, ContactNumberType, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -266,6 +277,7 @@ class InfoConsultant extends Component {
 						</Form.Item>
 					</Form>
 				</div>
+				<PageLoading loading={loading} isBackground={true} />
 			</Row>
 		);
 	}
