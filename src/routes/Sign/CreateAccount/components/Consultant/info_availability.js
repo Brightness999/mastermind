@@ -49,7 +49,7 @@ class ConsultantAvailability extends Component {
     const { registerData } = this.props.register;
     let manualSchedule = [];
     const invalidDayInWeek = Object.values(values).findIndex(times => {
-      if (times.find(v => v.from_date?.isAfter(v.to_date) || v.from_time?.isAfter(v.to_time))) {
+      if (times?.find(v => (v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)) || (v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time)))) {
         return true;
       } else {
         return false;
@@ -113,7 +113,7 @@ class ConsultantAvailability extends Component {
         message.error(error?.response?.data?.data ?? error.message);
       }
     } else {
-      this.setState({ errorMessage: 'The selected time is not valid' });
+      this.setState({ errorMessage: `The selected date or time is not valid on ${day_week[invalidDayInWeek]}` });
     }
   };
 
