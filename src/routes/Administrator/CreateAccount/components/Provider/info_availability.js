@@ -68,9 +68,14 @@ class InfoAvailability extends Component {
 	}
 
 	onFinish = (values) => {
-		const { isHomeVisit, isSchools, isPrivateOffice, isPrivateForHmgh } = this.state;
-		this.props.setRegisterData({ availability: { ...values, isHomeVisit, isSchools, isPrivateOffice, isPrivateForHmgh } });
-		this.props.onContinue();
+		const invalidDayInWeek = Object.values(values).findIndex(times => times?.find(v => (v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)) || (v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time))));
+		if (invalidDayInWeek < 0) {
+			const { isHomeVisit, isSchools, isPrivateOffice, isPrivateForHmgh } = this.state;
+			this.props.setRegisterData({ availability: { ...values, isHomeVisit, isSchools, isPrivateOffice, isPrivateForHmgh } });
+			this.props.onContinue();
+		} else {
+			message.error(`The selected date or time is not valid on ${day_week[invalidDayInWeek]}`);
+		}
 	};
 
 	onFinishFailed = (errorInfo) => {

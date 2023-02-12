@@ -13,6 +13,21 @@ import { userSignUp } from '../../../../../utils/api/apiList'
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 
+const day_week = [
+	{
+		label: intl.formatMessage(messages.sunday),
+		value: 1
+	},
+	{
+		label: intl.formatMessage(messages.monday) + '-' + intl.formatMessage(messages.thursday),
+		value: 2
+	},
+	{
+		label: intl.formatMessage(messages.friday),
+		value: 3
+	},
+]
+
 class SchoolAvailability extends React.Component {
 	constructor(props) {
 		super(props);
@@ -75,22 +90,30 @@ class SchoolAvailability extends React.Component {
 
 	onFinish = async () => {
 		const { registerData } = this.props.register;
-		let newRegisterData = JSON.parse(JSON.stringify(registerData));
+		const { sessionsAfterSchool, sessionsInSchool } = this.state;
+		const invalidInSchoolDay = sessionsInSchool?.findIndex(times => moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin })));
+		const invalidAfterSchoolDay = sessionsAfterSchool?.findIndex(times => moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin })));
+		if (invalidAfterSchoolDay < 0 && invalidInSchoolDay < 0) {
+			let newRegisterData = JSON.parse(JSON.stringify(registerData));
 
-		// update in school - after school
-		newRegisterData.sessionsInSchool = this.arrDayScheduleFormat(this.state.sessionsInSchool);
-		newRegisterData.sessionsAfterSchool = this.arrDayScheduleFormat(this.state.sessionsAfterSchool);
+			// update in school - after school
+			newRegisterData.sessionsInSchool = this.arrDayScheduleFormat(sessionsInSchool);
+			newRegisterData.sessionsAfterSchool = this.arrDayScheduleFormat(sessionsAfterSchool);
 
-		// post to server
-		this.setState({ isSubmit: true });
-		const response = await axios.post(url + userSignUp, newRegisterData);
-		this.setState({ isSubmit: false });
-		const { success } = response.data;
-		if (success) {
-			this.props.onContinue(true);
-			this.props.removeRegisterData();
+			// post to server
+			this.setState({ isSubmit: true });
+			const response = await axios.post(url + userSignUp, newRegisterData);
+			this.setState({ isSubmit: false });
+			const { success } = response.data;
+			if (success) {
+				this.props.onContinue(true);
+				this.props.removeRegisterData();
+			} else {
+				message.error(error?.response?.data?.data ?? error.message);
+			}
 		} else {
-			message.error(error?.response?.data?.data ?? error.message);
+			invalidAfterSchoolDay > -1 && message.error(`The selected After-school session time is not valid on ${day_week[invalidAfterSchoolDay]?.label}`);
+			invalidInSchoolDay > -1 && message.error(`The selected In-school session time is not valid on ${day_week[invalidInSchoolDay]?.label}`);
 		}
 	};
 
@@ -225,20 +248,6 @@ class SchoolAvailability extends React.Component {
 
 	render() {
 		const { dayIsSelected, sessionsInSchool, sessionsAfterSchool, isSubmit } = this.state;
-		const day_week = [
-			{
-				label: intl.formatMessage(messages.sunday),
-				value: 1
-			},
-			{
-				label: intl.formatMessage(messages.monday) + '-' + intl.formatMessage(messages.thursday),
-				value: 2
-			},
-			{
-				label: intl.formatMessage(messages.friday),
-				value: 3
-			},
-		]
 
 		return (
 			<Row justify="center" className="row-form">

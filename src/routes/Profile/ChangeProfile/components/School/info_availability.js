@@ -13,6 +13,21 @@ import request from '../../../../../utils/api/request';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 import PageLoading from '../../../../../components/Loading/PageLoading';
 
+const day_week = [
+	{
+		label: intl.formatMessage(messages.sunday),
+		value: 1
+	},
+	{
+		label: intl.formatMessage(messages.monday) + '-' + intl.formatMessage(messages.thursday),
+		value: 2
+	},
+	{
+		label: intl.formatMessage(messages.friday),
+		value: 3
+	},
+];
+
 class InfoAvailability extends React.Component {
 	constructor(props) {
 		super(props);
@@ -95,20 +110,27 @@ class InfoAvailability extends React.Component {
 	onFinish = (values) => {
 		const { sessionsInSchool, sessionsAfterSchool } = this.state
 		const { blackoutDates } = values;
-		const params = {
-			sessionsAfterSchool,
-			sessionsInSchool,
-			blackoutDates: blackoutDates?.map(date => date.toString()),
-			_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.schoolInfo?._id : this.props.auth.user?.schoolInfo?._id,
-		}
-
-		request.post(updateSchoolAvailability, params).then(res => {
-			if (res.success) {
-				message.success('Updated successfully');
+		const invalidInSchoolDay = sessionsInSchool?.findIndex(times => moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin })));
+		const invalidAfterSchoolDay = sessionsAfterSchool?.findIndex(times => moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin })));
+		if (invalidAfterSchoolDay < 0 && invalidInSchoolDay < 0) {
+			const params = {
+				sessionsAfterSchool,
+				sessionsInSchool,
+				blackoutDates: blackoutDates?.map(date => date.toString()),
+				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.schoolInfo?._id : this.props.auth.user?.schoolInfo?._id,
 			}
-		}).catch(err => {
-			console.log('update school availability error---', err);
-		})
+
+			request.post(updateSchoolAvailability, params).then(res => {
+				if (res.success) {
+					message.success('Updated successfully');
+				}
+			}).catch(err => {
+				console.log('update school availability error---', err);
+			})
+		} else {
+			invalidAfterSchoolDay > -1 && message.error(`The selected After-school session time is not valid on ${day_week[invalidAfterSchoolDay]?.label}`);
+			invalidInSchoolDay > -1 && message.error(`The selected In-school session time is not valid on ${day_week[invalidInSchoolDay]?.label}`);
+		}
 	};
 
 	onFinishFailed = (errorInfo) => {
@@ -196,20 +218,6 @@ class InfoAvailability extends React.Component {
 
 	render() {
 		const { sessionsAfterSchool, sessionsInSchool, dayIsSelected, loading } = this.state;
-		const day_week = [
-			{
-				label: intl.formatMessage(messages.sunday),
-				value: 1
-			},
-			{
-				label: intl.formatMessage(messages.monday) + '-' + intl.formatMessage(messages.thursday),
-				value: 2
-			},
-			{
-				label: intl.formatMessage(messages.friday),
-				value: 3
-			},
-		]
 
 		return (
 			<Row justify="center" className="row-form">

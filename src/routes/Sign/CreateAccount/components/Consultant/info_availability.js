@@ -28,7 +28,6 @@ class ConsultantAvailability extends Component {
     super(props);
     this.state = {
       currentSelectedDay: day_week[0],
-      errorMessage: '',
       isSubmit: false,
     }
   }
@@ -48,15 +47,8 @@ class ConsultantAvailability extends Component {
   onFinish = async (values) => {
     const { registerData } = this.props.register;
     let manualSchedule = [];
-    const invalidDayInWeek = Object.values(values).findIndex(times => {
-      if (times?.find(v => (v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)) || (v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time)))) {
-        return true;
-      } else {
-        return false;
-      }
-    });
+    const invalidDayInWeek = Object.values(values).findIndex(times => times?.find(v => (v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)) || (v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time))));
     if (invalidDayInWeek < 0) {
-      this.setState({ errorMessage: '' });
       for (let i = 0; i < day_week.length; i++) {
         for (let j = 0; j < values['' + day_week[i]].length; j++) {
           let scheduleItem = values['' + day_week[i]][j];
@@ -113,7 +105,7 @@ class ConsultantAvailability extends Component {
         message.error(error?.response?.data?.data ?? error.message);
       }
     } else {
-      this.setState({ errorMessage: `The selected date or time is not valid on ${day_week[invalidDayInWeek]}` });
+      message.error(`The selected date or time is not valid on ${day_week[invalidDayInWeek]}`);
     }
   };
 
@@ -165,7 +157,7 @@ class ConsultantAvailability extends Component {
   }
 
   render() {
-    const { errorMessage, currentSelectedDay, isSubmit } = this.state;
+    const { currentSelectedDay, isSubmit } = this.state;
 
     return (
       <Row justify="center" className="row-form">
@@ -279,7 +271,6 @@ class ConsultantAvailability extends Component {
                 plugins={[<DatePanel />]}
               />
             </Form.Item>
-            {errorMessage.length > 0 && (<p className='text-left text-red'>{errorMessage}</p>)}
             <Form.Item className="form-btn continue-btn" >
               <Button
                 block

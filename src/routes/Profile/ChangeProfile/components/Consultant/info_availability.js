@@ -28,7 +28,6 @@ class ConsultantAvailability extends Component {
 		super(props);
 		this.state = {
 			currentSelectedDay: day_week[0],
-			errorMessage: '',
 			loading: false,
 		}
 	}
@@ -94,50 +93,55 @@ class ConsultantAvailability extends Component {
 
 	onFinish = (values) => {
 		let manualSchedule = [];
-		day_week.map(day => {
-			values[day]?.forEach(t => {
-				if (t.from_time && t.to_time) {
-					const times = {
-						fromYear: t.from_date?.year() ?? 1,
-						fromMonth: t.from_date?.month() ?? 0,
-						fromDate: t.from_date?.date() ?? 1,
-						toYear: t.to_date?.year() ?? 10000,
-						toMonth: t.to_date?.month() ?? 0,
-						toDate: t.to_date?.date() ?? 0,
-						openHour: t.from_time?.hours() ?? 0,
-						openMin: t.from_time?.minutes() ?? 0,
-						closeHour: t.to_time?.hours() ?? 0,
-						closeMin: t.to_time?.minutes() ?? 0,
-						dayInWeek: this.getDayOfWeekIndex(day),
+		const invalidDayInWeek = Object.values(values).findIndex(times => times?.find(v => (v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)) || (v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time))));
+		if (invalidDayInWeek < 0) {
+			day_week.map(day => {
+				values[day]?.forEach(t => {
+					if (t.from_time && t.to_time) {
+						const times = {
+							fromYear: t.from_date?.year() ?? 1,
+							fromMonth: t.from_date?.month() ?? 0,
+							fromDate: t.from_date?.date() ?? 1,
+							toYear: t.to_date?.year() ?? 10000,
+							toMonth: t.to_date?.month() ?? 0,
+							toDate: t.to_date?.date() ?? 0,
+							openHour: t.from_time?.hours() ?? 0,
+							openMin: t.from_time?.minutes() ?? 0,
+							closeHour: t.to_time?.hours() ?? 0,
+							closeMin: t.to_time?.minutes() ?? 0,
+							dayInWeek: this.getDayOfWeekIndex(day),
+						}
+						manualSchedule.push(times);
+					} else {
+						const times = {
+							fromYear: 0,
+							fromMonth: 0,
+							fromDate: 0,
+							toYear: 0,
+							toMonth: 0,
+							toDate: 0,
+							openHour: 0,
+							openMin: 0,
+							closeHour: 0,
+							closeMin: 0,
+							dayInWeek: this.getDayOfWeekIndex(day),
+						}
+						manualSchedule.push(times);
 					}
-					manualSchedule.push(times);
-				} else {
-					const times = {
-						fromYear: 0,
-						fromMonth: 0,
-						fromDate: 0,
-						toYear: 0,
-						toMonth: 0,
-						toDate: 0,
-						openHour: 0,
-						openMin: 0,
-						closeHour: 0,
-						closeMin: 0,
-						dayInWeek: this.getDayOfWeekIndex(day),
-					}
-					manualSchedule.push(times);
+				})
+			});
+			values.manualSchedule = manualSchedule.flat();
+			values.blackoutDates = values.blackoutDates?.map(date => date.toString());
+			request.post(updateConsultantAvailability, { ...values, _id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.consultantInfo?._id : this.props.auth.user?.consultantInfo }).then(res => {
+				if (res.success) {
+					message.success('Updated successfully');
 				}
+			}).catch(err => {
+				message.error(err.message);
 			})
-		});
-		values.manualSchedule = manualSchedule.flat();
-		values.blackoutDates = values.blackoutDates?.map(date => date.toString());
-		request.post(updateConsultantAvailability, { ...values, _id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.consultantInfo?._id : this.props.auth.user?.consultantInfo }).then(res => {
-			if (res.success) {
-				message.success('Updated successfully');
-			}
-		}).catch(err => {
-			message.error(err.message);
-		})
+		} else {
+			message.error(`The selected date or time is not valid on ${day_week[invalidDayInWeek]}`);
+		}
 	};
 
 	onFinishFailed = (errorInfo) => {
@@ -182,7 +186,7 @@ class ConsultantAvailability extends Component {
 	}
 
 	render() {
-		const { errorMessage, currentSelectedDay, loading } = this.state;
+		const { currentSelectedDay, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -292,7 +296,6 @@ class ConsultantAvailability extends Component {
 								plugins={[<DatePanel />]}
 							/>
 						</Form.Item>
-						{errorMessage.length > 0 && (<p className='text-left text-red'>{errorMessage}</p>)}
 						<Form.Item className="form-btn continue-btn" >
 							<Button
 								block

@@ -50,6 +50,7 @@ class InfoAvailability extends Component {
 				const { success, data } = result;
 				if (success) {
 					this.form?.setFieldsValue(data?.providerInfo);
+					this.form?.setFieldValue('serviceableSchool', data?.providerInfo?.serviceableSchool?.map(d => d._id));
 					this.form?.setFieldsValue({ blackoutDates: data?.providerInfo?.blackoutDates?.map(date => new Date(date)) });
 					day_week.map((day) => {
 						const times = data?.providerInfo?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
@@ -203,37 +204,43 @@ class InfoAvailability extends Component {
 		values.manualSchedule = manualSchedule.flat();
 		values.isPrivateForHmgh = isPrivateForHmgh;
 		values.blackoutDates = values.blackoutDates?.map(date => date.toString());
-		if (window.location.pathname?.includes('changeuserprofile')) {
-			request.post(updateMyProviderAvailability, { ...values, _id: this.props.auth.selectedUser?.providerInfo?._id }).then(result => {
-				const { success } = result;
-				if (success) {
-					message.success('Updated successfully');
-				}
-			}).catch(err => {
-				message.error("Can't update availability");
-				console.log('update provider availability error---', err);
-			})
+
+		const invalidDay = Object.values(values?.manualSchedule)?.find(v => moment().set({ years: v?.fromYear, months: v?.fromMonth, dates: v?.fromDate })?.isAfter(moment().set({ years: v?.toYear, months: v?.toMonth, dates: v?.toDate })) || moment().set({ hours: v?.openHour, minutes: v?.openMin })?.isAfter(moment().set({ hours: v?.closeHour, minutes: v?.closeMin })));
+		if (invalidDay) {
+			message.error(`The selected date or time is not valid on ${day_week[invalidDay.dayInWeek]}`);
 		} else {
-			request.post(updateMyProviderAvailability, { ...values, _id: this.props.auth.user.providerInfo?._id }).then(result => {
-				const { success } = result;
-				if (success) {
-					message.success('Updated successfully');
-					let newUser = {
-						...this.props.auth.user,
-						providerInfo: {
-							...this.props.auth.user.providerInfo,
-							isHomeVisit: values.isHomeVisit,
-							privateOffice: values.privateOffice,
-							isPrivateForHmgh: isPrivateForHmgh,
-							serviceableSchool: listSchool?.filter(school => values.serviceableSchool?.find(id => id == school._id)),
-						}
+			if (window.location.pathname?.includes('changeuserprofile')) {
+				request.post(updateMyProviderAvailability, { ...values, _id: this.props.auth.selectedUser?.providerInfo?._id }).then(result => {
+					const { success } = result;
+					if (success) {
+						message.success('Updated successfully');
 					}
-					store.dispatch(setUser(newUser));
-				}
-			}).catch(err => {
-				message.error("Can't update availability");
-				console.log('update provider availability error---', err);
-			})
+				}).catch(err => {
+					message.error("Can't update availability");
+					console.log('update provider availability error---', err);
+				})
+			} else {
+				request.post(updateMyProviderAvailability, { ...values, _id: this.props.auth.user.providerInfo?._id }).then(result => {
+					const { success } = result;
+					if (success) {
+						message.success('Updated successfully');
+						let newUser = {
+							...this.props.auth.user,
+							providerInfo: {
+								...this.props.auth.user.providerInfo,
+								isHomeVisit: values.isHomeVisit,
+								privateOffice: values.privateOffice,
+								isPrivateForHmgh: isPrivateForHmgh,
+								serviceableSchool: listSchool?.filter(school => values.serviceableSchool?.find(id => id == school._id)),
+							}
+						}
+						store.dispatch(setUser(newUser));
+					}
+				}).catch(err => {
+					message.error("Can't update availability");
+					console.log('update provider availability error---', err);
+				})
+			}
 		}
 	};
 
