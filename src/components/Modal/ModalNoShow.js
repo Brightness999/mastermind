@@ -12,8 +12,35 @@ class ModalNoShow extends React.Component {
 	componentDidMount() {
 		const { event } = this.props;
 		if (event?.flagStatus == 0) {
-			const currentBalance = event?.type == 2 ? event?.provider?.separateEvaluationRate : event?.type == 3 ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate : event?.type == 5 ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.subsidizedRate : '';
-			this.form?.setFieldsValue({ penalty: currentBalance, program: 5 });
+			if (event?.type == 2) {
+				this.form?.setFieldsValue({ penalty: event?.provider?.separateEvaluationRate, program: 5 });
+			} else if (event?.type == 3) {
+				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(event?.dependent?.currentGrade)) {
+					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level))?.rate, program: 5 });
+				} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(event?.dependent?.currentGrade)) {
+					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(a.level))?.rate, program: 5 });
+				} else if (['Grades 7', 'Grades 8'].includes(event?.dependent?.currentGrade)) {
+					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(a.level))?.rate, program: 5 });
+				} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(event?.dependent?.currentGrade)) {
+					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'High School Grades 9-12'].includes(a.level))?.rate, program: 5 });
+				} else {
+					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate, program: 5 });
+				}
+			} else if (event?.type == 5) {
+				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(event?.dependent?.currentGrade)) {
+					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level))?.subsidizedRate, program: 5 });
+				} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(event?.dependent?.currentGrade)) {
+					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(a.level))?.subsidizedRate, program: 5 });
+				} else if (['Grades 7', 'Grades 8'].includes(event?.dependent?.currentGrade)) {
+					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(a.level))?.subsidizedRate, program: 5 });
+				} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(event?.dependent?.currentGrade)) {
+					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'High School Grades 9-12'].includes(a.level))?.subsidizedRate, program: 5 });
+				} else {
+					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.subsidizedRate, program: 5 });
+				}
+			} else {
+				this.form?.setFieldsValue({ penalty: '', program: 5 });
+			}
 		} else {
 			this.form?.setFieldsValue({ penalty: event?.flagItems?.penalty, program: event?.flagItems?.program, notes: event?.flagItems?.notes });
 		}

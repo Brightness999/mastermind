@@ -409,9 +409,9 @@ class DrawerDetail extends Component {
           <div className='font-10 flex-1'>
             <p className='mb-0 text-bold'>Grade level(s)</p>
             <div>{event?.provider?.academicLevel?.map((level, i) => (
-              <div key={i} className="flex">
+              <div key={i} className="flex justify-between gap-2">
                 <span>{level.level}</span>
-                <span className='ml-10'>${level.rate}</span>
+                <span>${level.rate}</span>
               </div>
             ))}</div>
           </div>

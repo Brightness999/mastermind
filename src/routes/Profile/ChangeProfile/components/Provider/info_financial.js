@@ -39,7 +39,11 @@ class InfoFinancial extends Component {
 				if (success) {
 					this.form?.setFieldsValue(data?.providerInfo);
 					const selectedLevels = data?.providerInfo.academicLevel?.map(item => item.level);
-					this.setState({ academicLevels: academicLevels?.filter(level => !selectedLevels?.find(l => l == level)) });
+					const levelOptions = [
+						{ label: 'By Level', options: academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+						{ label: 'By Grade', options: academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+					];
+					this.setState({ academicLevels: levelOptions });
 				}
 			}).catch(err => {
 				console.log('get provider info error ---', err);
@@ -52,13 +56,16 @@ class InfoFinancial extends Component {
 				if (success) {
 					this.form?.setFieldsValue(data);
 					const selectedLevels = data.academicLevel?.map(item => item.level);
-					this.setState({ academicLevels: academicLevels?.filter(level => !selectedLevels?.find(l => l == level)) });
+					const levelOptions = [
+						{ label: 'By Level', options: academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+						{ label: 'By Grade', options: academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+					];
+					this.setState({ academicLevels: levelOptions });
 				}
 			}).catch(err => {
 				console.log('get provider info error ---', err);
 				this.setState({ academicLevels: academicLevels, loading: false });
 			})
-
 		}
 	}
 
@@ -67,11 +74,14 @@ class InfoFinancial extends Component {
 		const token = localStorage.getItem('token');
 
 		try {
-			if (window.location.pathname?.includes('changeuserprofile')) {
-				store.dispatch(setInforProvider({ data: { ...values, W9FormPath, _id: this.props.auth.selectedUser?.providerInfo?._id }, token: token }))
-			} else {
-				store.dispatch(setInforProvider({ data: { ...values, W9FormPath, _id: this.props.auth.user?.providerInfo?._id }, token: token }))
-			}
+			store.dispatch(setInforProvider({
+				data: {
+					...values,
+					W9FormPath,
+					_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id
+				},
+				token: token,
+			}))
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -93,6 +103,41 @@ class InfoFinancial extends Component {
 			message.error(`${info.file.name} file upload failed.`);
 			this.setState(prevState => ({ fileList: [...prevState.fileList, info.file] }));
 		}
+	}
+
+	handleSelectLevel = (selectedLevel) => {
+		const arr = this.form.getFieldValue('academicLevel');
+		const { academicLevels } = this.props.auth;
+		let selectedLevels = arr?.map(item => item.level);
+
+		if (selectedLevel == 'Early Education') {
+			selectedLevels = selectedLevels?.filter(a => !['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(a));
+		} else if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(selectedLevel)) {
+			selectedLevels = selectedLevels?.filter(a => a != 'Early Education');
+		} else if (selectedLevel == 'Elementary Grades 1-6') {
+			selectedLevels = selectedLevels?.filter(a => !['Elementary Grades 1-8', 'Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(a));
+		} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(selectedLevel)) {
+			selectedLevels = selectedLevels?.filter(a => a != 'Elementary Grades 1-6' && a != 'Elementary Grades 1-8');
+		} else if (selectedLevel == 'Elementary Grades 1-8') {
+			selectedLevels = selectedLevels?.filter(a => !['Elementary Grades 1-6', 'Middle Grades 7-8', 'Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6', 'Grades 7', 'Grades 8'].includes(a));
+		} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6', 'Grades 7', 'Grades 8'].includes(selectedLevel)) {
+			selectedLevels = selectedLevels?.filter(a => a != 'Elementary Grades 1-8');
+		} else if (selectedLevel == 'Middle Grades 7-8') {
+			selectedLevels = selectedLevels?.filter(a => !['Elementary Grades 1-8', 'Grades 7', 'Grades 8'].includes(a));
+		} else if (['Grades 7', 'Grades 8'].includes(selectedLevel)) {
+			selectedLevels = selectedLevels?.filter(a => a != 'Middle Grades 7-8' && a != 'Elementary Grades 1-8');
+		} else if (selectedLevel == 'High School Grades 9-12') {
+			selectedLevels = selectedLevels?.filter(a => !['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(a));
+		} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(selectedLevel)) {
+			selectedLevels = selectedLevels?.filter(a => a != 'High School Grades 9-12');
+		}
+
+		const levelOptions = [
+			{ label: 'By Level', options: academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+			{ label: 'By Grade', options: academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+		];
+		this.form.setFieldValue('academicLevel', arr.filter(a => selectedLevels?.includes(a.level)));
+		this.setState({ academicLevels: levelOptions });
 	}
 
 	render() {
@@ -194,15 +239,9 @@ class InfoFinancial extends Component {
 													>
 														<Select
 															placeholder={intl.formatMessage(messages.academicLevel)}
-															onChange={() => {
-																const arr = this.form.getFieldValue('academicLevel');
-																const selectedLevels = arr?.map(item => item.level);
-																this.setState({ academicLevels: this.props.auth.academicLevels?.filter(level => !selectedLevels?.find(l => l == level)) });
-															}}
+															options={academicLevels}
+															onChange={(selectedLevel) => this.handleSelectLevel(selectedLevel)}
 														>
-															{academicLevels?.map((level, index) => (
-																<Select.Option key={index} value={level}>{level}</Select.Option>
-															))}
 														</Select>
 													</Form.Item>
 												</Col>
@@ -240,7 +279,16 @@ class InfoFinancial extends Component {
 															})}
 														/>
 													</Form.Item>
-													<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
+													<BsDashCircle size={16} className='text-red icon-remove' onClick={() => {
+														remove(field.name);
+														const selectedLevels = this.form.getFieldValue('academicLevel');
+														console.log(selectedLevels);
+														const levelOptions = [
+															{ label: 'By Level', options: this.props.auth.academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+															{ label: 'By Grade', options: this.props.auth.academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+														];
+														this.setState({ academicLevels: levelOptions });
+													}} />
 												</Col>
 											</Row>
 										);

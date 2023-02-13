@@ -55,7 +55,7 @@ class InfoChild extends Component {
 			if (success) {
 				this.setState({
 					listServices: data?.SkillSet,
-					academicLevels: data?.AcademicLevel,
+					academicLevels: data?.AcademicLevel?.splice(6),
 				})
 			} else {
 				this.setState({

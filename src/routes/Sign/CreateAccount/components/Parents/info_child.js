@@ -55,7 +55,7 @@ class InfoChild extends Component {
 			if (success) {
 				this.setState({
 					listServices: data?.SkillSet,
-					academicLevels: data?.AcademicLevel,
+					academicLevels: data?.AcademicLevel?.splice(6),
 				})
 			} else {
 				this.setState({
@@ -132,7 +132,7 @@ class InfoChild extends Component {
 	};
 
 	render() {
-		const { listSchools, listServices, academicLevels, parentInfo } = this.state;
+		const { listSchools, listServices, academicLevels } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">

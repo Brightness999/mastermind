@@ -38,10 +38,17 @@ class InfoFinancial extends Component {
 	}
 
 	getDataFromServer = () => {
+		const { registerData } = this.props.register;
 		axios.post(url + getDefaultValueForProvider).then(result => {
 			const { success, data } = result.data;
 			if (success) {
-				this.setState({ AcademicLevel: data.AcademicLevel, academicLevels: data.AcademicLevel });
+				this.setState({
+					AcademicLevel: data.AcademicLevel,
+					academicLevels: [
+						{ label: 'By Level', options: registerData?.financialInfor?.academicLevel ? data.AcademicLevel.slice(0, 6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : data.AcademicLevel.slice(0, 6)?.map(a => ({ label: a, value: a })) ?? [] },
+						{ label: 'By Grade', options: registerData?.financialInfor?.academicLevel ? data.AcademicLevel.slice(6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : data.AcademicLevel.slice(0, 6)?.map(a => ({ label: a, value: a })) ?? [] },
+					]
+				});
 			} else {
 				this.setState({ AcademicLevel: [], academicLevels: [] });
 			}
@@ -108,8 +115,43 @@ class InfoFinancial extends Component {
 		this.setValueToReduxRegisterData(fieldName, value);
 	}
 
+	handleSelectLevel = (selectedLevel) => {
+		const arr = this.form.getFieldValue('academicLevel');
+		const { AcademicLevel } = this.state;
+		let selectedLevels = arr?.map(item => item.level);
+
+		if (selectedLevel == 'Early Education') {
+			selectedLevels = selectedLevels?.filter(a => !['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(a));
+		} else if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(selectedLevel)) {
+			selectedLevels = selectedLevels?.filter(a => a != 'Early Education');
+		} else if (selectedLevel == 'Elementary Grades 1-6') {
+			selectedLevels = selectedLevels?.filter(a => !['Elementary Grades 1-8', 'Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(a));
+		} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(selectedLevel)) {
+			selectedLevels = selectedLevels?.filter(a => a != 'Elementary Grades 1-6' && a != 'Elementary Grades 1-8');
+		} else if (selectedLevel == 'Elementary Grades 1-8') {
+			selectedLevels = selectedLevels?.filter(a => !['Elementary Grades 1-6', 'Middle Grades 7-8', 'Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6', 'Grades 7', 'Grades 8'].includes(a));
+		} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6', 'Grades 7', 'Grades 8'].includes(selectedLevel)) {
+			selectedLevels = selectedLevels?.filter(a => a != 'Elementary Grades 1-8');
+		} else if (selectedLevel == 'Middle Grades 7-8') {
+			selectedLevels = selectedLevels?.filter(a => !['Elementary Grades 1-8', 'Grades 7', 'Grades 8'].includes(a));
+		} else if (['Grades 7', 'Grades 8'].includes(selectedLevel)) {
+			selectedLevels = selectedLevels?.filter(a => a != 'Middle Grades 7-8' && a != 'Elementary Grades 1-8');
+		} else if (selectedLevel == 'High School Grades 9-12') {
+			selectedLevels = selectedLevels?.filter(a => !['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(a));
+		} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(selectedLevel)) {
+			selectedLevels = selectedLevels?.filter(a => a != 'High School Grades 9-12');
+		}
+
+		const levelOptions = [
+			{ label: 'By Level', options: AcademicLevel.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+			{ label: 'By Grade', options: AcademicLevel.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+		];
+		this.form.setFieldValue('academicLevel', arr.filter(a => selectedLevels?.includes(a.level)));
+		this.setState({ academicLevels: levelOptions });
+	}
+
 	render() {
-		const { AcademicLevel, sameRateForAllLevel, billingAddress, academicLevels } = this.state;
+		const { sameRateForAllLevel, billingAddress, academicLevels } = this.state;
 		const { registerData } = this.props.register;
 		const uploadProps = {
 			name: 'file',
@@ -198,7 +240,7 @@ class InfoFinancial extends Component {
 									{fields.map((field) => {
 										return (
 											<Row gutter={14} key={field.key}>
-												<Col xs={12} sm={12} md={12}>
+												<Col xs={16} sm={16} md={16}>
 													<Form.Item
 														name={[field.name, "level"]}
 														label={intl.formatMessage(messages.level)}
@@ -207,21 +249,14 @@ class InfoFinancial extends Component {
 														style={{ marginTop: 14 }}
 													>
 														<Select
-															onChange={() => {
-																const arr = this.form.getFieldValue('academicLevel')
-																this.setValueToReduxRegisterData('academicLevel', arr);
-																const selectedLevels = arr?.map(item => item?.level);
-																this.setState({ academicLevels: AcademicLevel?.filter(level => !selectedLevels?.find(l => l == level)) });
-															}}
+															onChange={(selectedLevel) => this.handleSelectLevel(selectedLevel)}
 															placeholder={intl.formatMessage(messages.academicLevel)}
+															options={academicLevels}
 														>
-															{academicLevels?.map((level, index) => (
-																<Select.Option key={index} value={level}>{level}</Select.Option>
-															))}
 														</Select>
 													</Form.Item>
 												</Col>
-												<Col xs={12} sm={12} md={12} className='item-remove'>
+												<Col xs={8} sm={8} md={8} className='item-remove'>
 													<Form.Item
 														name={[field.name, "rate"]}
 														label={'Standard ' + intl.formatMessage(messages.rate)}
