@@ -34,6 +34,7 @@ import { clearFlag, getDefaultDataForAdmin, requestClearance } from '../../../ut
 import PanelAppointment from './PanelAppointment';
 import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
+import PageLoading from '../../../components/Loading/PageLoading';
 
 const { Panel } = Collapse;
 
@@ -76,6 +77,7 @@ class SchedulingCenter extends React.Component {
       confirmMessage: '',
       selectedDependentId: 0,
       subsidyId: '',
+      loading: false,
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -83,6 +85,7 @@ class SchedulingCenter extends React.Component {
 
   componentDidMount() {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
+      this.setState({ loading: true });
       checkPermission().then(loginData => {
         this.props.dispatch(setUser(loginData));
         loginData?.role < 900 && this.props.history.push(routerLinks.Dashboard)
@@ -114,8 +117,9 @@ class SchedulingCenter extends React.Component {
 
   loadDefaultData() {
     request.post(getDefaultDataForAdmin).then(res => {
-      if (res.success) {
-        const data = res.data;
+      this.setState({ loading: false });
+      const { success, data } = res;
+      if (success) {
         this.setState({
           SkillSet: data?.skillSet,
           listProvider: data?.providers,
@@ -130,6 +134,7 @@ class SchedulingCenter extends React.Component {
       }
     }).catch(err => {
       console.log('get default data error---', err);
+      this.setState({ loading: false });
     });
   }
 
@@ -564,6 +569,7 @@ class SchedulingCenter extends React.Component {
       visibleNewSubsidy,
       visibleSubsidy,
       subsidyId,
+      loading,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -1049,6 +1055,7 @@ class SchedulingCenter extends React.Component {
         <ModalNewSubsidyReview {...modalNewReviewProps} />
         {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
         {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
+        <PageLoading loading={loading} isBackground={true} />
       </div>
     );
   }

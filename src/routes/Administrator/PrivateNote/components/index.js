@@ -32,8 +32,8 @@ export default class extends React.Component {
 
   componentDidMount() {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
+      this.setState({ loading: true });
       checkPermission().then(loginData => {
-        this.setState({ loading: true });
         request.post(getDependents).then(result => {
           this.setState({ loading: false });
           const { success, data } = result;

@@ -34,10 +34,11 @@ class FlagList extends React.Component {
 
   componentDidMount() {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
+      this.setState({ loading: true });
       checkPermission().then(loginData => {
         loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
         const skillSet = JSON.parse(JSON.stringify(this.props.auth.skillSet));
-        this.setState({ loading: true, skillSet: skillSet?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; }) });
+        this.setState({ skillSet: skillSet?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; }) });
         request.post(getFlagList).then(result => {
           const { success, data } = result;
           this.setState({ loading: false });

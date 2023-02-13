@@ -35,9 +35,10 @@ class UserManager extends React.Component {
 
 	componentDidMount() {
 		if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
+			this.setState({ loading: true });
 			checkPermission().then(loginData => {
 				loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
-				this.setState({ loading: true, userRole: loginData.role });
+				this.setState({ userRole: loginData.role });
 				request.post(getUsers).then(result => {
 					const { success, data } = result;
 					this.setState({ loading: false });

@@ -7,6 +7,7 @@ import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import request from '../../../../../utils/api/request';
 import { getAdminInfo, getCityConnections, getUserProfile, updateAdminInfo } from '../../../../../utils/api/apiList';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class InfoAdmin extends React.Component {
   constructor(props) {
@@ -14,16 +15,22 @@ class InfoAdmin extends React.Component {
     this.state = {
       admin_details: localStorage.getItem('admin_details') ? JSON.parse(localStorage.getItem('admin_details')) : '',
       locations: [],
+      loading: false,
     };
   }
 
   componentDidMount() {
+    this.setState({ loading: true });
     if (window.location.pathname?.includes('changeuserprofile')) {
       request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+        this.setState({ loading: false });
         const { success, data } = result;
         if (success) {
           this.form?.setFieldsValue(data);
         }
+      }).catch(err => {
+        this.setState({ loading: false });
+        message.error(err.message);
       })
 
       request.post(getCityConnections).then(result => {
@@ -36,6 +43,7 @@ class InfoAdmin extends React.Component {
       })
     } else {
       request.post(getAdminInfo).then(res => {
+        this.setState({ loading: false });
         const { success, data } = res;
         if (success) {
           this.form?.setFieldsValue(data?.admin);
@@ -44,6 +52,8 @@ class InfoAdmin extends React.Component {
           }
           this.setState({ locations: data?.locations });
         }
+      }).catch(err => {
+        message.error(err.message);
       })
     }
   }
@@ -67,7 +77,7 @@ class InfoAdmin extends React.Component {
   };
 
   render() {
-    const { locations } = this.state;
+    const { locations, loading } = this.state;
 
     return (
       <Row justify="center" className="row-form">
@@ -142,6 +152,7 @@ class InfoAdmin extends React.Component {
             </Form.Item>
           </Form>
         </div>
+        <PageLoading loading={loading} isBackground={true} />
       </Row>
     );
   }
