@@ -30,7 +30,7 @@ class ModalInputCode extends React.Component {
 
 		return (
 			<Modal {...modalProps}>
-				<Input placeholder={intl.formatMessage(messages.verificationCode)} onChange={(e) => this.setState({ code: e.target.value })} />
+				<Input placeholder={intl.formatMessage(messages.verificationCode)} onKeyUp={(e) => e.key == 'Enter' && this.props.onSubmit(this.state.code)} onChange={(e) => this.setState({ code: e.target.value })} />
 			</Modal>
 		);
 	}
