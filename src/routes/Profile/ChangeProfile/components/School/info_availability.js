@@ -95,16 +95,16 @@ class InfoAvailability extends React.Component {
 
 	valueForAvailabilityScheduleForOpenHour = (array, index) => {
 		if (array?.length - 1 < index) {
-			return moment('00:00:00', 'HH:mm:ss')
+			return moment('00:00:00', 'HH:mm:ss');
 		}
-		return moment(`${array[index].openHour}:${array[index].openMin}:00`, 'HH:mm:ss')
+		return (array[index].openHour > -1 || array[index].openMin > -1) ? moment(`${array[index].openHour}:${array[index].openMin}:00`, 'HH:mm:ss') : undefined;
 	}
 
 	valueForAvailabilityScheduleForCloseHour = (array, index) => {
 		if (array?.length - 1 < index) {
-			return moment('00:00:00', 'HH:mm:ss')
+			return moment('00:00:00', 'HH:mm:ss');
 		}
-		return moment(`${array[index].closeHour}:${array[index].closeMin}:00`, 'HH:mm:ss')
+		return (array[index].closeHour > -1 || array[index].closeMin > -1) ? moment(`${array[index].closeHour}:${array[index].closeMin}:00`, 'HH:mm:ss') : undefined;
 	}
 
 	onFinish = (values) => {
@@ -142,50 +142,22 @@ class InfoAvailability extends React.Component {
 	}
 
 	onSelectTimeForSesssion(index, value, type) {
-		const hour = value.hour()
-		const minute = value.minute()
+		const hour = value?.hour();
+		const minute = value?.minute();
 		const { sessionsInSchool, sessionsAfterSchool } = this.state;
 
 		switch (type) {
 			case 'inOpen':
-				this.setState({
-					sessionsInSchool: sessionsInSchool.map((session, sessIndex) => {
-						if (sessIndex == index) {
-							return { ...session, openHour: hour, minute: minute };
-						}
-						return session;
-					})
-				})
+				this.setState({ sessionsInSchool: sessionsInSchool.map((session, sessIndex) => sessIndex == index ? { ...session, openHour: hour, openMin: minute } : session) });
 				break;
 			case 'inClose':
-				this.setState({
-					sessionsInSchool: sessionsInSchool.map((session, sessIndex) => {
-						if (sessIndex == index) {
-							return { ...session, closeHour: hour, closeMin: minute };
-						}
-						return session;
-					})
-				})
+				this.setState({ sessionsInSchool: sessionsInSchool.map((session, sessIndex) => sessIndex == index ? { ...session, closeHour: hour, closeMin: minute } : session) });
 				break;
 			case 'afterOpen':
-				this.setState({
-					sessionsAfterSchool: sessionsAfterSchool.map((session, sessIndex) => {
-						if (sessIndex == index) {
-							return { ...session, openHour: hour, openMin: minute };
-						}
-						return session;
-					})
-				})
+				this.setState({ sessionsAfterSchool: sessionsAfterSchool.map((session, sessIndex) => sessIndex == index ? { ...session, openHour: hour, openMin: minute } : session) });
 				break;
 			case 'afterClose':
-				this.setState({
-					sessionsAfterSchool: sessionsAfterSchool.map((session, sessIndex) => {
-						if (sessIndex == index) {
-							return { ...session, closeHour: hour, closeMin: minute };
-						}
-						return session;
-					})
-				})
+				this.setState({ sessionsAfterSchool: sessionsAfterSchool.map((session, sessIndex) => sessIndex == index ? { ...session, closeHour: hour, closeMin: minute } : session) });
 				break;
 			default:
 				break;
@@ -240,6 +212,7 @@ class InfoAvailability extends React.Component {
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
 												onSelect={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
+												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'inOpen')}
 												popupClassName="timepicker"
 												use12Hours
 												format="h:mm a"
@@ -250,6 +223,7 @@ class InfoAvailability extends React.Component {
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
 												onSelect={v => this.onSelectTimeForSesssion(index, v, 'inClose')}
+												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'inClose')}
 												popupClassName="timepicker"
 												use12Hours
 												format="h:mm a"
@@ -263,6 +237,7 @@ class InfoAvailability extends React.Component {
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
 												onSelect={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')}
+												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'afterOpen')}
 												popupClassName="timepicker"
 												use12Hours
 												format="h:mm a"
@@ -273,6 +248,7 @@ class InfoAvailability extends React.Component {
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
 												onSelect={v => this.onSelectTimeForSesssion(index, v, 'afterClose')}
+												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'afterClose')}
 												popupClassName="timepicker"
 												use12Hours
 												format="h:mm a"
