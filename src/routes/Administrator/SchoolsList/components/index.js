@@ -1,6 +1,6 @@
 import { Divider, Table, Space, Button, Input, message } from 'antd';
 import { routerLinks } from '../../../constant';
-import { ModalConfirm, ModalEditUser } from '../../../../components/Modal';
+import { ModalConfirm, ModalInputCode } from '../../../../components/Modal';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
 import mgsSidebar from '../../../../components/SideBar/messages';
@@ -9,12 +9,14 @@ import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
 import { activateUser, getSchools } from '../../../../utils/api/apiList';
 import PageLoading from '../../../../components/Loading/PageLoading';
+import { setSelectedUser } from '../../../../redux/features/authSlice';
+import { store } from '../../../../redux/store';
 
 export default class extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			visibleEdit: false,
+			visibleInputCode: false,
 			schools: [],
 			userRole: -1,
 			isConfirmModal: false,
@@ -56,12 +58,22 @@ export default class extends React.Component {
 		this.props.history.push(routerLinks.CreateAccountForAdmin);
 	}
 
-	onShowModalEdit = () => {
-		this.setState({ visibleEdit: true })
+	onShowModalInputCode = (user) => {
+		this.setState({ visibleInputCode: true, selectedUser: user })
 	}
 
-	onCloseModalEdit = () => {
-		this.setState({ visibleEdit: false })
+	onCloseModalInputCode = () => {
+		this.setState({ visibleInputCode: false })
+	}
+
+	verifyCode = (code) => {
+		if (code == 613) {
+			this.onCloseModalInputCode();
+			store.dispatch(setSelectedUser(this.state.selectedUser));
+			this.props.history.push(routerLinks.ChangeUserProfile);
+		} else {
+			message.warning('Invalid code. Try again.');
+		}
 	}
 
 	handleActivate = (id, state) => {
@@ -100,12 +112,11 @@ export default class extends React.Component {
 	}
 
 	render() {
-		const { visibleEdit, schools, isConfirmModal, confirmMessage, loading } = this.state;
+		const { visibleInputCode, schools, isConfirmModal, confirmMessage, loading } = this.state;
 		const columns = [
 			{ title: 'User Name', dataIndex: 'username', key: 'username', sorter: (a, b) => a.username > b.username ? 1 : -1 },
 			{ title: 'Email', dataIndex: 'email', key: 'email', sorter: (a, b) => a.email > b.email ? 1 : -1 },
 			{ title: 'School Name', dataIndex: 'schoolInfo', key: 'schoolname', sorter: (a, b) => a?.schoolInfo?.name > b?.schoolInfo?.name ? 1 : -1, render: (schoolInfo) => schoolInfo?.name },
-			{ title: 'Community', dataIndex: 'schoolInfo', key: 'communityserved', sorter: (a, b) => a?.schoolInfo?.communityServed?.name > b?.schoolInfo?.communityServed?.name ? 1 : -1, render: (schoolInfo) => schoolInfo?.communityServed?.name },
 			{
 				title: 'Address', dataIndex: 'schoolInfo', key: 'address',
 				sorter: (a, b) => a?.schoolInfo?.valueForContact > b?.schoolInfo?.valueForContact ? 1 : -1, render: (schoolInfo) => schoolInfo?.valueForContact,
@@ -157,17 +168,17 @@ export default class extends React.Component {
 			{
 				title: 'Action', key: 'action', render: (user) => (
 					<Space size="middle">
-						<a className='btn-blue' onClick={() => this.onShowModalEdit()}>Edit</a>
+						<a className='btn-blue' onClick={() => this.onShowModalInputCode(user)}>Edit</a>
 						<a className='btn-red' onClick={() => this.handleActivate(user._id, user.isActive ? 0 : 1)}>{user.isActive ? 'Deactivate' : 'Activate'}</a>
 					</Space>
 				),
 			},
 		];
 
-		const modalEditUserProps = {
-			visible: visibleEdit,
-			onSubmit: this.onCloseModalEdit,
-			onCancel: this.onCloseModalEdit,
+		const modalInputCodeProps = {
+			visible: visibleInputCode,
+			onSubmit: this.verifyCode,
+			onCancel: this.onCloseModalInputCode,
 		}
 
 		const confirmModalProps = {
@@ -183,11 +194,8 @@ export default class extends React.Component {
 					<p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.schoolsList)}</p>
 					<Divider />
 				</div>
-				{/* <div className='text-right mb-20'>
-					<Button type='primary' onClick={() => this.handleNewSchool()}>Create New School</Button>
-				</div> */}
 				<Table bordered size='middle' dataSource={schools} columns={columns} />
-				<ModalEditUser {...modalEditUserProps} />
+				<ModalInputCode {...modalInputCodeProps} />
 				<ModalConfirm {...confirmModalProps} />
 				<PageLoading loading={loading} isBackground={true} />
 			</div>
