@@ -116,6 +116,11 @@ class InfoAvailability extends Component {
 				locations: ['Dependent Home', ...this.state.locations],
 			});
 		} else {
+			message.warning("All availability for dependent's home will also be deleted.").then(() => {
+				day_week.forEach(day => {
+					this.form.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a.location != 'Dependent Home'));
+				})
+			});
 			this.setState({
 				isHomeVisit: state,
 				locations: this.state.locations?.filter(location => location != 'Dependent Home'),
@@ -130,6 +135,11 @@ class InfoAvailability extends Component {
 				locations: ['Provider Office', ...this.state.locations],
 			});
 		} else {
+			message.warning('All availability for your office will also be deleted.').then(() => {
+				day_week.forEach(day => {
+					this.form.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a.location != 'Provider Office'));
+				})
+			});
 			this.setState({
 				isPrivateOffice: state,
 				locations: this.state.locations?.filter(location => location != 'Provider Office'),
@@ -141,6 +151,11 @@ class InfoAvailability extends Component {
 		if (state) {
 			this.setState({ isSchools: state });
 		} else {
+			message.warning('All availability for those school will also be deleted.').then(() => {
+				day_week.forEach(day => {
+					this.form.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a.location == 'Provider Office' || a.location == 'Dependent Home'));
+				})
+			});
 			this.setState({
 				isSchools: state,
 				locations: this.state.locations?.filter(location => location == 'Provider Office' || location == 'Dependent Home'),
@@ -158,6 +173,11 @@ class InfoAvailability extends Component {
 		const { locations, listSchool } = this.state;
 		const schoolName = listSchool?.find(school => school._id == schoolId)?.name;
 		this.setState({ locations: locations.filter(location => location != schoolName) });
+		message.warning('All availability for this school will also be deleted.').then(() => {
+			day_week.forEach(day => {
+				this.form.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a.location != schoolName));
+			})
+		});
 	}
 
 	getDayOfWeekIndex = (day) => {
@@ -214,9 +234,9 @@ class InfoAvailability extends Component {
 		const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
 
 		fetch(usa_url).then(response => response.json()).then(data => {
-			const holidays = [...new Set(data.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
+			const holidays = [...new Set(data?.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
 			fetch(jewish_url).then(response => response.json()).then(data1 => {
-				const holidays1 = [...new Set(data1.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
+				const holidays1 = [...new Set(data1?.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
 				const dates = this.form.getFieldValue("blackoutDates");
 				let uniqueDates = [];
 				[...dates ?? [], ...holidays ?? [], ...holidays1 ?? []]?.sort((a, b) => a - b)?.forEach(c => {
@@ -376,7 +396,7 @@ class InfoAvailability extends Component {
 														</div>
 													</Col>
 													<Col span={12}>
-														<div className='text-center div-copy-week'>
+														<div className='div-copy-week justify-center'>
 															<a className='font-10 underline text-primary' onClick={() => this.copyToFullWeek(day)}>
 																{intl.formatMessage(messages.copyFullWeek)}
 															</a>

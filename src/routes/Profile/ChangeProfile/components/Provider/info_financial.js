@@ -282,7 +282,6 @@ class InfoFinancial extends Component {
 													<BsDashCircle size={16} className='text-red icon-remove' onClick={() => {
 														remove(field.name);
 														const selectedLevels = this.form.getFieldValue('academicLevel');
-														console.log(selectedLevels);
 														const levelOptions = [
 															{ label: 'By Level', options: this.props.auth.academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
 															{ label: 'By Grade', options: this.props.auth.academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },

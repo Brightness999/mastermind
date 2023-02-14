@@ -46,7 +46,7 @@ class InfoFinancial extends Component {
 					AcademicLevel: data.AcademicLevel,
 					academicLevels: [
 						{ label: 'By Level', options: registerData?.financialInfor?.academicLevel ? data.AcademicLevel.slice(0, 6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : data.AcademicLevel.slice(0, 6)?.map(a => ({ label: a, value: a })) ?? [] },
-						{ label: 'By Grade', options: registerData?.financialInfor?.academicLevel ? data.AcademicLevel.slice(6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : data.AcademicLevel.slice(0, 6)?.map(a => ({ label: a, value: a })) ?? [] },
+						{ label: 'By Grade', options: registerData?.financialInfor?.academicLevel ? data.AcademicLevel.slice(6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : data.AcademicLevel.slice(6)?.map(a => ({ label: a, value: a })) ?? [] },
 					]
 				});
 			} else {
