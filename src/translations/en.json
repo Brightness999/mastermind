@@ -331,6 +331,7 @@
   "components.Modal.currentBalanceDue": "Current balance due",
   "components.Modal.daysPastDue": "Days past due",
   "components.Modal.scheduleConsultation": "Schedule Consultation",
+  "components.Modal.createGoogleMeet": "Create Google Meet",
   "components.Modal.referralService": "HMGH Referral Service",
   "components.Modal.byPhone": "By phone",
   "components.Modal.googleMeet": "Google Meet",

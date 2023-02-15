@@ -269,6 +269,10 @@ export default {
     id: `${scope}.scheduleConsultation`,
     defaultMessage: 'Schedule Consultation',
   },
+  createGoogleMeet: {
+    id: `${scope}.createGoogleMeet`,
+    defaultMessage: 'Create Google Meet',
+  },
   referralService: {
     id: `${scope}.referralService`,
     defaultMessage: 'HMGH Referral Service',

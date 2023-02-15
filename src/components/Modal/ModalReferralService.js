@@ -13,10 +13,11 @@ import '../../assets/styles/login.less';
 import { url } from '../../utils/api/baseUrl'
 import request from '../../utils/api/request'
 import 'moment/locale/en-au';
-import { createAppointmentForParent, createGoogleMeet, getAllConsultantForParent } from '../../utils/api/apiList';
+import { createAppointmentForParent, getAllConsultantForParent, getAuthorizationUrl, getMeetingLink } from '../../utils/api/apiList';
 moment.locale('en');
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { setMeetingLink, setSelectedTime } from '../../redux/features/authSlice';
 
 class ModalReferralService extends React.Component {
 	state = {
@@ -57,7 +58,9 @@ class ModalReferralService extends React.Component {
 			});
 		}
 		this.setState({ arrTime: arrTime, phoneNumber: user?.parentInfo?.fatherPhoneNumber ? user?.parentInfo?.fatherPhoneNumber : user?.parentInfo?.motherPhoneNumber });
-		this.form?.setFieldsValue({ phoneNumber: user?.parentInfo?.fatherPhoneNumber ? user?.parentInfo?.fatherPhoneNumber : user?.parentInfo?.motherPhoneNumber });
+		if (user.role == 3) {
+			this.form?.setFieldsValue({ phoneNumber: user?.parentInfo?.fatherPhoneNumber ? user?.parentInfo?.fatherPhoneNumber : user?.parentInfo?.motherPhoneNumber });
+		}
 	}
 
 	getConsultationData = (dependentId) => {
@@ -141,40 +144,36 @@ class ModalReferralService extends React.Component {
 		}
 	}
 
-	changeMeetingType = (status) => {
-		const { selectedDependent, selectedTimeIndex, selectedDate, arrTime } = this.state;
+	changeMeetingType = () => {
+		const { selectedTimeIndex, selectedDate, arrTime } = this.state;
 		const meetingLink = this.form.getFieldValue('meetingLink');
-		if (status && !meetingLink) {
-
-			/* Checking if the user has selected a dependent, date and time. If not, it will display a warning
-			message. */
-			if (!selectedDependent) {
-				message.warning('Please select your dependent.');
-				this.setState({ isGoogleMeet: false });
-				return;
-			}
-
-			if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
-				message.warning('Please select date and time.');
-				this.setState({ isGoogleMeet: false });
-				return;
-			}
-
-			/* Setting the state of the isGoogleMeet variable to the status variable. */
-			this.setState({ isGoogleMeet: status });
-
-			/* Creating a Google Meet link. */
+		if (!meetingLink) {
 			const { years, months, date } = selectedDate.toObject();
 			const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
 
-			request.post(createGoogleMeet, { startTime: selectedTime.format('YYYY-MM-DDTHH:mm:ssZ'), endTime: selectedTime.clone().add(30, 'minute').format('YYYY-MM-DDTHH:mm:ssZ') }).then(res => {
-				const { success, data } = res;
-				if (success) {
-					this.form.setFieldsValue({ meetingLink: data });
-				}
+			this.props.dispatch(setSelectedTime(selectedTime));
+			request.post(getAuthorizationUrl).then(res => {
+				this.props.dispatch(setMeetingLink(res.data?.id));
+				window.open(res.data?.authorizeUrl);
+				let i = 0;
+				const checkMeetingLink = setInterval(() => {
+					i++;
+					request.post(getMeetingLink, { _id: res.data?.id }).then(result => {
+						if (result.data) {
+							this.form.setFieldValue('meetingLink', result.data);
+							clearInterval(checkMeetingLink);
+						}
+					}).catch(err => {
+						clearInterval(checkMeetingLink);
+					})
+
+					if (i === 180) {
+						clearInterval(checkMeetingLink);
+					}
+				}, 1000);
 			})
 		} else {
-			this.setState({ isGoogleMeet: status });
+			this.createConsulation();
 		}
 	}
 
@@ -195,10 +194,14 @@ class ModalReferralService extends React.Component {
 	}
 
 	handleSelectDependent = (dependentId) => {
+		const dependent = this.props.auth.dependents?.find(d => d._id == dependentId);
 		this.setState({
 			selectedDependent: dependentId,
-			skillSet: this.props.auth.dependents?.find(d => d._id == dependentId)?.services,
+			skillSet: dependent?.services,
 		});
+		if (this.props.auth.user?.role > 3) {
+			this.form.setFieldValue('phoneNumber', dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ?? dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber);
+		}
 		this.getConsultationData(dependentId);
 	}
 
@@ -280,7 +283,7 @@ class ModalReferralService extends React.Component {
 					<Form
 						name='consultation-form'
 						layout='vertical'
-						onFinish={this.createConsulation}
+						onFinish={this.changeMeetingType}
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
@@ -323,7 +326,7 @@ class ModalReferralService extends React.Component {
 							<Col xs={24} sm={24} md={8}>
 								<div className='flex gap-2 pb-10'>
 									<div>{intl.formatMessage(messages.byPhone)}</div>
-									<Switch className='phone-googlemeet-switch' checked={isGoogleMeet} onChange={this.changeMeetingType} />
+									<Switch className='phone-googlemeet-switch' checked={isGoogleMeet} onChange={(status) => this.setState({ isGoogleMeet: status })} />
 									<div>{intl.formatMessage(messages.googleMeet)}</div>
 								</div>
 								<Form.Item
@@ -344,7 +347,7 @@ class ModalReferralService extends React.Component {
 								<Form.Item
 									name='meetingLink'
 									label={intl.formatMessage(messages.meetingLink)}
-									rules={[{ required: isGoogleMeet }]}
+									rules={[{ required: false }]}
 									className={`${isGoogleMeet ? '' : 'd-none'}`}
 								>
 									<Input className='meeting-link' disabled />
@@ -454,8 +457,8 @@ class ModalReferralService extends React.Component {
 	}
 };
 
-const mapStateToProps = state => {
-	return ({ auth: state.auth });
-}
+const mapStateToProps = state => ({
+	auth: state.auth,
+});
 
 export default compose(connect(mapStateToProps))(ModalReferralService);
