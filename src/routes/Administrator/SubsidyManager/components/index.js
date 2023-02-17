@@ -7,7 +7,7 @@ import request, { generateSearchStructureWithPopulateSearch } from '../../../../
 import { ModalNewGroup, ModalSubsidyProgress } from '../../../../components/Modal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { getSubsidyRequests } from '../../../../utils/api/apiList';
+import { getAdminSubsidyRequests } from '../../../../utils/api/apiList';
 import PageLoading from '../../../../components/Loading/PageLoading';
 
 class SubsidyManager extends React.Component {
@@ -84,7 +84,7 @@ class SubsidyManager extends React.Component {
   getSubsidyPerPage = (page = 1) => {
     const postData = this.generatePostData();
     this.setState({ loading: true });
-    request.post(getSubsidyRequests, postData).then(result => {
+    request.post(getAdminSubsidyRequests, postData).then(result => {
       this.setState({ loading: false });
       const { success, data } = result;
       if (success) {
