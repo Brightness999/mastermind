@@ -882,7 +882,7 @@ class SchedulingCenter extends React.Component {
                           <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
                         </div>
                         <div className='text-center ml-auto mr-5'>
-                          <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
+                          <p className='font-11 mb-0'>{appointment?.meetingLink ? intl.formatMessage(msgDrawer.meeting) : intl.formatMessage(messages.phoneCall)}</p>
                           <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
                         </div>
                         <div className='ml-auto'>

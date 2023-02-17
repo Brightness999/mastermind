@@ -37,8 +37,6 @@ class ModalCurrentReferralService extends React.Component {
 	}
 
 	componentDidMount = () => {
-
-		console.log(moment('Tue Feb 14 2023 00:00:00 GMT+0600 (East Kazakhstan Time)').date())
 		const { event } = this.props;
 		let arrTime = [];
 		let hour9AM = moment().set({ hours: 9, minutes: 0, seconds: 0, milliseconds: 0 });
