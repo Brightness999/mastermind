@@ -14,7 +14,8 @@ import { url } from '../../utils/api/baseUrl';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import 'moment/locale/en-au';
-import { createAppointmentForParent, getAllConsultantForParent } from '../../utils/api/apiList';
+import { createAppointmentForParent, getAllConsultantForParent, getAuthorizationUrl, getMeetingLink } from '../../utils/api/apiList';
+import { setMeetingLink, setSelectedTime } from '../../redux/features/authSlice';
 moment.locale('en');
 
 class ModalCurrentReferralService extends React.Component {
@@ -25,8 +26,8 @@ class ModalCurrentReferralService extends React.Component {
 		selectedSkillSet: this.props.event?.skillSet?._id,
 		phoneNumber: this.props.event?.phoneNumber,
 		note: this.props.event?.notes,
-		isGoogleMeet: false,
-		selectedDate: moment(),
+		isGoogleMeet: !!this.props.event?.meetingLink,
+		selectedDate: moment(this.props.event?.date),
 		errorMessage: '',
 		arrTime: [],
 		appointments: [],
@@ -36,6 +37,8 @@ class ModalCurrentReferralService extends React.Component {
 	}
 
 	componentDidMount = () => {
+
+		console.log(moment('Tue Feb 14 2023 00:00:00 GMT+0600 (East Kazakhstan Time)').date())
 		const { event } = this.props;
 		let arrTime = [];
 		let hour9AM = moment().set({ hours: 9, minutes: 0, seconds: 0, milliseconds: 0 });
@@ -56,18 +59,25 @@ class ModalCurrentReferralService extends React.Component {
 				active: false,
 			});
 		}
-		this.setState({ arrTime: arrTime });
+		this.setState({ arrTime: arrTime, skillSet: event?.dependent?.services });
 		this.form.setFieldsValue({ selectedDependent: event?.dependent?._id, selectedSkillSet: event?.skillSet?._id, phoneNumber: event?.phoneNumber });
-		event?.dependent?._id && this.getConsultationData(event?.dependent?._id);
+
+		if (event?.meetingLink) {
+			this.form.setFieldValue('meetingLink', event.meetingLink);
+		}
+		event?.dependent?._id && this.getConsultationData(event?.dependent?._id, event?.date);
 	}
 
-	getConsultationData = (dependentId) => {
+	getConsultationData = (dependentId, date) => {
 		request.post(getAllConsultantForParent, { dependentId: dependentId }).then(res => {
 			if (res.success) {
 				this.setState({
 					consultants: res.data?.consultants,
 					appointments: res.data?.appointments,
 				});
+				if (date) {
+					this.onSelectDate(moment(date));
+				}
 			} else {
 				this.setState({ consultants: [], appointments: [] });
 			}
@@ -79,6 +89,7 @@ class ModalCurrentReferralService extends React.Component {
 
 	createConsulation = () => {
 		const { selectedDependent, selectedSkillSet, phoneNumber, fileList, note, selectedTimeIndex, selectedDate, arrTime, isGoogleMeet } = this.state;
+		const meetingLink = this.form.getFieldValue("meetingLink");
 
 		if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
 			this.setState({ errorMessage: 'Please select a date and time' });
@@ -93,6 +104,7 @@ class ModalCurrentReferralService extends React.Component {
 			skillSet: selectedSkillSet,
 			date: selectedTime,
 			phoneNumber: isGoogleMeet ? undefined : phoneNumber,
+			meetingLink: isGoogleMeet ? meetingLink : undefined,
 			addtionalDocuments: fileList.length > 0 ? [fileList[0].response.data] : [],
 			notes: note,
 			type: 4,
@@ -137,8 +149,37 @@ class ModalCurrentReferralService extends React.Component {
 		}
 	}
 
-	changeMeetingType = (status) => {
-		this.setState({ isGoogleMeet: status });
+	changeMeetingType = () => {
+		const { selectedTimeIndex, selectedDate, arrTime, isGoogleMeet } = this.state;
+		const meetingLink = this.form.getFieldValue('meetingLink');
+		if (isGoogleMeet && !meetingLink) {
+			const { years, months, date } = selectedDate.toObject();
+			const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
+
+			store.dispatch(setSelectedTime(selectedTime));
+			request.post(getAuthorizationUrl).then(res => {
+				store.dispatch(setMeetingLink(res.data?.id));
+				window.open(res.data?.authorizeUrl);
+				let i = 0;
+				const checkMeetingLink = setInterval(() => {
+					i++;
+					request.post(getMeetingLink, { _id: res.data?.id }).then(result => {
+						if (result.data) {
+							this.form.setFieldValue('meetingLink', result.data);
+							clearInterval(checkMeetingLink);
+						}
+					}).catch(err => {
+						clearInterval(checkMeetingLink);
+					})
+
+					if (i === 180) {
+						clearInterval(checkMeetingLink);
+					}
+				}, 1000);
+			})
+		} else {
+			this.createConsulation();
+		}
 	}
 
 	prevMonth = () => {
@@ -158,7 +199,19 @@ class ModalCurrentReferralService extends React.Component {
 	}
 
 	handleSelectDependent = (value) => {
-		this.setState({ selectedDependent: value });
+		const dependent = this.state.dependents?.find(d => d._id == value);
+		this.setState({
+			selectedDependent: value,
+			skillSet: dependent?.services,
+			selectedSkillSet: undefined,
+		});
+		if (store.getState().auth.user?.role > 3) {
+			this.form.setFieldsValue({
+				phoneNumber: dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ?? dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber,
+				selectedSkillSet: undefined,
+			});
+			this.setState({ phoneNumber: dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ?? dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber });
+		}
 		this.getConsultationData(value);
 	}
 
@@ -207,7 +260,7 @@ class ModalCurrentReferralService extends React.Component {
 	}
 
 	render() {
-		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, dependents, skillSet } = this.state;
+		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, dependents, skillSet, consultants } = this.state;
 		const { event } = this.props;
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -257,7 +310,7 @@ class ModalCurrentReferralService extends React.Component {
 					<Form
 						name='consultation-form'
 						layout='vertical'
-						onFinish={this.createConsulation}
+						onFinish={this.changeMeetingType}
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
@@ -300,7 +353,7 @@ class ModalCurrentReferralService extends React.Component {
 							<Col xs={24} sm={24} md={8}>
 								<div className='flex gap-2 pb-10'>
 									<div>{intl.formatMessage(messages.byPhone)}</div>
-									<Switch className='phone-googlemeet-switch' checked={isGoogleMeet} onChange={this.changeMeetingType} />
+									<Switch className='phone-googlemeet-switch' checked={isGoogleMeet} onChange={(status) => this.setState({ isGoogleMeet: status })} />
 									<div>{intl.formatMessage(messages.googleMeet)}</div>
 								</div>
 								<Form.Item
@@ -310,13 +363,21 @@ class ModalCurrentReferralService extends React.Component {
 										{ required: !isGoogleMeet, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
 										{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
 									]}
-									className={`${isGoogleMeet ? 'display-none' : ''}`}
+									className={`${isGoogleMeet ? 'd-none' : ''}`}
 								>
 									<Input
 										placeholder={intl.formatMessage(msgCreateAccount.contactNumber)}
 										value={phoneNumber}
 										onChange={v => this.setState({ phoneNumber: v.target.value })}
 									/>
+								</Form.Item>
+								<Form.Item
+									name='meetingLink'
+									label={intl.formatMessage(messages.meetingLink)}
+									rules={[{ required: false }]}
+									className={`${isGoogleMeet ? '' : 'd-none'}`}
+								>
+									<Input className='meeting-link' disabled />
 								</Form.Item>
 							</Col>
 						</Row>
@@ -350,7 +411,27 @@ class ModalCurrentReferralService extends React.Component {
 													fullscreen={false}
 													value={selectedDate}
 													onSelect={this.onSelectDate}
-													disabledDate={(date) => date.isBefore(new Date())}
+													disabledDate={(date) => {
+														if (date.isBefore(moment())) {
+															return true;
+														}
+
+														if (date.isAfter(moment()) && date.day() == 6) {
+															return true;
+														}
+
+														const ranges = consultants?.filter(consultant => consultant?.manualSchedule?.find(d => d.dayInWeek == date.day() && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate }))));
+														if (!ranges?.length) {
+															return true;
+														}
+
+														const blackoutDates = consultants?.filter(consultant => consultant?.blackoutDates?.find(d => date.year() == moment(d).year() && date.month() == moment(d).month() && date.date() == moment(d).date()));
+														if (blackoutDates?.length) {
+															return true;
+														}
+
+														return false;
+													}}
 													headerRender={() => (
 														<div className='mb-10'>
 															<Row gutter={8} justify="space-between" align="middle">
@@ -380,7 +461,7 @@ class ModalCurrentReferralService extends React.Component {
 												<Row gutter={15}>
 													{arrTime?.map((time, index) => (
 														<Col key={index} span={12}>
-															<div className={`${selectedTimeIndex === index ? 'active' : ''} ${time.active ? 'time-available' : 'time-not-available'}`} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
+															<div className={`${selectedTimeIndex === index ? 'active' : ''} ${time.active ? 'time-available' : 'time-not-available'} ${moment(event?.date)?.year() == selectedDate?.year() && moment(event?.date)?.month() == selectedDate?.month() && moment(event?.date)?.date() == selectedDate?.date() && moment(event?.date).hours() == time.value.hours() && moment(event?.date).minutes() == time.value.minutes() ? 'prev-time' : ''}`} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
 																<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
 															</div>
 														</Col>

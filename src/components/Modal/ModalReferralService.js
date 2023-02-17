@@ -145,9 +145,9 @@ class ModalReferralService extends React.Component {
 	}
 
 	changeMeetingType = () => {
-		const { selectedTimeIndex, selectedDate, arrTime } = this.state;
+		const { selectedTimeIndex, selectedDate, arrTime, isGoogleMeet } = this.state;
 		const meetingLink = this.form.getFieldValue('meetingLink');
-		if (!meetingLink) {
+		if (isGoogleMeet && !meetingLink) {
 			const { years, months, date } = selectedDate.toObject();
 			const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
 
@@ -198,9 +198,14 @@ class ModalReferralService extends React.Component {
 		this.setState({
 			selectedDependent: dependentId,
 			skillSet: dependent?.services,
+			selectedSkillSet: undefined,
 		});
 		if (this.props.auth.user?.role > 3) {
-			this.form.setFieldValue('phoneNumber', dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ?? dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber);
+			this.form.setFieldsValue({
+				phoneNumber: dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ?? dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber,
+				selectedSkillSet: undefined,
+			});
+			this.setState({ phoneNumber: dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ?? dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber });
 		}
 		this.getConsultationData(dependentId);
 	}
@@ -395,6 +400,11 @@ class ModalReferralService extends React.Component {
 
 														const ranges = consultants?.filter(consultant => consultant?.manualSchedule?.find(d => d.dayInWeek == date.day() && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate }))));
 														if (!ranges?.length) {
+															return true;
+														}
+
+														const blackoutDates = consultants?.filter(consultant => consultant?.blackoutDates?.find(d => date.year() == moment(d).year() && date.month() == moment(d).month() && date.date() == moment(d).date()));
+														if (blackoutDates?.length) {
 															return true;
 														}
 
