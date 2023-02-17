@@ -36,14 +36,15 @@ class SchoolAvailability extends React.Component {
 			sessionsInSchool: [],
 			sessionsAfterSchool: [],
 			isSubmit: false,
+			allHolidays: [],
 		}
 	}
 
-	componentDidMount() {
+	async componentDidMount() {
 		const { registerData } = this.props.register;
 
 		this.form.setFieldsValue(registerData);
-		if (!registerData.sessionsInSchool || registerData.sessionsInSchool.length == 0) {
+		if (!registerData?.sessionsInSchool || registerData?.sessionsInSchool.length == 0) {
 			this.setState({
 				sessionsInSchool: [this.defaultTimeRangeItem(), this.defaultTimeRangeItem(), this.defaultTimeRangeItem()],
 				sessionsAfterSchool: [this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false)]
@@ -52,6 +53,16 @@ class SchoolAvailability extends React.Component {
 			this.setState({
 				sessionsInSchool: registerData.sessionsInSchool,
 				sessionsAfterSchool: registerData.sessionsAfterSchool
+			})
+		}
+
+		const holidays = await this.getHolidays();
+		if (registerData?.blackoutDates?.length) {
+			await this.updateBlackoutDates(registerData?.blackoutDates?.map(date => new Date(date)));
+			document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
+				let name = document.createElement("div");
+				name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
+				el.after(name);
 			})
 		}
 	}
@@ -179,30 +190,82 @@ class SchoolAvailability extends React.Component {
 		this.setReduxForSchool('sessionsAfterSchool', this.state.sessionsAfterSchool);
 	}
 
-	handleClickGoogleCalendar = () => {
-		const usa_url = `${BASE_CALENDAR_URL}/${USA_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
-		const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+	getHolidays = async () => {
+		try {
+			const usa_url = `${BASE_CALENDAR_URL}/${USA_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+			const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
 
-		fetch(usa_url).then(response => response.json()).then(data => {
-			const holidays = [...new Set(data.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
-			fetch(jewish_url).then(response => response.json()).then(data1 => {
-				const holidays1 = [...new Set(data1.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
-				const dates = this.form.getFieldValue("blackoutDates");
-				let uniqueDates = [];
-				[...dates ?? [], ...holidays ?? [], ...holidays1 ?? []]?.sort((a, b) => a - b)?.forEach(c => {
-					if (!uniqueDates.find(d => d.toString() == c.toString())) {
-						uniqueDates.push(c);
-					}
-				})
-				this.form.setFieldsValue({ blackoutDates: uniqueDates });
-				this.setReduxForSchool('blackoutDates', uniqueDates?.map(date => date.toString()));
-			})
+			const usa_data = await fetch(usa_url).then(response => response.json());
+			const jewish_data = await fetch(jewish_url).then(response => response.json());
+
+			this.setState({ allHolidays: [...usa_data?.items ?? [], ...jewish_data?.items ?? []] });
+			this.props.setRegisterData({ allHolidays: [...usa_data?.items ?? [], ...jewish_data?.items ?? []] });
+
+			return [...usa_data?.items ?? [], ...jewish_data?.items ?? []];
+		} catch (error) {
+			return [];
+		}
+	}
+
+	handleClickGoogleCalendar = async () => {
+		const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
+		let uniqueDates = [];
+		[...dates ?? [], ...[...new Set(this.state.allHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+			if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
+				uniqueDates.push(c);
+			}
+		})
+
+		await this.updateBlackoutDates(uniqueDates);
+
+		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
+			const name = this.state.allHolidays?.find(a => a.start.date == el.innerText)?.summary;
+			if (name) {
+				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
+					el.nextElementSibling.innerText = name;
+				} else {
+					let newElement = document.createElement("div");
+					newElement.textContent = name;
+					el.after(newElement);
+				}
+			} else {
+				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
+					el.nextElementSibling.innerText = '';
+				}
+			}
 		})
 	}
 
-	handleUpdateBlackoutDates = (dates) => {
+	updateBlackoutDates = async (dates) => {
 		this.form.setFieldsValue({ blackoutDates: dates });
 		this.setReduxForSchool('blackoutDates', dates?.map(date => date.toString()));
+		return new Promise((resolveOuter) => {
+			resolveOuter(
+				new Promise((resolveInner) => {
+					setTimeout(resolveInner, 0);
+				}),
+			);
+		});
+	}
+
+	handleUpdateBlackoutDates = async (dates) => {
+		await this.updateBlackoutDates(dates);
+		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
+			const name = this.state.allHolidays?.find(a => a.start.date == el.innerText)?.summary;
+			if (name) {
+				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
+					el.nextElementSibling.innerText = name;
+				} else {
+					let newElement = document.createElement("div");
+					newElement.textContent = name;
+					el.after(newElement);
+				}
+			} else {
+				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
+					el.nextElementSibling.innerText = '';
+				}
+			}
+		})
 	}
 
 	render() {
@@ -279,17 +342,20 @@ class SchoolAvailability extends React.Component {
 							))}
 						</div>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
-						<div className='flex items-center justify-center gap-2 cursor mb-10' onClick={() => this.handleClickGoogleCalendar()}>
-							<img src='../images/gg.png' className='h-30' />
-							<p className='font-16 mb-0'>Google</p>
+						<div className='flex items-center justify-center mb-10'>
+							<div className='flex gap-2 items-center cursor' onClick={() => this.handleClickGoogleCalendar()}>
+								<img src='../images/gg.png' className='h-30' />
+								<p className='font-16 mb-0 text-underline'>Google</p>
+							</div>
 						</div>
 						<Form.Item name="blackoutDates">
 							<MultiDatePicker.Calendar
 								multiple
 								sort
 								className='m-auto'
+								format="YYYY-MM-DD"
 								onChange={dates => this.handleUpdateBlackoutDates(dates)}
-								plugins={[<DatePanel />]}
+								plugins={[<DatePanel id="datepanel" />]}
 							/>
 						</Form.Item>
 						<Form.Item className="form-btn continue-btn" >

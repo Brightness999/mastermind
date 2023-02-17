@@ -587,7 +587,7 @@
 
 .col-review-account,
 .col-availability {
-  width: 450px;
+  width: 500px;
   margin-top: 50px;
 
   .review-item {
@@ -611,10 +611,34 @@
   .continue-btn {
     margin-top: 60px;
   }
+}
 
-  .rmdp-wrapper .rmdp-panel.right ul li .b-deselect {
-    color: black;
-    padding: 8px;
+.rmdp-wrapper {
+  width: 100% !important;
+
+  .rmdp-panel.right {
+    flex: 1;
+
+    ul {
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      li {
+        display: block;
+
+        span {
+          flex: 1;
+          text-align: center;
+          font-size: 15px;
+        }
+
+        .b-deselect {
+          color: black;
+          padding: 8px;
+        }
+      }
+    }
   }
 }
 
@@ -687,7 +711,7 @@
 }
 
 .col-school {
-  width: 450px;
+  width: 500px;
   margin-top: 50px;
   padding: 30px 30px;
 

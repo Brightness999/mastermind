@@ -29,14 +29,23 @@ class ConsultantAvailability extends Component {
     this.state = {
       currentSelectedDay: day_week[0],
       isSubmit: false,
+      allHolidays: [],
     }
   }
 
-  componentDidMount() {
-    let { registerData } = this.props.register;
+  async componentDidMount() {
+    const { registerData } = this.props.register;
+    const holidays = await this.getHolidays();
+
     if (!!registerData.step2) {
       this.form?.setFieldsValue({ ...registerData.step2 });
-      this.form?.setFieldValue('blackoutDates', registerData?.step2?.blackoutDates?.map(date => new Date(date)));
+
+      await this.updateBlackoutDates(registerData?.step2?.blackoutDates?.map(date => new Date(date)));
+      document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
+        let name = document.createElement("div");
+        name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
+        el.after(name);
+      })
     } else {
       day_week.map((day) => {
         this.form.setFieldValue(day, [''])
@@ -130,30 +139,82 @@ class ConsultantAvailability extends Component {
     })
   }
 
-  handleClickGoogleCalendar = () => {
-    const usa_url = `${BASE_CALENDAR_URL}/${USA_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
-    const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+  getHolidays = async () => {
+    try {
+      const usa_url = `${BASE_CALENDAR_URL}/${USA_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+      const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
 
-    fetch(usa_url).then(response => response.json()).then(data => {
-      const holidays = [...new Set(data.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
-      fetch(jewish_url).then(response => response.json()).then(data1 => {
-        const holidays1 = [...new Set(data1.items?.map(item => [item.start.date]).flat())]?.map(date => new Date(date));
-        const dates = this.form.getFieldValue("blackoutDates");
-        let uniqueDates = [];
-        [...dates ?? [], ...holidays ?? [], ...holidays1 ?? []]?.sort((a, b) => a - b)?.forEach(c => {
-          if (!uniqueDates.find(d => d.toString() == c.toString())) {
-            uniqueDates.push(c);
-          }
-        })
-        this.form.setFieldsValue({ blackoutDates: uniqueDates });
-        this.onChangeScheduleValue();
-      })
+      const usa_data = await fetch(usa_url).then(response => response.json());
+      const jewish_data = await fetch(jewish_url).then(response => response.json());
+
+      this.setState({ allHolidays: [...usa_data?.items ?? [], ...jewish_data?.items ?? []] });
+      this.props.setRegisterData({ allHolidays: [...usa_data?.items ?? [], ...jewish_data?.items ?? []] });
+
+      return [...usa_data?.items ?? [], ...jewish_data?.items ?? []];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  handleClickGoogleCalendar = async () => {
+    const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
+    let uniqueDates = [];
+    [...dates ?? [], ...[...new Set(this.state.allHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+      if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
+        uniqueDates.push(c);
+      }
+    })
+
+    await this.updateBlackoutDates(uniqueDates);
+
+    document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
+      const name = this.state.allHolidays?.find(a => a.start.date == el.innerText)?.summary;
+      if (name) {
+        if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
+          el.nextElementSibling.innerText = name;
+        } else {
+          let newElement = document.createElement("div");
+          newElement.textContent = name;
+          el.after(newElement);
+        }
+      } else {
+        if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
+          el.nextElementSibling.innerText = '';
+        }
+      }
     })
   }
 
-  handleUpdateBlackoutDates = (dates) => {
+  updateBlackoutDates = async (dates) => {
     this.form.setFieldsValue({ blackoutDates: dates });
     this.onChangeScheduleValue();
+    return new Promise((resolveOuter) => {
+      resolveOuter(
+        new Promise((resolveInner) => {
+          setTimeout(resolveInner, 0);
+        }),
+      );
+    });
+  }
+
+  handleUpdateBlackoutDates = async (dates) => {
+    await this.updateBlackoutDates(dates);
+    document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
+      const name = this.state.allHolidays?.find(a => a.start.date == el.innerText)?.summary;
+      if (name) {
+        if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
+          el.nextElementSibling.innerText = name;
+        } else {
+          let newElement = document.createElement("div");
+          newElement.textContent = name;
+          el.after(newElement);
+        }
+      } else {
+        if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
+          el.nextElementSibling.innerText = '';
+        }
+      }
+    })
   }
 
   render() {
@@ -258,17 +319,20 @@ class ConsultantAvailability extends Component {
               ))}
             </div>
             <p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
-            <div className='flex items-center justify-center gap-2 cursor mb-10' onClick={() => this.handleClickGoogleCalendar()}>
-              <img src='../images/gg.png' className='h-30' />
-              <p className='font-16 mb-0'>Google</p>
+            <div className='flex items-center justify-center mb-10'>
+              <div className='flex gap-2 items-center cursor' onClick={() => this.handleClickGoogleCalendar()}>
+                <img src='../images/gg.png' className='h-30' />
+                <p className='font-16 mb-0 text-underline'>Google</p>
+              </div>
             </div>
             <Form.Item name="blackoutDates">
               <MultiDatePicker.Calendar
                 multiple
                 sort
                 className='m-auto'
+                format="YYYY-MM-DD"
                 onChange={dates => this.handleUpdateBlackoutDates(dates)}
-                plugins={[<DatePanel />]}
+                plugins={[<DatePanel id="datepanel" />]}
               />
             </Form.Item>
             <Form.Item className="form-btn continue-btn" >

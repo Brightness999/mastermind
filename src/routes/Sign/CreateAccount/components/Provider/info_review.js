@@ -324,6 +324,15 @@ class InfoReview extends Component {
 										})}
 									</div>
 								</div>
+								<div className='mt-10'>
+									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.blackoutDates)}</p>
+									{registerData?.availability?.blackoutDates?.map((date, index) => (
+										<div className='flex gap-2' key={index}>
+											<div>{new Date(date.toString()).toLocaleDateString()}</div>
+											<div>{registerData?.allHolidays?.find(a => new Date(a?.start?.date).toLocaleDateString() == new Date(date.toString()).toLocaleDateString())?.summary}</div>
+										</div>
+									))}
+								</div>
 							</Col>
 						</Row>
 						<div className="form-btn continue-btn" >
