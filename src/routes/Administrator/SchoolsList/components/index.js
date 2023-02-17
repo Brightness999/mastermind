@@ -153,18 +153,22 @@ export default class extends React.Component {
 				filterIcon: (filtered) => (
 					<SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
 				),
-				onFilter: (value, record) =>
-					record?.schoolInfo?.valueForContact
-						.toString()
-						.toLowerCase()
-						.includes((value).toLowerCase()),
+				onFilter: (value, record) => record?.schoolInfo?.valueForContact.toString().toLowerCase().includes((value).toLowerCase()),
 				onFilterDropdownOpenChange: visible => {
 					if (visible) {
 						setTimeout(() => this.searchInput.current?.select(), 100);
 					}
 				}
 			},
-			{ title: 'Active', dataIndex: 'isActive', key: 'isActive', render: (isActive) => isActive ? 'True' : 'False', sorter: (a, b) => a.isActive - b.isActive },
+			{
+				title: 'Active', dataIndex: 'isActive', key: 'isActive',
+				render: (isActive) => isActive ? 'True' : 'False',
+				filters: [
+					{ text: 'True', value: 1 },
+					{ text: 'False', value: 0 },
+				],
+				onFilter: (value, record) => record.isActive == value,
+			},
 			{
 				title: 'Action', key: 'action', render: (user) => (
 					<Space size="middle">

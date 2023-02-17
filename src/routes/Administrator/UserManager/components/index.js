@@ -190,8 +190,20 @@ class UserManager extends React.Component {
 				],
 				onFilter: (value, record) => record.role == value,
 			},
-			{ title: 'Active', dataIndex: 'isActive', key: 'isActive', render: (isActive) => isActive ? 'True' : 'False', sorter: (a, b) => a.isActive - b.isActive },
-			{ title: 'Last Activity', dataIndex: 'activity', key: 'lastActivity', render: (activity) => new Date(activity?.slice(-1)?.[0]?.timeLogin)?.toLocaleString(), sorter: (a, b) => new Date(a?.activity?.slice(-1)?.[0]?.timeLogin) > new Date(b?.activity?.slice(-1)?.[0]?.timeLogin) ? 1 : -1 },
+			{
+				title: 'Active', dataIndex: 'isActive', key: 'isActive',
+				render: (isActive) => isActive ? 'True' : 'False',
+				filters: [
+					{ text: 'True', value: 1 },
+					{ text: 'False', value: 0 },
+				],
+				onFilter: (value, record) => record.isActive == value,
+			},
+			{
+				title: 'Last Activity', dataIndex: 'activity', key: 'lastActivity',
+				render: (activity) => new Date(activity?.slice(-1)?.[0]?.timeLogin)?.toLocaleString(),
+				sorter: (a, b) => new Date(a?.activity?.slice(-1)?.[0]?.timeLogin) > new Date(b?.activity?.slice(-1)?.[0]?.timeLogin) ? 1 : -1,
+			},
 			{
 				title: 'Action', key: 'action', render: (user) => (
 					<Space size="middle">
