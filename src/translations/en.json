@@ -379,6 +379,7 @@
   "components.drawerdetail.screeningDetails": "Screening Details",
   "components.drawerdetail.screeningCancelled": "Screening Cancelled",
   "components.drawerdetail.phonenumber": "PhoneNumber",
+  "components.drawerdetail.meeting": "Meeting",
   "components.drawerdetail.what": "What",
   "components.drawerdetail.who": "Who",
   "components.drawerdetail.with": "With",

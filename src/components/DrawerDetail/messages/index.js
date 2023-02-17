@@ -25,6 +25,10 @@ export default {
     id: `${scope}.phonenumber`,
     defaultMessage: 'PhoneNumber',
   },
+  meeting: {
+    id: `${scope}.meeting`,
+    defaultMessage: 'Meeting',
+  },
   what: {
     id: `${scope}.what`,
     defaultMessage: 'What',

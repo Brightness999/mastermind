@@ -101,6 +101,11 @@ class DrawerDetail extends Component {
     this.updateAppointments();
   }
 
+  submitModalCurrentReferral = () => {
+    this.setState({ visibleCurrentReferral: false });
+    this.updateAppointments();
+  }
+
   closeModalCurrent = () => {
     this.props.event?.type == 4 ? this.setState({ visibleCurrentReferral: false }) : this.setState({ visibleCurrent: false });
   }
@@ -149,11 +154,11 @@ class DrawerDetail extends Component {
 
   displayDuration = () => {
     const { event } = this.props;
-    let duration = event?.provider?.duration ?? 0;
+    let duration = event?.provider?.duration ?? 30;
     if (event?.type == 2) {
       duration = duration * 1 + event?.provider?.separateEvaluationDuration * 1;
     }
-    return `${moment(event?.date).format('MM/DD/YYYY hh:mm a')} - ${moment(event?.date).add(duration, 'minutes').format('hh:mm a')}`;
+    return `${moment(event?.date).format('MM/DD/YYYY hh:mm a')} - ${moment(event?.date).clone().add(duration, 'minutes').format('hh:mm a')}`;
   }
 
   handleMarkAsClosed = (items, skipEvaluation, note, publicFeedback) => {
@@ -467,6 +472,7 @@ class DrawerDetail extends Component {
     }
     const modalCurrentReferralProps = {
       visible: visibleCurrentReferral,
+      onSubmit: this.submitModalCurrentReferral,
       onCancel: this.closeModalCurrent,
       event: event,
     }
@@ -576,8 +582,8 @@ class DrawerDetail extends Component {
           )}
           {[1, 4].includes(event?.type) && (
             <div className='detail-item flex'>
-              <p className='font-18 font-700 title'>{intl.formatMessage(messages.phonenumber)}</p>
-              <p className='font-18'>{event?.phoneNumber}</p>
+              <p className='font-18 font-700 title'>{(event?.type == 4 && event?.meetingLink) ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}</p>
+              <p className={`font-18 ${(event?.type == 4 && event?.meetingLink) ? 'text-underline text-primary' : ''}`} onClick={() => (event?.type == 4 && event?.meetingLink) && window.open(event?.meetingLink)} >{(event?.type == 4 && event?.meetingLink) ? event?.meetingLink : event?.phoneNumber}</p>
             </div>
           )}
         </div>
