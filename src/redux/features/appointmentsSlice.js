@@ -4,7 +4,7 @@ import request from '../../utils/api/request'
 import { getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getParentSubsidyRequests, getSchoolSubsidyRequests } from '../../utils/api/apiList';
 
 const initialState = {
-	dataAppointments: {},
+	dataAppointments: [],
 	dataSubsidyRequests: [],
 	dataAppointmentsMonth: []
 };
