@@ -375,13 +375,13 @@ class SchedulingCenter extends React.Component {
   handleClickPrevMonth = () => {
     const calendar = this.calendarRef.current;
     calendar._calendarApi.prev();
-    this.updateCalendarEvents(this.state.userRole);
+    this.updateCalendarEvents(this.state.userRole, this.state.selectedDependentId);
   }
 
   handleClickNextMonth = () => {
     const calendar = this.calendarRef.current;
     calendar._calendarApi.next();
-    this.updateCalendarEvents(this.state.userRole);
+    this.updateCalendarEvents(this.state.userRole, this.state.selectedDependentId);
   }
 
   updateCalendarEvents(role, dependentId) {
