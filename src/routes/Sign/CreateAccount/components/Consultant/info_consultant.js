@@ -178,7 +178,7 @@ class InfoConsultant extends Component {
                         >
                           <Select placeholder={intl.formatMessage(messages.type)}>
                             {ContactNumberType.map((value, index) => (
-                              <Select.Option key={index} value={index}>{value}</Select.Option>
+                              <Select.Option key={index} value={value}>{value}</Select.Option>
                             ))}
                           </Select>
                         </Form.Item>
@@ -236,7 +236,7 @@ class InfoConsultant extends Component {
                         >
                           <Select placeholder={intl.formatMessage(messages.type)}>
                             {EmailType.map((value, index) => (
-                              <Select.Option key={index} value={index}>{value}</Select.Option>
+                              <Select.Option key={index} value={value}>{value}</Select.Option>
                             ))}
                           </Select>
                         </Form.Item>
