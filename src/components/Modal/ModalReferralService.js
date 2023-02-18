@@ -17,7 +17,7 @@ import { createAppointmentForParent, getAllConsultantForParent, getAuthorization
 moment.locale('en');
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { setMeetingLink, setSelectedTime } from '../../redux/features/authSlice';
+import { setMeetingLink, setSelectedTime, setSelectedUser } from '../../redux/features/authSlice';
 
 class ModalReferralService extends React.Component {
 	state = {
@@ -145,13 +145,15 @@ class ModalReferralService extends React.Component {
 	}
 
 	changeMeetingType = () => {
-		const { selectedTimeIndex, selectedDate, arrTime, isGoogleMeet } = this.state;
+		const { selectedTimeIndex, selectedDate, arrTime, isGoogleMeet, selectedDependent } = this.state;
+		const { dependents } = this.props.auth;
 		const meetingLink = this.form.getFieldValue('meetingLink');
 		if (isGoogleMeet && !meetingLink) {
 			const { years, months, date } = selectedDate.toObject();
 			const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
 
 			this.props.dispatch(setSelectedTime(selectedTime));
+			this.props.dispatch(setSelectedUser(dependents?.find(a => a?._id == selectedDependent)?.parent?.[0]?.parentInfo?.[0]));
 			request.post(getAuthorizationUrl).then(res => {
 				this.props.dispatch(setMeetingLink(res.data?.id));
 				window.open(res.data?.authorizeUrl);
