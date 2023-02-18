@@ -307,7 +307,7 @@ class ConsultantAvailability extends Component {
                           </Col>
                           <Col span={12}>
                             <div className='div-copy-week justify-center'>
-                              <a className='font-10 underline text-primary' onClick={() => this.copyToFullWeek(day)}>{intl.formatMessage(messages.copyFullWeek)}</a>
+                              <a className='underline text-primary' onClick={() => this.copyToFullWeek(day)}>{intl.formatMessage(messages.copyFullWeek)}</a>
                               <QuestionCircleOutlined className='text-primary' />
                             </div>
                           </Col>

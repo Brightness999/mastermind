@@ -322,7 +322,7 @@ class DependentAvailability extends Component {
 							<a className='text-primary'>{intl.formatMessage(messages.addTimeRange)}</a>
 						</div>
 						<div className='text-right div-copy-week' onClick={() => this.copyToFullWeek(index, currentDaySelecting[index])}>
-							<a className='font-10 underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
+							<a className='underline text-primary'>{intl.formatMessage(messages.copyFullWeek)}</a>
 							<QuestionCircleOutlined className='text-primary' />
 						</div>
 					</div>
