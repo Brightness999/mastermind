@@ -60,8 +60,8 @@ class InfoAvailability extends Component {
 				isSchools: registerData.availability?.isSchools,
 			})
 		} else {
-			day_week.map((day) => this.form.setFieldValue(day, ['']));
-			this.form.setFieldsValue({ serviceableSchool: [] });
+			day_week.map((day) => this.form?.setFieldValue(day, ['']));
+			this.form?.setFieldsValue({ serviceableSchool: [] });
 			this.props.setRegisterData({ availability: { isHomeVisit: true, isPrivateOffice: true, isSchools: true } });
 			this.setState({ locations: ['Dependent Home', 'Private Office'] });
 		}
@@ -111,19 +111,19 @@ class InfoAvailability extends Component {
 	}
 
 	onChangeScheduleValue = () => {
-		this.props.setRegisterData({ availability: this.form.getFieldsValue() });
+		this.props.setRegisterData({ availability: this.form?.getFieldsValue() });
 	}
 
 	onLocationChange = (location) => {
-		this.props.setRegisterData({ availability: this.form.getFieldsValue() });
+		this.props.setRegisterData({ availability: this.form?.getFieldsValue() });
 		this.setState({ selectedLocation: location });
 	}
 
 	copyToFullWeek = (dayForCopy) => {
-		const arrToCopy = this.form.getFieldValue(dayForCopy);
+		const arrToCopy = this.form?.getFieldValue(dayForCopy);
 		day_week.map((newDay) => {
 			if (newDay != dayForCopy) {
-				this.form.setFieldValue(newDay, arrToCopy);
+				this.form?.setFieldValue(newDay, arrToCopy);
 			}
 		})
 	}
@@ -137,7 +137,7 @@ class InfoAvailability extends Component {
 		} else {
 			message.warning("All availability for dependent's home will also be deleted.").then(() => {
 				day_week.forEach(day => {
-					this.form?.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a?.location != 'Dependent Home'));
+					this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a?.location != 'Dependent Home'));
 				})
 			});
 			this.setState({
@@ -156,7 +156,7 @@ class InfoAvailability extends Component {
 		} else {
 			message.warning('All availability for your office will also be deleted.').then(() => {
 				day_week.forEach(day => {
-					this.form?.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a?.location != 'Private Office'));
+					this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a?.location != 'Private Office'));
 				})
 			});
 			this.setState({
@@ -172,7 +172,7 @@ class InfoAvailability extends Component {
 		} else {
 			message.warning('All availability for those school will also be deleted.').then(() => {
 				day_week.forEach(day => {
-					this.form?.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a.location == 'Private Office' || a.location == 'Dependent Home'));
+					this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a.location == 'Private Office' || a.location == 'Dependent Home'));
 				})
 			});
 			this.setState({
@@ -213,7 +213,7 @@ class InfoAvailability extends Component {
 
 	handleSelectTime = (value, type, day, index) => {
 		const { selectedLocation, currentSelectedDay, listSchool } = this.state;
-		const dayTime = this.form.getFieldValue(day);
+		const dayTime = this.form?.getFieldValue(day);
 		if (selectedLocation) {
 			const school = listSchool?.find(school => school.name == selectedLocation);
 			if (school) {
@@ -228,22 +228,22 @@ class InfoAvailability extends Component {
 						if (!((value.isSame(inOpenTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterOpenTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
 							message.warning("The school is not available at that time. Please select another time.", 5);
 						} else {
-							this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: value }) : d));
+							this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: value }) : d));
 						}
 					}
 					if (type == 'to_time') {
 						if (!((value.isSame(inCloseTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterCloseTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
 							message.warning("The school is not available at that time. Please select another time.", 5);
 						} else {
-							this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, to_time: value }) : d));
+							this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, to_time: value }) : d));
 						}
 					}
 				}
 			} else {
-				this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: value }) : d));
+				this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: value }) : d));
 			}
 		} else {
-			this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: value }) : d));
+			this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: value }) : d));
 		}
 		this.onChangeScheduleValue();
 	}
@@ -266,7 +266,7 @@ class InfoAvailability extends Component {
 	}
 
 	handleClickGoogleCalendar = async () => {
-		const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
+		const dates = this.form?.getFieldValue("blackoutDates")?.map(date => new Date(date));
 		let uniqueDates = [];
 		[...dates ?? [], ...[...new Set(this.state.allHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
 			if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
@@ -295,7 +295,7 @@ class InfoAvailability extends Component {
 	}
 
 	updateBlackoutDates = async (dates) => {
-		this.form.setFieldsValue({ blackoutDates: dates });
+		this.form?.setFieldsValue({ blackoutDates: dates });
 		return new Promise((resolveOuter) => {
 			resolveOuter(
 				new Promise((resolveInner) => {
