@@ -23,8 +23,17 @@ class InfoSchool extends React.Component {
 	}
 
 	componentDidMount() {
-		this.loadCommunitiServer()
 		const { registerData } = this.props.register;
+		const { user } = this.props.auth;
+
+		this.getDefaultData();
+
+		if (user?.role > 900) {
+			this.setState({ listCommunitiServer: user?.adminCommunity });
+		} else {
+			this.loadCommunitiServer();
+		}
+
 		if (!registerData.contactEmail || registerData.contactEmail.length == 0) {
 			this.setReduxForSchool('contactEmail', [{ email: registerData?.email, type: 'Work' }]);
 			this.form.setFieldsValue({ contactEmail: [{ email: registerData?.email, type: 'Work' }] });
@@ -67,7 +76,9 @@ class InfoSchool extends React.Component {
 			console.log(err);
 			message.error('Cant loading', intl.formatMessage(messages.communitiesServed));
 		})
+	}
 
+	getDefaultData = () => {
 		axios.post(url + getDefaultValueForProvider).then(result => {
 			const { success, data } = result.data;
 			if (success) {
@@ -83,7 +94,7 @@ class InfoSchool extends React.Component {
 
 	render() {
 		const { listCommunitiServer, school_address, emailTypes } = this.state;
-		
+
 		return (
 			<Row justify="center" className="row-form">
 				<div className='col-form col-school'>
@@ -353,7 +364,8 @@ class InfoSchool extends React.Component {
 }
 
 const mapStateToProps = state => ({
-	register: state.register
+	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData, removeRegisterData }))(InfoSchool);

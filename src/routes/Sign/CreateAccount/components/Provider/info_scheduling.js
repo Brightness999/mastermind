@@ -39,24 +39,15 @@ class InfoScheduling extends Component {
 
 	getDataFromServer = () => {
 		axios.post(url + getDefaultValueForProvider).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
+			const { success, data } = result.data;
+			if (success) {
 				this.setState({
-					durations: data?.durations,
-					cancellationWindow: data?.CancellationWindow,
+					durations: data?.durations ?? [],
+					cancellationWindow: data?.CancellationWindow ?? [],
 				})
-			} else {
-				this.setState({
-					durations: [],
-					cancellationWindow: [],
-				});
 			}
 		}).catch(err => {
 			console.log(err);
-			this.setState({
-				durations: [],
-				cancellationWindow: [],
-			});
 		})
 	}
 

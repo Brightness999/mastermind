@@ -237,8 +237,8 @@ class UserManager extends React.Component {
 					<Button type='primary' onClick={() => this.handleNewUser()}>Create New User</Button>
 				</div>
 				<Table bordered size='middle' dataSource={users} columns={columns} />
-				<ModalInputCode {...modalInputCodeProps} />
-				<ModalConfirm {...confirmModalProps} />
+				{visibleInputCode && <ModalInputCode {...modalInputCodeProps} />}
+				{isConfirmModal && <ModalConfirm {...confirmModalProps} />}
 				<PageLoading loading={loading} isBackground={true} />
 			</div>
 		);

@@ -54,21 +54,12 @@ class InfoChild extends Component {
 			const { success, data } = result.data;
 			if (success) {
 				this.setState({
-					listServices: data?.SkillSet,
-					academicLevels: data?.AcademicLevel?.splice(6),
+					listServices: data?.SkillSet ?? [],
+					academicLevels: data?.AcademicLevel?.slice(6) ?? [],
 				})
-			} else {
-				this.setState({
-					listServices: [],
-					academicLevels: [],
-				});
 			}
 		}).catch(err => {
 			console.log('getDefaultValueForClient error---', err);
-			this.setState({
-				listServices: [],
-				academicLevels: [],
-			});
 		})
 	}
 

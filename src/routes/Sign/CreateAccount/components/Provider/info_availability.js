@@ -33,9 +33,10 @@ class InfoAvailability extends Component {
 			isHomeVisit: true,
 			isPrivateOffice: true,
 			isSchools: true,
-			locations: ['Dependent Home', 'Provider Office'],
+			locations: [],
 			listSchool: [],
 			selectedLocation: '',
+			isPrivateForHmgh: false,
 			allHolidays: [],
 		}
 	}
@@ -61,15 +62,24 @@ class InfoAvailability extends Component {
 		} else {
 			day_week.map((day) => this.form.setFieldValue(day, ['']));
 			this.form.setFieldsValue({ serviceableSchool: [] });
+			this.props.setRegisterData({ availability: { isHomeVisit: true, isPrivateOffice: true, isSchools: true } });
+			this.setState({ locations: ['Dependent Home', 'Private Office'] });
 		}
-		this.loadSchools(registerData.profileInfor);
+		this.loadSchools(registerData.profileInfor, registerData.availability);
 	}
 
-	loadSchools(providerInfor) {
-		axios.post(url + getAllSchoolsForParent, { communityServed: providerInfor?.cityConnection }).then(result => {
+	loadSchools(profileInfo, availabilityInfo) {
+		axios.post(url + getAllSchoolsForParent, { communityServed: profileInfo?.cityConnection }).then(result => {
 			const { success, data } = result.data;
 			if (success) {
 				this.setState({ listSchool: data });
+				if (!!availabilityInfo) {
+					let locations = [];
+					availabilityInfo?.isHomeVisit && locations.push('Dependent Home');
+					availabilityInfo?.isPrivateOffice && locations.push('Private Office');
+					availabilityInfo?.serviceableSchool?.length && data?.forEach(school => locations.push(school.name));
+					this.setState({ locations: locations });
+				}
 			}
 		}).catch(err => {
 			console.log('get all schools for parent error---', err);
@@ -79,8 +89,8 @@ class InfoAvailability extends Component {
 	onFinish = (values) => {
 		const invalidDayInWeek = Object.values(values).findIndex(times => times?.find(v => (v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)) || (v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time))));
 		if (invalidDayInWeek < 0) {
-			const { isHomeVisit, isSchools, isPrivateOffice } = this.state;
-			this.props.setRegisterData({ availability: { ...values, isHomeVisit, isSchools, isPrivateOffice } });
+			const { isHomeVisit, isSchools, isPrivateOffice, isPrivateForHmgh } = this.state;
+			this.props.setRegisterData({ availability: { ...values, isHomeVisit, isSchools, isPrivateOffice, isPrivateForHmgh } });
 			this.props.onContinue();
 		} else {
 			message.error(`The selected date or time is not valid on ${day_week[invalidDayInWeek]}`);
@@ -127,7 +137,7 @@ class InfoAvailability extends Component {
 		} else {
 			message.warning("All availability for dependent's home will also be deleted.").then(() => {
 				day_week.forEach(day => {
-					this.form?.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a.location != 'Dependent Home'));
+					this.form?.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a?.location != 'Dependent Home'));
 				})
 			});
 			this.setState({
@@ -141,17 +151,17 @@ class InfoAvailability extends Component {
 		if (state) {
 			this.setState({
 				isPrivateOffice: state,
-				locations: ['Provider Office', ...this.state.locations],
+				locations: ['Private Office', ...this.state.locations],
 			});
 		} else {
 			message.warning('All availability for your office will also be deleted.').then(() => {
 				day_week.forEach(day => {
-					this.form?.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a.location != 'Provider Office'));
+					this.form?.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a?.location != 'Private Office'));
 				})
 			});
 			this.setState({
 				isPrivateOffice: state,
-				locations: this.state.locations?.filter(location => location != 'Provider Office'),
+				locations: this.state.locations?.filter(location => location != 'Private Office'),
 			});
 		}
 	}
@@ -162,12 +172,12 @@ class InfoAvailability extends Component {
 		} else {
 			message.warning('All availability for those school will also be deleted.').then(() => {
 				day_week.forEach(day => {
-					this.form?.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a.location == 'Provider Office' || a.location == 'Dependent Home'));
+					this.form?.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a.location == 'Private Office' || a.location == 'Dependent Home'));
 				})
 			});
 			this.setState({
 				isSchools: state,
-				locations: this.state.locations?.filter(location => location == 'Provider Office' || location == 'Dependent Home'),
+				locations: this.state.locations?.filter(location => location == 'Private Office' || location == 'Dependent Home'),
 			});
 		}
 	}
@@ -184,7 +194,7 @@ class InfoAvailability extends Component {
 		this.setState({ locations: locations.filter(location => location != schoolName) });
 		message.warning('All availability for this school will also be deleted.').then(() => {
 			day_week.forEach(day => {
-				this.form.setFieldValue(day, this.form.getFieldValue(day)?.filter(a => a.location != schoolName));
+				this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a?.location != schoolName));
 			})
 		});
 	}
@@ -316,7 +326,7 @@ class InfoAvailability extends Component {
 	}
 
 	render() {
-		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool } = this.state;
+		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh } = this.state;
 		const { registerData } = this.props.register;
 
 		return (
@@ -439,7 +449,7 @@ class InfoAvailability extends Component {
 															</Col>
 														</Row>
 														{registerData?.subsidy?.isWillingOpenPrivate ? (
-															<div className="flex items-center justify-start gap-2">
+															<div className={`flex items-center justify-start gap-2 ${isPrivateForHmgh ? 'display-none' : ''}`}>
 																<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
 																	<Switch size="small" />
 																</Form.Item>
@@ -472,6 +482,12 @@ class InfoAvailability extends Component {
 								</div>
 							))}
 						</div>
+						{this.props.user?.role > 900 ?
+							<div className="flex items-center justify-start gap-2">
+								<Switch size="small" onChange={(state) => this.setState({ isPrivateForHmgh: state })} />
+								<p className='font-12 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
+							</div> : null
+						}
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
 						<div className='flex items-center justify-center mb-10'>
 							<div className='flex gap-2 items-center cursor' onClick={() => this.handleClickGoogleCalendar()}>
@@ -507,6 +523,7 @@ class InfoAvailability extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
+	user: state.auth.user,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoAvailability);

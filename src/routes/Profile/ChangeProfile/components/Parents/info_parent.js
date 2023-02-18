@@ -26,9 +26,10 @@ class InfoParent extends Component {
 	componentDidMount() {
 		const tokenUser = localStorage.getItem('token');
 		if (tokenUser) {
+			const { selectedUser, user } = this.props.auth;
 			this.setState({ loading: true });
 			if (window.location.pathname?.includes('changeuserprofile')) {
-				request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+				request.post(getUserProfile, { id: selectedUser?._id }).then(result => {
 					const { success, data } = result;
 					if (success) {
 						this.form.setFieldsValue(data?.parentInfo);
@@ -41,27 +42,18 @@ class InfoParent extends Component {
 				this.form.setFieldsValue(parentInfo);
 			}
 
+			user?.role > 900 && this.setState({ cityConnections: user?.adminCommunity });
+
 			request.post(getDefaultValueForClient).then(result => {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.setState({
-						cityConnections: data?.cityConnections,
-						maritialTypes: data?.MaritialType,
-					})
-				} else {
-					this.setState({
-						cityConnections: [],
-						maritialTypes: [],
-					});
+					this.setState({ maritialTypes: data?.MaritialType });
+					user?.role < 900 && this.setState({ cityConnections: data?.cityConnections ?? [] });
 				}
 			}).catch(err => {
 				console.log('get default data for client error---', err);
 				this.setState({ loading: false });
-				this.setState({
-					cityConnections: [],
-					maritialTypes: [],
-				});
 			})
 		}
 	}

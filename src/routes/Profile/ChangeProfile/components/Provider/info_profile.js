@@ -23,24 +23,26 @@ class InfoProfile extends Component {
 			ContactNumberType: [],
 			contactPhoneNumber: [],
 			contactEmail: [],
-			CityConnections: [],
+			cityConnections: [],
 			loading: false,
 		}
 	}
 
 	componentDidMount() {
+		const { selectedUser, user } = this.props.auth;
+
 		this.getDataFromServer();
-		this.searchCityConnection();
 		this.setState({ loading: true });
+		user?.role > 900 ? this.setState({ cityConnections: user?.adminCommunity }) : this.searchCityConnection();
 		if (window.location.pathname?.includes('changeuserprofile')) {
-			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+			request.post(getUserProfile, { id: selectedUser?._id }).then(result => {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data?.providerInfo);
 				}
 			}).catch(err => {
-				console.log('get provider info error---', err);
+				console.log('get user profile error---', err);
 				this.setState({ loading: false });
 			})
 		} else {
@@ -62,21 +64,12 @@ class InfoProfile extends Component {
 			const { success, data } = result;
 			if (success) {
 				this.setState({
-					ContactNumberType: data.ContactNumberType,
-					EmailType: data.EmailType,
-				});
-			} else {
-				this.setState({
-					ContactNumberType: [],
-					EmailType: [],
+					ContactNumberType: data.ContactNumberType ?? [],
+					EmailType: data.EmailType ?? [],
 				});
 			}
 		}).catch(err => {
 			console.log('get default value for provider error ---', err);
-			this.setState({
-				ContactNumberType: [],
-				EmailType: [],
-			});
 		})
 	}
 
@@ -84,13 +77,10 @@ class InfoProfile extends Component {
 		request.post(getCityConnections).then(result => {
 			const { success, data } = result;
 			if (success) {
-				this.setState({ CityConnections: data });
-			} else {
-				this.setState({ CityConnections: [] });
+				this.setState({ cityConnections: data ?? [] });
 			}
 		}).catch(err => {
 			console.log('get city connections error---', err);
-			this.setState({ CityConnections: [] });
 		})
 	}
 
@@ -113,7 +103,7 @@ class InfoProfile extends Component {
 	};
 
 	render() {
-		const { service_address, CityConnections, ContactNumberType, EmailType, loading } = this.state;
+		const { service_address, cityConnections, ContactNumberType, EmailType, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -162,7 +152,7 @@ class InfoProfile extends Component {
 								optionFilterProp="children"
 								filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
 							>
-								{CityConnections?.map((value, index) => (
+								{cityConnections?.map((value, index) => (
 									<Select.Option key={index} value={value._id}>{value.name}</Select.Option>
 								))}
 							</Select>

@@ -18,14 +18,18 @@ class InfoConsultant extends Component {
 			ContactNumberType: [],
 			contactEmail: [],
 			SkillSet: [],
-			CityConnections: [],
+			cityConnections: [],
 			loading: false,
 		}
 	}
 
 	componentDidMount() {
+		const { user } = this.props.auth;
+
 		this.getDataFromServer();
 		this.setState({ loading: true });
+		user?.role > 900 && this.setState({ cityConnections: user?.adminCommunity });
+
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
 				this.setState({ loading: false });
@@ -56,11 +60,11 @@ class InfoConsultant extends Component {
 			const { success, data } = result;
 			if (success) {
 				this.setState({
-					ContactNumberType: data?.ContactNumberType,
-					EmailType: data?.EmailType,
-					SkillSet: data?.SkillSet,
-					CityConnections: data?.CityConnections,
+					ContactNumberType: data?.ContactNumberType ?? [],
+					EmailType: data?.EmailType ?? [],
+					SkillSet: data?.SkillSet ?? [],
 				})
+				this.props.auth?.user?.role < 900 && this.setState({ cityConnections: data.CityConnections ?? [] });
 			}
 		}).catch(err => {
 			console.log(err);
@@ -88,7 +92,7 @@ class InfoConsultant extends Component {
 	};
 
 	render() {
-		const { CityConnections, SkillSet, EmailType, ContactNumberType, loading } = this.state;
+		const { cityConnections, SkillSet, EmailType, ContactNumberType, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -122,7 +126,7 @@ class InfoConsultant extends Component {
 								optionFilterProp="children"
 								filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
 							>
-								{CityConnections?.map((value, index) => (
+								{cityConnections?.map((value, index) => (
 									<Select.Option key={index} value={value._id}>{value.name}</Select.Option>
 								))}
 							</Select>

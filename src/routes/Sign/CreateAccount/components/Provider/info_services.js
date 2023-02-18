@@ -31,15 +31,12 @@ class InfoServices extends Component {
 
 	getDataFromServer = () => {
 		axios.post(url + getDefaultValueForProvider).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
-				this.setState({ SkillSet: data.SkillSet.docs });
-			} else {
-				this.setState({ SkillSet: [] });
+			const { success, data } = result.data;
+			if (success) {
+				this.setState({ SkillSet: data?.SkillSet?.docs ?? [] });
 			}
 		}).catch(err => {
 			console.log('get default value for provider error ---', err);
-			this.setState({ SkillSet: [] });
 		})
 	}
 

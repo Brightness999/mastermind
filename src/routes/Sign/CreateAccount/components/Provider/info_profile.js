@@ -21,14 +21,20 @@ class InfoProfile extends Component {
 			ContactNumberType: [],
 			contactPhoneNumber: [],
 			contactEmail: [],
-			CityConnections: [],
+			cityConnections: [],
 		}
 	}
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
+		const { user } = this.props.auth;
+
+		if (user?.role > 900) {
+			this.setState({ cityConnections: user?.adminCommunity });
+		} else {
+			this.searchCityConnection();
+		}
 		this.getDataFromServer();
-		this.searchCityConnection();
 		const profileInfor = registerData.profileInfor || this.getDefaultObj();
 		this.form.setFieldsValue(profileInfor);
 		if (!registerData.profileInfor) {
@@ -38,24 +44,15 @@ class InfoProfile extends Component {
 
 	getDataFromServer = () => {
 		axios.post(url + getDefaultValueForProvider).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
+			const { success, data } = result.data;
+			if (success) {
 				this.setState({
 					ContactNumberType: data?.ContactNumberType ?? [],
 					EmailType: data?.EmailType ?? [],
 				});
-			} else {
-				this.setState({
-					ContactNumberType: [],
-					EmailType: [],
-				});
 			}
 		}).catch(err => {
 			console.log('get default values for provider error---', err);
-			this.setState({
-				ContactNumberType: [],
-				EmailType: [],
-			});
 		})
 	}
 
@@ -63,13 +60,10 @@ class InfoProfile extends Component {
 		axios.post(url + getCityConnections).then(result => {
 			const { success, data } = result.data;
 			if (success) {
-				this.setState({ CityConnections: data });
-			} else {
-				this.setState({ CityConnections: [] });
+				this.setState({ cityConnections: data ?? [] });
 			}
 		}).catch(err => {
 			console.log('get city connections error ---', err);
-			this.setState({ CityConnections: [] });
 		})
 	}
 
@@ -104,7 +98,7 @@ class InfoProfile extends Component {
 	}
 
 	render() {
-		const { service_address, CityConnections, ContactNumberType, EmailType } = this.state;
+		const { service_address, cityConnections, ContactNumberType, EmailType } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -150,7 +144,7 @@ class InfoProfile extends Component {
 								optionFilterProp="children"
 								filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
 							>
-								{CityConnections?.map((value, index) => (
+								{cityConnections?.map((value, index) => (
 									<Select.Option key={index} value={value._id}>{value.name}</Select.Option>
 								))}
 							</Select>
@@ -336,6 +330,7 @@ class InfoProfile extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoProfile);

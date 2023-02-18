@@ -137,9 +137,9 @@ class ReviewAccount extends Component {
 							<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.address)}</p>
 							<p>Street Address : {registerData?.parentInfo?.address}</p>
 						</div>
+						<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.dependentsInfo)}</p>
 						{registerData?.studentInfos?.map((item, index) => (
 							<div key={index}>
-								<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.dependentsInfo)}</p>
 								<p className='font-14 font-700 mb-10'>{item.firstName} {item.lastName} - {new Date(item.birthday).toDateString()}</p>
 								<p>School : {listSchools?.find(school => school._id == item.school)?.name}</p>
 								<div className='review-item'>

@@ -51,6 +51,7 @@ class CreateDefault extends Component {
 				password: defaultPassword
 			})
 		}
+		this.props.onHandleChangeRoleRegister(registerData.account_type || intl.formatMessage(messages.parent));
 	}
 
 	onFinish = async (values) => {
@@ -159,6 +160,9 @@ class CreateDefault extends Component {
 			case intl.formatMessage(messages.consultant):
 				role = 100;
 				break;
+			case intl.formatMessage(messages.admin):
+				role = 999;
+				break;
 		}
 		this.props.setRegisterData({
 			role: role,
@@ -253,6 +257,7 @@ class CreateDefault extends Component {
 
 	render() {
 		const { showValidateBox } = this.state;
+
 		return (
 			<Row justify="center" className="row-form">
 				<div className="col-form col-create-default">
@@ -334,6 +339,7 @@ class CreateDefault extends Component {
 								<Select.Option value={intl.formatMessage(messages.provider)}>{intl.formatMessage(messages.provider)}</Select.Option>
 								<Select.Option value={intl.formatMessage(messages.school)}>{intl.formatMessage(messages.school)}</Select.Option>
 								<Select.Option value={intl.formatMessage(messages.consultant)}>{intl.formatMessage(messages.consultant)}</Select.Option>
+								{this.props.auth?.user?.role > 900 && <Select.Option value={intl.formatMessage(messages.admin)}>{intl.formatMessage(messages.admin)}</Select.Option>}
 							</Select>
 						</Form.Item>
 						<Form.Item className="form-btn continue-btn">
@@ -348,11 +354,10 @@ class CreateDefault extends Component {
 	}
 }
 
-const mapStateToProps = state => {
-	return {
-		register: state.register
-	}
-}
+const mapStateToProps = state => ({
+	register: state.register,
+	auth: state.auth,
+})
 
 export default compose(
 	connect(mapStateToProps, { setRegisterData }))(CreateDefault);

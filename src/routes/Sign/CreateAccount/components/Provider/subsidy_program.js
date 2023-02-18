@@ -24,6 +24,7 @@ class SubsidyProgram extends Component {
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
+		const { academicLevels, user } = this.props.auth;
 
 		if (registerData.subsidy) {
 			this.form?.setFieldsValue(registerData.subsidy);
@@ -38,20 +39,22 @@ class SubsidyProgram extends Component {
 			isAcceptReduceRate: registerData.isAcceptReduceRate || false,
 			isWillingOpenPrivate: registerData.isWillingOpenPrivate || false,
 		})
-		this.getDataFromServer();
+
+		if (user?.role > 900) {
+			this.setState({ academicLevels: academicLevels });
+		} else {
+			this.getDataFromServer();
+		}
 	}
 
 	getDataFromServer = () => {
 		axios.post(url + getDefaultValueForProvider).then(result => {
 			const { success, data } = result.data;
 			if (success) {
-				this.setState({ academicLevels: data?.AcademicLevel });
-			} else {
-				this.setState({ academicLevels: [] });
+				this.setState({ academicLevels: data?.AcademicLevel ?? [] });
 			}
 		}).catch(err => {
 			console.log('get default data error---', err);
-			this.setState({ academicLevels: [] });
 		})
 	}
 
@@ -272,6 +275,7 @@ class SubsidyProgram extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(SubsidyProgram);

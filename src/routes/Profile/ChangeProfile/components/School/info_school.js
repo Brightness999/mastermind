@@ -6,7 +6,6 @@ import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import PlacesAutocomplete from 'react-places-autocomplete';
 import { getCommunitiServer, getDefaultValueForProvider, getMySchoolInfo, getUserProfile } from '../../../../../utils/api/apiList'
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { setInforSchool } from '../../../../../redux/features/authSlice';
 import { store } from '../../../../../redux/store'
 import { connect } from 'react-redux';
@@ -26,10 +25,13 @@ class InfoSchool extends React.Component {
 	}
 
 	componentDidMount() {
+		const { selectedUser, user } = this.props.auth;
+
 		this.setState({ loading: true });
-		this.loadCommunitiServer();
+		user?.role > 900 ? this.setState({ listCommunitiServer: user?.adminCommunity }) : this.loadCommunitiServer();
+
 		if (window.location.pathname?.includes('changeuserprofile')) {
-			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
+			request.post(getUserProfile, { id: selectedUser?._id }).then(result => {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
@@ -367,8 +369,7 @@ class InfoSchool extends React.Component {
 }
 
 const mapStateToProps = state => ({
-	register: state.register,
 	auth: state.auth
 })
 
-export default compose(connect(mapStateToProps, { setRegisterData }))(InfoSchool);
+export default compose(connect(mapStateToProps))(InfoSchool);

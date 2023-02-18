@@ -19,12 +19,15 @@ class InfoConsultant extends Component {
       ContactNumberType: [],
       contactEmail: [],
       SkillSet: [],
-      CityConnections: [],
+      cityConnections: [],
     }
   }
 
   componentDidMount() {
     const { registerData } = this.props.register;
+    const { user } = this.props.auth;
+
+    user?.role > 900 && this.setState({ cityConnections: user?.adminCommunity });
     this.getDataFromServer();
     const consultantInfo = registerData.consultantInfo || this.getDefaultObj();
     this.form.setFieldsValue(consultantInfo);
@@ -35,20 +38,17 @@ class InfoConsultant extends Component {
 
   getDataFromServer = () => {
     axios.post(url + getDefaultValuesForConsultant).then(result => {
-      if (result.data.success) {
-        const data = result.data.data;
+      const { success, data } = result.data;
+      if (success) {
         this.setState({
           ContactNumberType: data.ContactNumberType,
           EmailType: data.EmailType,
           SkillSet: data.SkillSet,
-          CityConnections: data.CityConnections,
         })
-      } else {
-        this.setState({ checkEmailExist: false });
+        this.props.auth?.user?.role < 900 && this.setState({ cityConnections: data.CityConnections });
       }
     }).catch(err => {
-      console.log(err);
-      this.setState({ checkEmailExist: false });
+      console.log('get default data error---', err);
     })
   }
 
@@ -91,7 +91,7 @@ class InfoConsultant extends Component {
   }
 
   render() {
-    const { CityConnections, SkillSet, EmailType, ContactNumberType } = this.state;
+    const { cityConnections, SkillSet, EmailType, ContactNumberType } = this.state;
 
     return (
       <Row justify="center" className="row-form">
@@ -120,7 +120,7 @@ class InfoConsultant extends Component {
                 optionFilterProp="children"
                 filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
               >
-                {CityConnections?.map((value, index) => (
+                {cityConnections?.map((value, index) => (
                   <Select.Option key={index} value={value._id}>{value.name}</Select.Option>
                 ))}
               </Select>
@@ -281,6 +281,7 @@ class InfoConsultant extends Component {
 
 const mapStateToProps = state => ({
   register: state.register,
+  auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoConsultant);

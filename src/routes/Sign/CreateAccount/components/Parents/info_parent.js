@@ -28,6 +28,7 @@ class InfoParent extends Component {
 		}
 		const parentInfo = registerData.parentInfo || this.getDefaultObj();
 		this.form.setFieldsValue(parentInfo);
+		this.setState({ cityConnections: this.props.user?.adminCommunity });
 		this.searchCityConnection();
 	}
 
@@ -48,24 +49,13 @@ class InfoParent extends Component {
 
 	searchCityConnection() {
 		axios.post(url + getDefaultValueForClient).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
-				this.setState({
-					cityConnections: data?.cityConnections,
-					maritialTypes: data?.MaritialType,
-				})
-			} else {
-				this.setState({
-					cityConnections: [],
-					maritialTypes: [],
-				});
+			const { success, data } = result.data;
+			if (success) {
+				this.setState({ maritialTypes: data?.MaritialType ?? [] });
+				this.props.user?.role < 900 && this.setState({ cityConnections: data?.cityConnections ?? [] });
 			}
 		}).catch(err => {
 			console.log('get default data for client error---', err);
-			this.setState({
-				cityConnections: [],
-				maritialTypes: [],
-			});
 		})
 	}
 
@@ -314,6 +304,7 @@ class InfoParent extends Component {
 
 const mapStateToProps = (state) => ({
 	register: state.register,
+	user: state.auth.user,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoParent);

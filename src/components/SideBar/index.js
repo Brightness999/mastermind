@@ -64,10 +64,9 @@ class SideBar extends Component {
     return (
       <Menu
         mode="inline"
-        rootClassName="height-full"
         items={items}
         defaultSelectedKeys={[location.pathname]}
-        style={{ overflowY: 'scroll' }}
+        style={{ overflowY: 'scroll', overflowX: 'hidden', height: 'calc(100vh - 40px)' }}
       />
     );
   }

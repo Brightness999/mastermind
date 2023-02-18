@@ -29,12 +29,24 @@ class InfoFinancial extends Component {
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
+		const { academicLevels, user } = this.props.auth;
 		if (!registerData.financialInfor) {
 			this.props.setRegisterData({ financialInfor: this.getDefaultObj() });
 		}
 		const financialInfor = registerData.financialInfor || this.getDefaultObj();
 		this.form.setFieldsValue(financialInfor);
-		this.getDataFromServer()
+
+		if (user?.role > 900) {
+			this.setState({
+				AcademicLevel: academicLevels,
+				academicLevels: [
+					{ label: 'By Level', options: registerData?.financialInfor?.academicLevel ? academicLevels.slice(0, 6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : academicLevels.slice(0, 6)?.map(a => ({ label: a, value: a })) ?? [] },
+					{ label: 'By Grade', options: registerData?.financialInfor?.academicLevel ? academicLevels.slice(6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : academicLevels.slice(6)?.map(a => ({ label: a, value: a })) ?? [] },
+				],
+			});
+		} else {
+			this.getDataFromServer()
+		}
 	}
 
 	getDataFromServer = () => {
@@ -43,18 +55,15 @@ class InfoFinancial extends Component {
 			const { success, data } = result.data;
 			if (success) {
 				this.setState({
-					AcademicLevel: data.AcademicLevel,
+					AcademicLevel: data.AcademicLevel ?? [],
 					academicLevels: [
 						{ label: 'By Level', options: registerData?.financialInfor?.academicLevel ? data.AcademicLevel.slice(0, 6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : data.AcademicLevel.slice(0, 6)?.map(a => ({ label: a, value: a })) ?? [] },
 						{ label: 'By Grade', options: registerData?.financialInfor?.academicLevel ? data.AcademicLevel.slice(6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : data.AcademicLevel.slice(6)?.map(a => ({ label: a, value: a })) ?? [] },
 					]
 				});
-			} else {
-				this.setState({ AcademicLevel: [], academicLevels: [] });
 			}
 		}).catch(err => {
 			console.log('get default data for provider error---', err);
-			this.setState({ AcademicLevel: [], academicLevels: [] });
 		})
 	}
 
@@ -400,6 +409,7 @@ class InfoFinancial extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoFinancial);
