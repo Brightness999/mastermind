@@ -14,7 +14,7 @@ import { url } from '../../utils/api/baseUrl';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import 'moment/locale/en-au';
-import { createAppointmentForParent, getAllConsultantForParent, getAuthorizationUrl, getMeetingLink } from '../../utils/api/apiList';
+import { getAllConsultantForParent, getAuthorizationUrl, getMeetingLink, rescheduleAppointmentForParent } from '../../utils/api/apiList';
 import { setMeetingLink, setSelectedTime } from '../../redux/features/authSlice';
 moment.locale('en');
 
@@ -98,6 +98,7 @@ class ModalCurrentReferralService extends React.Component {
 		const { years, months, date } = selectedDate.toObject();
 		const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
 		const postData = {
+			_id: this.props.event?._id,
 			dependent: selectedDependent,
 			skillSet: selectedSkillSet,
 			date: selectedTime,
@@ -109,7 +110,7 @@ class ModalCurrentReferralService extends React.Component {
 			status: 0,
 		};
 
-		request.post(createAppointmentForParent, postData).then(result => {
+		request.post(rescheduleAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({
 					selectedDate: undefined,
