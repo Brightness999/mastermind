@@ -61,6 +61,13 @@ class ModalReferralService extends React.Component {
 		if (user.role == 3) {
 			this.form?.setFieldsValue({ phoneNumber: user?.parentInfo?.fatherPhoneNumber ? user?.parentInfo?.fatherPhoneNumber : user?.parentInfo?.motherPhoneNumber });
 		}
+		this.props.dispatch(setMeetingLink(''));
+	}
+
+	componentDidUpdate(_, prevProps) {
+		if (prevProps?.auth?.meetingLink != this.props.auth?.meetingLink) {
+			this.form?.setFieldValue('meetingLink', this.props.auth?.meetingLink);
+		}
 	}
 
 	getConsultationData = (dependentId) => {
@@ -113,7 +120,8 @@ class ModalReferralService extends React.Component {
 					selectedDependent: undefined,
 					selectedSkillSet: undefined,
 				})
-				this.form.setFieldsValue({ selectedDependent: undefined, selectedSkillSet: undefined });
+				this.form.setFieldsValue({ selectedDependent: undefined, selectedSkillSet: undefined, meetingLink: undefined });
+				this.props.dispatch(setMeetingLink(''));
 				this.props.onSubmit();
 			} else {
 				message.error('cannot create referral');
@@ -155,24 +163,7 @@ class ModalReferralService extends React.Component {
 			this.props.dispatch(setSelectedTime(selectedTime));
 			this.props.dispatch(setSelectedUser(dependents?.find(a => a?._id == selectedDependent)?.parent?.[0]?.parentInfo?.[0]));
 			request.post(getAuthorizationUrl).then(res => {
-				this.props.dispatch(setMeetingLink(res.data?.id));
-				window.open(res.data?.authorizeUrl);
-				let i = 0;
-				const checkMeetingLink = setInterval(() => {
-					i++;
-					request.post(getMeetingLink, { _id: res.data?.id }).then(result => {
-						if (result.data) {
-							this.form.setFieldValue('meetingLink', result.data);
-							clearInterval(checkMeetingLink);
-						}
-					}).catch(err => {
-						clearInterval(checkMeetingLink);
-					})
-
-					if (i === 180) {
-						clearInterval(checkMeetingLink);
-					}
-				}, 1000);
+				window.open(res.data);
 			})
 		} else {
 			this.createConsulation();

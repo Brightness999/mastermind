@@ -29,13 +29,14 @@ import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { setAcademicLevels, setDependents, setLocations, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
+import { setAcademicLevels, setDependents, setLocations, setMeetingLink, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 import Subsidaries from './school';
+import PageLoading from '../../../components/Loading/PageLoading';
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -81,6 +82,7 @@ class Dashboard extends React.Component {
       selectedDependentId: 0,
       visibleCreateNote: false,
       subsidyId: '',
+      loading: false,
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -88,6 +90,7 @@ class Dashboard extends React.Component {
 
   componentDidMount() {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
+      this.setState({ loading: true });
       checkPermission().then(loginData => {
         this.props.dispatch(setUser(loginData));
         const params = new URLSearchParams(window.location.search);
@@ -105,24 +108,7 @@ class Dashboard extends React.Component {
           });
         }
         loginData?.role > 900 && this.props.history.push(routerLinks.Admin)
-        switch (loginData.role) {
-          case 3:
-            this.setState({ parentInfo: loginData.parentInfo });
-            this.loadDefaultData();
-            break;
-          case 30:
-            this.setState({ providerInfo: loginData.providerInfo })
-            this.loadDefaultData();
-            break;
-          case 60:
-            this.setState({ schoolInfo: loginData.schoolInfo })
-            this.loadDefaultData();
-            break;
-          case 100:
-            this.setState({ consultantInfo: loginData.consultantInfo });
-            this.loadDefaultData();
-            break;
-        }
+        this.loadDefaultData();
         this.updateCalendarEvents(loginData.role);
         this.getMyAppointments(loginData.role);
         this.props.dispatch(getSubsidyRequests({ role: loginData.role }));
@@ -245,32 +231,23 @@ class Dashboard extends React.Component {
 
   loadDefaultData() {
     request.post(getDefaultDataForAdmin).then(result => {
+      this.setState({ loading: false });
       const { data, success } = result;
       if (success) {
         this.setState({
-          listProvider: data?.providers,
-          SkillSet: data?.skillSet,
-          listDependents: data?.dependents,
+          listProvider: data?.providers ?? [],
+          SkillSet: data?.skillSet ?? [],
+          listDependents: data?.dependents ?? [],
         });
-        this.props.dispatch(setDependents(data?.dependents));
-        this.props.dispatch(setProviders(data?.providers));
-        this.props.dispatch(setSkillSet(data?.skillSet));
-        this.props.dispatch(setLocations(data?.locations));
-        this.props.dispatch(setAcademicLevels(data?.academicLevels));
-      } else {
-        this.setState({
-          listProvider: [],
-          SkillSet: [],
-          listDependents: [],
-        });
+        this.props.dispatch(setDependents(data?.dependents ?? []));
+        this.props.dispatch(setProviders(data?.providers ?? []));
+        this.props.dispatch(setSkillSet(data?.skillSet ?? []));
+        this.props.dispatch(setLocations(data?.locations ?? []));
+        this.props.dispatch(setAcademicLevels(data?.academicLevels ?? []));
       }
     }).catch(err => {
       console.log('get default data error ---', err);
-      this.setState({
-        listProvider: [],
-        SkillSet: [],
-        listDependents: [],
-      });
+      this.setState({ loading: false });
     })
   }
 
@@ -293,7 +270,7 @@ class Dashboard extends React.Component {
 
     this.socket.on('connect', () => {
       console.log('socket connect success');
-      this.getSubprofile();
+      this.socket.emit('join_room', this.props.user?._id);
     });
 
     this.socket.on('socket_result', data => {
@@ -348,30 +325,11 @@ class Dashboard extends React.Component {
         this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
         this.showNotificationForSubsidyChange(data.data);
         return;
+      case 'meeting_link':
+        this.props.dispatch(setMeetingLink(data.data));
       case 'appeal_subsidy':
         return;
     }
-  }
-
-  getSubprofile = () => {
-    switch (this.state.userRole) {
-      case 3: // get parent info
-        this.joinRoom(this.state.parentInfo._id);
-        for (let i = 0; i < this.state.listDependents.length; i++) {
-          this.joinRoom(this.state.listDependents[i]._id);
-        }
-        return;
-      case 30: // get provider info
-        this.joinRoom(this.state.providerInfo._id);
-        return;
-      case 60:// get school info
-        this.joinRoom(this.state.schoolInfo._id);
-        return;
-    }
-  }
-
-  joinRoom = (roomId) => {
-    this.socket.emit('join_room', roomId);
   }
 
   onShowFilter = () => {
@@ -779,6 +737,7 @@ class Dashboard extends React.Component {
       visibleNewSubsidy,
       visibleSubsidy,
       subsidyId,
+      loading,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -1333,6 +1292,7 @@ class Dashboard extends React.Component {
           {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
           {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
           {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
+          <PageLoading loading={loading} isBackground={true} />
         </div>
       );
     }

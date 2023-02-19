@@ -12,7 +12,6 @@ const CalendarOauth = () => {
       code: query.get('code'),
       startTime: moment(store.getState().auth.selectedTime).format('YYYY-MM-DDTHH:mm:ssZ'),
       endTime: moment(store.getState().auth.selectedTime).clone().add(30, 'minute').format('YYYY-MM-DDTHH:mm:ssZ'),
-      calendarTempId: store.getState().auth.meetingLink,
       parentInfoId: store.getState().auth.selectedUser?._id,
     }
     request.post(createGoogleMeet, params).then(res => {

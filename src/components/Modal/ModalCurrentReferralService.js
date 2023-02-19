@@ -12,10 +12,11 @@ import './style/index.less';
 import '../../assets/styles/login.less';
 import { url } from '../../utils/api/baseUrl';
 import request from '../../utils/api/request';
-import { store } from '../../redux/store';
 import 'moment/locale/en-au';
-import { getAllConsultantForParent, getAuthorizationUrl, getMeetingLink, rescheduleAppointmentForParent } from '../../utils/api/apiList';
-import { setMeetingLink, setSelectedTime } from '../../redux/features/authSlice';
+import { getAllConsultantForParent, getAuthorizationUrl, rescheduleAppointmentForParent } from '../../utils/api/apiList';
+import { setMeetingLink, setSelectedTime, setSelectedUser } from '../../redux/features/authSlice';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 moment.locale('en');
 
 class ModalCurrentReferralService extends React.Component {
@@ -32,8 +33,8 @@ class ModalCurrentReferralService extends React.Component {
 		arrTime: [],
 		appointments: [],
 		consultants: [],
-		dependents: store.getState().auth.dependents,
-		skillSet: store.getState().auth.skillSet,
+		dependents: this.props.auth.dependents,
+		skillSet: this.props.auth.skillSet,
 	}
 
 	componentDidMount = () => {
@@ -64,6 +65,12 @@ class ModalCurrentReferralService extends React.Component {
 			this.form.setFieldValue('meetingLink', event.meetingLink);
 		}
 		event?.dependent?._id && this.getConsultationData(event?.dependent?._id, event?.date);
+	}
+
+	componentDidUpdate(_, prevProps) {
+		if (prevProps?.auth?.meetingLink != this.props.auth?.meetingLink) {
+			this.form?.setFieldValue('meetingLink', this.props.auth?.meetingLink);
+		}
 	}
 
 	getConsultationData = (dependentId, date) => {
@@ -119,7 +126,8 @@ class ModalCurrentReferralService extends React.Component {
 					selectedDependent: undefined,
 					selectedSkillSet: undefined,
 				})
-				this.form.setFieldsValue({ selectedDependent: undefined, selectedSkillSet: undefined });
+				this.form.setFieldsValue({ selectedDependent: undefined, selectedSkillSet: undefined, meetingLink: undefined });
+				this.props.dispatch(setMeetingLink(''));
 				this.props.onSubmit();
 			} else {
 				message.error('cannot create referral');
@@ -149,32 +157,16 @@ class ModalCurrentReferralService extends React.Component {
 	}
 
 	changeMeetingType = () => {
-		const { selectedTimeIndex, selectedDate, arrTime, isGoogleMeet } = this.state;
+		const { selectedTimeIndex, selectedDate, arrTime, isGoogleMeet, selectedDependent } = this.state;
 		const meetingLink = this.form.getFieldValue('meetingLink');
 		if (isGoogleMeet && !meetingLink) {
 			const { years, months, date } = selectedDate.toObject();
 			const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
 
-			store.dispatch(setSelectedTime(selectedTime));
+			this.props.dispatch(setSelectedTime(selectedTime));
+			this.props.dispatch(setSelectedUser(this.props.auth?.dependents?.find(a => a?._id == selectedDependent)?.parent?.[0]?.parentInfo?.[0]));
 			request.post(getAuthorizationUrl).then(res => {
-				store.dispatch(setMeetingLink(res.data?.id));
-				window.open(res.data?.authorizeUrl);
-				let i = 0;
-				const checkMeetingLink = setInterval(() => {
-					i++;
-					request.post(getMeetingLink, { _id: res.data?.id }).then(result => {
-						if (result.data) {
-							this.form.setFieldValue('meetingLink', result.data);
-							clearInterval(checkMeetingLink);
-						}
-					}).catch(err => {
-						clearInterval(checkMeetingLink);
-					})
-
-					if (i === 180) {
-						clearInterval(checkMeetingLink);
-					}
-				}, 1000);
+				window.open(res.data);
 			})
 		} else {
 			this.createConsulation();
@@ -204,7 +196,7 @@ class ModalCurrentReferralService extends React.Component {
 			skillSet: dependent?.services,
 			selectedSkillSet: undefined,
 		});
-		if (store.getState().auth.user?.role > 3) {
+		if (this.props.auth.user?.role > 3) {
 			this.form.setFieldsValue({
 				phoneNumber: dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ?? dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber,
 				selectedSkillSet: undefined,
@@ -488,4 +480,8 @@ class ModalCurrentReferralService extends React.Component {
 	}
 };
 
-export default ModalCurrentReferralService;
+const mapStateToProps = state => ({
+	auth: state.auth,
+});
+
+export default compose(connect(mapStateToProps))(ModalCurrentReferralService);

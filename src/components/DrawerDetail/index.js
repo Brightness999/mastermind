@@ -42,7 +42,6 @@ class DrawerDetail extends Component {
       visibleBalance: false,
       isFlag: this.props.event?.flagStatus,
       note: '',
-      publicFeedback: '',
       visibleEvaluationProcess: false,
       items: [],
     };

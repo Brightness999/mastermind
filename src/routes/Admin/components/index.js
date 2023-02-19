@@ -27,7 +27,7 @@ import moment from 'moment';
 import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice'
 import { routerLinks } from "../../constant";
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { setAcademicLevels, setDependents, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
+import { setAcademicLevels, setDependents, setMeetingLink, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { clearFlag, getDefaultDataForAdmin, requestClearance } from '../../../utils/api/apiList';
@@ -121,16 +121,14 @@ class SchedulingCenter extends React.Component {
       const { success, data } = res;
       if (success) {
         this.setState({
-          SkillSet: data?.skillSet,
-          listProvider: data?.providers,
-          listDependents: data?.dependents,
+          SkillSet: data?.skillSet ?? [],
+          listProvider: data?.providers ?? [],
+          listDependents: data?.dependents ?? [],
         });
-        this.props.dispatch(setDependents(data?.dependents));
-        this.props.dispatch(setProviders(data?.providers));
-        this.props.dispatch(setSkillSet(data?.skillSet));
-        this.props.dispatch(setAcademicLevels(data?.academicLevels));
-      } else {
-        console.log('get default data error---', err);
+        this.props.dispatch(setDependents(data?.dependents ?? []));
+        this.props.dispatch(setProviders(data?.providers ?? []));
+        this.props.dispatch(setSkillSet(data?.skillSet ?? []));
+        this.props.dispatch(setAcademicLevels(data?.academicLevels ?? []));
       }
     }).catch(err => {
       console.log('get default data error---', err);
@@ -157,6 +155,7 @@ class SchedulingCenter extends React.Component {
 
     this.socket.on('connect', () => {
       console.log('socket connect success');
+      this.socket.emit('join_room', this.props.auth?.user?._id);
     });
 
     this.socket.on('socket_result', data => {
@@ -211,6 +210,8 @@ class SchedulingCenter extends React.Component {
         this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
         this.showNotificationForSubsidyChange(data.data);
         return;
+      case 'meeting_link':
+        this.props.dispatch(setMeetingLink(data.data));
       case 'appeal_subsidy':
         return;
     }
@@ -1093,6 +1094,7 @@ const mapStateToProps = state => {
   return ({
     appointments: state.appointments.dataAppointments,
     appointmentsInMonth: state.appointments.dataAppointmentsMonth,
+    auth: state.auth,
   })
 }
 
