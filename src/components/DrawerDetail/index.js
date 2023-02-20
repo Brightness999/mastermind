@@ -143,6 +143,7 @@ class DrawerDetail extends Component {
             isShowEditNotes: false,
           });
           message.success('Successfully Updated');
+          this.updateAppointments();
         }
       }).catch(err => {
         console.log('update edit notes error---', err);
