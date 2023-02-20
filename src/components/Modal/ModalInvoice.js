@@ -39,12 +39,15 @@ class ModalInvoice extends React.Component {
 	}
 
 	handleAddItem = () => {
-		this.state.items.push({
-			type: '',
-			locationDate: '',
-			rate: '',
-		})
-		this.setState({ items: this.state.items });
+		this.setState({
+			items: [
+				...this.state.items,
+				{
+					type: '',
+					locationDate: '',
+					rate: '',
+				}]
+		});
 	}
 
 	onEditItem = (index) => {
@@ -65,17 +68,27 @@ class ModalInvoice extends React.Component {
 	}
 
 	onDeleteItem = (index) => {
-		this.state.items.splice(index, 1);
-		this.state.subTotal = this.state.items.reduce((a, b) => a = a * 1 + b.rate * 1, 0);
-		this.setState({ items: this.state.items, subTotal: this.state.subTotal });
+		const newItems = [...this.state.items];
+		newItems.splice(index, 1);
+		this.setState({ items: newItems, subTotal: newItems.reduce((a, b) => a = a * 1 + b.rate * 1, 0) });
 	}
 
 	handleChangeItem = (type, value) => {
-		this.state.items[this.state.selectedItemIndex][type] = value;
-		if (type === 'rate') {
-			this.state.subTotal = this.state.items.reduce((a, b) => a = a * 1 + b.rate * 1, 0);
-		}
-		this.setState({ [type]: value, items: this.state.items, subTotal: this.state.subTotal });
+		const { items, subTotal, selectedItemIndex } = this.state;
+		const newItems = JSON.parse(JSON.stringify(items))?.map((a, i) => {
+			if (i == selectedItemIndex) {
+				a[type] = value;
+				return a;
+			} else {
+				return a;
+			}
+		})
+
+		this.setState({
+			[type]: value,
+			items: newItems,
+			subTotal: type === 'rate' ? newItems.reduce((a, b) => a = a * 1 + b.rate * 1, 0) : subTotal,
+		});
 	}
 
 	downloadInvoice = () => {

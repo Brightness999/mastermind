@@ -339,7 +339,7 @@ class PanelAppointment extends React.Component {
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
         <Tabs.TabPane tab={intl.formatMessage(msgDashboard.upcoming)} key="1">
-          {appointments?.filter(a => a.type == 3 && a.flagStatus != 1 && a.status == 0 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => a.type == 3 && a.flagStatus != 1 && a.status == 0 && moment().isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {data.status == 0 && (
@@ -350,7 +350,7 @@ class PanelAppointment extends React.Component {
               )}
             </div>
           ))}
-          {(appointments?.filter(a => a.type == 3 && a.flagStatus != 1 && a.status == 0 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
+          {(appointments?.filter(a => a.type == 3 && a.flagStatus != 1 && a.status == 0 && moment().isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
             <div key={1} className='list-item'>
               <p className='p-10'>No upcoming appoiment</p>
             </div>
@@ -378,7 +378,7 @@ class PanelAppointment extends React.Component {
           {visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(msgDashboard.past)} key="3">
-          {appointments?.filter(a => a.type == 3 && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => a.type == 3 && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className={`item-right gap-1 ${data?.status == -3 && 'display-none'}`}>
@@ -387,7 +387,7 @@ class PanelAppointment extends React.Component {
               </div>
             </div>
           ))}
-          {(appointments?.filter(a => a.type == 3 && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
+          {(appointments?.filter(a => a.type == 3 && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
             <div key={1} className='list-item'>
               <p className='p-10'>No past appoiment</p>
             </div>
