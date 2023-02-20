@@ -2212,3 +2212,12 @@ table.notification-settings {
     padding: 12px 26px 12px 16px;
   }
 }
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+}

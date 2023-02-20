@@ -129,7 +129,7 @@ class ModalInvoice extends React.Component {
 
 		return (
 			<Modal {...modalProps}>
-				<table className='w-100 table-fixed'>
+				<table className='w-100 table-fixed' id="invoice">
 					<tbody>
 						<tr>
 							<td colSpan={2}>
@@ -266,9 +266,12 @@ class ModalInvoice extends React.Component {
 					<Button key="print" onClick={() => {
 						document.querySelector(".add-item").style.display = 'none';
 						document.querySelector(".actions").style.display = 'none';
+						document.querySelector(".ant-modal-mask").style.backgroundColor = 'white';
+						document.querySelector(".ant-modal-content").style.boxShadow = 'none';
 						window.print();
 						document.querySelector(".actions").style.display = '';
 						document.querySelector(".add-item").style.display = '';
+						document.querySelector(".ant-modal-mask").style.backgroundColor = '';
 					}}>
 						<PrinterTwoTone />
 						{intl.formatMessage(messages.print)}
@@ -277,7 +280,7 @@ class ModalInvoice extends React.Component {
 						{intl.formatMessage(messages.download)}
 					</Button>
 					<Button key="submit" type="primary" onClick={() => user.role > 3 ? this.props.onSubmit(items) : this.props.onCancel()} style={{ padding: '0px 30px', height: 38 }}>
-						{event?.status == 0 ? intl.formatMessage(messages.createInvoice) : event?.status == -1 ? intl.formatMessage(messages.editInvoice) : intl.formatMessage(messages.ok)}
+						{event?.status == 0 ? intl.formatMessage(messages.createInvoice) : intl.formatMessage(messages.ok)}
 					</Button>
 				</div>
 			</Modal>
