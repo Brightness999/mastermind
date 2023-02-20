@@ -41,18 +41,9 @@ class ModalCurrentReferralService extends React.Component {
 		const { event } = this.props;
 		let arrTime = [];
 		let hour9AM = moment().set({ hours: 9, minutes: 0, seconds: 0, milliseconds: 0 });
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < 18; i++) {
 			let newTime = hour9AM.clone();
 			hour9AM = hour9AM.add(30, 'minutes')
-			arrTime.push({
-				value: newTime,
-				active: false,
-			});
-		}
-		let hour2PM = moment().set({ hours: 14, minutes: 0, seconds: 0, milliseconds: 0 });
-		for (let i = 0; i < 8; i++) {
-			let newTime = hour2PM.clone();
-			hour2PM = hour2PM.add(30, 'minutes')
 			arrTime.push({
 				value: newTime,
 				active: false,
