@@ -362,6 +362,9 @@
   "components.Modal.print": "Print",
   "components.Modal.download": "Download",
   "components.Modal.meetingLink": "Meeting Link",
+  "components.Modal.createInvoice": "Create Invoice",
+  "components.Modal.ok": "Ok",
+  "components.Modal.editInvoice": "Edit Invoice",
 
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.subsidyManager": "Subsidy Request",

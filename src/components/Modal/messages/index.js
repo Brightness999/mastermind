@@ -368,5 +368,17 @@ export default {
   meetingLink: {
     id: `${scope}.meetingLink`,
     defaultMessage: 'Meeting Link',
+  },
+  createInvoice: {
+    id: `${scope}.createInvoice`,
+    defaultMessage: 'Create Invoice',
+  },
+  ok: {
+    id: `${scope}.ok`,
+    defaultMessage: 'Ok',
+  },
+  editInvoice: {
+    id: `${scope}.editInvoice`,
+    defaultMessage: 'Edit Invoice',
   }
 };
