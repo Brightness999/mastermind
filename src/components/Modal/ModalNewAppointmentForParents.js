@@ -236,7 +236,12 @@ class ModalNewAppointmentForParents extends React.Component {
 						}
 					})
 
-					return flag ? { ...time, active: true } : { ...time, active: false };
+					if (flag) {
+						time.active = true;
+					} else {
+						time.active = false;
+					}
+					return time;
 				})
 				this.setState({ arrTime: newArrTime });
 			} else {
@@ -323,7 +328,12 @@ class ModalNewAppointmentForParents extends React.Component {
 				}
 			})
 
-			return flag ? { ...time, active: true } : { ...time, active: false };
+			if (flag) {
+				time.active = true;
+			} else {
+				time.active = false;
+			}
+			return time;
 		})
 
 		let standardRate = 0;

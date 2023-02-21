@@ -240,7 +240,12 @@ class ModalCurrentAppointment extends React.Component {
 						}
 					})
 
-					return flag ? { ...time, active: true } : { ...time, active: false };
+					if (flag) {
+						time.active = true;
+					} else {
+						time.active = false;
+					}
+					return time;
 				})
 				this.setState({ arrTime: newArrTime });
 			} else {
@@ -326,29 +331,13 @@ class ModalCurrentAppointment extends React.Component {
 				}
 			})
 
-			return flag ? { ...time, active: true } : { ...time, active: false };
-		})
-		if (availableTime && availableTime.isPrivate) {
-			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
-			const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
-			const openTime = selectedDate.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
-			const closeTime = selectedDate.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-duration, 'minutes');
-			newPrivateArrTime.map(time => {
-				const { years, months, date } = selectedDate?.toObject();
-				time.value = moment(time.value).set({ years, months, date });
-				if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
-					time.active = true;
-				} else {
-					time.active = false;
-				}
-				return time;
-			})
-		} else {
-			newPrivateArrTime.map(time => {
+			if (flag) {
+				time.active = true;
+			} else {
 				time.active = false;
-				return time;
-			})
-		}
+			}
+			return time;
+		})
 
 		let standardRate = 0;
 		let subsidizedRate = 0;
@@ -885,7 +874,6 @@ class ModalCurrentAppointment extends React.Component {
 														if (selectedProviderIndex > -1) {
 															const range = listProvider[selectedProviderIndex]?.manualSchedule?.find(d => d.dayInWeek == date.day() && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
 															if (date.date() == 9 && date.month() == 2)
-																console.log(range)
 															if (range) {
 																if (range.isPrivate) {
 																	return true;

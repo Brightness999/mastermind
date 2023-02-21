@@ -223,12 +223,17 @@ class ModalNewAppointment extends React.Component {
 
 					let flag = true;
 					this.props.listAppointmentsRecent?.filter(appointment => (appointment.status == 0) && (appointment.provider?._id == listProvider[selectedProviderIndex]?._id || appointment.dependent?._id == selectedDependent))?.forEach(appointment => {
-						if (time.value.isSame(moment(appointment.date))) {
+						if (time.value.toLocaleString() == moment(appointment.date).toLocaleString()) {
 							flag = false;
 						}
 					})
 
-					return flag ? { ...time, active: true } : { ...time, active: false };
+					if (flag) {
+						time.active = true;
+					} else {
+						time.active = false;
+					}
+					return time;
 				})
 				this.setState({ arrTime: newArrTime });
 			} else {
@@ -309,7 +314,12 @@ class ModalNewAppointment extends React.Component {
 				}
 			})
 
-			return flag ? { ...time, active: true } : { ...time, active: false };
+			if (flag) {
+				time.active = true;
+			} else {
+				time.active = false;
+			}
+			return time;
 		})
 
 		let standardRate = 0;
