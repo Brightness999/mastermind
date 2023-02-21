@@ -40,6 +40,7 @@ class InfoAvailability extends Component {
 			isPrivateForHmgh: false,
 			loading: false,
 			allHolidays: [],
+			isWillingOpenPrivate: false,
 		}
 	}
 
@@ -82,6 +83,7 @@ class InfoAvailability extends Component {
 						isSchools: !!data?.providerInfo?.serviceableSchool?.length,
 						isPrivateForHmgh: data?.providerInfo?.isPrivateForHmgh,
 						locations: locations,
+						isWillingOpenPrivate: data?.providerInfo?.isWillingOpenPrivate,
 					})
 				}
 			}).catch(err => {
@@ -124,6 +126,7 @@ class InfoAvailability extends Component {
 						isSchools: !!user?.providerInfo?.serviceableSchool?.length,
 						isPrivateForHmgh: user?.providerInfo?.isPrivateForHmgh,
 						locations: locations,
+						isWillingOpenPrivate: user?.providerInfo?.isWillingOpenPrivate,
 					})
 				}
 			}).catch(err => {
@@ -478,8 +481,7 @@ class InfoAvailability extends Component {
 	}
 
 	render() {
-		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh, loading } = this.state;
-		const { user } = this.props.auth;
+		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh, loading, isWillingOpenPrivate } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -601,7 +603,7 @@ class InfoAvailability extends Component {
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 															</Col>
 														</Row>
-														{user?.providerInfo?.isWillingOpenPrivate ? (
+														{isWillingOpenPrivate ? (
 															<div className={`flex items-center justify-start gap-2 ${isPrivateForHmgh ? 'd-none' : ''}`}>
 																<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
 																	<Switch size="small" />

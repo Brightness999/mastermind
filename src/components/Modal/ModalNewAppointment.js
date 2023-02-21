@@ -48,10 +48,10 @@ class ModalNewAppointment extends React.Component {
 		loading: false,
 	}
 
-	getArrTime = (type, providerIndex) => {
+	getArrTime = (type, providerIndex, date) => {
 		let arrTime = [];
 		let duration = 30;
-		const { listProvider } = this.state;
+		const { listProvider, address } = this.state;
 		const provider = listProvider[providerIndex];
 		if (type == 1 || type == 3) {
 			duration = provider?.duration;
@@ -61,21 +61,54 @@ class ModalNewAppointment extends React.Component {
 		}
 		this.setState({ duration: duration });
 
-		let hour9AM = moment().set({ hours: 9, minutes: 0, seconds: 0, milliseconds: 0 });
-		for (let i = 0; i < 540 / duration; i++) {
-			let newTime = hour9AM.clone();
-			hour9AM = hour9AM.add(duration, 'minutes')
-			arrTime.push({
-				value: newTime,
-				active: false,
-			});
+		if (date) {
+			if (date.day() == 6) {
+				return [];
+			} else if (provider?.blackoutDates?.includes(a => moment(a).year() == date.year() && moment(a).month() == date.month() && moment(a).date() == date.date())) {
+				return [];
+			} else {
+				const ranges = provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && !a.isPrivate && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+				if (!!ranges?.length) {
+					let arr24 = new Array(24).fill(0);
+					let timeObject = { start: 0, end: 0 };
+					let timeArr = [];
+					ranges.forEach(a => {
+						for (let i = a?.openHour; i <= a?.closeHour; i++) {
+							arr24[i] = 1;
+						}
+					})
+					arr24.forEach((a, i) => {
+						if (a == 0) {
+							timeObject = { start: 0, end: 0 };
+						} else {
+							if (i == 0 || arr24[i - 1] == 0) {
+								timeObject.start = i;
+							}
+							if (i == 23 || arr24[i + 1] == 0) {
+								timeObject.end = i;
+								timeArr.push(timeObject);
+							}
+						}
+					});
+					timeArr.forEach(a => {
+						let startTime = moment().set({ hours: a.start, minutes: 0, seconds: 0, milliseconds: 0 });
+						for (let i = 0; i < (a.end - a.start) * 60 / duration; i++) {
+							arrTime.push({
+								value: startTime.clone().add(duration * i, 'minutes'),
+								active: date.isBefore(moment()) ? false : true,
+							});
+						}
+					})
+					return arrTime;
+				} else {
+					return [];
+				}
+			}
 		}
-		return arrTime
 	}
 
 	componentDidMount() {
 		this.setState({
-			arrTime: this.getArrTime(0),
 			skillSet: this.props.SkillSet,
 			selectedDate: moment(this.props.selectedDate),
 		});
@@ -182,44 +215,21 @@ class ModalNewAppointment extends React.Component {
 		if (newValue.isSameOrAfter(new Date())) {
 			const { selectedProviderIndex, selectedDependent, listProvider, appointmentType } = this.state;
 			if (selectedProviderIndex > -1) {
-				const newArrTime = this.getArrTime(appointmentType, selectedProviderIndex);
-				const selectedDay = newValue.day();
-				const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDay);
-				let duration = 30;
-				if (appointmentType == 1 || appointmentType == 3) {
-					duration = listProvider[selectedProviderIndex]?.duration;
-				}
-				if (appointmentType == 2) {
-					duration = listProvider[selectedProviderIndex]?.duration * 1 + listProvider[selectedProviderIndex]?.separateEvaluationDuration * 1
-				}
-				if (availableTime && !availableTime.isPrivate) {
-					const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
-					const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
-					const openTime = newValue.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
-					const closeTime = newValue.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-duration, 'minutes');
-					newArrTime.map(time => {
-						const { years, months, date } = newValue.toObject();
-						time.value = moment(time.value).set({ years, months, date });
-						if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
-							let flag = true;
-							this.props.listAppointmentsRecent?.filter(appointment => (appointment.status == 0) && (appointment.provider?._id == selectedProviderIndex || appointment.dependent?._id == selectedDependent))?.forEach(appointment => {
-								if (time.value.isSame(moment(appointment.date))) {
-									flag = false;
-								}
-							})
-							if (flag) {
-								time.active = true;
-							} else {
-								time.active = false;
-							}
-						} else {
-							time.active = false;
+				const newArrTime = this.getArrTime(appointmentType, selectedProviderIndex, newValue);
+
+				newArrTime?.map(time => {
+					const { years, months, date } = newValue.toObject();
+					time.value = moment(time.value).set({ years, months, date });
+
+					let flag = true;
+					this.props.listAppointmentsRecent?.filter(appointment => (appointment.status == 0) && (appointment.provider?._id == listProvider[selectedProviderIndex]?._id || appointment.dependent?._id == selectedDependent))?.forEach(appointment => {
+						if (time.value.isSame(moment(appointment.date))) {
+							flag = false;
 						}
-						return time;
 					})
-				} else {
-					newArrTime.map(time => ({ ...time, active: false }));
-				}
+
+					return flag ? { ...time, active: true } : { ...time, active: false };
+				})
 				this.setState({ arrTime: newArrTime });
 			} else {
 				this.setState({ arrTime: this.state.arrTime?.map(time => ({ ...time, active: false })) });
@@ -286,69 +296,21 @@ class ModalNewAppointment extends React.Component {
 		}
 		this.setState({ appointmentType: appointmentType });
 
-		const newArrTime = this.getArrTime(appointmentType, providerIndex);
-		const newPrivateArrTime = this.getArrTime(1, providerIndex);
-		const availableTime = listProvider[providerIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDate.day());
-		let duration = 30;
+		const newArrTime = this.getArrTime(appointmentType, providerIndex, selectedDate);
+		const newPrivateArrTime = this.getArrTime(1, providerIndex, selectedDate);
+		newArrTime.map(time => {
+			const { years, months, date } = selectedDate?.toObject();
+			time.value = moment(time.value).set({ years, months, date });
 
-		if (appointmentType == 1 || appointmentType == 3) {
-			duration = listProvider[providerIndex]?.duration;
-		}
-		if (appointmentType == 2) {
-			duration = listProvider[providerIndex]?.duration * 1 + listProvider[providerIndex]?.separateEvaluationDuration * 1
-		}
-		if (availableTime && !availableTime.isPrivate) {
-			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
-			const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
-			const openTime = selectedDate.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
-			const closeTime = selectedDate.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-duration, 'minutes');
-			newArrTime.map(time => {
-				const { years, months, date } = selectedDate?.toObject();
-				time.value = moment(time.value).set({ years, months, date });
-				if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
-					let flag = true;
-					this.props.listAppointmentsRecent?.filter(appointment => (appointment.status == 0) && (appointment.provider?._id == selectedProviderIndex || appointment.dependent?._id == selectedDependent))?.forEach(appointment => {
-						if (time.value.isSame(moment(appointment.date))) {
-							flag = false;
-						}
-					})
-					if (flag) {
-						time.active = true;
-					} else {
-						time.active = false;
-					}
-				} else {
-					time.active = false;
+			let flag = true;
+			this.props.listAppointmentsRecent?.filter(appointment => (appointment.status == 0) && (appointment.provider?._id == listProvider[selectedProviderIndex]?._id || appointment.dependent?._id == selectedDependent))?.forEach(appointment => {
+				if (time.value.isSame(moment(appointment.date))) {
+					flag = false;
 				}
-				return time;
 			})
-		} else {
-			newArrTime.map(time => {
-				time.active = false;
-				return time;
-			})
-		}
-		if (availableTime && availableTime.isPrivate) {
-			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
-			const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
-			const openTime = selectedDate.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
-			const closeTime = selectedDate.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-duration, 'minutes');
-			newPrivateArrTime.map(time => {
-				const { years, months, date } = selectedDate?.toObject();
-				time.value = moment(time.value).set({ years, months, date });
-				if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
-					time.active = true;
-				} else {
-					time.active = false;
-				}
-				return time;
-			})
-		} else {
-			newPrivateArrTime.map(time => {
-				time.active = false;
-				return time;
-			})
-		}
+
+			return flag ? { ...time, active: true } : { ...time, active: false };
+		})
 
 		let standardRate = 0;
 		let subsidizedRate = 0;
@@ -454,31 +416,8 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	onSelectPrivateDate = (newValue) => {
-		const { listProvider, selectedProviderIndex } = this.state;
-		const newArrTime = this.getArrTime(1, selectedProviderIndex);
-		const selectedDay = newValue.day();
-		const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == selectedDay && time.isPrivate);
-		if (availableTime) {
-			const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
-			const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
-			const openTime = newValue.clone().set({ hours: availableTime.openHour, minutes: availableTime.openMin, seconds: 0, milliseconds: 0 });
-			const closeTime = newValue.clone().set({ hours: availableTime.closeHour, minutes: availableTime.closeMin, seconds: 0, milliseconds: 0 }).add(-30, 'minutes');
-			newArrTime.map(time => {
-				const { years, months, date } = newValue.toObject();
-				time.value = moment(time.value).set({ years, months, date });
-				if (time.value.isBetween(availableFromDate, availableToDate) && time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime)) {
-					time.active = true;
-				} else {
-					time.active = false;
-				}
-				return time;
-			})
-		} else {
-			newArrTime.map(time => {
-				time.active = false;
-				return time;
-			})
-		}
+		const { selectedProviderIndex } = this.state;
+		const newArrTime = this.getArrTime(1, selectedProviderIndex, newValue);
 		this.setState({
 			selectedPrivateDate: newValue,
 			privateArrTime: newArrTime,
