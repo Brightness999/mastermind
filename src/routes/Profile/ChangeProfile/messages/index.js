@@ -400,7 +400,7 @@ export default ({
   },
   privateOffice: {
     id: `${scope}.privateOffice`,
-    defaultMessage: 'Private office',
+    defaultMessage: 'Provider Office',
   },
   receiptsRequest: {
     id: `${scope}.receiptsRequest`,

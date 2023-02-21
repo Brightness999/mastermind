@@ -135,7 +135,7 @@
   "routes.Createaccount.sameRateLevels": "Same rate for all levels",
   "routes.Createaccount.separateEvaluation": "Separate evaluation rate",
   "routes.Createaccount.homeVisits": "Home visits",
-  "routes.Createaccount.privateOffice": "Private office",
+  "routes.Createaccount.privateOffice": "Provider Office",
   "routes.Createaccount.receiptsRequest": "Receipts provided for insurance upon request",
   "routes.Createaccount.newClientScreening": "New client screening",
   "routes.Createaccount.newClientEvaluation": "New client evaluation",

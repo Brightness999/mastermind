@@ -63,7 +63,7 @@ class InfoAvailability extends Component {
 			day_week.map((day) => this.form?.setFieldValue(day, ['']));
 			this.form?.setFieldsValue({ serviceableSchool: [] });
 			this.props.setRegisterData({ availability: { isHomeVisit: true, isPrivateOffice: true, isSchools: true } });
-			this.setState({ locations: ['Dependent Home', 'Private Office'] });
+			this.setState({ locations: ['Dependent Home', 'Provider Office'] });
 		}
 		this.loadSchools(registerData.profileInfor, registerData.availability);
 	}
@@ -76,7 +76,7 @@ class InfoAvailability extends Component {
 				if (!!availabilityInfo) {
 					let locations = [];
 					availabilityInfo?.isHomeVisit && locations.push('Dependent Home');
-					availabilityInfo?.isPrivateOffice && locations.push('Private Office');
+					availabilityInfo?.isPrivateOffice && locations.push('Provider Office');
 					availabilityInfo?.serviceableSchool?.length && data?.forEach(school => locations.push(school.name));
 					this.setState({ locations: locations });
 				}
@@ -151,17 +151,17 @@ class InfoAvailability extends Component {
 		if (state) {
 			this.setState({
 				isPrivateOffice: state,
-				locations: ['Private Office', ...this.state.locations],
+				locations: ['Provider Office', ...this.state.locations],
 			});
 		} else {
 			message.warning('All availability for your office will also be deleted.').then(() => {
 				day_week.forEach(day => {
-					this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a?.location != 'Private Office'));
+					this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a?.location != 'Provider Office'));
 				})
 			});
 			this.setState({
 				isPrivateOffice: state,
-				locations: this.state.locations?.filter(location => location != 'Private Office'),
+				locations: this.state.locations?.filter(location => location != 'Provider Office'),
 			});
 		}
 	}
@@ -172,12 +172,12 @@ class InfoAvailability extends Component {
 		} else {
 			message.warning('All availability for those school will also be deleted.').then(() => {
 				day_week.forEach(day => {
-					this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a.location == 'Private Office' || a.location == 'Dependent Home'));
+					this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a.location == 'Provider Office' || a.location == 'Dependent Home'));
 				})
 			});
 			this.setState({
 				isSchools: state,
-				locations: this.state.locations?.filter(location => location == 'Private Office' || location == 'Dependent Home'),
+				locations: this.state.locations?.filter(location => location == 'Provider Office' || location == 'Dependent Home'),
 			});
 		}
 	}
