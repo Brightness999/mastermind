@@ -13,6 +13,10 @@ export default {
     id: `${scope}.new`,
     defaultMessage: 'New',
   },
+  old: {
+    id: `${scope}.old`,
+    defaultMessage: 'Old',
+  },
   cancel: {
     id: `${scope}.cancel`,
     defaultMessage: 'Cancel',

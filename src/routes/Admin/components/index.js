@@ -655,7 +655,7 @@ class SchedulingCenter extends React.Component {
     const drawerDetailProps = {
       visible: userDrawerVisible,
       onClose: this.onCloseDrawerDetail,
-      event: selectedEvent,
+      event: listAppointmentsRecent?.find(a => a._id == selectedEvent?._id),
       calendar: this.calendarRef,
       listAppointmentsRecent: listAppointmentsRecent,
     };

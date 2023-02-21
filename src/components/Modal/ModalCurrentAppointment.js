@@ -124,6 +124,8 @@ class ModalCurrentAppointment extends React.Component {
 			selectedProvider: event?.provider?._id,
 			selectedDate: moment(event?.date),
 			addressOptions: ['Dependent Home', 'Provider Office', store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.school?.name],
+			standardRate: event?.type == 3 ? event?.rate : '',
+			subsidizedRate: event?.type == 5 ? event?.rate : '',
 		});
 		this.form?.setFieldsValue({ dependent: event?.dependent?._id, skill: event?.skillSet?._id, address: event?.location, phoneNumber: event?.phoneNumber });
 		this.searchProvider('', event?.location, event?.skillSet?._id, event?.dependent?._id, true, event?.provider?._id);
@@ -157,8 +159,7 @@ class ModalCurrentAppointment extends React.Component {
 			} else {
 				this.setState({ listProvider: [] });
 			}
-			this.setState({ standardRate: '', subsidizedRate: '' });
-			!isInitial && this.setState({ selectedProvider: undefined });
+			!isInitial && this.setState({ selectedProvider: undefined, standardRate: '', subsidizedRate: '' });
 		}).catch(err => {
 			console.log('provider list error-----', err);
 			this.setState({
@@ -435,7 +436,7 @@ class ModalCurrentAppointment extends React.Component {
 	}
 
 	handleReschedule = () => {
-		const { listProvider, selectedProviderIndex, appointmentType, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, notes, standardRate, subsidizedRate, screeningData } = this.state;
+		const { listProvider, appointmentType, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, notes, standardRate, subsidizedRate, screeningData } = this.state;
 		const postData = {
 			_id: this.props.event?._id,
 			skillSet: selectedSkillSet,
@@ -447,7 +448,7 @@ class ModalCurrentAppointment extends React.Component {
 			notes: appointmentType == 1 ? screeningData?.notes : notes,
 			type: appointmentType,
 			status: 0,
-			rate: appointmentType == 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType == 3 ? standardRate : appointmentType == 5 ? subsidizedRate : 0,
+			rate: appointmentType == 2 ? listProvider?.find(p => p?._id == selectedProvider)?.separateEvaluationRate : appointmentType == 3 ? standardRate : appointmentType == 5 ? subsidizedRate : 0,
 			screeningTime: appointmentType == 1 ? screeningData?.time : '',
 		};
 		this.requestUpdateAppointment(postData);
@@ -873,7 +874,6 @@ class ModalCurrentAppointment extends React.Component {
 
 														if (selectedProviderIndex > -1) {
 															const range = listProvider[selectedProviderIndex]?.manualSchedule?.find(d => d.dayInWeek == date.day() && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
-															if (date.date() == 9 && date.month() == 2)
 															if (range) {
 																if (range.isPrivate) {
 																	return true;
@@ -934,10 +934,7 @@ class ModalCurrentAppointment extends React.Component {
 							<Button key="back" onClick={this.props.onCancel}>
 								{intl.formatMessage(msgReview.goBack).toUpperCase()}
 							</Button>
-							{!isConfirm && <Button key="submit" type="primary" htmlType='submit'>
-								{intl.formatMessage(msgDrawer.reschedule)?.toUpperCase()}
-							</Button>}
-							{isConfirm && (
+							{isConfirm ? (
 								<Popover
 									placement="topRight"
 									content={contentConfirm}
@@ -948,6 +945,10 @@ class ModalCurrentAppointment extends React.Component {
 										{intl.formatMessage(msgCreateAccount.confirm).toUpperCase()}
 									</Button>
 								</Popover>
+							) : (
+								<Button key="submit" type="primary" htmlType='submit'>
+									{intl.formatMessage(msgDrawer.reschedule)?.toUpperCase()}
+								</Button>
 							)}
 						</Row>
 					</Form>

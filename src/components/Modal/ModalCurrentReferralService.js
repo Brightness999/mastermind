@@ -42,10 +42,7 @@ class ModalCurrentReferralService extends React.Component {
 
 		this.setState({ skillSet: event?.dependent?.services });
 		this.form.setFieldsValue({ selectedDependent: event?.dependent?._id, selectedSkillSet: event?.skillSet?._id, phoneNumber: event?.phoneNumber });
-
-		if (event?.meetingLink) {
-			this.form.setFieldValue('meetingLink', event.meetingLink);
-		}
+		this.props.dispatch(setMeetingLink(event?.meetingLink));
 		event?.dependent?._id && this.getConsultationData(event?.dependent?._id, event?.date);
 	}
 

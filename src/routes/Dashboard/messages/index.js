@@ -138,4 +138,8 @@ export default ({
     id: `${scope}.requestNewSubsidy`,
     defaultMessage: 'Request new subsidy',
   },
+  rescheduled: {
+    id: `${scope}.rescheduled`,
+    defaultMessage: 'rescheduled',
+  },
 });

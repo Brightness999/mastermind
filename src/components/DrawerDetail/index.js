@@ -152,8 +152,7 @@ class DrawerDetail extends Component {
     }
   }
 
-  displayDuration = () => {
-    const { event } = this.props;
+  displayDuration = (event) => {
     let duration = event?.provider?.duration ?? 30;
     if (event?.type == 2) {
       duration = duration * 1 + event?.provider?.separateEvaluationDuration * 1;
@@ -381,6 +380,10 @@ class DrawerDetail extends Component {
     this.setState({ visibleEvaluationProcess: false });
   }
 
+  displayTime = (value) => {
+    return `${value?.split(' ')[0]?.split(':')[0]}:${value?.split(' ')[0]?.split(':')[1]} ${value?.split(' ')[1]}`;
+  }
+
   render() {
     const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage } = this.state;
     const { event, listAppointmentsRecent } = this.props;
@@ -448,7 +451,7 @@ class DrawerDetail extends Component {
       visible: visibleCancel,
       onSubmit: this.handleConfirmCancel,
       onCancel: this.closeModalCancel,
-      event: event,
+      event: listAppointmentsRecent?.find(a => a?._id == event?._id),
     };
     const modalProcessProps = {
       visible: visibleProcess,
@@ -456,13 +459,13 @@ class DrawerDetail extends Component {
       onSubmit: this.handleMarkAsClosed,
       onConfirm: this.confirmModalProcess,
       onCancel: this.closeModalProcess,
-      event: event,
+      event: listAppointmentsRecent?.find(a => a?._id == event?._id),
     };
     const modalCurrentProps = {
       visible: visibleCurrent,
       onSubmit: this.submitModalCurrent,
       onCancel: this.closeModalCurrent,
-      event: event,
+      event: listAppointmentsRecent?.find(a => a?._id == event?._id),
     };
     const modalInvoiceProps = {
       visible: isModalInvoice,
@@ -474,19 +477,19 @@ class DrawerDetail extends Component {
       visible: visibleCurrentReferral,
       onSubmit: this.submitModalCurrentReferral,
       onCancel: this.closeModalCurrent,
-      event: event,
+      event: listAppointmentsRecent?.find(a => a?._id == event?._id),
     }
     const modalNoShowProps = {
       visible: visibleNoShow,
       onSubmit: this.onSubmitFlagNoShow,
       onCancel: this.onCloseModalNoShow,
-      event: event,
+      event: listAppointmentsRecent?.find(a => a?._id == event?._id),
     };
     const modalBalanceProps = {
       visible: visibleBalance,
       onSubmit: this.onSubmitFlagBalance,
       onCancel: this.onCloseModalBalance,
-      event: event,
+      event: listAppointmentsRecent?.find(a => a?._id == event?._id),
     };
     const modalEvaluationProcessProps = {
       visible: visibleEvaluationProcess,
@@ -494,6 +497,46 @@ class DrawerDetail extends Component {
       onDecline: this.declineEvaluation,
       onCancel: this.onCloseModalEvaluationProcess,
     };
+    console.log(event)
+
+    const contentConfirm = (
+      <div className='confirm-content'>
+        <Row gutter={10}>
+          <Col xs={24} sm={24} md={12} className="flex flex-col">
+            <p className='font-16 text-center mb-0'>{intl.formatMessage(msgModal.current)}</p>
+            <div className='current-content flex-1'>
+              <p className='font-16 font-700'>{event?.type == 1 ? intl.formatMessage(msgModal.screening) : event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.appointment) : event?.type == 4 ? intl.formatMessage(msgModal.consultation) : ''}</p>
+              <p className='font-16'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
+              <p className='font-16'>{`${event?.previousAppointment?.provider?.firstName ?? ''} ${event?.previousAppointment?.provider?.firstName ?? ''}`}</p>
+              {event?.type == 1 ? (
+                <p className='font-16'>{intl.formatMessage(messages.phonenumber)}: {event?.phoneNumber}</p>
+              ) : event?.type == 4 ? (
+                <p className='font-16'>{event?.meetingLink ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}: {event?.meetingLink ? event?.meetingLink : event?.phoneNumber}</p>
+              ) : (
+                <p className='font-16'>{intl.formatMessage(messages.where)}: {event?.location}</p>
+              )}
+              <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.type == 1 ? event?.screeningTime ?? '' : this.displayDuration(event)}</span></p>
+            </div>
+          </Col>
+          <Col xs={24} sm={24} md={12} className="flex flex-col">
+            <p className='font-16 text-center mb-0'>{intl.formatMessage(msgModal.old)}</p>
+            <div className='new-content flex-1'>
+              <p className='font-16 font-700'>{event?.type == 1 ? intl.formatMessage(msgModal.screening) : event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.appointment) : event?.type == 4 ? intl.formatMessage(msgModal.consultation) : ''}</p>
+              <p className='font-16'>{`${event?.previousAppointment?.dependent?.firstName ?? ''} ${event?.previousAppointment?.dependent?.lastName ?? ''}`}</p>
+              <p className='font-16'>{`${event?.previousAppointment?.provider?.firstName ?? ''} ${event?.previousAppointment?.provider?.firstName ?? ''}`}</p>
+              {event?.previousAppointment?.type == 1 ? (
+                <p className='font-16'>{intl.formatMessage(messages.phonenumber)}: {event?.previousAppointment?.phoneNumber}</p>
+              ) : event?.previousAppointment?.type == 4 ? (
+                <p className='font-16'>{event?.previousAppointment?.meetingLink ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}: {event?.previousAppointment?.meetingLink ? event?.previousAppointment?.meetingLink : event?.previousAppointment?.phoneNumber}</p>
+              ) : (
+                <p className='font-16'>{intl.formatMessage(messages.where)}: {event?.previousAppointment?.location}</p>
+              )}
+              <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.previousAppointment?.type == 1 ? event?.screeningTime ?? '' : this.displayDuration(event?.previousAppointment)}</span></p>
+            </div>
+          </Col>
+        </Row>
+      </div>
+    );
 
     return (
       <Drawer
@@ -520,6 +563,17 @@ class DrawerDetail extends Component {
           )}
           {event?.flagStatus != 1 && event?.status == -3 && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(msgDashboard.declined)}]</div>
+          )}
+          {event?.flagStatus != 1 && event?.status == 0 && event?.previousAppointment && (
+            <Popover
+              content={contentConfirm}
+              className='popup-confirm'
+              trigger="click"
+            >
+              <div className='event-status text-consultation font-20 text-center text-underline cursor'>
+                {intl.formatMessage(msgDashboard.rescheduled)}
+              </div>
+            </Popover>
           )}
           <div className='detail-item flex'>
             <div className='title'>
@@ -566,7 +620,7 @@ class DrawerDetail extends Component {
           )}
           <div className='detail-item flex'>
             <p className='font-18 font-700 title'>{intl.formatMessage(messages.when)}</p>
-            <p className='font-16'>{event?.type == 1 ? event?.screeningTime ?? '' : this.displayDuration()}</p>
+            <p className='font-16'>{event?.type == 1 ? event?.screeningTime ?? '' : this.displayDuration(event)}</p>
           </div>
           {[2, 3, 5].includes(event?.type) && (
             <div className='detail-item flex'>
