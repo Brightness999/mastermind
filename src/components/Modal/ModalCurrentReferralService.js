@@ -39,17 +39,8 @@ class ModalCurrentReferralService extends React.Component {
 
 	componentDidMount = () => {
 		const { event } = this.props;
-		let arrTime = [];
-		let hour9AM = moment().set({ hours: 9, minutes: 0, seconds: 0, milliseconds: 0 });
-		for (let i = 0; i < 18; i++) {
-			let newTime = hour9AM.clone();
-			hour9AM = hour9AM.add(30, 'minutes')
-			arrTime.push({
-				value: newTime,
-				active: false,
-			});
-		}
-		this.setState({ arrTime: arrTime, skillSet: event?.dependent?.services });
+
+		this.setState({ skillSet: event?.dependent?.services });
 		this.form.setFieldsValue({ selectedDependent: event?.dependent?._id, selectedSkillSet: event?.skillSet?._id, phoneNumber: event?.phoneNumber });
 
 		if (event?.meetingLink) {
@@ -113,7 +104,7 @@ class ModalCurrentReferralService extends React.Component {
 				this.setState({
 					selectedDate: undefined,
 					selectedTimeIndex: -1,
-					arrTime: this.state.arrTime.map(time => { time.active = false; return time; }),
+					arrTime: [],
 					selectedDependent: undefined,
 					selectedSkillSet: undefined,
 				})
@@ -202,42 +193,92 @@ class ModalCurrentReferralService extends React.Component {
 			selectedDate: newValue,
 			selectedTimeIndex: -1,
 		});
+
 		if (newValue.isSameOrAfter(new Date())) {
-			const { appointments, consultants, arrTime, selectedDependent } = this.state;
-			const { years, months, date } = newValue.toObject();
-			const dayInWeek = newValue.day();
-			const newArrTime = arrTime.map(time => {
-				if (selectedDependent) {
-					time.value = time.value.set({ years: years, months: months, date: date });
-					let consultant_length = 0; let appointment_length = 0;
-					consultants.forEach(consultant => {
-						const availableTime = consultant.manualSchedule.find(s => s.dayInWeek == dayInWeek);
-						const fromDate = moment().set({ years: availableTime?.fromYear, months: availableTime?.fromMonth, date: availableTime?.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
-						const toDate = moment().set({ years: availableTime?.toYear, months: availableTime?.toMonth, date: availableTime?.toDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
-						const openTime = moment().set({ years, months, date, hours: availableTime?.openHour, minutes: availableTime?.openMin });
-						const closeTime = moment().set({ years, months, date, hours: availableTime?.closeHour, minutes: availableTime?.closeMin });
-						if (newValue.isBetween(fromDate, toDate) && (time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime))) {
-							consultant_length++;
-						}
-					})
-					appointments.forEach(appointment => {
-						if (time.value.isSame(moment(appointment.date))) {
-							appointment_length++;
-						}
-					})
-					if (consultant_length - appointment_length > 0) {
-						time.active = true;
-					} else {
-						time.active = false;
-					}
+			const { appointments, consultants, selectedDependent } = this.state;
+
+			if (newValue.day() == 6) {
+				this.setState({ arrTime: [] });
+			} else {
+				const blackoutConsultants = consultants?.filter(consultant => consultant?.blackoutDates?.find(d => newValue.year() == moment(d).year() && newValue.month() == moment(d).month() && newValue.date() == moment(d).date()));
+
+				if (blackoutConsultants?.length == consultants?.length) {
+					this.setState({ arrTime: [] });
 				} else {
-					time.active = false;
+					let arrTime = [];
+					const ranges = consultants?.map(a => a.manualSchedule)?.flat()?.filter(a => a.dayInWeek == newValue.day() && newValue.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+
+					if (!!ranges?.length) {
+						let arr24 = new Array(24).fill(0);
+						let timeObject = { start: 0, end: 0 };
+						let timeArr = [];
+						ranges.forEach(a => {
+							for (let i = a?.openHour; i <= a?.closeHour; i++) {
+								arr24[i] = 1;
+							}
+						})
+						arr24.forEach((a, i) => {
+							if (a == 0) {
+								timeObject = { start: 0, end: 0 };
+							} else {
+								if (i == 0 || arr24[i - 1] == 0) {
+									timeObject.start = i;
+								}
+								if (i == 23 || arr24[i + 1] == 0) {
+									timeObject.end = i;
+									timeArr.push(timeObject);
+								}
+							}
+						});
+						timeArr.forEach(a => {
+							let startTime = moment().set({ hours: a.start, minutes: 0, seconds: 0, milliseconds: 0 });
+							for (let i = 0; i < (a.end - a.start) * 60 / 30; i++) {
+								arrTime.push({
+									value: startTime.clone().add(30 * i, 'minutes'),
+									active: true,
+								});
+							}
+						})
+
+						const { years, months, date } = newValue.toObject();
+						const dayInWeek = newValue.day();
+						const newArrTime = arrTime.map(time => {
+							if (selectedDependent) {
+								time.value = time.value.set({ years: years, months: months, date: date });
+								let consultant_length = 0; let appointment_length = 0;
+								consultants.forEach(consultant => {
+									const availableTime = consultant.manualSchedule.find(s => s.dayInWeek == dayInWeek);
+									const fromDate = moment().set({ years: availableTime?.fromYear, months: availableTime?.fromMonth, date: availableTime?.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+									const toDate = moment().set({ years: availableTime?.toYear, months: availableTime?.toMonth, date: availableTime?.toDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+									const openTime = moment().set({ years, months, date, hours: availableTime?.openHour, minutes: availableTime?.openMin, seconds: 0, milliseconds: 0 });
+									const closeTime = moment().set({ years, months, date, hours: availableTime?.closeHour, minutes: availableTime?.closeMin, seconds: 0, milliseconds: 0 });
+									if (newValue.isBetween(fromDate, toDate) && (time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime))) {
+										consultant_length++;
+									}
+								})
+								appointments.forEach(appointment => {
+									if (time.value.isSame(moment(appointment.date))) {
+										appointment_length++;
+									}
+								})
+								if (consultant_length - appointment_length > 0) {
+									time.active = true;
+								} else {
+									time.active = false;
+								}
+							} else {
+								time.active = false;
+							}
+							return time;
+						})
+						this.setState({ arrTime: newArrTime });
+					} else {
+						this.setState({ arrTime: [] });
+					}
 				}
-				return time;
-			})
-			this.setState({ arrTime: newArrTime });
+			}
 		} else {
-			this.setState({ arrTime: this.state.arrTime?.map(time => ({ ...time, active: false })) });
+			this.setState({ arrTime: [] });
 		}
 	}
 
@@ -402,13 +443,13 @@ class ModalCurrentReferralService extends React.Component {
 															return true;
 														}
 
-														const ranges = consultants?.filter(consultant => consultant?.manualSchedule?.find(d => d.dayInWeek == date.day() && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate }))));
+														const ranges = consultants?.filter(consultant => consultant?.manualSchedule?.find(d => d.dayInWeek == date.day() && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 }))));
 														if (!ranges?.length) {
 															return true;
 														}
 
-														const blackoutDates = consultants?.filter(consultant => consultant?.blackoutDates?.find(d => date.year() == moment(d).year() && date.month() == moment(d).month() && date.date() == moment(d).date()));
-														if (blackoutDates?.length) {
+														const blackoutConsultants = consultants?.filter(consultant => consultant?.blackoutDates?.find(d => date.year() == moment(d).year() && date.month() == moment(d).month() && date.date() == moment(d).date()));
+														if (blackoutConsultants?.length == consultants?.length) {
 															return true;
 														}
 
