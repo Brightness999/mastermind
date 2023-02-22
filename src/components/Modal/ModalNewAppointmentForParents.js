@@ -553,6 +553,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			subsidyAvailable,
 			restSessions,
 			loading,
+			notes,
 		} = this.state;
 		const modalProps = {
 			className: 'modal-new',
@@ -569,6 +570,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			onCancel: this.onCloseModalScreening,
 			provider: listProvider[selectedProviderIndex],
 			dependent: this.props.listDependents?.find(dependent => dependent._id == selectedDependent),
+			notes: notes,
 		}
 
 		return (

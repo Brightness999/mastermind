@@ -546,7 +546,7 @@ class DrawerDetail extends Component {
               <p className='font-16'>{`${event?.previousAppointment?.dependent?.firstName ?? ''} ${event?.previousAppointment?.dependent?.lastName ?? ''}`}</p>
               <p className='font-16'>{`${event?.previousAppointment?.provider?.firstName ?? ''} ${event?.previousAppointment?.provider?.firstName ?? ''}`}</p>
               {event?.previousAppointment?.type == 1 ? (
-                <p className='font-16'>{intl.formatMessage(messages.phonenumber)}: {event?.previousAppointment?.phoneNumber}</p>
+                <p className='font-16 whitespace-nowrap'>{intl.formatMessage(messages.phonenumber)}: {event?.previousAppointment?.phoneNumber}</p>
               ) : event?.previousAppointment?.type == 4 ? (
                 <p className='font-16'>{event?.previousAppointment?.meetingLink ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}: {event?.previousAppointment?.meetingLink ? event?.previousAppointment?.meetingLink : event?.previousAppointment?.phoneNumber}</p>
               ) : (
@@ -562,7 +562,7 @@ class DrawerDetail extends Component {
               <p className='font-16'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
               <p className='font-16'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.firstName ?? ''}`}</p>
               {event?.type == 1 ? (
-                <p className='font-16'>{intl.formatMessage(messages.phonenumber)}: {event?.phoneNumber}</p>
+                <p className='font-16 whitespace-nowrap'>{intl.formatMessage(messages.phonenumber)}: {event?.phoneNumber}</p>
               ) : event?.type == 4 ? (
                 <p className='font-16'>{event?.meetingLink ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}: {event?.meetingLink ? event?.meetingLink : event?.phoneNumber}</p>
               ) : (

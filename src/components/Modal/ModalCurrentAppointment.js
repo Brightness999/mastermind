@@ -113,6 +113,7 @@ class ModalCurrentAppointment extends React.Component {
 	componentDidMount() {
 		this.setState({ arrTime: this.getArrTime(0) });
 		const { event } = this.props;
+		console.log(event);
 		this.setState({
 			selectedDependent: event?.dependent?._id,
 			selectedSkillSet: event?.skillSet?._id,
@@ -592,6 +593,7 @@ class ModalCurrentAppointment extends React.Component {
 			subsidyAvailable,
 			restSessions,
 			loading,
+			notes,
 		} = this.state;
 		const { event } = this.props;
 		const modalProps = {
@@ -610,6 +612,7 @@ class ModalCurrentAppointment extends React.Component {
 			provider: listProvider[selectedProviderIndex],
 			dependent: dependents?.find(dependent => dependent._id == selectedDependent),
 			event: event,
+			notes: notes,
 		}
 
 		const contentConfirm = (

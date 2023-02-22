@@ -13,9 +13,9 @@ moment.locale('en');
 
 class ModalNewScreening extends React.Component {
   componentDidMount() {
-    const { dependent, event } = this.props;
+    const { dependent, event, notes } = this.props;
     if (event) {
-      this.form.setFieldsValue({ phoneNumber: event?.phoneNumber, time: event?.screeningTime, notes: event?.notes });
+      this.form.setFieldsValue({ phoneNumber: event?.phoneNumber, time: event?.screeningTime, notes: notes ? notes : event?.notes });
     } else {
       this.form.setFieldsValue({ phoneNumber: dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ? dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber : dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber });
     }
