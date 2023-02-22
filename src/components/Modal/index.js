@@ -26,6 +26,7 @@ import ModalSessionsNeedToClose from './ModalSessionsNeedToClose';
 import ModalPayment from './ModalPayment';
 import ModalFeedback from './ModalFeedback';
 import ModalEvaluationProcess from './ModalEvaluationProcess';
+import ModalNewScreening from './ModalNewScreening';
 
 export {
   ModalCreateDone,
@@ -55,4 +56,5 @@ export {
   ModalPayment,
   ModalFeedback,
   ModalEvaluationProcess,
+  ModalNewScreening,
 }

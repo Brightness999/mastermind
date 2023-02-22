@@ -5,7 +5,7 @@ import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsXCircle } from
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
-import { ModalBalance, ModalCancelAppointment, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
+import { ModalBalance, ModalCancelAppointment, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
 import intl from "react-intl-universal";
 import messages from './messages';
 import msgModal from '../Modal/messages';
@@ -15,7 +15,7 @@ import moment from 'moment';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestFeedbackForClient, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 import { MdOutlineEventBusy, MdOutlineRequestQuote } from 'react-icons/md';
 import { TbSend } from 'react-icons/tb';
 const { Paragraph } = Typography;
@@ -46,6 +46,7 @@ class DrawerDetail extends Component {
       visibleEvaluationProcess: false,
       items: [],
       visibleModalMessage: false,
+      visibleCurrentScreen: false,
     };
   }
 
@@ -108,11 +109,11 @@ class DrawerDetail extends Component {
   }
 
   closeModalCurrent = () => {
-    this.props.event?.type == 4 ? this.setState({ visibleCurrentReferral: false }) : this.setState({ visibleCurrent: false });
+    this.props.event?.type == 1 ? this.setState({ visibleCurrentScreen: false }) : this.props.event?.type == 4 ? this.setState({ visibleCurrentReferral: false }) : this.setState({ visibleCurrent: false });
   }
 
   openModalCurrent = () => {
-    this.props.event?.type == 4 ? this.setState({ visibleCurrentReferral: true }) : this.setState({ visibleCurrent: true });
+    this.props.event?.type == 1 ? this.setState({ visibleCurrentScreen: true }) : this.props.event?.type == 4 ? this.setState({ visibleCurrentReferral: true }) : this.setState({ visibleCurrent: true });
   }
 
   showEditNotes = () => {
@@ -416,8 +417,20 @@ class DrawerDetail extends Component {
     });
   }
 
+  handleRescheduleScreening = (data) => {
+    request.post(rescheduleAppointmentForParent, { screeningTime: data?.time, phoneNumber: data?.phoneNumber, notes: data?.notes, _id: this.props.event?._id }).then(result => {
+      if (result.success) {
+        this.closeModalCurrent();
+        this.updateAppointments();
+        message.success("Updated successfully");
+      }
+    }).catch(err => {
+      message.error(err.message);
+    });
+  }
+
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage, visibleCurrentScreen } = this.state;
     const { event, listAppointmentsRecent } = this.props;
 
     const providerProfile = (
@@ -536,6 +549,14 @@ class DrawerDetail extends Component {
       onSubmit: this.handleAppealRequest,
       onCancel: this.closeModalMessage,
     };
+    const modalCurrentScreeningProps = {
+      visible: visibleCurrentScreen,
+      onSubmit: this.handleRescheduleScreening,
+      onCancel: this.closeModalCurrent,
+      provider: event?.provider,
+      dependent: event?.dependent,
+      event: event,
+    }
 
     const contentConfirm = (
       <div className='confirm-content'>
@@ -845,19 +866,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(event?.type != 1 && event?.status == 0 && !isNotPending) && (
-                <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<BsClockHistory size={15} />}
-                    block
-                    onClick={this.openModalCurrent}
-                  >
-                    {intl.formatMessage(messages.reschedule)}
-                  </Button>
-                </Col>
-              )}
-              {(event?.type == 1 && event?.status == 0 && !isNotPending) && (
+              {(event?.status == 0 && !isNotPending) && (
                 <Col span={12}>
                   <Button
                     type='primary'
@@ -934,8 +943,7 @@ class DrawerDetail extends Component {
               )}
             </Row>
           </>
-        )
-        }
+        )}
         {errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
         {visibleCancel && <ModalCancelAppointment {...modalCancelProps} />}
         {visibleProcess && <ModalProcessAppointment {...modalProcessProps} />}
@@ -946,6 +954,7 @@ class DrawerDetail extends Component {
         {visibleBalance && <ModalBalance {...modalBalanceProps} />}
         {visibleEvaluationProcess && <ModalEvaluationProcess {...modalEvaluationProcessProps} />}
         {visibleModalMessage && <ModalCreateNote {...modalMessageProps} />}
+        {visibleCurrentScreen && <ModalNewScreening {...modalCurrentScreeningProps} />}
       </Drawer >
     );
   }
