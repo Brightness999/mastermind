@@ -298,6 +298,7 @@
   "components.Modal.subsidyOnly": "Subsidy only",
   "components.Modal.availableProviders": "Available providers",
   "components.Modal.screeningRequired": "Screening required",
+  "components.Modal.screenCompleted": "Screen completed",
   "components.Modal.popularDoctors": "Popular doctors",
   "components.Modal.searchDoctor": "Search a doctor",
   "components.Modal.areSureChangeAppoint": "Are you sure you want to change your appointment?",

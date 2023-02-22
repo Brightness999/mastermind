@@ -59,7 +59,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			duration = provider?.duration;
 		}
 		if (type == 2) {
-			duration = provider?.duration * 1 + provider?.separateEvaluationDuration * 1
+			duration = provider?.separateEvaluationDuration;
 		}
 		this.setState({ duration: duration });
 
@@ -269,9 +269,23 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	onChooseProvider = (providerIndex) => {
-		this.setState({ providerErrorMessage: '' });
 		const { listProvider, selectedDate, selectedDependent, selectedSkillSet } = this.state;
 		const appointments = listProvider[providerIndex]?.appointments ?? [];
+
+		const flagAppointments = appointments?.filter(a => a?.dependent == selectedDependent && a?.flagStatus == 1);
+		const declinedAppointments = appointments?.filter(a => a?.dependent == selectedDependent && a?.status == -3);
+
+		if (declinedAppointments?.length) {
+			message.error('The provider declined your request');
+			return;
+		}
+
+		if (flagAppointments?.length) {
+			message.error('Sorry there is an open flag. Please clear the flag to proceed');
+			return;
+		}
+
+		this.setState({ providerErrorMessage: '' });
 		let appointmentType = 0;
 
 		if (listProvider[providerIndex].isNewClientScreening) {
@@ -383,11 +397,9 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	requestCreateAppointment(postData) {
-		const { searchKey, address, selectedSkillSet, selectedDependent } = this.state;
 		request.post(createAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
-				this.searchProvider(searchKey, address, selectedSkillSet, selectedDependent);
 				this.props.onSubmit();
 			} else {
 				this.setState({ errorMessage: result.data });
@@ -567,7 +579,7 @@ class ModalNewAppointmentForParents extends React.Component {
 							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType == 2 && selectedProviderIndex > -1 && (
 								<div className='font-20'>
-									<div>{listProvider[selectedProviderIndex]?.separateEvaluationDuration * 1 + listProvider[selectedProviderIndex]?.duration * 1}Minutes evaluation</div>
+									<div>{listProvider[selectedProviderIndex]?.separateEvaluationDuration}Minutes evaluation</div>
 									<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
 								</div>
 							)}
@@ -628,7 +640,7 @@ class ModalNewAppointmentForParents extends React.Component {
 								<Form.Item
 									name="address"
 									label={intl.formatMessage(msgCreateAccount.location)}
-									rules={[{ required: appointmentType == 3, message: "Select a location." }]}
+									rules={[{ required: [2, 3, 5].includes(appointmentType), message: "Select a location." }]}
 								>
 									<Select
 										showSearch
@@ -688,7 +700,7 @@ class ModalNewAppointmentForParents extends React.Component {
 											{!!listProvider[selectedProviderIndex]?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
 											{userRole > 3 && listProvider[selectedProviderIndex]?.manualSchedule?.find(m => m.isPrivate) ? <Popover content={this.privateSlot} trigger="click"><FaCalendarAlt size={16} className="text-green500 cursor" /></Popover> : null}
 										</p>
-										<p className='font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? intl.formatMessage(messages.screeningRequired) : ''}</p>
+										<p className='font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
 									<div className='flex'>
 										<div className='flex-1'>

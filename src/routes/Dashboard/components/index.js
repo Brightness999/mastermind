@@ -119,7 +119,7 @@ class Dashboard extends React.Component {
                 res.data?.forEach(appointment => {
                   let duration = appointment.provider?.duration;
                   if (appointment.type == 2) {
-                    duration = duration * 1 + appointment.provider?.separateEvaluateDuration * 1;
+                    duration = appointment.provider?.separateEvaluateDuration;
                   }
                   const key = `open${Date.now()}`;
                   const btn = (
@@ -157,7 +157,7 @@ class Dashboard extends React.Component {
                 res.data?.forEach(appointment => {
                   let duration = appointment.provider?.duration;
                   if (appointment.type == 2) {
-                    duration = duration * 1 + appointment.provider?.separateEvaluateDuration * 1;
+                    duration = appointment.provider?.separateEvaluateDuration;
                   }
                   const key = `open${Date.now()}`;
                   const btn = (

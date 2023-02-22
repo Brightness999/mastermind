@@ -101,6 +101,10 @@ export default {
     id: `${scope}.screeningRequired`,
     defaultMessage: 'Screening required',
   },
+  screenCompleted: {
+    id: `${scope}.screenCompleted`,
+    defaultMessage: 'Screen completed',
+  },
   popularDoctors: {
     id: `${scope}.popularDoctors`,
     defaultMessage: 'Popular provider',
