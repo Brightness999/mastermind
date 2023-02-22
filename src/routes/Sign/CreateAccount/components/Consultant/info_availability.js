@@ -134,7 +134,7 @@ class ConsultantAvailability extends Component {
     const arrToCopy = this.form.getFieldValue(dayForCopy);
     day_week.map((newDay) => {
       if (newDay != dayForCopy) {
-        this.form.setFieldValue(newDay, arrToCopy);
+        this.form.setFieldValue(newDay, [...this.form.getFieldValue(newDay), ...arrToCopy]);
       }
     })
   }
@@ -319,20 +319,20 @@ class ConsultantAvailability extends Component {
               ))}
             </div>
             <p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
-						<div className='flex items-center justify-center mb-10'>
-							<div className='flex gap-2 items-center cursor' onClick={() => this.handleClickGoogleCalendar()}>
-								<img src='../images/gg.png' className='h-30' />
-								<p className='font-16 mb-0 text-underline'>Google</p>
-							</div>
-						</div>
+            <div className='flex items-center justify-center mb-10'>
+              <div className='flex gap-2 items-center cursor' onClick={() => this.handleClickGoogleCalendar()}>
+                <img src='../images/gg.png' className='h-30' />
+                <p className='font-16 mb-0 text-underline'>Google</p>
+              </div>
+            </div>
             <Form.Item name="blackoutDates">
               <MultiDatePicker.Calendar
                 multiple
                 sort
                 className='m-auto'
-								format="YYYY-MM-DD"
+                format="YYYY-MM-DD"
                 onChange={dates => this.handleUpdateBlackoutDates(dates)}
-								plugins={[<DatePanel id="datepanel" />]}
+                plugins={[<DatePanel id="datepanel" />]}
               />
             </Form.Item>
             <Form.Item className="form-btn continue-btn" >

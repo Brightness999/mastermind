@@ -199,7 +199,7 @@ export default class extends React.Component {
 					<Divider />
 				</div>
 				<Table bordered size='middle' dataSource={schools} columns={columns} />
-				<ModalInputCode {...modalInputCodeProps} />
+				{visibleInputCode && <ModalInputCode {...modalInputCodeProps} />}
 				<ModalConfirm {...confirmModalProps} />
 				<PageLoading loading={loading} isBackground={true} />
 			</div>
