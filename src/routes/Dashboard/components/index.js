@@ -29,7 +29,7 @@ import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { setAcademicLevels, setDependents, setLocations, setMeetingLink, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
+import { setAcademicLevels, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
@@ -244,6 +244,7 @@ class Dashboard extends React.Component {
         this.props.dispatch(setSkillSet(data?.skillSet ?? []));
         this.props.dispatch(setLocations(data?.locations ?? []));
         this.props.dispatch(setAcademicLevels(data?.academicLevels ?? []));
+        this.props.dispatch(setDurations(data?.durations ?? []));
       }
     }).catch(err => {
       console.log('get default data error ---', err);

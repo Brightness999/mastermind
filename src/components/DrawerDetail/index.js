@@ -498,6 +498,7 @@ class DrawerDetail extends Component {
       onSubmit: this.submitModalCurrent,
       onCancel: this.closeModalCurrent,
       event: listAppointmentsRecent?.find(a => a?._id == event?._id),
+      listAppointmentsRecent,
     };
     const modalInvoiceProps = {
       visible: isModalInvoice,

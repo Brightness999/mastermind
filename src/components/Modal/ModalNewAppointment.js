@@ -15,6 +15,7 @@ import request from '../../utils/api/request'
 import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils/api/apiList';
 import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import ModalNewScreening from './ModalNewScreening';
+import { store } from '../../redux/store';
 
 const { Paragraph } = Typography;
 moment.locale('en');
@@ -383,9 +384,15 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	requestCreateAppointment(postData) {
+		const { listProvider, selectedProviderIndex } = this.state;
+		const { durations } = store.getState().auth;
+
 		request.post(createAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
+				if (postData?.type == 2) {
+					message.success(`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''} requires a ${durations?.find(a => a.value == postData?.duration)?.label} evaluation. Please proceed to schedule.`);
+				}
 				this.props.onSubmit();
 			} else {
 				this.setState({ errorMessage: result.data });
@@ -566,7 +573,7 @@ class ModalNewAppointment extends React.Component {
 							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType == 2 && selectedProviderIndex > -1 && (
 								<div className='font-20'>
-									<div>{listProvider[selectedProviderIndex]?.separateEvaluationDuration}Minutes evaluation</div>
+									<div>{store.getState().auth.durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
 									<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
 								</div>
 							)}

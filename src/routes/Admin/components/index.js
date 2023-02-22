@@ -27,7 +27,7 @@ import moment from 'moment';
 import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice'
 import { routerLinks } from "../../constant";
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { setAcademicLevels, setDependents, setMeetingLink, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
+import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { clearFlag, getDefaultDataForAdmin, requestClearance } from '../../../utils/api/apiList';
@@ -129,6 +129,7 @@ class SchedulingCenter extends React.Component {
         this.props.dispatch(setProviders(data?.providers ?? []));
         this.props.dispatch(setSkillSet(data?.skillSet ?? []));
         this.props.dispatch(setAcademicLevels(data?.academicLevels ?? []));
+        this.props.dispatch(setDurations(data?.durations ?? []));
       }
     }).catch(err => {
       console.log('get default data error---', err);

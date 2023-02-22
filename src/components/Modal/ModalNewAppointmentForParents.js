@@ -48,6 +48,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		subsidyAvailable: false,
 		restSessions: 0,
 		loading: false,
+		duration: 30,
 	}
 
 	getArrTime = (type, providerIndex, date) => {
@@ -154,7 +155,7 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	createAppointment = (data) => {
-		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, standardRate, subsidizedRate } = this.state;
+		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, standardRate, subsidizedRate, duration } = this.state;
 		if (selectedProvider == undefined) {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
 			return;
@@ -193,6 +194,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			status: 0,
 			rate: appointmentType == 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType == 3 ? standardRate : appointmentType == 5 ? subsidizedRate : 0,
 			screeningTime: appointmentType == 1 ? data.time : '',
+			duration: appointmentType == 2 ? listProvider[selectedProviderIndex]?.separateEvaluationDuration : listProvider[selectedProviderIndex]?.duration,
 		};
 		this.setState({ visibleModalScreening: false });
 		this.requestCreateAppointment(postData);
@@ -397,9 +399,15 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	requestCreateAppointment(postData) {
+		const { listProvider, selectedProviderIndex } = this.state;
+		const { durations } = store.getState().auth;
+
 		request.post(createAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
+				if (postData?.type == 2) {
+					message.success(`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''} requires a ${durations?.find(a => a.value == postData?.duration)?.label} evaluation. Please proceed to schedule.`);
+				}
 				this.props.onSubmit();
 			} else {
 				this.setState({ errorMessage: result.data });
@@ -581,7 +589,7 @@ class ModalNewAppointmentForParents extends React.Component {
 							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType == 2 && selectedProviderIndex > -1 && (
 								<div className='font-20'>
-									<div>{listProvider[selectedProviderIndex]?.separateEvaluationDuration}Minutes evaluation</div>
+									<div>{store.getState().auth.durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
 									<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
 								</div>
 							)}

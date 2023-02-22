@@ -19,6 +19,7 @@ const initialState = {
 	selectedUser: {},
 	selectedTime: undefined,
 	meetingLink: '',
+	durations: [],
 };
 
 export const getInfoAuth = createAsyncThunk(
@@ -173,6 +174,9 @@ export const authSlice = createSlice({
 		setMeetingLink(state, action) {
 			state.meetingLink = action.payload
 		},
+		setDurations(state, action) {
+			state.durations = action.payload
+		},
 		logout(state) {
 			localStorage.removeItem('token');
 			helper.history.push('/');
@@ -202,6 +206,6 @@ export const authSlice = createSlice({
 	}
 });
 
-export const { logout, setAuthData, setUser, removeUser, changeInforClientChild, changeInforClientParent, changeInfor, setDependents, setProviders, setSkillSet, setLocations, setAcademicLevels, setCommunity, setSelectedUser, setSelectedTime, setMeetingLink } = authSlice.actions;
+export const { logout, setAuthData, setUser, removeUser, changeInforClientChild, changeInforClientParent, changeInfor, setDependents, setProviders, setSkillSet, setLocations, setAcademicLevels, setCommunity, setSelectedUser, setSelectedTime, setMeetingLink, setDurations } = authSlice.actions;
 
 export default authSlice.reducer;

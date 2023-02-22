@@ -49,6 +49,7 @@ class ModalCurrentAppointment extends React.Component {
 		subsidyAvailable: false,
 		restSessions: 0,
 		loading: false,
+		duration: 30,
 	}
 
 	getArrTime = (type, providerIndex, date) => {
@@ -113,7 +114,6 @@ class ModalCurrentAppointment extends React.Component {
 	componentDidMount() {
 		this.setState({ arrTime: this.getArrTime(0) });
 		const { event } = this.props;
-		console.log(event);
 		this.setState({
 			selectedDependent: event?.dependent?._id,
 			selectedSkillSet: event?.skillSet?._id,
@@ -126,6 +126,7 @@ class ModalCurrentAppointment extends React.Component {
 			addressOptions: ['Dependent Home', 'Provider Office', store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.school?.name],
 			standardRate: event?.type == 3 ? event?.rate : '',
 			subsidizedRate: event?.type == 5 ? event?.rate : '',
+			duration: event?.type == 2 ? event?.provider?.separateEvaluationDuration : event?.provider?.duration,
 		});
 		this.form?.setFieldsValue({ dependent: event?.dependent?._id, skill: event?.skillSet?._id, address: event?.location, phoneNumber: event?.phoneNumber });
 		this.searchProvider('', event?.location, event?.skillSet?._id, event?.dependent?._id, true, event?.provider?._id);
@@ -335,12 +336,7 @@ class ModalCurrentAppointment extends React.Component {
 			time.value = moment(time.value).set({ years, months, date });
 
 			let flag = true;
-			dependents.find(dependent => dependent._id == selectedDependent)?.appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
-				if (time.value.isSame(moment(appointment.date))) {
-					flag = false;
-				}
-			})
-			appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
+			this.props.listAppointmentsRecent?.filter(appointment => (appointment.status == 0) && (appointment.provider?._id == listProvider[providerIndex]?._id || appointment.dependent?._id == selectedDependent))?.forEach(appointment => {
 				if (time.value.isSame(moment(appointment.date))) {
 					flag = false;
 				}
@@ -402,9 +398,15 @@ class ModalCurrentAppointment extends React.Component {
 	}
 
 	requestUpdateAppointment(postData) {
+		const { listProvider, selectedProviderIndex } = this.state;
+		const { durations } = store.getState().auth;
+
 		request.post(rescheduleAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
+				if (postData?.type == 2) {
+					message.success(`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''} requires a ${durations?.find(a => a.value == postData?.duration)?.label} evaluation. Please proceed to schedule.`);
+				}
 				this.props.onSubmit();
 			} else {
 				this.setState({ errorMessage: result.data });
@@ -463,13 +465,14 @@ class ModalCurrentAppointment extends React.Component {
 			status: 0,
 			rate: appointmentType == 2 ? listProvider?.find(p => p?._id == selectedProvider)?.separateEvaluationRate : appointmentType == 3 ? standardRate : appointmentType == 5 ? subsidizedRate : 0,
 			screeningTime: appointmentType == 1 ? screeningData?.time : '',
+			duration: appointmentType == 2 ? listProvider?.find(p => p?._id == selectedProvider)?.separateEvaluationDuration : listProvider?.find(p => p?._id == selectedProvider)?.duration,
 		};
 		this.requestUpdateAppointment(postData);
 	}
 
 	displayDuration = () => {
 		const { event } = this.props;
-		return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.provider?.duration, 'minutes').format('hh:mm a')}`;
+		return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.duration, 'minutes').format('hh:mm a')}`;
 	}
 
 	onOpenModalScreening = () => {
@@ -690,7 +693,7 @@ class ModalCurrentAppointment extends React.Component {
 							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType == 2 && selectedProviderIndex > -1 && (
 								<div className='font-20'>
-									<div>{listProvider[selectedProviderIndex]?.separateEvaluationDuration}Minutes evaluation</div>
+									<div>{store.getState().auth.durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
 									<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
 								</div>
 							)}
