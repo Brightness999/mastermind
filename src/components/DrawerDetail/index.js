@@ -696,7 +696,7 @@ class DrawerDetail extends Component {
           {[1, 4].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{(event?.type == 4 && event?.meetingLink) ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}</p>
-              <p className={`font-18 ${(event?.type == 4 && event?.meetingLink) ? 'text-underline text-primary' : ''}`} onClick={() => (event?.type == 4 && event?.meetingLink) && window.open(event?.meetingLink)} >{(event?.type == 4 && event?.meetingLink) ? event?.meetingLink : event?.phoneNumber}</p>
+              <p className={`font-18 cursor ${(event?.type == 4 && event?.meetingLink) ? 'text-underline text-primary' : ''}`} onClick={() => (event?.type == 4 && event?.meetingLink) && window.open(event?.meetingLink)} >{(event?.type == 4 && event?.meetingLink) ? event?.meetingLink : event?.phoneNumber}</p>
             </div>
           )}
         </div>

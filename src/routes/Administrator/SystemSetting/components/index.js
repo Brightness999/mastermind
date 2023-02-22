@@ -14,7 +14,6 @@ class SystemSetting extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			community: undefined,
 			cityConnections: [],
 			newCity: '',
 			loading: false,
@@ -32,6 +31,7 @@ class SystemSetting extends React.Component {
 				} else {
 					this.setState({ cityConnections: [] });
 				}
+				this.form?.setFieldsValue({ community: this.props.community?.community?._id });
 			}).catch(error => {
 				this.setState({ loading: false });
 				console.log('get cityConnections error---', error);
@@ -41,8 +41,6 @@ class SystemSetting extends React.Component {
 			this.setState({ cityConnections: this.props.user?.adminCommunity });
 		}
 
-		this.setState({ community: this.props.community?.community?._id });
-		this.form?.setFieldsValue({ community: this.props.community?.community?._id });
 	}
 
 	onFinish = (values) => {
@@ -79,7 +77,7 @@ class SystemSetting extends React.Component {
 	}
 
 	render() {
-		const { community, cityConnections, loading } = this.state;
+		const { cityConnections, loading } = this.state;
 		const { user } = this.props;
 		const layout = {
 			labelCol: {
@@ -104,7 +102,7 @@ class SystemSetting extends React.Component {
 						name="community"
 						label="Community"
 					>
-						<Select value={community}>
+						<Select>
 							{cityConnections.map((city, index) => (
 								<Select.Option key={index} value={city._id}>{city.name}</Select.Option>
 							))}
