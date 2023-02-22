@@ -28,7 +28,6 @@ class ModalCurrentAppointment extends React.Component {
 		selectedTimeIndex: -1,
 		listProvider: [],
 		selectedSkillSet: undefined,
-		address: '',
 		addressOptions: store.getState().auth.locations,
 		selectedDependent: undefined,
 		selectedProvider: undefined,
@@ -37,7 +36,7 @@ class ModalCurrentAppointment extends React.Component {
 		errorMessage: '',
 		skillSet: store.getState().auth.skillSet,
 		searchKey: '',
-		appointmentType: 3,
+		appointmentType: this.props.event?.type,
 		notes: '',
 		providerErrorMessage: '',
 		isConfirm: false,
@@ -113,7 +112,7 @@ class ModalCurrentAppointment extends React.Component {
 
 	componentDidMount() {
 		this.setState({ arrTime: this.getArrTime(0) });
-		const event = this.props.event;
+		const { event } = this.props;
 		this.setState({
 			selectedDependent: event?.dependent?._id,
 			selectedSkillSet: event?.skillSet?._id,
@@ -149,7 +148,7 @@ class ModalCurrentAppointment extends React.Component {
 					data.providers?.forEach((provider, i) => {
 						if (provider?._id == providerId) {
 							this.setState({ selectedProviderIndex: i }, () => {
-								this.onChooseProvider(i);
+								this.onChooseProvider(i, isInitial);
 							});
 						}
 					})
@@ -273,7 +272,7 @@ class ModalCurrentAppointment extends React.Component {
 		this.onSelectDate(moment(this.state.selectedDate).add(-1, 'month'));
 	}
 
-	onChooseProvider = (providerIndex) => {
+	onChooseProvider = (providerIndex, isInitial) => {
 		this.setState({ providerErrorMessage: '' });
 		const { listProvider, selectedDate, dependents, selectedDependent, selectedSkillSet } = this.state;
 		const appointments = listProvider[providerIndex]?.appointments ?? [];
@@ -312,7 +311,7 @@ class ModalCurrentAppointment extends React.Component {
 				appointmentType = 3;
 			}
 		}
-		this.setState({ appointmentType: appointmentType });
+		!isInitial && this.setState({ appointmentType: appointmentType });
 
 		const newArrTime = this.getArrTime(appointmentType, providerIndex, selectedDate);
 		const newPrivateArrTime = this.getArrTime(1, providerIndex, selectedDate);
@@ -384,6 +383,7 @@ class ModalCurrentAppointment extends React.Component {
 
 	onSelectTime = (index) => {
 		this.setState({ selectedTimeIndex: index })
+		index > -1 && this.setState({ errorMessage: '' });
 	}
 
 	requestUpdateAppointment(postData) {

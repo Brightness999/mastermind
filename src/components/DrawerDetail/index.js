@@ -5,7 +5,7 @@ import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsXCircle } from
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
-import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
+import { ModalBalance, ModalCancelAppointment, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
 import intl from "react-intl-universal";
 import messages from './messages';
 import msgModal from '../Modal/messages';
@@ -15,8 +15,9 @@ import moment from 'moment';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestFeedbackForClient, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestFeedbackForClient, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 import { MdOutlineEventBusy, MdOutlineRequestQuote } from 'react-icons/md';
+import { TbSend } from 'react-icons/tb';
 const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
@@ -44,6 +45,7 @@ class DrawerDetail extends Component {
       note: '',
       visibleEvaluationProcess: false,
       items: [],
+      visibleModalMessage: false,
     };
   }
 
@@ -129,6 +131,14 @@ class DrawerDetail extends Component {
     this.setState({ isShowFeedback: false });
   }
 
+  openModalMessage = () => {
+    this.setState({ visibleModalMessage: true });
+  }
+
+  closeModalMessage = () => {
+    this.setState({ visibleModalMessage: false });
+  }
+
   handleChangeNotes = (value) => {
     this.setState({ notes: value });
   }
@@ -155,7 +165,7 @@ class DrawerDetail extends Component {
   displayDuration = (event) => {
     let duration = event?.provider?.duration ?? 30;
     if (event?.type == 2) {
-      duration = duration * 1 + event?.provider?.separateEvaluationDuration * 1;
+      duration = event?.provider?.separateEvaluationDuration;
     }
     return `${moment(event?.date).format('MM/DD/YYYY hh:mm a')} - ${moment(event?.date).clone().add(duration, 'minutes').format('hh:mm a')}`;
   }
@@ -384,8 +394,30 @@ class DrawerDetail extends Component {
     return `${value?.split(' ')[0]?.split(':')[0]}:${value?.split(' ')[0]?.split(':')[1]} ${value?.split(' ')[1]}`;
   }
 
+  handleAcceptDeclinedScreening = () => {
+    request.post(acceptDeclinedScreening, { _id: this.props.event?._id, status: 0 }).then(res => {
+      if (res.success) {
+        message.success('Accepted successfully');
+        this.updateAppointments();
+      }
+    }).catch(err => {
+      message.error(err.message);
+    });
+  }
+
+  handleAppealRequest = (msg) => {
+    request.post(appealRequest, { id: this.props.event?._id, message: msg }).then(res => {
+      if (res.success) {
+        message.success('Your request has been submitted. Please allow up to 24 hours for the provider to review this.');
+        this.closeModalMessage();
+      }
+    }).catch(err => {
+      message.error(err.message);
+    });
+  }
+
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage } = this.state;
     const { event, listAppointmentsRecent } = this.props;
 
     const providerProfile = (
@@ -497,31 +529,20 @@ class DrawerDetail extends Component {
       onDecline: this.declineEvaluation,
       onCancel: this.onCloseModalEvaluationProcess,
     };
-    console.log(event)
+    const modalMessageProps = {
+      visible: visibleModalMessage,
+      title: 'Message',
+      onSubmit: this.handleAppealRequest,
+      onCancel: this.closeModalMessage,
+    };
 
     const contentConfirm = (
       <div className='confirm-content'>
         <Row gutter={10}>
           <Col xs={24} sm={24} md={12} className="flex flex-col">
-            <p className='font-16 text-center mb-0'>{intl.formatMessage(msgModal.current)}</p>
-            <div className='current-content flex-1'>
-              <p className='font-16 font-700'>{event?.type == 1 ? intl.formatMessage(msgModal.screening) : event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.appointment) : event?.type == 4 ? intl.formatMessage(msgModal.consultation) : ''}</p>
-              <p className='font-16'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
-              <p className='font-16'>{`${event?.previousAppointment?.provider?.firstName ?? ''} ${event?.previousAppointment?.provider?.firstName ?? ''}`}</p>
-              {event?.type == 1 ? (
-                <p className='font-16'>{intl.formatMessage(messages.phonenumber)}: {event?.phoneNumber}</p>
-              ) : event?.type == 4 ? (
-                <p className='font-16'>{event?.meetingLink ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}: {event?.meetingLink ? event?.meetingLink : event?.phoneNumber}</p>
-              ) : (
-                <p className='font-16'>{intl.formatMessage(messages.where)}: {event?.location}</p>
-              )}
-              <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.type == 1 ? event?.screeningTime ?? '' : this.displayDuration(event)}</span></p>
-            </div>
-          </Col>
-          <Col xs={24} sm={24} md={12} className="flex flex-col">
             <p className='font-16 text-center mb-0'>{intl.formatMessage(msgModal.old)}</p>
             <div className='new-content flex-1'>
-              <p className='font-16 font-700'>{event?.type == 1 ? intl.formatMessage(msgModal.screening) : event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.appointment) : event?.type == 4 ? intl.formatMessage(msgModal.consultation) : ''}</p>
+              <p className='font-16 font-700'>{event?.previousAppointment?.type == 1 ? intl.formatMessage(msgModal.screening) : event?.previousAppointment?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.previousAppointment?.type == 3 ? intl.formatMessage(msgModal.appointment) : event?.previousAppointment?.type == 4 ? intl.formatMessage(msgModal.consultation) : ''}</p>
               <p className='font-16'>{`${event?.previousAppointment?.dependent?.firstName ?? ''} ${event?.previousAppointment?.dependent?.lastName ?? ''}`}</p>
               <p className='font-16'>{`${event?.previousAppointment?.provider?.firstName ?? ''} ${event?.previousAppointment?.provider?.firstName ?? ''}`}</p>
               {event?.previousAppointment?.type == 1 ? (
@@ -531,7 +552,23 @@ class DrawerDetail extends Component {
               ) : (
                 <p className='font-16'>{intl.formatMessage(messages.where)}: {event?.previousAppointment?.location}</p>
               )}
-              <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.previousAppointment?.type == 1 ? event?.screeningTime ?? '' : this.displayDuration(event?.previousAppointment)}</span></p>
+              <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.previousAppointment?.type == 1 ? event?.previousAppointment?.screeningTime ?? '' : this.displayDuration(event?.previousAppointment)}</span></p>
+            </div>
+          </Col>
+          <Col xs={24} sm={24} md={12} className="flex flex-col">
+            <p className='font-16 text-center mb-0'>{intl.formatMessage(msgModal.current)}</p>
+            <div className='current-content flex-1'>
+              <p className='font-16 font-700'>{event?.type == 1 ? intl.formatMessage(msgModal.screening) : event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.appointment) : event?.type == 4 ? intl.formatMessage(msgModal.consultation) : ''}</p>
+              <p className='font-16'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
+              <p className='font-16'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.firstName ?? ''}`}</p>
+              {event?.type == 1 ? (
+                <p className='font-16'>{intl.formatMessage(messages.phonenumber)}: {event?.phoneNumber}</p>
+              ) : event?.type == 4 ? (
+                <p className='font-16'>{event?.meetingLink ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}: {event?.meetingLink ? event?.meetingLink : event?.phoneNumber}</p>
+              ) : (
+                <p className='font-16'>{intl.formatMessage(messages.where)}: {event?.location}</p>
+              )}
+              <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.type == 1 ? event?.screeningTime ?? '' : this.displayDuration(event)}</span></p>
             </div>
           </Col>
         </Row>
@@ -719,7 +756,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {[2, 4].includes(event?.type) && moment().isAfter(moment(event?.date)) && event?.status == 0 && userRole > 3 && (
+              {[2, 4].includes(event?.type) && event?.status == 0 && userRole > 3 && (
                 <Col span={12}>
                   <Button
                     type='primary'
@@ -733,7 +770,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {[3, 5].includes(event?.type) && moment(event?.date).isBefore(moment()) && event?.status == 0 && userRole > 3 && (
+              {[3, 5].includes(event?.type) && event?.status == 0 && userRole > 3 && (
                 <Col span={12}>
                   <Button
                     type='primary'
@@ -756,6 +793,30 @@ class DrawerDetail extends Component {
                     onClick={this.onOpenModalInvoice}
                   >
                     {intl.formatMessage(messages.viewInvoice)}
+                  </Button>
+                </Col>
+              )}
+              {((userRole == 30 || userRole > 900) && event?.status == -3 && event?.type == 1) && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<BsCheckCircle size={15} />}
+                    block
+                    onClick={this.handleAcceptDeclinedScreening}
+                  >
+                    {intl.formatMessage(msgModal.accept)}
+                  </Button>
+                </Col>
+              )}
+              {(userRole == 3 && event?.status == -3 && [2, 3, 5].includes(event?.type)) && (
+                <Col span={12}>
+                  <Button
+                    type='primary'
+                    icon={<TbSend size={12} />}
+                    block
+                    onClick={this.openModalMessage}
+                  >
+                    {intl.formatMessage(msgModal.appeal)}
                   </Button>
                 </Col>
               )}
@@ -783,7 +844,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(event?.type != 1 && event?.status == 0 && !isNotPending && moment().isBefore(moment(event?.date))) && (
+              {(event?.type != 1 && event?.status == 0 && !isNotPending) && (
                 <Col span={12}>
                   <Button
                     type='primary'
@@ -883,6 +944,7 @@ class DrawerDetail extends Component {
         {visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
         {visibleBalance && <ModalBalance {...modalBalanceProps} />}
         {visibleEvaluationProcess && <ModalEvaluationProcess {...modalEvaluationProcessProps} />}
+        {visibleModalMessage && <ModalCreateNote {...modalMessageProps} />}
       </Drawer >
     );
   }

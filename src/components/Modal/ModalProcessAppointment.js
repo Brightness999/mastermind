@@ -11,12 +11,13 @@ class ModalProcessAppointment extends React.Component {
     super(props);
     this.state = {
       note: '',
-      publicFeedback: '',
+      publicFeedback: this.props.event?.publicFeedback,
     }
   }
 
   render() {
     const { event } = this.props;
+    console.log(event);
     const { note, publicFeedback } = this.state;
     const modalProps = {
       className: 'modal-cancel',
@@ -49,9 +50,9 @@ class ModalProcessAppointment extends React.Component {
             ) : (
               <>
                 <Button type='primary' block onClick={() => this.props.onDecline(note, publicFeedback)}>{intl.formatMessage(messages.decline)}</Button>
-                {event?.type == 1 && <Button type='primary' block onClick={() => this.props.onSubmit([], false, note, publicFeedback)}>{intl.formatMessage(messages.toEvaluation)}</Button>}
-                {(event?.type == 1) && <Button type='primary' block onClick={() => this.props.onSubmit([], true, note, publicFeedback)}>{intl.formatMessage(messages.toStandardSession)}</Button>}
-                {(event?.type == 3 || event?.type == 5) && <Button type='primary' block onClick={() => this.props.onConfirm(note, publicFeedback)}>{intl.formatMessage(msgDrawer.markClosed)}</Button>}
+                {(event?.type == 1 && event?.provider?.isSeparateEvaluationRate) ? <Button type='primary' block onClick={() => this.props.onSubmit([], false, note, publicFeedback)}>{intl.formatMessage(messages.toEvaluation)}</Button> : null}
+                {event?.type == 1 ? <Button type='primary' block onClick={() => this.props.onSubmit([], true, note, publicFeedback)}>{intl.formatMessage(messages.toStandardSession)}</Button> : null}
+                {(event?.type == 3 || event?.type == 5) ? <Button type='primary' block onClick={() => this.props.onConfirm(note, publicFeedback)}>{intl.formatMessage(msgDrawer.markClosed)}</Button> : null}
               </>
             )}
           </div>

@@ -365,6 +365,7 @@ class ModalNewAppointment extends React.Component {
 
 	onSelectTime = (index) => {
 		this.setState({ selectedTimeIndex: index })
+		index > -1 && this.setState({ errorMessage: '' });
 	}
 
 	requestCreateAppointment(postData) {
