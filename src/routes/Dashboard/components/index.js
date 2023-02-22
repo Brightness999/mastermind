@@ -519,7 +519,7 @@ class Dashboard extends React.Component {
     const eventType = type == 1 ? 'Screening' : type == 2 ? 'Evaluation' : type == 4 ? 'Consultation' : 'Session';
 
     return (
-      <div key={index} className={`text-white item-feed ${status != 0 ? 'line-through' : ''} bg-${status == 0 ? 'active' : eventType.toLowerCase()}`}>
+      <div key={index} className={`text-white item-feed ${status != 0 ? 'line-through' : ''} bg-${status == 0 ? 'active' : eventType.toLowerCase()}`} onClick={() => this.onShowDrawerDetail(appointment?._id)}>
         <p className='font-700'>{appointment.dependent?.firstName ?? ''} {appointment.dependent?.lastName ?? ''} {status == -2 ? 'Cancelled' : ''}</p>
         {appointment.provider != undefined && <p>{`${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>}
         {appointment.school != undefined && <p>{appointment.school?.name}</p>}
