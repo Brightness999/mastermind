@@ -27,9 +27,9 @@ class InfoChild extends Component {
 		}
 	}
 
-	componentDidMount() {
+	async componentDidMount() {
 		this.setState({ loading: true, listServices: this.props.auth.skillSet, academicLevels: this.props.auth.academicLevels?.slice(6) });
-		this.loadServices();
+		await this.loadServices();
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
 				this.setState({ loading: false });
@@ -67,8 +67,8 @@ class InfoChild extends Component {
 		}
 	}
 
-	loadServices() {
-		request.post(getDefaultValueForClient, { cityConnection: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.parentInfo?.cityConnection : this.props.auth.user?.parentInfo?.cityConnection }).then(result => {
+	async loadServices() {
+		return await request.post(getDefaultValueForClient, { cityConnection: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.parentInfo?.cityConnection : this.props.auth.user?.parentInfo?.cityConnection }).then(result => {
 			const { success, data } = result;
 
 			if (success) {
