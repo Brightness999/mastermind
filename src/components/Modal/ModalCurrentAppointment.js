@@ -1,6 +1,6 @@
 import React from 'react';
-import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Popover, message, Form, Spin } from 'antd';
-import { BiChevronLeft, BiChevronRight, BiSearch } from 'react-icons/bi';
+import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Popover, message, Form } from 'antd';
+import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
 import { BsCheck } from 'react-icons/bs';
 import { GoPrimitiveDot } from 'react-icons/go';
 import intl from 'react-intl-universal';
@@ -16,62 +16,50 @@ const { Paragraph } = Typography;
 import 'moment/locale/en-au';
 moment.locale('en');
 import { store } from '../../redux/store';
-import { rescheduleAppointmentForParent, searchProvidersForAdmin } from '../../utils/api/apiList';
+import { rescheduleAppointmentForParent } from '../../utils/api/apiList';
 import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
-import ModalNewScreening from './ModalNewScreening';
 
 class ModalCurrentAppointment extends React.Component {
 	state = {
-		selectedDate: moment(),
-		selectedPrivateDate: moment(),
-		selectedProviderIndex: -1,
+		selectedDate: moment(this.props.event?.date),
+		selectedPrivateDate: moment(this.props.event?.date),
 		selectedTimeIndex: -1,
-		listProvider: [],
-		selectedSkillSet: undefined,
 		addressOptions: store.getState().auth.locations,
-		selectedDependent: undefined,
-		selectedProvider: undefined,
 		arrTime: [],
 		privateArrTime: [],
 		errorMessage: '',
 		skillSet: store.getState().auth.skillSet,
-		searchKey: '',
-		appointmentType: this.props.event?.type,
-		notes: '',
-		providerErrorMessage: '',
-		isConfirm: false,
+		notes: this.props.event?.notes,
 		dependents: store.getState().auth.dependents,
 		standardRate: '',
 		subsidizedRate: '',
-		visibleModalScreening: false,
-		screeningData: undefined,
 		userRole: store.getState().auth.user.role,
 		subsidyAvailable: false,
 		restSessions: 0,
-		loading: false,
 		duration: 30,
+		address: this.props.event?.location,
 	}
 
-	getArrTime = (type, providerIndex, date) => {
+	getArrTime = (date) => {
 		let arrTime = [];
 		let duration = 30;
-		const { listProvider, address } = this.state;
-		const provider = listProvider[providerIndex];
-		if (type == 1 || type == 3) {
-			duration = provider?.duration;
-		}
-		if (type == 2) {
-			duration = provider?.separateEvaluationDuration;
+		const { address } = this.state;
+		const { event } = this.props;
+
+		if (event?.type == 2) {
+			duration = event?.provider?.separateEvaluationDuration;
+		} else {
+			duration = event?.provider?.duration;
 		}
 		this.setState({ duration: duration });
 
 		if (date) {
 			if (date.day() == 6) {
 				return [];
-			} else if (provider?.blackoutDates?.includes(a => moment(a).year() == date.year() && moment(a).month() == date.month() && moment(a).date() == date.date())) {
+			} else if (event?.provider?.blackoutDates?.includes(a => moment(a).year() == date.year() && moment(a).month() == date.month() && moment(a).date() == date.date())) {
 				return [];
 			} else {
-				const ranges = provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && !a.isPrivate && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+				const ranges = event?.provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && !a.isPrivate && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
 				if (!!ranges?.length) {
 					let arr24 = new Array(24).fill(0);
 					let timeObject = { start: 0, end: 0 };
@@ -115,94 +103,15 @@ class ModalCurrentAppointment extends React.Component {
 		this.setState({ arrTime: this.getArrTime(0) });
 		const { event } = this.props;
 		this.setState({
-			selectedDependent: event?.dependent?._id,
-			selectedSkillSet: event?.skillSet?._id,
-			address: event?.location ?? undefined,
-			appointmentType: event?.type,
-			notes: event?.notes,
 			skillSet: store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.services ?? [],
-			selectedProvider: event?.provider?._id,
 			selectedDate: moment(event?.date),
 			addressOptions: ['Dependent Home', 'Provider Office', store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.school?.name],
 			standardRate: event?.type == 3 ? event?.rate : '',
 			subsidizedRate: event?.type == 5 ? event?.rate : '',
 			duration: event?.type == 2 ? event?.provider?.separateEvaluationDuration : event?.provider?.duration,
 		});
-		this.form?.setFieldsValue({ dependent: event?.dependent?._id, skill: event?.skillSet?._id, address: event?.location, phoneNumber: event?.phoneNumber });
-		this.searchProvider('', event?.location, event?.skillSet?._id, event?.dependent?._id, true, event?.provider?._id);
-	}
-
-	searchProvider(searchKey, address, selectedSkillSet, dependentId, isInitial, providerId) {
-		const data = {
-			search: searchKey,
-			address: address,
-			skill: selectedSkillSet,
-			dependentId: dependentId,
-		};
-
-		this.setState({ loading: true });
-		request.post(searchProvidersForAdmin, data).then(result => {
-			this.setState({ loading: false });
-			const { data, success } = result;
-			if (success) {
-				this.setState({ listProvider: data.providers });
-				if (isInitial) {
-					data.providers?.forEach((provider, i) => {
-						if (provider?._id == providerId) {
-							this.setState({ selectedProviderIndex: i }, () => {
-								this.onChooseProvider(i, isInitial);
-							});
-						}
-					})
-				} else {
-					this.setState({ selectedProviderIndex: -1 });
-				}
-			} else {
-				this.setState({ listProvider: [] });
-			}
-			!isInitial && this.setState({ selectedProvider: undefined, standardRate: '', subsidizedRate: '' });
-		}).catch(err => {
-			console.log('provider list error-----', err);
-			this.setState({
-				loading: false,
-				listProvider: [],
-				selectedProviderIndex: -1,
-				selectedProvider: undefined,
-				standardRate: '',
-				subsidizedRate: '',
-			});
-		})
-	}
-
-	createAppointment = (data) => {
-		const { appointmentType, selectedTimeIndex, selectedDependent, selectedDate, selectedProvider, arrTime, selectedProviderIndex, listProvider } = this.state;
-		if (selectedProvider == undefined) {
-			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
-			return;
-		}
-		if (appointmentType != 1 && (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0)) {
-			this.setState({ errorMessage: 'Please select a date and time' })
-			return;
-		}
-		this.setState({ errorMessage: '' })
-		if (appointmentType == 2) {
-			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a._id != this.props.event?._id && a.dependent == selectedDependent && a.type == 2 && a.status == 0);
-			if (appointment) {
-				message.warning("You can't create more evaluation.");
-				return;
-			}
-		}
-		if (appointmentType == 1) {
-			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a._id != this.props.event?._id && a.dependent == selectedDependent && a.type == 1 && a.status == 0);
-			if (appointment) {
-				message.warning("Your screening request is still being processed", 5);
-				return;
-			}
-		}
-		const { years, months, date } = selectedDate.toObject();
-		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
-		this.setState({ selectedDate: hour, visibleModalScreening: false, screeningData: data });
-		this.onConfirm();
+		this.form?.setFieldsValue({ dependent: event?.dependent?._id, skill: event?.skillSet?._id, address: event?.location });
+		this.onSelectDate(moment(event?.date));
 	}
 
 	onFinishFailed = (err) => {
@@ -210,51 +119,36 @@ class ModalCurrentAppointment extends React.Component {
 	}
 
 	handleChangeAddress = address => {
-		const { searchKey, selectedSkillSet, selectedDependent } = this.state;
 		this.setState({ address: address });
-		this.searchProvider(searchKey, address, selectedSkillSet, selectedDependent);
 	};
 
 	onSelectDate = (newValue) => {
-		this.setState({
-			selectedDate: newValue,
-			selectedTimeIndex: -1,
-		});
+		const { event } = this.props;
+		const newArrTime = this.getArrTime(newValue);
+		this.setState({ selectedDate: newValue, selectedTimeIndex: -1 });
+
 		if (newValue.isSameOrAfter(new Date())) {
-			const { selectedProviderIndex, dependents, selectedDependent, listProvider, appointmentType } = this.state;
+			newArrTime.map(time => {
+				const { years, months, date } = newValue.toObject();
+				time.value = moment(time.value).set({ years, months, date });
 
-			if (selectedProviderIndex > -1) {
-				const newArrTime = this.getArrTime(appointmentType, selectedProviderIndex, newValue);
-				const appointments = listProvider[selectedProviderIndex]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
-				newArrTime.map(time => {
-					const { years, months, date } = newValue.toObject();
-					time.value = moment(time.value).set({ years, months, date });
-
-					let flag = true;
-					dependents.find(dependent => dependent._id == selectedDependent)?.appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
-						if (time.value.isSame(moment(appointment.date))) {
-							flag = false;
-						}
-					})
-					appointments.forEach(appointment => {
-						if (time.value.isSame(moment(appointment.date))) {
-							flag = false;
-						}
-					})
-
-					if (flag) {
-						time.active = true;
-					} else {
-						time.active = false;
+				let flag = true;
+				this.props.listAppointmentsRecent?.filter(appointment => (appointment.status == 0) && (appointment.provider?._id == event?.provider?._id || appointment.dependent?._id == event?.dependent?._id))?.forEach(appointment => {
+					if (time.value.isSame(moment(appointment.date))) {
+						flag = false;
 					}
-					return time;
 				})
-				this.setState({ arrTime: newArrTime });
-			} else {
-				this.setState({ arrTime: this.state.arrTime?.map(time => ({ ...time, active: false })) });
-			}
+
+				if (flag) {
+					time.active = true;
+				} else {
+					time.active = false;
+				}
+				return time;
+			})
+			this.setState({ arrTime: newArrTime });
 		} else {
-			this.setState({ arrTime: this.state.arrTime?.map(time => ({ ...time, active: false })) });
+			this.setState({ arrTime: newArrTime?.map(time => ({ ...time, active: false })) });
 		}
 	}
 
@@ -274,138 +168,52 @@ class ModalCurrentAppointment extends React.Component {
 		this.onSelectDate(moment(this.state.selectedDate).add(-1, 'month'));
 	}
 
-	onChooseProvider = (providerIndex, isInitial) => {
-		const { listProvider, selectedDate, dependents, selectedDependent, selectedSkillSet } = this.state;
-		const appointments = listProvider[providerIndex]?.appointments ?? [];
-
-		const flagAppointments = appointments?.filter(a => a?.dependent == selectedDependent && a?.flagStatus == 1);
-		const declinedAppointments = appointments?.filter(a => a?.dependent == selectedDependent && a?.status == -3);
-
-		if (declinedAppointments?.length) {
-			message.error('The provider declined your request');
-			return;
-		}
-
-		if (flagAppointments?.length) {
-			message.error('Sorry there is an open flag. Please clear the flag to proceed');
-			return;
-		}
-
-		this.setState({ providerErrorMessage: '' });
-		let appointmentType = 0;
-
-		if (listProvider[providerIndex].isNewClientScreening) {
-			if (listProvider[providerIndex].isSeparateEvaluationRate) {
-				if (appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1)) {
-					if (appointments?.find(a => a.dependent == selectedDependent && a.type == 2 && a.status == -1)) {
-						appointmentType = 3;
-					} else {
-						if (appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1 && a.skipEvaluation)) {
-							appointmentType = 3;
-						} else {
-							appointmentType = 2;
-						}
-					}
-				} else {
-					appointmentType = 1;
-				}
-			} else {
-				if (appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1)) {
-					appointmentType = 3;
-				} else {
-					appointmentType = 1;
-				}
-			}
-		} else {
-			if (listProvider[providerIndex].isSeparateEvaluationRate) {
-				if (appointments?.find(a => a.dependent == selectedDependent && a.type == 2 && a.status == -1)) {
-					appointmentType = 3;
-				} else {
-					appointmentType = 2;
-				}
-			} else {
-				appointmentType = 3;
-			}
-		}
-		!isInitial && this.setState({ appointmentType: appointmentType });
-
-		const newArrTime = this.getArrTime(appointmentType, providerIndex, selectedDate);
-		const newPrivateArrTime = this.getArrTime(1, providerIndex, selectedDate);
-		newArrTime.map(time => {
-			const { years, months, date } = selectedDate?.toObject();
-			time.value = moment(time.value).set({ years, months, date });
-
-			let flag = true;
-			this.props.listAppointmentsRecent?.filter(appointment => (appointment.status == 0) && (appointment.provider?._id == listProvider[providerIndex]?._id || appointment.dependent?._id == selectedDependent))?.forEach(appointment => {
-				if (time.value.isSame(moment(appointment.date))) {
-					flag = false;
-				}
-			})
-
-			if (flag) {
-				time.active = true;
-			} else {
-				time.active = false;
-			}
-			return time;
-		})
-
-		let standardRate = 0;
-		let subsidizedRate = 0;
-
-		if (selectedDependent) {
-			const currentGrade = dependents?.find(dependent => dependent?._id == selectedDependent)?.currentGrade;
-
-			if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(currentGrade)) {
-				standardRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'Early Education'].includes(level.level))?.rate;
-				subsidizedRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'Early Education'].includes(level.level))?.subsidizedRate;
-			} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(currentGrade)) {
-				standardRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(level.level))?.rate;
-				subsidizedRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(level.level))?.subsidizedRate;
-			} else if (['Grades 7', 'Grades 8'].includes(currentGrade)) {
-				standardRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(level.level))?.rate;
-				subsidizedRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(level.level))?.subsidizedRate;
-			} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(currentGrade)) {
-				standardRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'High School Grades 9-12'].includes(level.level))?.rate;
-				subsidizedRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'High School Grades 9-12'].includes(level.level))?.subsidizedRate;
-			} else {
-				standardRate = listProvider[providerIndex]?.academicLevel?.find(level => level.level == currentGrade)?.rate;
-				subsidizedRate = listProvider[providerIndex]?.academicLevel?.find(level => level.level == currentGrade)?.subsidizedRate;
-			}
-
-			if (selectedSkillSet) {
-				const subsidy = this.props.listDependents?.find(d => d._id == selectedDependent)?.subsidy?.find(s => s.skillSet == selectedSkillSet);
-				if (subsidy?.status && subsidy?.adminApprovalStatus) {
-					this.setState({ subsidyAvailable: true, restSessions: subsidy?.numberOfSessions });
-				}
-			}
-		}
-
-
-		this.setState({
-			selectedProviderIndex: providerIndex,
-			selectedProvider: listProvider[providerIndex]._id,
-			arrTime: newArrTime,
-			standardRate: standardRate,
-			subsidizedRate: subsidizedRate,
-			privateArrTime: newPrivateArrTime,
-		});
-	}
-
 	onSelectTime = (index) => {
 		this.setState({ selectedTimeIndex: index })
 		index > -1 && this.setState({ errorMessage: '' });
 	}
 
-	requestUpdateAppointment(postData) {
-		const { listProvider, selectedProviderIndex } = this.state;
+	handleChangeNote = (notes) => {
+		this.setState({ notes: notes });
+	}
+
+	displayTime = (value) => {
+		return `${value?.split(' ')[0]?.split(':')[0]}:${value?.split(' ')[0]?.split(':')[1]} ${value?.split(' ')[1]}`;
+	}
+
+	handleReschedule = () => {
+		const { selectedDate, address, notes, selectedTimeIndex, arrTime } = this.state;
 		const { durations } = store.getState().auth;
+		const { event } = this.props;
+
+		if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
+			this.setState({ errorMessage: 'Please select a date and time' })
+			return;
+		}
+		this.setState({ errorMessage: '' })
+		if (event?.type == 2) {
+			const appointment = event?.provider?.appointments?.find(a => a._id != event?._id && a.dependent == event?.dependent?._id && a.type == 2 && a.status == 0);
+			if (appointment) {
+				message.warning("You can't create more evaluation.");
+				return;
+			}
+		}
+
+		const { years, months, date } = selectedDate.toObject();
+		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
+		const postData = {
+			_id: this.props.event?._id,
+			date: hour?.valueOf(),
+			location: address,
+			notes: notes,
+			status: 0,
+		};
 
 		request.post(rescheduleAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
 				if (postData?.type == 2) {
-					message.success(`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''} requires a ${durations?.find(a => a.value == postData?.duration)?.label} evaluation. Please proceed to schedule.`);
+					message.success(`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''} requires a ${durations?.find(a => a.value == this.state.duration)?.label} evaluation. Please proceed to schedule.`);
 				}
 				this.props.onSubmit();
 			} else {
@@ -416,71 +224,9 @@ class ModalCurrentAppointment extends React.Component {
 		});
 	}
 
-	handleSearchProvider = (value) => {
-		const { address, selectedSkillSet, selectedDependent } = this.state;
-		this.setState({ searchKey: value });
-		this.searchProvider(value, address, selectedSkillSet, selectedDependent);
-	}
-
-	handleSelectDependent = (dependentId) => {
-		const { searchKey, address, selectedSkillSet, dependents } = this.state;
-		this.setState({
-			selectedDependent: dependentId,
-			skillSet: dependents?.find(dependent => dependent._id == dependentId)?.services,
-			addressOptions: ['Dependent Home', 'Provider Office', dependents?.find(dependent => dependent._id == dependentId)?.school?.name],
-		});
-		this.searchProvider(searchKey, address, selectedSkillSet, dependentId);
-	}
-
-	handleSelectSkill = (skill) => {
-		const { searchKey, address, selectedDependent } = this.state;
-		this.setState({ selectedSkillSet: skill });
-		this.searchProvider(searchKey, address, skill, selectedDependent);
-	}
-
-	handleChangeNote = (notes) => {
-		this.setState({ notes: notes });
-	}
-
-	onConfirm = () => {
-		this.setState({ isConfirm: true });
-	}
-
-	displayTime = (value) => {
-		return `${value?.split(' ')[0]?.split(':')[0]}:${value?.split(' ')[0]?.split(':')[1]} ${value?.split(' ')[1]}`;
-	}
-
-	handleReschedule = () => {
-		const { listProvider, appointmentType, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, notes, standardRate, subsidizedRate, screeningData } = this.state;
-		const postData = {
-			_id: this.props.event?._id,
-			skillSet: selectedSkillSet,
-			dependent: selectedDependent,
-			provider: selectedProvider,
-			date: appointmentType == 1 ? undefined : selectedDate?.valueOf(),
-			location: appointmentType > 1 ? address : '',
-			phoneNumber: appointmentType == 1 ? screeningData?.phoneNumber : '',
-			notes: appointmentType == 1 ? screeningData?.notes : notes,
-			type: appointmentType,
-			status: 0,
-			rate: appointmentType == 2 ? listProvider?.find(p => p?._id == selectedProvider)?.separateEvaluationRate : appointmentType == 3 ? standardRate : appointmentType == 5 ? subsidizedRate : 0,
-			screeningTime: appointmentType == 1 ? screeningData?.time : '',
-			duration: appointmentType == 2 ? listProvider?.find(p => p?._id == selectedProvider)?.separateEvaluationDuration : listProvider?.find(p => p?._id == selectedProvider)?.duration,
-		};
-		this.requestUpdateAppointment(postData);
-	}
-
 	displayDuration = () => {
 		const { event } = this.props;
 		return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.duration, 'minutes').format('hh:mm a')}`;
-	}
-
-	onOpenModalScreening = () => {
-		this.setState({ visibleModalScreening: true });
-	}
-
-	onCloseModalScreening = () => {
-		this.setState({ visibleModalScreening: false });
 	}
 
 	nextPrivateMonth = () => {
@@ -492,8 +238,7 @@ class ModalCurrentAppointment extends React.Component {
 	}
 
 	onSelectPrivateDate = (newValue) => {
-		const { selectedProviderIndex } = this.state;
-		const newArrTime = this.getArrTime(1, selectedProviderIndex, newValue);
+		const newArrTime = this.getArrTime(newValue);
 		this.setState({
 			selectedPrivateDate: newValue,
 			privateArrTime: newArrTime,
@@ -501,7 +246,8 @@ class ModalCurrentAppointment extends React.Component {
 	}
 
 	privateSlot = () => {
-		const { listProvider, selectedProviderIndex, userRole, selectedPrivateDate, privateArrTime } = this.state;
+		const { userRole, selectedPrivateDate, privateArrTime } = this.state;
+		const { event } = this.props;
 
 		return (
 			<div className='private-calendar'>
@@ -513,8 +259,8 @@ class ModalCurrentAppointment extends React.Component {
 							value={selectedPrivateDate}
 							onSelect={this.onSelectPrivateDate}
 							dateCellRender={date => {
-								if (selectedProviderIndex > -1 && userRole > 3) {
-									const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == date.day());
+								if (userRole > 3) {
+									const availableTime = event?.provider?.manualSchedule?.find(time => time.dayInWeek == date.day());
 									if (availableTime) {
 										const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 										const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
@@ -574,29 +320,19 @@ class ModalCurrentAppointment extends React.Component {
 	render() {
 		const {
 			selectedDate,
-			selectedProviderIndex,
 			selectedTimeIndex,
-			listProvider,
-			selectedProvider,
 			skillSet,
 			arrTime,
 			errorMessage,
-			providerErrorMessage,
 			addressOptions,
-			appointmentType,
-			selectedDependent,
 			address,
 			isConfirm,
 			dependents,
 			standardRate,
 			subsidizedRate,
-			visibleModalScreening,
-			screeningData,
 			userRole,
 			subsidyAvailable,
 			restSessions,
-			loading,
-			notes,
 		} = this.state;
 		const { event } = this.props;
 		const modalProps = {
@@ -608,15 +344,6 @@ class ModalCurrentAppointment extends React.Component {
 			width: 1000,
 			footer: []
 		};
-		const modalScreeningProps = {
-			visible: visibleModalScreening,
-			onSubmit: this.createAppointment,
-			onCancel: this.onCloseModalScreening,
-			provider: listProvider[selectedProviderIndex],
-			dependent: dependents?.find(dependent => dependent._id == selectedDependent),
-			event: event,
-			notes: notes,
-		}
 
 		const contentConfirm = (
 			<div className='confirm-content'>
@@ -627,33 +354,17 @@ class ModalCurrentAppointment extends React.Component {
 						<div className='current-content'>
 							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</span></p>
 							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
-							{event?.type == 1 ? (
-								<p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {event?.phoneNumber}</p>
-							) : (
-								<p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {event?.location}</p>
-							)}
-							{appointmentType == 1 ? (
-								<p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{event?.screeningTime ?? ''}</span></p>
-							) : (
-								<p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(event?.date?.toString())?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(event?.date?.toString())?.toLocaleDateString()}</span></p>
-							)}
+							<p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {event?.location}</p>
+							<p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(event?.date?.toString())?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(event?.date?.toString())?.toLocaleDateString()}</span></p>
 						</div>
 					</Col>
 					<Col xs={24} sm={24} md={12}>
 						<p className='font-12 text-center mb-0'>{intl.formatMessage(messages.new)}</p>
 						<div className='new-content'>
-							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}</span></p>
-							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${dependents.find(dependent => dependent._id == selectedDependent)?.firstName ?? ''} ${dependents?.find(dependent => dependent._id == selectedDependent)?.lastName ?? ''}`}</p>
-							{appointmentType == 1 ? (
-								<p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {screeningData?.phoneNumber}</p>
-							) : (
-								<p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {address}</p>
-							)}
-							{appointmentType == 1 ? (
-								<p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{screeningData?.time ?? ''}</span></p>
-							) : (
-								<p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(selectedDate?.toString())?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(selectedDate?.toString())?.toLocaleDateString()}</span></p>
-							)}
+							<p className='font-10'>30 minutes {intl.formatMessage(messages.meetingWith)} <span className='font-11 font-700'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</span></p>
+							<p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${dependents.find(dependent => dependent._id == event?.dependent?._id)?.firstName ?? ''} ${dependents?.find(dependent => dependent._id == event?.dependent?._id)?.lastName ?? ''}`}</p>
+							<p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {address}</p>
+							<p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(selectedDate?.toString())?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(selectedDate?.toString())?.toLocaleDateString()}</span></p>
 						</div>
 					</Col>
 				</Row>
@@ -685,22 +396,22 @@ class ModalCurrentAppointment extends React.Component {
 					<Form
 						name="current-appointment"
 						layout='vertical'
-						onFinish={() => appointmentType == 1 ? selectedProvider ? this.onOpenModalScreening() : this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) }) : this.createAppointment()}
+						onFinish={this.handleReschedule}
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<div className='flex gap-5 items-center'>
-							<p className='font-30 mb-10'>{appointmentType == 3 && intl.formatMessage(messages.newAppointment)}{appointmentType == 2 && intl.formatMessage(messages.newEvaluation)}{appointmentType == 1 && intl.formatMessage(messages.newScreening)}</p>
-							{appointmentType == 2 && selectedProviderIndex > -1 && (
+							<p className='font-30 mb-10'>{event?.type == 3 && intl.formatMessage(messages.newAppointment)}{event?.type == 2 && intl.formatMessage(messages.newEvaluation)}{event?.type == 1 && intl.formatMessage(messages.newScreening)}</p>
+							{event?.type == 2 && (
 								<div className='font-20'>
-									<div>{store.getState().auth.durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
-									<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
+									<div>{store.getState().auth.durations?.find(a => a.value == event?.provider?.separateEvaluationDuration)?.label} evaluation</div>
+									<div>Rate: ${event?.provider?.separateEvaluationRate}</div>
 								</div>
 							)}
 						</div>
 						<div className='flex flex-row items-center mb-10'>
 							<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}<sup>*</sup></p>
-							{appointmentType == 3 && subsidyAvailable && (
+							{event?.type == 3 && subsidyAvailable && (
 								<div className='flex flex-row items-center ml-20 gap-5'>
 									<p className='mb-0'>Number of Sessions: {restSessions}</p>
 									<div className='flex items-center gap-2'>
@@ -718,12 +429,8 @@ class ModalCurrentAppointment extends React.Component {
 									rules={[{ required: true, message: 'Please select a dependent' }]}
 								>
 									<Select
-										showSearch
-										optionFilterProp="children"
-										filterOption={(input, option) => option.children?.join('').includes(input)}
-										filterSort={(optionA, optionB) => optionA.children?.join('').toLowerCase().localeCompare(optionB.children?.join('').toLowerCase())}
-										onChange={value => this.handleSelectDependent(value)}
 										placeholder={intl.formatMessage(msgCreateAccount.dependent)}
+										disabled
 									>
 										{dependents?.map((dependent, index) => (
 											<Select.Option key={index} value={dependent._id}>{dependent.firstName} {dependent.lastName}</Select.Option>
@@ -738,11 +445,8 @@ class ModalCurrentAppointment extends React.Component {
 									rules={[{ required: true, message: 'Please select a skill.' }]}
 								>
 									<Select
-										showSearch
-										optionFilterProp="children"
-										filterOption={(input, option) => option.children?.includes(input)}
-										onChange={v => this.handleSelectSkill(v)}
 										placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
+										disabled
 									>
 										{skillSet?.map((skill, index) => (
 											<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
@@ -754,7 +458,7 @@ class ModalCurrentAppointment extends React.Component {
 								<Form.Item
 									name="address"
 									label={intl.formatMessage(msgCreateAccount.location)}
-									rules={[{ required: [2, 3, 5].includes(appointmentType), message: "Select an appointment location." }]}
+									rules={[{ required: [2, 3, 5].includes(event?.type), message: "Select an appointment location." }]}
 								>
 									<Select
 										showSearch
@@ -779,31 +483,17 @@ class ModalCurrentAppointment extends React.Component {
 						</Row>
 						{userRole != 30 && (
 							<div className='choose-doctor'>
-								<p className='font-16 mt-10'>{intl.formatMessage(messages.selectProvider)}<sup>*</sup></p>
+								<p className='font-16 mt-10'>{intl.formatMessage(msgCreateAccount.provider)}</p>
 								<div className='doctor-content'>
-									<Row>
-										<Col xs={24} sm={24} md={8} className='select-small'>
-											<Input
-												onChange={e => this.handleSearchProvider(e.target.value)}
-												placeholder={intl.formatMessage(messages.searchProvider)}
-												suffix={<BiSearch size={17} />}
-											/>
-										</Col>
-									</Row>
 									<div className='doctor-list'>
-										{loading ? <Spin spinning={loading} /> : listProvider?.length > 0 ? listProvider?.map((provider, index) => (
-											<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
-												<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
-												<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
-												{selectedProvider === provider._id && (
-													<div className='selected-doctor'>
-														<BsCheck size={12} />
-													</div>
-												)}
+										<div className='doctor-item'>
+											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
+											<p className='font-12 text-center'>{`${event?.provider.firstName ?? ''} ${event?.provider.lastName ?? ''}`}</p>
+											<div className='selected-doctor'>
+												<BsCheck size={12} />
 											</div>
-										)) : "No matching providers found. Please update the options to find an available provider."}
+										</div>
 									</div>
-									{providerErrorMessage.length > 0 && (<p className='text-left text-red mr-5'>{providerErrorMessage}</p>)}
 								</div>
 							</div>
 						)}
@@ -812,22 +502,22 @@ class ModalCurrentAppointment extends React.Component {
 								<div className='provider-profile'>
 									<div className='flex flex-row items-center'>
 										<p className='font-16 font-700'>
-											{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}
-											{!!listProvider[selectedProviderIndex]?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
-											{userRole > 3 && listProvider[selectedProviderIndex]?.manualSchedule?.find(m => m.isPrivate) ? <Popover content={this.privateSlot} trigger="click"><FaCalendarAlt size={16} className="text-green500 cursor" /></Popover> : null}
+											{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}
+											{!!event?.provider?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
+											{userRole > 3 && event?.provider?.manualSchedule?.find(m => m.isPrivate) ? <Popover content={this.privateSlot} trigger="click"><FaCalendarAlt size={16} className="text-green500 cursor" /></Popover> : null}
 										</p>
-										<p className='font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
+										<p className='font-700 ml-auto text-primary'>{event?.provider?.isNewClientScreening ? event?.provider?.appointments?.find(a => a.dependent == event?.dependent?._id && a.type == 1 && a.status == -1) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
 									<div className='flex'>
 										<div className='flex-1'>
-											{listProvider[selectedProviderIndex]?.contactNumber?.map((phone, index) => (
+											{event?.provider?.contactNumber?.map((phone, index) => (
 												<p key={index} className='font-12'>{phone.phoneNumber}</p>
 											))}
-											{listProvider[selectedProviderIndex]?.contactEmail?.map((email, index) => (
+											{event?.provider?.contactEmail?.map((email, index) => (
 												<p key={index} className='font-12'>{email.email}</p>
 											))}
-											{listProvider[selectedProviderIndex]?.serviceAddress && (
-												<p className='font-12'>{listProvider[selectedProviderIndex].serviceAddress}</p>
+											{event?.provider?.serviceAddress && (
+												<p className='font-12'>{event?.provider.serviceAddress}</p>
 											)}
 										</div>
 										<div className='flex-1 font-12'>
@@ -838,13 +528,13 @@ class ModalCurrentAppointment extends React.Component {
 									<div className='flex mt-10'>
 										<div className='flex-1'>
 											<p className='text-bold'>Skillset(s):</p>
-											{listProvider[selectedProviderIndex]?.skillSet?.map((skill, index) => (
+											{event?.provider?.skillSet?.map((skill, index) => (
 												<p key={index} className='font-12'>{skill.name}</p>
 											))}
 										</div>
 										<div className='flex-1'>
 											<p className='text-bold'>Grade level(s)</p>
-											{listProvider[selectedProviderIndex]?.academicLevel?.map((level, i) => (
+											{event?.provider?.academicLevel?.map((level, i) => (
 												<p key={i} className='font-12'>{level.level}</p>
 											))}
 										</div>
@@ -852,7 +542,7 @@ class ModalCurrentAppointment extends React.Component {
 									<p className='mt-10 text-bold'>Profile</p>
 									<div className='profile-text'>
 										<Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-											{listProvider[selectedProviderIndex]?.publicProfile}
+											{event?.provider?.publicProfile}
 										</Paragraph>
 									</div>
 								</div>
@@ -867,8 +557,8 @@ class ModalCurrentAppointment extends React.Component {
 													fullscreen={false}
 													value={selectedDate}
 													dateCellRender={date => {
-														if (selectedProviderIndex > -1 && userRole > 3) {
-															const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == date.day());
+														if (userRole > 3) {
+															const availableTime = event?.provider?.manualSchedule?.find(time => time.dayInWeek == date.day());
 															if (availableTime) {
 																const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
 																const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 });
@@ -894,18 +584,17 @@ class ModalCurrentAppointment extends React.Component {
 															return true;
 														}
 
-														if (selectedProviderIndex > -1) {
-															const range = listProvider[selectedProviderIndex]?.manualSchedule?.find(d => d.dayInWeek == date.day() && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
-															if (range) {
-																if (range.isPrivate) {
-																	return true;
-																}
-															} else {
+														const range = event?.provider?.manualSchedule?.find(d => d.dayInWeek == date.day() && d.location == address && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+														if (range) {
+															if (range.isPrivate) {
 																return true;
 															}
-															if (listProvider[selectedProviderIndex]?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() == date.year() && moment(blackoutDate).month() == date.month() && moment(blackoutDate).date() == date.date())) {
-																return true;
-															}
+														} else {
+															return true;
+														}
+
+														if (event?.provider?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() == date.year() && moment(blackoutDate).month() == date.month() && moment(blackoutDate).date() == date.date())) {
+															return true;
 														}
 
 														return false;
@@ -974,7 +663,6 @@ class ModalCurrentAppointment extends React.Component {
 							)}
 						</Row>
 					</Form>
-					{visibleModalScreening && <ModalNewScreening {...modalScreeningProps} />}
 				</div>
 			</Modal>
 		);

@@ -297,7 +297,8 @@ class PanelAppointment extends React.Component {
       visible: visibleCurrent,
       onSubmit: this.submitModalCurrent,
       onCancel: this.closeModalCurrent,
-      event: event,
+      event: appointments?.find(a => a?._id == event?._id),
+      listAppointmentsRecent: appointments,
     };
 
     const modalProcessProps = {

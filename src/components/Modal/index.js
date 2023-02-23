@@ -10,11 +10,8 @@ import ModalReferralService from './ModalReferralService';
 import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
 import ModalNewGroup from './ModaNewGroup';
 import ModalNewSubsidyReview from './ModalNewSubsidyReview';
-import ModalEditUser from './ModalEditUser';
 import ModalInputCode from './ModalInputCode';
-import ModalNewClientScreening from './ModalNewClientScreening';
 import ModalSeparateEvaluation from './ModalSeparateEvaluation';
-import ModalStandardSession from './ModalStandardSession';
 import ModalConfirm from './ModalConfirm';
 import ModalCreateNote from './ModalCreateNote';
 import ModalDependentDetail from './ModalDependentDetail';
@@ -41,10 +38,7 @@ export {
   ModalNewGroup,
   ModalNewSubsidyReview,
   ModalInputCode,
-  ModalEditUser,
-  ModalNewClientScreening,
   ModalSeparateEvaluation,
-  ModalStandardSession,
   ModalConfirm,
   ModalCreateNote,
   ModalDependentDetail,

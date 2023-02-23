@@ -1,6 +1,6 @@
 import { Divider, Table, Space, Button, Input, message, Popconfirm } from 'antd';
 import { routerLinks } from '../../../constant';
-import { ModalConfirm, ModalEditUser } from '../../../../components/Modal';
+import { ModalConfirm } from '../../../../components/Modal';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
 import mgsSidebar from '../../../../components/SideBar/messages';
@@ -19,7 +19,6 @@ class FlagList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      visibleEdit: false,
       schools: [],
       isConfirmModal: false,
       confirmMessage: '',
@@ -62,14 +61,6 @@ class FlagList extends React.Component {
 
   handleNewSchool = () => {
     this.props.history.push(routerLinks.CreateAccountForAdmin);
-  }
-
-  onShowModalEdit = () => {
-    this.setState({ visibleEdit: true })
-  }
-
-  onCloseModalEdit = () => {
-    this.setState({ visibleEdit: false })
   }
 
   handleActivate = (id, state) => {
@@ -120,7 +111,7 @@ class FlagList extends React.Component {
   }
 
   render() {
-    const { visibleEdit, flags, isConfirmModal, confirmMessage, skillSet, loading } = this.state;
+    const { flags, isConfirmModal, confirmMessage, skillSet, loading } = this.state;
     const columns = [
       {
         title: 'Dependent', key: 'dependent',
@@ -203,12 +194,6 @@ class FlagList extends React.Component {
       },
     ];
 
-    const modalEditUserProps = {
-      visible: visibleEdit,
-      onSubmit: this.onCloseModalEdit,
-      onCancel: this.onCloseModalEdit,
-    }
-
     const confirmModalProps = {
       visible: isConfirmModal,
       message: confirmMessage,
@@ -223,7 +208,6 @@ class FlagList extends React.Component {
           <Divider />
         </div>
         <Table bordered size='middle' dataSource={flags} columns={columns} />
-        <ModalEditUser {...modalEditUserProps} />
         <ModalConfirm {...confirmModalProps} />
         <PageLoading loading={loading} isBackground={true} />
       </div>

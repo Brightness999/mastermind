@@ -562,6 +562,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			restSessions,
 			loading,
 			notes,
+			address,
 		} = this.state;
 		const modalProps = {
 			className: 'modal-new',
@@ -789,7 +790,7 @@ class ModalNewAppointmentForParents extends React.Component {
 														}
 
 														if (selectedProviderIndex > -1) {
-															const range = listProvider[selectedProviderIndex]?.manualSchedule?.find(d => d.dayInWeek == date.day() && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+															const range = listProvider[selectedProviderIndex]?.manualSchedule?.find(d => d.dayInWeek == date.day() && d.location == address && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
 															if (range) {
 																if (range.isPrivate) {
 																	return true;
