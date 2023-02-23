@@ -65,6 +65,7 @@ export const setInforClientChild = createAsyncThunk(
 			return result;
 		} catch (error) {
 			console.log(error, 'error')
+			message.error(error.message);
 		}
 		return false
 	}
@@ -80,6 +81,7 @@ export const setAvailabilityClientChild = createAsyncThunk(
 			}
 		} catch (error) {
 			console.log(error, 'error')
+			message.error(error.message);
 		}
 		return false
 	}
@@ -95,6 +97,7 @@ export const setInforClientParent = createAsyncThunk(
 			}
 		} catch (error) {
 			console.log(error, 'error')
+			message.error(error.message);
 		}
 		return false
 	}
@@ -111,6 +114,7 @@ export const setInforProvider = createAsyncThunk(
 			}
 		} catch (error) {
 			console.log(error, 'error')
+			message.error(error.message);
 		}
 		return false
 	}
@@ -126,6 +130,7 @@ export const setInforSchool = createAsyncThunk(
 			}
 		} catch (error) {
 			console.log(error, 'error')
+			message.error(error.message);
 		}
 		return false
 	}

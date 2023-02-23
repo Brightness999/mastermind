@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Select, Switch } from 'antd';
+import { Row, Col, Form, Button, Select, Switch, message } from 'antd';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
 import { connect } from 'react-redux'
@@ -20,6 +20,7 @@ class InfoScheduling extends Component {
 
 	componentDidMount() {
 		this.setState({ loading: true });
+		this.getDataFromServer();
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
 				this.setState({ loading: false });
@@ -33,6 +34,7 @@ class InfoScheduling extends Component {
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
+				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
 		} else {
@@ -48,10 +50,10 @@ class InfoScheduling extends Component {
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
+				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
 		}
-		this.getDataFromServer();
 	}
 
 	getDataFromServer = () => {

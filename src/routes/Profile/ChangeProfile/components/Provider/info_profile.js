@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select } from 'antd';
+import { Row, Col, Form, Button, Input, Select, message } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
@@ -43,6 +43,7 @@ class InfoProfile extends Component {
 				}
 			}).catch(err => {
 				console.log('get user profile error---', err);
+				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
 		} else {
@@ -54,6 +55,7 @@ class InfoProfile extends Component {
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
+				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
 		}

@@ -35,6 +35,7 @@ class InfoParent extends Component {
 						this.form.setFieldsValue(data?.parentInfo);
 					}
 				}).catch(err => {
+					message.error("Getting Profile" + err.message);
 					console.log(err);
 				})
 			} else {

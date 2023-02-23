@@ -23,6 +23,7 @@ class InfoServices extends Component {
 
 	componentDidMount() {
 		this.setState({ loading: true });
+		this.getDataFromServer();
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
 				this.setState({ loading: false });
@@ -32,6 +33,7 @@ class InfoServices extends Component {
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
+				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
 		} else {
@@ -42,11 +44,10 @@ class InfoServices extends Component {
 					this.form?.setFieldsValue(data);
 				}
 			}).catch(err => {
-				message.error(err.message);
+				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
 		}
-		this.getDataFromServer();
 	}
 
 	getDataFromServer = () => {

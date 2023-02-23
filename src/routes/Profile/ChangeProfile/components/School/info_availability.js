@@ -63,7 +63,7 @@ class InfoAvailability extends React.Component {
 					})
 				}
 			}).catch(err => {
-				message.error(err.message);
+				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
 		} else {
@@ -86,7 +86,7 @@ class InfoAvailability extends React.Component {
 					})
 				}
 			}).catch(err => {
-				message.error(err.message);
+				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
 		}

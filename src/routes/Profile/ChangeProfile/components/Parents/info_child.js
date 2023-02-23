@@ -29,6 +29,7 @@ class InfoChild extends Component {
 
 	componentDidMount() {
 		this.setState({ loading: true, listServices: this.props.auth.skillSet, academicLevels: this.props.auth.academicLevels?.slice(6) });
+		this.loadServices();
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
 				this.setState({ loading: false });
@@ -43,7 +44,7 @@ class InfoChild extends Component {
 					this.form.setFieldsValue({ children: data?.studentInfos?.filter(s => !s.isRemoved) });
 				}
 			}).catch(err => {
-				message.error(err.message);
+				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
 		} else {
@@ -60,11 +61,10 @@ class InfoChild extends Component {
 					this.form.setFieldsValue({ children: data });
 				}
 			}).catch(err => {
-				message.error(err.message);
+				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
 		}
-		this.loadServices();
 	}
 
 	loadServices() {

@@ -47,6 +47,7 @@ class InfoFinancial extends Component {
 				}
 			}).catch(err => {
 				console.log('get provider info error ---', err);
+				message.error("Getting Profile" + err.message);
 				this.setState({ academicLevels: academicLevels, loading: false });
 			})
 		} else {
@@ -64,6 +65,7 @@ class InfoFinancial extends Component {
 				}
 			}).catch(err => {
 				console.log('get provider info error ---', err);
+				message.error("Getting Profile" + err.message);
 				this.setState({ academicLevels: academicLevels, loading: false });
 			})
 		}

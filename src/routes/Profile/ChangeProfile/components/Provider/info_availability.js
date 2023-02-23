@@ -46,14 +46,17 @@ class InfoAvailability extends Component {
 
 	async componentDidMount() {
 		this.setState({ loading: true });
+		this.loadSchools();
 		const holidays = await this.getHolidays();
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(async result => {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.form?.setFieldsValue(data?.providerInfo);
-					this.form?.setFieldValue('serviceableSchool', data?.providerInfo?.serviceableSchool?.map(d => d._id));
+					this.form?.setFieldsValue({
+						...data?.providerInfo,
+						serviceableSchool: data?.providerInfo?.serviceableSchool?.map(d => d._id),
+					});
 
 					await this.updateBlackoutDates(data?.providerInfo?.blackoutDates?.map(date => new Date(date)));
 					document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
@@ -88,6 +91,7 @@ class InfoAvailability extends Component {
 				}
 			}).catch(err => {
 				this.setState({ loading: false });
+				message.error("Getting Profile" + err.message);
 				console.log(err);
 			})
 		} else {
@@ -131,12 +135,9 @@ class InfoAvailability extends Component {
 				}
 			}).catch(err => {
 				this.setState({ loading: false });
-				message.error(err.message);
+				message.error("Getting Profile" + err.message);
 			})
 		}
-
-		this.getDataFromServer();
-		this.loadSchools();
 	}
 
 	getHolidays = async () => {
@@ -153,20 +154,6 @@ class InfoAvailability extends Component {
 		} catch (error) {
 			return [];
 		}
-	}
-
-	getDataFromServer = () => {
-		request.post(getDefaultValueForProvider).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ CancellationWindow: data.CancellationWindow });
-			} else {
-				this.setState({ CancellationWindow: [] });
-			}
-		}).catch(err => {
-			console.log(err);
-			this.setState({ CancellationWindow: [] });
-		})
 	}
 
 	loadSchools() {

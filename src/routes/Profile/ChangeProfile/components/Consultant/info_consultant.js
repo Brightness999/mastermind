@@ -38,7 +38,7 @@ class InfoConsultant extends Component {
 					this.form.setFieldsValue(data?.consultantInfo);
 				}
 			}).catch(err => {
-				message.error(err.message);
+				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
 		} else {
@@ -49,7 +49,7 @@ class InfoConsultant extends Component {
 					this.form.setFieldsValue(data);
 				}
 			}).catch(err => {
-				message.error(err.message);
+				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
 		}
