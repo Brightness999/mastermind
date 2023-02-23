@@ -7,6 +7,10 @@ import LeftSiderBar from '../components/SideBar';
 import PropTypes from 'prop-types';
 import '../assets/styles/index.less';
 import './styles/main.less';
+import { checkPermission } from '../utils/auth/checkPermission';
+import { routerLinks } from "../routes/constant";
+import { setUser } from '../redux/features/authSlice';
+import { store } from '../redux/store';
 const { Header, Sider, Content } = Layout;
 
 class AdminLayout extends React.PureComponent {
@@ -19,7 +23,13 @@ class AdminLayout extends React.PureComponent {
 	}
 
 	componentDidMount() {
-		if (!localStorage.getItem('token')) {
+		if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
+			checkPermission().then(loginData => {
+				loginData?.role < 900 && this.props.history.push(routerLinks.Dashboard);
+				store.dispatch(setUser(loginData));
+			})
+			return;
+		} else {
 			this.props.history.push('/');
 		}
 	}

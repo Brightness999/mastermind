@@ -1,9 +1,7 @@
 import { Divider, Table, Space, Button, Input, message } from 'antd';
-import { routerLinks } from '../../../constant';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
 import mgsSidebar from '../../../../components/SideBar/messages';
-import { checkPermission } from '../../../../utils/auth/checkPermission';
 import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
 import { getConsultationList } from '../../../../utils/api/apiList';
@@ -24,31 +22,23 @@ class ConsultationRequest extends React.Component {
   }
 
   componentDidMount() {
-    if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
-      this.setState({ loading: true });
-      checkPermission().then(loginData => {
-        loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
-        const skillSet = JSON.parse(JSON.stringify(this.props.auth.skillSet));
-        this.setState({ skillSet: skillSet?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; }) });
-        request.post(getConsultationList).then(result => {
-          this.setState({ loading: false });
-          const { success, data } = result;
-          if (success) {
-            this.setState({
-              consultationList: data?.map((consultation, i) => {
-                consultation['key'] = i; return consultation;
-              }) ?? []
-            });
-          }
-        }).catch(err => {
-          message.error(err.message);
-          this.setState({ loading: false });
-        })
-      }).catch(err => {
-        console.log(err);
-        this.props.history.push('/');
-      })
-    }
+    this.setState({ loading: true });
+    const skillSet = JSON.parse(JSON.stringify(this.props.auth.skillSet));
+    this.setState({ skillSet: skillSet?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; }) });
+    request.post(getConsultationList).then(result => {
+      this.setState({ loading: false });
+      const { success, data } = result;
+      if (success) {
+        this.setState({
+          consultationList: data?.map((consultation, i) => {
+            consultation['key'] = i; return consultation;
+          }) ?? []
+        });
+      }
+    }).catch(err => {
+      message.error(err.message);
+      this.setState({ loading: false });
+    })
   }
 
   render() {

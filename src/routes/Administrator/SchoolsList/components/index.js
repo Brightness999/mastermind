@@ -4,7 +4,6 @@ import { ModalConfirm, ModalInputCode } from '../../../../components/Modal';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
 import mgsSidebar from '../../../../components/SideBar/messages';
-import { checkPermission } from '../../../../utils/auth/checkPermission';
 import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
 import { activateUser, getSchools } from '../../../../utils/api/apiList';
@@ -18,7 +17,6 @@ export default class extends React.Component {
 		this.state = {
 			visibleInputCode: false,
 			schools: [],
-			userRole: -1,
 			isConfirmModal: false,
 			confirmMessage: '',
 			userId: '',
@@ -29,29 +27,21 @@ export default class extends React.Component {
 	}
 
 	componentDidMount() {
-		if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
-			this.setState({ loading: true });
-			checkPermission().then(loginData => {
-				loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
-				request.post(getSchools).then(result => {
-					this.setState({ loading: false });
-					const { success, data } = result;
-					if (success) {
-						this.setState({
-							schools: data?.map((user, i) => {
-								user['key'] = i; return user;
-							}) ?? []
-						});
-					}
-				}).catch(err => {
-					message.error(err.message);
-					this.setState({ loading: false });
-				})
-				this.setState({ userRole: loginData.role });
-			}).catch(err => {
-				this.props.history.push('/');
-			})
-		}
+		this.setState({ loading: true });
+		request.post(getSchools).then(result => {
+			this.setState({ loading: false });
+			const { success, data } = result;
+			if (success) {
+				this.setState({
+					schools: data?.map((user, i) => {
+						user['key'] = i; return user;
+					}) ?? []
+				});
+			}
+		}).catch(err => {
+			message.error(err.message);
+			this.setState({ loading: false });
+		})
 	}
 
 	handleNewSchool = () => {

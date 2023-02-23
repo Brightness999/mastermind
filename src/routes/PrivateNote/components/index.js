@@ -1,6 +1,6 @@
 import { Divider, Table, Space, Input, Button } from 'antd';
 import { routerLinks } from '../../constant';
-import { ModalConfirm, ModalDependentDetail } from '../../../components/Modal';
+import { ModalDependentDetail } from '../../../components/Modal';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
 import msgMainHeader from '../../../components/MainHeader/messages';
@@ -10,28 +10,29 @@ import request from '../../../utils/api/request';
 import { deletePrivateNote, getDependents } from '../../../utils/api/apiList';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
+import PageLoading from '../../../components/Loading/PageLoading';
 
 export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       dependents: [],
-      userRole: -1,
-      isConfirmModal: false,
-      confirmMessage: '',
-      userId: '',
       selectedDependentId: '',
       note: '',
       visibleDependent: false,
       selectedDependent: {},
+      loading: false,
     };
     this.searchInput = createRef(null);
   }
 
   componentDidMount() {
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
+      this.setState({ loading: true });
       checkPermission().then(loginData => {
+        loginData.role > 900 && this.props.history.push(routerLinks.Admin);
         request.post(getDependents).then(result => {
+          this.setState({ loading: false });
           const { success, data } = result;
           if (success) {
             this.setState({
@@ -42,12 +43,8 @@ export default class extends React.Component {
           }
         }).catch(err => {
           console.log('get dependents error ---', err);
-          this.setState({ dependents: [] });
+          this.setState({ dependents: [], loading: false });
         })
-        this.setState({
-          userRole: loginData.role,
-          userId: loginData._id,
-        });
       }).catch(err => {
         console.log(err);
         this.props.history.push('/');
@@ -62,14 +59,6 @@ export default class extends React.Component {
 
   onCloseModalDependent = () => {
     this.setState({ visibleDependent: false });
-  }
-
-  handleDeleteNote = (dependentId) => {
-    this.setState({
-      isConfirmModal: true,
-      confirmMessage: `Are you sure you want to delete this note?`,
-      selectedDependentId: dependentId
-    });
   }
 
   handleConfirm = () => {
@@ -91,11 +80,6 @@ export default class extends React.Component {
         console.log('activate user error---', err);
       })
     }
-    this.setState({ isConfirmModal: false });
-  }
-
-  handleCancel = () => {
-    this.setState({ isConfirmModal: false });
   }
 
   handleClickRow = (dependent) => {
@@ -103,7 +87,7 @@ export default class extends React.Component {
   }
 
   render() {
-    const { dependents, isConfirmModal, confirmMessage, visibleDependent, selectedDependent } = this.state;
+    const { dependents, visibleDependent, selectedDependent, loading } = this.state;
     const columns = [
       {
         title: 'Full Name', key: 'name',
@@ -164,13 +148,6 @@ export default class extends React.Component {
       dependent: selectedDependent,
     }
 
-    const confirmModalProps = {
-      visible: isConfirmModal,
-      message: confirmMessage,
-      onSubmit: this.handleConfirm,
-      onCancel: this.handleCancel,
-    }
-
     return (
       <div className="full-layout page usermanager-page">
         <div className='div-title-admin'>
@@ -190,7 +167,7 @@ export default class extends React.Component {
           }}
         />
         {visibleDependent && <ModalDependentDetail {...modalDependentProps} />}
-        <ModalConfirm {...confirmModalProps} />
+        <PageLoading loading={loading} isBackground={true} />
       </div>
     );
   }

@@ -107,6 +107,7 @@ class ModalDependentDetail extends React.Component {
 
 	render() {
 		const { dependent, selectedNoteId, isNew, visibleNewSubsidy } = this.state;
+		const { user } = this.props;
 		const modalProps = {
 			className: 'modal-dependent',
 			title: "",
@@ -178,7 +179,7 @@ class ModalDependentDetail extends React.Component {
 											<div className='text-left'>{note.user?.role > 900 ? 'Admin' : note.user?.username}</div>
 											<div className='text-left'>{moment(note?.updatedAt).format('MM/DD/YYYY hh:mm')}</div>
 										</div>
-										{(this.props.user?.role > 900 || this.props.user?._id == note.user?._id) && (
+										{(user?.role > 900 || user?._id == note.user?._id) && (
 											<div className='flex justify-end gap-2'>
 												{selectedNoteId == note._id ? (
 													<>
@@ -215,8 +216,8 @@ class ModalDependentDetail extends React.Component {
 						)}
 					</div>
 					<div className='flex gap-5 mt-2'>
-						<Button type='primary' block className={`${this.props.user?.role == 3 ? '' : 'display-none'}`} onClick={() => this.onOpenModalNewSubsidy()}>Request Subsidy</Button>
-						<Button type='primary' block className={`${this.props.user?.role == 3 ? 'display-none' : ''}`} onClick={() => this.onAddComment()}>Add Comment</Button>
+						<Button type='primary' block className={`${user?.role == 3 ? '' : 'display-none'}`} onClick={() => this.onOpenModalNewSubsidy()}>Request Subsidy</Button>
+						<Button type='primary' block className={`${user?.role == 3 ? 'display-none' : ''}`} onClick={() => this.onAddComment()}>Add Comment</Button>
 					</div>
 				</Card>
 				{visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}

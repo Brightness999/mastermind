@@ -7,7 +7,6 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import mgsSidebar from '../../../../components/SideBar/messages';
 import './index.less';
-import { checkPermission } from '../../../../utils/auth/checkPermission';
 import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
 import { activateUser, getUsers } from '../../../../utils/api/apiList';
@@ -22,7 +21,6 @@ class UserManager extends React.Component {
 		this.state = {
 			visibleInputCode: false,
 			users: [],
-			userRole: -1,
 			isConfirmModal: false,
 			confirmMessage: '',
 			userId: '',
@@ -34,29 +32,21 @@ class UserManager extends React.Component {
 	}
 
 	componentDidMount() {
-		if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
-			this.setState({ loading: true });
-			checkPermission().then(loginData => {
-				loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
-				this.setState({ userRole: loginData.role });
-				request.post(getUsers).then(result => {
-					const { success, data } = result;
-					this.setState({ loading: false });
-					if (success) {
-						this.setState({
-							users: data?.map((user, i) => {
-								user['key'] = i; return user;
-							}) ?? []
-						});
-					}
-				}).catch(err => {
-					this.setState({ loading: false });
-					message.error(err.message);
-				})
-			}).catch(err => {
-				this.props.history.push('/');
-			})
-		}
+		this.setState({ loading: true });
+		request.post(getUsers).then(result => {
+			const { success, data } = result;
+			this.setState({ loading: false });
+			if (success) {
+				this.setState({
+					users: data?.map((user, i) => {
+						user['key'] = i; return user;
+					}) ?? []
+				});
+			}
+		}).catch(err => {
+			this.setState({ loading: false });
+			message.error(err.message);
+		})
 	}
 
 	handleNewUser = () => {
@@ -245,6 +235,8 @@ class UserManager extends React.Component {
 	}
 }
 
-const mapStateToProps = state => ({})
+const mapStateToProps = state => ({
+	user: state.auth.user,
+})
 
 export default compose(connect(mapStateToProps, { removeRegisterData }))(UserManager);

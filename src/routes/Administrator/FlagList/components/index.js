@@ -6,7 +6,6 @@ import intl from 'react-intl-universal';
 import mgsSidebar from '../../../../components/SideBar/messages';
 import msgModal from '../../../../components/Modal/messages';
 import msgDrawer from '../../../../components/DrawerDetail/messages';
-import { checkPermission } from '../../../../utils/auth/checkPermission';
 import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
 import { activateUser, clearFlag, getFlagList } from '../../../../utils/api/apiList';
@@ -32,31 +31,23 @@ class FlagList extends React.Component {
   }
 
   componentDidMount() {
-    if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
-      this.setState({ loading: true });
-      checkPermission().then(loginData => {
-        loginData.role < 900 && this.props.history.push(routerLinks.Dashboard);
-        const skillSet = JSON.parse(JSON.stringify(this.props.auth.skillSet));
-        this.setState({ skillSet: skillSet?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; }) });
-        request.post(getFlagList).then(result => {
-          const { success, data } = result;
-          this.setState({ loading: false });
-          if (success) {
-            this.setState({
-              flags: data?.map((flag, i) => {
-                flag['key'] = i; return flag;
-              }) ?? []
-            });
-          }
-        }).catch(err => {
-          message.error(err.message);
-          this.setState({ loading: false });
-        })
-      }).catch(err => {
-        console.log(err);
-        this.props.history.push('/');
-      })
-    }
+    this.setState({ loading: true });
+    const skillSet = JSON.parse(JSON.stringify(this.props.auth.skillSet));
+    this.setState({ skillSet: skillSet?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; }) });
+    request.post(getFlagList).then(result => {
+      const { success, data } = result;
+      this.setState({ loading: false });
+      if (success) {
+        this.setState({
+          flags: data?.map((flag, i) => {
+            flag['key'] = i; return flag;
+          }) ?? []
+        });
+      }
+    }).catch(err => {
+      message.error(err.message);
+      this.setState({ loading: false });
+    })
   }
 
   handleNewSchool = () => {

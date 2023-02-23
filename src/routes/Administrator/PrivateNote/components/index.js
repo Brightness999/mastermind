@@ -1,11 +1,10 @@
 import { Divider, Table, Space, Input, Button, message } from 'antd';
 import { routerLinks } from '../../../constant';
-import { ModalConfirm, ModalDependentDetail } from '../../../../components/Modal';
+import { ModalDependentDetail } from '../../../../components/Modal';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
 import msgMainHeader from '../../../../components/MainHeader/messages';
 import './index.less';
-import { checkPermission } from '../../../../utils/auth/checkPermission';
 import request from '../../../../utils/api/request';
 import { deletePrivateNote, getDependents } from '../../../../utils/api/apiList';
 import { SearchOutlined } from '@ant-design/icons';
@@ -17,10 +16,6 @@ export default class extends React.Component {
     super(props);
     this.state = {
       dependents: [],
-      userRole: -1,
-      isConfirmModal: false,
-      confirmMessage: '',
-      userId: '',
       selectedDependentId: '',
       note: '',
       visibleDependent: false,
@@ -31,32 +26,21 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
-    if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
-      this.setState({ loading: true });
-      checkPermission().then(loginData => {
-        request.post(getDependents).then(result => {
-          this.setState({ loading: false });
-          const { success, data } = result;
-          if (success) {
-            this.setState({
-              dependents: data?.map((user, i) => {
-                user['key'] = i; return user;
-              }) ?? []
-            });
-          }
-        }).catch(err => {
-          message.error(err.message);
-          this.setState({ dependents: [], loading: false });
-        })
+    this.setState({ loading: true });
+    request.post(getDependents).then(result => {
+      this.setState({ loading: false });
+      const { success, data } = result;
+      if (success) {
         this.setState({
-          userRole: loginData.role,
-          userId: loginData._id,
+          dependents: data?.map((user, i) => {
+            user['key'] = i; return user;
+          }) ?? []
         });
-      }).catch(err => {
-        console.log(err);
-        this.props.history.push('/');
-      })
-    }
+      }
+    }).catch(err => {
+      message.error(err.message);
+      this.setState({ dependents: [], loading: false });
+    })
   }
 
   handleNewUser = () => {
@@ -66,14 +50,6 @@ export default class extends React.Component {
 
   onCloseModalDependent = () => {
     this.setState({ visibleDependent: false });
-  }
-
-  handleDeleteNote = (dependentId) => {
-    this.setState({
-      isConfirmModal: true,
-      confirmMessage: `Are you sure you want to delete this note?`,
-      selectedDependentId: dependentId
-    });
   }
 
   handleConfirm = () => {
@@ -95,11 +71,6 @@ export default class extends React.Component {
         console.log('activate user error---', err);
       })
     }
-    this.setState({ isConfirmModal: false });
-  }
-
-  handleCancel = () => {
-    this.setState({ isConfirmModal: false });
   }
 
   handleClickRow = (dependent) => {
@@ -107,7 +78,7 @@ export default class extends React.Component {
   }
 
   render() {
-    const { dependents, isConfirmModal, confirmMessage, visibleDependent, selectedDependent, loading } = this.state;
+    const { dependents, visibleDependent, selectedDependent, loading } = this.state;
     const columns = [
       {
         title: 'Full Name', key: 'name',
@@ -169,13 +140,6 @@ export default class extends React.Component {
       dependent: selectedDependent,
     }
 
-    const confirmModalProps = {
-      visible: isConfirmModal,
-      message: confirmMessage,
-      onSubmit: this.handleConfirm,
-      onCancel: this.handleCancel,
-    }
-
     return (
       <div className="full-layout page usermanager-page">
         <div className='div-title-admin'>
@@ -195,7 +159,6 @@ export default class extends React.Component {
           }}
         />
         {visibleDependent && <ModalDependentDetail {...modalDependentProps} />}
-        <ModalConfirm {...confirmModalProps} />
         <PageLoading loading={loading} isBackground={true} />
       </div>
     );

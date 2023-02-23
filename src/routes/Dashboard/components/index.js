@@ -1,9 +1,9 @@
 import React from 'react';
-import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input, Popconfirm } from 'antd';
+import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input } from 'antd';
 import { FaUser, FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import { MdFormatAlignLeft, MdOutlineEventBusy, MdOutlineRequestQuote } from 'react-icons/md';
 import { BsFilter, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
-import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalPayment, ModalCreateNote } from '../../../components/Modal';
+import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
 import intl from 'react-intl-universal';
@@ -18,18 +18,16 @@ import messages from '../messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
 import msgModal from '../../../components/Modal/messages';
 import msgDrawer from '../../../components/DrawerDetail/messages';
-import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 const { Panel } = Collapse;
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
 import moment from 'moment';
 import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
-import { routerLinks } from "../../constant";
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { setAcademicLevels, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
+import { setAcademicLevels, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
@@ -89,113 +87,105 @@ class Dashboard extends React.Component {
   }
 
   componentDidMount() {
-    if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
-      this.setState({ loading: true });
-      checkPermission().then(loginData => {
-        this.props.dispatch(setUser(loginData));
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('success') === 'true' && params.get('id')) {
-          const appointmentId = params.get('id');
-          request.post(payInvoice, { id: appointmentId }).then(res => {
-            const { success } = res;
-            if (success) {
-              message.success('Paid successfully');
-              window.location.search = '';
-            }
-          }).catch(err => {
-            console.log('pay flag error---', err);
-            message.error(err.message);
-          });
+    const { user } = this.props;
+    this.setState({ loading: true });
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === 'true' && params.get('id')) {
+      const appointmentId = params.get('id');
+      request.post(payInvoice, { id: appointmentId }).then(res => {
+        const { success } = res;
+        if (success) {
+          message.success('Paid successfully');
+          window.location.search = '';
         }
-        loginData?.role > 900 && this.props.history.push(routerLinks.Admin)
-        this.loadDefaultData();
-        this.updateCalendarEvents(loginData.role);
-        this.getMyAppointments(loginData.role);
-        this.props.dispatch(getSubsidyRequests({ role: loginData.role }));
-        const notifications = setInterval(() => {
-          if (loginData.role == 3) {
-            request.post(checkNotificationForClient).then(res => {
-              if (res.success) {
-                res.data?.forEach(appointment => {
-                  let duration = appointment.provider?.duration;
-                  if (appointment.type == 2) {
-                    duration = appointment.provider?.separateEvaluateDuration;
-                  }
-                  const key = `open${Date.now()}`;
-                  const btn = (
-                    <Button type="primary" size="small" onClick={() => {
-                      notification.close(key);
-                      this.handleCloseNotification(appointment._id);
-                    }}>
-                      Confirm
-                    </Button>
-                  );
-                  const description = (
-                    <div>
-                      <p className='font-10'>{duration ?? ''} minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{`${appointment?.provider?.firstName ?? ''} ${appointment?.provider?.lastName ?? ''}`}</span></p>
-                      <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName ?? ''} ${appointment?.dependent?.lastName ?? ''}`}</p>
-                      {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber ?? ''}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location ?? ''}</p>}
-                      <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
-                    </div>
-                  )
-                  notification.open({
-                    message: 'Notification',
-                    description,
-                    btn,
-                    key,
-                    onClose: close(key),
-                    duration: 10,
-                    placement: 'top',
-                  });
-                })
-              }
-            })
-          }
-          if (loginData.role == 30) {
-            request.post(checkNotificationForProvider).then(res => {
-              if (res.success) {
-                res.data?.forEach(appointment => {
-                  let duration = appointment.provider?.duration;
-                  if (appointment.type == 2) {
-                    duration = appointment.provider?.separateEvaluateDuration;
-                  }
-                  const key = `open${Date.now()}`;
-                  const btn = (
-                    <Button type="primary" size="small" onClick={() => {
-                      notification.close(key);
-                      this.handleCloseNotification(appointment._id);
-                    }}>
-                      Confirm
-                    </Button>
-                  );
-                  const description = (
-                    <div>
-                      <p className='font-10'>{duration} minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{`${appointment?.provider?.firstName ?? ''} ${appointment?.provider?.lastName ?? ''}`}</span></p>
-                      <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName ?? ''} ${appointment?.dependent?.lastName ?? ''}`}</p>
-                      {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber ?? ''}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location ?? ''}</p>}
-                      <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
-                    </div>
-                  )
-                  notification.open({
-                    message: 'Notification',
-                    description,
-                    btn,
-                    key,
-                    onClose: close(key),
-                    duration: 0,
-                    placement: 'top',
-                  });
-                })
-              }
-            })
-          }
-        }, 60000);
-        this.setState({ intervalId: notifications });
       }).catch(err => {
-        console.log('check permission error ---', err);
-        this.props.history.push('/');
-      })
+        console.log('pay flag error---', err);
+        message.error(err.message);
+      });
     }
+    this.loadDefaultData();
+    this.updateCalendarEvents(user.role);
+    this.getMyAppointments(user.role);
+    this.props.dispatch(getSubsidyRequests({ role: user.role }));
+    const notifications = setInterval(() => {
+      if (user.role == 3) {
+        request.post(checkNotificationForClient).then(res => {
+          if (res.success) {
+            res.data?.forEach(appointment => {
+              let duration = appointment.provider?.duration;
+              if (appointment.type == 2) {
+                duration = appointment.provider?.separateEvaluateDuration;
+              }
+              const key = `open${Date.now()}`;
+              const btn = (
+                <Button type="primary" size="small" onClick={() => {
+                  notification.close(key);
+                  this.handleCloseNotification(appointment._id);
+                }}>
+                  Confirm
+                </Button>
+              );
+              const description = (
+                <div>
+                  <p className='font-10'>{duration ?? ''} minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{`${appointment?.provider?.firstName ?? ''} ${appointment?.provider?.lastName ?? ''}`}</span></p>
+                  <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName ?? ''} ${appointment?.dependent?.lastName ?? ''}`}</p>
+                  {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber ?? ''}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location ?? ''}</p>}
+                  <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
+                </div>
+              )
+              notification.open({
+                message: 'Notification',
+                description,
+                btn,
+                key,
+                onClose: close(key),
+                duration: 10,
+                placement: 'top',
+              });
+            })
+          }
+        })
+      }
+      if (user.role == 30) {
+        request.post(checkNotificationForProvider).then(res => {
+          if (res.success) {
+            res.data?.forEach(appointment => {
+              let duration = appointment.provider?.duration;
+              if (appointment.type == 2) {
+                duration = appointment.provider?.separateEvaluateDuration;
+              }
+              const key = `open${Date.now()}`;
+              const btn = (
+                <Button type="primary" size="small" onClick={() => {
+                  notification.close(key);
+                  this.handleCloseNotification(appointment._id);
+                }}>
+                  Confirm
+                </Button>
+              );
+              const description = (
+                <div>
+                  <p className='font-10'>{duration} minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{`${appointment?.provider?.firstName ?? ''} ${appointment?.provider?.lastName ?? ''}`}</span></p>
+                  <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName ?? ''} ${appointment?.dependent?.lastName ?? ''}`}</p>
+                  {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber ?? ''}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location ?? ''}</p>}
+                  <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
+                </div>
+              )
+              notification.open({
+                message: 'Notification',
+                description,
+                btn,
+                key,
+                onClose: close(key),
+                duration: 0,
+                placement: 'top',
+              });
+            })
+          }
+        })
+      }
+    }, 60000);
+    this.setState({ intervalId: notifications });
 
     const script = document.createElement("script");
     script.src = socketUrlJSFile;

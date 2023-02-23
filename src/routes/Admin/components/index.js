@@ -19,15 +19,13 @@ import messagesCreateAccount from '../../Sign/CreateAccount/messages';
 import msgSidebar from '../../../components/SideBar/messages';
 import msgDrawer from '../../../components/DrawerDetail/messages';
 import msgModal from '../../../components/Modal/messages';
-import { checkPermission } from '../../../utils/auth/checkPermission';
 import './index.less';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
 import moment from 'moment';
 import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice'
-import { routerLinks } from "../../constant";
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setUser } from '../../../redux/features/authSlice';
+import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { clearFlag, getDefaultDataForAdmin, requestClearance } from '../../../utils/api/apiList';
@@ -55,7 +53,7 @@ class SchedulingCenter extends React.Component {
       isGridDayView: 'Grid',
       calendarWeekends: true,
       calendarEvents: this.props.appointmentsInMonth,
-      userRole: -1,
+      userRole: this.props.auth.user?.role,
       listDependents: [],
       parentInfo: {},
       providerInfo: {},
@@ -84,20 +82,11 @@ class SchedulingCenter extends React.Component {
   }
 
   componentDidMount() {
-    if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
-      this.setState({ loading: true });
-      checkPermission().then(loginData => {
-        this.props.dispatch(setUser(loginData));
-        loginData?.role < 900 && this.props.history.push(routerLinks.Dashboard)
-        this.setState({ userRole: loginData.role });
-        this.updateCalendarEvents(loginData.role);
-        this.getMyAppointments(loginData.role);
-        this.loadDefaultData();
-      }).catch(err => {
-        console.log('check permission error ---', err);
-        this.props.history.push('/');
-      })
-    }
+    const { auth } = this.props;
+    this.setState({ loading: true });
+    this.updateCalendarEvents(auth?.user?.role);
+    this.getMyAppointments(auth?.user?.role);
+    this.loadDefaultData();
 
     const script = document.createElement("script");
     script.src = socketUrlJSFile;
