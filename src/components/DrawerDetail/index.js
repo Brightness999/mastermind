@@ -465,31 +465,28 @@ class DrawerDetail extends Component {
 
     const providerProfile = (
       <div className='provider-profile'>
-        <p className='font-16 font-700 mb-10'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
+        <p className='font-20 font-700 mb-10'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
         <div className='flex'>
           <div className='flex-1'>
             {event?.provider?.contactNumber?.map((phone, index) => (
-              <p key={index} className='font-10'>{phone.phoneNumber}</p>
+              <p key={index} className='font-16'>{phone.phoneNumber}</p>
             ))}
             {event?.provider?.contactEmail?.map((email, index) => (
-              <p key={index} className='font-10'>{email.email}</p>
+              <p key={index} className='font-16'>{email.email}</p>
             ))}
             {event?.provider?.serviceAddress && (
-              <p className='font-10'>{event?.provider.serviceAddress}</p>
+              <p className='font-16'>{event?.provider.serviceAddress}</p>
             )}
-          </div>
-          <div className='flex-1'>
-
           </div>
         </div>
         <div className='flex'>
           <div className='flex-1'>
-            <p className='font-10 mb-0 text-bold'>Skillset(s):</p>
+            <p className='font-16 mb-0 text-bold'>Skillset(s):</p>
             {event?.provider?.skillSet?.map((skill, index) => (
-              <p key={index} className='font-10 mb-0'>{skill.name}</p>
+              <p key={index} className='font-16 mb-0'>{skill.name}</p>
             ))}
           </div>
-          <div className='font-10 flex-1'>
+          <div className='font-16 flex-1'>
             <p className='mb-0 text-bold'>Grade level(s)</p>
             <div>{event?.provider?.academicLevel?.map((level, i) => (
               <div key={i} className="flex justify-between gap-2">
@@ -499,9 +496,9 @@ class DrawerDetail extends Component {
             ))}</div>
           </div>
         </div>
-        <p className='font-10 mb-0 text-bold'>Profile</p>
+        <p className='font-16 mb-0 text-bold'>Profile</p>
         <div className='profile-text'>
-          <Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
+          <Paragraph className='font-16 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
             {event?.provider?.publicProfile}
           </Paragraph>
         </div>
@@ -509,13 +506,13 @@ class DrawerDetail extends Component {
     );
     const dependentProfile = (
       <div className='provider-profile'>
-        <p className='font-16 font-700 mb-10'>{event?.dependent?.firstName ?? ''} {event?.dependent?.lastName ?? ''}</p>
+        <p className='font-20 font-700 mb-10'>{event?.dependent?.firstName ?? ''} {event?.dependent?.lastName ?? ''}</p>
         <div className='flex'>
           <div className='flex-1'>
-            <p className='font-10 mb-0'>{event?.dependent?.guardianPhone ?? ''}</p>
-            <p className='font-10 mb-0'>{event?.dependent?.guardianEmail ?? ''}</p>
+            <p className='font-16 mb-0'>{event?.dependent?.guardianPhone ?? ''}</p>
+            <p className='font-16 mb-0'>{event?.dependent?.guardianEmail ?? ''}</p>
           </div>
-          <div className='flex-1 font-10'>
+          <div className='flex-1 font-16'>
             <div className='text-bold'>Skillset</div>
             {event?.dependent?.services?.map((service, i) => (<div key={i}>{service.name}</div>))}
           </div>
@@ -587,7 +584,6 @@ class DrawerDetail extends Component {
       dependent: event?.dependent,
       event: event,
     }
-
     const modalCreateNoteProps = {
       visible: visibleCreateNote,
       onSubmit: this.handleRequestClearance,
