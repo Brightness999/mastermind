@@ -21,6 +21,7 @@ class SubsidyProgram extends Component {
 		isSameRate: true,
 		isWillingOpenPrivate: false,
 		loading: false,
+		isPrivateForHmgh: false,
 	}
 
 	componentDidMount() {
@@ -39,7 +40,8 @@ class SubsidyProgram extends Component {
 					this.setState({
 						isAcceptProBono: data?.providerInfo?.isAcceptProBono,
 						isAcceptReduceRate: data?.providerInfo?.isAcceptReduceRate,
-						isWillingOpenPrivate: data?.providerInfo?.isWillingOpenPrivate,
+						isWillingOpenPrivate: data?.providerInfo?.isPrivateForHmgh ? false : data?.providerInfo?.isWillingOpenPrivate,
+						isPrivateForHmgh: data?.providerInfo?.isPrivateForHmgh,
 					})
 				}
 			}).catch(err => {
@@ -56,7 +58,8 @@ class SubsidyProgram extends Component {
 					this.setState({
 						isAcceptProBono: data.isAcceptProBono,
 						isAcceptReduceRate: data.isAcceptReduceRate,
-						isWillingOpenPrivate: data.isWillingOpenPrivate,
+						isWillingOpenPrivate: data?.providerInfo?.isPrivateForHmgh ? false : data.isWillingOpenPrivate,
+						isPrivateForHmgh: data?.providerInfo?.isPrivateForHmgh,
 					})
 				}
 			}).catch(err => {
@@ -102,7 +105,7 @@ class SubsidyProgram extends Component {
 	};
 
 	render() {
-		const { academicLevels, isAcceptProBono, isAcceptReduceRate, numberOfSession, isWillingOpenPrivate, isSameRate, loading } = this.state;
+		const { academicLevels, isAcceptProBono, isAcceptReduceRate, numberOfSession, isWillingOpenPrivate, isSameRate, loading, isPrivateForHmgh } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -225,6 +228,7 @@ class SubsidyProgram extends Component {
 							<Checkbox
 								onChange={e => this.setState({ isWillingOpenPrivate: e.target.checked })}
 								checked={isWillingOpenPrivate}
+								disabled={isPrivateForHmgh}
 							/>
 							<p className='font-15 font-700 mb-0 ml-10'>{intl.formatMessage(messages.openPrivateSlots)}</p>
 						</div>

@@ -86,13 +86,14 @@ class InfoReview extends Component {
 	}
 
 	validAvaiability = (availability) => {
+		const { registerData } = this.props.register;
 		let manualSchedule = [];
 		for (let i = 0; i < day_week.length; i++) {
 			for (let j = 0; j < availability['' + day_week[i]].length; j++) {
 				const scheduleItem = availability['' + day_week[i]][j];
 				if (scheduleItem.from_time && scheduleItem.to_time && scheduleItem.location) {
 					manualSchedule.push({
-						isPrivate: availability?.isPrivateForHmgh ? true : scheduleItem.isPrivate ?? false,
+						isPrivate: registerData?.profileInfor?.isPrivateForHmgh ? true : scheduleItem.isPrivate ?? false,
 						location: scheduleItem.location,
 						dayInWeek: i,
 						fromYear: scheduleItem.from_date?.year() ?? 1,
@@ -129,7 +130,6 @@ class InfoReview extends Component {
 			manualSchedule: manualSchedule,
 			serviceableSchool: availability.serviceableSchool,
 			isHomeVisit: availability.isHomeVisit,
-			isPrivateForHmgh: availability.isPrivateForHmgh,
 			privateOffice: availability.isPrivateOffice,
 			isSchools: availability.isSchools,
 			blackoutDates: availability.blackoutDates?.map(date => date.toString()),

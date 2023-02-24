@@ -149,6 +149,7 @@
   "routes.Createaccount.location": "Location",
   "routes.Createaccount.locations": "Locations",
   "routes.Createaccount.privateHMGHAgents": "Private for HMGH agents only",
+  "routes.Createaccount.onlyVisibleToHmgh": "I am only visible to HMGH",
   "routes.Createaccount.addRange": "Add range",
   "routes.Createaccount.cancellationWindow": "Cancellation window",
   "routes.Createaccount.cancellationFee": "Cancellation fee",

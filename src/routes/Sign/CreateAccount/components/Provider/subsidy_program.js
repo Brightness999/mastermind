@@ -20,6 +20,7 @@ class SubsidyProgram extends Component {
 		isAcceptReduceRate: false,
 		isWillingOpenPrivate: false,
 		isSameRate: true,
+		isPrivateForHmgh: false,
 	}
 
 	componentDidMount() {
@@ -37,7 +38,8 @@ class SubsidyProgram extends Component {
 		this.setState({
 			isAcceptProBono: registerData.isAcceptProBono || false,
 			isAcceptReduceRate: registerData.isAcceptReduceRate || false,
-			isWillingOpenPrivate: registerData.isWillingOpenPrivate || false,
+			isWillingOpenPrivate: registerData?.profileInfor?.isPrivateForHmgh ? false : registerData.isWillingOpenPrivate || false,
+			isPrivateForHmgh: registerData?.profileInfor?.isPrivateForHmgh || false,
 		})
 
 		if (user?.role > 900) {
@@ -111,7 +113,7 @@ class SubsidyProgram extends Component {
 	}
 
 	render() {
-		const { isAcceptProBono, isAcceptReduceRate, isWillingOpenPrivate, academicLevels, isSameRate, numberOfSession } = this.state;
+		const { isAcceptProBono, isAcceptReduceRate, isWillingOpenPrivate, academicLevels, isSameRate, numberOfSession, isPrivateForHmgh } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -260,6 +262,7 @@ class SubsidyProgram extends Component {
 									this.changeCheckboxValueOnRedux('isWillingOpenPrivate', v.target.checked)
 								}}
 								checked={isWillingOpenPrivate}
+								disabled={isPrivateForHmgh}
 							/>
 							<p className='font-15 font-700 mb-0 ml-10'>{intl.formatMessage(messages.openPrivateSlots)}</p>
 						</div>

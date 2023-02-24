@@ -36,7 +36,6 @@ class InfoAvailability extends Component {
 			locations: [],
 			listSchool: [],
 			selectedLocation: '',
-			isPrivateForHmgh: false,
 			allHolidays: [],
 		}
 	}
@@ -89,8 +88,8 @@ class InfoAvailability extends Component {
 	onFinish = (values) => {
 		const invalidDayInWeek = Object.values(values).findIndex(times => times?.find(v => (v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)) || (v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time))));
 		if (invalidDayInWeek < 0) {
-			const { isHomeVisit, isSchools, isPrivateOffice, isPrivateForHmgh } = this.state;
-			this.props.setRegisterData({ availability: { ...values, isHomeVisit, isSchools, isPrivateOffice, isPrivateForHmgh } });
+			const { isHomeVisit, isSchools, isPrivateOffice } = this.state;
+			this.props.setRegisterData({ availability: { ...values, isHomeVisit, isSchools, isPrivateOffice } });
 			this.props.onContinue();
 		} else {
 			message.error(`The selected date or time is not valid on ${day_week[invalidDayInWeek]}`);
@@ -326,7 +325,7 @@ class InfoAvailability extends Component {
 	}
 
 	render() {
-		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh } = this.state;
+		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool } = this.state;
 		const { registerData } = this.props.register;
 
 		return (
@@ -448,8 +447,8 @@ class InfoAvailability extends Component {
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 															</Col>
 														</Row>
-														{registerData?.subsidy?.isWillingOpenPrivate ? (
-															<div className={`flex items-center justify-start gap-2 ${isPrivateForHmgh ? 'display-none' : ''}`}>
+														{!registerData?.profileInfor?.isPrivateForHmgh ? (
+															<div className={`flex items-center justify-start gap-2 ${!registerData?.subsidy?.isWillingOpenPrivate ? 'display-none' : ''}`}>
 																<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
 																	<Switch size="small" />
 																</Form.Item>
@@ -482,12 +481,6 @@ class InfoAvailability extends Component {
 								</div>
 							))}
 						</div>
-						{this.props.user?.role > 900 ?
-							<div className="flex items-center justify-start gap-2">
-								<Switch size="small" onChange={(state) => this.setState({ isPrivateForHmgh: state })} />
-								<p className='font-12 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
-							</div> : null
-						}
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
 						<div className='flex items-center justify-center mb-10'>
 							<div className='flex gap-2 items-center cursor' onClick={() => this.handleClickGoogleCalendar()}>

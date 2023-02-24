@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select, message } from 'antd';
+import { Row, Col, Form, Button, Input, Select, message, Switch } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
@@ -25,6 +25,7 @@ class InfoProfile extends Component {
 			contactEmail: [],
 			cityConnections: [],
 			loading: false,
+			isPrivateForHmgh: false,
 		}
 	}
 
@@ -40,6 +41,7 @@ class InfoProfile extends Component {
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data?.providerInfo);
+					this.setState({ isPrivateForHmgh: data?.providerInfo?.isPrivateForHmgh });
 				}
 			}).catch(err => {
 				console.log('get user profile error---', err);
@@ -52,6 +54,7 @@ class InfoProfile extends Component {
 				const { success, data } = result;
 				if (success) {
 					this.form.setFieldsValue(data);
+					this.setState({ isPrivateForHmgh: user?.providerInfo?.isPrivateForHmgh });
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
@@ -90,11 +93,13 @@ class InfoProfile extends Component {
 		const token = localStorage.getItem('token');
 
 		try {
-			if (window.location.pathname?.includes('changeuserprofile')) {
-				store.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.selectedUser?.providerInfo?._id }, token: token }))
-			} else {
-				store.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.user?.providerInfo?._id }, token: token }))
-			}
+			store.dispatch(setInforProvider({
+				data: {
+					...values,
+					_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
+				},
+				token: token,
+			}))
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -105,7 +110,7 @@ class InfoProfile extends Component {
 	};
 
 	render() {
-		const { service_address, cityConnections, ContactNumberType, EmailType, loading } = this.state;
+		const { service_address, cityConnections, ContactNumberType, EmailType, loading, isPrivateForHmgh } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -120,6 +125,12 @@ class InfoProfile extends Component {
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
+						<div className="flex items-center justify-start gap-2 h-50">
+							<Form.Item name="isPrivateForHmgh" className='mb-0'>
+								<Switch size="small" checked={isPrivateForHmgh} onChange={(state) => this.setState({ isPrivateForHmgh: state })} />
+							</Form.Item>
+							<p className='font-12 mb-0'>{intl.formatMessage(messages.onlyVisibleToHmgh)}</p>
+						</div>
 						<Row gutter={14}>
 							<Col xs={24} sm={24} md={12}>
 								<Form.Item

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Input, Select } from 'antd';
+import { Row, Col, Form, Button, Input, Select, Switch } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
@@ -22,6 +22,7 @@ class InfoProfile extends Component {
 			contactPhoneNumber: [],
 			contactEmail: [],
 			cityConnections: [],
+			isPrivateForHmgh: false,
 		}
 	}
 
@@ -37,9 +38,7 @@ class InfoProfile extends Component {
 		this.getDataFromServer();
 		const profileInfor = registerData.profileInfor || this.getDefaultObj();
 		this.form.setFieldsValue(profileInfor);
-		if (!registerData.profileInfor) {
-			this.props.setRegisterData({ profileInfor: this.getDefaultObj() });
-		}
+		this.setState({ isPrivateForHmgh: profileInfor?.isPrivateForHmgh });
 	}
 
 	getDataFromServer = () => {
@@ -77,11 +76,13 @@ class InfoProfile extends Component {
 			serviceAddress: "",
 			contactEmail: [{ email: registerData?.email, type: 'Work' }],
 			contactNumber: [{ phoneNumber: "", type: 'Home' }],
+			isPrivateForHmgh: false,
 		};
 	}
 
 	onFinish = (values) => {
-		this.props.setRegisterData({ profileInfor: values });
+		const { isPrivateForHmgh } = this.state;
+		this.props.setRegisterData({ profileInfor: { ...values, isPrivateForHmgh } });
 		this.props.onContinue();
 	};
 
@@ -98,7 +99,7 @@ class InfoProfile extends Component {
 	}
 
 	render() {
-		const { service_address, cityConnections, ContactNumberType, EmailType } = this.state;
+		const { service_address, cityConnections, ContactNumberType, EmailType, isPrivateForHmgh } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -113,6 +114,12 @@ class InfoProfile extends Component {
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
+						<div className="flex items-center justify-start gap-2 h-50">
+							<Form.Item name="isPrivateForHmgh" className='mb-0'>
+								<Switch size="small" checked={isPrivateForHmgh} onChange={(state) => this.setState({ isPrivateForHmgh: state })} />
+							</Form.Item>
+							<p className='font-12 mb-0'>{intl.formatMessage(messages.onlyVisibleToHmgh)}</p>
+						</div>
 						<Row gutter={14}>
 							<Col xs={24} sm={24} md={12}>
 								<Form.Item

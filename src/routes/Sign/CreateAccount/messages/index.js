@@ -514,6 +514,10 @@ export default ({
     id: `${scope}.privateHMGHAgents`,
     defaultMessage: 'Private for HMGH agents only',
   },
+  onlyVisibleToHmgh: {
+    id: `${scope}.onlyVisibleToHmgh`,
+    defaultMessage: 'I am only visible to HMGH',
+  },
   addRange: {
     id: `${scope}.addRange`,
     defaultMessage: 'Add range',

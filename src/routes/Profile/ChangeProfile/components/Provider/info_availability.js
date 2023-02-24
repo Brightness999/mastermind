@@ -8,7 +8,7 @@ import msgSidebar from '../../../../../components/SideBar/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import request from '../../../../../utils/api/request';
-import { getAllSchoolsForParent, getDefaultValueForProvider, getMyProviderInfo, getUserProfile, updateMyProviderAvailability } from '../../../../../utils/api/apiList';
+import { getAllSchoolsForParent, getMyProviderInfo, getUserProfile, updateMyProviderAvailability } from '../../../../../utils/api/apiList';
 import moment from 'moment';
 import { store } from '../../../../../redux/store';
 import { setUser } from '../../../../../redux/features/authSlice';
@@ -224,7 +224,6 @@ class InfoAvailability extends Component {
 			})
 		});
 		values.manualSchedule = manualSchedule.flat();
-		values.isPrivateForHmgh = isPrivateForHmgh;
 		values.blackoutDates = values.blackoutDates?.map(date => date.toString());
 
 		const invalidDay = Object.values(values?.manualSchedule)?.find(v => moment().set({ years: v?.fromYear, months: v?.fromMonth, dates: v?.fromDate })?.isAfter(moment().set({ years: v?.toYear, months: v?.toMonth, dates: v?.toDate })) || moment().set({ hours: v?.openHour, minutes: v?.openMin })?.isAfter(moment().set({ hours: v?.closeHour, minutes: v?.closeMin })));
@@ -252,7 +251,6 @@ class InfoAvailability extends Component {
 								...this.props.auth.user.providerInfo,
 								isHomeVisit: values.isHomeVisit,
 								privateOffice: values.privateOffice,
-								isPrivateForHmgh: isPrivateForHmgh,
 								serviceableSchool: listSchool?.filter(school => values.serviceableSchool?.find(id => id == school._id)),
 							}
 						}
@@ -590,8 +588,8 @@ class InfoAvailability extends Component {
 																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
 															</Col>
 														</Row>
-														{isWillingOpenPrivate ? (
-															<div className={`flex items-center justify-start gap-2 ${isPrivateForHmgh ? 'd-none' : ''}`}>
+														{!isPrivateForHmgh ? (
+															<div className={`flex items-center justify-start gap-2 ${!isWillingOpenPrivate ? 'd-none' : ''}`}>
 																<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
 																	<Switch size="small" />
 																</Form.Item>
@@ -623,10 +621,6 @@ class InfoAvailability extends Component {
 									</Form.List>
 								</div>
 							))}
-						</div>
-						<div className="flex items-center justify-start gap-2">
-							<Switch size="small" checked={isPrivateForHmgh} onChange={(state) => this.setState({ isPrivateForHmgh: state })} />
-							<p className='font-12 mb-0'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
 						</div>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
 						<div className='flex items-center justify-center mb-10'>
