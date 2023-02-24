@@ -1,6 +1,6 @@
 import './style/index.less';
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Typography, Popover, Input, message } from 'antd';
+import { Drawer, Button, Row, Col, Typography, Popover, Input, message, Popconfirm } from 'antd';
 import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsXCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
@@ -15,7 +15,7 @@ import moment from 'moment';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, clearFlag, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 import { MdOutlineEventBusy, MdOutlineRequestQuote } from 'react-icons/md';
 import { TbSend } from 'react-icons/tb';
 const { Paragraph } = Typography;
@@ -47,6 +47,7 @@ class DrawerDetail extends Component {
       items: [],
       visibleModalMessage: false,
       visibleCurrentScreen: false,
+      visibleCreateNote: false,
     };
   }
 
@@ -429,8 +430,37 @@ class DrawerDetail extends Component {
     });
   }
 
+  handleClearFlag = () => {
+    request.post(clearFlag, { _id: this.props.event?._id }).then(result => {
+      const { success } = result;
+      if (success) {
+        message.success('Cleared successfully');
+        this.updateAppointments();
+      }
+    }).catch(err => {
+      message.error('Clear Flag: ' + err.message);
+    })
+  }
+
+  onOpenModalCreateNote = () => {
+    this.setState({ visibleCreateNote: true });
+  }
+
+  onCloseModalCreateNote = () => {
+    this.setState({ visibleCreateNote: false });
+  }
+
+  handleRequestClearance = (requestMessage) => {
+    this.onCloseModalCreateNote();
+    message.success("Your request has been submitted. Please allow up to 24 hours for the provider to review this.");
+
+    request.post(requestClearance, { appointmentId: this.props.event?._id, message: requestMessage }).catch(err => {
+      message.error(err.message);
+    })
+  }
+
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage, visibleCurrentScreen } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage, visibleCurrentScreen, visibleCreateNote } = this.state;
     const { event, listAppointmentsRecent } = this.props;
 
     const providerProfile = (
@@ -557,6 +587,13 @@ class DrawerDetail extends Component {
       dependent: event?.dependent,
       event: event,
     }
+
+    const modalCreateNoteProps = {
+      visible: visibleCreateNote,
+      onSubmit: this.handleRequestClearance,
+      onCancel: this.onCloseModalCreateNote,
+      title: "Request Message"
+    };
 
     const contentConfirm = (
       <div className='confirm-content'>
@@ -706,6 +743,67 @@ class DrawerDetail extends Component {
               <MdOutlineRequestQuote color="#ff0000" size={32} />
             ) : (
               <MdOutlineEventBusy color="#ff0000" size={32} />
+            )}
+            {userRole > 3 ? (
+              <Popconfirm
+                title="Are you sure to clear this flag?"
+                onConfirm={this.handleClearFlag}
+                okText="Yes"
+                cancelText="No"
+                overlayClassName='clear-flag-confirm'
+              >
+                <Button
+                  type='primary'
+                  block
+                  className='h-30 p-0'
+                >
+                  {intl.formatMessage(messages.clearFlag)}
+                </Button>
+              </Popconfirm>
+            ) : (
+              <div className='flex items-center justify-between gap-2'>
+                <Button
+                  type='primary'
+                  block
+                  className='flex-1 h-30 p-0'
+                  onClick={this.onOpenModalCreateNote}
+                >
+                  {intl.formatMessage(messages.requestClearance)}
+                </Button>
+                {event?.isPaid ? (
+                  <Button
+                    type='primary'
+                    block
+                    className='flex-1 h-30 p-0'
+                    disabled
+                  >
+                    {intl.formatMessage(messages.paid)}
+                  </Button>
+                ) : event?.flagItems?.rate == 0 ? null : (
+                  <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                    <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+                    <input type="hidden" name="business" value="office@helpmegethelp.org" />
+                    <input type="hidden" name="cmd" value="_donations" />
+                    <input type="hidden" name="item_name" value="Help Me Get Help" />
+                    <input type="hidden" name="item_number" />
+                    <input type="hidden" name="amount" value={event?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                    <input type="hidden" name="shipping" value="0.00" />
+                    <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+                    <input type="hidden" name="rm" value="0" />
+                    <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${event?._id}`} />
+                    <input type="hidden" name="cancel_return" value={window.location.href} />
+                    <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+                    <Button
+                      type='primary'
+                      block
+                      className='h-30 p-0'
+                      htmlType='submit'
+                    >
+                      {intl.formatMessage(messages.payFlag)}
+                    </Button>
+                  </form>
+                )}
+              </div>
             )}
           </div>
         ) : (
@@ -955,6 +1053,7 @@ class DrawerDetail extends Component {
         {visibleEvaluationProcess && <ModalEvaluationProcess {...modalEvaluationProcessProps} />}
         {visibleModalMessage && <ModalCreateNote {...modalMessageProps} />}
         {visibleCurrentScreen && <ModalNewScreening {...modalCurrentScreeningProps} />}
+        {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
       </Drawer >
     );
   }

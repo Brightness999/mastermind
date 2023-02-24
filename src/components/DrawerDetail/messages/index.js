@@ -121,6 +121,10 @@ export default {
     id: `${scope}.requestClearance`,
     defaultMessage: 'Request Clearance',
   },
+  paid: {
+    id: `${scope}.paid`,
+    defaultMessage: 'Paid',
+  },
   payFlag: {
     id: `${scope}.payFlag`,
     defaultMessage: 'Pay Flag',

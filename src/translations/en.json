@@ -409,6 +409,7 @@
   "components.drawerdetail.noShow": "No show / cancellation",
   "components.drawerdetail.flagDependent": "Flag Dependent",
   "components.drawerdetail.requestClearance": "Request Clearance",
+  "components.drawerdetail.paid": "Paid",
   "components.drawerdetail.payFlag": "Pay Flag",
   "components.drawerdetail.clearFlag": "Clear Flag",
   "components.drawerdetail.viewInvoice": "View Invoice",
