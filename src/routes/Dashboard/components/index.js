@@ -1267,11 +1267,7 @@ class Dashboard extends React.Component {
               </section>
             )}
           </div>
-          <div className='text-right'>
-            <div className='btn-call'>
-              <img src='../images/call.png' onClick={this.onShowModalReferral} />
-            </div>
-          </div>
+          <img src='../images/call.png' className='btn-call' width="6%" onClick={this.onShowModalReferral} />
           {userDrawerVisible && <DrawerDetail {...drawerDetailProps} />}
           {visibleNewAppoint && <ModalNewAppointmentForParents {...modalNewAppointProps} />}
           {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}

@@ -225,6 +225,7 @@
   "routes.dashboard.appointments": "Appointments",
   "routes.dashboard.referrals": "Referrals",
   "routes.dashboard.rescheduled": "Rescheduled",
+  "routes.dashboard.action": "Action",
   "routes.dashboard.screenings": "Screenings",
   "routes.dashboard.evaluations": "Evaluations",
   "routes.dashboard.consultations": "Consultations",

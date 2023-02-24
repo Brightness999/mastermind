@@ -738,29 +738,13 @@ class DrawerDetail extends Component {
           )}
         </div>
         {event?.status == 0 && listAppointmentsRecent?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1) ? (
-          <div className='text-center font-20 mt-2'>
+          <div className='text-center font-18 mt-2'>
             {listAppointmentsRecent?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1).flagItems?.flagType == 1 ? (
               <MdOutlineRequestQuote color="#ff0000" size={32} />
             ) : (
               <MdOutlineEventBusy color="#ff0000" size={32} />
             )}
-            {userRole > 3 ? (
-              <Popconfirm
-                title="Are you sure to clear this flag?"
-                onConfirm={this.handleClearFlag}
-                okText="Yes"
-                cancelText="No"
-                overlayClassName='clear-flag-confirm'
-              >
-                <Button
-                  type='primary'
-                  block
-                  className='h-30 p-0'
-                >
-                  {intl.formatMessage(messages.clearFlag)}
-                </Button>
-              </Popconfirm>
-            ) : (
+            {userRole == 3 ? (
               <div className='flex items-center justify-between gap-2'>
                 <Button
                   type='primary'
@@ -803,6 +787,81 @@ class DrawerDetail extends Component {
                     </Button>
                   </form>
                 )}
+              </div>
+            ) : userRole == 30 ? (
+              <Popconfirm
+                title="Are you sure to clear this flag?"
+                onConfirm={this.handleClearFlag}
+                okText="Yes"
+                cancelText="No"
+                overlayClassName='clear-flag-confirm'
+              >
+                <Button
+                  type='primary'
+                  block
+                  className='h-30 p-0'
+                >
+                  {intl.formatMessage(messages.clearFlag)}
+                </Button>
+              </Popconfirm>
+            ) : (
+              <div className='flex items-center justify-between gap-2'>
+                <Button
+                  type='primary'
+                  block
+                  className='flex-1 h-30 p-0 px-5'
+                  onClick={this.onOpenModalCreateNote}
+                >
+                  {intl.formatMessage(messages.requestClearance)}
+                </Button>
+                {event?.isPaid ? (
+                  <Button
+                    type='primary'
+                    block
+                    className='flex-1 h-30 p-0'
+                    disabled
+                  >
+                    {intl.formatMessage(messages.paid)}
+                  </Button>
+                ) : event?.flagItems?.rate == 0 ? null : (
+                  <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                    <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+                    <input type="hidden" name="business" value="office@helpmegethelp.org" />
+                    <input type="hidden" name="cmd" value="_donations" />
+                    <input type="hidden" name="item_name" value="Help Me Get Help" />
+                    <input type="hidden" name="item_number" />
+                    <input type="hidden" name="amount" value={event?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                    <input type="hidden" name="shipping" value="0.00" />
+                    <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+                    <input type="hidden" name="rm" value="0" />
+                    <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${event?._id}`} />
+                    <input type="hidden" name="cancel_return" value={window.location.href} />
+                    <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+                    <Button
+                      type='primary'
+                      block
+                      className='h-30 p-0'
+                      htmlType='submit'
+                    >
+                      {intl.formatMessage(messages.payFlag)}
+                    </Button>
+                  </form>
+                )}
+                <Popconfirm
+                  title="Are you sure to clear this flag?"
+                  onConfirm={this.handleClearFlag}
+                  okText="Yes"
+                  cancelText="No"
+                  overlayClassName='clear-flag-confirm'
+                >
+                  <Button
+                    type='primary'
+                    block
+                    className='flex-1 h-30 p-0'
+                  >
+                    {intl.formatMessage(messages.clearFlag)}
+                  </Button>
+                </Popconfirm>
               </div>
             )}
           </div>

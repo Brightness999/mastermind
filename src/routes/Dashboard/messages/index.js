@@ -142,4 +142,8 @@ export default ({
     id: `${scope}.rescheduled`,
     defaultMessage: 'rescheduled',
   },
+  action: {
+    id: `${scope}.action`,
+    defaultMessage: 'Action',
+  },
 });

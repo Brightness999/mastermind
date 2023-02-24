@@ -1,9 +1,9 @@
 import React from 'react';
-import { Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input, Divider, Collapse, Tabs, Avatar, Badge } from 'antd';
+import { Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input, Divider, Collapse, Tabs, Avatar, Badge, Popover, Modal } from 'antd';
 import { FaCalendarAlt, FaUser } from 'react-icons/fa';
 import { MdFormatAlignLeft, MdOutlineEventBusy, MdOutlineRequestQuote } from 'react-icons/md';
 import { BsClockHistory, BsFillDashSquareFill, BsFillFlagFill, BsFillPlusSquareFill, BsFilter, BsX } from 'react-icons/bs';
-import { ModalNewGroup, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm } from '../../../components/Modal';
+import { ModalNewGroup, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm, ModalCreateNote } from '../../../components/Modal';
 import CSSAnimate from '../../../components/CSSAnimate';
 import DrawerDetail from '../../../components/DrawerDetail';
 import intl from 'react-intl-universal';
@@ -70,12 +70,13 @@ class SchedulingCenter extends React.Component {
       selectedDate: undefined,
       visibleSessionsNeedToClose: false,
       visibleFlagExpand: false,
-      modalType: '',
       visibleConfirm: false,
       confirmMessage: '',
       selectedDependentId: 0,
       subsidyId: '',
       loading: false,
+      visibleCreateNote: false,
+      visibleFlagAction: false,
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -447,7 +448,8 @@ class SchedulingCenter extends React.Component {
   }
 
   handleRequestClearance = () => {
-    this.onCloseModalConfirm();
+    this.closeFlagAction();
+    this.onCloseModalCreateNote();
     request.post(requestClearance, { appointmentId: this.state.selectedEvent?._id }).then(result => {
       const { success } = result;
       if (success) {
@@ -458,35 +460,30 @@ class SchedulingCenter extends React.Component {
 
   handleClearFlag = () => {
     this.onCloseModalConfirm();
-    request.post(clearFlag, { _id: this.state.selectedEvent?._id }).then(result => {
+    this.closeFlagAction();
+    const { selectedEvent, userRole } = this.state;
+    request.post(clearFlag, { _id: selectedEvent?._id }).then(result => {
       const { success } = result;
       if (success) {
         message.success('Cleared successfully');
-        this.updateCalendarEvents(this.state.userRole);
-        this.getMyAppointments(this.state.userRole);
+        this.updateCalendarEvents(userRole);
+        this.getMyAppointments(userRole);
+      } else {
+        message.error("Cannot find this flag");
       }
+    }).catch(err => {
+      message.error("Clear Flag: " + err.message);
     })
-  }
-
-  onSubmitModalConfirm = () => {
-    if (this.state.modalType == 'request-clearance') {
-      this.handleRequestClearance();
-    }
-    if (this.state.modalType == 'clear-flag') {
-      this.handleClearFlag();
-    }
   }
 
   onCloseModalConfirm = () => {
     this.setState({ visibleConfirm: false });
   }
 
-  onOpenModalConfirm = (type, appointment) => {
+  onOpenModalConfirm = () => {
     this.setState({
       visibleConfirm: true,
-      confirmMessage: type == 'request-clearance' ? 'Did you pay for this flag?' : 'Are you sure to clear this flag?',
-      modalType: type,
-      selectedEvent: appointment,
+      confirmMessage: 'Are you sure to clear this flag?',
     });
   }
 
@@ -528,6 +525,22 @@ class SchedulingCenter extends React.Component {
     this.getMyAppointments(this.state.userRole, 0);
   }
 
+  onOpenModalCreateNote = () => {
+    this.setState({ visibleCreateNote: true });
+  }
+
+  onCloseModalCreateNote = () => {
+    this.setState({ visibleCreateNote: false });
+  }
+
+  openFlagAction = (appointment) => {
+    this.setState({ selectedEvent: appointment, visibleFlagAction: true });
+  }
+
+  closeFlagAction = () => {
+    this.setState({ visibleFlagAction: false, selectedEvent: {} });
+  }
+
   render() {
     const {
       isFilter,
@@ -561,6 +574,8 @@ class SchedulingCenter extends React.Component {
       visibleSubsidy,
       subsidyId,
       loading,
+      visibleCreateNote,
+      visibleFlagAction,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -660,7 +675,7 @@ class SchedulingCenter extends React.Component {
 
     const modalConfirmProps = {
       visible: visibleConfirm,
-      onSubmit: this.onSubmitModalConfirm,
+      onSubmit: this.handleClearFlag,
       onCancel: this.onCloseModalConfirm,
       message: confirmMessage,
     };
@@ -679,6 +694,13 @@ class SchedulingCenter extends React.Component {
       openReferral: this.onShowModalReferral,
       openHierachy: this.openHierachyModal,
     }
+
+    const modalCreateNoteProps = {
+      visible: visibleCreateNote,
+      onSubmit: this.handleRequestClearance,
+      onCancel: this.onCloseModalCreateNote,
+      title: "Request Message"
+    };
 
     return (
       <div className="full-layout page admin-page">
@@ -1003,7 +1025,7 @@ class SchedulingCenter extends React.Component {
                           <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                         </div>
                         <div className='font-12'>{appointment?.type == 2 ? intl.formatMessage(messages.evaluation) : appointment?.type == 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
-                        <a className='font-12 flag-action' onClick={() => this.onOpenModalConfirm('clear-flag', appointment)}>{intl.formatMessage(msgDrawer.clearFlag)}</a>
+                        <a className='font-12 flag-action' onClick={() => this.openFlagAction(appointment)}>{intl.formatMessage(messages.action)}</a>
                       </div>
                     )}
                   </Tabs.TabPane>
@@ -1028,11 +1050,7 @@ class SchedulingCenter extends React.Component {
             </Collapse>
           </section>
         </div>
-        <div className='text-right'>
-          <div className='btn-call'>
-            <img src='../images/call.png' onClick={this.onShowModalReferral} />
-          </div>
-        </div>
+        <img src='../images/call.png' className='btn-call' width="6%" onClick={this.onShowModalReferral} />
         {userDrawerVisible && <DrawerDetail {...drawerDetailProps} />}
         {visibleNewAppoint && <ModalNewAppointment {...modalNewAppointProps} />}
         {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
@@ -1046,6 +1064,34 @@ class SchedulingCenter extends React.Component {
         <ModalNewSubsidyReview {...modalNewReviewProps} />
         {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
         {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
+        {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
+        <Modal title="Flag Action" open={visibleFlagAction} footer={null} onCancel={this.closeFlagAction}>
+          <div className='flex items-center gap-2'>
+            <Button type='primary' block className='font-16 flag-action whitespace-nowrap' onClick={() => this.onOpenModalCreateNote()}>{intl.formatMessage(msgDrawer.requestClearance)}</Button>
+            {selectedEvent?.isPaid ? (
+              <Button type='primary' block className='font-16 flag-action whitespace-nowrap' disabled>
+                {intl.formatMessage(msgDrawer.paid)}
+              </Button>
+            ) : selectedEvent?.flagItems?.rate == 0 ? null : (
+              <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+                <input type="hidden" name="business" value="office@helpmegethelp.org" />
+                <input type="hidden" name="cmd" value="_donations" />
+                <input type="hidden" name="item_name" value="Help Me Get Help" />
+                <input type="hidden" name="item_number" />
+                <input type="hidden" name="amount" value={selectedEvent?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                <input type="hidden" name="shipping" value="0.00" />
+                <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+                <input type="hidden" name="rm" value="0" />
+                <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${selectedEvent?._id}`} />
+                <input type="hidden" name="cancel_return" value={window.location.href} />
+                <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+                <Button type='primary' htmlType='submit' block className='font-16 flag-action whitespace-nowrap'>{intl.formatMessage(msgDrawer.payFlag)}</Button>
+              </form>
+            )}
+            <Button type='primary' block className='font-16 flag-action whitespace-nowrap' onClick={() => this.onOpenModalConfirm()}>{intl.formatMessage(msgDrawer.clearFlag)}</Button>
+          </div>
+        </Modal>
         <PageLoading loading={loading} isBackground={true} />
       </div>
     );
