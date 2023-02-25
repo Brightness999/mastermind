@@ -53,14 +53,14 @@ class Dashboard extends React.Component {
       isGridDayView: 'Grid',
       canDrop: true,
       calendarWeekends: true,
-      calendarEvents: this.props.appointmentsInMonth,
+      calendarEvents: [],
       userRole: this.props.user?.role,
       listDependents: [],
       parentInfo: {},
       providerInfo: {},
       schoolInfo: {},
       consultantInfo: {},
-      listAppointmentsRecent: this.props.appointments,
+      listAppointmentsRecent: [],
       listAppoinmentsFilter: [],
       SkillSet: [],
       selectedProviders: [],
@@ -307,22 +307,20 @@ class Dashboard extends React.Component {
       description:
         `A parent has sent 1 ${data.type == 1 ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data.type == 1 ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data.type == 3 ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data.type == 4 ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data.type == 5 ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''}, press for view.`,
       onClick: () => {
-        console.log('Notification Clicked!');
         this.setState({ userDrawerVisible: true, selectedEvent: this.state.listAppointmentsRecent?.find(a => a._id == data?._id) });
         notification.destroy();
       },
     });
   }
 
-  showNotificationForAppointmentReschedule(data) {
+  showNotificationForAppointmentUpdate(data) {
     notification.open({
-      message: 'Reschedule',
+      message: data.type.toUpperCase(),
       duration: 10,
       description:
-        `1 ${data.type == 1 ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data.type == 1 ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data.type == 3 ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data.type == 4 ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data.type == 5 ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''} has rescheduled, press for view.`,
+        `1 ${data?.appointment?.type == 1 ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data?.appointment?.type == 1 ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data?.appointment?.type == 3 ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data?.appointment?.type == 4 ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data?.appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''} has been ${data.type}, press for view.`,
       onClick: () => {
-        console.log('Notification Clicked!');
-        this.setState({ userDrawerVisible: true, selectedEvent: this.state.listAppointmentsRecent?.find(a => a._id == data?._id) });
+        this.setState({ userDrawerVisible: true, selectedEvent: this.state.listAppointmentsRecent?.find(a => a._id == data?.appointment?._id) });
         notification.destroy();
       },
     });
@@ -336,10 +334,10 @@ class Dashboard extends React.Component {
         this.getMyAppointments(userRole);
         this.showNotificationForAppointment(data.data);
         return;
-      case 'reschedule_appointment':
+      case 'update_appointment':
         this.updateCalendarEvents(userRole);
         this.getMyAppointments(userRole);
-        this.showNotificationForAppointmentReschedule(data.data);
+        this.showNotificationForAppointmentUpdate(data.data);
         return;
       case 'new_subsidy_request_from_client':
         this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true);
@@ -527,8 +525,9 @@ class Dashboard extends React.Component {
     this.setState({ visibleNewAppoint: true, selectedDate: moment(date.date) });
   }
 
-  getMyAppointments(userRole, dependentId) {
-    this.props.dispatch(getAppointmentsData({ role: userRole, dependentId: dependentId }));
+  async getMyAppointments(userRole, dependentId) {
+    const appointments = await this.props.dispatch(getAppointmentsData({ role: userRole, dependentId: dependentId }));
+    this.setState({ listAppointmentsRecent: appointments?.payload ?? [] });
   }
 
   onCollapseChange = (v => {
@@ -590,7 +589,7 @@ class Dashboard extends React.Component {
     this.updateCalendarEvents(this.state.userRole, this.state.selectedDependentId);
   }
 
-  updateCalendarEvents(role, dependentId) {
+  async updateCalendarEvents(role, dependentId) {
     const calendar = this.calendarRef.current;
     const month = calendar?._calendarApi.getDate().getMonth() + 1;
     const year = calendar?._calendarApi.getDate().getFullYear();
@@ -610,7 +609,8 @@ class Dashboard extends React.Component {
         dependentId: dependentId,
       }
     };
-    this.props.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+    const appointmentsInMonth = await this.props.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+    this.setState({ calendarEvents: appointmentsInMonth?.payload ?? [] });
   }
 
   handleSelectProvider = (name) => {

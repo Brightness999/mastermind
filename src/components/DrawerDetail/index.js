@@ -885,7 +885,7 @@ class DrawerDetail extends Component {
               </div>
             )}
             <div className='post-feedback mt-1'>
-              {event.status != 0 && (
+              {event?.status != 0 && (
                 <>
                   <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.feedback)}</p>
                   <Input.TextArea rows={7} className="appointment-feedback" disabled={userRole == 3 ? true : !isShowFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
