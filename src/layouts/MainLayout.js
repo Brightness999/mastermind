@@ -21,7 +21,6 @@ class MainLayout extends React.PureComponent {
   }
 
   componentDidMount() {
-    console.log(this.props)
     if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
       checkPermission().then(loginData => {
         (this.props.location.pathname == routerLinks.Dashboard && loginData?.role > 900) && this.props.history.push(routerLinks.Admin);

@@ -97,7 +97,7 @@ class InfoParent extends Component {
 			<Row justify="center" className="row-form">
 				<div className='col-form col-info-parent'>
 					<div className='div-form-title'>
-						<p className='font-24 text-center'>{intl.formatMessage(messages.parentInformation)}</p>
+						<p className='font-30 text-center'>{intl.formatMessage(messages.parentInformation)}</p>
 					</div>
 					<Form
 						name="form_contact"

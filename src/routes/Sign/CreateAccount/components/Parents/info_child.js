@@ -129,7 +129,7 @@ class InfoChild extends Component {
 			<Row justify="center" className="row-form">
 				<div className='col-form col-info-child'>
 					<div className='div-form-title'>
-						<p className='font-24 text-center'>{intl.formatMessage(messages.dependentsInformation)}</p>
+						<p className='font-30 text-center'>{intl.formatMessage(messages.dependentsInformation)}</p>
 					</div>
 					<Form
 						name="form_contact"

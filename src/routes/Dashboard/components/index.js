@@ -300,20 +300,53 @@ class Dashboard extends React.Component {
     });
   }
 
+  showNotificationForAppointment(data) {
+    notification.open({
+      message: 'You have new Appointment',
+      duration: 10,
+      description:
+        `A parent has sent 1 ${data.type == 1 ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data.type == 1 ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data.type == 3 ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data.type == 4 ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data.type == 5 ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''}, press for view.`,
+      onClick: () => {
+        console.log('Notification Clicked!');
+        this.setState({ userDrawerVisible: true, selectedEvent: this.state.listAppointmentsRecent?.find(a => a._id == data?._id) });
+        notification.destroy();
+      },
+    });
+  }
+
+  showNotificationForAppointmentReschedule(data) {
+    notification.open({
+      message: 'Reschedule',
+      duration: 10,
+      description:
+        `1 ${data.type == 1 ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data.type == 1 ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data.type == 3 ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data.type == 4 ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data.type == 5 ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''} has rescheduled, press for view.`,
+      onClick: () => {
+        console.log('Notification Clicked!');
+        this.setState({ userDrawerVisible: true, selectedEvent: this.state.listAppointmentsRecent?.find(a => a._id == data?._id) });
+        notification.destroy();
+      },
+    });
+  }
+
   handleSocketResult(data) {
+    const { userRole } = this.state;
     switch (data.key) {
       case 'new_appoint_from_client':
-        this.setState({ providerDrawervisible: true, });
+        this.updateCalendarEvents(userRole);
+        this.getMyAppointments(userRole);
+        this.showNotificationForAppointment(data.data);
+        return;
+      case 'reschedule_appointment':
+        this.updateCalendarEvents(userRole);
+        this.getMyAppointments(userRole);
+        this.showNotificationForAppointmentReschedule(data.data);
         return;
       case 'new_subsidy_request_from_client':
-        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
-        return;
-      case 'new_subsidy_request_from_client':
-        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
+        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true);
         this.showNotificationForSubsidy(data);
         return;
       case 'subsidy_change_status':
-        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
+        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true);
         this.showNotificationForSubsidyChange(data.data);
         return;
       case 'meeting_link':
