@@ -8,6 +8,7 @@ import 'moment/locale/en-au';
 import './style/index.less';
 import '../../assets/styles/login.less';
 import TextArea from 'antd/lib/input/TextArea';
+import { store } from '../../redux/store';
 
 moment.locale('en');
 
@@ -66,7 +67,7 @@ class ModalNewScreening extends React.Component {
                     { pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
                   ]}
                 >
-                  <Input className='h-40' placeholder={intl.formatMessage(messages.contactNumber)} />
+                  <Input className='h-40' disabled={store.getState().auth.user?.role == 30} placeholder={intl.formatMessage(messages.contactNumber)} />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={24} md={12}>
