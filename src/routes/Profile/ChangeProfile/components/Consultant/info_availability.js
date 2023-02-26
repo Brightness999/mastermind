@@ -21,6 +21,7 @@ const day_week = [
 	intl.formatMessage(messages.wednesday),
 	intl.formatMessage(messages.thursday),
 	intl.formatMessage(messages.friday),
+	intl.formatMessage(messages.saturday),
 ]
 
 class ConsultantAvailability extends Component {
@@ -117,6 +118,7 @@ class ConsultantAvailability extends Component {
 			case intl.formatMessage(messages.wednesday): return 3;
 			case intl.formatMessage(messages.thursday): return 4;
 			case intl.formatMessage(messages.friday): return 5;
+			case intl.formatMessage(messages.friday): return 6;
 			default: return -1;
 		}
 	}
@@ -182,11 +184,20 @@ class ConsultantAvailability extends Component {
 		e && this.setState({ currentSelectedDay: e });
 	}
 
-	copyToFullWeek = (dayForCopy) => {
+	copyToFullWeek = (dayForCopy, index) => {
 		const arrToCopy = this.form.getFieldValue(dayForCopy);
 		day_week.map((newDay) => {
 			if (newDay != dayForCopy) {
-				this.form.setFieldValue(newDay, [...this.form.getFieldValue(newDay), ...arrToCopy]);
+				this.form.setFieldValue(newDay, [...this.form.getFieldValue(newDay), arrToCopy[index]]);
+			}
+		})
+	}
+
+	handleRemoveRange = (day) => {
+		const arrToCopy = this.form?.getFieldValue(day);
+		day_week.map((newDay) => {
+			if (newDay == day) {
+				this.form.setFieldValue(newDay, arrToCopy);
 			}
 		})
 	}
@@ -292,7 +303,7 @@ class ConsultantAvailability extends Component {
 																		placeholder={intl.formatMessage(messages.to)}
 																	/>
 																</Form.Item>
-																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
+																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day) }} />}
 															</Col>
 														</Row>
 														<Row gutter={14}>
@@ -323,9 +334,15 @@ class ConsultantAvailability extends Component {
 																		placeholder={intl.formatMessage(messages.to)}
 																	/>
 																</Form.Item>
-																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
+																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day) }} />}
 															</Col>
 														</Row>
+														<Col offset={12} span={12}>
+															<div className='div-copy-week mb-10'>
+																<a className='underline text-primary' onClick={() => this.copyToFullWeek(day, index)}>{intl.formatMessage(messages.copyFullWeek)}</a>
+																<QuestionCircleOutlined className='text-primary' />
+															</div>
+														</Col>
 													</div>
 												))}
 												<Row>
@@ -333,12 +350,6 @@ class ConsultantAvailability extends Component {
 														<div className='div-add-time justify-center'>
 															<BsPlusCircle size={17} className='mr-5 text-primary' />
 															<a className='text-primary' onClick={() => add()}>{intl.formatMessage(messages.addRange)}</a>
-														</div>
-													</Col>
-													<Col span={12}>
-														<div className='div-copy-week justify-center'>
-															<a className='underline text-primary' onClick={() => this.copyToFullWeek(day)}>{intl.formatMessage(messages.copyFullWeek)}</a>
-															<QuestionCircleOutlined className='text-primary' />
 														</div>
 													</Col>
 												</Row>

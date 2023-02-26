@@ -118,11 +118,21 @@ class InfoAvailability extends Component {
 		this.setState({ selectedLocation: location });
 	}
 
-	copyToFullWeek = (dayForCopy) => {
+	copyToFullWeek = (dayForCopy, index) => {
 		const arrToCopy = this.form?.getFieldValue(dayForCopy);
+		console.log(arrToCopy)
 		day_week.map((newDay) => {
 			if (newDay != dayForCopy) {
-				this.form.setFieldValue(newDay, [...this.form.getFieldValue(newDay), ...arrToCopy]);
+				this.form.setFieldValue(newDay, [...this.form.getFieldValue(newDay), arrToCopy[index]]);
+			}
+		})
+	}
+
+	handleRemoveRange = (day) => {
+		const arrToCopy = this.form?.getFieldValue(day);
+		day_week.map((newDay) => {
+			if (newDay == day) {
+				this.form.setFieldValue(newDay, arrToCopy);
 			}
 		})
 	}
@@ -384,7 +394,7 @@ class InfoAvailability extends Component {
 									<Form.List name={day}>
 										{(fields, { add, remove }) => (
 											<div className='div-time'>
-												{fields.map((field) => (
+												{fields.map((field, i) => (
 													<div key={field.key}>
 														{field.key != 0 && <Divider className='bg-gray' />}
 														<Form.Item name={[field.name, "location"]}>
@@ -417,7 +427,7 @@ class InfoAvailability extends Component {
 																		placeholder={intl.formatMessage(messages.to)}
 																	/>
 																</Form.Item>
-																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
+																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day); }} />}
 															</Col>
 														</Row>
 														<Row gutter={14}>
@@ -429,7 +439,7 @@ class InfoAvailability extends Component {
 																		format="h:mm a"
 																		popupClassName='timepicker'
 																		placeholder={intl.formatMessage(messages.from)}
-																		onSelect={(v) => this.handleSelectTime(v, 'from_time', day, field.key)}
+																		onSelect={(v) => this.handleSelectTime(v, 'from_time', day, i)}
 																	/>
 																</Form.Item>
 															</Col>
@@ -441,20 +451,32 @@ class InfoAvailability extends Component {
 																		format="h:mm a"
 																		popupClassName='timepicker'
 																		placeholder={intl.formatMessage(messages.to)}
-																		onSelect={(v) => this.handleSelectTime(v, 'to_time', day, field.key)}
+																		onSelect={(v) => this.handleSelectTime(v, 'to_time', day, i)}
 																	/>
 																</Form.Item>
-																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />}
+																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day); }} />}
 															</Col>
 														</Row>
-														{!registerData?.profileInfor?.isPrivateForHmgh ? (
-															<div className={`flex items-center justify-start gap-2 ${!registerData?.subsidy?.isWillingOpenPrivate ? 'display-none' : ''}`}>
-																<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
-																	<Switch size="small" />
-																</Form.Item>
-																<p className='font-09'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
-															</div>
-														) : null}
+														<Row>
+															<Col span={12}>
+																{!registerData?.profileInfor?.isPrivateForHmgh ? (
+																	<div className={`flex items-center justify-start gap-2 ${!registerData?.subsidy?.isWillingOpenPrivate ? 'display-none' : ''}`}>
+																		<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
+																			<Switch size="small" />
+																		</Form.Item>
+																		<p className='font-09'>{intl.formatMessage(messages.privateHMGHAgents)}</p>
+																	</div>
+																) : null}
+															</Col>
+															<Col span={12}>
+																<div className='div-copy-week'>
+																	<a className='underline text-primary' onClick={() => this.copyToFullWeek(day, i)}>
+																		{intl.formatMessage(messages.copyFullWeek)}
+																	</a>
+																	<QuestionCircleOutlined className='text-primary' />
+																</div>
+															</Col>
+														</Row>
 													</div>
 												))}
 												<Row>
@@ -464,14 +486,6 @@ class InfoAvailability extends Component {
 															<a className='text-primary' onClick={() => add()}>
 																{intl.formatMessage(messages.addRange)}
 															</a>
-														</div>
-													</Col>
-													<Col span={12}>
-														<div className='div-copy-week justify-center'>
-															<a className='underline text-primary' onClick={() => this.copyToFullWeek(day)}>
-																{intl.formatMessage(messages.copyFullWeek)}
-															</a>
-															<QuestionCircleOutlined className='text-primary' />
 														</div>
 													</Col>
 												</Row>

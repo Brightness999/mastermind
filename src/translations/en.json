@@ -91,6 +91,7 @@
   "routes.Createaccount.wednesday": "Wednesday",
   "routes.Createaccount.thursday": "Thursday",
   "routes.Createaccount.friday": "Friday",
+  "routes.Createaccount.saturday": "Saturday",
   "routes.Createaccount.from": "From",
   "routes.Createaccount.to": "To",
   "routes.Createaccount.toMess": "Please enter To time",

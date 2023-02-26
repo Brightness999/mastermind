@@ -246,6 +246,10 @@ export default ({
     id: `${scope}.friday`,
     defaultMessage: 'Friday',
   },
+  saturday: {
+    id: `${scope}.saturday`,
+    defaultMessage: 'Saturday',
+  },
   from: {
     id: `${scope}.from`,
     defaultMessage: 'From',
