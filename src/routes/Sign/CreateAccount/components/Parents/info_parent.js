@@ -7,9 +7,8 @@ import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import axios from 'axios';
-import { url } from '../../../../../utils/api/baseUrl';
 import { getDefaultValueForClient } from '../../../../../utils/api/apiList';
+import request from '../../../../../utils/api/request';
 
 class InfoParent extends Component {
 	constructor(props) {
@@ -48,8 +47,8 @@ class InfoParent extends Component {
 	}
 
 	searchCityConnection() {
-		axios.post(url + getDefaultValueForClient).then(result => {
-			const { success, data } = result.data;
+		request.post(getDefaultValueForClient).then(result => {
+			const { success, data } = result;
 			if (success) {
 				this.setState({ maritialTypes: data?.MaritialType ?? [] });
 				this.props.user?.role < 900 && this.setState({ cityConnections: data?.cityConnections ?? [] });

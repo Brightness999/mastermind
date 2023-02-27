@@ -4,10 +4,9 @@ import intl from 'react-intl-universal';
 import messages from '../../messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { url } from '../../../../../utils/api/baseUrl'
-import axios from 'axios';
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { getAllSchoolsForParent, getDefaultValueForClient, userSignUp } from '../../../../../utils/api/apiList';
+import request from '../../../../../utils/api/request';
 
 class ReviewAccount extends Component {
 	constructor(props) {
@@ -31,10 +30,10 @@ class ReviewAccount extends Component {
 	}
 
 	loadDataFromServer() {
-		axios.post(url + getDefaultValueForClient).then(result => {
-			if (result.data.success) {
-				const data = result.data.data;
-				this.setState({ listServices: data.SkillSet })
+		request.post(getDefaultValueForClient).then(result => {
+			const { success, data } = result;
+			if (success) {
+				this.setState({ listServices: data.SkillSet ?? [] })
 			}
 		}).catch(err => {
 			console.log(err);
@@ -45,10 +44,10 @@ class ReviewAccount extends Component {
 	}
 
 	loadSchools() {
-		axios.post(url + getAllSchoolsForParent, { communityServed: this.props.register.registerData.parentInfo.cityConnection }).then(result => {
-			const { success, data } = result.data;
+		request.post(getAllSchoolsForParent, { communityServed: this.props.register.registerData.parentInfo.cityConnection }).then(result => {
+			const { success, data } = result;
 			if (success) {
-				this.setState({ listSchools: data });
+				this.setState({ listSchools: data ?? [] });
 			}
 		}).catch(err => {
 			console.log(err);
@@ -64,9 +63,9 @@ class ReviewAccount extends Component {
 			}
 		}
 		this.setState({ isSubmit: true });
-		const response = await axios.post(url + userSignUp, customData);
+		const response = await request.post(userSignUp, customData);
 		this.setState({ isSubmit: false });
-		const { success } = response.data;
+		const { success } = response;
 		if (success) {
 			this.props.removeRegisterData();
 			this.props.onContinue(true);
@@ -76,38 +75,7 @@ class ReviewAccount extends Component {
 		return;
 	}
 
-	checkHaveSchedule(dayInWeek, studentInfo) {
-		for (let i = 0; i < studentInfo.availabilitySchedule.length; i++) {
-			if (studentInfo.availabilitySchedule[i].dayInWeek == dayInWeek) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	getScheduleInDay(dayInWeek, studentInfo) {
-		const arr = [];
-		for (let i = 0; i < studentInfo.availabilitySchedule.length; i++) {
-			if (studentInfo.availabilitySchedule[i].dayInWeek == dayInWeek) {
-				arr.push(studentInfo.availabilitySchedule[i])
-			}
-		}
-		return arr;
-	}
-
-	displayHourMin(value) {
-		return value > 9 ? value : ('0' + value)
-	}
-
 	render() {
-		const day_week = [
-			intl.formatMessage(messages.sunday),
-			intl.formatMessage(messages.monday),
-			intl.formatMessage(messages.tuesday),
-			intl.formatMessage(messages.wednesday),
-			intl.formatMessage(messages.thursday),
-			intl.formatMessage(messages.friday),
-		]
 		const { registerData, listSchools, listServices, isSubmit } = this.state;
 
 		return (
@@ -149,28 +117,11 @@ class ReviewAccount extends Component {
 								<div className='flex gap-2'>
 									<p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.servicesRequested)}</p>
 									<div>
-										{item.services?.map((service, index) => (
+										{item?.services?.map((service, index) => (
 											<p key={index}>{listServices?.find(skill => skill._id == service)?.name}</p>
 										))}
 									</div>
 								</div>
-								{/* <div>
-									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.availability)}</p>
-									<div className='review-item-flex'>
-										{day_week.map((dayInWeek, dayInWeekIndex) => {
-											if (this.checkHaveSchedule(dayInWeekIndex, item)) {
-												return (
-													<div key={dayInWeekIndex} className='item-flex'>
-														<p className='font-14 font-700 mb-10'>{dayInWeek}</p>
-														{this.getScheduleInDay(dayInWeekIndex, item).map((schedule, index) => (
-															<p key={index}>{this.displayHourMin(schedule.openHour)}:{this.displayHourMin(schedule.openMin)} - {this.displayHourMin(schedule.closeHour)}:{this.displayHourMin(schedule.closeMin)}</p>
-														))}
-													</div>
-												);
-											}
-										})}
-									</div>
-								</div> */}
 							</div>
 						))}
 						<div className="form-btn continue-btn" >

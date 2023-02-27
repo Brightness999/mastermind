@@ -4,14 +4,13 @@ import moment from 'moment';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import axios from 'axios';
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
 import messages from '../../messages';
-import { url } from '../../../../../utils/api/baseUrl';
 import { userSignUp } from '../../../../../utils/api/apiList'
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
+import request from '../../../../../utils/api/request';
 
 const day_week = [
 	{
@@ -113,9 +112,9 @@ class SchoolAvailability extends React.Component {
 
 			// post to server
 			this.setState({ isSubmit: true });
-			const response = await axios.post(url + userSignUp, newRegisterData);
+			const response = await request.post(userSignUp, newRegisterData);
 			this.setState({ isSubmit: false });
-			const { success } = response.data;
+			const { success } = response;
 			if (success) {
 				this.props.onContinue(true);
 				this.props.removeRegisterData();

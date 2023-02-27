@@ -7,10 +7,9 @@ import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios'
 import 'moment/locale/en-au';
 import { getDefaultValueForProvider } from '../../../../../utils/api/apiList';
+import request from '../../../../../utils/api/request';
 moment.locale('en');
 
 class InfoScheduling extends Component {
@@ -38,8 +37,8 @@ class InfoScheduling extends Component {
 	}
 
 	getDataFromServer = () => {
-		axios.post(url + getDefaultValueForProvider).then(result => {
-			const { success, data } = result.data;
+		request.post(getDefaultValueForProvider).then(result => {
+			const { success, data } = result;
 			if (success) {
 				this.setState({
 					durations: data?.durations ?? [],

@@ -8,10 +8,9 @@ import intl from 'react-intl-universal';
 import messages from '../messages';
 import messagesLogin from '../../Login/messages';
 import { setRegisterData } from '../../../../redux/features/registerSlice';
-import { url } from '../../../../utils/api/baseUrl';
 import { checkEmailRegistered } from '../../../../utils/api/apiList';
 import './index.less';
-import axios from 'axios';
+import request from '../../../../utils/api/request';
 
 const notCheck = 0;
 const valid = 1;
@@ -57,12 +56,12 @@ class CreateDefault extends Component {
 	onFinish = async (values) => {
 		try {
 			const { email, username } = values;
-			const emailExits = await axios.post(url + checkEmailRegistered, { searchData: { email } })
-			if (emailExits.data.data > 0) {
+			const emailExits = await request.post(checkEmailRegistered, { searchData: { email } })
+			if (emailExits.data > 0) {
 				return message.error('Email already exists');
 			}
-			const usernameExits = await axios.post(url + checkEmailRegistered, { searchData: { username } })
-			if (usernameExits.data.data > 0) {
+			const usernameExits = await request.post(checkEmailRegistered, { searchData: { username } })
+			if (usernameExits.data > 0) {
 				return message.error('Username already exists');
 			}
 			return this.props.onContinue();
@@ -92,8 +91,8 @@ class CreateDefault extends Component {
 			return;
 		}
 		this.timeoutCheckUsername = setTimeout(() => {
-			axios.post(url + checkEmailRegistered, { searchData: { username: event.target.value } }).then(result => {
-				if (result.data.data > 0) {
+			request.post(checkEmailRegistered, { searchData: { username: event.target.value } }).then(result => {
+				if (result.data > 0) {
 					this.form.setFields([
 						{
 							name: 'username',
@@ -123,8 +122,8 @@ class CreateDefault extends Component {
 			return;
 		}
 		this.timeoutCheckUsername = setTimeout(() => {
-			axios.post(url + checkEmailRegistered, { searchData: { email: event.target.value } }).then(result => {
-				if (result.data.data > 0) {
+			request.post(checkEmailRegistered, { searchData: { email: event.target.value } }).then(result => {
+				if (result.data > 0) {
 					this.form.setFields([
 						{
 							name: 'email',
@@ -137,9 +136,7 @@ class CreateDefault extends Component {
 				}
 			}).catch(err => {
 				console.log(err);
-				this.setState({
-					checkEmailExist: false,
-				});
+				this.setState({ checkEmailExist: false });
 			})
 		}, 300);
 	}

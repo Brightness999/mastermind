@@ -4,13 +4,13 @@ import { Row, Form, Button, Input } from 'antd';
 import { routerLinks } from "../../../constant";
 import intl from 'react-intl-universal';
 import messages from '../messages';
-import { url } from '../../../../utils/api/baseUrl';
-import axios from 'axios';
 import './index.less';
 import { decode as base64_decode, encode as base64_encode } from 'base-64';
 import { getInfoAuth, setUser } from '../../../../redux/features/authSlice';
 import { getAppointmentsData } from "../../../../redux/features/appointmentsSlice"
 import { store } from '../../../../redux/store';
+import request from '../../../../utils/api/request';
+import { userActivate, userLogin } from '../../../../utils/api/apiList';
 
 export default class extends React.Component {
 
@@ -23,9 +23,9 @@ export default class extends React.Component {
 	}
 
 	activeAccount(decodedString) {
-		axios.post(url + 'users/active_user', { token: decodedString }).then(result => {
-			var data = result.data;
-			if (data.success) {
+		request.post(userActivate, { token: decodedString }).then(result => {
+			const { success } = result;
+			if (success) {
 				this.form.setFields([
 					{
 						name: 'loginresult',
@@ -53,8 +53,8 @@ export default class extends React.Component {
 	onSubmit = async () => {
 		try {
 			const values = await this.form.validateFields();
-			const response = await axios.post(url + 'users/login', values);
-			const { success, data } = response.data;
+			const response = await request.post(userLogin, values);
+			const { success, data } = response;
 			if (success) {
 				localStorage.setItem('token', data.token);
 				localStorage.setItem('user', JSON.stringify(data.user));

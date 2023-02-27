@@ -7,8 +7,8 @@ import SubHeader from './subHeader';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { PAYPAL_CLIENT_ID } from '../../../utils/index';
 import toast, { Toaster } from 'react-hot-toast';
-import { url } from '../../../utils/api/baseUrl';
-import axios from 'axios'
+import request from '../../../utils/api/request';
+import { monthlyCustomAmount, donationReceipt } from '../../../utils/api/apiList';
 
 const StyledBoxTan = styled(Box)({
   backgroundColor: "#FBF2D4",
@@ -33,11 +33,11 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
       toast.error("The form is not valid.")
       return actions.reject();
     }
-    else {      
+    else {
       return actions.resolve();
     }
   };
-  
+
   const createSubscription = (data, actions) => {
     return actions.subscription.create({
       plan_id: packageSelected.planId,
@@ -45,7 +45,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
     });
   }
 
-  const createOrder = (data, actions) => { 
+  const createOrder = (data, actions) => {
     return actions.order.create({
       purchase_units: [
         {
@@ -58,13 +58,13 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
         shipping_preference: "NO_SHIPPING",
       },
     })
-    .then((orderID) => {
-      setOrderID(orderID);
-      return orderID;
-    });
+      .then((orderID) => {
+        setOrderID(orderID);
+        return orderID;
+      });
   }
 
-  const onApprove = (data, actions) => {    
+  const onApprove = (data, actions) => {
     if (frequency === 'monthly') {
       sendRequestMonthlyCustomAmount(paymentAmount, sponsoredChildren, packageSelected)
     }
@@ -73,49 +73,39 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
       sendDonationReceipt(paymentAmount, donorEmail)
     }
     return actions.order.capture().then(function (details) {
-      const {payer} = details;
+      const { payer } = details;
       setBillingDetails(payer);
     })
   };
 
-  const onError = (data, actions)=>{    
+  const onError = (data, actions) => {
     toast.error("Something went wrong with your payment")
   };
 
   //email events
   const sendRequestMonthlyCustomAmount = (paymentAmount, sponsoredChildren, packageSelected) => {
-    axios.post(url + 'donations/monthly_custom_amount', { paymentAmount, sponsoredChildren, packageSelected }
-        ).then(result => {
-            console.log('monthly_custom_amount', result.data);
-            console.log(result.data)
-            if (result.data.success) {
-                var data = result.data.data;
-                this.setState({isSent:true})
-            } else {
-              console.log('error sending email')
-            }
-
-        }).catch(err=>{
-          console.log('error trying to send email')
-        })
+    request.post(monthlyCustomAmount, { paymentAmount, sponsoredChildren, packageSelected }).then(result => {
+      if (result.success) {
+        this.setState({ isSent: true })
+      } else {
+        console.log('error sending email')
+      }
+    }).catch(err => {
+      console.log('error trying to send email')
+    })
   }
 
   const sendDonationReceipt = (money, email) => {
-    axios.post(url + 'donations/donation_receipt', { money, email }
-        ).then(result => {
-            console.log('donation_receipt', result.data);
-            console.log(result.data)
-            if (result.data.success) {
-                var data = result.data.data;
-                this.setState({isSent:true})
-            } else {
-              console.log('error sending email')
-            }
-
-        }).catch(err=>{
-          console.log(err)
-          console.log('error trying to generate or send donation receipt')
-        })
+    request.post(donationReceipt, { money, email }).then(result => {
+      if (result.success) {
+        this.setState({ isSent: true })
+      } else {
+        console.log('error sending email')
+      }
+    }).catch(err => {
+      console.log(err)
+      console.log('error trying to generate or send donation receipt')
+    })
   }
 
   // //form events
@@ -234,96 +224,96 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
     //       </Grid>
     //     </Grid>
     //   </StyledBoxTan>
-      <StyledBoxTan
-        // style={{ width: '36%', height: 'min-content', display: "flex", gap: "30px", flexDirection: "column" }}
-      >
-        <Toaster />
-        <Header style={{ fontSize: '52px', whiteSpace: 'noWrap' }} text="Donation Total:" />
-        <Header style={{ fontSize: '41px', paddingBottom: '20px' }} text={`${formatter.format(paymentAmount || 0)} / ${frequency}`} />
-        <Box mb="20px">
-          <FormControlLabel
-            control={<Checkbox checked={sendReceipt} onChange={(e) => setSendReceipt(e.target.checked)} />}
-            label="Send Me A Receipt"
+    <StyledBoxTan
+    // style={{ width: '36%', height: 'min-content', display: "flex", gap: "30px", flexDirection: "column" }}
+    >
+      <Toaster />
+      <Header style={{ fontSize: '52px', whiteSpace: 'noWrap' }} text="Donation Total:" />
+      <Header style={{ fontSize: '41px', paddingBottom: '20px' }} text={`${formatter.format(paymentAmount || 0)} / ${frequency}`} />
+      <Box mb="20px">
+        <FormControlLabel
+          control={<Checkbox checked={sendReceipt} onChange={(e) => setSendReceipt(e.target.checked)} />}
+          label="Send Me A Receipt"
+        />
+        <TextField
+          label="Email Address"
+          fullWidth
+          type="email"
+          value={donorEmail}
+          onChange={(e) => setDonorEmail(e.target.value)}
+          variant="outlined"
+          hidden={!sendReceipt}
+        />
+      </Box>
+      {/* <Button onClick={() => sendDonationReceipt(paymentAmount)}>Send Receipt</Button> */}
+      <Box display={frequency === 'once' ? 'block' : 'none'}>
+        <PayPalScriptProvider
+          options={{
+            "client-id": PAYPAL_CLIENT_ID.clientId,
+            components: "buttons",
+            "data-namespace": "paypalOrder"
+          }}
+        >
+          <PayPalButtons
+            style={{
+              color: "black",
+              shape: "rect",
+              label: "paypal",
+              layout: "horizontal",
+            }}
+            onClick={onPayPalButtonClick}
+            createOrder={createOrder}
+            onApprove={onApprove}
+            fundingSource="card"
+            // disabled={!isFormValid}
+            disabled={paymentAmount < 1}
+            forceReRender={[paymentAmount, frequency]}
           />
-          <TextField
-            label="Email Address"
-            fullWidth
-            type="email"
-            value={donorEmail}
-            onChange={(e) => setDonorEmail(e.target.value)}
-            variant="outlined"
-            hidden={!sendReceipt}
+        </PayPalScriptProvider>
+      </Box>
+      <Box display={frequency === 'monthly' ? 'block' : 'none'}>
+        <PayPalScriptProvider
+          options={{
+            "client-id": PAYPAL_CLIENT_ID.clientId,
+            components: "buttons",
+            intent: "subscription",
+            vault: true,
+          }}
+        >
+          <PayPalButtons
+            style={{
+              color: "black",
+              shape: "rect",
+              label: "paypal",
+              layout: "horizontal",
+            }}
+            onClick={onPayPalButtonClick}
+            createSubscription={createSubscription}
+            onApprove={onApprove}
+            fundingSource="card"
+            // disabled={!isFormValid}
+            disabled={paymentAmount < 1}
+            forceReRender={[paymentAmount, frequency]}
+            label="Subscribe"
           />
-        </Box>
-        {/* <Button onClick={() => sendDonationReceipt(paymentAmount)}>Send Receipt</Button> */}
-          <Box display={frequency === 'once' ? 'block' : 'none'}>
-            <PayPalScriptProvider
-              options={{
-                "client-id": PAYPAL_CLIENT_ID.clientId,
-                components: "buttons",
-                "data-namespace": "paypalOrder"
-              }}
-            >
-              <PayPalButtons
-                style={{
-                  color: "black",
-                  shape: "rect",
-                  label: "paypal",
-                  layout: "horizontal",
-                }}
-                onClick={onPayPalButtonClick}
-                createOrder={createOrder}
-                onApprove={onApprove}
-                fundingSource="card"
-                // disabled={!isFormValid}
-                disabled={paymentAmount < 1}
-                forceReRender={[paymentAmount, frequency]}
-              />
-            </PayPalScriptProvider>
-          </Box>
-          <Box display={frequency === 'monthly' ? 'block' : 'none'}>
-            <PayPalScriptProvider
-              options={{
-                "client-id": PAYPAL_CLIENT_ID.clientId,
-                components: "buttons",
-                intent: "subscription",
-                vault: true,
-              }}
-            >
-              <PayPalButtons
-                style={{
-                  color: "black",
-                  shape: "rect",
-                  label: "paypal",
-                  layout: "horizontal",
-                }}
-                onClick={onPayPalButtonClick}
-                createSubscription={createSubscription}
-                onApprove={onApprove}
-                fundingSource="card"
-                // disabled={!isFormValid}
-                disabled={paymentAmount < 1}
-                forceReRender={[paymentAmount, frequency]}
-                label="Subscribe"
-              />
-            </PayPalScriptProvider>
-          </Box>
-          <SubHeader style={{ textAlign: 'center' }} text="or" />
-          <Button
-            style={{ backgroundColor: "#eee", width: "100%", padding: "10px", marginTop: "10px" }}
-            component="a"
-            href="https://thedonorsfund.org/app/login"
-            target="_blank"
-            rel="noopener noreferrer">
-            Donate with The Donors Fund
-          </Button>
-          <Box width="100%" textAlign="center">
-            <Typography variant="caption">
-              {"Please search for Tax ID: 36-6116829 (Association For Torah Advancement) from the available charities listed."}
-            </Typography>
-          </Box>
-        <SubHeader style={{ paddingTop: '20px', textAlign: 'justify' }} text="Help Me Get Help is a project of the Association for Torah Advancement (AFTA). AFTA is a nonprofit organization. All donations are tax deductible." />
-      </StyledBoxTan>
+        </PayPalScriptProvider>
+      </Box>
+      <SubHeader style={{ textAlign: 'center' }} text="or" />
+      <Button
+        style={{ backgroundColor: "#eee", width: "100%", padding: "10px", marginTop: "10px" }}
+        component="a"
+        href="https://thedonorsfund.org/app/login"
+        target="_blank"
+        rel="noopener noreferrer">
+        Donate with The Donors Fund
+      </Button>
+      <Box width="100%" textAlign="center">
+        <Typography variant="caption">
+          {"Please search for Tax ID: 36-6116829 (Association For Torah Advancement) from the available charities listed."}
+        </Typography>
+      </Box>
+      <SubHeader style={{ paddingTop: '20px', textAlign: 'justify' }} text="Help Me Get Help is a project of the Association for Torah Advancement (AFTA). AFTA is a nonprofit organization. All donations are tax deductible." />
+    </StyledBoxTan>
     // </Form>
   )
 }

@@ -9,10 +9,9 @@ import { compose } from 'redux'
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
-import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios';
 import { userSignUp } from '../../../../../utils/api/apiList';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
+import request from '../../../../../utils/api/request';
 
 const day_week = [
   intl.formatMessage(messages.sunday),
@@ -105,9 +104,9 @@ class ConsultantAvailability extends Component {
 
       // post to server
       this.setState({ isSubmit: true });
-      const response = await axios.post(url + userSignUp, newRegisterData);
+      const response = await request.post(userSignUp, newRegisterData);
       this.setState({ isSubmit: false });
-      const { success } = response.data;
+      const { success } = response;
       if (success) {
         this.props.removeRegisterData();
         this.props.onContinue(true);

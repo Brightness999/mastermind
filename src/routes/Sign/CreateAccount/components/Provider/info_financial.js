@@ -9,9 +9,9 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios';
 import { getDefaultValueForProvider, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
 import PlacesAutocomplete from 'react-places-autocomplete';
+import request from '../../../../../utils/api/request';
 
 class InfoFinancial extends Component {
 	constructor(props) {
@@ -51,8 +51,8 @@ class InfoFinancial extends Component {
 
 	getDataFromServer = () => {
 		const { registerData } = this.props.register;
-		axios.post(url + getDefaultValueForProvider).then(result => {
-			const { success, data } = result.data;
+		request.post(getDefaultValueForProvider).then(result => {
+			const { success, data } = result;
 			if (success) {
 				this.setState({
 					AcademicLevel: data.AcademicLevel ?? [],

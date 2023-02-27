@@ -9,9 +9,8 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import moment from 'moment';
-import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios';
 import { getAllSchoolsForParent, getDefaultValueForClient } from '../../../../../utils/api/apiList';
+import request from '../../../../../utils/api/request';
 
 class InfoChild extends Component {
 	constructor(props) {
@@ -37,8 +36,8 @@ class InfoChild extends Component {
 	}
 
 	loadServices() {
-		axios.post(url + getDefaultValueForClient).then(result => {
-			const { success, data } = result.data;
+		request.post(getDefaultValueForClient).then(result => {
+			const { success, data } = result;
 			if (success) {
 				this.setState({
 					listServices: data?.SkillSet ?? [],
@@ -51,8 +50,8 @@ class InfoChild extends Component {
 	}
 
 	loadSchools(parentInfo) {
-		axios.post(url + getAllSchoolsForParent, { communityServed: parentInfo?.cityConnection }).then(result => {
-			const { success, data } = result.data;
+		request.post(getAllSchoolsForParent, { communityServed: parentInfo?.cityConnection }).then(result => {
+			const { success, data } = result;
 			if (success) {
 				this.setState({ listSchools: data })
 			}

@@ -8,9 +8,8 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios';
 import { getCityConnections, getDefaultValueForProvider } from '../../../../../utils/api/apiList';
+import request from '../../../../../utils/api/request';
 
 class InfoProfile extends Component {
 	constructor(props) {
@@ -42,8 +41,8 @@ class InfoProfile extends Component {
 	}
 
 	getDataFromServer = () => {
-		axios.post(url + getDefaultValueForProvider).then(result => {
-			const { success, data } = result.data;
+		request.post(getDefaultValueForProvider).then(result => {
+			const { success, data } = result;
 			if (success) {
 				this.setState({
 					ContactNumberType: data?.ContactNumberType ?? [],
@@ -56,8 +55,8 @@ class InfoProfile extends Component {
 	}
 
 	searchCityConnection() {
-		axios.post(url + getCityConnections).then(result => {
-			const { success, data } = result.data;
+		request.post(getCityConnections).then(result => {
+			const { success, data } = result;
 			if (success) {
 				this.setState({ cityConnections: data ?? [] });
 			}

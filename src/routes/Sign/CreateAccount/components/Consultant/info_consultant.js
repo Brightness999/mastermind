@@ -7,9 +7,8 @@ import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios';
 import { getDefaultValuesForConsultant } from '../../../../../utils/api/apiList';
+import request from '../../../../../utils/api/request';
 
 class InfoConsultant extends Component {
   constructor(props) {
@@ -37,8 +36,8 @@ class InfoConsultant extends Component {
   }
 
   getDataFromServer = () => {
-    axios.post(url + getDefaultValuesForConsultant).then(result => {
-      const { success, data } = result.data;
+    request.post(getDefaultValuesForConsultant).then(result => {
+      const { success, data } = result;
       if (success) {
         this.setState({
           ContactNumberType: data.ContactNumberType,

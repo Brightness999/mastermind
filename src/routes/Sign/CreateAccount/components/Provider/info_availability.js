@@ -3,7 +3,6 @@ import { Row, Col, Form, Button, Select, Segmented, TimePicker, Switch, DatePick
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
-import axios from 'axios';
 import moment from 'moment';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
@@ -12,9 +11,9 @@ import DatePanel from "react-multi-date-picker/plugins/date_panel"
 import messages from '../../messages';
 import msgSidebar from '../../../../../components/SideBar/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { url } from '../../../../../utils/api/baseUrl';
 import { getAllSchoolsForParent } from '../../../../../utils/api/apiList';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
+import request from '../../../../../utils/api/request';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -68,10 +67,10 @@ class InfoAvailability extends Component {
 	}
 
 	loadSchools(profileInfo, availabilityInfo) {
-		axios.post(url + getAllSchoolsForParent, { communityServed: profileInfo?.cityConnection }).then(result => {
-			const { success, data } = result.data;
+		request.post(getAllSchoolsForParent, { communityServed: profileInfo?.cityConnection }).then(result => {
+			const { success, data } = result;
 			if (success) {
-				this.setState({ listSchool: data });
+				this.setState({ listSchool: data ?? [] });
 				if (!!availabilityInfo) {
 					let locations = [];
 					availabilityInfo?.isHomeVisit && locations.push('Dependent Home');
@@ -120,7 +119,6 @@ class InfoAvailability extends Component {
 
 	copyToFullWeek = (dayForCopy, index) => {
 		const arrToCopy = this.form?.getFieldValue(dayForCopy);
-		console.log(arrToCopy)
 		day_week.map((newDay) => {
 			if (newDay != dayForCopy) {
 				this.form.setFieldValue(newDay, [...this.form.getFieldValue(newDay), arrToCopy[index]]);

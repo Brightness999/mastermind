@@ -5,9 +5,8 @@ import messages from '../../messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
-import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios'
 import { getReviewInfoForProvider, userSignUp } from '../../../../../utils/api/apiList';
+import request from '../../../../../utils/api/request';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -31,14 +30,14 @@ class InfoReview extends Component {
 	}
 
 	componentDidMount() {
-		axios.post(url + getReviewInfoForProvider).then(result => {
-			const { success, data } = result.data;
+		request.post(getReviewInfoForProvider).then(result => {
+			const { success, data } = result;
 			if (success) {
 				this.setState({
-					cityConnections: data?.cityConnections,
-					skillSet: data?.skillSet,
-					listSchools: data?.listSchools,
-					durations: data?.durations,
+					cityConnections: data?.cityConnections ?? [],
+					skillSet: data?.skillSet ?? [],
+					listSchools: data?.listSchools ?? [],
+					durations: data?.durations ?? [],
 				})
 			} else {
 				this.setState({
@@ -63,9 +62,9 @@ class InfoReview extends Component {
 		const { registerData } = this.props.register;
 		const postData = this.copyField(registerData);
 		this.setState({ isSubmit: true });
-		const response = await axios.post(url + userSignUp, postData);
+		const response = await request.post(userSignUp, postData);
 		this.setState({ isSubmit: false });
-		const { success } = response.data;
+		const { success } = response;
 		if (success) {
 			this.props.removeRegisterData();
 			this.props.onContinue(true);

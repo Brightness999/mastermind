@@ -6,10 +6,9 @@ import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { url } from '../../../../../utils/api/baseUrl';
-import axios from 'axios';
 import { getDefaultValueForProvider } from '../../../../../utils/api/apiList';
 import { BsDashCircle, BsPlusCircle } from 'react-icons/bs';
+import request from '../../../../../utils/api/request';
 
 class InfoServices extends Component {
 	constructor(props) {
@@ -30,8 +29,8 @@ class InfoServices extends Component {
 	}
 
 	getDataFromServer = () => {
-		axios.post(url + getDefaultValueForProvider).then(result => {
-			const { success, data } = result.data;
+		request.post(getDefaultValueForProvider).then(result => {
+			const { success, data } = result;
 			if (success) {
 				this.setState({ SkillSet: data?.SkillSet?.docs ?? [] });
 			}

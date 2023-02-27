@@ -7,8 +7,8 @@ import './index.less';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { setRegisterData } from '../../../../redux/features/registerSlice';
-import { url } from '../../../../utils/api/baseUrl';
-import axios from 'axios';
+import request from '../../../../utils/api/request';
+import { getDefaultValueForClient, getAllSchoolsForParent } from '../../../../utils/api/apiList';
 
 class SubsidyReview extends React.Component {
 	constructor(props) {
@@ -33,28 +33,21 @@ class SubsidyReview extends React.Component {
 	}
 
 	loadDataFromServer() {
-		axios.post(url + 'clients/get_default_value_for_client'
-		).then(result => {
-			if (result.data.success) {
-				var data = result.data.data;
-				this.setState({ SkillSet: data.SkillSet })
-			} else {
-				this.setState({ checkEmailExist: false });
+		request.post(getDefaultValueForClient).then(result => {
+			const { success, data } = result;
+			if (success) {
+				this.setState({ SkillSet: data.SkillSet ?? [] });
 			}
 		}).catch(err => {
 			console.log(err);
-			this.setState({
-				checkEmailExist: false,
-			});
 		})
 	}
 
 	loadSchools() {
-		axios.post(url + 'clients/get_all_schools'
-		).then(result => {
-			if (result.data.success) {
-				var data = result.data.data;
-				this.setState({ listSchools: data })
+		request.post(getAllSchoolsForParent).then(result => {
+			const { success, data } = result;
+			if (success) {
+				this.setState({ listSchools: data ?? [] });
 			}
 		}).catch(err => {
 			console.log(err);

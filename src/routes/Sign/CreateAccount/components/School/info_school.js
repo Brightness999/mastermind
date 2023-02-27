@@ -5,12 +5,11 @@ import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import axios from 'axios';
-import { url } from '../../../../../utils/api/baseUrl';
 import { getCityConnections, getDefaultValueForProvider } from '../../../../../utils/api/apiList'
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import request from '../../../../../utils/api/request';
 
 class InfoSchool extends React.Component {
 	constructor(props) {
@@ -65,8 +64,8 @@ class InfoSchool extends React.Component {
 	};
 
 	loadCommunitiServer = () => {
-		axios.post(url + getCityConnections).then(response => {
-			const { success, data } = response.data;
+		request.post(getCityConnections).then(result => {
+			const { success, data } = result;
 			if (success) {
 				this.setState({ listCommunitiServer: data });
 			} else {
@@ -79,8 +78,8 @@ class InfoSchool extends React.Component {
 	}
 
 	getDefaultData = () => {
-		axios.post(url + getDefaultValueForProvider).then(result => {
-			const { success, data } = result.data;
+		request.post(getDefaultValueForProvider).then(result => {
+			const { success, data } = result;
 			if (success) {
 				this.setState({ emailTypes: data?.EmailType });
 			} else {
