@@ -29,24 +29,11 @@ class InfoChild extends Component {
 		this.setState({ parentInfo: registerData.parentInfo })
 		const newChild = this.getDefaultChildObj(registerData.parentInfo);
 		let studentInfos = !!registerData.studentInfos ? JSON.parse(JSON.stringify(registerData.studentInfos)) : [newChild];
-		if (!registerData.studentInfos) {
-			this.props.setRegisterData({ studentInfos: studentInfos });
-		}
-		for (let i = 0; i < studentInfos.length; i++) {
-			if ((studentInfos[i].birthday + '').length > 0) {
-				studentInfos[i].birthday_moment = moment(studentInfos[i].birthday);
-			}
-		}
+		this.props.setRegisterData({ studentInfos: studentInfos });
+		studentInfos = studentInfos?.map(student => student.birthday ? { ...student, birthday: moment(student.birthday) } : student);
 		this.form.setFieldsValue({ children: studentInfos });
 		this.loadServices();
 		this.loadSchools(registerData.parentInfo);
-	}
-
-	createNewChild() {
-		const { registerData } = this.props.register;
-		const newChild = this.getDefaultChildObj(registerData.parentInfo);
-		this.form.setFieldsValue({ children: [...registerData.studentInfos, newChild] });
-		this.props.setRegisterData({ studentInfos: [...registerData.studentInfos, newChild] });
 	}
 
 	loadServices() {
@@ -78,7 +65,7 @@ class InfoChild extends Component {
 		const obj = {
 			"firstName": "",
 			"lastName": parentInfo?.familyName,
-			"birthday": "",
+			"birthday": undefined,
 			"guardianPhone": parentInfo?.fatherPhoneNumber || parentInfo?.motherPhoneNumber,
 			"guardianEmail": parentInfo?.fatherEmail || parentInfo?.motherEmail,
 			"backgroundInfor": "",
@@ -86,6 +73,7 @@ class InfoChild extends Component {
 			"primaryTeacher": "",
 			"currentGrade": "",
 			"services": [],
+			"age": "",
 			"availabilitySchedule": []
 		};
 		return obj;
@@ -102,14 +90,19 @@ class InfoChild extends Component {
 		const { registerData } = this.props.register;
 		let studentInfos = [...registerData.studentInfos]
 		let selectedObj = { ...studentInfos[index] };
-		selectedObj[fieldName] = value;
+		if (fieldName === 'birthday') {
+			selectedObj.birthday = value?.valueOf();
+			selectedObj.age = value ? moment().year() - value.year() : 0;
+		} else {
+			selectedObj[fieldName] = value;
+		}
 		studentInfos[index] = selectedObj;
 		this.props.setRegisterData({ studentInfos: studentInfos });
 	}
 
 	getBirthday = (index) => {
-		if (!!this.props.register.studentInfos && this.props.register.studentInfos[index] != undefined && !!this.props.register.studentInfos[index].birthday_moment) {
-			return this.props.register.studentInfos[index].birthday_moment;
+		if (!!this.props.register.studentInfos && this.props.register.studentInfos[index] != undefined && !!this.props.register.studentInfos[index].birthday) {
+			return this.props.register.studentInfos[index].birthday;
 		}
 		return moment();
 	}
@@ -122,8 +115,16 @@ class InfoChild extends Component {
 		console.log('Failed:', errorInfo);
 	};
 
+	handleSelectBirthday = (date, index) => {
+		if (date) {
+			const dependents = this.form.getFieldsValue();
+			this.form.setFieldsValue({ children: dependents?.children?.map((child, i) => i === index ? { ...child, age: moment().year() - date.year() } : child) });
+		}
+	}
+
 	render() {
 		const { listSchools, listServices, academicLevels } = this.state;
+		const { registerData } = this.props.register;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -159,7 +160,7 @@ class InfoChild extends Component {
 													>{intl.formatMessage(messages.remove)}</Button>}
 												</div>
 												<Row gutter={14}>
-													<Col xs={24} sm={24} md={9}>
+													<Col xs={24} sm={24} md={12}>
 														<Form.Item
 															name={[field.name, "firstName"]}
 															label={intl.formatMessage(messages.firstName)}
@@ -171,25 +172,15 @@ class InfoChild extends Component {
 															/>
 														</Form.Item>
 													</Col>
-													<Col xs={24} sm={24} md={9}>
-														<Form.Item name={[field.name, "lastName"]} label={intl.formatMessage(messages.lastName)}>
+													<Col xs={24} sm={24} md={12}>
+														<Form.Item
+															name={[field.name, "lastName"]}
+															label={intl.formatMessage(messages.lastName)}
+															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.lastName) }]}
+														>
 															<Input
 																onChange={v => this.updateReduxValueForDepedent(index, "lastName", v.target.value)}
 																placeholder={intl.formatMessage(messages.lastName)}
-															/>
-														</Form.Item>
-													</Col>
-													<Col xs={24} sm={24} md={6}>
-														<Form.Item
-															name={[field.name, "birthday_moment"]}
-															label={intl.formatMessage(messages.dateBirth)}
-															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.dateBirth) }]}
-														>
-															<DatePicker
-																format='YYYY-MM-DD'
-																placeholder={intl.formatMessage(messages.dateBirth)}
-																selected={this.getBirthday(index)}
-																onChange={v => this.updateReduxValueForDepedent(index, "birthday", v.valueOf())}
 															/>
 														</Form.Item>
 													</Col>
@@ -217,23 +208,25 @@ class InfoChild extends Component {
 														</Form.Item>
 													</Col>
 												</Row>
-												<Form.Item
-													name={[field.name, "school"]}
-													label={intl.formatMessage(messages.school)}
-													rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
-												>
-													<Select
-														showArrow
-														placeholder={intl.formatMessage(messages.school)}
-														optionLabelProp="label"
-														onChange={v => this.updateReduxValueForDepedent(index, "school", v)}
-													>
-														{listSchools?.map((school, index) => (
-															<Select.Option key={index} label={school.name} value={school._id}>{school.name}</Select.Option>
-														))}
-													</Select>
-												</Form.Item>
 												<Row gutter={14}>
+													<Col xs={24} sm={24} md={12}>
+														<Form.Item
+															name={[field.name, "school"]}
+															label={intl.formatMessage(messages.school)}
+															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
+														>
+															<Select
+																showArrow
+																placeholder={intl.formatMessage(messages.school)}
+																optionLabelProp="label"
+																onChange={v => this.updateReduxValueForDepedent(index, "school", v)}
+															>
+																{listSchools?.map((school, index) => (
+																	<Select.Option key={index} label={school.name} value={school._id}>{school.name}</Select.Option>
+																))}
+															</Select>
+														</Form.Item>
+													</Col>
 													<Col xs={24} sm={24} md={12}>
 														<Form.Item
 															name={[field.name, "primaryTeacher"]}
@@ -246,7 +239,32 @@ class InfoChild extends Component {
 															/>
 														</Form.Item>
 													</Col>
-													<Col xs={24} sm={24} md={12}>
+												</Row>
+												<Row gutter={14}>
+													<Col xs={24} sm={24} md={8}>
+														<Form.Item
+															name={[field.name, "birthday"]}
+															label={intl.formatMessage(messages.dateBirth)}
+															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.dateBirth) }]}
+														>
+															<DatePicker
+																format='YYYY-MM-DD'
+																placeholder={intl.formatMessage(messages.dateBirth)}
+																onSelect={(date) => this.handleSelectBirthday(date, index)}
+																onChange={v => this.updateReduxValueForDepedent(index, "birthday", v)}
+															/>
+														</Form.Item>
+													</Col>
+													<Col xs={24} sm={24} md={8}>
+														<Form.Item
+															name={[field.name, "age"]}
+															label={intl.formatMessage(messages.age)}
+															rules={[{ required: true }]}
+														>
+															<Input disabled type='number' min={0} className="bg-white" />
+														</Form.Item>
+													</Col>
+													<Col xs={24} sm={24} md={8}>
 														<Form.Item
 															name={[field.name, "currentGrade"]}
 															label={intl.formatMessage(messages.currentGrade)}
@@ -302,7 +320,7 @@ class InfoChild extends Component {
 											type="text"
 											className='add-dependent-btn'
 											icon={<BsPlusCircle size={17} className='mr-5' />}
-											onClick={() => this.createNewChild()}
+											onClick={() => add(this.getDefaultChildObj(registerData.parentInfo))}
 										>
 											{intl.formatMessage(messages.addDependent)}
 										</Button>

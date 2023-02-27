@@ -24,6 +24,7 @@ class InfoChild extends Component {
 			academicLevels: [],
 			children: [],
 			loading: false,
+			user: this.props.auth.user,
 		}
 	}
 
@@ -35,7 +36,7 @@ class InfoChild extends Component {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.setState({ children: data?.studentInfos?.filter(s => !s.isRemoved) });
+					this.setState({ user: data, children: data?.studentInfos?.filter(s => !s.isRemoved) });
 					data?.studentInfos?.map(item => {
 						item.services = item.services.map(item => item._id);
 						item.birthday = moment(item.birthday);
@@ -116,9 +117,13 @@ class InfoChild extends Component {
 		console.log('Failed:', errorInfo);
 	};
 
+	handleSelectBirthday = (date, index) => {
+		const dependents = this.form.getFieldsValue();
+		this.form.setFieldsValue({ children: dependents?.children?.map((child, i) => i === index ? { ...child, age: date ? moment().year() - date.year() : 0 } : child) });
+	}
+
 	render() {
-		const { listServices, listSchools, academicLevels, loading } = this.state;
-		const { user } = this.props.auth;
+		const { listServices, listSchools, academicLevels, loading, user } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -155,7 +160,7 @@ class InfoChild extends Component {
 												</Popconfirm>
 											</div>
 											<Row gutter={14}>
-												<Col xs={24} sm={24} md={9}>
+												<Col xs={24} sm={24} md={12}>
 													<Form.Item
 														name={[field.name, "firstName"]}
 														label={intl.formatMessage(messages.firstName)}
@@ -165,7 +170,7 @@ class InfoChild extends Component {
 														<Input placeholder={intl.formatMessage(messages.firstName)} />
 													</Form.Item>
 												</Col>
-												<Col xs={24} sm={24} md={9}>
+												<Col xs={24} sm={24} md={12}>
 													<Form.Item
 														name={[field.name, "lastName"]}
 														label={intl.formatMessage(messages.lastName)}
@@ -175,20 +180,7 @@ class InfoChild extends Component {
 														<Input placeholder={intl.formatMessage(messages.lastName)} />
 													</Form.Item>
 												</Col>
-												<Col xs={24} sm={24} md={6}>
-													<Form.Item
-														name={[field.name, "birthday"]}
-														label={intl.formatMessage(messages.dateBirth)}
-														className='float-label-item'
-														rules={[{ required: true }]}
-													>
-														<DatePicker
-															format={"YYYY-MM-DD"}
-															defaultValue={this.getBirthday(index)}
-															placeholder={intl.formatMessage(messages.dateBirth)}
-														/>
-													</Form.Item>
-												</Col>
+
 											</Row>
 											<Row gutter={14}>
 												<Col xs={24} sm={24} md={12}>
@@ -212,8 +204,8 @@ class InfoChild extends Component {
 													</Form.Item>
 												</Col>
 											</Row>
-											<Row>
-												<Col span={24}>
+											<Row gutter={14}>
+												<Col xs={24} sm={24} md={12}>
 													<Form.Item
 														name={[field.name, "school"]}
 														label={intl.formatMessage(messages.school)}
@@ -231,8 +223,6 @@ class InfoChild extends Component {
 														</Select>
 													</Form.Item>
 												</Col>
-											</Row>
-											<Row gutter={14}>
 												<Col xs={24} sm={24} md={12}>
 													<Form.Item
 														name={[field.name, "primaryTeacher"]}
@@ -243,7 +233,33 @@ class InfoChild extends Component {
 														<Input placeholder={intl.formatMessage(messages.primaryTeacher)} />
 													</Form.Item>
 												</Col>
-												<Col xs={24} sm={24} md={12}>
+											</Row>
+											<Row gutter={14}>
+												<Col xs={24} sm={24} md={8}>
+													<Form.Item
+														name={[field.name, "birthday"]}
+														label={intl.formatMessage(messages.dateBirth)}
+														className='float-label-item'
+														rules={[{ required: true }]}
+													>
+														<DatePicker
+															format={"YYYY-MM-DD"}
+															placeholder={intl.formatMessage(messages.dateBirth)}
+															onSelect={(date) => this.handleSelectBirthday(date, index)}
+														/>
+													</Form.Item>
+												</Col>
+												<Col xs={24} sm={24} md={8}>
+													<Form.Item
+														name={[field.name, "age"]}
+														label={intl.formatMessage(messages.age)}
+														className='float-label-item'
+														rules={[{ required: true }]}
+													>
+														<Input type='number' disabled min={0} className="bg-white" />
+													</Form.Item>
+												</Col>
+												<Col xs={24} sm={24} md={8}>
 													<Form.Item
 														name={[field.name, "currentGrade"]}
 														label={intl.formatMessage(messages.currentGrade)}

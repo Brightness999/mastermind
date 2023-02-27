@@ -170,6 +170,10 @@ export default ({
     id: `${scope}.dateBirth`,
     defaultMessage: 'Date of birth',
   },
+  age: {
+    id: `${scope}.age`,
+    defaultMessage: 'Age',
+  },
   guardianPhone: {
     id: `${scope}.guardianPhone`,
     defaultMessage: 'Guardian phone',

@@ -70,6 +70,7 @@
   "routes.Createaccount.firstName": "First name",
   "routes.Createaccount.lastName": "Last name",
   "routes.Createaccount.dateBirth": "Date of birth",
+  "routes.Createaccount.age": "Age",
   "routes.Createaccount.guardianPhone": "Guardian phone",
   "routes.Createaccount.guardianEmail": "Guardian email",
   "routes.Createaccount.backgroundInformation": "Background information",
