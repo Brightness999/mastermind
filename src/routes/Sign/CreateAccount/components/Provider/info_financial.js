@@ -31,9 +31,9 @@ class InfoFinancial extends Component {
 		const { registerData } = this.props.register;
 		const { academicLevels, user } = this.props.auth;
 		if (!registerData.financialInfor) {
-			this.props.setRegisterData({ financialInfor: this.getDefaultObj() });
+			this.props.setRegisterData({ financialInfor: this.getDefaultObj(registerData) });
 		}
-		const financialInfor = registerData.financialInfor || this.getDefaultObj();
+		const financialInfor = registerData.financialInfor || this.getDefaultObj(registerData);
 		this.form.setFieldsValue(financialInfor);
 
 		if (user?.role > 900) {
@@ -67,9 +67,9 @@ class InfoFinancial extends Component {
 		})
 	}
 
-	getDefaultObj = () => {
+	getDefaultObj = (registerData) => {
 		return {
-			legalName: '',
+			legalName: `${registerData?.profileInfor?.firstName ?? ''} ${registerData?.profileInfor?.lastName ?? ''}`,
 			billingAddress: '',
 			academicLevel: [{
 				level: undefined,
