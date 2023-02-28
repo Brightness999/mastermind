@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { removeUser } from '../../redux/features/authSlice';
 import { MdOutlineSpaceDashboard } from 'react-icons/md';
+import Cookies from 'js-cookie';
 
 class MainHeader extends Component {
   constructor(props) {
@@ -21,7 +22,7 @@ class MainHeader extends Component {
   }
 
   logout = () => {
-    localStorage.removeItem('token');
+    Cookies.remove('tk');
     this.props.removeUser();
   }
 

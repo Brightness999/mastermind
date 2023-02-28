@@ -80,14 +80,11 @@ class InfoScheduling extends Component {
 	}
 
 	onFinish = (values) => {
-		const token = localStorage.getItem('token');
-
 		try {
-			if (window.location.pathname?.includes('changeuserprofile')) {
-				this.props.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.selectedUser?.providerInfo?._id }, token: token }));
-			} else {
-				this.props.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.user?.providerInfo?._id }, token: token }));
-			}
+			this.props.dispatch(setInforProvider({
+				...values,
+				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
+			}));
 		} catch (error) {
 			console.log(error, 'error')
 		}

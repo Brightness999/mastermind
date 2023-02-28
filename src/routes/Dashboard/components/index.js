@@ -35,6 +35,7 @@ import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 import Subsidaries from './school';
 import PageLoading from '../../../components/Loading/PageLoading';
+import Cookies from 'js-cookie';
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -249,7 +250,7 @@ class Dashboard extends React.Component {
   scriptLoaded = () => {
     let opts = {
       query: {
-        token: localStorage.getItem('token'),
+        token: Cookies.get('tk'),
       },
       withCredentials: true,
       autoConnect: true,
@@ -503,7 +504,6 @@ class Dashboard extends React.Component {
   handleEventChange = (changeInfo) => {
     const obj = changeInfo.event.toPlainObject();
     const data = {
-      token: localStorage.getItem('token'),
       role: this.state.userRole,
       data: {
         appointId: obj.extendedProps._id,

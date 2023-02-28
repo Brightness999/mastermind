@@ -3,6 +3,7 @@ import { Layout } from 'antd';
 import { Switch } from 'dva/router';
 import MainHeader from '../components/MainHeader';
 import PropTypes from 'prop-types';
+import Cookies from 'js-cookie';
 import '../assets/styles/index.less';
 import './styles/main.less';
 import { checkPermission } from '../utils/auth/checkPermission';
@@ -21,9 +22,10 @@ class MainLayout extends React.PureComponent {
   }
 
   componentDidMount() {
-    if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
+    const token = Cookies.get('tk');
+    if (token?.length > 0) {
       checkPermission().then(loginData => {
-        (this.props.location.pathname == routerLinks.Dashboard && loginData?.role > 900) && this.props.history.push(routerLinks.Admin);
+        loginData?.role > 900 && this.props.history.push(routerLinks.Admin);
         store.dispatch(setUser(loginData));
       })
       return;

@@ -13,7 +13,6 @@ class InfoAdmin extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      admin_details: localStorage.getItem('admin_details') ? JSON.parse(localStorage.getItem('admin_details')) : '',
       locations: [],
       loading: false,
     };

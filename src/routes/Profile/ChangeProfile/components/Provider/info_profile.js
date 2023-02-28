@@ -90,15 +90,10 @@ class InfoProfile extends Component {
 	}
 
 	onFinish = (values) => {
-		const token = localStorage.getItem('token');
-
 		try {
 			store.dispatch(setInforProvider({
-				data: {
-					...values,
-					_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
-				},
-				token: token,
+				...values,
+				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
 			}))
 		} catch (error) {
 			console.log(error, 'error')

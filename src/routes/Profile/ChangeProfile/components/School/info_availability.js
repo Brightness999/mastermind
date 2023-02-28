@@ -197,7 +197,7 @@ class InfoAvailability extends React.Component {
 	}
 
 	handleClickGoogleCalendar = async () => {
-		const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
+		const dates = this.form?.getFieldValue("blackoutDates")?.map(date => new Date(date));
 		let uniqueDates = [];
 		[...dates ?? [], ...[...new Set(this.state.allHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
 			if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
@@ -226,7 +226,7 @@ class InfoAvailability extends React.Component {
 	}
 
 	updateBlackoutDates = async (dates) => {
-		this.form.setFieldsValue({ blackoutDates: dates });
+		this.form?.setFieldsValue({ blackoutDates: dates });
 		return new Promise((resolveOuter) => {
 			resolveOuter(
 				new Promise((resolveInner) => {

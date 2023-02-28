@@ -65,14 +65,11 @@ class InfoServices extends Component {
 	}
 
 	onFinish = (values) => {
-		const token = localStorage.getItem('token');
-
 		try {
-			if (window.location.pathname?.includes('changeuserprofile')) {
-				store.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.selectedUser?.providerInfo?._id }, token: token }));
-			} else {
-				store.dispatch(setInforProvider({ data: { ...values, _id: this.props.auth.user?.providerInfo?._id }, token: token }));
-			}
+			store.dispatch(setInforProvider({
+				...values,
+				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
+			}));
 		} catch (error) {
 			console.log('updating provider error---', error);
 		}

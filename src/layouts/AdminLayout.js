@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout, Button } from 'antd';
 import { Switch } from 'dva/router';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
+import Cookies from 'js-cookie';
 import MainHeader from '../components/MainHeader';
 import LeftSiderBar from '../components/SideBar';
 import PropTypes from 'prop-types';
@@ -23,7 +24,8 @@ class AdminLayout extends React.PureComponent {
 	}
 
 	componentDidMount() {
-		if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
+		const token = Cookies.get('tk');
+		if (token?.length > 0) {
 			checkPermission().then(loginData => {
 				loginData?.role < 900 && this.props.history.push(routerLinks.Dashboard);
 				store.dispatch(setUser(loginData));

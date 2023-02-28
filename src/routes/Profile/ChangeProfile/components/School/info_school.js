@@ -56,10 +56,8 @@ class InfoSchool extends React.Component {
 	}
 
 	onFinish = (values) => {
-		const token = localStorage.getItem('token');
-
 		try {
-			store.dispatch(setInforSchool({ data: { ...values, _id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.schoolInfo?._id : this.props.auth.user?.schoolInfo?._id }, token }))
+			store.dispatch(setInforSchool({ ...values, _id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.schoolInfo?._id : this.props.auth.user?.schoolInfo?._id }))
 		} catch (error) {
 			console.log('update school error---', error);
 		}

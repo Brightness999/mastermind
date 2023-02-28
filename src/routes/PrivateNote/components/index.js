@@ -27,29 +27,21 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
-    if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
-      this.setState({ loading: true });
-      checkPermission().then(loginData => {
-        loginData.role > 900 && this.props.history.push(routerLinks.Admin);
-        request.post(getDependents).then(result => {
-          this.setState({ loading: false });
-          const { success, data } = result;
-          if (success) {
-            this.setState({
-              dependents: data?.map((user, i) => {
-                user['key'] = i; return user;
-              }) ?? []
-            });
-          }
-        }).catch(err => {
-          console.log('get dependents error ---', err);
-          this.setState({ dependents: [], loading: false });
-        })
-      }).catch(err => {
-        console.log(err);
-        this.props.history.push('/');
-      })
-    }
+    this.setState({ loading: true });
+    request.post(getDependents).then(result => {
+      this.setState({ loading: false });
+      const { success, data } = result;
+      if (success) {
+        this.setState({
+          dependents: data?.map((user, i) => {
+            user['key'] = i; return user;
+          }) ?? []
+        });
+      }
+    }).catch(err => {
+      console.log('get dependents error ---', err);
+      this.setState({ dependents: [], loading: false });
+    })
   }
 
   handleNewUser = () => {

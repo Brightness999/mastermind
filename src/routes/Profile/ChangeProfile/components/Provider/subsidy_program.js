@@ -73,7 +73,6 @@ class SubsidyProgram extends Component {
 	onFinish = async (values) => {
 		const { user, selectedUser } = this.props.auth;
 		const { isAcceptProBono, isAcceptReduceRate, isWillingOpenPrivate } = this.state;
-		const token = localStorage.getItem('token');
 		let data = {
 			_id: window.location.pathname?.includes('changeuserprofile') ? selectedUser?.providerInfo?._id : user?.providerInfo?._id,
 			isAcceptProBono: isAcceptProBono,
@@ -94,7 +93,7 @@ class SubsidyProgram extends Component {
 		}
 
 		try {
-			store.dispatch(setInforProvider({ data: data, token: token }))
+			store.dispatch(setInforProvider(data))
 		} catch (error) {
 			console.log(error, 'error')
 		}

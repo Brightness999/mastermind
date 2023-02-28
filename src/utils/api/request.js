@@ -1,17 +1,20 @@
 import { url } from './baseUrl';
 import axios from 'axios'
+import Cookies from 'js-cookie';
+
 // config aioxs
 const instance = axios.create({
 	baseURL: url,
 	timeout: 300000,
 	headers: {
 		'Content-Type': 'application/json',
-	}
+	},
+	withCredentials: true,
 })
 
 instance.interceptors.request.use(
 	config => {
-		const token = localStorage.getItem('token');
+		const token = Cookies.get('tk');
 		if (token) {
 			config.headers.Authorization = `Bearer ${token}`;
 		} else {

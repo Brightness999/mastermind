@@ -93,7 +93,6 @@ class InfoChild extends Component {
 
 	onFinish = async (values) => {
 		try {
-			const token = localStorage.getItem('token');
 			const { children } = this.state;
 			const additionalChildren = values.children?.filter(child => !child._id);
 			const updateChildren = values.children?.filter(child => child._id);
@@ -106,7 +105,7 @@ class InfoChild extends Component {
 				studentInfos: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.studentInfos : this.props.auth.user?.studentInfos,
 			};
 
-			const result = await store.dispatch(setInforClientChild({ data: params, token: token }))
+			const result = await store.dispatch(setInforClientChild(params))
 			this.form.setFieldsValue({ children: result.payload.data?.map(item => ({ ...item, birthday: moment(item.birthday) })) });
 		} catch (error) {
 			console.log('update children error ---', error)

@@ -6,10 +6,13 @@ import PropTypes from 'prop-types';
 const { Content } = Layout;
 import { checkPermission } from '../utils/auth/checkPermission';
 import { routerLinks } from "../routes/constant";
+import Cookies from 'js-cookie';
 
 class UserLayout extends React.PureComponent {
   componentDidMount() {
-    if (!!localStorage.getItem('token') && localStorage.getItem('token').length > 0) {
+    console.log('user layout-------', Cookies.get('token'))
+    const token = Cookies.get('tk');
+    if (token?.length > 0) {
       checkPermission().then(loginData => {
         loginData?.role > 900 ? this.props.history.push(routerLinks.Admin) : this.props.history.push(routerLinks.Dashboard);
       })

@@ -1,4 +1,3 @@
-import { url } from '../../utils/api/baseUrl';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { helper } from '../../utils/auth/helper';
 import request from '../../utils/api/request'
@@ -24,27 +23,27 @@ const initialState = {
 
 export const getInfoAuth = createAsyncThunk(
 	'auth/getInfoAuth',
-	async (role, token) => {
+	async (data) => {
 		try {
 			let result = '';
 			let resultParent = {};
 			let resultChild = {};
-			switch (role) {
+			switch (data?.role) {
 				case 1000:
-					result = await request.post(url + getSettings, {}, token);
+					result = await request.post(getSettings, data);
 					return result.data;
 				case 999:
-					result = await request.post(url + getSettings, {}, token);
+					result = await request.post(getSettings, data);
 					return result.data;
 				case 60:
-					result = await request.post(url + getMySchoolInfo, {}, token);
+					result = await request.post(getMySchoolInfo, data);
 					return result.data;
 				case 30:
-					result = await request.post(url + getMyProviderInfo, {}, token);
+					result = await request.post(getMyProviderInfo, data);
 					return result.data;
 				case 3:
-					resultParent = await request.post(url + getParentProfile, {}, token);
-					resultChild = await request.post(url + getChildProfile, {}, token);
+					resultParent = await request.post(getParentProfile, data);
+					resultChild = await request.post(getChildProfile, data);
 					return { parent: resultParent.data, child: resultChild.data };
 			}
 		} catch (error) {
@@ -58,7 +57,7 @@ export const setInforClientChild = createAsyncThunk(
 	'auth/setInforClientChild',
 	async (data) => {
 		try {
-			const result = await request.post(url + updateChildProfile, data.data, data.token);
+			const result = await request.post(updateChildProfile, data);
 			if (result.success) {
 				message.success('Updated successfully');
 			}
@@ -75,7 +74,7 @@ export const setAvailabilityClientChild = createAsyncThunk(
 	'auth/setAvailabilityClientChild',
 	async (data) => {
 		try {
-			const result = await request.post(url + updateChildAvailability, data.data, data.token);
+			const result = await request.post(updateChildAvailability, data.data);
 			if (result.success) {
 				message.success('Updated successfully');
 			}
@@ -91,7 +90,7 @@ export const setInforClientParent = createAsyncThunk(
 	'auth/setInforClientParent',
 	async (data) => {
 		try {
-			const result = await request.post(url + updateParentProfile, data.data, data.token);
+			const result = await request.post(updateParentProfile, data.data);
 			if (result.success) {
 				message.success('Updated successfully');
 			}
@@ -107,7 +106,7 @@ export const setInforProvider = createAsyncThunk(
 	'auth/setInforProvider',
 	async (data) => {
 		try {
-			const result = await request.post(url + updateMyProviderProfile, data.data, data.token);
+			const result = await request.post(updateMyProviderProfile, data);
 			if (result.success) {
 				message.success('Updated successfully');
 				return result.data;
@@ -124,7 +123,7 @@ export const setInforSchool = createAsyncThunk(
 	'auth/setInforSchool',
 	async (data) => {
 		try {
-			const result = await request.post(url + updateSchoolInfo, data.data, data.token);
+			const result = await request.post(updateSchoolInfo, data);
 			if (result.success) {
 				message.success('Updated successfully');
 			}
@@ -183,17 +182,15 @@ export const authSlice = createSlice({
 			state.durations = action.payload
 		},
 		logout(state) {
-			localStorage.removeItem('token');
 			helper.history.push('/');
 		},
 		removeUser() {
-			localStorage.removeItem('user'),
-				state.initialState = { ...initialState }
+			state.initialState = { ...initialState }
 		}
 	},
 	extraReducers: {
 		[getInfoAuth.fulfilled]: (state, action) => {
-			const user = localStorage.getItem('user') && JSON.parse(localStorage.getItem('user'))
+			const user = state.user;
 			if (user) {
 				if (user.role == 3) {
 					state.authDataClientChild = action.payload.child;

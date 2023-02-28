@@ -1,7 +1,6 @@
-import { url } from '../../utils/api/baseUrl';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import request from '../../utils/api/request'
-import { getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getParentSubsidyRequests, getSchoolSubsidyRequests } from '../../utils/api/apiList';
+import { cancelAppointmentForParent, cancelAppointmentForProvider, changeTimeAppointForParent, changeTimeAppointForProvider, getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getParentSubsidyRequests, getSchoolSubsidyRequests } from '../../utils/api/apiList';
 
 const initialState = {
 	dataAppointments: [],
@@ -16,19 +15,19 @@ export const getAppointmentsData = createAsyncThunk(
 		try {
 			switch (data.role) {
 				case 1000:
-					result = await request.post(url + getAppointmentsForAdmin, data, data.token);
+					result = await request.post(getAppointmentsForAdmin, data);
 					return result.data;
 				case 999:
-					result = await request.post(url + getAppointmentsForAdmin, data, data.token);
+					result = await request.post(getAppointmentsForAdmin, data);
 					return result.data;
 				case 100:
-					result = await request.post(url + getAppointmentsForConsultant, data, data.token);
+					result = await request.post(getAppointmentsForConsultant, data);
 					return result.data;
 				case 30:
-					result = await request.post(url + getAppointmentsForProvider, data, data.token);
+					result = await request.post(getAppointmentsForProvider, data);
 					return result.data;
 				case 3:
-					result = await request.post(url + getAppointmentsForParent, data, data.token);
+					result = await request.post(getAppointmentsForParent, data);
 					return result.data;
 			}
 		} catch (error) {
@@ -44,16 +43,16 @@ export const getSubsidyRequests = createAsyncThunk(
 		try {
 			switch (data.role) {
 				case 1000:
-					result = await request.post(url + getAdminSubsidyRequests, data, data.token);
+					result = await request.post(getAdminSubsidyRequests, data);
 					return result.data.docs;
 				case 999:
-					result = await request.post(url + getAdminSubsidyRequests, data, data.token);
+					result = await request.post(getAdminSubsidyRequests, data);
 					return result.data.docs;
 				case 60:
-					result = await request.post(url + getSchoolSubsidyRequests, data, data.token);
+					result = await request.post(getSchoolSubsidyRequests, data);
 					return result.data.docs;
 				case 3:
-					result = await request.post(url + getParentSubsidyRequests, data, data.token);
+					result = await request.post(getParentSubsidyRequests, data);
 					return result.data.docs;
 			}
 		} catch (error) {
@@ -69,19 +68,19 @@ export const getAppointmentsMonthData = createAsyncThunk(
 		try {
 			switch (data.role) {
 				case 1000:
-					result = await request.post(url + getAppointmentsInMonthForAdmin, data.data);
+					result = await request.post(getAppointmentsInMonthForAdmin, data.data);
 					break;
 				case 999:
-					result = await request.post(url + getAppointmentsInMonthForAdmin, data.data);
+					result = await request.post(getAppointmentsInMonthForAdmin, data.data);
 					break;
 				case 100:
-					result = await request.post(url + getAppointmentsInMonthForConsultant, data.data);
+					result = await request.post(getAppointmentsInMonthForConsultant, data.data);
 					break;
 				case 30:
-					result = await request.post(url + getAppointmentsInMonthForProvider, data.data);
+					result = await request.post(getAppointmentsInMonthForProvider, data.data);
 					break;
 				case 3:
-					result = await request.post(url + getAppointmentsInMonthForParent, data.data);
+					result = await request.post(getAppointmentsInMonthForParent, data.data);
 					break;
 			}
 			result.data?.forEach((appoint) => {
@@ -108,10 +107,10 @@ export const changeTime = createAsyncThunk(
 		try {
 			switch (data.role) {
 				case 30:
-					result = await request.post(url + 'providers/change_time_appoint', data.data, data.token);
+					result = await request.post(changeTimeAppointForProvider, data.data);
 					return result.data;
 				case 3:
-					result = await request.post(url + 'clients/change_time_appoint', data.data, data.token);
+					result = await request.post(changeTimeAppointForParent, data.data);
 					return result.data;
 			}
 		} catch (error) {
@@ -127,10 +126,10 @@ export const removeAppoint = createAsyncThunk(
 		try {
 			switch (data.role) {
 				case 30:
-					result = await request.post(url + 'providers/cancel_appoint', data.data, data.token);
+					result = await request.post(cancelAppointmentForProvider, data.data);
 					break;
 				case 3:
-					result = await request.post(url + 'clients/cancel_appoint', data.data, data.token);
+					result = await request.post(cancelAppointmentForParent, data.data);
 					break;
 			}
 			return result;

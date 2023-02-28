@@ -24,25 +24,21 @@ class DependentAvailability extends Component {
 	}
 
 	componentDidMount() {
-		const tokenUser = localStorage.getItem('token');
-
-		if (tokenUser) {
-			request.post(getChildProfile).then(result => {
-				const { success, data } = result;
-				if (success) {
-					if (this.state.currentDaySelecting.length == 0) {
-						const arr = []
-						for (let i = 0; i < data.length; i++) {
-							arr.push(0);
-						}
-						this.setState({ currentDaySelecting: arr });
+		request.post(getChildProfile).then(result => {
+			const { success, data } = result;
+			if (success) {
+				if (this.state.currentDaySelecting.length == 0) {
+					const arr = []
+					for (let i = 0; i < data.length; i++) {
+						arr.push(0);
 					}
-					this.setState({ studentInfos: data });
+					this.setState({ currentDaySelecting: arr });
 				}
-			}).catch(err => {
-				console.log('get child profile error---', err);
-			})
-		}
+				this.setState({ studentInfos: data });
+			}
+		}).catch(err => {
+			console.log('get child profile error---', err);
+		})
 	}
 
 	onSameAllDependent = () => {
@@ -50,7 +46,6 @@ class DependentAvailability extends Component {
 	}
 
 	onSubmit = async () => {
-		const token = localStorage.getItem('token');
 		try {
 			store.dispatch(setAvailabilityClientChild({ data: this.state.studentInfos, token: token }));
 		} catch (error) {

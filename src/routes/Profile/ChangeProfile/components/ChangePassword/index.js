@@ -7,6 +7,7 @@ import { compose } from 'redux';
 import { BsCheck, BsDot, BsX } from 'react-icons/bs';
 import request from '../../../../../utils/api/request';
 import { changePassword } from '../../../../../utils/api/apiList';
+import Cookies from 'js-cookie';
 
 const notCheck = 0;
 const valid = 1;
@@ -27,7 +28,7 @@ class ChangePassword extends React.Component {
   }
 
   onFinish = (values) => {
-    const token = localStorage.getItem('token');
+    const token = Cookies.get('tk');
     request.post(changePassword, { ...values, token, type: 'update' }).then(res => {
       if (res.success) {
         message.success('Updated Successfully');

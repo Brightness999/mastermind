@@ -73,16 +73,11 @@ class InfoFinancial extends Component {
 
 	onFinish = (values) => {
 		const { W9FormPath } = this.state;
-		const token = localStorage.getItem('token');
-
 		try {
 			store.dispatch(setInforProvider({
-				data: {
-					...values,
-					W9FormPath,
-					_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id
-				},
-				token: token,
+				...values,
+				W9FormPath,
+				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
 			}))
 		} catch (error) {
 			console.log(error, 'error')

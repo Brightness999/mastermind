@@ -24,51 +24,47 @@ class InfoParent extends Component {
 	}
 
 	componentDidMount() {
-		const tokenUser = localStorage.getItem('token');
-		if (tokenUser) {
-			const { selectedUser, user } = this.props.auth;
-			this.setState({ loading: true });
-			if (window.location.pathname?.includes('changeuserprofile')) {
-				request.post(getUserProfile, { id: selectedUser?._id }).then(result => {
-					const { success, data } = result;
-					if (success) {
-						this.form.setFieldsValue(data?.parentInfo);
-					}
-				}).catch(err => {
-					message.error("Getting Profile" + err.message);
-					console.log(err);
-				})
-			} else {
-				const parentInfo = this.props.auth.user.parentInfo;
-				this.form.setFieldsValue(parentInfo);
-			}
-
-			user?.role > 900 && this.setState({ cityConnections: user?.adminCommunity });
-
-			request.post(getDefaultValueForClient).then(result => {
-				this.setState({ loading: false });
+		const { selectedUser, user } = this.props.auth;
+		this.setState({ loading: true });
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(getUserProfile, { id: selectedUser?._id }).then(result => {
 				const { success, data } = result;
 				if (success) {
-					this.setState({ maritialTypes: data?.MaritialType });
-					user?.role < 900 && this.setState({ cityConnections: data?.cityConnections ?? [] });
+					this.form.setFieldsValue(data?.parentInfo);
 				}
 			}).catch(err => {
-				console.log('get default data for client error---', err);
-				this.setState({ loading: false });
+				message.error("Getting Profile" + err.message);
+				console.log(err);
 			})
+		} else {
+			const parentInfo = this.props.auth.user.parentInfo;
+			this.form.setFieldsValue(parentInfo);
 		}
+
+		user?.role > 900 && this.setState({ cityConnections: user?.adminCommunity });
+
+		request.post(getDefaultValueForClient).then(result => {
+			this.setState({ loading: false });
+			const { success, data } = result;
+			if (success) {
+				this.setState({ maritialTypes: data?.MaritialType });
+				user?.role < 900 && this.setState({ cityConnections: data?.cityConnections ?? [] });
+			}
+		}).catch(err => {
+			console.log('get default data for client error---', err);
+			this.setState({ loading: false });
+		})
 	}
 
 	onFinish = (values) => {
 		if (values) {
 			try {
-				const token = localStorage.getItem('token');
 				if (window.location.pathname?.includes('changeuserprofile')) {
 					store.dispatch(setInforClientParent({ data: { ...values, _id: this.props.auth.selectedUser?.parentInfo?._id }, token: token }));
 				} else {
 					const { parentInfo } = this.props.auth.user;
 					const dataFrom = { ...values, _id: parentInfo._id }
-					store.dispatch(setInforClientParent({ data: dataFrom, token: token }));
+					store.dispatch(setInforClientParent({ data: dataFrom }));
 					let user = JSON.parse(JSON.stringify(this.props.auth.user));
 					user.parentInfo = dataFrom;
 					store.dispatch(setUser(user));

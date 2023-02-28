@@ -11,6 +11,7 @@ import { getAppointmentsData } from "../../../../redux/features/appointmentsSlic
 import { store } from '../../../../redux/store';
 import request from '../../../../utils/api/request';
 import { userActivate, userLogin } from '../../../../utils/api/apiList';
+import Cookie from 'js-cookie';
 
 export default class extends React.Component {
 
@@ -56,10 +57,10 @@ export default class extends React.Component {
 			const response = await request.post(userLogin, values);
 			const { success, data } = response;
 			if (success) {
-				localStorage.setItem('token', data.token);
-				localStorage.setItem('user', JSON.stringify(data.user));
+				// localStorage.setItem('token', data.token);
+				Cookie.set('tk', data.token);
 				store.dispatch(setUser(data.user))
-				store.dispatch(getInfoAuth(data.user.role));
+				store.dispatch(getInfoAuth({ role: data.user.role, token: data.token }));
 				store.dispatch(getAppointmentsData({ role: data.user.role, token: data.token }))
 				data.user.role > 900 ? this.props.history.push(routerLinks.Admin) : this.props.history.push(routerLinks.Dashboard);
 			}
