@@ -18,7 +18,10 @@ const FirstSection = () => {
     }}>
       <Box display="flex" flexDirection="column" gap="20px">
         <Header text="Give the gift of success." />
-        <SubHeader text="Sponsor tutoring, speech or occupational therapy for a child in need." />
+        <SubHeader
+          text="Sponsor tutoring, speech or occupational therapy for a child in need."
+          style={{ paddingRight: "40px" }}
+        />
         <Box display="flex" gap="20px" alignItems="center">
           <DonationButton>Donate</DonationButton>
           <Typography>Donate your services</Typography>
