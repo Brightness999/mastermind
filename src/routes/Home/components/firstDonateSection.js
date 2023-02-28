@@ -18,7 +18,7 @@ const FirstDonateSection = () => {
     }}>
       <Box display="flex" flexDirection="column" gap="20px">
         <Header text="Your donation will help a child succeed" />
-        <SubHeader text="Sponsor tutoring, speech, or occupational therapy for a child in need." />
+        <SubHeader text="Sponsor tutoring, speech, or occupational therapy for a child in need." style={{ paddingRight: "40px" }} />
       </Box>
       <img src={Image5} style={{
          width: "501px",

@@ -28,7 +28,7 @@ const FourthSection = () => {
           flexDirection: "column"
         }} gap="40px">
           <Caption text="Donate your services" style={{ color: 'white' }} />
-          <Header text="Use your expertise to help a student in need by providing services at a reduced rate." style={{ fontSize: '48px', color: 'white', padding: "0px 50px", textAlign: "center" }} />
+          <Header text="Use your expertise to help a student in need by providing services at a reduced rate." style={{ fontSize: '2.5rem', color: 'white', padding: "0px 50px", textAlign: "center" }} />
           <DonationButton style={{ backgroundColor: 'white', color: '#8445C0' }}>Find out how</DonationButton>
         </Box>
       </Box>

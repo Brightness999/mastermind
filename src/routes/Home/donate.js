@@ -115,7 +115,9 @@ const Donate = () => {
     setSponsoredChildren((previousValue) => previousValue - 1)
   }
   return (
-    <>
+    <Box style={{
+      width: 'fit-content'
+    }}>
       <Box style={{
         backgroundColor: '#FFF5D1',
         padding: "18px 50px 0px 50px"
@@ -337,7 +339,7 @@ const Donate = () => {
 
         </Grid>
       </Grid>
-    </>
+    </Box>
   )
 }
 

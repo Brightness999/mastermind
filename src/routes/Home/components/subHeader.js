@@ -8,7 +8,8 @@ const useStyles = makeStyles({
     fontSize: '18px',
     lineHeight: '28px',
     // maxWidth: '332px',
-    width: '100%'
+    width: '100%',
+    textAlign: "justify"
   }
 });
 

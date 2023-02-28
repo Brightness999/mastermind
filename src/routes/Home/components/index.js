@@ -9,7 +9,9 @@ import '../styles.less';
 
 const Home = () => {
   return (    
-    <>
+    <Box style={{
+      width: "fit-content"
+    }}>
       <Box style={{
         backgroundColor: '#FFF5D1',
         padding: "18px 50px 0px 50px"
@@ -43,7 +45,7 @@ const Home = () => {
           {"Help Me Get Help is a project of the Association for Torah Advancement (AFTA). AFTA is a nonprofit organization. All donations are tax deductible."}
         </Box>
       </Box>
-    </>
+    </Box>
   )
 }
 
