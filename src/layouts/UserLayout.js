@@ -10,7 +10,6 @@ import Cookies from 'js-cookie';
 
 class UserLayout extends React.PureComponent {
   componentDidMount() {
-    console.log('user layout-------', Cookies.get('token'))
     const token = Cookies.get('tk');
     if (token?.length > 0) {
       checkPermission().then(loginData => {
