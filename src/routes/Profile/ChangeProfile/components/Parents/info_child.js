@@ -40,6 +40,7 @@ class InfoChild extends Component {
 					data?.studentInfos?.map(item => {
 						item.services = item.services.map(item => item._id);
 						item.birthday = moment(item.birthday);
+						item.age = moment().year() - moment(item.birthday).year() ?? 0;
 						return item;
 					})
 					this.form.setFieldsValue({ children: data?.studentInfos?.filter(s => !s.isRemoved) });
@@ -57,6 +58,7 @@ class InfoChild extends Component {
 					data?.map(item => {
 						item.services = item.services.map(item => item._id);
 						item.birthday = moment(item.birthday);
+						item.age = moment().year() - moment(item.birthday).year() ?? 0;
 						return item;
 					})
 					this.form.setFieldsValue({ children: data });
