@@ -742,14 +742,16 @@ class DrawerDetail extends Component {
             )}
             {userRole == 3 ? (
               <div className='flex items-center justify-between gap-2'>
-                <Button
-                  type='primary'
-                  block
-                  className='flex-1 h-30 p-0'
-                  onClick={this.onOpenModalCreateNote}
-                >
-                  {intl.formatMessage(messages.requestClearance)}
-                </Button>
+                {(event?.isPaid || event?.flagItems?.rate == 0) ? (
+                  <Button
+                    type='primary'
+                    block
+                    className='flex-1 h-30 p-0'
+                    onClick={this.onOpenModalCreateNote}
+                  >
+                    {intl.formatMessage(messages.requestClearance)}
+                  </Button>
+                ) : null}
                 {event?.isPaid ? (
                   <Button
                     type='primary'
@@ -802,14 +804,16 @@ class DrawerDetail extends Component {
               </Popconfirm>
             ) : (
               <div className='flex items-center justify-between gap-2'>
-                <Button
-                  type='primary'
-                  block
-                  className='flex-1 h-30 p-0 px-5'
-                  onClick={this.onOpenModalCreateNote}
-                >
-                  {intl.formatMessage(messages.requestClearance)}
-                </Button>
+                {(event?.isPaid || event?.flagItems?.rate == 0) ? (
+                  <Button
+                    type='primary'
+                    block
+                    className='flex-1 h-30 p-0 px-5'
+                    onClick={this.onOpenModalCreateNote}
+                  >
+                    {intl.formatMessage(messages.requestClearance)}
+                  </Button>
+                ) : null}
                 {event?.isPaid ? (
                   <Button
                     type='primary'
@@ -1071,12 +1075,13 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(userRole == 3 && [2, 3, 5].includes(event?.type) && event?.status == -1 && event?.flagStatus == 1) && (
+              {(userRole == 3 && [2, 3, 5].includes(event?.type) && event?.flagStatus == 1 && (event?.isPaid || event?.flagItems?.rate == 0)) && (
                 <Col span={12}>
                   <Button
                     type='primary'
                     icon={<FaFileContract size={12} />}
                     block
+                    onClick={this.onOpenModalCreateNote}
                   >
                     {intl.formatMessage(messages.requestClearance)}
                   </Button>

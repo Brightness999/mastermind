@@ -1067,7 +1067,9 @@ class SchedulingCenter extends React.Component {
         {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
         <Modal title="Flag Action" open={visibleFlagAction} footer={null} onCancel={this.closeFlagAction}>
           <div className='flex items-center gap-2'>
-            <Button type='primary' block className='font-16 flag-action whitespace-nowrap' onClick={() => this.onOpenModalCreateNote()}>{intl.formatMessage(msgDrawer.requestClearance)}</Button>
+            {(selectedEvent?.isPaid || selectedEvent?.flagItems?.rate == 0) ? (
+              <Button type='primary' block className='font-16 flag-action whitespace-nowrap' onClick={() => this.onOpenModalCreateNote()}>{intl.formatMessage(msgDrawer.requestClearance)}</Button>
+            ) : null}
             {selectedEvent?.isPaid ? (
               <Button type='primary' block className='font-16 flag-action whitespace-nowrap' disabled>
                 {intl.formatMessage(msgDrawer.paid)}
