@@ -7,7 +7,6 @@ import messages from '../messages';
 import CreateDefault from './create_default';
 import InfoParent from './Parents/info_parent';
 import InfoChild from './Parents/info_child';
-import DependentAvailability from './Parents/dependent_availability';
 import ReviewAccount from './Parents/review_account';
 import InfoProfile from './Provider/info_profile';
 import InfoServices from './Provider/info_services';
@@ -24,7 +23,6 @@ import ConsultantAvailability from './Consultant/info_availability';
 import { routerLinks } from "../../../constant";
 import './index.less';
 import '../../../../assets/styles/login.less';
-const { Step } = Steps;
 
 export default class extends React.Component {
   constructor(props) {
@@ -85,7 +83,6 @@ export default class extends React.Component {
             { title: intl.formatMessage(messages.accountInfo), icon: (<p>1</p>) },
             { title: intl.formatMessage(messages.contactInfo), icon: (<p>2</p>) },
             { title: intl.formatMessage(messages.dependentsInfo), icon: (<p>3</p>) },
-            // { title: intl.formatMessage(messages.dependentAvailability), icon: (<p>1</p>) },
             { title: intl.formatMessage(messages.reviewInfo), icon: (<p>4</p>) },
           ]}>
           </Steps>
@@ -181,14 +178,11 @@ export default class extends React.Component {
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
             return (<ReviewAccount onContinue={this.handleContinue} />)
-          // return (<DependentAvailability onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoScheduling onContinue={this.handleContinue} />)
         }
       case 4:
         switch (this.state.accountType) {
-          // case intl.formatMessage(messages.parent):
-          //   return (<ReviewAccount onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoFinancial onContinue={this.handleContinue} />)
         }
@@ -226,7 +220,7 @@ export default class extends React.Component {
             </Button>
           )}
         </div>
-        <ModalCreateDone {...createDoneProps} />
+        {visibleCreateDone && <ModalCreateDone {...createDoneProps} />}
       </div>
     );
   }

@@ -18,7 +18,7 @@ instance.interceptors.request.use(
 		if (token) {
 			config.headers.Authorization = `Bearer ${token}`;
 		} else {
-			if (window.location.pathname.includes('account') || window.location.pathname.includes('administrator')) {
+			if (window.location.pathname.includes('/account') || window.location.pathname.includes('/administrator')) {
 				window.location.href = '/';
 			} else {
 				delete instance.defaults.headers.common.Authorization;
