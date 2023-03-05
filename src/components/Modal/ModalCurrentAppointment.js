@@ -18,6 +18,7 @@ moment.locale('en');
 import { store } from '../../redux/store';
 import { rescheduleAppointmentForParent } from '../../utils/api/apiList';
 import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
+import { MdAdminPanelSettings } from 'react-icons/md';
 
 class ModalCurrentAppointment extends React.Component {
 	state = {
@@ -489,9 +490,10 @@ class ModalCurrentAppointment extends React.Component {
 										<div className='doctor-item'>
 											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
 											<p className='font-12 text-center'>{`${event?.provider.firstName ?? ''} ${event?.provider.lastName ?? ''}`}</p>
-											<div className='selected-doctor'>
-												<BsCheck size={12} />
-											</div>
+											<BsCheck size={12} className='selected-doctor' />
+											{userRole > 3 && event?.provider.isPrivateForHmgh ? (
+												<MdAdminPanelSettings size={12} className='selected-private-provider' />
+											) : null}
 										</div>
 									</div>
 								</div>
@@ -504,7 +506,7 @@ class ModalCurrentAppointment extends React.Component {
 										<p className='font-16 font-700'>
 											{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}
 											{!!event?.provider?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
-											{userRole > 3 && event?.provider?.manualSchedule?.find(m => m.isPrivate) ? <Popover content={this.privateSlot} trigger="click"><FaCalendarAlt size={16} className="text-green500 cursor" /></Popover> : null}
+											{userRole > 3 && event?.provider?.isPrivateForHmgh ? <Popover content={this.privateSlot} trigger="click"><FaCalendarAlt size={16} className="text-green500 cursor" /></Popover> : null}
 										</p>
 										<p className='font-700 ml-auto text-primary'>{event?.provider?.isNewClientScreening ? event?.provider?.appointments?.find(a => a.dependent == event?.dependent?._id && a.type == 1 && a.status == -1) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>

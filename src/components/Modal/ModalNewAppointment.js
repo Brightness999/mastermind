@@ -16,6 +16,7 @@ import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils
 import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import ModalNewScreening from './ModalNewScreening';
 import { store } from '../../redux/store';
+import { MdAdminPanelSettings } from 'react-icons/md';
 
 const { Paragraph } = Typography;
 moment.locale('en');
@@ -675,11 +676,12 @@ class ModalNewAppointment extends React.Component {
 										<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
 											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
 											<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
-											{selectedProvider === provider._id && (
-												<div className='selected-doctor'>
-													<BsCheck size={12} />
-												</div>
-											)}
+											{selectedProvider === provider._id ? (
+												<BsCheck className='selected-doctor' size={12} />
+											) : null}
+											{provider.isPrivateForHmgh ? (
+												<MdAdminPanelSettings size={12} className='selected-private-provider' />
+											) : null}
 										</div>
 									)) : "No matching providers found. Please update the options to find an available provider."}
 								</div>
@@ -693,7 +695,7 @@ class ModalNewAppointment extends React.Component {
 										<p className='font-16 font-700'>
 											{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}
 											{!!listProvider[selectedProviderIndex]?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
-											{listProvider[selectedProviderIndex]?.manualSchedule?.find(m => m.isPrivate) ? <Popover content={this.privateSlot} trigger="click"><FaCalendarAlt size={16} className="text-green500 cursor" /></Popover> : null}
+											{listProvider[selectedProviderIndex]?.isPrivateForHmgh ? <Popover content={this.privateSlot} trigger="click"><FaCalendarAlt size={16} className="text-green500 cursor" /></Popover> : null}
 										</p>
 										<p className='font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
