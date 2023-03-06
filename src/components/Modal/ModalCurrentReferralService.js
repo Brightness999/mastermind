@@ -168,23 +168,6 @@ class ModalCurrentReferralService extends React.Component {
 		this.onSelectDate(moment(this.state.selectedDate).add(1, 'month'));
 	}
 
-	handleSelectDependent = (value) => {
-		const dependent = this.state.dependents?.find(d => d._id == value);
-		this.setState({
-			selectedDependent: value,
-			skillSet: dependent?.services,
-			selectedSkillSet: undefined,
-		});
-		if (this.props.auth.user?.role > 3) {
-			this.form.setFieldsValue({
-				phoneNumber: dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ?? dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber,
-				selectedSkillSet: undefined,
-			});
-			this.setState({ phoneNumber: dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ?? dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber });
-		}
-		this.getConsultationData(value);
-	}
-
 	onSelectDate = (newValue) => {
 		this.setState({
 			selectedDate: newValue,
@@ -193,6 +176,7 @@ class ModalCurrentReferralService extends React.Component {
 
 		if (newValue.isSameOrAfter(new Date())) {
 			const { appointments, consultants, selectedDependent } = this.state;
+			const { event } = this.props;
 
 			if (newValue.day() == 6) {
 				this.setState({ arrTime: [] });
@@ -263,6 +247,10 @@ class ModalCurrentReferralService extends React.Component {
 								} else {
 									time.active = false;
 								}
+
+								if ((moment(event.date).year() === newValue.year() && moment(event.date).month() === newValue.month() && moment(event.date).date() === newValue.date() && moment(event.date).hours() === time.value.hours() && moment(event.date).minutes() === time.value.minutes())) {
+									time.active = false;
+								}
 							} else {
 								time.active = false;
 							}
@@ -281,6 +269,7 @@ class ModalCurrentReferralService extends React.Component {
 
 	render() {
 		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, dependents, skillSet, consultants } = this.state;
+		console.log(arrTime)
 		const { event } = this.props;
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -345,7 +334,7 @@ class ModalCurrentReferralService extends React.Component {
 									<Select
 										placeholder={intl.formatMessage(msgCreateAccount.dependent)}
 										value={selectedDependent}
-										onChange={v => this.handleSelectDependent(v)}
+										disabled
 									>
 										{dependents?.map((dependent, index) => (
 											<Select.Option key={index} value={dependent._id}>{dependent.firstName} {dependent.lastName}</Select.Option>
@@ -362,7 +351,7 @@ class ModalCurrentReferralService extends React.Component {
 									<Select
 										placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
 										value={selectedSkillSet}
-										onChange={v => this.setState({ selectedSkillSet: v })}
+										disabled
 									>
 										{skillSet?.map((skill, index) => (
 											<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>

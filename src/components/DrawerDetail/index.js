@@ -646,7 +646,7 @@ class DrawerDetail extends Component {
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.what)}</p>
               <BiDollarCircle size={18} className='mx-10 text-green500' />
             </div>
-            <p className='font-16'>{event?.skillSet?.name}</p>
+            <p className='font-16 flex flex-col'><span>{event?.skillSet?.name}</span><span>{event.type === 4 ? '(HMGH Consultation)' : ''}</span></p>
           </div>
           <Popover
             placement="leftTop"
