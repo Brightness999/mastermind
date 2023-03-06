@@ -416,7 +416,7 @@
   "components.drawerdetail.requestClearance": "Request Clearance",
   "components.drawerdetail.paid": "Paid",
   "components.drawerdetail.payFlag": "Pay Flag",
-  "components.drawerdetail.pay": "Pay",
+  "components.drawerdetail.payInvoice": "Pay Invoice",
   "components.drawerdetail.clearFlag": "Clear Flag",
   "components.drawerdetail.viewInvoice": "View Invoice",
   

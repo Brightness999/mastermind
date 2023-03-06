@@ -133,9 +133,9 @@ export default {
     id: `${scope}.payFlag`,
     defaultMessage: 'Pay Flag',
   },
-  pay: {
-    id: `${scope}.pay`,
-    defaultMessage: 'Pay',
+  payInvoice: {
+    id: `${scope}.payInvoice`,
+    defaultMessage: 'Pay Invoice',
   },
   clearFlag: {
     id: `${scope}.clearFlag`,

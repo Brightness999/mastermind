@@ -950,7 +950,7 @@ class DrawerDetail extends Component {
                     <input type="hidden" name="cancel_return" value={window.location.href} />
                     <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
                     <Button type='primary' icon={<BsPaypal size={15} color="#fff" />} block htmlType='submit'>
-                      {intl.formatMessage(messages.pay)}
+                      {intl.formatMessage(messages.payInvoice)}
                     </Button>
                   </form>
                 </Col>
