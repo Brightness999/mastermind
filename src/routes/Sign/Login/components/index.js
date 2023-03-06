@@ -11,7 +11,7 @@ import { getAppointmentsData } from "../../../../redux/features/appointmentsSlic
 import { store } from '../../../../redux/store';
 import request from '../../../../utils/api/request';
 import { userActivate, userLogin } from '../../../../utils/api/apiList';
-import Cookie from 'js-cookie';
+import Cookies from 'js-cookie';
 
 export default class extends React.Component {
 
@@ -57,8 +57,7 @@ export default class extends React.Component {
 			const response = await request.post(userLogin, values);
 			const { success, data } = response;
 			if (success) {
-				// localStorage.setItem('token', data.token);
-				Cookie.set('tk', data.token);
+				Cookies.set('tk', data.token, { expires: new Date(Date.now() + 10 * 60 * 1000) });
 				store.dispatch(setUser(data.user))
 				store.dispatch(getInfoAuth({ role: data.user.role, token: data.token }));
 				store.dispatch(getAppointmentsData({ role: data.user.role, token: data.token }))

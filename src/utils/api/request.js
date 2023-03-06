@@ -1,6 +1,7 @@
 import { url } from './baseUrl';
 import axios from 'axios'
 import Cookies from 'js-cookie';
+import { message } from 'antd';
 
 // config aioxs
 const instance = axios.create({
@@ -15,10 +16,16 @@ const instance = axios.create({
 instance.interceptors.request.use(
 	config => {
 		const token = Cookies.get('tk');
+
 		if (token) {
 			config.headers.Authorization = `Bearer ${token}`;
+			Cookies.set('tk', token, { expires: new Date(Date.now() + 10 * 60 * 1000) });
 		} else {
 			if (window.location.pathname.includes('/account') || window.location.pathname.includes('/administrator')) {
+				message.warning({
+					content: 'Your session has expired.',
+					className: 'popup-session-expired'
+				})
 				window.location.href = '/';
 			} else {
 				delete instance.defaults.headers.common.Authorization;
