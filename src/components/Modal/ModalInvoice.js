@@ -305,7 +305,7 @@ class ModalInvoice extends React.Component {
 						</Button>
 					) : null}
 					<Button key="submit" type="primary" onClick={() => user.role > 3 ? this.props.onSubmit(items) : this.props.onCancel()} style={{ padding: '0px 30px', height: 38 }}>
-						{event?.status == 0 ? intl.formatMessage(messages.createInvoice) : intl.formatMessage(messages.ok)}
+						{(event?.status == 0 && user.role > 3) ? intl.formatMessage(messages.createInvoice) : intl.formatMessage(messages.ok)}
 					</Button>
 				</div>
 			</Modal>
