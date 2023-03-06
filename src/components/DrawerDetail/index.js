@@ -29,7 +29,6 @@ class DrawerDetail extends Component {
       visibleCancel: false,
       visibleCurrent: false,
       errorMessage: '',
-      isNotPending: this.props.event?.status < 0,
       isShowEditNotes: false,
       notes: this.props.event?.notes,
       isModalInvoice: false,
@@ -77,23 +76,14 @@ class DrawerDetail extends Component {
         const data = { appointId: this.props.event._id };
         request.post(cancelAppointmentForParent, data).then(result => {
           if (result.success) {
-            this.setState({
-              errorMessage: '',
-              isNotPending: true,
-            });
+            this.setState({ errorMessage: '' });
             this.updateAppointments();
           } else {
-            this.setState({
-              errorMessage: result.data,
-              isNotPending: true,
-            });
+            this.setState({ errorMessage: result.data });
           }
         }).catch(error => {
           console.log('closed error---', error);
-          this.setState({
-            errorMessage: error.message,
-            isNotPending: true,
-          });
+          this.setState({ errorMessage: error.message });
         })
       }
     });
@@ -185,23 +175,14 @@ class DrawerDetail extends Component {
       }
       request.post(closeAppointmentForProvider, data).then(result => {
         if (result.success) {
-          this.setState({
-            errorMessage: '',
-            isNotPending: true,
-          });
+          this.setState({ errorMessage: '' });
           this.updateAppointments();
         } else {
-          this.setState({
-            errorMessage: result.data,
-            isNotPending: false,
-          });
+          this.setState({ errorMessage: result.data });
         }
       }).catch(error => {
         console.log('closed error---', error);
-        this.setState({
-          errorMessage: error.message,
-          isNotPending: false,
-        });
+        this.setState({ errorMessage: error.message });
       })
     }
   }
@@ -218,23 +199,14 @@ class DrawerDetail extends Component {
       }
       request.post(declineAppointmentForProvider, data).then(result => {
         if (result.success) {
-          this.setState({
-            errorMessage: '',
-            isNotPending: true,
-          });
+          this.setState({ errorMessage: '' });
           this.updateAppointments();
         } else {
-          this.setState({
-            errorMessage: result.data,
-            isNotPending: false,
-          });
+          this.setState({ errorMessage: result.data });
         }
       }).catch(error => {
         console.log('closed error---', error);
-        this.setState({
-          errorMessage: error.message,
-          isNotPending: false,
-        });
+        this.setState({ errorMessage: error.message });
       })
     }
   }
@@ -460,7 +432,7 @@ class DrawerDetail extends Component {
   }
 
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isNotPending, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage, visibleCurrentScreen, visibleCreateNote } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage, visibleCurrentScreen, visibleCreateNote } = this.state;
     const { event, listAppointmentsRecent } = this.props;
 
     const providerProfile = (
@@ -634,7 +606,7 @@ class DrawerDetail extends Component {
       <Drawer
         title={event?.type == 1 ? intl.formatMessage(messages.screeningDetails) : event?.type == 2 ? intl.formatMessage(messages.evaluationDetails) : event?.type == 3 ? intl.formatMessage(messages.appointmentDetails) : intl.formatMessage(messages.consultationDetails)}
         closable={true}
-        onClose={() => { this.props.onClose(); this.setState({ isShowEditNotes: false }); }}
+        onClose={() => this.props.onClose()}
         open={this.props.visible}
         extra={
           <Button type='text' icon={<BsBell size={18} />} />
@@ -930,7 +902,6 @@ class DrawerDetail extends Component {
                     icon={<BsCheckCircle size={15} />}
                     block
                     onClick={() => this.openModalProcess()}
-                    disabled={isNotPending}
                     className='flex items-center gap-2 h-30'
                   >
                     {intl.formatMessage(messages.markClosed)}
@@ -944,7 +915,6 @@ class DrawerDetail extends Component {
                     icon={<BsCheckCircle size={15} />}
                     block
                     onClick={() => event.type == 2 ? this.openModalProcess() : this.handleMarkAsClosed()}
-                    disabled={isNotPending}
                     className='flex items-center gap-2 h-30'
                   >
                     {intl.formatMessage(messages.markClosed)}
@@ -958,7 +928,6 @@ class DrawerDetail extends Component {
                     icon={<BsCheckCircle size={15} />}
                     block
                     onClick={() => this.onOpenModalInvoice()}
-                    disabled={isNotPending}
                     className='flex items-center gap-2 h-30'
                   >
                     {intl.formatMessage(messages.markClosed)}
@@ -1046,7 +1015,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(event?.status == 0 && !isNotPending) && (
+              {(event?.status == 0 && moment().isBefore(moment(event?.date))) && (
                 <Col span={12}>
                   <Button
                     type='primary'
@@ -1074,14 +1043,13 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(event?.status == 0 && !isNotPending) && (
+              {event?.status == 0 && (
                 <Col span={12}>
                   <Button
                     type='primary'
                     icon={<BsXCircle size={15} />}
                     block
                     onClick={this.openModalCancel}
-                    disabled={isNotPending}
                   >
                     {intl.formatMessage(msgModal.cancel)}
                   </Button>
@@ -1110,7 +1078,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {((userRole == 3 || userRole > 900) && event?.status == 0 && !isNotPending) && (
+              {((userRole == 3 || userRole > 900) && event?.status == 0) && (
                 <Col span={12}>
                   <Button
                     type='primary'
