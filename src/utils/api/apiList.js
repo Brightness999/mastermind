@@ -69,6 +69,7 @@ export const updateMyProviderProfile = 'providers/update_my_provider_profile'
 export const updateMyProviderAvailability = 'providers/update_my_provider_availability'
 export const setFlag = 'providers/set_flag'
 export const acceptDeclinedScreening = 'providers/accept_declined_screening'
+export const sendEmailInvoice = 'providers/send_email_invoice'
 
 export const getAppointmentsForParent = 'clients/get_my_appointments'
 export const getAppointmentsInMonthForParent = 'clients/get_my_appointments_in_month'

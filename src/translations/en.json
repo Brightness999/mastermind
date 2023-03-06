@@ -398,6 +398,7 @@
   "components.drawerdetail.reschedule": "Reschedule",
   "components.drawerdetail.cancel": "Cancel",
   "components.drawerdetail.cancelled": "Cancelled",
+  "components.drawerdetail.graduated": "Graduated",
   "components.drawerdetail.accepted": "Accepted",
   "components.drawerdetail.markClosed": "Mark as closed",
   "components.drawerdetail.closed": "Closed",

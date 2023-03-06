@@ -2,12 +2,13 @@ import React from 'react';
 import { Modal, Button, Popover, Input, message } from 'antd';
 import intl from 'react-intl-universal';
 import messages from './messages';
+import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
-import { CheckCircleTwoTone, CloseCircleTwoTone, DeleteTwoTone, DownloadOutlined, EditTwoTone, PrinterTwoTone } from '@ant-design/icons';
+import { CheckCircleTwoTone, CloseCircleTwoTone, DeleteTwoTone, DownloadOutlined, EditTwoTone, PrinterTwoTone, SendOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { downloadInvoice } from '../../utils/api/apiList';
+import { downloadInvoice, sendEmailInvoice } from '../../utils/api/apiList';
 import request from '../../utils/api/request';
 
 class ModalInvoice extends React.Component {
@@ -21,6 +22,7 @@ class ModalInvoice extends React.Component {
 			rate: '',
 			subTotal: '',
 			loadingDownload: false,
+			loadingEmail: false,
 		};
 	}
 
@@ -112,9 +114,27 @@ class ModalInvoice extends React.Component {
 		})
 	}
 
+	sendEmailInvoice = () => {
+		const { event } = this.props;
+		const { items } = this.state;
+
+		this.setState({ loadingEmail: true });
+		request.post(sendEmailInvoice, { appointmentId: event?._id, items: items }).then(res => {
+			this.setState({ loadingEmail: false });
+			if (res.success) {
+				message.success('This invoice has been sent successfully.');
+			} else {
+				message.error("Something went wrong. Please try again.");
+			}
+		}).catch(err => {
+			this.setState({ loadingEmail: false });
+			message.error(err.message);
+		})
+	}
+
 	render() {
 		const { event, user } = this.props;
-		const { items, selectedItemIndex, subTotal, loadingDownload } = this.state;
+		const { items, selectedItemIndex, subTotal, loadingDownload, loadingEmail } = this.state;
 
 		const modalProps = {
 			className: 'modal-invoice',
@@ -279,6 +299,11 @@ class ModalInvoice extends React.Component {
 					<Button key="download" icon={<DownloadOutlined />} loading={loadingDownload} onClick={() => this.downloadInvoice()}>
 						{intl.formatMessage(messages.download)}
 					</Button>
+					{user.role > 3 ? (
+						<Button key="email" icon={<SendOutlined />} loading={loadingEmail} onClick={() => this.sendEmailInvoice()}>
+							{intl.formatMessage(msgCreateAccount.email)}
+						</Button>
+					) : null}
 					<Button key="submit" type="primary" onClick={() => user.role > 3 ? this.props.onSubmit(items) : this.props.onCancel()} style={{ padding: '0px 30px', height: 38 }}>
 						{event?.status == 0 ? intl.formatMessage(messages.createInvoice) : intl.formatMessage(messages.ok)}
 					</Button>
@@ -288,8 +313,6 @@ class ModalInvoice extends React.Component {
 	}
 };
 
-const mapStateToProps = state => {
-	return ({ user: state.auth.user });
-}
+const mapStateToProps = state => ({ user: state.auth.user });
 
 export default compose(connect(mapStateToProps))(ModalInvoice);

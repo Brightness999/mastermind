@@ -281,7 +281,7 @@ class DrawerDetail extends Component {
     const data = { providerInfoId: this.props.event.provider?._id };
     request.post(requestFeedbackForClient, data).then(result => {
       if (result.success) {
-        message.success('The request was sent.');
+        message.success('The request has been sent successfully.');
       } else {
         this.setState({ errorMessage: result.data });
       }
@@ -650,9 +650,11 @@ class DrawerDetail extends Component {
           {event?.flagStatus != 1 && event?.status == -1 && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.accepted)}]</div>
           )}
-          {event?.flagStatus != 1 && event?.status == -2 && (
+          {event?.flagStatus != 1 && event?.status == -2 ? event?.dependent?.isRemoved ? (
+            <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.graduated)}]</div>
+          ) : (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.cancelled)}]</div>
-          )}
+          ) : null}
           {event?.flagStatus != 1 && event?.status == -3 && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(msgDashboard.declined)}]</div>
           )}
@@ -733,7 +735,7 @@ class DrawerDetail extends Component {
             </div>
           )}
         </div>
-        {event?.status == 0 && listAppointmentsRecent?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1) ? (
+        {listAppointmentsRecent?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1) ? (
           <div className='text-center font-18 mt-2'>
             {listAppointmentsRecent?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1).flagItems?.flagType == 1 ? (
               <MdOutlineRequestQuote color="#ff0000" size={32} />

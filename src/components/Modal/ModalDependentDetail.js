@@ -127,8 +127,9 @@ class ModalDependentDetail extends React.Component {
 
 		return (
 			<Modal {...modalProps} bodyStyle={{ overflowY: 'scroll', height: '60vh' }}>
-				<div className='flex bg-primary text-white header'>
+				<div className='flex bg-primary text-white header flex-row items-center'>
 					<b className='font-20'>{`${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`}</b>
+					{dependent.isRemoved ? "(Graduated)" : null}
 				</div>
 				<Card className='bg-white'>
 					<div className='flex'>
@@ -215,8 +216,8 @@ class ModalDependentDetail extends React.Component {
 							</div>
 						)}
 					</div>
-					<div className='flex gap-5 mt-2'>
-						<Button type='primary' block className={`${user?.role == 3 ? '' : 'display-none'}`} onClick={() => this.onOpenModalNewSubsidy()}>Request Subsidy</Button>
+					<div className={`flex gap-5 mt-2 ${dependent?.isRemoved ? 'd-none' : ''}`}>
+						<Button type='primary' block className={`${(user?.role == 3 || user?.role > 900) ? '' : 'display-none'}`} onClick={() => this.onOpenModalNewSubsidy()}>Request Subsidy</Button>
 						<Button type='primary' block className={`${user?.role == 3 ? 'display-none' : ''}`} onClick={() => this.onAddComment()}>Add Comment</Button>
 					</div>
 				</Card>

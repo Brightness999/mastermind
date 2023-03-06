@@ -61,6 +61,10 @@ export default {
     id: `${scope}.cancelled`,
     defaultMessage: 'Cancelled',
   },
+  graduated: {
+    id: `${scope}.graduated`,
+    defaultMessage: 'Graduated',
+  },
   accepted: {
     id: `${scope}.accepted`,
     defaultMessage: 'Accepted',
