@@ -133,6 +133,10 @@ export default {
     id: `${scope}.payFlag`,
     defaultMessage: 'Pay Flag',
   },
+  pay: {
+    id: `${scope}.pay`,
+    defaultMessage: 'Pay',
+  },
   clearFlag: {
     id: `${scope}.clearFlag`,
     defaultMessage: 'Clear Flag',

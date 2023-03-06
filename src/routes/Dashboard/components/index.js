@@ -94,10 +94,11 @@ class Dashboard extends React.Component {
     if (params.get('success') === 'true' && params.get('id')) {
       const appointmentId = params.get('id');
       request.post(payInvoice, { id: appointmentId }).then(res => {
-        const { success } = res;
-        if (success) {
+        if (res.success) {
           message.success('Paid successfully');
           window.location.search = '';
+        } else {
+          message.warning('Something went wrong. Please try again');
         }
       }).catch(err => {
         console.log('pay flag error---', err);

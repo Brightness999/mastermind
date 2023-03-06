@@ -1,7 +1,7 @@
 import './style/index.less';
 import React, { Component } from 'react';
 import { Drawer, Button, Row, Col, Typography, Popover, Input, message, Popconfirm } from 'antd';
-import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsXCircle } from 'react-icons/bs';
+import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsPaypal, BsXCircle } from 'react-icons/bs';
 import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
@@ -963,6 +963,27 @@ class DrawerDetail extends Component {
                   >
                     {intl.formatMessage(messages.markClosed)}
                   </Button>
+                </Col>
+              )}
+              {[2, 3, 5].includes(event?.type) && event?.status == -1 && !event?.isPaid && (userRole === 3 || userRole > 900) && (
+                <Col span={12}>
+                  <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                    <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+                    <input type="hidden" name="business" value="office@helpmegethelp.org" />
+                    <input type="hidden" name="cmd" value="_donations" />
+                    <input type="hidden" name="item_name" value="Help Me Get Help" />
+                    <input type="hidden" name="item_number" />
+                    <input type="hidden" name="amount" value={event?.items?.reduce((a, b) => a += b.rate * 1, 0)} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                    <input type="hidden" name="shipping" value="0.00" />
+                    <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+                    <input type="hidden" name="rm" value="0" />
+                    <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${event?._id}`} />
+                    <input type="hidden" name="cancel_return" value={window.location.href} />
+                    <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+                    <Button type='primary' icon={<BsPaypal size={15} color="#fff" />} block htmlType='submit'>
+                      {intl.formatMessage(messages.pay)}
+                    </Button>
+                  </form>
                 </Col>
               )}
               {[2, 3, 5].includes(event?.type) && event?.status == -1 && (

@@ -28,7 +28,7 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { clearFlag, getDefaultDataForAdmin, requestClearance } from '../../../utils/api/apiList';
+import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
 import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
@@ -86,6 +86,21 @@ class SchedulingCenter extends React.Component {
   componentDidMount() {
     const { auth } = this.props;
     this.setState({ loading: true });
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === 'true' && params.get('id')) {
+      const appointmentId = params.get('id');
+      request.post(payInvoice, { id: appointmentId }).then(res => {
+        if (res.success) {
+          message.success('Paid successfully');
+          window.location.search = '';
+        } else {
+          message.warning('Something went wrong. Please try again.');
+        }
+      }).catch(err => {
+        console.log('pay flag error---', err);
+        message.error(err.message);
+      });
+    }
     this.updateCalendarEvents(auth?.user?.role);
     this.getMyAppointments(auth?.user?.role);
     this.loadDefaultData();
