@@ -27,7 +27,6 @@ class InfoParent extends Component {
 		}
 		const parentInfo = registerData.parentInfo || this.getDefaultObj();
 		this.form.setFieldsValue(parentInfo);
-		this.setState({ cityConnections: this.props.user?.adminCommunity });
 		this.searchCityConnection();
 	}
 
@@ -51,7 +50,7 @@ class InfoParent extends Component {
 			const { success, data } = result;
 			if (success) {
 				this.setState({ maritialTypes: data?.MaritialType ?? [] });
-				this.props.user?.role < 900 && this.setState({ cityConnections: data?.cityConnections ?? [] });
+				this.setState({ cityConnections: this.props.user?.role ? this.props.user?.adminCommunity : data?.cityConnections ?? [] });
 			}
 		}).catch(err => {
 			console.log('get default data for client error---', err);
