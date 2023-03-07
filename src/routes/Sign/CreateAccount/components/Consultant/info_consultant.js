@@ -29,7 +29,7 @@ class InfoConsultant extends Component {
     user?.role > 900 && this.setState({ cityConnections: user?.adminCommunity });
     this.getDataFromServer();
     const consultantInfo = registerData.consultantInfo || this.getDefaultObj();
-    this.form.setFieldsValue(consultantInfo);
+    this.form?.setFieldsValue(consultantInfo);
     if (!registerData.consultantInfo) {
       this.props.setRegisterData({ consultantInfo: this.getDefaultObj() });
     }
@@ -96,7 +96,7 @@ class InfoConsultant extends Component {
       <Row justify="center" className="row-form">
         <div className='col-form col-info-parent'>
           <div className='div-form-title'>
-            <p className='font-30 text-center mb-10'>{intl.formatMessage(messages.tellYourself)}</p>
+            <p className='font-30 text-center mb-10'>{intl.formatMessage(messages.generalInformation)}</p>
           </div>
           <Form
             name="form_profile_provider"
@@ -118,6 +118,7 @@ class InfoConsultant extends Component {
                 showSearch
                 optionFilterProp="children"
                 filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
+                onChange={v => this.handelChange("cityConnection", v)}
               >
                 {cityConnections?.map((value, index) => (
                   <Select.Option key={index} value={value._id}>{value.name}</Select.Option>
@@ -150,7 +151,7 @@ class InfoConsultant extends Component {
                           {...restField}
                           name={[name, 'phoneNumber']}
                           label={intl.formatMessage(messages.contactNumber)}
-                          className='bottom-0'
+                          className='bottom-0 float-label-item'
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                           rules={[
                             {
@@ -163,7 +164,10 @@ class InfoConsultant extends Component {
                             },
                           ]}
                         >
-                          <Input placeholder={intl.formatMessage(messages.contactNumber)} />
+                          <Input
+                            onChange={() => this.handelChange('contactNumber', this.form?.getFieldValue('contactNumber'))}
+                            placeholder={intl.formatMessage(messages.contactNumber)}
+                          />
                         </Form.Item>
                       </Col>
                       <Col xs={8} sm={8} md={8} className='item-remove'>
@@ -172,10 +176,10 @@ class InfoConsultant extends Component {
                           name={[name, 'type']}
                           label={intl.formatMessage(messages.type)}
                           rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type) }]}
-                          className='bottom-0'
+                          className='bottom-0 float-label-item'
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                         >
-                          <Select placeholder={intl.formatMessage(messages.type)}>
+                          <Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.handelChange('contactNumber', this.form?.getFieldValue('contactNumber'))}>
                             {ContactNumberType.map((value, index) => (
                               <Select.Option key={index} value={value}>{value}</Select.Option>
                             ))}
@@ -208,7 +212,7 @@ class InfoConsultant extends Component {
                           {...restField}
                           name={[name, 'email']}
                           label={intl.formatMessage(messages.contactEmail)}
-                          className='bottom-0'
+                          className='bottom-0 float-label-item'
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                           rules={[
                             {
@@ -221,7 +225,10 @@ class InfoConsultant extends Component {
                             }
                           ]}
                         >
-                          <Input placeholder={intl.formatMessage(messages.contactEmail)} />
+                          <Input
+                            onChange={() => this.handelChange('contactEmail', this.form?.getFieldValue('contactEmail'))}
+                            placeholder={intl.formatMessage(messages.contactEmail)}
+                          />
                         </Form.Item>
                       </Col>
                       <Col xs={8} sm={8} md={8} className='item-remove'>
@@ -230,10 +237,10 @@ class InfoConsultant extends Component {
                           name={[name, 'type']}
                           label={intl.formatMessage(messages.type)}
                           rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.type) }]}
-                          className='bottom-0'
+                          className='bottom-0 float-label-item'
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                         >
-                          <Select placeholder={intl.formatMessage(messages.type)}>
+                          <Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.handelChange('contactEmail', this.form?.getFieldValue('contactEmail'))}>
                             {EmailType.map((value, index) => (
                               <Select.Option key={index} value={value}>{value}</Select.Option>
                             ))}

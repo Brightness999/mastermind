@@ -12,6 +12,7 @@ import { setRegisterData, removeRegisterData } from '../../../../../redux/featur
 import { userSignUp } from '../../../../../utils/api/apiList';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 import request from '../../../../../utils/api/request';
+import PageLoading from '../../../../../components/Loading/PageLoading';
 
 const day_week = [
   intl.formatMessage(messages.sunday),
@@ -30,12 +31,15 @@ class ConsultantAvailability extends Component {
       currentSelectedDay: day_week[0],
       isSubmit: false,
       allHolidays: [],
+      loading: false,
     }
   }
 
   async componentDidMount() {
+    this.setState({ loading: true });
     const { registerData } = this.props.register;
     const holidays = await this.getHolidays();
+    this.setState({ loading: false });
 
     if (!!registerData?.step2) {
       this.form?.setFieldsValue({ ...registerData.step2 });
@@ -48,7 +52,7 @@ class ConsultantAvailability extends Component {
       })
     } else {
       day_week.map((day) => {
-        this.form.setFieldValue(day, [''])
+        this.form?.setFieldValue(day, [''])
       })
     }
   }
@@ -227,7 +231,7 @@ class ConsultantAvailability extends Component {
   }
 
   render() {
-    const { currentSelectedDay, isSubmit } = this.state;
+    const { currentSelectedDay, isSubmit, loading } = this.state;
 
     return (
       <Row justify="center" className="row-form">
@@ -261,7 +265,7 @@ class ConsultantAvailability extends Component {
                                   />
                                 </Form.Item>
                               </Col>
-                              <Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
+                              <Col xs={24} sm={24} md={12} className='item-remove'>
                                 <Form.Item name={[field.name, "to_date"]}>
                                   <DatePicker
                                     format="MM/DD/YYYY"
@@ -269,7 +273,7 @@ class ConsultantAvailability extends Component {
                                     onChange={() => this.onChangeScheduleValue()}
                                   />
                                 </Form.Item>
-                                {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day) }} />}
+                                <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day) }} />
                               </Col>
                             </Row>
                             <Row gutter={14}>
@@ -288,7 +292,7 @@ class ConsultantAvailability extends Component {
                                   />
                                 </Form.Item>
                               </Col>
-                              <Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
+                              <Col xs={24} sm={24} md={12} className='item-remove'>
                                 <Form.Item name={[field.name, "to_time"]}>
                                   <TimePicker
                                     onSelect={(time) => {
@@ -302,7 +306,7 @@ class ConsultantAvailability extends Component {
                                     placeholder={intl.formatMessage(messages.to)}
                                   />
                                 </Form.Item>
-                                {field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day) }} />}
+                                <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day) }} />
                               </Col>
                             </Row>
                             <Col offset={12} span={12}>
@@ -313,14 +317,10 @@ class ConsultantAvailability extends Component {
                             </Col>
                           </div>
                         ))}
-                        <Row>
-                          <Col span={12}>
-                            <div className='div-add-time justify-center'>
-                              <BsPlusCircle size={17} className='mr-5 text-primary' />
-                              <a className='text-primary' onClick={() => add()}>{intl.formatMessage(messages.addRange)}</a>
-                            </div>
-                          </Col>
-                        </Row>
+                        <div className='div-add-time justify-center'>
+                          <BsPlusCircle size={17} className='mr-5 text-primary' />
+                          <a className='text-primary' onClick={() => add()}>{intl.formatMessage(messages.addRange)}</a>
+                        </div>
                       </div>
                     )}
                   </Form.List>
@@ -357,6 +357,7 @@ class ConsultantAvailability extends Component {
             </Form.Item>
           </Form>
         </div>
+        <PageLoading loading={loading} isBackground={true} />
       </Row>
     );
   }
