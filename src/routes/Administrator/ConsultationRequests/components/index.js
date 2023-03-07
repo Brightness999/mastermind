@@ -96,6 +96,10 @@ class ConsultationRequest extends React.Component {
         onFilter: (value, record) => record.skillSet?._id == value,
         render: skill => skill?.name,
       },
+      {
+        title: 'PhoneNumber / Google Meet',
+        render: (appointment) => appointment?.phoneNumber ? appointment?.phoneNumber : appointment?.meetingLink,
+      },
       { title: 'Referral Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm a') },
     ];
 
