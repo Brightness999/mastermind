@@ -43,7 +43,7 @@ class InfoChild extends Component {
 						item.age = moment().year() - moment(item.birthday).year() ?? 0;
 						return item;
 					})
-					this.form.setFieldsValue({ children: data?.studentInfos?.filter(s => !s.isRemoved) });
+					this.form?.setFieldsValue({ children: data?.studentInfos?.filter(s => !s.isRemoved) });
 				}
 			}).catch(err => {
 				message.error("Getting Profile" + err.message);
@@ -61,7 +61,7 @@ class InfoChild extends Component {
 						item.age = moment().year() - moment(item.birthday).year() ?? 0;
 						return item;
 					})
-					this.form.setFieldsValue({ children: data });
+					this.form?.setFieldsValue({ children: data });
 				}
 			}).catch(err => {
 				message.error("Getting Profile" + err.message);
@@ -86,7 +86,7 @@ class InfoChild extends Component {
 	}
 
 	getBirthday = (index) => {
-		const children = this.form.getFieldsValue()?.children;
+		const children = this.form?.getFieldsValue()?.children;
 		if (!!children && children[index] != undefined && !!children[index].birthday) {
 			return moment(children[index].birthday);
 		}
@@ -107,8 +107,8 @@ class InfoChild extends Component {
 				studentInfos: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.studentInfos : this.props.auth.user?.studentInfos,
 			};
 
-			const result = await store.dispatch(setInforClientChild(params))
-			this.form.setFieldsValue({ children: result.payload.data?.map(item => ({ ...item, birthday: moment(item.birthday) })) });
+			const result = await store.dispatch(setInforClientChild(params));
+			this.form?.setFieldsValue({ children: result.payload.data?.map(item => ({ ...item, birthday: moment(item.birthday) })) });
 		} catch (error) {
 			console.log('update children error ---', error)
 		}
@@ -119,8 +119,8 @@ class InfoChild extends Component {
 	};
 
 	handleSelectBirthday = (date, index) => {
-		const dependents = this.form.getFieldsValue();
-		this.form.setFieldsValue({ children: dependents?.children?.map((child, i) => i === index ? { ...child, age: date ? moment().year() - date.year() : 0 } : child) });
+		const dependents = this.form?.getFieldsValue();
+		this.form?.setFieldsValue({ children: dependents?.children?.map((child, i) => i === index ? { ...child, age: date ? moment().year() - date.year() : 0 } : child) });
 	}
 
 	render() {

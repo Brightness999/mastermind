@@ -63,7 +63,7 @@ class ModalNewAppointment extends React.Component {
 		}
 		this.setState({ duration: duration });
 
-		if (date) {
+		if (moment().isBefore(moment(date))) {
 			if (date.day() == 6) {
 				return [];
 			} else if (provider?.blackoutDates?.includes(a => moment(a).year() == date.year() && moment(a).month() == date.month() && moment(a).date() == date.date())) {
@@ -319,7 +319,7 @@ class ModalNewAppointment extends React.Component {
 
 		const newArrTime = this.getArrTime(appointmentType, providerIndex, selectedDate);
 		const newPrivateArrTime = this.getArrTime(1, providerIndex, selectedDate);
-		newArrTime.map(time => {
+		newArrTime?.map(time => {
 			const { years, months, date } = selectedDate?.toObject();
 			time.value = moment(time.value).set({ years, months, date });
 

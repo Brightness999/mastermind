@@ -16,7 +16,6 @@ import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils
 import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import ModalNewScreening from './ModalNewScreening';
 import { store } from '../../redux/store';
-import { MdAdminPanelSettings } from 'react-icons/md';
 
 const { Paragraph } = Typography;
 moment.locale('en');
@@ -65,7 +64,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		}
 		this.setState({ duration: duration });
 
-		if (date) {
+		if (moment().isBefore(moment(date))) {
 			if (date.day() == 6) {
 				return [];
 			} else if (provider?.blackoutDates?.includes(a => moment(a).year() == date.year() && moment(a).month() == date.month() && moment(a).date() == date.date())) {
@@ -329,7 +328,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		const newArrTime = this.getArrTime(appointmentType, providerIndex, selectedDate);
 		const newPrivateArrTime = this.getArrTime(1, providerIndex, selectedDate);
 
-		newArrTime.map(time => {
+		newArrTime?.map(time => {
 			const { years, months, date } = selectedDate?.toObject();
 			time.value = moment(time.value).set({ years, months, date });
 

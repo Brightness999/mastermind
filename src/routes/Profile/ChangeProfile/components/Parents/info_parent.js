@@ -30,7 +30,7 @@ class InfoParent extends Component {
 			request.post(getUserProfile, { id: selectedUser?._id }).then(result => {
 				const { success, data } = result;
 				if (success) {
-					this.form.setFieldsValue(data?.parentInfo);
+					this.form?.setFieldsValue(data?.parentInfo);
 				}
 			}).catch(err => {
 				message.error("Getting Profile" + err.message);
@@ -38,7 +38,7 @@ class InfoParent extends Component {
 			})
 		} else {
 			const parentInfo = this.props.auth.user.parentInfo;
-			this.form.setFieldsValue(parentInfo);
+			this.form?.setFieldsValue(parentInfo);
 		}
 
 		user?.role > 900 && this.setState({ cityConnections: user?.adminCommunity });
@@ -83,7 +83,7 @@ class InfoParent extends Component {
 
 	handleChangeAddress = address => {
 		this.setState({ address: address });
-		this.form.setFieldsValue({ address: address });
+		this.form?.setFieldsValue({ address: address });
 	};
 
 	render() {
