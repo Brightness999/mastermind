@@ -283,26 +283,30 @@ class ModalInvoice extends React.Component {
 					<Button key="back" onClick={this.props.onCancel}>
 						{intl.formatMessage(messages.cancel)}
 					</Button>
-					<Button key="print" onClick={() => {
-						document.querySelector(".add-item").style.display = 'none';
-						document.querySelector(".actions").style.display = 'none';
-						document.querySelector(".ant-modal-mask").style.backgroundColor = 'white';
-						document.querySelector(".ant-modal-content").style.boxShadow = 'none';
-						window.print();
-						document.querySelector(".actions").style.display = '';
-						document.querySelector(".add-item").style.display = '';
-						document.querySelector(".ant-modal-mask").style.backgroundColor = '';
-					}}>
-						<PrinterTwoTone />
-						{intl.formatMessage(messages.print)}
-					</Button>
-					<Button key="download" icon={<DownloadOutlined />} loading={loadingDownload} onClick={() => this.downloadInvoice()}>
-						{intl.formatMessage(messages.download)}
-					</Button>
-					{user.role > 3 ? (
-						<Button key="email" icon={<SendOutlined />} loading={loadingEmail} onClick={() => this.sendEmailInvoice()}>
-							{intl.formatMessage(msgCreateAccount.email)}
-						</Button>
+					{event?.status != 0 ? (
+						<>
+							<Button key="print" onClick={() => {
+								document.querySelector(".add-item").style.display = 'none';
+								document.querySelector(".actions").style.display = 'none';
+								document.querySelector(".ant-modal-mask").style.backgroundColor = 'white';
+								document.querySelector(".ant-modal-content").style.boxShadow = 'none';
+								window.print();
+								document.querySelector(".actions").style.display = '';
+								document.querySelector(".add-item").style.display = '';
+								document.querySelector(".ant-modal-mask").style.backgroundColor = '';
+							}}>
+								<PrinterTwoTone />
+								{intl.formatMessage(messages.print)}
+							</Button>
+							<Button key="download" icon={<DownloadOutlined />} loading={loadingDownload} onClick={() => this.downloadInvoice()}>
+								{intl.formatMessage(messages.download)}
+							</Button>
+							{user.role > 3 ? (
+								<Button key="email" icon={<SendOutlined />} loading={loadingEmail} onClick={() => this.sendEmailInvoice()}>
+									{intl.formatMessage(msgCreateAccount.email)}
+								</Button>
+							) : null}
+						</>
 					) : null}
 					<Button key="submit" type="primary" onClick={() => user.role > 3 ? this.props.onSubmit(items) : this.props.onCancel()} style={{ padding: '0px 30px', height: 38 }}>
 						{(event?.status === 0 && user.role > 3) ? intl.formatMessage(messages.createInvoice) : (event?.status === -1 && user.role > 3) ? intl.formatMessage(messages.editInvoice) : intl.formatMessage(messages.ok)}
