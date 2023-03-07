@@ -250,7 +250,7 @@ class InfoChild extends Component {
 																format='YYYY-MM-DD'
 																placeholder={intl.formatMessage(messages.dateBirth)}
 																onSelect={(date) => this.handleSelectBirthday(date, index)}
-																onChange={v => this.updateReduxValueForDepedent(index, "birthday", v)}
+																onChange={date => { this.handleSelectBirthday(date, index); this.updateReduxValueForDepedent(index, "birthday", date); }}
 															/>
 														</Form.Item>
 													</Col>

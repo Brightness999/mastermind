@@ -247,6 +247,7 @@ class InfoChild extends Component {
 															format={"YYYY-MM-DD"}
 															placeholder={intl.formatMessage(messages.dateBirth)}
 															onSelect={(date) => this.handleSelectBirthday(date, index)}
+															onChange={(date) => this.handleSelectBirthday(date, index)}
 														/>
 													</Form.Item>
 												</Col>
