@@ -184,8 +184,8 @@ export const authSlice = createSlice({
 		logout(state) {
 			helper.history.push('/');
 		},
-		removeUser() {
-			state.initialState = { ...initialState }
+		removeUser(state) {
+			state.user = {};
 		}
 	},
 	extraReducers: {
