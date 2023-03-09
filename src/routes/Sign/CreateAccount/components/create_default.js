@@ -8,7 +8,8 @@ import intl from 'react-intl-universal';
 import messages from '../messages';
 import messagesLogin from '../../Login/messages';
 import { setRegisterData } from '../../../../redux/features/registerSlice';
-import { checkEmailRegistered } from '../../../../utils/api/apiList';
+import { setGeneralData } from '../../../../redux/features/authSlice';
+import { checkEmailRegistered, getDataForCreatingUser } from '../../../../utils/api/apiList';
 import './index.less';
 import request from '../../../../utils/api/request';
 
@@ -51,6 +52,19 @@ class CreateDefault extends Component {
 			})
 		}
 		this.props.onHandleChangeRoleRegister(registerData.account_type || intl.formatMessage(messages.parent));
+
+		request.get(getDataForCreatingUser).then(res => {
+			const { success, data } = res;
+
+			if (success) {
+				this.props.setGeneralData(data);
+			} else {
+				message.warning('Something went wrong. Please try again.');
+			}
+		}).catch(e => {
+			console.log(e);
+			message.warning('Something went wrong. Please try again.');
+		})
 	}
 
 	onFinish = async (values) => {
@@ -356,5 +370,4 @@ const mapStateToProps = state => ({
 	auth: state.auth,
 })
 
-export default compose(
-	connect(mapStateToProps, { setRegisterData }))(CreateDefault);
+export default compose(connect(mapStateToProps, { setRegisterData, setGeneralData }))(CreateDefault);

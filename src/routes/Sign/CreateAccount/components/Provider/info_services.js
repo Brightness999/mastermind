@@ -6,16 +6,11 @@ import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { getDefaultValueForProvider } from '../../../../../utils/api/apiList';
 import { BsDashCircle, BsPlusCircle } from 'react-icons/bs';
-import request from '../../../../../utils/api/request';
 
 class InfoServices extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			SkillSet: [],
-		}
 	}
 
 	componentDidMount() {
@@ -25,18 +20,6 @@ class InfoServices extends Component {
 		}
 		const serviceInfor = registerData.serviceInfor || this.getDefaultObj();
 		this.form.setFieldsValue(serviceInfor);
-		this.getDataFromServer()
-	}
-
-	getDataFromServer = () => {
-		request.post(getDefaultValueForProvider).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ SkillSet: data?.SkillSet?.docs ?? [] });
-			}
-		}).catch(err => {
-			console.log('get default value for provider error ---', err);
-		})
 	}
 
 	getDefaultObj = () => {
@@ -65,7 +48,7 @@ class InfoServices extends Component {
 	}
 
 	render() {
-		const { SkillSet } = this.state;
+		const { skillSets } = this.props.auth.generalData;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -86,7 +69,7 @@ class InfoServices extends Component {
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
 						>
 							<Select mode="multiple" showArrow placeholder={intl.formatMessage(messages.skillsets)} onChange={skill => this.setValueToReduxRegisterData("skillSet", skill)}>
-								{SkillSet.map((skill, index) => (
+								{skillSets?.map((skill, index) => (
 									<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
 								))}
 							</Select>
@@ -127,7 +110,7 @@ class InfoServices extends Component {
 													name={[field.name, 'name']}
 													rules={[{ required: false }]}
 												>
-													<Input placeholder={intl.formatMessage(messages.references)} onChange={() => this.setValueToReduxRegisterData("references", this.form?.getFieldValue('references'))}/>
+													<Input placeholder={intl.formatMessage(messages.references)} onChange={() => this.setValueToReduxRegisterData("references", this.form?.getFieldValue('references'))} />
 												</Form.Item>
 												<BsDashCircle size={16} className='text-red icon-remove provider-admin-reference' onClick={() => remove(field.name)} />
 											</div>
@@ -164,6 +147,7 @@ class InfoServices extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoServices);

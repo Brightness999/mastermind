@@ -1,23 +1,20 @@
 import React from 'react';
-import { Row, Col, Form, Button, Input, Select, message } from 'antd';
+import { Row, Col, Form, Button, Input, Select } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { getCityConnections, getDefaultValueForProvider } from '../../../../../utils/api/apiList'
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import request from '../../../../../utils/api/request';
 
 class InfoSchool extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			school_address: '',
-			listCommunitiServer: [],
-			emailTypes: [],
+			listCommunitiServer: this.props.auth.generalData?.cityConnections ?? [],
 		}
 	}
 
@@ -25,12 +22,8 @@ class InfoSchool extends React.Component {
 		const { registerData } = this.props.register;
 		const { user } = this.props.auth;
 
-		this.getDefaultData();
-
 		if (window.location.pathname.includes('administrator')) {
 			this.setState({ listCommunitiServer: user?.adminCommunity });
-		} else {
-			this.loadCommunitiServer();
 		}
 
 		if (!registerData.contactEmail || registerData.contactEmail.length == 0) {
@@ -63,36 +56,9 @@ class InfoSchool extends React.Component {
 		this.form.setFieldsValue({ valueForContact: school_address });
 	};
 
-	loadCommunitiServer = () => {
-		request.post(getCityConnections).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ listCommunitiServer: data });
-			} else {
-				message.error('Cant loading', intl.formatMessage(messages.communitiesServed));
-			}
-		}).catch(err => {
-			console.log(err);
-			message.error('Cant loading', intl.formatMessage(messages.communitiesServed));
-		})
-	}
-
-	getDefaultData = () => {
-		request.post(getDefaultValueForProvider).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ emailTypes: data?.EmailType });
-			} else {
-				message.error('Cant loading', intl.formatMessage(messages.communitiesServed));
-			}
-		}).catch(err => {
-			console.log(err);
-			message.error('Cant loading', intl.formatMessage(messages.communitiesServed));
-		})
-	}
-
 	render() {
-		const { listCommunitiServer, school_address, emailTypes } = this.state;
+		const { listCommunitiServer, school_address } = this.state;
+		const { emailTypes } = this.props.auth.generalData;
 
 		return (
 			<Row justify="center" className="row-form">

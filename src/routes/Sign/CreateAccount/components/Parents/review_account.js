@@ -5,7 +5,7 @@ import messages from '../../messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
-import { getAllSchoolsForParent, getDefaultValueForClient, userSignUp } from '../../../../../utils/api/apiList';
+import { userSignUp } from '../../../../../utils/api/apiList';
 import request from '../../../../../utils/api/request';
 
 class ReviewAccount extends Component {
@@ -16,8 +16,6 @@ class ReviewAccount extends Component {
 				parentInfo: {},
 				studentInfos: [],
 			},
-			listServices: [],
-			listSchools: [],
 			isSubmit: false,
 		}
 	}
@@ -25,33 +23,6 @@ class ReviewAccount extends Component {
 	componentDidMount() {
 		const { registerData } = this.props.register;
 		this.setState({ registerData: registerData })
-		this.loadDataFromServer();
-		this.loadSchools();
-	}
-
-	loadDataFromServer() {
-		request.post(getDefaultValueForClient).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ listServices: data.SkillSet ?? [] })
-			}
-		}).catch(err => {
-			console.log(err);
-			this.setState({
-				checkEmailExist: false,
-			});
-		})
-	}
-
-	loadSchools() {
-		request.post(getAllSchoolsForParent, { communityServed: this.props.register.registerData.parentInfo.cityConnection }).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ listSchools: data ?? [] });
-			}
-		}).catch(err => {
-			console.log(err);
-		})
 	}
 
 	onSubmit = async () => {
@@ -76,7 +47,9 @@ class ReviewAccount extends Component {
 	}
 
 	render() {
-		const { registerData, listSchools, listServices, isSubmit } = this.state;
+		const { registerData, isSubmit } = this.state;
+		const { schools, skillSets } = this.props.auth.generalData;
+		const listSchools = schools?.filter(school => school.communityServed?._id === registerData.parentInfo?.cityConnection) ?? [];
 
 		return (
 			<Row justify="center" className="row-form">
@@ -118,7 +91,7 @@ class ReviewAccount extends Component {
 									<p className='font-14 font-700 mb-10'>{intl.formatMessage(messages.servicesRequested)}</p>
 									<div>
 										{item?.services?.map((service, index) => (
-											<p key={index}>{listServices?.find(skill => skill._id == service)?.name}</p>
+											<p key={index}>{skillSets?.find(skill => skill._id == service)?.name}</p>
 										))}
 									</div>
 								</div>
@@ -144,7 +117,8 @@ class ReviewAccount extends Component {
 }
 
 const mapStateToProps = state => ({
-	register: state.register
+	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData, removeRegisterData }))(ReviewAccount);

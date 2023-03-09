@@ -8,12 +8,9 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import 'moment/locale/en-au';
-import { getDefaultValueForProvider } from '../../../../../utils/api/apiList';
-import request from '../../../../../utils/api/request';
 
 class SubsidyProgram extends Component {
 	state = {
-		academicLevels: [],
 		numberOfSession: [1, 2, 3, 4, 5, 6, 7],
 		isAcceptProBono: false,
 		isAcceptReduceRate: false,
@@ -24,7 +21,6 @@ class SubsidyProgram extends Component {
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
-		const { academicLevels, user } = this.props.auth;
 
 		if (registerData.subsidy) {
 			this.form?.setFieldsValue(registerData.subsidy);
@@ -39,23 +35,6 @@ class SubsidyProgram extends Component {
 			isAcceptReduceRate: registerData.isAcceptReduceRate || false,
 			isWillingOpenPrivate: registerData?.profileInfor?.isPrivateForHmgh ? false : registerData.isWillingOpenPrivate || false,
 			isPrivateForHmgh: registerData?.profileInfor?.isPrivateForHmgh || false,
-		})
-
-		if (window.location.pathname.includes('administrator')) {
-			this.setState({ academicLevels: academicLevels });
-		} else {
-			this.getDataFromServer();
-		}
-	}
-
-	getDataFromServer = () => {
-		request.post(getDefaultValueForProvider).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ academicLevels: data?.AcademicLevel ?? [] });
-			}
-		}).catch(err => {
-			console.log('get default data error---', err);
 		})
 	}
 
@@ -116,7 +95,8 @@ class SubsidyProgram extends Component {
 	}
 
 	render() {
-		const { isAcceptProBono, isAcceptReduceRate, isWillingOpenPrivate, academicLevels, isSameRate, numberOfSession, isPrivateForHmgh } = this.state;
+		const { isAcceptProBono, isAcceptReduceRate, isWillingOpenPrivate, isSameRate, numberOfSession, isPrivateForHmgh } = this.state;
+		const { academicLevels } = this.props.auth.generalData;
 
 		return (
 			<Row justify="center" className="row-form">

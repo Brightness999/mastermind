@@ -5,7 +5,7 @@ import messages from '../../messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
-import { getReviewInfoForProvider, userSignUp } from '../../../../../utils/api/apiList';
+import { userSignUp } from '../../../../../utils/api/apiList';
 import request from '../../../../../utils/api/request';
 
 const day_week = [
@@ -21,41 +21,15 @@ class InfoReview extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			cityConnections: [],
-			listSchools: [],
-			skillSet: [],
-			durations: [],
+			cityConnections: this.props.auth.generalData?.cityConnections,
 			isSubmit: false,
 		}
 	}
 
 	componentDidMount() {
-		request.post(getReviewInfoForProvider).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({
-					cityConnections: data?.cityConnections ?? [],
-					skillSet: data?.skillSet ?? [],
-					listSchools: data?.listSchools ?? [],
-					durations: data?.durations ?? [],
-				})
-			} else {
-				this.setState({
-					cityConnections: [],
-					skillSet: [],
-					listSchools: [],
-					durations: [],
-				});
-			}
-		}).catch(err => {
-			console.log('get default data for provider error---', err);
-			this.setState({
-				cityConnections: [],
-				skillSet: [],
-				listSchools: [],
-				durations: [],
-			});
-		})
+		if (window.location.pathname.includes('administrator')) {
+			this.setState({ cityConnections: this.props.auth.user?.adminCommunity });
+		}
 	}
 
 	onSubmit = async () => {
@@ -145,7 +119,9 @@ class InfoReview extends Component {
 
 	render() {
 		const { registerData, isSubmit } = this.props.register;
-		const { listSchools, cityConnections, skillSet } = this.state;
+		const { cityConnections } = this.state;
+		const { schools, skillSets } = this.props.auth.generalData;
+		const listSchools = schools?.filter(school => school.communityServed?._id === registerData.profileInfor?.cityConnection);
 
 		return (
 			<Row justify="center" className="row-form">
@@ -182,7 +158,7 @@ class InfoReview extends Component {
 								</div>
 								<div className='mt-10'>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.professionalInformation)}</p>
-									<div className='flex gap-2'><span className='font-700'>Skillset:</span><div>{registerData?.serviceInfor?.skillSet?.map(id => skillSet?.find(skill => skill._id == id)?.name)}</div></div>
+									<div className='flex gap-2'><span className='font-700'>Skillset:</span><div>{registerData?.serviceInfor?.skillSet?.map(id => skillSets?.find(skill => skill._id == id)?.name)}</div></div>
 									<div><span className='font-700'>Years of Experience:</span> {registerData?.serviceInfor?.yearExp}</div>
 									<div className='mb-10'>
 										<div className='font-700'>Public profile:</div>
@@ -356,6 +332,7 @@ class InfoReview extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData, removeRegisterData }))(InfoReview);

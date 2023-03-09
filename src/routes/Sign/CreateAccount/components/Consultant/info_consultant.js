@@ -7,45 +7,26 @@ import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { getDefaultValuesForConsultant } from '../../../../../utils/api/apiList';
-import request from '../../../../../utils/api/request';
 
 class InfoConsultant extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      EmailType: [],
-      ContactNumberType: [],
-      contactEmail: [],
-      SkillSet: [],
       cityConnections: [],
     }
   }
 
   componentDidMount() {
     const { registerData } = this.props.register;
-    this.getDataFromServer();
     const consultantInfo = registerData.consultantInfo || this.getDefaultObj();
     this.form?.setFieldsValue(consultantInfo);
     if (!registerData.consultantInfo) {
       this.props.setRegisterData({ consultantInfo: this.getDefaultObj() });
     }
-  }
 
-  getDataFromServer = () => {
-    request.post(getDefaultValuesForConsultant).then(result => {
-      const { success, data } = result;
-      if (success) {
-        this.setState({
-          ContactNumberType: data.ContactNumberType,
-          EmailType: data.EmailType,
-          SkillSet: data.SkillSet,
-          cityConnections: window.location.pathname.includes('administrator') ? this.props.auth?.user?.adminCommunity : data.CityConnections,
-        })
-      }
-    }).catch(err => {
-      console.log('get default data error---', err);
-    })
+    if (window.location.pathname.includes('administrator')) {
+      this.setState({ cityConnections: this.props.auth?.user?.adminCommunity });
+    }
   }
 
   getDefaultObj = () => {
@@ -87,7 +68,8 @@ class InfoConsultant extends Component {
   }
 
   render() {
-    const { cityConnections, SkillSet, EmailType, ContactNumberType } = this.state;
+    const { cityConnections } = this.state;
+    const { consultantSkill, emailTypes, contactNumberTypes } = this.props.auth.generalData;
 
     return (
       <Row justify="center" className="row-form">
@@ -133,7 +115,7 @@ class InfoConsultant extends Component {
                 value={0}
                 disabled
               >
-                {SkillSet.map((value, index) => (
+                {consultantSkill?.map((value, index) => (
                   <Select.Option key={index} value={index}>{value}</Select.Option>
                 ))}
               </Select>
@@ -177,7 +159,7 @@ class InfoConsultant extends Component {
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                         >
                           <Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.handelChange('contactNumber', this.form?.getFieldValue('contactNumber'))}>
-                            {ContactNumberType.map((value, index) => (
+                            {contactNumberTypes?.map((value, index) => (
                               <Select.Option key={index} value={value}>{value}</Select.Option>
                             ))}
                           </Select>
@@ -238,7 +220,7 @@ class InfoConsultant extends Component {
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                         >
                           <Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.handelChange('contactEmail', this.form?.getFieldValue('contactEmail'))}>
-                            {EmailType.map((value, index) => (
+                            {emailTypes?.map((value, index) => (
                               <Select.Option key={index} value={value}>{value}</Select.Option>
                             ))}
                           </Select>

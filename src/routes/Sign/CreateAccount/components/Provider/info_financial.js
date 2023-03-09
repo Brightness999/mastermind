@@ -9,9 +9,8 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
-import { getDefaultValueForProvider, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
+import { uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import request from '../../../../../utils/api/request';
 
 class InfoFinancial extends Component {
 	constructor(props) {
@@ -20,7 +19,6 @@ class InfoFinancial extends Component {
 			fileList: [],
 			uploading: false,
 			documentUploaded: [],
-			AcademicLevel: [],
 			academicLevels: [],
 			sameRateForAllLevel: true,
 			billingAddress: '',
@@ -29,42 +27,19 @@ class InfoFinancial extends Component {
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
-		const { academicLevels } = this.props.auth;
+		const { academicLevels } = this.props.auth.generalData;
 		if (!registerData.financialInfor) {
 			this.props.setRegisterData({ financialInfor: this.getDefaultObj(registerData) });
 		}
 		const financialInfor = registerData.financialInfor || this.getDefaultObj(registerData);
 		this.form.setFieldsValue(financialInfor);
 
-		if (window.location.pathname.includes('administrator')) {
-			this.setState({
-				AcademicLevel: academicLevels,
-				academicLevels: [
-					{ label: 'By Level', options: registerData?.financialInfor?.academicLevel ? academicLevels.slice(0, 6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : academicLevels.slice(0, 6)?.map(a => ({ label: a, value: a })) ?? [] },
-					{ label: 'By Grade', options: registerData?.financialInfor?.academicLevel ? academicLevels.slice(6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : academicLevels.slice(6)?.map(a => ({ label: a, value: a })) ?? [] },
-				],
-			});
-		} else {
-			this.getDataFromServer()
-		}
-	}
-
-	getDataFromServer = () => {
-		const { registerData } = this.props.register;
-		request.post(getDefaultValueForProvider).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({
-					AcademicLevel: data.AcademicLevel ?? [],
-					academicLevels: [
-						{ label: 'By Level', options: registerData?.financialInfor?.academicLevel ? data.AcademicLevel.slice(0, 6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : data.AcademicLevel.slice(0, 6)?.map(a => ({ label: a, value: a })) ?? [] },
-						{ label: 'By Grade', options: registerData?.financialInfor?.academicLevel ? data.AcademicLevel.slice(6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : data.AcademicLevel.slice(6)?.map(a => ({ label: a, value: a })) ?? [] },
-					]
-				});
-			}
-		}).catch(err => {
-			console.log('get default data for provider error---', err);
-		})
+		this.setState({
+			academicLevels: [
+				{ label: 'By Level', options: registerData?.financialInfor?.academicLevel ? academicLevels.slice(0, 6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : academicLevels.slice(0, 6)?.map(a => ({ label: a, value: a })) ?? [] },
+				{ label: 'By Grade', options: registerData?.financialInfor?.academicLevel ? academicLevels.slice(6)?.filter(level => !registerData?.financialInfor?.academicLevel?.find(item => item.level == level))?.map(a => ({ label: a, value: a })) : academicLevels.slice(6)?.map(a => ({ label: a, value: a })) ?? [] },
+			],
+		});
 	}
 
 	getDefaultObj = (registerData) => {
@@ -124,7 +99,7 @@ class InfoFinancial extends Component {
 
 	handleSelectLevel = (selectedLevel) => {
 		const arr = this.form.getFieldValue('academicLevel');
-		const { AcademicLevel } = this.state;
+		const { academicLevels } = this.props.auth.generalData;
 		let selectedLevels = arr?.map(item => item.level);
 
 		if (selectedLevel == 'Early Education') {
@@ -150,8 +125,8 @@ class InfoFinancial extends Component {
 		}
 
 		const levelOptions = [
-			{ label: 'By Level', options: AcademicLevel.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
-			{ label: 'By Grade', options: AcademicLevel.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+			{ label: 'By Level', options: academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+			{ label: 'By Grade', options: academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
 		];
 		this.form.setFieldValue('academicLevel', arr.filter(a => selectedLevels?.includes(a.level)));
 		this.setState({ academicLevels: levelOptions });

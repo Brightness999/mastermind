@@ -9,55 +9,19 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import moment from 'moment';
-import { getAllSchoolsForParent, getDefaultValueForClient } from '../../../../../utils/api/apiList';
-import request from '../../../../../utils/api/request';
 
 class InfoChild extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			listServices: [],
-			parentInfo: {},
-			listSchools: [],
-			academicLevels: [],
-		}
 	}
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
-		this.setState({ parentInfo: registerData.parentInfo })
 		const newChild = this.getDefaultChildObj(registerData.parentInfo);
 		let studentInfos = !!registerData.studentInfos ? JSON.parse(JSON.stringify(registerData.studentInfos)) : [newChild];
 		this.props.setRegisterData({ studentInfos: studentInfos });
 		studentInfos = studentInfos?.map(student => student.birthday ? { ...student, birthday: moment(student.birthday) } : student);
 		this.form.setFieldsValue({ children: studentInfos });
-		this.loadServices();
-		this.loadSchools(registerData.parentInfo);
-	}
-
-	loadServices() {
-		request.post(getDefaultValueForClient).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({
-					listServices: data?.SkillSet ?? [],
-					academicLevels: data?.AcademicLevel?.slice(6) ?? [],
-				})
-			}
-		}).catch(err => {
-			console.log('getDefaultValueForClient error---', err);
-		})
-	}
-
-	loadSchools(parentInfo) {
-		request.post(getAllSchoolsForParent, { communityServed: parentInfo?.cityConnection }).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ listSchools: data })
-			}
-		}).catch(err => {
-			console.log('getAllSchoolsForParent error---', err);
-		})
 	}
 
 	getDefaultChildObj(parentInfo) {
@@ -122,8 +86,9 @@ class InfoChild extends Component {
 	}
 
 	render() {
-		const { listSchools, listServices, academicLevels } = this.state;
+		const { schools, skillSets, academicLevels } = this.props.auth.generalData;
 		const { registerData } = this.props.register;
+		const listSchools = schools?.filter(school => school.communityServed?._id === registerData.parentInfo?.cityConnection) ?? [];
 
 		return (
 			<Row justify="center" className="row-form">
@@ -294,7 +259,7 @@ class InfoChild extends Component {
 															optionLabelProp="label"
 															onChange={v => this.updateReduxValueForDepedent(index, "services", v)}
 														>
-															{listServices?.map((service, index) => (
+															{skillSets?.map((service, index) => (
 																<Select.Option key={index} label={service.name} value={service._id}>{service.name}</Select.Option>
 															))}
 														</Select>
@@ -348,6 +313,7 @@ class InfoChild extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoChild);

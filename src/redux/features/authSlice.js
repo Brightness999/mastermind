@@ -19,6 +19,18 @@ const initialState = {
 	selectedTime: undefined,
 	meetingLink: '',
 	durations: [],
+	generalData: {
+		contactNumberTypes: [],
+		emailTypes: [],
+		skillSets: [],
+		sreenTimes: [],
+		academicLevels: [],
+		cancellationWindow: [],
+		durations: [],
+		maritialTypes: [],
+		cityConnections: [],
+		schools: [],
+	},
 };
 
 export const getInfoAuth = createAsyncThunk(
@@ -181,6 +193,9 @@ export const authSlice = createSlice({
 		setDurations(state, action) {
 			state.durations = action.payload
 		},
+		setGeneralData(state, action) {
+			state.generalData = action.payload
+		},
 		logout(state) {
 			helper.history.push('/');
 		},
@@ -208,6 +223,25 @@ export const authSlice = createSlice({
 	}
 });
 
-export const { logout, setAuthData, setUser, removeUser, changeInforClientChild, changeInforClientParent, changeInfor, setDependents, setProviders, setSkillSet, setLocations, setAcademicLevels, setCommunity, setSelectedUser, setSelectedTime, setMeetingLink, setDurations } = authSlice.actions;
+export const {
+	logout,
+	setAuthData,
+	setUser,
+	removeUser,
+	changeInforClientChild,
+	changeInforClientParent,
+	changeInfor,
+	setDependents,
+	setProviders,
+	setSkillSet,
+	setLocations,
+	setAcademicLevels,
+	setCommunity,
+	setSelectedUser,
+	setSelectedTime,
+	setMeetingLink,
+	setDurations,
+	setGeneralData,
+} = authSlice.actions;
 
 export default authSlice.reducer;

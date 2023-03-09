@@ -8,14 +8,10 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import 'moment/locale/en-au';
-import { getDefaultValueForProvider } from '../../../../../utils/api/apiList';
-import request from '../../../../../utils/api/request';
 moment.locale('en');
 
 class InfoScheduling extends Component {
 	state = {
-		durations: [],
-		cancellationWindow: [],
 		isNewClientScreening: true,
 		isSeparateEvaluationRate: true,
 	}
@@ -33,21 +29,6 @@ class InfoScheduling extends Component {
 			this.form.setFieldsValue({ chidren: [this.getDefaultObj()] });
 			this.props.setRegisterData({ scheduling: this.getDefaultObj() });
 		}
-		this.getDataFromServer();
-	}
-
-	getDataFromServer = () => {
-		request.post(getDefaultValueForProvider).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({
-					durations: data?.durations ?? [],
-					cancellationWindow: data?.CancellationWindow ?? [],
-				})
-			}
-		}).catch(err => {
-			console.log(err);
-		})
 	}
 
 	getDefaultObj = () => {
@@ -80,7 +61,8 @@ class InfoScheduling extends Component {
 	}
 
 	render() {
-		const { durations, cancellationWindow, isSeparateEvaluationRate, isNewClientScreening } = this.state;
+		const { isSeparateEvaluationRate, isNewClientScreening } = this.state;
+		const { durations, cancellationWindow } = this.props.auth.generalData;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -175,6 +157,7 @@ class InfoScheduling extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoScheduling);

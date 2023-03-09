@@ -16,6 +16,7 @@ export const userActivate = 'users/activate_user'
 export const userLogin = 'users/login'
 export const forgotPassword = 'users/forgot_password'
 export const confirmForgotPassword = 'users/confirm_forgot_password'
+export const getDataForCreatingUser = 'users/get_data_for_creating_user'
 
 export const getAppointmentsForAdmin = 'admin/get_appointments'
 export const getAppointmentsInMonthForAdmin = 'admin/get_appointments_in_month'

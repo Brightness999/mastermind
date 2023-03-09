@@ -8,19 +8,13 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { getCityConnections, getDefaultValueForProvider } from '../../../../../utils/api/apiList';
-import request from '../../../../../utils/api/request';
 
 class InfoProfile extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			service_address: '',
-			EmailType: [],
-			ContactNumberType: [],
-			contactPhoneNumber: [],
-			contactEmail: [],
-			cityConnections: [],
+			cityConnections: this.props.auth.generalData?.cityConnections,
 			isPrivateForHmgh: false,
 		}
 	}
@@ -31,41 +25,13 @@ class InfoProfile extends Component {
 
 		if (window.location.pathname.includes('administrator')) {
 			this.setState({ cityConnections: user?.adminCommunity });
-		} else {
-			this.searchCityConnection();
 		}
-		this.getDataFromServer();
 		const profileInfor = registerData.profileInfor || this.getDefaultObj();
 		this.form.setFieldsValue(profileInfor);
 		this.setState({ isPrivateForHmgh: profileInfor?.isPrivateForHmgh });
 		if (!registerData.profileInfor) {
 			this.props.setRegisterData({ profileInfor: this.getDefaultObj() });
 		}
-	}
-
-	getDataFromServer = () => {
-		request.post(getDefaultValueForProvider).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({
-					ContactNumberType: data?.ContactNumberType ?? [],
-					EmailType: data?.EmailType ?? [],
-				});
-			}
-		}).catch(err => {
-			console.log('get default values for provider error---', err);
-		})
-	}
-
-	searchCityConnection() {
-		request.post(getCityConnections).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ cityConnections: data ?? [] });
-			}
-		}).catch(err => {
-			console.log('get city connections error ---', err);
-		})
 	}
 
 	getDefaultObj = () => {
@@ -101,7 +67,8 @@ class InfoProfile extends Component {
 	}
 
 	render() {
-		const { service_address, cityConnections, ContactNumberType, EmailType, isPrivateForHmgh } = this.state;
+		const { service_address, cityConnections, isPrivateForHmgh } = this.state;
+		const { contactNumberTypes, emailTypes } = this.props.auth.generalData;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -242,7 +209,7 @@ class InfoProfile extends Component {
 													style={{ marginTop: key === 0 ? 0 : 14 }}
 												>
 													<Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.setValueToReduxRegisterData("contactNumber", this.form?.getFieldValue('contactNumber'))}>
-														{ContactNumberType?.map((value, index) => (
+														{contactNumberTypes?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
 													</Select>
@@ -300,7 +267,7 @@ class InfoProfile extends Component {
 													style={{ marginTop: key === 0 ? 0 : 14 }}
 												>
 													<Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.setValueToReduxRegisterData("contactEmail", this.form?.getFieldValue('contactEmail'))}>
-														{EmailType?.map((value, index) => (
+														{emailTypes?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
 													</Select>

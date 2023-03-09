@@ -7,16 +7,13 @@ import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { getDefaultValueForClient } from '../../../../../utils/api/apiList';
-import request from '../../../../../utils/api/request';
 
 class InfoParent extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			address: '',
-			cityConnections: [],
-			maritialTypes: [],
+			cityConnections: this.props.auth.generalData?.cityConnections ?? [],
 		};
 	}
 
@@ -27,7 +24,10 @@ class InfoParent extends Component {
 		}
 		const parentInfo = registerData.parentInfo || this.getDefaultObj();
 		this.form.setFieldsValue(parentInfo);
-		this.searchCityConnection();
+
+		if (window.location.pathname.includes('administrator')) {
+			this.setState({ cityConnections: this.props.auth?.user?.adminCommunity });
+		}
 	}
 
 	getDefaultObj = () => {
@@ -43,18 +43,6 @@ class InfoParent extends Component {
 			motherEmail: '',
 			cityConnection: undefined,
 		};
-	}
-
-	searchCityConnection() {
-		request.post(getDefaultValueForClient).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ maritialTypes: data?.MaritialType ?? [] });
-				this.setState({ cityConnections: window.location.pathname.includes('administrator') ? this.props.user?.adminCommunity : data?.cityConnections ?? [] });
-			}
-		}).catch(err => {
-			console.log('get default data for client error---', err);
-		})
 	}
 
 	getDefaultValueInitForm = (key) => {
@@ -99,7 +87,8 @@ class InfoParent extends Component {
 	};
 
 	render() {
-		const { address, cityConnections, maritialTypes } = this.state;
+		const { address, cityConnections } = this.state;
+		const { maritialTypes } = this.props.auth.generalData;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -303,7 +292,7 @@ class InfoParent extends Component {
 
 const mapStateToProps = (state) => ({
 	register: state.register,
-	user: state.auth.user,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoParent);

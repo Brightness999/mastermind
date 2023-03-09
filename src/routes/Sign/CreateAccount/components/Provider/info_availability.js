@@ -11,9 +11,7 @@ import DatePanel from "react-multi-date-picker/plugins/date_panel"
 import messages from '../../messages';
 import msgSidebar from '../../../../../components/SideBar/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { getAllSchoolsForParent } from '../../../../../utils/api/apiList';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
-import request from '../../../../../utils/api/request';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -40,7 +38,9 @@ class InfoAvailability extends Component {
 
 	async componentDidMount() {
 		const { registerData } = this.props.register;
-		this.loadSchools(registerData.profileInfor, registerData.availability);
+		const { schools } = this.props.auth.generalData;
+
+		this.setState({ listSchool: schools?.filter(school => school.communityServed?._id === registerData.profileInfor?.cityConnection) });
 		const holidays = await this.getHolidays();
 		if (!!registerData.availability) {
 			this.form?.setFieldsValue({ ...registerData.availability });
@@ -52,10 +52,16 @@ class InfoAvailability extends Component {
 				el.after(name);
 			})
 
+			let locations = [];
+			registerData.availability.isHomeVisit && locations.push('Dependent Home');
+			registerData.availability.isPrivateOffice && locations.push('Provider Office');
+			registerData.availability.serviceableSchool?.length && schools?.filter(school => school.communityServed?._id === registerData.profileInfor?.cityConnection)?.forEach(school => locations.push(school.name));
+
 			this.setState({
 				isHomeVisit: registerData.availability?.isHomeVisit,
 				isPrivateOffice: registerData.availability?.isPrivateOffice,
 				isSchools: registerData.availability?.isSchools,
+				locations: locations,
 			})
 		} else {
 			day_week.map((day) => this.form?.setFieldValue(day, ['']));
@@ -63,24 +69,6 @@ class InfoAvailability extends Component {
 			this.props.setRegisterData({ availability: { isHomeVisit: true, isPrivateOffice: true, isSchools: true } });
 			this.setState({ locations: ['Dependent Home', 'Provider Office'] });
 		}
-	}
-
-	loadSchools(profileInfo, availabilityInfo) {
-		request.post(getAllSchoolsForParent, { communityServed: profileInfo?.cityConnection }).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ listSchool: data ?? [] });
-				if (!!availabilityInfo) {
-					let locations = [];
-					availabilityInfo?.isHomeVisit && locations.push('Dependent Home');
-					availabilityInfo?.isPrivateOffice && locations.push('Provider Office');
-					availabilityInfo?.serviceableSchool?.length && data?.forEach(school => locations.push(school.name));
-					this.setState({ locations: locations });
-				}
-			}
-		}).catch(err => {
-			console.log('get all schools for parent error---', err);
-		})
 	}
 
 	onFinish = (values) => {
@@ -554,7 +542,7 @@ class InfoAvailability extends Component {
 
 const mapStateToProps = state => ({
 	register: state.register,
-	user: state.auth.user,
+	auth: state.auth,
 })
 
 export default compose(connect(mapStateToProps, { setRegisterData }))(InfoAvailability);
