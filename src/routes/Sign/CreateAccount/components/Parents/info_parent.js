@@ -172,6 +172,7 @@ class InfoParent extends Component {
 								showSearch
 								optionFilterProp="children"
 								filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
+								onChange={(value) => this.setValueToReduxRegisterData("cityConnection", value)}
 							>
 								{cityConnections?.map((value, index) => (
 									<Select.Option key={index} value={value._id}>{value.name}</Select.Option>

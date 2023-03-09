@@ -7,7 +7,7 @@ import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import request from '../../../../../utils/api/request';
 import { getCityConnections, userSignUp } from '../../../../../utils/api/apiList';
-import { removeRegisterData } from '../../../../../redux/features/registerSlice';
+import { removeRegisterData, setRegisterData } from '../../../../../redux/features/registerSlice';
 
 class AdminInfo extends React.Component {
   constructor(props) {
@@ -21,7 +21,10 @@ class AdminInfo extends React.Component {
     const { user } = this.props;
     const { registerData } = this.props.register;
 
-    this.form?.setFieldValue('adminEmail', registerData?.email);
+    this.form?.setFieldsValue(registerData);
+    if (!registerData?.adminEmail) {
+      this.form?.setFieldValue('adminEmail', registerData?.email);
+    }
     request.post(getCityConnections, { id: user?._id, role: user?.role }).then(result => {
       const { success, data } = result;
 
@@ -73,7 +76,7 @@ class AdminInfo extends React.Component {
               label={intl.formatMessage(messages.name)}
               rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.name) }]}
             >
-              <Input placeholder={intl.formatMessage(messages.name)} />
+              <Input placeholder={intl.formatMessage(messages.name)} onChange={() => this.props.setRegisterData(this.form?.getFieldsValue())} />
             </Form.Item>
             <Form.Item
               name="phoneNumber"
@@ -89,7 +92,7 @@ class AdminInfo extends React.Component {
                 },
               ]}
             >
-              <Input placeholder={intl.formatMessage(messages.phoneNumber)} />
+              <Input placeholder={intl.formatMessage(messages.phoneNumber)} onChange={() => this.props.setRegisterData(this.form?.getFieldsValue())} />
             </Form.Item>
             <Form.Item
               name="adminCommunity"
@@ -102,6 +105,7 @@ class AdminInfo extends React.Component {
                 optionFilterProp="children"
                 mode="multiple"
                 filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
+                onChange={() => this.props.setRegisterData(this.form?.getFieldsValue())}
               >
                 {cityConnections?.map((value, index) => (
                   <Select.Option key={index} value={value._id}>{value.name}</Select.Option>
@@ -122,7 +126,7 @@ class AdminInfo extends React.Component {
                 }
               ]}
             >
-              <Input placeholder={intl.formatMessage(messages.contactEmail)} />
+              <Input placeholder={intl.formatMessage(messages.contactEmail)} onChange={() => this.props.setRegisterData(this.form?.getFieldsValue())} />
             </Form.Item>
             <Form.Item className="form-btn continue-btn" >
               <Button
@@ -143,4 +147,4 @@ class AdminInfo extends React.Component {
 
 const mapStateToProps = state => ({ register: state.register, user: state.auth.user });
 
-export default compose(connect(mapStateToProps, { removeRegisterData }))(AdminInfo);
+export default compose(connect(mapStateToProps, { removeRegisterData, setRegisterData }))(AdminInfo);

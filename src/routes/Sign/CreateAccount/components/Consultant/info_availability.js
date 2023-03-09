@@ -230,6 +230,12 @@ class ConsultantAvailability extends Component {
     })
   }
 
+  handleChangeTime = (time, type, day, index) => {
+    this.onChangeScheduleValue();
+    const dayTime = this.form.getFieldValue(day);
+    this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: time }) : d));
+  }
+
   render() {
     const { currentSelectedDay, isSubmit, loading } = this.state;
 
@@ -280,11 +286,8 @@ class ConsultantAvailability extends Component {
                               <Col xs={24} sm={24} md={12}>
                                 <Form.Item name={[field.name, "from_time"]}>
                                   <TimePicker
-                                    onSelect={(time) => {
-                                      this.onChangeScheduleValue();
-                                      const dayTime = this.form.getFieldValue(day);
-                                      this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: time }) : d));
-                                    }}
+                                    onSelect={(time) => this.handleChangeTime(time, 'from_time', day, index)}
+                                    onChange={(time) => this.handleChangeTime(time, 'from_time', day, index)}
                                     use12Hours
                                     format="h:mm a"
                                     popupClassName='timepicker'
@@ -295,11 +298,8 @@ class ConsultantAvailability extends Component {
                               <Col xs={24} sm={24} md={12} className='item-remove'>
                                 <Form.Item name={[field.name, "to_time"]}>
                                   <TimePicker
-                                    onSelect={(time) => {
-                                      this.onChangeScheduleValue();
-                                      const dayTime = this.form.getFieldValue(day);
-                                      this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, to_time: time }) : d));
-                                    }}
+                                    onSelect={(time) => this.handleChangeTime(time, 'to_time', day, index)}
+                                    onChange={(time) => this.handleChangeTime(time, 'to_time', day, index)}
                                     use12Hours
                                     format="h:mm a"
                                     popupClassName='timepicker'

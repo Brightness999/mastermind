@@ -319,7 +319,10 @@ class InfoChild extends Component {
 											type="text"
 											className='add-dependent-btn'
 											icon={<BsPlusCircle size={17} className='mr-5' />}
-											onClick={() => add(this.getDefaultChildObj(registerData.parentInfo))}
+											onClick={() => {
+												add(this.getDefaultChildObj(registerData.parentInfo));
+												this.props.setRegisterData({ studentInfos: this.form.getFieldsValue()?.children });
+											}}
 										>
 											{intl.formatMessage(messages.addDependent)}
 										</Button>

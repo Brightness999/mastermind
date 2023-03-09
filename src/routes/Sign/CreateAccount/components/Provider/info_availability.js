@@ -265,7 +265,7 @@ class InfoAvailability extends Component {
 				if (dayTime[index]?.from_time) {
 					const fromTime = moment(dayTime[index]?.from_time).set({ seconds: 0, milliseconds: 0 });
 					if (!((fromTime.isSame(inOpenTime) || fromTime.isBetween(inOpenTime, inCloseTime)) || (fromTime.isSame(afterOpenTime) || fromTime.isBetween(afterOpenTime, afterCloseTime)))) {
-						message.warning("The school is not available at the from_time. Please select another time.", 5);
+						message.warning("The school is not available at the from_time. Please select another location.", 5);
 						this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: null }) : d));
 					} else {
 						this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: location }) : d));
@@ -274,7 +274,7 @@ class InfoAvailability extends Component {
 				if (dayTime[index]?.to_time) {
 					const toTime = moment(dayTime[index]?.to_time).set({ seconds: 0, milliseconds: 0 });
 					if (!((toTime.isSame(inCloseTime) || toTime.isBetween(inOpenTime, inCloseTime)) || (toTime.isSame(afterCloseTime) || toTime.isBetween(afterOpenTime, afterCloseTime)))) {
-						message.warning("The school is not available at the to_time. Please select another time.", 5);
+						message.warning("The school is not available at the to_time. Please select another location.", 5);
 						this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: null }) : d));
 					} else {
 						this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: location }) : d));

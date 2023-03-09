@@ -292,6 +292,7 @@ class SchoolAvailability extends React.Component {
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
 												onSelect={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
+												onChange={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
 												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'inOpen')}
 												use12Hours
 												format="h:mm a"
@@ -303,6 +304,7 @@ class SchoolAvailability extends React.Component {
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
 												onSelect={v => this.onSelectTimeForSesssion(index, v, 'inClose')}
+												onChange={v => this.onSelectTimeForSesssion(index, v, 'inClose')}
 												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'inClose')}
 												value={this.valueForAvailabilityScheduleForCloseHour(sessionsInSchool, index)}
 												use12Hours
@@ -317,6 +319,7 @@ class SchoolAvailability extends React.Component {
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
 												onSelect={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')}
+												onChange={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')}
 												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'afterOpen')}
 												use12Hours
 												value={this.valueForAvailabilityScheduleForOpenHour(sessionsAfterSchool, index)}
@@ -328,6 +331,7 @@ class SchoolAvailability extends React.Component {
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
 												onSelect={v => this.onSelectTimeForSesssion(index, v, 'afterClose')}
+												onChange={v => this.onSelectTimeForSesssion(index, v, 'afterClose')}
 												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'afterClose')}
 												use12Hours
 												value={this.valueForAvailabilityScheduleForCloseHour(sessionsAfterSchool, index)}
