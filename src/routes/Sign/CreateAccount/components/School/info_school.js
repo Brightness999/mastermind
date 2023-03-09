@@ -27,7 +27,7 @@ class InfoSchool extends React.Component {
 
 		this.getDefaultData();
 
-		if (user?.role > 900) {
+		if (window.location.pathname.includes('administrator')) {
 			this.setState({ listCommunitiServer: user?.adminCommunity });
 		} else {
 			this.loadCommunitiServer();

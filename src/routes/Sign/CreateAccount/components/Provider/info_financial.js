@@ -29,14 +29,14 @@ class InfoFinancial extends Component {
 
 	componentDidMount() {
 		const { registerData } = this.props.register;
-		const { academicLevels, user } = this.props.auth;
+		const { academicLevels } = this.props.auth;
 		if (!registerData.financialInfor) {
 			this.props.setRegisterData({ financialInfor: this.getDefaultObj(registerData) });
 		}
 		const financialInfor = registerData.financialInfor || this.getDefaultObj(registerData);
 		this.form.setFieldsValue(financialInfor);
 
-		if (user?.role > 900) {
+		if (window.location.pathname.includes('administrator')) {
 			this.setState({
 				AcademicLevel: academicLevels,
 				academicLevels: [

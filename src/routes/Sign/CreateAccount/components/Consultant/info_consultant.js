@@ -24,9 +24,6 @@ class InfoConsultant extends Component {
 
   componentDidMount() {
     const { registerData } = this.props.register;
-    const { user } = this.props.auth;
-
-    user?.role > 900 && this.setState({ cityConnections: user?.adminCommunity });
     this.getDataFromServer();
     const consultantInfo = registerData.consultantInfo || this.getDefaultObj();
     this.form?.setFieldsValue(consultantInfo);
@@ -43,8 +40,8 @@ class InfoConsultant extends Component {
           ContactNumberType: data.ContactNumberType,
           EmailType: data.EmailType,
           SkillSet: data.SkillSet,
+          cityConnections: window.location.pathname.includes('administrator') ? this.props.auth?.user?.adminCommunity : data.CityConnections,
         })
-        this.props.auth?.user?.role < 900 && this.setState({ cityConnections: data.CityConnections });
       }
     }).catch(err => {
       console.log('get default data error---', err);

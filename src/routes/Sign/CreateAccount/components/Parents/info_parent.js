@@ -50,7 +50,7 @@ class InfoParent extends Component {
 			const { success, data } = result;
 			if (success) {
 				this.setState({ maritialTypes: data?.MaritialType ?? [] });
-				this.setState({ cityConnections: this.props.user?.role ? this.props.user?.adminCommunity : data?.cityConnections ?? [] });
+				this.setState({ cityConnections: window.location.pathname.includes('administrator') ? this.props.user?.adminCommunity : data?.cityConnections ?? [] });
 			}
 		}).catch(err => {
 			console.log('get default data for client error---', err);

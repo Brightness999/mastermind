@@ -41,7 +41,7 @@ class SubsidyProgram extends Component {
 			isPrivateForHmgh: registerData?.profileInfor?.isPrivateForHmgh || false,
 		})
 
-		if (user?.role > 900) {
+		if (window.location.pathname.includes('administrator')) {
 			this.setState({ academicLevels: academicLevels });
 		} else {
 			this.getDataFromServer();

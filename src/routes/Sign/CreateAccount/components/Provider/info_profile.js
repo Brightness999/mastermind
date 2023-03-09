@@ -29,7 +29,7 @@ class InfoProfile extends Component {
 		const { registerData } = this.props.register;
 		const { user } = this.props.auth;
 
-		if (user?.role > 900) {
+		if (window.location.pathname.includes('administrator')) {
 			this.setState({ cityConnections: user?.adminCommunity });
 		} else {
 			this.searchCityConnection();
