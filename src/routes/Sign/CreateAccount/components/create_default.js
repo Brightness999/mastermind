@@ -335,8 +335,8 @@ class CreateDefault extends Component {
 								<Select.Option value={intl.formatMessage(messages.parent)}>{intl.formatMessage(messages.parent)}</Select.Option>
 								<Select.Option value={intl.formatMessage(messages.provider)}>{intl.formatMessage(messages.provider)}</Select.Option>
 								<Select.Option value={intl.formatMessage(messages.school)}>{intl.formatMessage(messages.school)}</Select.Option>
-								{this.props.auth?.user?.role > 900 && < Select.Option value={intl.formatMessage(messages.consultant)}>{intl.formatMessage(messages.consultant)}</Select.Option>}
-								{this.props.auth?.user?.role > 900 && <Select.Option value={intl.formatMessage(messages.admin)}>{intl.formatMessage(messages.admin)}</Select.Option>}
+								{window.location.pathname.includes('administrator') && < Select.Option value={intl.formatMessage(messages.consultant)}>{intl.formatMessage(messages.consultant)}</Select.Option>}
+								{window.location.pathname.includes('administrator') && <Select.Option value={intl.formatMessage(messages.admin)}>{intl.formatMessage(messages.admin)}</Select.Option>}
 							</Select>
 						</Form.Item>
 						<Form.Item className="form-btn continue-btn">
