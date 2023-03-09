@@ -32,7 +32,7 @@ class SubsidyProgram extends Component {
 			this.props.setRegisterData({ subsidy: this.getDefaultObj() });
 		}
 
-		this.form?.setFieldsValue({ academicLevel: registerData?.financialInfor?.academicLevel });
+		this.form?.setFieldsValue({ academicLevel: registerData?.subsidy?.academicLevel ? registerData?.subsidy?.academicLevel : registerData?.financialInfor?.academicLevel });
 
 		this.setState({
 			isAcceptProBono: registerData.isAcceptProBono || false,
@@ -88,7 +88,10 @@ class SubsidyProgram extends Component {
 		}
 
 		this.props.setRegisterData({
-			subsidy: { ...data },
+			subsidy: {
+				...data,
+				academicLevel: isAcceptReduceRate ? values.academicLevel : values.academicLevel?.map(level => ({ ...level, subsidizedRate: level?.rate })),
+			},
 			financialInfor: {
 				...registerData.financialInfor,
 				academicLevel: isAcceptReduceRate ? values.academicLevel : values.academicLevel?.map(level => ({ ...level, subsidizedRate: level?.rate })),
@@ -108,6 +111,7 @@ class SubsidyProgram extends Component {
 	}
 
 	handleSelectChange = () => {
+		console.log(this.form.getFieldsValue())
 		this.props.setRegisterData({ subsidy: this.form.getFieldsValue() })
 	}
 
@@ -181,7 +185,6 @@ class SubsidyProgram extends Component {
 													>
 														<Select
 															disabled
-															onChange={() => this.handleSelectChange()}
 															placeholder={intl.formatMessage(messages.level)}
 														>
 															{academicLevels?.map((lvl, index) => (
@@ -208,7 +211,7 @@ class SubsidyProgram extends Component {
 												<Col xs={12} sm={12} md={6} className={field.key !== 0 && 'item-remove'}>
 													<Form.Item
 														name={[field.name, "subsidizedRate"]}
-														label={'Subsidized' + intl.formatMessage(messages.rate)}
+														label={'Subsidized ' + intl.formatMessage(messages.rate)}
 														className='select-small'
 														rules={[{
 															required: isAcceptReduceRate,

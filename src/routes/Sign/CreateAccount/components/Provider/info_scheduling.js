@@ -71,6 +71,14 @@ class InfoScheduling extends Component {
 		console.log('Failed:', errorInfo);
 	};
 
+	setValueToReduxRegisterData = (fieldName, value) => {
+		const { registerData } = this.props.register;
+		const scheduling = registerData.scheduling;
+		let obj = {};
+		obj[fieldName] = value;
+		this.props.setRegisterData({ scheduling: { ...scheduling, ...obj } });
+	}
+
 	render() {
 		const { durations, cancellationWindow, isSeparateEvaluationRate, isNewClientScreening } = this.state;
 
@@ -93,7 +101,7 @@ class InfoScheduling extends Component {
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.duration) }]}
 							className='w-100'
 						>
-							<Select placeholder={intl.formatMessage(messages.duration)}>
+							<Select placeholder={intl.formatMessage(messages.duration)} onChange={duration => this.setValueToReduxRegisterData("duration", duration)}>
 								{durations?.map((duration, index) => (
 									<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
 								))}
@@ -104,7 +112,7 @@ class InfoScheduling extends Component {
 								<Switch
 									size='small'
 									checked={isNewClientScreening}
-									onChange={v => this.setState({ isNewClientScreening: v })}
+									onChange={v => { this.setState({ isNewClientScreening: v }); this.setValueToReduxRegisterData("isNewClientScreening", v) }}
 								/>
 							</Form.Item>
 							<p>{intl.formatMessage(messages.newClientScreening)}</p>
@@ -116,7 +124,7 @@ class InfoScheduling extends Component {
 										<Switch
 											size='small'
 											checked={isSeparateEvaluationRate}
-											onChange={v => this.setState({ isSeparateEvaluationRate: v })}
+											onChange={v => { this.setState({ isSeparateEvaluationRate: v }); this.setValueToReduxRegisterData("isSeparateEvaluationRate", v) }}
 										/>
 									</Form.Item>
 									<p>{intl.formatMessage(messages.newClientEvaluation)}</p>
@@ -130,7 +138,7 @@ class InfoScheduling extends Component {
 										className='w-100 float-label-item'
 										rules={[{ required: isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.duration) }]}
 									>
-										<Select placeholder={intl.formatMessage(messages.duration)}>
+										<Select placeholder={intl.formatMessage(messages.duration)} onChange={separateEvaluationDuration => this.setValueToReduxRegisterData("separateEvaluationDuration", separateEvaluationDuration)}>
 											{durations?.map((duration, index) => (
 												<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
 											))}
@@ -146,7 +154,7 @@ class InfoScheduling extends Component {
 								rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationWindow) }]}
 								className='w-100'
 							>
-								<Select placeholder={intl.formatMessage(messages.cancellationWindow)}>
+								<Select placeholder={intl.formatMessage(messages.cancellationWindow)} onChange={cancellationWindow => this.setValueToReduxRegisterData("cancellationWindow", cancellationWindow)}>
 									{cancellationWindow?.map((value, index) => (
 										<Select.Option key={index} value={value}>{value}</Select.Option>
 									))}

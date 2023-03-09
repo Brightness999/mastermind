@@ -56,6 +56,14 @@ class InfoServices extends Component {
 		console.log('Failed:', errorInfo);
 	};
 
+	setValueToReduxRegisterData = (fieldName, value) => {
+		const { registerData } = this.props.register;
+		const serviceInfor = registerData.serviceInfor;
+		let obj = {};
+		obj[fieldName] = value;
+		this.props.setRegisterData({ serviceInfor: { ...serviceInfor, ...obj } });
+	}
+
 	render() {
 		const { SkillSet } = this.state;
 
@@ -77,7 +85,7 @@ class InfoServices extends Component {
 							label={intl.formatMessage(messages.skillsets)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
 						>
-							<Select mode="multiple" showArrow placeholder={intl.formatMessage(messages.skillsets)}>
+							<Select mode="multiple" showArrow placeholder={intl.formatMessage(messages.skillsets)} onChange={skill => this.setValueToReduxRegisterData("skillSet", skill)}>
 								{SkillSet.map((skill, index) => (
 									<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
 								))}
@@ -97,7 +105,7 @@ class InfoServices extends Component {
 										},
 									}]}
 								>
-									<Input type='number' min={0} placeholder={intl.formatMessage(messages.yearsExperience)} />
+									<Input type='number' min={0} placeholder={intl.formatMessage(messages.yearsExperience)} onChange={e => this.setValueToReduxRegisterData("yearExp", e.target.value)} />
 								</Form.Item>
 							</Col>
 						</Row>
@@ -106,7 +114,7 @@ class InfoServices extends Component {
 							label={intl.formatMessage(messages.publicProfile)}
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.publicProfile) }]}
 						>
-							<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.publicProfile)} />
+							<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.publicProfile)} onChange={e => this.setValueToReduxRegisterData("publicProfile", e.target.value)} />
 						</Form.Item>
 						<Form.List name="references">
 							{(fields, { add, remove }) => (
@@ -119,7 +127,7 @@ class InfoServices extends Component {
 													name={[field.name, 'name']}
 													rules={[{ required: false }]}
 												>
-													<Input placeholder={intl.formatMessage(messages.references)} />
+													<Input placeholder={intl.formatMessage(messages.references)} onChange={() => this.setValueToReduxRegisterData("references", this.form?.getFieldValue('references'))}/>
 												</Form.Item>
 												<BsDashCircle size={16} className='text-red icon-remove provider-admin-reference' onClick={() => remove(field.name)} />
 											</div>

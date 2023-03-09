@@ -34,13 +34,13 @@ class InfoAvailability extends Component {
 			isSchools: true,
 			locations: [],
 			listSchool: [],
-			selectedLocation: '',
 			allHolidays: [],
 		}
 	}
 
 	async componentDidMount() {
 		const { registerData } = this.props.register;
+		this.loadSchools(registerData.profileInfor, registerData.availability);
 		const holidays = await this.getHolidays();
 		if (!!registerData.availability) {
 			this.form?.setFieldsValue({ ...registerData.availability });
@@ -63,7 +63,6 @@ class InfoAvailability extends Component {
 			this.props.setRegisterData({ availability: { isHomeVisit: true, isPrivateOffice: true, isSchools: true } });
 			this.setState({ locations: ['Dependent Home', 'Provider Office'] });
 		}
-		this.loadSchools(registerData.profileInfor, registerData.availability);
 	}
 
 	loadSchools(profileInfo, availabilityInfo) {
@@ -100,21 +99,12 @@ class InfoAvailability extends Component {
 	};
 
 	onSelectDay = e => {
-		if (e) {
-			this.setState({
-				currentSelectedDay: e,
-				selectedLocation: '',
-			})
-		}
+		e && this.setState({ currentSelectedDay: e });
 	}
 
 	onChangeScheduleValue = () => {
-		this.props.setRegisterData({ availability: this.form?.getFieldsValue() });
-	}
-
-	onLocationChange = (location) => {
-		this.props.setRegisterData({ availability: this.form?.getFieldsValue() });
-		this.setState({ selectedLocation: location });
+		const { isPrivateOffice, isHomeVisit, isSchools } = this.state;
+		this.props.setRegisterData({ availability: { ...this.form?.getFieldsValue(), isPrivateOffice, isHomeVisit, isSchools } });
 	}
 
 	copyToFullWeek = (dayForCopy, index) => {
@@ -133,6 +123,7 @@ class InfoAvailability extends Component {
 				this.form.setFieldValue(newDay, arrToCopy);
 			}
 		})
+		this.onChangeScheduleValue();
 	}
 
 	handleSwitchHome = (state) => {
@@ -140,7 +131,7 @@ class InfoAvailability extends Component {
 			this.setState({
 				isHomeVisit: state,
 				locations: ['Dependent Home', ...this.state.locations],
-			});
+			}, () => this.onChangeScheduleValue());
 		} else {
 			message.warning("All availability for dependent's home will also be deleted.").then(() => {
 				day_week.forEach(day => {
@@ -150,7 +141,7 @@ class InfoAvailability extends Component {
 			this.setState({
 				isHomeVisit: state,
 				locations: this.state.locations?.filter(location => location != 'Dependent Home'),
-			});
+			}, () => this.onChangeScheduleValue());
 		}
 	}
 
@@ -159,7 +150,7 @@ class InfoAvailability extends Component {
 			this.setState({
 				isPrivateOffice: state,
 				locations: ['Provider Office', ...this.state.locations],
-			});
+			}, () => this.onChangeScheduleValue());
 		} else {
 			message.warning('All availability for your office will also be deleted.').then(() => {
 				day_week.forEach(day => {
@@ -169,13 +160,13 @@ class InfoAvailability extends Component {
 			this.setState({
 				isPrivateOffice: state,
 				locations: this.state.locations?.filter(location => location != 'Provider Office'),
-			});
+			}, () => this.onChangeScheduleValue());
 		}
 	}
 
 	handleSwitchSchool = (state) => {
 		if (state) {
-			this.setState({ isSchools: state });
+			this.setState({ isSchools: state }, () => this.onChangeScheduleValue());
 		} else {
 			message.warning('All availability for those school will also be deleted.').then(() => {
 				day_week.forEach(day => {
@@ -185,7 +176,7 @@ class InfoAvailability extends Component {
 			this.setState({
 				isSchools: state,
 				locations: this.state.locations?.filter(location => location == 'Provider Office' || location == 'Dependent Home'),
-			});
+			}, () => this.onChangeScheduleValue());
 		}
 	}
 
@@ -193,6 +184,7 @@ class InfoAvailability extends Component {
 		const { locations, listSchool } = this.state;
 		locations.push(listSchool?.find(school => school._id == schoolId)?.name);
 		this.setState({ locations: locations });
+		this.onChangeScheduleValue();
 	}
 
 	handleDeselectSchool = (schoolId) => {
@@ -204,6 +196,7 @@ class InfoAvailability extends Component {
 				this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a?.location != schoolName));
 			})
 		});
+		this.onChangeScheduleValue();
 	}
 
 	getDayOfWeekIndex = (day) => {
@@ -219,12 +212,13 @@ class InfoAvailability extends Component {
 	}
 
 	handleSelectTime = (value, type, day, index) => {
-		const { selectedLocation, currentSelectedDay, listSchool } = this.state;
+		const { listSchool } = this.state;
 		const dayTime = this.form?.getFieldValue(day);
-		if (selectedLocation) {
-			const school = listSchool?.find(school => school.name == selectedLocation);
+		const location = dayTime?.[index]?.location;
+		if (location) {
+			const school = listSchool?.find(school => school.name == location);
 			if (school) {
-				const dayIndex = this.getDayOfWeekIndex(currentSelectedDay);
+				const dayIndex = this.getDayOfWeekIndex(day);
 				if (dayIndex > -1) {
 					value = value.set({ seconds: 0, milliseconds: 0 });
 					const inOpenTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.openHour, minutes: school.sessionsInSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
@@ -253,6 +247,43 @@ class InfoAvailability extends Component {
 			this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: value }) : d));
 		}
 		this.onChangeScheduleValue();
+	}
+
+	handleSelectLocation = (location, day, index) => {
+		const { listSchool } = this.state;
+		const dayTime = this.form?.getFieldValue(day);
+
+		const school = listSchool?.find(school => school.name == location);
+		if (school) {
+			const dayIndex = this.getDayOfWeekIndex(day);
+			if (dayIndex > -1) {
+				const inOpenTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.openHour, minutes: school.sessionsInSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
+				const inCloseTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.closeHour, minutes: school.sessionsInSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
+				const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.openHour, minutes: school.sessionsAfterSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
+				const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.closeHour, minutes: school.sessionsAfterSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
+
+				if (dayTime[index]?.from_time) {
+					const fromTime = moment(dayTime[index]?.from_time).set({ seconds: 0, milliseconds: 0 });
+					if (!((fromTime.isSame(inOpenTime) || fromTime.isBetween(inOpenTime, inCloseTime)) || (fromTime.isSame(afterOpenTime) || fromTime.isBetween(afterOpenTime, afterCloseTime)))) {
+						message.warning("The school is not available at the from_time. Please select another time.", 5);
+						this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: null }) : d));
+					} else {
+						this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: location }) : d));
+					}
+				}
+				if (dayTime[index]?.to_time) {
+					const toTime = moment(dayTime[index]?.to_time).set({ seconds: 0, milliseconds: 0 });
+					if (!((toTime.isSame(inCloseTime) || toTime.isBetween(inOpenTime, inCloseTime)) || (toTime.isSame(afterCloseTime) || toTime.isBetween(afterOpenTime, afterCloseTime)))) {
+						message.warning("The school is not available at the to_time. Please select another time.", 5);
+						this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: null }) : d));
+					} else {
+						this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: location }) : d));
+					}
+				}
+			}
+		} else {
+			this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: location }) : d));
+		}
 	}
 
 	getHolidays = async () => {
@@ -330,6 +361,7 @@ class InfoAvailability extends Component {
 				}
 			}
 		})
+		this.onChangeScheduleValue();
 	}
 
 	render() {
@@ -394,16 +426,14 @@ class InfoAvailability extends Component {
 											<div className='div-time'>
 												{fields.map((field, i) => (
 													<div key={field.key}>
-														{field.key != 0 && <Divider className='bg-gray' />}
 														<Form.Item name={[field.name, "location"]}>
 															<Select
 																showArrow
 																placeholder={intl.formatMessage(messages.location)}
-																optionLabelProp="label"
-																onSelect={(v) => this.onLocationChange(v)}
+																onChange={(location) => this.handleSelectLocation(location, day, i)}
 															>
 																{locations.map((location, index) => (
-																	<Select.Option key={index} label={location} value={location}>{location}</Select.Option>
+																	<Select.Option key={index} value={location}>{location}</Select.Option>
 																))}
 															</Select>
 														</Form.Item>
@@ -417,7 +447,7 @@ class InfoAvailability extends Component {
 																	/>
 																</Form.Item>
 															</Col>
-															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
+															<Col xs={24} sm={24} md={12} className='item-remove'>
 																<Form.Item name={[field.name, "to_date"]}>
 																	<DatePicker
 																		onChange={() => this.onChangeScheduleValue()}
@@ -425,7 +455,7 @@ class InfoAvailability extends Component {
 																		placeholder={intl.formatMessage(messages.to)}
 																	/>
 																</Form.Item>
-																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day); }} />}
+																<BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day); }} />
 															</Col>
 														</Row>
 														<Row gutter={14}>
@@ -441,7 +471,7 @@ class InfoAvailability extends Component {
 																	/>
 																</Form.Item>
 															</Col>
-															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
+															<Col xs={24} sm={24} md={12} className='item-remove'>
 																<Form.Item name={[field.name, "to_time"]}>
 																	<TimePicker
 																		onChange={() => this.onChangeScheduleValue()}
@@ -452,7 +482,7 @@ class InfoAvailability extends Component {
 																		onSelect={(v) => this.handleSelectTime(v, 'to_time', day, i)}
 																	/>
 																</Form.Item>
-																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day); }} />}
+																<BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day); }} />
 															</Col>
 														</Row>
 														<Row>
@@ -477,16 +507,12 @@ class InfoAvailability extends Component {
 														</Row>
 													</div>
 												))}
-												<Row>
-													<Col span={12}>
-														<div className='div-add-time justify-center'>
-															<BsPlusCircle size={17} className='mr-5 text-primary' />
-															<a className='text-primary' onClick={() => add()}>
-																{intl.formatMessage(messages.addRange)}
-															</a>
-														</div>
-													</Col>
-												</Row>
+												<div className='div-add-time justify-center'>
+													<BsPlusCircle size={17} className='mr-5 text-primary' />
+													<a className='text-primary' onClick={() => add()}>
+														{intl.formatMessage(messages.addRange)}
+													</a>
+												</div>
 											</div>
 										)}
 									</Form.List>

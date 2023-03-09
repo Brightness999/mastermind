@@ -105,7 +105,9 @@ class InfoFinancial extends Component {
 			this.props.setRegisterData({
 				upload_w_9: info.file.name,
 				uploaded_path: info.file.response.data.toString(),
-			})
+			});
+
+			this.setValueToReduxRegisterData('upload_w_9', info.file.name);
 			this.setState(prevState => ({ documentUploaded: [...prevState.documentUploaded, info.file.response.data] }));
 		} else if (info.file.status === 'error') {
 			message.error(`${info.file.name} file upload failed.`);
@@ -118,10 +120,6 @@ class InfoFinancial extends Component {
 		let financialInfor = JSON.parse(JSON.stringify(registerData.financialInfor));
 		financialInfor[fieldName] = value;
 		this.props.setRegisterData({ financialInfor: financialInfor });
-	}
-
-	handleSelectChange = (fieldName, value) => {
-		this.setValueToReduxRegisterData(fieldName, value);
 	}
 
 	handleSelectLevel = (selectedLevel) => {

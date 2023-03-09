@@ -38,6 +38,9 @@ class InfoProfile extends Component {
 		const profileInfor = registerData.profileInfor || this.getDefaultObj();
 		this.form.setFieldsValue(profileInfor);
 		this.setState({ isPrivateForHmgh: profileInfor?.isPrivateForHmgh });
+		if (!registerData.profileInfor) {
+			this.props.setRegisterData({ profileInfor: this.getDefaultObj() });
+		}
 	}
 
 	getDataFromServer = () => {
@@ -149,6 +152,7 @@ class InfoProfile extends Component {
 								showSearch
 								optionFilterProp="children"
 								filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+								onChange={(value) => this.setValueToReduxRegisterData("cityConnection", value)}
 							>
 								{cityConnections?.map((value, index) => (
 									<Select.Option key={index} value={value._id}>{value.name}</Select.Option>
@@ -225,7 +229,7 @@ class InfoProfile extends Component {
 														},
 													]}
 												>
-													<Input placeholder={intl.formatMessage(messages.contactNumber)} />
+													<Input placeholder={intl.formatMessage(messages.contactNumber)} onChange={() => this.setValueToReduxRegisterData("contactNumber", this.form?.getFieldValue('contactNumber'))} />
 												</Form.Item>
 											</Col>
 											<Col xs={8} sm={8} md={8} className='item-remove'>
@@ -237,7 +241,7 @@ class InfoProfile extends Component {
 													className='bottom-0'
 													style={{ marginTop: key === 0 ? 0 : 14 }}
 												>
-													<Select placeholder={intl.formatMessage(messages.type)}>
+													<Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.setValueToReduxRegisterData("contactNumber", this.form?.getFieldValue('contactNumber'))}>
 														{ContactNumberType?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
@@ -283,7 +287,7 @@ class InfoProfile extends Component {
 														}
 													]}
 												>
-													<Input placeholder={intl.formatMessage(messages.contactEmail)} />
+													<Input placeholder={intl.formatMessage(messages.contactEmail)} onChange={() => this.setValueToReduxRegisterData("contactEmail", this.form?.getFieldValue('contactEmail'))} />
 												</Form.Item>
 											</Col>
 											<Col xs={8} sm={8} md={8} className='item-remove'>
@@ -295,7 +299,7 @@ class InfoProfile extends Component {
 													className='bottom-0'
 													style={{ marginTop: key === 0 ? 0 : 14 }}
 												>
-													<Select placeholder={intl.formatMessage(messages.type)}>
+													<Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.setValueToReduxRegisterData("contactEmail", this.form?.getFieldValue('contactEmail'))}>
 														{EmailType?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
