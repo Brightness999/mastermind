@@ -16,6 +16,7 @@ import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils
 import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import ModalNewScreening from './ModalNewScreening';
 import { store } from '../../redux/store';
+import ModalConfirm from './ModalConfirm';
 
 const { Paragraph } = Typography;
 moment.locale('en');
@@ -49,6 +50,8 @@ class ModalNewAppointmentForParents extends React.Component {
 		restSessions: 0,
 		loading: false,
 		duration: 30,
+		visibleModalConfirm: false,
+		confirmMessage: '',
 	}
 
 	getArrTime = (type, providerIndex, date) => {
@@ -156,6 +159,8 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	createAppointment = (data) => {
 		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, standardRate, subsidizedRate, duration } = this.state;
+		const { durations } = store.getState().auth;
+
 		if (selectedProvider == undefined) {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
 			return;
@@ -197,6 +202,33 @@ class ModalNewAppointmentForParents extends React.Component {
 			duration: appointmentType == 2 ? listProvider[selectedProviderIndex]?.separateEvaluationDuration : listProvider[selectedProviderIndex]?.duration,
 		};
 		this.setState({ visibleModalScreening: false });
+		if (appointmentType === 2) {
+			this.setState({
+				visibleModalConfirm: true,
+				confirmMessage: (<span><span className='text-bold'>{listProvider[selectedProviderIndex]?.firstName ?? ''} {listProvider[selectedProviderIndex]?.lastName ?? ''}</span> requires a <span className='text-bold'>{durations?.find(a => a.value == postData?.duration)?.label}</span> evaluation. Please proceed to schedule.</span>)
+			});
+		} else {
+			this.requestCreateAppointment(postData);
+		}
+	}
+
+	onConfirmEvaluation = () => {
+		this.onCloseModalConfirm();
+		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration } = this.state;
+		const { years, months, date } = selectedDate.toObject();
+		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
+		const postData = {
+			skillSet: selectedSkill,
+			dependent: selectedDependent,
+			provider: selectedProvider,
+			date: hour,
+			location: address,
+			notes: notes,
+			duration: duration,
+			type: appointmentType,
+			status: 0,
+			rate: listProvider[selectedProviderIndex]?.separateEvaluationRate ?? 0,
+		};
 		this.requestCreateAppointment(postData);
 	}
 
@@ -399,15 +431,9 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	requestCreateAppointment(postData) {
-		const { listProvider, selectedProviderIndex } = this.state;
-		const { durations } = store.getState().auth;
-
 		request.post(createAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
-				if (postData?.type == 2) {
-					message.success(`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''} requires a ${durations?.find(a => a.value == postData?.duration)?.label} evaluation. Please proceed to schedule.`);
-				}
 				this.props.onSubmit();
 			} else {
 				this.setState({ errorMessage: result.data });
@@ -450,6 +476,10 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	onCloseModalScreening = () => {
 		this.setState({ visibleModalScreening: false });
+	}
+
+	onCloseModalConfirm = () => {
+		this.setState({ visibleModalConfirm: false });
 	}
 
 	nextPrivateMonth = () => {
@@ -563,6 +593,8 @@ class ModalNewAppointmentForParents extends React.Component {
 			loading,
 			notes,
 			address,
+			visibleModalConfirm,
+			confirmMessage,
 		} = this.state;
 		const modalProps = {
 			className: 'modal-new',
@@ -580,6 +612,12 @@ class ModalNewAppointmentForParents extends React.Component {
 			provider: listProvider[selectedProviderIndex],
 			dependent: this.props.listDependents?.find(dependent => dependent._id == selectedDependent),
 			notes: notes,
+		}
+		const modalConfirmProps = {
+			visible: visibleModalConfirm,
+			onSubmit: this.onConfirmEvaluation,
+			onCancel: this.onCloseModalConfirm,
+			message: confirmMessage,
 		}
 
 		return (
@@ -845,6 +883,7 @@ class ModalNewAppointmentForParents extends React.Component {
 							</Col>
 						</Row>
 						{visibleModalScreening && <ModalNewScreening {...modalScreeningProps} />}
+						{visibleModalConfirm && <ModalConfirm {...modalConfirmProps} />}
 						{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
 						<Row className='justify-end gap-2'>
 							<Button key="back" onClick={this.props.onCancel}>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, Button } from 'antd';
 import intl from 'react-intl-universal';
 import messages from './messages';
+import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -17,8 +18,8 @@ class ModalConfirm extends React.Component {
 				<Button key="back" onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel)}
 				</Button>,
-				<Button key="submit" type="primary" onClick={this.props.onSubmit} style={{ padding: '7.5px 30px' }}>
-					{intl.formatMessage(messages.save)}
+				<Button key="submit" type="primary" onClick={this.props.onSubmit}>
+					{intl.formatMessage(msgCreateAccount.confirm)}
 				</Button>
 			]
 		};
