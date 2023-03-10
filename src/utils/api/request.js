@@ -24,7 +24,8 @@ instance.interceptors.request.use(
 			if (window.location.pathname.includes('/account') || window.location.pathname.includes('/administrator')) {
 				message.warning({
 					content: 'Your session has expired.',
-					className: 'popup-session-expired'
+					className: 'popup-session-expired',
+					duration: 2,
 				})
 				window.location.href = '/';
 			} else {
