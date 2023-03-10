@@ -806,7 +806,7 @@ class ModalNewAppointment extends React.Component {
 													}}
 													onSelect={this.onSelectDate}
 													disabledDate={(date) => {
-														if (date.isBefore(moment())) {
+														if (date.set({ hours: 0, minutes: 0, seconds: 0 }).isBefore(moment())) {
 															return true;
 														}
 
@@ -816,11 +816,7 @@ class ModalNewAppointment extends React.Component {
 
 														if (selectedProviderIndex > -1) {
 															const range = listProvider[selectedProviderIndex]?.manualSchedule?.find(d => d.dayInWeek == date.day() && d.location == address && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate })));
-															if (range) {
-																if (range.isPrivate) {
-																	return true;
-																}
-															} else {
+															if (!range) {
 																return true;
 															}
 															if (listProvider[selectedProviderIndex]?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() == date.year() && moment(blackoutDate).month() == date.month() && moment(blackoutDate).date() == date.date())) {
