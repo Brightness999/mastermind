@@ -177,13 +177,6 @@ class ModalNewAppointment extends React.Component {
 				return;
 			}
 		}
-		if (appointmentType == 1) {
-			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == 0);
-			if (appointment) {
-				message.warning("Your screening request is still being processed", 5);
-				return;
-			}
-		}
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
 		const postData = {
@@ -458,6 +451,13 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	onOpenModalScreening = () => {
+		const { selectedDependent, listProvider, selectedProviderIndex } = this.state;
+		const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == 0);
+		if (appointment) {
+			message.warning("Your screening request is still being processed", 5);
+			return;
+		}
+
 		this.setState({ visibleModalScreening: true });
 	}
 

@@ -23,7 +23,6 @@ const initialState = {
 		contactNumberTypes: [],
 		emailTypes: [],
 		skillSets: [],
-		sreenTimes: [],
 		academicLevels: [],
 		cancellationWindow: [],
 		durations: [],
