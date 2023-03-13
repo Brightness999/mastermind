@@ -24,7 +24,7 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      user: {},
+      user: store.getState().auth.selectedUser,
       parent: {
         info_child: true,
         info_parent: false,
@@ -50,15 +50,12 @@ export default class extends React.Component {
         info_admin: true,
       },
       listMenu: [],
-      keyActive: 0,
+      keyActive: setKeyDefault(store.getState().auth.selectedUser?.role),
     };
   }
 
   componentDidMount() {
-    const selectedUser = this.props.location?.pathname?.includes("changeuserprofile") ? store.getState().auth.selectedUser : store.getState().auth.user;
-    this.setState({ user: selectedUser });
-    setKeyDefault(selectedUser?.role);
-    switch (selectedUser?.role) {
+    switch (this.state.user?.role) {
       case 1000:
         this.setState({ listMenu: this.getMenuList(MENU_ADMIN) });
         break;

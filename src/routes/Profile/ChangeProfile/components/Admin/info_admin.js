@@ -119,7 +119,6 @@ class InfoAdmin extends React.Component {
               <Select
                 placeholder={intl.formatMessage(messages.cityConnections)}
                 showSearch
-                disabled
                 optionFilterProp="children"
                 mode="multiple"
                 filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}

@@ -22,7 +22,6 @@ import { setKeyDefault } from '../service';
 import { store } from '../../../../redux/store';
 import SubsidyProgram from './Provider/subsidy_program';
 
-const user = store.getState().auth.user;
 export default class extends React.Component {
   constructor(props) {
     super(props);
@@ -60,13 +59,14 @@ export default class extends React.Component {
         info_admin: true,
         change_password: false
       },
+      user: store.getState().auth.user,
       listMenu: [],
-      keyActive: setKeyDefault(user.role)
+      keyActive: setKeyDefault(store.getState().auth.user?.role)
     };
   }
 
   componentDidMount() {
-    switch (user.role) {
+    switch (this.state.user?.role) {
       case 1000:
         this.setState({ listMenu: this.getMenuList(MENU_ADMIN) });
         break;
@@ -103,7 +103,7 @@ export default class extends React.Component {
 
   changeMenu = (val) => {
     this.setState({ keyActive: val });
-    switch (user.role) {
+    switch (this.state.user.role) {
       case 1000:
         let newStateSuperAdmin = { ...this.state.admin };
         switch (val) {
@@ -213,7 +213,7 @@ export default class extends React.Component {
   }
 
   getScreen = () => {
-    const { admin, school, parent, provider, consultant } = this.state;
+    const { admin, school, parent, provider, consultant, user } = this.state;
     switch (user.role) {
       case 1000:
         if (admin.info_admin) {
