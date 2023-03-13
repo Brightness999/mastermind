@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Select, Segmented, TimePicker, Switch, DatePicker, message, Divider } from 'antd';
+import { Row, Col, Form, Button, Select, Segmented, TimePicker, Switch, DatePicker, message, Divider, Checkbox } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
@@ -39,8 +39,11 @@ class InfoAvailability extends Component {
 			selectedLocation: '',
 			isPrivateForHmgh: false,
 			loading: false,
-			allHolidays: [],
 			isWillingOpenPrivate: false,
+			legalHolidays: [],
+			jewishHolidays: [],
+			isLegalHolidays: false,
+			isJewishHolidays: false,
 		}
 	}
 
@@ -87,11 +90,13 @@ class InfoAvailability extends Component {
 						isPrivateForHmgh: data?.providerInfo?.isPrivateForHmgh,
 						locations: locations,
 						isWillingOpenPrivate: data?.providerInfo?.isWillingOpenPrivate,
+						isLegalHolidays: data?.providerInfo?.isLegalHolidays,
+						isJewishHolidays: data?.providerInfo?.isJewishHolidays,
 					})
 				}
 			}).catch(err => {
 				this.setState({ loading: false });
-				message.error("Getting Profile" + err.message);
+				message.error("Getting Profile: " + err.message);
 				console.log(err);
 			})
 		} else {
@@ -131,11 +136,13 @@ class InfoAvailability extends Component {
 						isPrivateForHmgh: user?.providerInfo?.isPrivateForHmgh,
 						locations: locations,
 						isWillingOpenPrivate: user?.providerInfo?.isWillingOpenPrivate,
+						isLegalHolidays: user?.providerInfo?.isLegalHolidays,
+						isJewishHolidays: user?.providerInfo?.isJewishHolidays,
 					})
 				}
 			}).catch(err => {
 				this.setState({ loading: false });
-				message.error("Getting Profile" + err.message);
+				message.error("Getting Profile: " + err.message);
 			})
 		}
 	}
@@ -148,7 +155,10 @@ class InfoAvailability extends Component {
 			const usa_data = await fetch(usa_url).then(response => response.json());
 			const jewish_data = await fetch(jewish_url).then(response => response.json());
 
-			this.setState({ allHolidays: [...usa_data?.items ?? [], ...jewish_data?.items ?? []] });
+			this.setState({
+				legalHolidays: usa_data?.items ?? [],
+				jewishHolidays: jewish_data?.items ?? [],
+			});
 
 			return [...usa_data?.items ?? [], ...jewish_data?.items ?? []];
 		} catch (error) {
@@ -182,7 +192,7 @@ class InfoAvailability extends Component {
 	}
 
 	onFinish = (values) => {
-		const { listSchool, isPrivateForHmgh } = this.state;
+		const { listSchool, isPrivateForHmgh, isJewishHolidays, isLegalHolidays } = this.state;
 		let manualSchedule = [];
 		day_week.map(day => {
 			values[day]?.forEach(t => {
@@ -231,7 +241,7 @@ class InfoAvailability extends Component {
 			message.error(`The selected date or time is not valid on ${day_week[invalidDay.dayInWeek]}`);
 		} else {
 			if (window.location.pathname?.includes('changeuserprofile')) {
-				request.post(updateMyProviderAvailability, { ...values, _id: this.props.auth.selectedUser?.providerInfo?._id }).then(result => {
+				request.post(updateMyProviderAvailability, { ...values, isJewishHolidays, isLegalHolidays, _id: this.props.auth.selectedUser?.providerInfo?._id }).then(result => {
 					const { success } = result;
 					if (success) {
 						message.success('Updated successfully');
@@ -241,7 +251,7 @@ class InfoAvailability extends Component {
 					console.log('update provider availability error---', err);
 				})
 			} else {
-				request.post(updateMyProviderAvailability, { ...values, _id: this.props.auth.user.providerInfo?._id }).then(result => {
+				request.post(updateMyProviderAvailability, { ...values, isJewishHolidays, isLegalHolidays, _id: this.props.auth.user.providerInfo?._id }).then(result => {
 					const { success } = result;
 					if (success) {
 						message.success('Updated successfully');
@@ -414,19 +424,42 @@ class InfoAvailability extends Component {
 		}
 	}
 
-	handleClickGoogleCalendar = async () => {
+	handleChangeLegalHolidays = async (status) => {
+		this.setState({ isLegalHolidays: status });
+
+		const { legalHolidays, jewishHolidays, isJewishHolidays } = this.state;
 		const dates = this.form?.getFieldValue("blackoutDates")?.map(date => new Date(date));
 		let uniqueDates = [];
-		[...dates ?? [], ...[...new Set(this.state.allHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
-			if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
-				uniqueDates.push(c);
+
+		if (status) {
+			[...dates ?? [], ...[...new Set(legalHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+				if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
+					uniqueDates.push(c);
+				}
+			})
+		} else {
+			if (isJewishHolidays) {
+				uniqueDates = jewishHolidays.map(a => new Date(a.start.date))?.sort((a, b) => a - b);
 			}
-		})
+		}
 
 		await this.updateBlackoutDates(uniqueDates);
 
+		let holidays = [];
+		if (status) {
+			if (isJewishHolidays) {
+				holidays = [...legalHolidays ?? [], ...jewishHolidays ?? []];
+			} else {
+				holidays = legalHolidays ?? [];
+			}
+		} else {
+			if (isJewishHolidays) {
+				holidays = jewishHolidays ?? [];
+			}
+		}
+
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = this.state.allHolidays?.find(a => a.start.date == el.innerText)?.summary;
+			const name = holidays?.find(a => a?.start?.date == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
@@ -435,9 +468,53 @@ class InfoAvailability extends Component {
 					newElement.textContent = name;
 					el.after(newElement);
 				}
+			}
+		})
+	}
+
+	handleChangeJewishHolidays = async (status) => {
+		this.setState({ isJewishHolidays: status });
+
+		const { jewishHolidays, legalHolidays, isLegalHolidays } = this.state;
+		const dates = this.form?.getFieldValue("blackoutDates")?.map(date => new Date(date));
+		let uniqueDates = [];
+
+		if (status) {
+			[...dates ?? [], ...[...new Set(jewishHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+				if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
+					uniqueDates.push(c);
+				}
+			})
+		} else {
+			if (isLegalHolidays) {
+				uniqueDates = legalHolidays.map(a => new Date(a.start.date))?.sort((a, b) => a - b);
+			}
+		}
+
+		await this.updateBlackoutDates(uniqueDates);
+
+		let holidays = [];
+		if (status) {
+			if (isLegalHolidays) {
+				holidays = [...jewishHolidays ?? [], ...legalHolidays ?? []];
 			} else {
+				holidays = jewishHolidays ?? [];
+			}
+		} else {
+			if (isLegalHolidays) {
+				holidays = legalHolidays ?? [];
+			}
+		}
+
+		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
+			const name = holidays?.find(a => a?.start?.date == el.innerText)?.summary;
+			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
-					el.nextElementSibling.innerText = '';
+					el.nextElementSibling.innerText = name;
+				} else {
+					let newElement = document.createElement("div");
+					newElement.textContent = name;
+					el.after(newElement);
 				}
 			}
 		})
@@ -456,8 +533,10 @@ class InfoAvailability extends Component {
 
 	handleUpdateBlackoutDates = async (dates) => {
 		await this.updateBlackoutDates(dates);
+		const { legalHolidays, jewishHolidays } = this.state;
+
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = this.state.allHolidays?.find(a => a.start.date == el.innerText)?.summary;
+			const name = [...legalHolidays ?? [], ...jewishHolidays ?? []]?.find(a => a.start.date == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
@@ -475,7 +554,7 @@ class InfoAvailability extends Component {
 	}
 
 	render() {
-		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh, loading, isWillingOpenPrivate } = this.state;
+		const { currentSelectedDay, isPrivateOffice, isHomeVisit, isSchools, locations, listSchool, isPrivateForHmgh, loading, isWillingOpenPrivate, isLegalHolidays, isJewishHolidays } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -562,14 +641,14 @@ class InfoAvailability extends Component {
 																	/>
 																</Form.Item>
 															</Col>
-															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
+															<Col xs={24} sm={24} md={12} className='item-remove'>
 																<Form.Item name={[field.name, "to_date"]} label={intl.formatMessage(messages.to)} className='float-label-item'>
 																	<DatePicker
 																		format='MM/DD/YYYY'
 																		placeholder={intl.formatMessage(messages.to)}
 																	/>
 																</Form.Item>
-																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day); }} />}
+																<BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day); }} />
 															</Col>
 														</Row>
 														<Row gutter={14}>
@@ -584,7 +663,7 @@ class InfoAvailability extends Component {
 																	/>
 																</Form.Item>
 															</Col>
-															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
+															<Col xs={24} sm={24} md={12} className='item-remove'>
 																<Form.Item name={[field.name, "to_time"]} label={intl.formatMessage(messages.to)} className='float-label-item'>
 																	<TimePicker
 																		use12Hours
@@ -594,7 +673,7 @@ class InfoAvailability extends Component {
 																		onSelect={(v) => this.handleSelectTime(v, 'to_time', day, i)}
 																	/>
 																</Form.Item>
-																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day); }} />}
+																<BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day); }} />
 															</Col>
 														</Row>
 														<Row>
@@ -619,16 +698,12 @@ class InfoAvailability extends Component {
 														</Row>
 													</div>
 												))}
-												<Row>
-													<Col span={12}>
-														<div className='div-add-time justify-center'>
-															<BsPlusCircle size={17} className='mr-5 text-primary' />
-															<a className='text-primary' onClick={() => add()}>
-																{intl.formatMessage(messages.addRange)}
-															</a>
-														</div>
-													</Col>
-												</Row>
+												<div className='div-add-time justify-center'>
+													<BsPlusCircle size={17} className='mr-5 text-primary' />
+													<a className='text-primary' onClick={() => add()}>
+														{intl.formatMessage(messages.addRange)}
+													</a>
+												</div>
 											</div>
 										)}
 									</Form.List>
@@ -637,9 +712,9 @@ class InfoAvailability extends Component {
 						</div>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
 						<div className='flex items-center justify-center mb-10'>
-							<div className='flex gap-2 items-center cursor' onClick={() => this.handleClickGoogleCalendar()}>
-								<img src='../images/gg.png' className='h-30' />
-								<p className='font-16 mb-0 text-underline'>Google</p>
+							<div className='flex gap-4 items-center cursor'>
+								<Checkbox checked={isLegalHolidays} onChange={(e) => this.handleChangeLegalHolidays(e.target.checked)}>Legal Holidays</Checkbox>
+								<Checkbox checked={isJewishHolidays} onChange={(e) => this.handleChangeJewishHolidays(e.target.checked)}>Jewish Holidays</Checkbox>
 							</div>
 						</div>
 						<Form.Item name="blackoutDates">

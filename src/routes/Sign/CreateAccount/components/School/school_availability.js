@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Form, Button, Segmented, TimePicker, message } from 'antd';
+import { Row, Col, Form, Button, Segmented, TimePicker, message, Checkbox } from 'antd';
 import moment from 'moment';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
@@ -35,7 +35,10 @@ class SchoolAvailability extends React.Component {
 			sessionsInSchool: [],
 			sessionsAfterSchool: [],
 			isSubmit: false,
-			allHolidays: [],
+			legalHolidays: [],
+			jewishHolidays: [],
+			isLegalHolidays: false,
+			isJewishHolidays: false,
 		}
 	}
 
@@ -51,18 +54,28 @@ class SchoolAvailability extends React.Component {
 		} else {
 			this.setState({
 				sessionsInSchool: registerData.sessionsInSchool,
-				sessionsAfterSchool: registerData.sessionsAfterSchool
+				sessionsAfterSchool: registerData.sessionsAfterSchool,
+				isLegalHolidays: registerData?.isLegalHolidays,
+				isJewishHolidays: registerData?.isJewishHolidays,
 			})
 		}
 
-		const holidays = await this.getHolidays();
-		if (registerData?.blackoutDates?.length) {
-			await this.updateBlackoutDates(registerData?.blackoutDates?.map(date => new Date(date)));
-			document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-				let name = document.createElement("div");
-				name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
-				el.after(name);
+		if (registerData?.legalHolidays?.length) {
+			const holidays = [...registerData?.legalHolidays ?? [], ...registerData?.jewishHolidays ?? []];
+			this.setState({
+				legalHolidays: registerData?.legalHolidays ?? [],
+				jewishHolidays: registerData?.jewishHolidays ?? [],
 			})
+			if (registerData?.blackoutDates?.length) {
+				await this.updateBlackoutDates(registerData?.blackoutDates?.map(date => new Date(date)));
+				document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
+					let name = document.createElement("div");
+					name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
+					el.after(name);
+				})
+			}
+		} else {
+			await this.getHolidays();
 		}
 	}
 
@@ -100,7 +113,7 @@ class SchoolAvailability extends React.Component {
 
 	onFinish = async () => {
 		const { registerData } = this.props.register;
-		const { sessionsAfterSchool, sessionsInSchool } = this.state;
+		const { sessionsAfterSchool, sessionsInSchool, isLegalHolidays, isJewishHolidays } = this.state;
 		const invalidInSchoolDay = sessionsInSchool?.findIndex(times => moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin })));
 		const invalidAfterSchoolDay = sessionsAfterSchool?.findIndex(times => moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin })));
 		if (invalidAfterSchoolDay < 0 && invalidInSchoolDay < 0) {
@@ -112,7 +125,7 @@ class SchoolAvailability extends React.Component {
 
 			// post to server
 			this.setState({ isSubmit: true });
-			const response = await request.post(userSignUp, newRegisterData);
+			const response = await request.post(userSignUp, { ...newRegisterData, isJewishHolidays, isLegalHolidays });
 			this.setState({ isSubmit: false });
 			const { success } = response;
 			if (success) {
@@ -197,8 +210,14 @@ class SchoolAvailability extends React.Component {
 			const usa_data = await fetch(usa_url).then(response => response.json());
 			const jewish_data = await fetch(jewish_url).then(response => response.json());
 
-			this.setState({ allHolidays: [...usa_data?.items ?? [], ...jewish_data?.items ?? []] });
-			this.props.setRegisterData({ allHolidays: [...usa_data?.items ?? [], ...jewish_data?.items ?? []] });
+			this.setState({
+				legalHolidays: usa_data?.items ?? [],
+				jewishHolidays: jewish_data?.items ?? [],
+			});
+			this.props.setRegisterData({
+				legalHolidays: usa_data?.items ?? [],
+				jewishHolidays: jewish_data?.items ?? [],
+			});
 
 			return [...usa_data?.items ?? [], ...jewish_data?.items ?? []];
 		} catch (error) {
@@ -206,19 +225,42 @@ class SchoolAvailability extends React.Component {
 		}
 	}
 
-	handleClickGoogleCalendar = async () => {
+	handleChangeLegalHolidays = async (status) => {
+		this.setState({ isLegalHolidays: status });
+
+		const { legalHolidays, jewishHolidays, isJewishHolidays } = this.state;
 		const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
 		let uniqueDates = [];
-		[...dates ?? [], ...[...new Set(this.state.allHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
-			if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
-				uniqueDates.push(c);
+
+		if (status) {
+			[...dates ?? [], ...[...new Set(legalHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+				if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
+					uniqueDates.push(c);
+				}
+			})
+		} else {
+			if (isJewishHolidays) {
+				uniqueDates = jewishHolidays.map(a => new Date(a.start.date))?.sort((a, b) => a - b);
 			}
-		})
+		}
 
 		await this.updateBlackoutDates(uniqueDates);
 
+		let holidays = [];
+		if (status) {
+			if (isJewishHolidays) {
+				holidays = [...legalHolidays ?? [], ...jewishHolidays ?? []];
+			} else {
+				holidays = legalHolidays ?? [];
+			}
+		} else {
+			if (isJewishHolidays) {
+				holidays = jewishHolidays ?? [];
+			}
+		}
+
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = this.state.allHolidays?.find(a => a.start.date == el.innerText)?.summary;
+			const name = holidays?.find(a => a.start.date == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
@@ -227,12 +269,58 @@ class SchoolAvailability extends React.Component {
 					newElement.textContent = name;
 					el.after(newElement);
 				}
+			}
+		})
+		this.setReduxForSchool('isLegalHolidays', status);
+	}
+
+	handleChangeJewishHolidays = async (status) => {
+		this.setState({ isJewishHolidays: status });
+
+		const { legalHolidays, jewishHolidays, isLegalHolidays } = this.state;
+		const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
+		let uniqueDates = [];
+
+		if (status) {
+			[...dates ?? [], ...[...new Set(jewishHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+				if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
+					uniqueDates.push(c);
+				}
+			})
+		} else {
+			if (isLegalHolidays) {
+				uniqueDates = legalHolidays.map(a => new Date(a.start.date))?.sort((a, b) => a - b);
+			}
+		}
+
+		await this.updateBlackoutDates(uniqueDates);
+
+		let holidays = [];
+		if (status) {
+			if (isLegalHolidays) {
+				holidays = [...jewishHolidays ?? [], ...legalHolidays ?? []];
 			} else {
+				holidays = jewishHolidays ?? [];
+			}
+		} else {
+			if (isLegalHolidays) {
+				holidays = legalHolidays ?? [];
+			}
+		}
+
+		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
+			const name = holidays?.find(a => a.start.date == el.innerText)?.summary;
+			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
-					el.nextElementSibling.innerText = '';
+					el.nextElementSibling.innerText = name;
+				} else {
+					let newElement = document.createElement("div");
+					newElement.textContent = name;
+					el.after(newElement);
 				}
 			}
 		})
+		this.setReduxForSchool('isJewishHolidays', status);
 	}
 
 	updateBlackoutDates = async (dates) => {
@@ -249,8 +337,10 @@ class SchoolAvailability extends React.Component {
 
 	handleUpdateBlackoutDates = async (dates) => {
 		await this.updateBlackoutDates(dates);
+		const { legalHolidays, jewishHolidays } = this.state;
+
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = this.state.allHolidays?.find(a => a.start.date == el.innerText)?.summary;
+			const name = [...legalHolidays ?? [], ...jewishHolidays ?? []]?.find(a => a.start.date == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
@@ -268,7 +358,7 @@ class SchoolAvailability extends React.Component {
 	}
 
 	render() {
-		const { dayIsSelected, sessionsInSchool, sessionsAfterSchool, isSubmit } = this.state;
+		const { dayIsSelected, sessionsInSchool, sessionsAfterSchool, isSubmit, isLegalHolidays, isJewishHolidays } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -346,9 +436,9 @@ class SchoolAvailability extends React.Component {
 						</div>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
 						<div className='flex items-center justify-center mb-10'>
-							<div className='flex gap-2 items-center cursor' onClick={() => this.handleClickGoogleCalendar()}>
-								<img src='../images/gg.png' className='h-30' />
-								<p className='font-16 mb-0 text-underline'>Google</p>
+							<div className='flex gap-4 items-center cursor'>
+								<Checkbox checked={isLegalHolidays} onChange={(e) => this.handleChangeLegalHolidays(e.target.checked)}>Legal Holidays</Checkbox>
+								<Checkbox checked={isJewishHolidays} onChange={(e) => this.handleChangeJewishHolidays(e.target.checked)}>Jewish Holidays</Checkbox>
 							</div>
 						</div>
 						<Form.Item name="blackoutDates">

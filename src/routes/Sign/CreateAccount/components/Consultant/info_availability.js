@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Segmented, TimePicker, message, DatePicker } from 'antd';
+import { Row, Col, Form, Button, Segmented, TimePicker, message, DatePicker, Checkbox } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
@@ -30,19 +30,21 @@ class ConsultantAvailability extends Component {
     this.state = {
       currentSelectedDay: day_week[0],
       isSubmit: false,
-      allHolidays: [],
       loading: false,
+      legalHolidays: [],
+      jewishHolidays: [],
+      isLegalHolidays: false,
+      isJewishHolidays: false,
+
     }
   }
 
   async componentDidMount() {
-    this.setState({ loading: true });
     const { registerData } = this.props.register;
-    const holidays = await this.getHolidays();
-    this.setState({ loading: false });
 
     if (!!registerData?.step2) {
       this.form?.setFieldsValue({ ...registerData.step2 });
+      const holidays = [...registerData?.legalHolidays ?? [], ...registerData?.jewishHolidays ?? []];
 
       await this.updateBlackoutDates(registerData?.step2?.blackoutDates?.map(date => new Date(date)));
       document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
@@ -50,7 +52,17 @@ class ConsultantAvailability extends Component {
         name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
         el.after(name);
       })
+
+      this.setState({
+        legalHolidays: registerData?.legalHolidays ?? [],
+        jewishHolidays: registerData?.jewishHolidays ?? [],
+        isLegalHolidays: registerData?.step2?.isLegalHolidays ?? [],
+        isJewishHolidays: registerData?.step2?.isJewishHolidays ?? [],
+      })
     } else {
+      this.setState({ loading: true });
+      await this.getHolidays();
+      this.setState({ loading: false });
       day_week.map((day) => {
         this.form?.setFieldValue(day, [''])
       })
@@ -59,6 +71,7 @@ class ConsultantAvailability extends Component {
 
   onFinish = async (values) => {
     const { registerData } = this.props.register;
+    const { isLegalHolidays, isJewishHolidays } = this.state;
     let manualSchedule = [];
     const invalidDayInWeek = Object.values(values).findIndex(times => times?.find(v => (v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)) || (v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time))));
     if (invalidDayInWeek < 0) {
@@ -102,6 +115,8 @@ class ConsultantAvailability extends Component {
         role: registerData.role,
         username: registerData.username,
         manualSchedule: manualSchedule,
+        isLegalHolidays,
+        isJewishHolidays,
         blackoutDates: values?.blackoutDates?.map(d => d.toString()),
         ...registerData.consultantInfo
       }
@@ -131,7 +146,8 @@ class ConsultantAvailability extends Component {
   }
 
   onChangeScheduleValue = () => {
-    this.props.setRegisterData({ step2: this.form.getFieldsValue() });
+    const { isLegalHolidays, isJewishHolidays } = this.state;
+    this.props.setRegisterData({ step2: { ...this.form.getFieldsValue(), isLegalHolidays, isJewishHolidays } });
   }
 
   copyToFullWeek = (dayForCopy, index) => {
@@ -160,8 +176,14 @@ class ConsultantAvailability extends Component {
       const usa_data = await fetch(usa_url).then(response => response.json());
       const jewish_data = await fetch(jewish_url).then(response => response.json());
 
-      this.setState({ allHolidays: [...usa_data?.items ?? [], ...jewish_data?.items ?? []] });
-      this.props.setRegisterData({ allHolidays: [...usa_data?.items ?? [], ...jewish_data?.items ?? []] });
+      this.setState({
+        legalHolidays: usa_data?.items ?? [],
+        jewishHolidays: jewish_data?.items ?? [],
+      });
+      this.props.setRegisterData({
+        legalHolidays: usa_data?.items ?? [],
+        jewishHolidays: jewish_data?.items ?? [],
+      });
 
       return [...usa_data?.items ?? [], ...jewish_data?.items ?? []];
     } catch (error) {
@@ -169,19 +191,42 @@ class ConsultantAvailability extends Component {
     }
   }
 
-  handleClickGoogleCalendar = async () => {
+  handleChangeLegalHolidays = async (status) => {
+    this.setState({ isLegalHolidays: status });
+
+    const { legalHolidays, jewishHolidays, isJewishHolidays } = this.state;
     const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
     let uniqueDates = [];
-    [...dates ?? [], ...[...new Set(this.state.allHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
-      if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
-        uniqueDates.push(c);
+
+    if (status) {
+      [...dates ?? [], ...[...new Set(legalHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+        if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
+          uniqueDates.push(c);
+        }
+      })
+    } else {
+      if (isJewishHolidays) {
+        uniqueDates = jewishHolidays.map(a => new Date(a.start.date))?.sort((a, b) => a - b);
       }
-    })
+    }
 
     await this.updateBlackoutDates(uniqueDates);
 
+    let holidays = [];
+    if (status) {
+      if (isJewishHolidays) {
+        holidays = [...legalHolidays ?? [], ...jewishHolidays ?? []];
+      } else {
+        holidays = legalHolidays ?? [];
+      }
+    } else {
+      if (isJewishHolidays) {
+        holidays = jewishHolidays ?? [];
+      }
+    }
+
     document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-      const name = this.state.allHolidays?.find(a => a.start.date == el.innerText)?.summary;
+      const name = holidays?.find(a => a.start.date == el.innerText)?.summary;
       if (name) {
         if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
           el.nextElementSibling.innerText = name;
@@ -190,12 +235,58 @@ class ConsultantAvailability extends Component {
           newElement.textContent = name;
           el.after(newElement);
         }
+      }
+    })
+    this.onChangeScheduleValue();
+  }
+
+  handleChangeJewishHolidays = async (status) => {
+    this.setState({ isJewishHolidays: status });
+
+    const { jewishHolidays, legalHolidays, isLegalHolidays } = this.state;
+    const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
+    let uniqueDates = [];
+
+    if (status) {
+      [...dates ?? [], ...[...new Set(jewishHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+        if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
+          uniqueDates.push(c);
+        }
+      })
+    } else {
+      if (isLegalHolidays) {
+        uniqueDates = legalHolidays.map(a => new Date(a.start.date))?.sort((a, b) => a - b);
+      }
+    }
+
+    await this.updateBlackoutDates(uniqueDates);
+
+    let holidays = [];
+    if (status) {
+      if (isLegalHolidays) {
+        holidays = [...jewishHolidays ?? [], ...legalHolidays ?? []];
       } else {
+        holidays = jewishHolidays ?? [];
+      }
+    } else {
+      if (isLegalHolidays) {
+        holidays = legalHolidays ?? [];
+      }
+    }
+
+    document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
+      const name = holidays?.find(a => a.start.date == el.innerText)?.summary;
+      if (name) {
         if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
-          el.nextElementSibling.innerText = '';
+          el.nextElementSibling.innerText = name;
+        } else {
+          let newElement = document.createElement("div");
+          newElement.textContent = name;
+          el.after(newElement);
         }
       }
     })
+    this.onChangeScheduleValue();
   }
 
   updateBlackoutDates = async (dates) => {
@@ -212,8 +303,10 @@ class ConsultantAvailability extends Component {
 
   handleUpdateBlackoutDates = async (dates) => {
     await this.updateBlackoutDates(dates);
+    const { legalHolidays, jewishHolidays } = this.state;
+
     document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-      const name = this.state.allHolidays?.find(a => a.start.date == el.innerText)?.summary;
+      const name = [...legalHolidays ?? [], ...jewishHolidays ?? []]?.find(a => a.start.date == el.innerText)?.summary;
       if (name) {
         if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
           el.nextElementSibling.innerText = name;
@@ -237,7 +330,7 @@ class ConsultantAvailability extends Component {
   }
 
   render() {
-    const { currentSelectedDay, isSubmit, loading } = this.state;
+    const { currentSelectedDay, isSubmit, loading, isJewishHolidays, isLegalHolidays } = this.state;
 
     return (
       <Row justify="center" className="row-form">
@@ -329,9 +422,9 @@ class ConsultantAvailability extends Component {
             </div>
             <p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.blackoutDates)}</p>
             <div className='flex items-center justify-center mb-10'>
-              <div className='flex gap-2 items-center cursor' onClick={() => this.handleClickGoogleCalendar()}>
-                <img src='../images/gg.png' className='h-30' />
-                <p className='font-16 mb-0 text-underline'>Google</p>
+              <div className='flex gap-4 items-center cursor'>
+                <Checkbox checked={isLegalHolidays} onChange={(e) => this.handleChangeLegalHolidays(e.target.checked)}>Legal Holidays</Checkbox>
+                <Checkbox checked={isJewishHolidays} onChange={(e) => this.handleChangeJewishHolidays(e.target.checked)}>Jewish Holidays</Checkbox>
               </div>
             </div>
             <Form.Item name="blackoutDates">
