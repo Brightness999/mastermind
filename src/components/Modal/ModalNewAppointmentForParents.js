@@ -57,7 +57,7 @@ class ModalNewAppointmentForParents extends React.Component {
 	getArrTime = (type, providerIndex, date) => {
 		let arrTime = [];
 		let duration = 30;
-		const { listProvider, address } = this.state;
+		const { listProvider, address, userRole } = this.state;
 		const provider = listProvider[providerIndex];
 		if (type == 1 || type == 3) {
 			duration = provider?.duration;
@@ -73,7 +73,12 @@ class ModalNewAppointmentForParents extends React.Component {
 			} else if (provider?.blackoutDates?.includes(a => moment(a).year() == date.year() && moment(a).month() == date.month() && moment(a).date() == date.date())) {
 				return [];
 			} else {
-				const ranges = provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && !a.isPrivate && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+				let ranges = [];
+				if (userRole === 3 || userRole === 60) {
+					ranges = provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && !a.isPrivate && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+				} else {
+					ranges = provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+				}
 				if (!!ranges?.length) {
 					let arr24 = new Array(24).fill(0);
 					let timeObject = { start: 0, end: 0 };
@@ -240,7 +245,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			selectedDate: newValue,
 			selectedTimeIndex: -1,
 		});
-		if (newValue.isSameOrAfter(new Date())) {
+		if (newValue?.isSameOrAfter(new Date())) {
 			const { selectedProviderIndex, listProvider, appointmentType, selectedDependent } = this.state;
 
 			if (selectedProviderIndex > -1) {
@@ -272,10 +277,10 @@ class ModalNewAppointmentForParents extends React.Component {
 				})
 				this.setState({ arrTime: newArrTime });
 			} else {
-				this.setState({ arrTime: this.state.arrTime?.map(time => ({ ...time, active: false })) });
+				this.setState({ arrTime: [] });
 			}
 		} else {
-			this.setState({ arrTime: this.state.arrTime?.map(time => ({ ...time, active: false })) });
+			this.setState({ arrTime: [] });
 		}
 	}
 

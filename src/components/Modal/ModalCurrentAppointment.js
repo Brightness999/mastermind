@@ -44,7 +44,7 @@ class ModalCurrentAppointment extends React.Component {
 	getArrTime = (date) => {
 		let arrTime = [];
 		let duration = 30;
-		const { address } = this.state;
+		const { address, userRole } = this.state;
 		const { event } = this.props;
 
 		if (event?.type == 2) {
@@ -60,7 +60,12 @@ class ModalCurrentAppointment extends React.Component {
 			} else if (event?.provider?.blackoutDates?.includes(a => moment(a).year() == date.year() && moment(a).month() == date.month() && moment(a).date() == date.date())) {
 				return [];
 			} else {
-				const ranges = event?.provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && !a.isPrivate && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+				let ranges = []
+				if (userRole === 3 || userRole === 60) {
+					ranges = event?.provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && !a.isPrivate && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+				} else {
+					ranges = event?.provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+				}
 				if (!!ranges?.length) {
 					let arr24 = new Array(24).fill(0);
 					let timeObject = { start: 0, end: 0 };
@@ -121,6 +126,7 @@ class ModalCurrentAppointment extends React.Component {
 
 	handleChangeAddress = address => {
 		this.setState({ address: address });
+		this.onSelectDate();
 	};
 
 	onSelectDate = (newValue) => {
@@ -128,7 +134,7 @@ class ModalCurrentAppointment extends React.Component {
 		const newArrTime = this.getArrTime(newValue);
 		this.setState({ selectedDate: newValue, selectedTimeIndex: -1 });
 
-		if (newValue.isSameOrAfter(new Date())) {
+		if (newValue?.isSameOrAfter(new Date())) {
 			newArrTime.map(time => {
 				const { years, months, date } = newValue.toObject();
 				time.value = moment(time.value).set({ years, months, date });
@@ -149,7 +155,7 @@ class ModalCurrentAppointment extends React.Component {
 			})
 			this.setState({ arrTime: newArrTime });
 		} else {
-			this.setState({ arrTime: newArrTime?.map(time => ({ ...time, active: false })) });
+			this.setState({ arrTime: [] });
 		}
 	}
 
