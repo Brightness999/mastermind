@@ -165,13 +165,13 @@ class ModalNewAppointment extends React.Component {
 			return;
 		}
 		this.setState({ providerErrorMessage: '' });
-		if (appointmentType != 1 && (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0)) {
+		if (appointmentType !== 1 && (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0)) {
 			this.setState({ errorMessage: 'Please select a date and time' })
 			return;
 		}
 		this.setState({ errorMessage: '' });
-		if (appointmentType == 2) {
-			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent == selectedDependent && a.type == 2 && a.status == 0);
+		if (appointmentType === 2) {
+			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === 0);
 			if (appointment) {
 				message.warning("scheduling with this provider will be available after the evaluation");
 				return;
@@ -183,15 +183,15 @@ class ModalNewAppointment extends React.Component {
 			skillSet: selectedSkill,
 			dependent: selectedDependent,
 			provider: selectedProvider,
-			date: appointmentType == 1 ? undefined : hour,
+			date: appointmentType === 1 ? undefined : hour,
 			location: appointmentType > 1 ? address : '',
-			phoneNumber: appointmentType == 1 ? data?.phoneNumber : '',
-			notes: appointmentType == 1 ? data?.notes : notes,
+			phoneNumber: appointmentType === 1 ? data?.phoneNumber : '',
+			notes: appointmentType === 1 ? data?.notes : notes,
 			duration: duration,
 			type: appointmentType,
 			status: 0,
-			rate: appointmentType == 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType == 3 ? standardRate : appointmentType == 5 ? subsidizedRate : 0,
-			screeningTime: appointmentType == 1 ? data.time : '',
+			rate: appointmentType === 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType === 3 ? standardRate : appointmentType === 5 ? subsidizedRate : 0,
+			screeningTime: appointmentType === 1 ? data.time : '',
 		};
 		this.setState({ visibleModalScreening: false });
 
@@ -250,8 +250,8 @@ class ModalNewAppointment extends React.Component {
 					time.value = moment(time.value).set({ years, months, date });
 
 					let flag = true;
-					this.props.listAppointmentsRecent?.filter(appointment => (appointment.status == 0) && (appointment.provider?._id == listProvider[selectedProviderIndex]?._id || appointment.dependent?._id == selectedDependent))?.forEach(appointment => {
-						if (time.value.toLocaleString() == moment(appointment.date).toLocaleString()) {
+					this.props.listAppointmentsRecent?.filter(appointment => (appointment.status === 0) && (appointment.provider?._id === listProvider[selectedProviderIndex]?._id || appointment.dependent?._id === selectedDependent))?.forEach(appointment => {
+						if (time.value.toLocaleString() === moment(appointment.date).toLocaleString()) {
 							flag = false;
 						}
 					})
@@ -292,8 +292,8 @@ class ModalNewAppointment extends React.Component {
 		const { listProvider, selectedDate, selectedDependent, selectedProviderIndex, selectedSkill } = this.state;
 		const appointments = listProvider[providerIndex]?.appointments ?? [];
 
-		const flagAppointments = appointments?.filter(a => a?.dependent == selectedDependent && a?.flagStatus == 1);
-		const declinedAppointments = appointments?.filter(a => a?.dependent == selectedDependent && a?.status == -3);
+		const flagAppointments = appointments?.filter(a => a?.dependent === selectedDependent && a?.flagStatus === 1);
+		const declinedAppointments = appointments?.filter(a => a?.dependent === selectedDependent && a?.status === -3);
 
 		if (declinedAppointments?.length) {
 			message.error('The provider declined your request');
@@ -310,31 +310,47 @@ class ModalNewAppointment extends React.Component {
 
 		if (listProvider[providerIndex].isNewClientScreening) {
 			if (listProvider[providerIndex].isSeparateEvaluationRate) {
-				if (appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1)) {
-					if (appointments?.find(a => a.dependent == selectedDependent && a.type == 2 && a.status == -1)) {
+				if (appointments?.find(a => a.dependent === selectedDependent && a.type === 1 && a.status === -1)) {
+					if (appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === -1)) {
 						appointmentType = 3;
 					} else {
-						if (appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1 && a.skipEvaluation)) {
+						if (appointments?.find(a => a.dependent === selectedDependent && a.type === 1 && a.status === -1 && a.skipEvaluation)) {
 							appointmentType = 3;
 						} else {
+							if (appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === 0)) {
+								message.warning("scheduling with this provider will be available after the evaluation");
+								return;
+							}
 							appointmentType = 2;
 						}
 					}
 				} else {
+					if (appointments?.find(a => a.dependent === selectedDependent && a.type === 1 && a.status === 0)) {
+						message.warning("Your screening request is still being processed", 5);
+						return;
+					}
 					appointmentType = 1;
 				}
 			} else {
-				if (appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1)) {
+				if (appointments?.find(a => a.dependent === selectedDependent && a.type === 1 && a.status === -1)) {
 					appointmentType = 3;
 				} else {
+					if (appointments?.find(a => a.dependent === selectedDependent && a.type === 1 && a.status === 0)) {
+						message.warning("Your screening request is still being processed", 5);
+						return;
+					}
 					appointmentType = 1;
 				}
 			}
 		} else {
 			if (listProvider[providerIndex].isSeparateEvaluationRate) {
-				if (appointments?.find(a => a.dependent == selectedDependent && a.type == 2 && a.status == -1)) {
+				if (appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === -1)) {
 					appointmentType = 3;
 				} else {
+					if (appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === 0)) {
+						message.warning("scheduling with this provider will be available after the evaluation");
+						return;
+					}
 					appointmentType = 2;
 				}
 			} else {
@@ -350,7 +366,7 @@ class ModalNewAppointment extends React.Component {
 			time.value = moment(time.value).set({ years, months, date });
 
 			let flag = true;
-			this.props.listAppointmentsRecent?.filter(appointment => (appointment.status == 0) && (appointment.provider?._id == listProvider[selectedProviderIndex]?._id || appointment.dependent?._id == selectedDependent))?.forEach(appointment => {
+			this.props.listAppointmentsRecent?.filter(appointment => (appointment.status === 0) && (appointment.provider?._id === listProvider[selectedProviderIndex]?._id || appointment.dependent?._id === selectedDependent))?.forEach(appointment => {
 				if (time.value.isSame(moment(appointment.date))) {
 					flag = false;
 				}
@@ -434,8 +450,8 @@ class ModalNewAppointment extends React.Component {
 		const dependents = this.props.listDependents;
 		this.setState({
 			selectedDependent: dependentId,
-			skillSet: dependents?.find(dependent => dependent._id == dependentId)?.services,
-			addressOptions: ['Dependent Home', 'Provider Office', dependents?.find(dependent => dependent._id == dependentId)?.school?.name],
+			skillSet: dependents?.find(dependent => dependent._id === dependentId)?.services,
+			addressOptions: ['Dependent Home', 'Provider Office', dependents?.find(dependent => dependent._id === dependentId)?.school?.name],
 		});
 		this.searchProvider(searchKey, address, selectedSkill, dependentId);
 	}
@@ -452,7 +468,7 @@ class ModalNewAppointment extends React.Component {
 
 	onOpenModalScreening = () => {
 		const { selectedDependent, listProvider, selectedProviderIndex } = this.state;
-		const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == 0);
+		const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent === selectedDependent && a.type == 1 && a.status == 0);
 		if (appointment) {
 			message.warning("Your screening request is still being processed", 5);
 			return;

@@ -171,13 +171,13 @@ class ModalNewAppointmentForParents extends React.Component {
 			return;
 		}
 		this.setState({ providerErrorMessage: '' });
-		if (appointmentType != 1 && (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0)) {
+		if (appointmentType !== 1 && (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0)) {
 			this.setState({ errorMessage: 'Please select a date and time' })
 			return;
 		}
 		this.setState({ errorMessage: '' });
-		if (appointmentType == 2) {
-			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent == selectedDependent && a.type == 2 && a.status == 0);
+		if (appointmentType === 2) {
+			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === 0);
 			if (appointment) {
 				message.warning("scheduling with this provider will be available after the evaluation");
 				return;
@@ -189,15 +189,15 @@ class ModalNewAppointmentForParents extends React.Component {
 			skillSet: selectedSkillSet,
 			dependent: selectedDependent,
 			provider: selectedProvider,
-			date: appointmentType == 1 ? undefined : hour,
+			date: appointmentType === 1 ? undefined : hour,
 			location: appointmentType > 1 ? address : '',
-			phoneNumber: appointmentType == 1 ? data.phoneNumber : '',
-			notes: appointmentType == 1 ? data.notes : notes,
+			phoneNumber: appointmentType === 1 ? data.phoneNumber : '',
+			notes: appointmentType === 1 ? data.notes : notes,
 			type: appointmentType,
 			status: 0,
-			rate: appointmentType == 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType == 3 ? standardRate : appointmentType == 5 ? subsidizedRate : 0,
-			screeningTime: appointmentType == 1 ? data.time : '',
-			duration: appointmentType == 2 ? listProvider[selectedProviderIndex]?.separateEvaluationDuration : listProvider[selectedProviderIndex]?.duration,
+			rate: appointmentType === 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType === 3 ? standardRate : appointmentType === 5 ? subsidizedRate : 0,
+			screeningTime: appointmentType === 1 ? data.time : '',
+			duration: appointmentType === 2 ? listProvider[selectedProviderIndex]?.separateEvaluationDuration : listProvider[selectedProviderIndex]?.duration,
 		};
 		this.setState({ visibleModalScreening: false });
 		if (appointmentType === 2) {
@@ -250,19 +250,19 @@ class ModalNewAppointmentForParents extends React.Component {
 
 			if (selectedProviderIndex > -1) {
 				const newArrTime = this.getArrTime(appointmentType, selectedProviderIndex, newValue);
-				const appointments = listProvider[selectedProviderIndex]?.appointments?.filter(appointment => appointment.status == 0) ?? [];
+				const appointments = listProvider[selectedProviderIndex]?.appointments?.filter(appointment => appointment.status === 0) ?? [];
 
 				newArrTime.map(time => {
 					const { years, months, date } = newValue.toObject();
 					time.value = moment(time.value).set({ years, months, date });
 
 					let flag = true;
-					this.props.listDependents?.find(dependent => dependent._id == selectedDependent)?.appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
+					this.props.listDependents?.find(dependent => dependent._id === selectedDependent)?.appointments?.filter(appointment => appointment.status === 0)?.forEach(appointment => {
 						if (time.value.isSame(moment(appointment.date))) {
 							flag = false;
 						}
 					})
-					appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
+					appointments?.filter(appointment => appointment.status === 0)?.forEach(appointment => {
 						if (time.value.isSame(moment(appointment.date))) {
 							flag = false;
 						}
@@ -304,8 +304,8 @@ class ModalNewAppointmentForParents extends React.Component {
 		const { listProvider, selectedDate, selectedDependent, selectedSkillSet } = this.state;
 		const appointments = listProvider[providerIndex]?.appointments ?? [];
 
-		const flagAppointments = appointments?.filter(a => a?.dependent == selectedDependent && a?.flagStatus == 1);
-		const declinedAppointments = appointments?.filter(a => a?.dependent == selectedDependent && a?.status == -3);
+		const flagAppointments = appointments?.filter(a => a?.dependent === selectedDependent && a?.flagStatus === 1);
+		const declinedAppointments = appointments?.filter(a => a?.dependent === selectedDependent && a?.status === -3);
 
 		if (declinedAppointments?.length) {
 			message.error('The provider declined your request');
@@ -322,31 +322,47 @@ class ModalNewAppointmentForParents extends React.Component {
 
 		if (listProvider[providerIndex].isNewClientScreening) {
 			if (listProvider[providerIndex].isSeparateEvaluationRate) {
-				if (appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1)) {
-					if (appointments?.find(a => a.dependent == selectedDependent && a.type == 2 && a.status == -1)) {
+				if (appointments?.find(a => a.dependent === selectedDependent && a.type === 1 && a.status === -1)) {
+					if (appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === -1)) {
 						appointmentType = 3;
 					} else {
-						if (appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1 && a.skipEvaluation)) {
+						if (appointments?.find(a => a.dependent === selectedDependent && a.type === 1 && a.status === -1 && a.skipEvaluation)) {
 							appointmentType = 3;
 						} else {
+							if (appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === 0)) {
+								message.warning("scheduling with this provider will be available after the evaluation");
+								return;
+							}
 							appointmentType = 2;
 						}
 					}
 				} else {
+					if (appointments?.find(a => a.dependent === selectedDependent && a.type === 1 && a.status === 0)) {
+						message.warning("Your screening request is still being processed", 5);
+						return;
+					}
 					appointmentType = 1;
 				}
 			} else {
-				if (appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1)) {
+				if (appointments?.find(a => a.dependent === selectedDependent && a.type === 1 && a.status === -1)) {
 					appointmentType = 3;
 				} else {
+					if (appointments?.find(a => a.dependent === selectedDependent && a.type === 1 && a.status === 0)) {
+						message.warning("Your screening request is still being processed", 5);
+						return;
+					}
 					appointmentType = 1;
 				}
 			}
 		} else {
 			if (listProvider[providerIndex].isSeparateEvaluationRate) {
-				if (appointments?.find(a => a.dependent == selectedDependent && a.type == 2 && a.status == -1)) {
+				if (appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === -1)) {
 					appointmentType = 3;
 				} else {
+					if (appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === 0)) {
+						message.warning("scheduling with this provider will be available after the evaluation");
+						return;
+					}
 					appointmentType = 2;
 				}
 			} else {
@@ -363,12 +379,12 @@ class ModalNewAppointmentForParents extends React.Component {
 			time.value = moment(time.value).set({ years, months, date });
 
 			let flag = true;
-			this.props.listDependents?.find(dependent => dependent._id == selectedDependent)?.appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
+			this.props.listDependents?.find(dependent => dependent._id === selectedDependent)?.appointments?.filter(appointment => appointment.status === 0)?.forEach(appointment => {
 				if (time.value.isSame(moment(appointment.date))) {
 					flag = false;
 				}
 			})
-			appointments?.filter(appointment => appointment.status == 0)?.forEach(appointment => {
+			appointments?.filter(appointment => appointment.status === 0)?.forEach(appointment => {
 				if (time.value.isSame(moment(appointment.date))) {
 					flag = false;
 				}
@@ -386,7 +402,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		let subsidizedRate = 0;
 
 		if (selectedDependent) {
-			const currentGrade = this.props.listDependents?.find(dependent => dependent?._id == selectedDependent)?.currentGrade;
+			const currentGrade = this.props.listDependents?.find(dependent => dependent?._id === selectedDependent)?.currentGrade;
 
 			if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(currentGrade)) {
 				standardRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'Early Education'].includes(level.level))?.rate;
@@ -401,12 +417,12 @@ class ModalNewAppointmentForParents extends React.Component {
 				standardRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'High School Grades 9-12'].includes(level.level))?.rate;
 				subsidizedRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'High School Grades 9-12'].includes(level.level))?.subsidizedRate;
 			} else {
-				standardRate = listProvider[providerIndex]?.academicLevel?.find(level => level.level == currentGrade)?.rate;
-				subsidizedRate = listProvider[providerIndex]?.academicLevel?.find(level => level.level == currentGrade)?.subsidizedRate;
+				standardRate = listProvider[providerIndex]?.academicLevel?.find(level => level.level === currentGrade)?.rate;
+				subsidizedRate = listProvider[providerIndex]?.academicLevel?.find(level => level.level === currentGrade)?.subsidizedRate;
 			}
 
 			if (selectedSkillSet) {
-				const subsidy = this.props.listDependents?.find(d => d._id == selectedDependent)?.subsidy?.find(s => s.skillSet == selectedSkillSet);
+				const subsidy = this.props.listDependents?.find(d => d._id === selectedDependent)?.subsidy?.find(s => s.skillSet === selectedSkillSet);
 				if (subsidy?.status && subsidy?.adminApprovalStatus) {
 					this.setState({ subsidyAvailable: true, restSessions: subsidy?.numberOfSessions });
 				}
@@ -452,8 +468,8 @@ class ModalNewAppointmentForParents extends React.Component {
 		const { searchKey, address, selectedSkillSet } = this.state;
 		this.setState({
 			selectedDependent: dependentId,
-			skillSet: dependents?.find(dependent => dependent._id == dependentId)?.services,
-			addressOptions: ['Dependent Home', 'Provider Office', dependents?.find(dependent => dependent._id == dependentId)?.school?.name],
+			skillSet: dependents?.find(dependent => dependent._id === dependentId)?.services,
+			addressOptions: ['Dependent Home', 'Provider Office', dependents?.find(dependent => dependent._id === dependentId)?.school?.name],
 		});
 		this.searchProvider(searchKey, address, selectedSkillSet, dependentId);
 	}
@@ -470,7 +486,7 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	onOpenModalScreening = () => {
 		const { selectedDependent, listProvider, selectedProviderIndex } = this.state;
-		const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == 0);
+		const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent === selectedDependent && a.type === 1 && a.status === 0);
 		if (appointment) {
 			message.warning("Your screening request is still being processed", 5);
 			return;
