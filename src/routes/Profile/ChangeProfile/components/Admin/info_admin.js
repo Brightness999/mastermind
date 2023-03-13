@@ -46,10 +46,13 @@ class InfoAdmin extends React.Component {
         const { success, data } = res;
         if (success) {
           this.form?.setFieldsValue(data?.admin);
-          if (data?.admin?.role == 1000) {
+          if (data?.admin?.role === 1000) {
             this.form?.setFieldValue('adminCommunity', data?.locations?.map(a => a._id));
+            this.setState({ locations: data?.locations });
+          } else {
+            this.form?.setFieldValue('adminCommunity', data?.admin?.adminCommunity?.map(a => a._id));
+            this.setState({ locations: data?.admin?.adminCommunity });
           }
-          this.setState({ locations: data?.locations });
         }
       }).catch(err => {
         message.error(err.message);

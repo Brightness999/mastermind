@@ -25,7 +25,7 @@ class MainLayout extends React.PureComponent {
     const token = Cookies.get('tk');
     if (token?.length > 0) {
       checkPermission().then(loginData => {
-        loginData?.role > 900 && this.props.history.push(routerLinks.Admin);
+        (loginData?.role > 900 && !window.location.pathname.includes('account/changeprofile') && !window.location.pathname.includes('account/notifications')) && this.props.history.push(routerLinks.Admin);
         store.dispatch(setUser(loginData));
       })
       return;
