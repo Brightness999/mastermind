@@ -147,6 +147,7 @@ class ModalNewAppointmentForParents extends React.Component {
 				selectedTimeIndex: -1,
 				standardRate: '',
 				subsidizedRate: '',
+				arrTime: [],
 			});
 		}).catch(err => {
 			console.log('provider list error-----', err);
@@ -158,6 +159,7 @@ class ModalNewAppointmentForParents extends React.Component {
 				selectedTimeIndex: -1,
 				standardRate: '',
 				subsidizedRate: '',
+				arrTime: [],
 			});
 		})
 	}

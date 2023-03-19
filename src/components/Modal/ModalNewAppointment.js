@@ -141,6 +141,7 @@ class ModalNewAppointment extends React.Component {
 				selectedTimeIndex: -1,
 				standardRate: '',
 				subsidizedRate: '',
+				arrTime: [],
 			});
 		}).catch(err => {
 			message.error(err.message);
@@ -152,6 +153,7 @@ class ModalNewAppointment extends React.Component {
 				selectedTimeIndex: -1,
 				standardRate: '',
 				subsidizedRate: '',
+				arrTime: [],
 			});
 		})
 	}

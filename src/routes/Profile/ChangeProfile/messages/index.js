@@ -138,9 +138,9 @@ export default ({
     id: `${scope}.dependentsInfo`,
     defaultMessage: 'Dependents info',
   },
-  dependentInformation: {
-    id: `${scope}.dependentInformation`,
-    defaultMessage: 'Dependent Information',
+  dependentsInformation: {
+    id: `${scope}.dependentsInformation`,
+    defaultMessage: 'Dependents Information',
   },
   parentInformation: {
     id: `${scope}.parentInformation`,
