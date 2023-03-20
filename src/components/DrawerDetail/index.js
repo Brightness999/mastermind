@@ -1,23 +1,25 @@
-import './style/index.less';
 import React, { Component } from 'react';
 import { Drawer, Button, Row, Col, Typography, Popover, Input, message, Popconfirm } from 'antd';
 import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsPaypal, BsXCircle } from 'react-icons/bs';
-import { BiDollarCircle, BiInfoCircle } from 'react-icons/bi';
+import { BiDollarCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
-import { ModalBalance, ModalCancelAppointment, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
+import { TbSend } from 'react-icons/tb';
+import { MdOutlineEventBusy, MdOutlineRequestQuote } from 'react-icons/md';
 import intl from "react-intl-universal";
+import moment from 'moment';
+
+import { ModalBalance, ModalCancelAppointment, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
 import messages from './messages';
 import msgModal from '../Modal/messages';
 import msgDashboard from '../../routes/Dashboard/messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import moment from 'moment';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
 import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, clearFlag, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
-import { MdOutlineEventBusy, MdOutlineRequestQuote } from 'react-icons/md';
-import { TbSend } from 'react-icons/tb';
+import './style/index.less';
+
 const { Paragraph } = Typography;
 
 class DrawerDetail extends Component {
@@ -571,7 +573,7 @@ class DrawerDetail extends Component {
             <div className='new-content flex-1'>
               <p className='font-16 font-700'>{event?.previousAppointment?.type == 1 ? intl.formatMessage(msgModal.screening) : event?.previousAppointment?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.previousAppointment?.type == 3 ? intl.formatMessage(msgModal.appointment) : event?.previousAppointment?.type == 4 ? intl.formatMessage(msgModal.consultation) : ''}</p>
               <p className='font-16'>{`${event?.previousAppointment?.dependent?.firstName ?? ''} ${event?.previousAppointment?.dependent?.lastName ?? ''}`}</p>
-              <p className='font-16'>{`${event?.previousAppointment?.provider?.firstName ?? ''} ${event?.previousAppointment?.provider?.firstName ?? ''}`}</p>
+              <p className='font-16'>{`${event?.previousAppointment?.provider?.firstName ?? ''} ${event?.previousAppointment?.provider?.lastName ?? ''}`}</p>
               {event?.previousAppointment?.type == 1 ? (
                 <p className='font-16 whitespace-nowrap'>{intl.formatMessage(messages.phonenumber)}: {event?.previousAppointment?.phoneNumber}</p>
               ) : event?.previousAppointment?.type == 4 ? (
@@ -587,7 +589,7 @@ class DrawerDetail extends Component {
             <div className='current-content flex-1'>
               <p className='font-16 font-700'>{event?.type == 1 ? intl.formatMessage(msgModal.screening) : event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.appointment) : event?.type == 4 ? intl.formatMessage(msgModal.consultation) : ''}</p>
               <p className='font-16'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
-              <p className='font-16'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.firstName ?? ''}`}</p>
+              <p className='font-16'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
               {event?.type == 1 ? (
                 <p className='font-16 whitespace-nowrap'>{intl.formatMessage(messages.phonenumber)}: {event?.phoneNumber}</p>
               ) : event?.type == 4 ? (
@@ -679,7 +681,6 @@ class DrawerDetail extends Component {
                 <p className='font-18 font-700 title'>{intl.formatMessage(messages.with)}</p>
                 <div className='flex flex-row flex-1'>
                   <a className='font-18 underline text-primary'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</a>
-                  <BiInfoCircle size={12} className='text-primary ml-auto' />
                 </div>
               </div>
             </Popover>
@@ -714,7 +715,7 @@ class DrawerDetail extends Component {
             ) : (
               <MdOutlineEventBusy color="#ff0000" size={32} />
             )}
-            {userRole == 3 ? (
+            {event?.flagStatus === 1 ? userRole == 3 ? (
               <div className='flex items-center justify-between gap-2'>
                 {(event?.isPaid || event?.flagItems?.rate == 0) ? (
                   <Button
@@ -837,7 +838,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Popconfirm>
               </div>
-            )}
+            ) : null}
           </div>
         ) : (
           <>

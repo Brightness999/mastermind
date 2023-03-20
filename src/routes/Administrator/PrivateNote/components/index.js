@@ -1,15 +1,16 @@
-import { Divider, Table, Space, Input, Button, message } from 'antd';
-import { routerLinks } from '../../../constant';
-import { ModalDependentDetail } from '../../../../components/Modal';
 import React, { createRef } from 'react';
-import intl from 'react-intl-universal';
-import msgMainHeader from '../../../../components/MainHeader/messages';
-import './index.less';
-import request from '../../../../utils/api/request';
-import { deletePrivateNote, getDependents } from '../../../../utils/api/apiList';
+import { Divider, Table, Space, Input, Button, message } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
+
+import { routerLinks } from '../../../constant';
+import { ModalDependentDetail } from '../../../../components/Modal';
+import intl from 'react-intl-universal';
+import msgMainHeader from '../../../../components/MainHeader/messages';
+import request from '../../../../utils/api/request';
+import { deletePrivateNote, getDependents } from '../../../../utils/api/apiList';
 import PageLoading from '../../../../components/Loading/PageLoading';
+import './index.less';
 
 export default class extends React.Component {
   constructor(props) {
@@ -124,7 +125,7 @@ export default class extends React.Component {
           }
         },
       },
-      { title: 'Age', dataIndex: 'birthday', key: 'age', sorter: (a, b) => a.birthday > b.birthday ? 1 : -1, render: (birthday) => moment().diff(moment(birthday), 'years') },
+      { title: 'Age', dataIndex: 'birthday', key: 'age', sorter: (a, b) => a.birthday > b.birthday ? 1 : -1, render: (birthday) => moment().year() - moment(birthday).year() },
       { title: 'Grade', dataIndex: 'currentGrade', key: 'grade' },
       { title: 'School', dataIndex: 'school', key: 'school', render: school => school.name },
       { title: 'Count of Sessions Past', dataIndex: 'appointments', key: 'countOfSessionsPast', render: appointments => appointments?.filter(a => [2, 3].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == -1)?.length },

@@ -1587,6 +1587,7 @@ ol {
   flex: auto;
   min-height: auto;
   position: relative;
+  height: 100%;
 
   .div-show-subsidy {
     width: 100%;
@@ -1608,7 +1609,6 @@ ol {
       height: auto;
       padding: 2px 5px;
 
-      // background-color: @primary-color-dark;
       span {
         white-space: normal;
         text-align: left;
@@ -2031,18 +2031,21 @@ ol {
       color: @primary-color;
     }
   }
-
 }
 
 .dashboard-page {
-  .div-multi-choice {
-    height: calc(100vh - 94px);
+  .div-content {
+    height: 100%;
+  }
+}
+
+.admin-page {
+  .div-content {
+    height: calc(100% - 61px) ;
   }
 }
 
 .div-title-admin {
-  margin-top: 10px;
-
   p {
     margin-bottom: 0;
     padding-left: 50px;

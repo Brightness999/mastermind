@@ -3,20 +3,21 @@ import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, 
 import { BiChevronLeft, BiChevronRight, BiSearch } from 'react-icons/bi';
 import { BsCheck } from 'react-icons/bs';
 import { GoPrimitiveDot } from 'react-icons/go';
+import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import intl from 'react-intl-universal';
+import moment from 'moment';
+import 'moment/locale/en-au';
+
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import msgReview from '../../routes/Sign/SubsidyReview/messages';
-import moment from 'moment';
-import 'moment/locale/en-au';
-import './style/index.less';
-import '../../assets/styles/login.less';
 import request from '../../utils/api/request';
 import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils/api/apiList';
-import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import ModalNewScreening from './ModalNewScreening';
 import { store } from '../../redux/store';
 import ModalConfirm from './ModalConfirm';
+import './style/index.less';
+import '../../assets/styles/login.less';
 
 const { Paragraph } = Typography;
 moment.locale('en');
@@ -287,19 +288,11 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	nextMonth = () => {
-		this.setState({
-			selectedDate: moment(this.state.selectedDate).add(1, 'month'),
-			selectedTimeIndex: -1,
-		});
-		this.onSelectDate(moment(this.state.selectedDate).add(1, 'month'))
+		this.onSelectDate(moment(this.state.selectedDate).add(1, 'month'));
 	}
 
 	prevMonth = () => {
-		this.setState({
-			selectedDate: moment(this.state.selectedDate).add(-1, 'month'),
-			selectedTimeIndex: -1,
-		});
-		this.onSelectDate(moment(this.state.selectedDate).add(-1, 'month'))
+		this.onSelectDate(moment(this.state.selectedDate).add(-1, 'month'));
 	}
 
 	onChooseProvider = (providerIndex) => {
@@ -505,94 +498,6 @@ class ModalNewAppointmentForParents extends React.Component {
 		this.setState({ visibleModalConfirm: false });
 	}
 
-	nextPrivateMonth = () => {
-		this.setState({ selectedPrivateDate: moment(this.state.selectedPrivateDate).add(1, 'month') });
-	}
-
-	prevPrivateMonth = () => {
-		this.setState({ selectedPrivateDate: moment(this.state.selectedPrivateDate).add(-1, 'month') });
-	}
-
-	onSelectPrivateDate = (newValue) => {
-		const { selectedProviderIndex } = this.state;
-		const newArrTime = this.getArrTime(1, selectedProviderIndex, newValue);
-		this.setState({
-			selectedPrivateDate: newValue,
-			privateArrTime: newArrTime,
-		});
-	}
-
-	privateSlot = () => {
-		const { listProvider, selectedProviderIndex, userRole, selectedPrivateDate, privateArrTime } = this.state;
-
-		return (
-			<div className='private-calendar'>
-				<p className='font-700'>{intl.formatMessage(msgCreateAccount.privateHMGHAgents)}</p>
-				<Row gutter={15}>
-					<Col xs={24} sm={24} md={12}>
-						<Calendar
-							fullscreen={false}
-							value={selectedPrivateDate}
-							onSelect={this.onSelectPrivateDate}
-							dateCellRender={date => {
-								if (selectedProviderIndex > -1 && userRole > 3) {
-									const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == date.day());
-									if (availableTime) {
-										const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
-										const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
-										if (date.isBetween(availableFromDate, availableToDate) && availableTime.isPrivate) {
-											return (<div className='absolute top-0 left-0 h-100 w-100 border border-1 border-warning rounded-2'></div>)
-										} else {
-											return null;
-										}
-									} else {
-										return null;
-									}
-								} else {
-									return null;
-								}
-							}}
-							headerRender={() => (
-								<div style={{ marginBottom: 10 }}>
-									<Row gutter={8} justify="space-between" align="middle">
-										<Col>
-											<p className='font-12 mb-0'>{selectedPrivateDate?.format('MMMM YYYY')}</p>
-										</Col>
-										<Col>
-											<Button
-												type='text'
-												className='mr-10 left-btn'
-												icon={<BiChevronLeft size={25} />}
-												onClick={this.prevPrivateMonth}
-											/>
-											<Button
-												type='text'
-												className='right-btn'
-												icon={<BiChevronRight size={25} />}
-												onClick={this.nextPrivateMonth}
-											/>
-										</Col>
-									</Row>
-								</div>
-							)}
-						/>
-					</Col>
-					<Col xs={24} sm={24} md={12}>
-						<Row gutter={15}>
-							{privateArrTime?.map((time, index) => (
-								<Col key={index} span={12}>
-									<div className={`${time.active ? 'time-available' : 'time-not-available'}`}>
-										<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
-									</div>
-								</Col>
-							))}
-						</Row>
-					</Col>
-				</Row>
-			</div>
-		)
-	}
-
 	render() {
 		const {
 			selectedDate,
@@ -768,9 +673,9 @@ class ModalNewAppointmentForParents extends React.Component {
 										<p className='font-16 font-700'>
 											{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}
 											{!!listProvider[selectedProviderIndex]?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
-											{userRole > 3 && listProvider[selectedProviderIndex]?.isPrivateForHmgh ? <Popover content={this.privateSlot} trigger="click"><FaCalendarAlt size={16} className="text-green500 cursor" /></Popover> : null}
+											{userRole > 3 && (listProvider[selectedProviderIndex]?.isPrivateForHmgh || listProvider[selectedProviderIndex]?.manualSchedule?.find(a => a.isPrivate && a.location === address && selectedDate?.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })))) ? <FaCalendarAlt size={16} className="text-green500" /> : null}
 										</p>
-										<p className='font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent == selectedDependent && a.type == 1 && a.status == -1) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
+										<p className='font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent === selectedDependent && a.type === 1 && a.status === -1) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
 									<div className='flex'>
 										<div className='flex-1'>

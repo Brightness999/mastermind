@@ -1,16 +1,17 @@
 import React from 'react';
 import { Modal, Input, Divider, Card, Button } from 'antd';
 import intl from 'react-intl-universal';
-import messages from './messages';
-import './style/index.less';
-import '../../assets/styles/login.less';
-import { createPrivateNote, deletePrivateNote, updatePrivateNote } from '../../utils/api/apiList';
-import request from '../../utils/api/request';
 import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { CheckCircleTwoTone, CloseCircleTwoTone, DeleteTwoTone, EditTwoTone } from '@ant-design/icons';
+
+import messages from './messages';
+import { createPrivateNote, deletePrivateNote, updatePrivateNote } from '../../utils/api/apiList';
+import request from '../../utils/api/request';
 import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
+import './style/index.less';
+import '../../assets/styles/login.less';
 
 class ModalDependentDetail extends React.Component {
 	constructor(props) {
@@ -135,7 +136,7 @@ class ModalDependentDetail extends React.Component {
 					<div className='flex'>
 						<div className='flex-1'>
 							<div><span className='text-bold'>Grade:</span> {dependent?.currentGrade ?? ''}</div>
-							<div><span className='text-bold'>Age:</span> {moment().diff(moment(dependent?.birthday), 'years')}</div>
+							<div><span className='text-bold'>Age:</span> {moment().year() - moment(dependent?.birthday).year()}</div>
 							<div><span className='text-bold'>School:</span> {dependent?.school?.name}</div>
 							<div><span className='text-bold'>Birthday:</span> {moment(dependent.birthday)?.format('MM/DD/YYYY')}</div>
 						</div>

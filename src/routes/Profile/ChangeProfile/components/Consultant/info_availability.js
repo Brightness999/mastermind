@@ -8,6 +8,7 @@ import { compose } from 'redux'
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
 import moment from 'moment';
+
 import messages from '../../messages';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 import request from '../../../../../utils/api/request';
@@ -443,14 +444,10 @@ class ConsultantAvailability extends Component {
 														</Col>
 													</div>
 												))}
-												<Row>
-													<Col span={12}>
-														<div className='div-add-time justify-center'>
-															<BsPlusCircle size={17} className='mr-5 text-primary' />
-															<a className='text-primary' onClick={() => add()}>{intl.formatMessage(messages.addRange)}</a>
-														</div>
-													</Col>
-												</Row>
+												<div className='div-add-time justify-center'>
+													<BsPlusCircle size={17} className='mr-5 text-primary' />
+													<a className='text-primary' onClick={() => add()}>{intl.formatMessage(messages.addRange)}</a>
+												</div>
 											</div>
 										)}
 									</Form.List>

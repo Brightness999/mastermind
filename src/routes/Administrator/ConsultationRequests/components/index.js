@@ -1,13 +1,14 @@
-import { Divider, Table, Space, Button, Input, message } from 'antd';
 import React, { createRef } from 'react';
+import { Divider, Table, Space, Button, Input, message } from 'antd';
 import intl from 'react-intl-universal';
-import mgsSidebar from '../../../../components/SideBar/messages';
-import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
-import { getConsultationList } from '../../../../utils/api/apiList';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import moment from 'moment';
+
+import mgsSidebar from '../../../../components/SideBar/messages';
+import request from '../../../../utils/api/request';
+import { getConsultationList } from '../../../../utils/api/apiList';
 import PageLoading from '../../../../components/Loading/PageLoading';
 
 class ConsultationRequest extends React.Component {
@@ -88,7 +89,7 @@ class ConsultationRequest extends React.Component {
           }
         },
       },
-      { title: 'Age', key: 'age', sorter: (a, b) => a.dependent?.birthday > b.dependent?.birthday ? 1 : -1, render: (appointment) => moment().diff(moment(appointment.dependent?.birthday), 'years') },
+      { title: 'Age', key: 'age', sorter: (a, b) => a.dependent?.birthday > b.dependent?.birthday ? 1 : -1, render: (appointment) => moment().year() - moment(appointment.dependent?.birthday).year() },
       { title: 'Grade', key: 'grade', render: (appointment) => appointment.dependent?.currentGrade },
       { title: 'School', key: 'school', render: appointment => appointment?.dependent?.school?.name },
       {

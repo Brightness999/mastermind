@@ -5,17 +5,18 @@ import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import moment from 'moment';
+
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import msgDashboard from '../../routes/Dashboard/messages';
 import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import msgRequest from '../../routes/Sign/SubsidyRequest/messages';
-import './style/index.less';
-import '../../assets/styles/login.less';
 import request from '../../utils/api/request'
 import { url, switchPathWithRole } from '../../utils/api/baseUrl'
 import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getAllProviderInSchool, getLastConsulation } from '../../utils/api/apiList';
 import { setSubsidyRequests } from '../../redux/features/appointmentsSlice';
+import './style/index.less';
+import '../../assets/styles/login.less';
 
 const { Step } = Steps;
 
@@ -375,7 +376,7 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-12'>Dependent: <b>{student.firstName} {student.lastName}</b></p>
 						<p className='font-12'>School: {student.school.name}</p>
 						<p className='font-12'>Skillset: {subsidy?.skillSet?.name}</p>
-						<p className='font-12'>Age: {moment().diff(student.birthday, 'years', false)}</p>
+						<p className='font-12'>Age: {moment().year() - moment(student.birthday).year()}</p>
 						<p className='font-12'>Grade: {student.currentGrade}</p>
 						<p className='font-12'>Teacher: {student.primaryTeacher}</p>
 					</div>

@@ -1,19 +1,20 @@
 import React from 'react';
 import { Modal, Button, Input, Table, Space } from 'antd';
 import intl from 'react-intl-universal';
-import messages from './messages';
-import './style/index.less';
-import '../../assets/styles/login.less';
-import request from '../../utils/api/request'
-import { closeAppointmentForProvider, declineAppointmentForProvider } from '../../utils/api/apiList';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
+
+import messages from './messages';
+import request from '../../utils/api/request'
+import { closeAppointmentForProvider, declineAppointmentForProvider } from '../../utils/api/apiList';
 import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/features/appointmentsSlice';
 import { store } from '../../redux/store';
 import ModalProcessAppointment from './ModalProcessAppointment';
 import ModalInvoice from './ModalInvoice';
+import './style/index.less';
+import '../../assets/styles/login.less';
 
 class ModalSessionsNeedToClose extends React.Component {
 	constructor(props) {
@@ -30,8 +31,8 @@ class ModalSessionsNeedToClose extends React.Component {
 	}
 
 	componentDidMount() {
-		const appointments = JSON.parse(JSON.stringify(this.props.appointments?.filter(appointment => appointment.type == 3 && appointment.status == 0 && moment(appointment.date).isBefore(moment()))));
-		this.setState({ appointments: appointments?.map(a => { a['key'] = a._id; return a; }) });
+		const appointments = JSON.parse(JSON.stringify(this.props.appointments?.filter(appointment => [2, 3, 5].includes(appointment.type) && appointment.status == 0 && moment(appointment.date).isBefore(moment()))));
+		this.setState({ appointments: appointments?.map(a => ({ ...a, key: a._id })) });
 	}
 
 	handleMarkAsClosed = (note, publicFeedback) => {
@@ -122,7 +123,7 @@ class ModalSessionsNeedToClose extends React.Component {
 		const { appointments, skillSet, visibleProcess, visibleInvoice, event, errorMessage } = this.state;
 		const modalProps = {
 			className: 'modal-referral-service',
-			title: "Sessions need to close",
+			title: (<span className='font-18 text-bold'>Sessions need to close</span>),
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
