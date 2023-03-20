@@ -26,7 +26,6 @@ moment.locale('en');
 class ModalNewAppointment extends React.Component {
 	state = {
 		selectedDate: moment(),
-		selectedPrivateDate: moment(),
 		selectedProviderIndex: -1,
 		selectedTimeIndex: -1,
 		listProvider: [],
@@ -36,7 +35,6 @@ class ModalNewAppointment extends React.Component {
 		selectedDependent: undefined,
 		selectedProvider: undefined,
 		arrTime: [],
-		privateArrTime: [],
 		errorMessage: '',
 		skillSet: [],
 		searchKey: '',
@@ -75,30 +73,25 @@ class ModalNewAppointment extends React.Component {
 			} else {
 				const ranges = provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
 				if (!!ranges?.length) {
-					let arr24 = new Array(24).fill(0);
-					let timeObject = { start: 0, end: 0 };
-					let timeArr = [];
-					ranges.forEach(a => {
-						for (let i = a?.openHour; i <= a?.closeHour; i++) {
-							arr24[i] = 1;
-						}
-					})
-					arr24.forEach((a, i) => {
-						if (a == 0) {
-							timeObject = { start: 0, end: 0 };
+					let timeArr = ranges?.map(a => ([a.openHour, a.closeHour]))?.reduce((a, b) => {
+						if (!a?.length) a.push(b);
+						else if (a?.find(c => (c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1]))) {
+							a = a.map(c => {
+								if ((c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1])) {
+									return [Math.min(...c, ...b), Math.max(...c, ...b)];
+								} else {
+									return c;
+								}
+							})
 						} else {
-							if (i == 0 || arr24[i - 1] == 0) {
-								timeObject.start = i;
-							}
-							if (i == 23 || arr24[i + 1] == 0) {
-								timeObject.end = i;
-								timeArr.push(timeObject);
-							}
+							a.push(b);
 						}
-					});
+						return a;
+					}, []);
+
 					timeArr.forEach(a => {
-						let startTime = moment().set({ hours: a.start, minutes: 0, seconds: 0, milliseconds: 0 });
-						for (let i = 0; i < (a.end - a.start) * 60 / duration; i++) {
+						let startTime = moment().set({ hours: a?.[0], minutes: 0, seconds: 0, milliseconds: 0 });
+						for (let i = 0; i < (a?.[1] - a?.[0]) * 60 / duration; i++) {
 							arrTime.push({
 								value: startTime.clone().add(duration * i, 'minutes'),
 								active: date.isBefore(moment()) ? false : true,
@@ -173,13 +166,7 @@ class ModalNewAppointment extends React.Component {
 			return;
 		}
 		this.setState({ errorMessage: '' });
-		if (appointmentType === 2) {
-			const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === 0);
-			if (appointment) {
-				message.warning("scheduling with this provider will be available after the evaluation");
-				return;
-			}
-		}
+
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
 		const postData = {
@@ -313,7 +300,7 @@ class ModalNewAppointment extends React.Component {
 							appointmentType = 3;
 						} else {
 							if (appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === 0)) {
-								message.warning("scheduling with this provider will be available after the evaluation");
+								message.warning("Scheduling with this provider will be available after the evaluation");
 								return;
 							}
 							appointmentType = 2;
@@ -343,7 +330,7 @@ class ModalNewAppointment extends React.Component {
 					appointmentType = 3;
 				} else {
 					if (appointments?.find(a => a.dependent === selectedDependent && a.type === 2 && a.status === 0)) {
-						message.warning("scheduling with this provider will be available after the evaluation");
+						message.warning("Scheduling with this provider will be available after the evaluation");
 						return;
 					}
 					appointmentType = 2;
@@ -355,7 +342,6 @@ class ModalNewAppointment extends React.Component {
 		this.setState({ appointmentType: appointmentType });
 
 		const newArrTime = this.getArrTime(appointmentType, providerIndex, selectedDate);
-		const newPrivateArrTime = this.getArrTime(1, providerIndex, selectedDate);
 		newArrTime?.map(time => {
 			const { years, months, date } = selectedDate?.toObject();
 			time.value = moment(time.value).set({ years, months, date });
@@ -412,7 +398,6 @@ class ModalNewAppointment extends React.Component {
 			arrTime: newArrTime,
 			standardRate: standardRate,
 			subsidizedRate: subsidizedRate,
-			privateArrTime: newPrivateArrTime,
 		});
 	}
 
@@ -711,20 +696,14 @@ class ModalNewAppointment extends React.Component {
 													value={selectedDate}
 													dateCellRender={date => {
 														if (selectedProviderIndex > -1) {
-															const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == date.day());
+															const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek == date.day() && time.isPrivate);
 															if (availableTime) {
 																const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
 																const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
-																if (date.isBetween(availableFromDate, availableToDate) && availableTime.isPrivate) {
+																if (date.isBetween(availableFromDate, availableToDate) && !listProvider[selectedProviderIndex]?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() == date.year() && moment(blackoutDate).month() == date.month() && moment(blackoutDate).date() == date.date())) {
 																	return (<div className='absolute top-0 left-0 h-100 w-100 border border-1 border-warning rounded-2'></div>)
-																} else {
-																	return null;
 																}
-															} else {
-																return null;
 															}
-														} else {
-															return null;
 														}
 													}}
 													onSelect={this.onSelectDate}
@@ -775,15 +754,15 @@ class ModalNewAppointment extends React.Component {
 												/>
 											</Col>
 											<Col xs={24} sm={24} md={12}>
-												<Row gutter={15}>
+												<div className='grid grid-columns-2 gap-2'>
 													{arrTime?.map((time, index) => (
-														<Col key={index} span={12}>
-															<div className={`${selectedTimeIndex === index ? 'active' : ''} ${time.active ? 'time-available' : 'time-not-available'}`} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
-																<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
+														<div key={index}>
+															<div className={`${selectedTimeIndex === index ? 'active' : ''} ${time.active ? 'time-available' : 'time-not-available'} ${listProvider[selectedProviderIndex]?.manualSchedule?.find(a => a.dayInWeek === selectedDate.day() && a.location === address && a.isPrivate && selectedDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })) && (time.value?.isBetween(moment(time.value).clone().set({ hours: a.openHour, minutes: a.openMin }), moment(time.value).clone().set({ hours: a.closeHour, minutes: a.closeMin })) || time.value?.isSame(moment(time.value).set({ hours: a.openHour, minutes: a.openMin })))) ? 'border border-1 border-warning' : ''}`} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
+																<p className='font-12 mb-0 flex items-center justify-center gap-1'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
 															</div>
-														</Col>
+														</div>
 													))}
-												</Row>
+												</div>
 											</Col>
 										</Row>
 									</div>
@@ -793,7 +772,7 @@ class ModalNewAppointment extends React.Component {
 						{visibleModalScreening && <ModalNewScreening {...modalScreeningProps} />}
 						{visibleModalConfirm && <ModalConfirm {...modalConfirmProps} />}
 						{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
-						<Row className='justify-end gap-2'>
+						<Row className='justify-end gap-2 mt-10'>
 							<Button key="back" onClick={this.props.onCancel}>
 								{intl.formatMessage(msgReview.goBack).toUpperCase()}
 							</Button>

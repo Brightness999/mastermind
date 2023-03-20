@@ -3,20 +3,22 @@ import { Modal, Button, Row, Col, Switch, Select, Calendar, Upload, Input, messa
 import { BiChevronLeft, BiChevronRight, BiUpload } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 import intl from 'react-intl-universal';
+import moment from 'moment';
+import 'moment/locale/en-au';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import msgRequest from '../../routes/Sign/SubsidyRequest/messages';
-import moment from 'moment';
-import './style/index.less';
-import '../../assets/styles/login.less';
 import { url } from '../../utils/api/baseUrl';
 import request from '../../utils/api/request';
-import 'moment/locale/en-au';
 import { getAllConsultantForParent, getAuthorizationUrl, rescheduleAppointmentForParent } from '../../utils/api/apiList';
 import { setMeetingLink, setSelectedTime, setSelectedUser } from '../../redux/features/authSlice';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
+import './style/index.less';
+import '../../assets/styles/login.less';
+
 moment.locale('en');
 
 class ModalCurrentReferralService extends React.Component {
@@ -467,15 +469,15 @@ class ModalCurrentReferralService extends React.Component {
 												/>
 											</Col>
 											<Col xs={24} sm={24} md={12}>
-												<Row gutter={15}>
+												<div className='grid grid-columns-2 gap-2'>
 													{arrTime?.map((time, index) => (
-														<Col key={index} span={12}>
+														<div key={index}>
 															<div className={`${selectedTimeIndex === index ? 'active' : ''} ${time.active ? 'time-available' : 'time-not-available'} ${moment(event?.date)?.year() == selectedDate?.year() && moment(event?.date)?.month() == selectedDate?.month() && moment(event?.date)?.date() == selectedDate?.date() && moment(event?.date).hours() == time.value.hours() && moment(event?.date).minutes() == time.value.minutes() ? 'prev-time' : ''}`} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
-																<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
+																<p className='font-12 mb-0 flex items-center justify-center gap-1'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
 															</div>
-														</Col>
+														</div>
 													))}
-												</Row>
+												</div>
 											</Col>
 										</Row>
 									</div>

@@ -3,31 +3,31 @@ import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, 
 import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
 import { BsCheck } from 'react-icons/bs';
 import { GoPrimitiveDot } from 'react-icons/go';
+import { MdAdminPanelSettings } from 'react-icons/md';
+import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import intl from 'react-intl-universal';
+import moment from 'moment';
+import 'moment/locale/en-au';
+
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import msgDrawer from '../../components/DrawerDetail/messages';
 import msgReview from '../../routes/Sign/SubsidyReview/messages';
-import moment from 'moment';
 import request from '../../utils/api/request';
-import './style/index.less';
-import '../../assets/styles/login.less';
-const { Paragraph } = Typography;
-import 'moment/locale/en-au';
-moment.locale('en');
 import { store } from '../../redux/store';
 import { rescheduleAppointmentForParent } from '../../utils/api/apiList';
-import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
-import { MdAdminPanelSettings } from 'react-icons/md';
+import './style/index.less';
+import '../../assets/styles/login.less';
+
+moment.locale('en');
+const { Paragraph } = Typography;
 
 class ModalCurrentAppointment extends React.Component {
 	state = {
 		selectedDate: moment(this.props.event?.date),
-		selectedPrivateDate: moment(this.props.event?.date),
 		selectedTimeIndex: -1,
 		addressOptions: store.getState().auth.locations,
 		arrTime: [],
-		privateArrTime: [],
 		errorMessage: '',
 		skillSet: store.getState().auth.skillSet,
 		notes: this.props.event?.notes,
@@ -67,30 +67,25 @@ class ModalCurrentAppointment extends React.Component {
 					ranges = event?.provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
 				}
 				if (!!ranges?.length) {
-					let arr24 = new Array(24).fill(0);
-					let timeObject = { start: 0, end: 0 };
-					let timeArr = [];
-					ranges.forEach(a => {
-						for (let i = a?.openHour; i <= a?.closeHour; i++) {
-							arr24[i] = 1;
-						}
-					})
-					arr24.forEach((a, i) => {
-						if (a == 0) {
-							timeObject = { start: 0, end: 0 };
+					let timeArr = ranges?.map(a => ([a.openHour, a.closeHour]))?.reduce((a, b) => {
+						if (!a?.length) a.push(b);
+						else if (a?.find(c => (c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1]))) {
+							a = a.map(c => {
+								if ((c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1])) {
+									return [Math.min(...c, ...b), Math.max(...c, ...b)];
+								} else {
+									return c;
+								}
+							})
 						} else {
-							if (i == 0 || arr24[i - 1] == 0) {
-								timeObject.start = i;
-							}
-							if (i == 23 || arr24[i + 1] == 0) {
-								timeObject.end = i;
-								timeArr.push(timeObject);
-							}
+							a.push(b);
 						}
-					});
+						return a;
+					}, []);
+
 					timeArr.forEach(a => {
-						let startTime = moment().set({ hours: a.start, minutes: 0, seconds: 0, milliseconds: 0 });
-						for (let i = 0; i < (a.end - a.start) * 60 / duration; i++) {
+						let startTime = moment().set({ hours: a?.[0], minutes: 0, seconds: 0, milliseconds: 0 });
+						for (let i = 0; i < (a?.[1] - a?.[0]) * 60 / duration; i++) {
 							arrTime.push({
 								value: startTime.clone().add(duration * i, 'minutes'),
 								active: date.isBefore(moment()) ? false : true,
@@ -234,94 +229,6 @@ class ModalCurrentAppointment extends React.Component {
 	displayDuration = () => {
 		const { event } = this.props;
 		return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.duration, 'minutes').format('hh:mm a')}`;
-	}
-
-	nextPrivateMonth = () => {
-		this.setState({ selectedPrivateDate: moment(this.state.selectedPrivateDate).add(1, 'month') });
-	}
-
-	prevPrivateMonth = () => {
-		this.setState({ selectedPrivateDate: moment(this.state.selectedPrivateDate).add(-1, 'month') });
-	}
-
-	onSelectPrivateDate = (newValue) => {
-		const newArrTime = this.getArrTime(newValue);
-		this.setState({
-			selectedPrivateDate: newValue,
-			privateArrTime: newArrTime,
-		});
-	}
-
-	privateSlot = () => {
-		const { userRole, selectedPrivateDate, privateArrTime } = this.state;
-		const { event } = this.props;
-
-		return (
-			<div className='private-calendar'>
-				<p className='font-700'>{intl.formatMessage(msgCreateAccount.privateHMGHAgents)}</p>
-				<Row gutter={15}>
-					<Col xs={24} sm={24} md={12}>
-						<Calendar
-							fullscreen={false}
-							value={selectedPrivateDate}
-							onSelect={this.onSelectPrivateDate}
-							dateCellRender={date => {
-								if (userRole > 3) {
-									const availableTime = event?.provider?.manualSchedule?.find(time => time.dayInWeek == date.day());
-									if (availableTime) {
-										const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate });
-										const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate });
-										if (date.isBetween(availableFromDate, availableToDate) && availableTime.isPrivate) {
-											return (<div className='absolute top-0 left-0 h-100 w-100 border border-1 border-warning rounded-2'></div>)
-										} else {
-											return null;
-										}
-									} else {
-										return null;
-									}
-								} else {
-									return null;
-								}
-							}}
-							headerRender={() => (
-								<div style={{ marginBottom: 10 }}>
-									<Row gutter={8} justify="space-between" align="middle">
-										<Col>
-											<p className='font-12 mb-0'>{selectedPrivateDate?.format('MMMM YYYY')}</p>
-										</Col>
-										<Col>
-											<Button
-												type='text'
-												className='mr-10 left-btn'
-												icon={<BiChevronLeft size={25} />}
-												onClick={this.prevPrivateMonth}
-											/>
-											<Button
-												type='text'
-												className='right-btn'
-												icon={<BiChevronRight size={25} />}
-												onClick={this.nextPrivateMonth}
-											/>
-										</Col>
-									</Row>
-								</div>
-							)}
-						/>
-					</Col>
-					<Col xs={24} sm={24} md={12}>
-						<Row gutter={15}>
-							{privateArrTime?.map((time, index) => (
-								<Col key={index} span={12}>
-									<div className={`${time.active ? 'time-available' : 'time-not-available'}`}>
-										<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
-									</div>
-								</Col>
-							))}
-						</Row>
-					</Col>
-				</Row>
-			</div>
-		)
 	}
 
 	render() {
@@ -512,7 +419,7 @@ class ModalCurrentAppointment extends React.Component {
 										<p className='font-16 font-700'>
 											{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}
 											{!!event?.provider?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
-											{userRole > 3 && event?.provider?.isPrivateForHmgh ? <Popover content={this.privateSlot} trigger="click"><FaCalendarAlt size={16} className="text-green500 cursor" /></Popover> : null}
+											{userRole > 3 && (event?.provider?.isPrivateForHmgh || event?.provider?.manualSchedule?.find(a => a.isPrivate && a.location === address && selectedDate?.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })))) ? <FaCalendarAlt size={16} className="text-green500" /> : null}
 										</p>
 										<p className='font-700 ml-auto text-primary'>{event?.provider?.isNewClientScreening ? event?.provider?.appointments?.find(a => a.dependent == event?.dependent?._id && a.type == 1 && a.status == -1) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
@@ -633,15 +540,15 @@ class ModalCurrentAppointment extends React.Component {
 												/>
 											</Col>
 											<Col xs={24} sm={24} md={12}>
-												<Row gutter={15}>
+												<div className='grid grid-columns-2 gap-2'>
 													{arrTime?.map((time, index) => (
-														<Col key={index} span={12}>
-															<div className={`${selectedTimeIndex === index ? 'active' : ''} ${time.active ? 'time-available' : 'time-not-available'} ${moment(event?.date)?.year() == selectedDate?.year() && moment(event?.date)?.month() == selectedDate?.month() && moment(event?.date)?.date() == selectedDate?.date() && moment(event?.date).hours() == time.value.hours() && moment(event?.date).minutes() == time.value.minutes() ? 'prev-time' : ''}`} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
-																<p className='font-12 mb-0'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
+														<div key={index}>
+															<div className={`${selectedTimeIndex === index ? 'active' : ''} ${time.active ? 'time-available' : 'time-not-available'} ${moment(event?.date)?.year() === selectedDate?.year() && moment(event?.date)?.month() === selectedDate?.month() && moment(event?.date)?.date() === selectedDate?.date() && moment(event?.date).hours() === time.value.hours() && moment(event?.date).minutes() === time.value.minutes() ? 'prev-time' : ''} ${event?.provider?.manualSchedule?.find(a => a.dayInWeek === selectedDate.day() && a.location === address && a.isPrivate && selectedDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })) && (time.value?.isBetween(moment(time.value).clone().set({ hours: a.openHour, minutes: a.openMin }), moment(time.value).clone().set({ hours: a.closeHour, minutes: a.closeMin })) || time.value?.isSame(moment(time.value).set({ hours: a.openHour, minutes: a.openMin })))) ? 'border border-1 border-warning' : ''}`} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
+																<p className='font-12 mb-0 flex items-center justify-center gap-1'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
 															</div>
-														</Col>
+														</div>
 													))}
-												</Row>
+												</div>
 											</Col>
 										</Row>
 									</div>
@@ -649,7 +556,7 @@ class ModalCurrentAppointment extends React.Component {
 							</Col>
 						</Row>
 						{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
-						<Row className='justify-end gap-2'>
+						<Row className='justify-end gap-2 mt-10'>
 							<Button key="back" onClick={this.props.onCancel}>
 								{intl.formatMessage(msgReview.goBack).toUpperCase()}
 							</Button>
