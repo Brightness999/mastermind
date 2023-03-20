@@ -203,11 +203,11 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	onConfirmEvaluation = () => {
 		this.onCloseModalConfirm();
-		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration } = this.state;
+		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration } = this.state;
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
 		const postData = {
-			skillSet: selectedSkill,
+			skillSet: selectedSkillSet,
 			dependent: selectedDependent,
 			provider: selectedProvider,
 			date: hour,
