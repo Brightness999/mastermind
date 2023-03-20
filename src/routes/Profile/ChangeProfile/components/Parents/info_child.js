@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
 import { Row, Col, Form, Button, Input, Select, DatePicker, Popconfirm, message } from 'antd';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import msgLogin from '../../../../Sign/Login/messages';
-import msgCreateAccount from '../../../../Sign/CreateAccount/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import moment from 'moment';
-import { setInforClientChild, changeInforClientChild } from '../../../../../redux/features/authSlice';
-import { store } from '../../../../../redux/store';
-import request from '../../../../../utils/api/request';
-import { getChildProfile, getDefaultValueForClient, getUserProfile } from '../../../../../utils/api/apiList';
 import { TbTrash } from 'react-icons/tb';
 import { BsPlusCircle } from 'react-icons/bs';
+
+import messages from '../../messages';
+import msgLogin from '../../../../Sign/Login/messages';
+import msgCreateAccount from '../../../../Sign/CreateAccount/messages';
+import { setInforClientChild } from '../../../../../redux/features/authSlice';
+import request from '../../../../../utils/api/request';
+import { getChildProfile, getDefaultValueForClient, getUserProfile } from '../../../../../utils/api/apiList';
 import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class InfoChild extends Component {
@@ -107,7 +107,7 @@ class InfoChild extends Component {
 				studentInfos: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.studentInfos : this.props.auth.user?.studentInfos,
 			};
 
-			const result = await store.dispatch(setInforClientChild(params));
+			const result = await this.props.dispatch(setInforClientChild(params));
 			this.form?.setFieldsValue({ children: result.payload.data?.map(item => ({ ...item, birthday: moment(item.birthday) })) });
 		} catch (error) {
 			console.log('update children error ---', error)
@@ -347,4 +347,4 @@ class InfoChild extends Component {
 
 const mapStateToProps = state => ({ auth: state.auth });
 
-export default compose(connect(mapStateToProps, { changeInforClientChild }))(InfoChild);
+export default compose(connect(mapStateToProps))(InfoChild);

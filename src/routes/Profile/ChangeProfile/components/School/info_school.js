@@ -2,14 +2,14 @@ import React from 'react';
 import { Row, Col, Form, Button, Input, Select, message } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import messagesLogin from '../../../../Sign/Login/messages';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { getCommunitiServer, getDefaultValueForProvider, getMySchoolInfo, getUserProfile } from '../../../../../utils/api/apiList'
-import { setInforSchool } from '../../../../../redux/features/authSlice';
-import { store } from '../../../../../redux/store'
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+
+import messages from '../../messages';
+import messagesLogin from '../../../../Sign/Login/messages';
+import { getCommunitiServer, getDefaultValueForProvider, getMySchoolInfo, getUserProfile } from '../../../../../utils/api/apiList'
+import { setInforSchool } from '../../../../../redux/features/authSlice';
 import request from '../../../../../utils/api/request';
 import PageLoading from '../../../../../components/Loading/PageLoading';
 
@@ -35,7 +35,7 @@ class InfoSchool extends React.Component {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.form.setFieldsValue(data?.schoolInfo);
+					this.form?.setFieldsValue(data?.schoolInfo);
 				}
 			}).catch(err => {
 				message.error("Getting Profile" + err.message);
@@ -46,7 +46,7 @@ class InfoSchool extends React.Component {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.form.setFieldsValue(data);
+					this.form?.setFieldsValue(data);
 				}
 			}).catch(err => {
 				message.error("Getting Profile" + err.message);
@@ -57,7 +57,8 @@ class InfoSchool extends React.Component {
 
 	onFinish = (values) => {
 		try {
-			store.dispatch(setInforSchool({ ...values, _id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.schoolInfo?._id : this.props.auth.user?.schoolInfo?._id }))
+			const { dispatch, auth } = this.props;
+			dispatch(setInforSchool({ ...values, _id: window.location.pathname?.includes('changeuserprofile') ? auth.selectedUser?.schoolInfo?._id : auth.user?.schoolInfo?._id }))
 		} catch (error) {
 			console.log('update school error---', error);
 		}

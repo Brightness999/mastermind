@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 import { Row, Col, Form, Button, Input, Select, message } from 'antd';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import messagesLogin from '../../../../Sign/Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { store } from '../../../../../redux/store';
+import { BsDashCircle, BsPlusCircle } from 'react-icons/bs';
+
+import messages from '../../messages';
+import messagesLogin from '../../../../Sign/Login/messages';
 import { setInforProvider } from '../../../../../redux/features/authSlice';
 import { getDefaultValueForProvider, getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
 import request from '../../../../../utils/api/request';
-import { BsDashCircle, BsPlusCircle } from 'react-icons/bs';
 import PageLoading from '../../../../../components/Loading/PageLoading';
 
 class InfoServices extends Component {
@@ -29,7 +29,7 @@ class InfoServices extends Component {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.form.setFieldsValue(data?.providerInfo);
+					this.form?.setFieldsValue(data?.providerInfo);
 				}
 			}).catch(err => {
 				console.log('get provider info error---', err);
@@ -66,7 +66,7 @@ class InfoServices extends Component {
 
 	onFinish = (values) => {
 		try {
-			store.dispatch(setInforProvider({
+			this.props.dispatch(setInforProvider({
 				...values,
 				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
 			}));

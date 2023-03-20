@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import { Row, Col, Form, Button, Select, Switch } from 'antd';
 import moment from 'moment';
+import 'moment/locale/en-au';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
+
+import messages from '../../messages';
+import messagesLogin from '../../../Login/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import 'moment/locale/en-au';
+
 moment.locale('en');
 
 class InfoScheduling extends Component {
@@ -20,13 +22,13 @@ class InfoScheduling extends Component {
 		const { registerData } = this.props.register;
 
 		if (registerData.scheduling) {
-			this.form.setFieldsValue(registerData.scheduling);
+			this.form?.setFieldsValue(registerData.scheduling);
 			this.setState({
 				isSeparateEvaluationRate: registerData.scheduling.isSeparateEvaluationRate,
 				isNewClientScreening: registerData.scheduling.isNewClientScreening,
 			});
 		} else {
-			this.form.setFieldsValue({ chidren: [this.getDefaultObj()] });
+			this.form?.setFieldsValue({ chidren: [this.getDefaultObj()] });
 			this.props.setRegisterData({ scheduling: this.getDefaultObj() });
 		}
 	}

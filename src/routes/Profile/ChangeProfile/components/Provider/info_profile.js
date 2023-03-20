@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import { Row, Col, Form, Button, Input, Select, message, Switch } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import messagesLogin from '../../../../Sign/Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import PlacesAutocomplete from 'react-places-autocomplete';
+
+import messages from '../../messages';
+import messagesLogin from '../../../../Sign/Login/messages';
 import { setInforProvider } from '../../../../../redux/features/authSlice';
-import { store } from '../../../../../redux/store'
 import request from '../../../../../utils/api/request';
 import { getMyProviderInfo, getDefaultValueForProvider, getCityConnections, getUserProfile } from '../../../../../utils/api/apiList';
 import PageLoading from '../../../../../components/Loading/PageLoading';
@@ -40,7 +40,7 @@ class InfoProfile extends Component {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.form.setFieldsValue(data?.providerInfo);
+					this.form?.setFieldsValue(data?.providerInfo);
 					this.setState({ isPrivateForHmgh: data?.providerInfo?.isPrivateForHmgh });
 				}
 			}).catch(err => {
@@ -53,7 +53,7 @@ class InfoProfile extends Component {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.form.setFieldsValue(data);
+					this.form?.setFieldsValue(data);
 					this.setState({ isPrivateForHmgh: user?.providerInfo?.isPrivateForHmgh });
 				}
 			}).catch(err => {
@@ -91,7 +91,7 @@ class InfoProfile extends Component {
 
 	onFinish = (values) => {
 		try {
-			store.dispatch(setInforProvider({
+			this.props.dispatch(setInforProvider({
 				...values,
 				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
 			}))

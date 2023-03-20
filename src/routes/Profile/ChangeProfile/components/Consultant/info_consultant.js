@@ -4,6 +4,7 @@ import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
+
 import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import request from '../../../../../utils/api/request';
@@ -35,7 +36,7 @@ class InfoConsultant extends Component {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.form.setFieldsValue(data?.consultantInfo);
+					this.form?.setFieldsValue(data?.consultantInfo);
 				}
 			}).catch(err => {
 				message.error("Getting Profile" + err.message);
@@ -46,7 +47,7 @@ class InfoConsultant extends Component {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.form.setFieldsValue(data);
+					this.form?.setFieldsValue(data);
 				}
 			}).catch(err => {
 				message.error("Getting Profile" + err.message);

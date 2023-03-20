@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 import { Row, Col, Form, Button, Input, Select } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
+
+import messages from '../../messages';
+import messagesLogin from '../../../Login/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 
 class InfoConsultant extends Component {

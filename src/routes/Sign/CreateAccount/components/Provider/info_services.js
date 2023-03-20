@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { Row, Col, Form, Button, Input, Select } from 'antd';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { BsDashCircle, BsPlusCircle } from 'react-icons/bs';
+
+import messages from '../../messages';
+import messagesLogin from '../../../Login/messages';
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
 
 class InfoServices extends Component {
 	constructor(props) {
@@ -19,7 +20,7 @@ class InfoServices extends Component {
 			this.props.setRegisterData({ serviceInfor: this.getDefaultObj() });
 		}
 		const serviceInfor = registerData.serviceInfor || this.getDefaultObj();
-		this.form.setFieldsValue(serviceInfor);
+		this.form?.setFieldsValue(serviceInfor);
 	}
 
 	getDefaultObj = () => {

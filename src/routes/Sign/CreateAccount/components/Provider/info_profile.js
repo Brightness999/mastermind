@@ -2,12 +2,13 @@ import React, { Component } from 'react';
 import { Row, Col, Form, Button, Input, Select, Switch } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import PlacesAutocomplete from 'react-places-autocomplete';
+
+import messages from '../../messages';
+import messagesLogin from '../../../Login/messages';
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
 
 class InfoProfile extends Component {
 	constructor(props) {
@@ -27,7 +28,7 @@ class InfoProfile extends Component {
 			this.setState({ cityConnections: user?.adminCommunity });
 		}
 		const profileInfor = registerData.profileInfor || this.getDefaultObj();
-		this.form.setFieldsValue(profileInfor);
+		this.form?.setFieldsValue(profileInfor);
 		this.setState({ isPrivateForHmgh: profileInfor?.isPrivateForHmgh });
 		if (!registerData.profileInfor) {
 			this.props.setRegisterData({ profileInfor: this.getDefaultObj() });
@@ -136,7 +137,7 @@ class InfoProfile extends Component {
 								onChange={(value) => this.setValueToReduxRegisterData("serviceAddress", value)}
 								onSelect={(value) => {
 									this.setValueToReduxRegisterData("serviceAddress", value);
-									this.form.setFieldsValue({ serviceAddress: value });
+									this.form?.setFieldsValue({ serviceAddress: value });
 								}}
 							>
 								{({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (

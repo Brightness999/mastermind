@@ -3,11 +3,12 @@ import { Row, Col, Form, Button, Segmented, TimePicker, message, DatePicker, Che
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
+
+import messages from '../../messages';
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { userSignUp } from '../../../../../utils/api/apiList';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
@@ -133,14 +134,14 @@ class ConsultantAvailability extends Component {
 
   onChangeScheduleValue = () => {
     const { isLegalHolidays, isJewishHolidays } = this.state;
-    this.props.setRegisterData({ step2: { ...this.form.getFieldsValue(), isLegalHolidays, isJewishHolidays } });
+    this.props.setRegisterData({ step2: { ...this.form?.getFieldsValue(), isLegalHolidays, isJewishHolidays } });
   }
 
   copyToFullWeek = (dayForCopy, index) => {
-    const arrToCopy = this.form.getFieldValue(dayForCopy);
+    const arrToCopy = this.form?.getFieldValue(dayForCopy);
     day_week.map((newDay) => {
       if (newDay != dayForCopy) {
-        this.form.setFieldValue(newDay, [...this.form.getFieldValue(newDay), arrToCopy[index]]);
+        this.form?.setFieldValue(newDay, [...this.form?.getFieldValue(newDay), arrToCopy[index]]);
       }
     })
   }
@@ -149,7 +150,7 @@ class ConsultantAvailability extends Component {
     const arrToCopy = this.form?.getFieldValue(day);
     day_week.map((newDay) => {
       if (newDay == day) {
-        this.form.setFieldValue(newDay, arrToCopy);
+        this.form?.setFieldValue(newDay, arrToCopy);
       }
     })
   }
@@ -181,7 +182,7 @@ class ConsultantAvailability extends Component {
     this.setState({ isLegalHolidays: status });
 
     const { legalHolidays, jewishHolidays, isJewishHolidays } = this.state;
-    const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
+    const dates = this.form?.getFieldValue("blackoutDates")?.map(date => new Date(date));
     let uniqueDates = [];
 
     if (status) {
@@ -230,7 +231,7 @@ class ConsultantAvailability extends Component {
     this.setState({ isJewishHolidays: status });
 
     const { jewishHolidays, legalHolidays, isLegalHolidays } = this.state;
-    const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
+    const dates = this.form?.getFieldValue("blackoutDates")?.map(date => new Date(date));
     let uniqueDates = [];
 
     if (status) {
@@ -276,7 +277,7 @@ class ConsultantAvailability extends Component {
   }
 
   updateBlackoutDates = async (dates) => {
-    this.form.setFieldsValue({ blackoutDates: dates });
+    this.form?.setFieldsValue({ blackoutDates: dates });
     this.onChangeScheduleValue();
     return new Promise((resolveOuter) => {
       resolveOuter(
@@ -311,8 +312,8 @@ class ConsultantAvailability extends Component {
 
   handleChangeTime = (time, type, day, index) => {
     this.onChangeScheduleValue();
-    const dayTime = this.form.getFieldValue(day);
-    this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: time }) : d));
+    const dayTime = this.form?.getFieldValue(day);
+    this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: time }) : d));
   }
 
   render() {

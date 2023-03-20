@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Row, Col, Button, message } from 'antd';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
+
+import messages from '../../messages';
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { userSignUp } from '../../../../../utils/api/apiList';
 import request from '../../../../../utils/api/request';

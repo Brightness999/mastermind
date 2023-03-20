@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import { Row, Col, Form, Button, Select, Switch, Divider, Input, Checkbox, message } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import messagesLogin from '../../../../Sign/Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
+
+import messages from '../../messages';
+import messagesLogin from '../../../../Sign/Login/messages';
 import { setInforProvider } from '../../../../../redux/features/authSlice';
-import { store } from '../../../../../redux/store'
 import request from '../../../../../utils/api/request';
 import { getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
 import PageLoading from '../../../../../components/Loading/PageLoading';
@@ -25,18 +25,13 @@ class SubsidyProgram extends Component {
 	}
 
 	componentDidMount() {
-		const arrReduce = [];
-		for (let i = 0; i < 100; i++) {
-			arrReduce.push(i);
-		}
-
 		this.setState({ loading: true, academicLevels: this.props.auth?.academicLevels });
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.form.setFieldsValue({ ...data?.providerInfo, numberSessions: '1' });
+					this.form?.setFieldsValue({ ...data?.providerInfo, numberSessions: '1' });
 					this.setState({
 						isAcceptProBono: data?.providerInfo?.isAcceptProBono,
 						isAcceptReduceRate: data?.providerInfo?.isAcceptReduceRate,
@@ -54,7 +49,7 @@ class SubsidyProgram extends Component {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.form.setFieldsValue({ ...data, numberSessions: '1' });
+					this.form?.setFieldsValue({ ...data, numberSessions: '1' });
 					this.setState({
 						isAcceptProBono: data.isAcceptProBono,
 						isAcceptReduceRate: data.isAcceptReduceRate,
@@ -93,7 +88,7 @@ class SubsidyProgram extends Component {
 		}
 
 		try {
-			store.dispatch(setInforProvider(data))
+			this.props.dispatch(setInforProvider(data))
 		} catch (error) {
 			console.log(error, 'error')
 		}
@@ -194,8 +189,8 @@ class SubsidyProgram extends Component {
 															min={0}
 															onChange={e => {
 																if (isSameRate) {
-																	let arr = JSON.parse(JSON.stringify(this.form.getFieldValue('academicLevel')));
-																	this.form.setFieldValue('academicLevel', arr?.map(item => ({ ...item, subsidizedRate: e.target.value })));
+																	let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));
+																	this.form?.setFieldValue('academicLevel', arr?.map(item => ({ ...item, subsidizedRate: e.target.value })));
 																}
 															}}
 															disabled={!isAcceptReduceRate}

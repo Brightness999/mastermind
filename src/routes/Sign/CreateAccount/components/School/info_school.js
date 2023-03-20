@@ -2,12 +2,13 @@ import React from 'react';
 import { Row, Col, Form, Button, Input, Select } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+
+import messages from '../../messages';
+import messagesLogin from '../../../Login/messages';
+import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
 
 class InfoSchool extends React.Component {
 	constructor(props) {
@@ -28,9 +29,9 @@ class InfoSchool extends React.Component {
 
 		if (!registerData.contactEmail || registerData.contactEmail.length == 0) {
 			this.setReduxForSchool('contactEmail', [{ email: registerData?.email, type: 'Work' }]);
-			this.form.setFieldsValue({ contactEmail: [{ email: registerData?.email, type: 'Work' }] });
+			this.form?.setFieldsValue({ contactEmail: [{ email: registerData?.email, type: 'Work' }] });
 		}
-		this.form.setFieldsValue(registerData);
+		this.form?.setFieldsValue(registerData);
 	}
 
 	onFinish = async () => {
@@ -53,7 +54,7 @@ class InfoSchool extends React.Component {
 
 	handleSelect = school_address => {
 		this.setReduxForSchool('valueForContact', school_address);
-		this.form.setFieldsValue({ valueForContact: school_address });
+		this.form?.setFieldsValue({ valueForContact: school_address });
 	};
 
 	render() {
@@ -160,7 +161,7 @@ class InfoSchool extends React.Component {
 													]}
 												>
 													<Input
-														onChange={() => this.setReduxForSchool('contactEmail', this.form.getFieldValue('contactEmail'))}
+														onChange={() => this.setReduxForSchool('contactEmail', this.form?.getFieldValue('contactEmail'))}
 														placeholder={intl.formatMessage(messages.contactEmail)}
 													/>
 												</Form.Item>
@@ -173,13 +174,13 @@ class InfoSchool extends React.Component {
 													className='bottom-0 float-label-item'
 													style={{ marginTop: field.key === 0 ? 0 : 14 }}
 												>
-													<Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.setReduxForSchool('contactEmail', this.form.getFieldValue('contactEmail'))}>
+													<Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.setReduxForSchool('contactEmail', this.form?.getFieldValue('contactEmail'))}>
 														{emailTypes?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
 													</Select>
 												</Form.Item>
-												{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove contact-email' onClick={() => { remove(field.name); this.setReduxForSchool('contactEmail', this.form.getFieldValue('contactEmail')); }} />}
+												{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove contact-email' onClick={() => { remove(field.name); this.setReduxForSchool('contactEmail', this.form?.getFieldValue('contactEmail')); }} />}
 											</Col>
 										</Row>
 									))}
@@ -188,7 +189,7 @@ class InfoSchool extends React.Component {
 											type="text"
 											className='add-number-btn mb-10'
 											icon={<BsPlusCircle size={17} className='mr-5' />}
-											onClick={() => { add(); this.setReduxForSchool('contactEmail', this.form.getFieldValue('contactEmail')); }}
+											onClick={() => { add(); this.setReduxForSchool('contactEmail', this.form?.getFieldValue('contactEmail')); }}
 										>
 											{intl.formatMessage(messages.addEmail)}
 										</Button>
@@ -208,7 +209,7 @@ class InfoSchool extends React.Component {
 													label={intl.formatMessage(messages.name)}
 													className="float-label-item"
 												>
-													<Input placeholder={intl.formatMessage(messages.name)} onChange={() => this.setReduxForSchool('techContactRef', this.form.getFieldValue('techContactRef'))} />
+													<Input placeholder={intl.formatMessage(messages.name)} onChange={() => this.setReduxForSchool('techContactRef', this.form?.getFieldValue('techContactRef'))} />
 												</Form.Item>
 												<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
 											</div>
@@ -224,7 +225,7 @@ class InfoSchool extends React.Component {
 														},
 													]}
 												>
-													<Input placeholder={intl.formatMessage(messages.contactNumber)} onChange={() => this.setReduxForSchool('techContactRef', this.form.getFieldValue('techContactRef'))} />
+													<Input placeholder={intl.formatMessage(messages.contactNumber)} onChange={() => this.setReduxForSchool('techContactRef', this.form?.getFieldValue('techContactRef'))} />
 												</Form.Item>
 												<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
 											</div>
@@ -240,7 +241,7 @@ class InfoSchool extends React.Component {
 														}
 													]}
 												>
-													<Input placeholder={intl.formatMessage(messages.contactEmail)} onChange={() => this.setReduxForSchool('techContactRef', this.form.getFieldValue('techContactRef'))} />
+													<Input placeholder={intl.formatMessage(messages.contactEmail)} onChange={() => this.setReduxForSchool('techContactRef', this.form?.getFieldValue('techContactRef'))} />
 												</Form.Item>
 												<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
 											</div>
@@ -266,7 +267,7 @@ class InfoSchool extends React.Component {
 													label={intl.formatMessage(messages.name)}
 													className="float-label-item"
 												>
-													<Input placeholder={intl.formatMessage(messages.name)} onChange={() => this.setReduxForSchool('studentContactRef', this.form.getFieldValue('studentContactRef'))} />
+													<Input placeholder={intl.formatMessage(messages.name)} onChange={() => this.setReduxForSchool('studentContactRef', this.form?.getFieldValue('studentContactRef'))} />
 												</Form.Item>
 												<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
 											</div>
@@ -282,7 +283,7 @@ class InfoSchool extends React.Component {
 														},
 													]}
 												>
-													<Input placeholder={intl.formatMessage(messages.contactNumber)} onChange={() => this.setReduxForSchool('studentContactRef', this.form.getFieldValue('studentContactRef'))} />
+													<Input placeholder={intl.formatMessage(messages.contactNumber)} onChange={() => this.setReduxForSchool('studentContactRef', this.form?.getFieldValue('studentContactRef'))} />
 												</Form.Item>
 												<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
 											</div>
@@ -298,7 +299,7 @@ class InfoSchool extends React.Component {
 														}
 													]}
 												>
-													<Input placeholder={intl.formatMessage(messages.contactEmail)} onChange={() => this.setReduxForSchool('studentContactRef', this.form.getFieldValue('studentContactRef'))} />
+													<Input placeholder={intl.formatMessage(messages.contactEmail)} onChange={() => this.setReduxForSchool('studentContactRef', this.form?.getFieldValue('studentContactRef'))} />
 												</Form.Item>
 												<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
 											</div>

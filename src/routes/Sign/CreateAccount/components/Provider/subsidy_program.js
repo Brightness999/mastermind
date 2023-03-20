@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import { Row, Col, Form, Button, Select, Switch, Divider, Input, Checkbox } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
+
+import messages from '../../messages';
+import messagesLogin from '../../../Login/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import 'moment/locale/en-au';
 
 class SubsidyProgram extends Component {
 	state = {
@@ -90,8 +90,7 @@ class SubsidyProgram extends Component {
 	}
 
 	handleSelectChange = () => {
-		console.log(this.form.getFieldsValue())
-		this.props.setRegisterData({ subsidy: this.form.getFieldsValue() })
+		this.props.setRegisterData({ subsidy: this.form?.getFieldsValue() })
 	}
 
 	render() {
@@ -207,8 +206,8 @@ class SubsidyProgram extends Component {
 															min={0}
 															onChange={e => {
 																if (isSameRate) {
-																	let arr = JSON.parse(JSON.stringify(this.form.getFieldValue('academicLevel')));
-																	this.form.setFieldValue('academicLevel', arr?.map(item => ({ ...item, subsidizedRate: e.target.value })));
+																	let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));
+																	this.form?.setFieldValue('academicLevel', arr?.map(item => ({ ...item, subsidizedRate: e.target.value })));
 																}
 																this.handleSelectChange();
 															}}

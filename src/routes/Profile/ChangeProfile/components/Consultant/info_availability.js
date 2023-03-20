@@ -55,7 +55,7 @@ class ConsultantAvailability extends Component {
 
 					day_week.map((day) => {
 						const times = data?.consultantInfo?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
-						this.form.setFieldValue(day, times?.map(t => {
+						this.form?.setFieldValue(day, times?.map(t => {
 							t.from_date = moment().set({ years: t.fromYear, months: t.fromMonth, date: t.fromDate });
 							t.to_date = moment().set({ years: t.toYear, months: t.toMonth, date: t.toDate });
 							t.from_time = moment().set({ hours: t.openHour, minutes: t.openMin });
@@ -87,7 +87,7 @@ class ConsultantAvailability extends Component {
 
 					day_week.map((day) => {
 						const times = data?.manualSchedule?.filter(t => t.dayInWeek == this.getDayOfWeekIndex(day));
-						this.form.setFieldValue(day, times?.map(t => {
+						this.form?.setFieldValue(day, times?.map(t => {
 							t.from_date = moment().set({ years: t.fromYear, months: t.fromMonth, date: t.fromDate });
 							t.to_date = moment().set({ years: t.toYear, months: t.toMonth, date: t.toDate });
 							t.from_time = moment().set({ hours: t.openHour, minutes: t.openMin });
@@ -196,10 +196,10 @@ class ConsultantAvailability extends Component {
 	}
 
 	copyToFullWeek = (dayForCopy, index) => {
-		const arrToCopy = this.form.getFieldValue(dayForCopy);
+		const arrToCopy = this.form?.getFieldValue(dayForCopy);
 		day_week.map((newDay) => {
 			if (newDay != dayForCopy) {
-				this.form.setFieldValue(newDay, [...this.form.getFieldValue(newDay), arrToCopy[index]]);
+				this.form?.setFieldValue(newDay, [...this.form?.getFieldValue(newDay), arrToCopy[index]]);
 			}
 		})
 	}
@@ -208,7 +208,7 @@ class ConsultantAvailability extends Component {
 		const arrToCopy = this.form?.getFieldValue(day);
 		day_week.map((newDay) => {
 			if (newDay == day) {
-				this.form.setFieldValue(newDay, arrToCopy);
+				this.form?.setFieldValue(newDay, arrToCopy);
 			}
 		})
 	}
@@ -217,7 +217,7 @@ class ConsultantAvailability extends Component {
 		this.setState({ isLegalHolidays: status });
 
 		const { legalHolidays, jewishHolidays, isJewishHolidays } = this.state;
-		const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
+		const dates = this.form?.getFieldValue("blackoutDates")?.map(date => new Date(date));
 		let uniqueDates = [];
 
 		if (status) {
@@ -265,7 +265,7 @@ class ConsultantAvailability extends Component {
 		this.setState({ isJewishHolidays: status });
 
 		const { jewishHolidays, legalHolidays, isLegalHolidays } = this.state;
-		const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
+		const dates = this.form?.getFieldValue("blackoutDates")?.map(date => new Date(date));
 		let uniqueDates = [];
 
 		if (status) {
@@ -314,7 +314,7 @@ class ConsultantAvailability extends Component {
 	}
 
 	updateBlackoutDates = async (dates) => {
-		this.form.setFieldsValue({ blackoutDates: dates });
+		this.form?.setFieldsValue({ blackoutDates: dates });
 		return new Promise((resolveOuter) => {
 			resolveOuter(
 				new Promise((resolveInner) => {
@@ -395,8 +395,8 @@ class ConsultantAvailability extends Component {
 																<Form.Item name={[field.name, "from_time"]}>
 																	<TimePicker
 																		onSelect={(time) => {
-																			const dayTime = this.form.getFieldValue(day);
-																			this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: time }) : d));
+																			const dayTime = this.form?.getFieldValue(day);
+																			this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: time }) : d));
 																		}}
 																		use12Hours
 																		format="h:mm a"
@@ -409,8 +409,8 @@ class ConsultantAvailability extends Component {
 																<Form.Item name={[field.name, "to_time"]}>
 																	<TimePicker
 																		onSelect={(time) => {
-																			const dayTime = this.form.getFieldValue(day);
-																			this.form.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, to_time: time }) : d));
+																			const dayTime = this.form?.getFieldValue(day);
+																			this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, to_time: time }) : d));
 																		}}
 																		use12Hours
 																		format="h:mm a"

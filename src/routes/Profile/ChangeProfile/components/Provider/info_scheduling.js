@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Row, Col, Form, Button, Select, Switch, message } from 'antd';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
+
+import messages from '../../messages';
 import { getDefaultValueForProvider, getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
 import request from '../../../../../utils/api/request';
 import { setInforProvider } from '../../../../../redux/features/authSlice';
@@ -26,7 +27,7 @@ class InfoScheduling extends Component {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.form.setFieldsValue(data?.providerInfo);
+					this.form?.setFieldsValue(data?.providerInfo);
 					this.setState({
 						isNewClientScreening: data?.providerInfo?.isNewClientScreening,
 						isSeparateEvaluationRate: data?.providerInfo?.isSeparateEvaluationRate,
@@ -42,7 +43,7 @@ class InfoScheduling extends Component {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.form.setFieldsValue(data);
+					this.form?.setFieldsValue(data);
 					this.setState({
 						isNewClientScreening: data?.isNewClientScreening,
 						isSeparateEvaluationRate: data?.isSeparateEvaluationRate,

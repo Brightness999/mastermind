@@ -3,17 +3,17 @@ import { Row, Col, Form, Button, Select, Segmented, TimePicker, Switch, DatePick
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import msgSidebar from '../../../../../components/SideBar/messages';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import request from '../../../../../utils/api/request';
-import { getAllSchoolsForParent, getMyProviderInfo, getUserProfile, updateMyProviderAvailability } from '../../../../../utils/api/apiList';
 import moment from 'moment';
-import { store } from '../../../../../redux/store';
-import { setUser } from '../../../../../redux/features/authSlice';
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
+
+import messages from '../../messages';
+import msgSidebar from '../../../../../components/SideBar/messages';
+import request from '../../../../../utils/api/request';
+import { getAllSchoolsForParent, getMyProviderInfo, getUserProfile, updateMyProviderAvailability } from '../../../../../utils/api/apiList';
+import { setUser } from '../../../../../redux/features/authSlice';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 import PageLoading from '../../../../../components/Loading/PageLoading';
 
@@ -247,7 +247,7 @@ class InfoAvailability extends Component {
 								serviceableSchool: listSchool?.filter(school => values.serviceableSchool?.find(id => id == school._id)),
 							}
 						}
-						store.dispatch(setUser(newUser));
+						this.props.dispatch(setUser(newUser));
 					}
 				}).catch(err => {
 					message.error("Can't update availability");

@@ -3,12 +3,12 @@ import { Row, Form, Button, Input, Select, message } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import PlacesAutocomplete from 'react-places-autocomplete';
+
 import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
-import PlacesAutocomplete from 'react-places-autocomplete';
 import request from '../../../../../utils/api/request';
-import { setInforClientParent, changeInforClientParent, setUser } from '../../../../../redux/features/authSlice';
-import { store } from '../../../../../redux/store'
+import { setInforClientParent, setUser } from '../../../../../redux/features/authSlice';
 import { getDefaultValueForClient, getUserProfile } from '../../../../../utils/api/apiList';
 import PageLoading from '../../../../../components/Loading/PageLoading';
 
@@ -60,14 +60,14 @@ class InfoParent extends Component {
 		if (values) {
 			try {
 				if (window.location.pathname?.includes('changeuserprofile')) {
-					store.dispatch(setInforClientParent({ data: { ...values, _id: this.props.auth.selectedUser?.parentInfo?._id }, token: token }));
+					this.props.dispatch(setInforClientParent({ data: { ...values, _id: this.props.auth.selectedUser?.parentInfo?._id }, token: token }));
 				} else {
 					const { parentInfo } = this.props.auth.user;
 					const dataFrom = { ...values, _id: parentInfo._id }
-					store.dispatch(setInforClientParent({ data: dataFrom }));
+					this.props.dispatch(setInforClientParent({ data: dataFrom }));
 					let user = JSON.parse(JSON.stringify(this.props.auth.user));
 					user.parentInfo = dataFrom;
-					store.dispatch(setUser(user));
+					this.props.dispatch(setUser(user));
 				}
 			} catch (error) {
 				message.error(error.message);
@@ -283,4 +283,4 @@ class InfoParent extends Component {
 
 const mapStateToProps = (state) => ({ auth: state.auth });
 
-export default compose(connect(mapStateToProps, { changeInforClientParent }))(InfoParent);
+export default compose(connect(mapStateToProps))(InfoParent);

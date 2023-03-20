@@ -3,10 +3,11 @@ import { Row, Form, Button, Input, Select } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import PlacesAutocomplete from 'react-places-autocomplete';
+
 import messages from '../../messages';
 import messagesLogin from '../../../Login/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import PlacesAutocomplete from 'react-places-autocomplete';
 
 class InfoParent extends Component {
 	constructor(props) {
@@ -23,7 +24,7 @@ class InfoParent extends Component {
 			this.props.setRegisterData({ parentInfo: this.getDefaultObj() });
 		}
 		const parentInfo = registerData.parentInfo || this.getDefaultObj();
-		this.form.setFieldsValue(parentInfo);
+		this.form?.setFieldsValue(parentInfo);
 
 		if (window.location.pathname.includes('administrator')) {
 			this.setState({ cityConnections: this.props.auth?.user?.adminCommunity });
@@ -82,7 +83,7 @@ class InfoParent extends Component {
 	};
 
 	handleSelectAddress = address => {
-		this.form.setFieldsValue({ address: address })
+		this.form?.setFieldsValue({ address: address })
 		this.setValueToReduxRegisterData('address', address);
 	};
 

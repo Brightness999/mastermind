@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
+
 import messages from '../../messages';
 import { userSignUp } from '../../../../../utils/api/apiList'
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
@@ -45,7 +46,7 @@ class SchoolAvailability extends React.Component {
 	async componentDidMount() {
 		const { registerData } = this.props.register;
 
-		this.form.setFieldsValue(registerData);
+		this.form?.setFieldsValue(registerData);
 		if (!registerData?.sessionsInSchool || registerData?.sessionsInSchool.length == 0) {
 			this.setState({
 				sessionsInSchool: [this.defaultTimeRangeItem(), this.defaultTimeRangeItem(), this.defaultTimeRangeItem()],
@@ -229,7 +230,7 @@ class SchoolAvailability extends React.Component {
 		this.setState({ isLegalHolidays: status });
 
 		const { legalHolidays, jewishHolidays, isJewishHolidays } = this.state;
-		const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
+		const dates = this.form?.getFieldValue("blackoutDates")?.map(date => new Date(date));
 		let uniqueDates = [];
 
 		if (status) {
@@ -278,7 +279,7 @@ class SchoolAvailability extends React.Component {
 		this.setState({ isJewishHolidays: status });
 
 		const { legalHolidays, jewishHolidays, isLegalHolidays } = this.state;
-		const dates = this.form.getFieldValue("blackoutDates")?.map(date => new Date(date));
+		const dates = this.form?.getFieldValue("blackoutDates")?.map(date => new Date(date));
 		let uniqueDates = [];
 
 		if (status) {
@@ -324,7 +325,7 @@ class SchoolAvailability extends React.Component {
 	}
 
 	updateBlackoutDates = async (dates) => {
-		this.form.setFieldsValue({ blackoutDates: dates });
+		this.form?.setFieldsValue({ blackoutDates: dates });
 		this.setReduxForSchool('blackoutDates', dates?.map(date => date.toString()));
 		return new Promise((resolveOuter) => {
 			resolveOuter(

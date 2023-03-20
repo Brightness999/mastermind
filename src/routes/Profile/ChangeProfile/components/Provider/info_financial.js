@@ -2,16 +2,16 @@ import React, { Component } from 'react';
 import { Row, Col, Form, Button, Input, Select, Switch, message, Upload } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import intl from 'react-intl-universal';
+import { connect } from 'react-redux'
+import { compose } from 'redux'
+import PlacesAutocomplete from 'react-places-autocomplete';
+
 import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import messagesRequest from '../../../../Sign/SubsidyRequest/messages';
-import { connect } from 'react-redux'
-import { compose } from 'redux'
 import { getMyProviderInfo, getUserProfile, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
-import PlacesAutocomplete from 'react-places-autocomplete';
 import request from '../../../../../utils/api/request';
 import { url } from '../../../../../utils/api/baseUrl';
-import { store } from '../../../../../redux/store'
 import { setInforProvider } from '../../../../../redux/features/authSlice';
 import PageLoading from '../../../../../components/Loading/PageLoading';
 
@@ -74,7 +74,7 @@ class InfoFinancial extends Component {
 	onFinish = (values) => {
 		const { W9FormPath } = this.state;
 		try {
-			store.dispatch(setInforProvider({
+			this.props.dispatch(setInforProvider({
 				...values,
 				W9FormPath,
 				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
@@ -103,7 +103,7 @@ class InfoFinancial extends Component {
 	}
 
 	handleSelectLevel = (selectedLevel) => {
-		const arr = this.form.getFieldValue('academicLevel');
+		const arr = this.form?.getFieldValue('academicLevel');
 		const { academicLevels } = this.props.auth;
 		let selectedLevels = arr?.map(item => item.level);
 
@@ -133,7 +133,7 @@ class InfoFinancial extends Component {
 			{ label: 'By Level', options: academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
 			{ label: 'By Grade', options: academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
 		];
-		this.form.setFieldValue('academicLevel', arr.filter(a => selectedLevels?.includes(a.level)));
+		this.form?.setFieldValue('academicLevel', arr.filter(a => selectedLevels?.includes(a.level)));
 		this.setState({ academicLevels: levelOptions });
 	}
 
@@ -179,7 +179,7 @@ class InfoFinancial extends Component {
 							<PlacesAutocomplete
 								value={billingAddress}
 								onChange={value => this.setState({ billingAddress: value })}
-								onSelect={value => this.form.setFieldsValue({ "billingAddress": value })}
+								onSelect={value => this.form?.setFieldsValue({ "billingAddress": value })}
 							>
 								{({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
 									<div key='billingaddress'>
@@ -263,7 +263,7 @@ class InfoFinancial extends Component {
 															min={0}
 															onChange={(event => {
 																const value = event.target.value;
-																let arr = JSON.parse(JSON.stringify(this.form.getFieldValue('academicLevel')));
+																let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));
 																if (sameRateForAllLevel) {
 																	for (let i = 0; i < arr.length; i++) {
 																		if (arr[i] == undefined) arr[i] = {};
@@ -272,13 +272,13 @@ class InfoFinancial extends Component {
 																} else {
 																	arr[field.key].rate = value;
 																}
-																this.form.setFieldValue('academicLevel', arr);
+																this.form?.setFieldValue('academicLevel', arr);
 															})}
 														/>
 													</Form.Item>
 													<BsDashCircle size={16} className='text-red icon-remove' onClick={() => {
 														remove(field.name);
-														const selectedLevels = this.form.getFieldValue('academicLevel');
+														const selectedLevels = this.form?.getFieldValue('academicLevel');
 														const levelOptions = [
 															{ label: 'By Level', options: this.props.auth.academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
 															{ label: 'By Grade', options: this.props.auth.academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },

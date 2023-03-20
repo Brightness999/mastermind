@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { message } from 'antd';
+
 import { helper } from '../../utils/auth/helper';
 import request from '../../utils/api/request'
 import { getChildProfile, getMyProviderInfo, getMySchoolInfo, getParentProfile, getSettings, updateChildAvailability, updateChildProfile, updateMyProviderProfile, updateParentProfile, updateSchoolInfo } from '../../utils/api/apiList';
-import { message } from 'antd';
 
 const initialState = {
 	user: {},
@@ -153,15 +154,6 @@ export const authSlice = createSlice({
 		setUser(state, action) {
 			state.user = action.payload
 		},
-		changeInforClientChild(state, action) {
-			state.authDataClientChild = action.payload
-		},
-		changeInforClientChild(state, action) {
-			state.authDataClientChild = action.payload
-		},
-		changeInfor(state, action) {
-			state.authData = action.payload
-		},
 		setDependents(state, action) {
 			state.dependents = action.payload
 		},
@@ -224,12 +216,8 @@ export const authSlice = createSlice({
 
 export const {
 	logout,
-	setAuthData,
 	setUser,
 	removeUser,
-	changeInforClientChild,
-	changeInforClientParent,
-	changeInfor,
 	setDependents,
 	setProviders,
 	setSkillSet,

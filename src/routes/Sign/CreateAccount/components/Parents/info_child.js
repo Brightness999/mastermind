@@ -3,12 +3,13 @@ import { Row, Col, Form, Button, Input, Select, DatePicker } from 'antd';
 import { BsPlusCircle } from 'react-icons/bs';
 import { TbTrash } from 'react-icons/tb';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import moment from 'moment';
+
+import messages from '../../messages';
+import messagesLogin from '../../../Login/messages';
+import { setRegisterData } from '../../../../../redux/features/registerSlice';
 
 class InfoChild extends Component {
 	constructor(props) {
@@ -21,7 +22,7 @@ class InfoChild extends Component {
 		let studentInfos = !!registerData.studentInfos ? JSON.parse(JSON.stringify(registerData.studentInfos)) : [newChild];
 		this.props.setRegisterData({ studentInfos: studentInfos });
 		studentInfos = studentInfos?.map(student => student.birthday ? { ...student, birthday: moment(student.birthday) } : student);
-		this.form.setFieldsValue({ children: studentInfos });
+		this.form?.setFieldsValue({ children: studentInfos });
 	}
 
 	getDefaultChildObj(parentInfo) {
@@ -80,8 +81,8 @@ class InfoChild extends Component {
 
 	handleSelectBirthday = (date, index) => {
 		if (date) {
-			const dependents = this.form.getFieldsValue();
-			this.form.setFieldsValue({ children: dependents?.children?.map((child, i) => i === index ? { ...child, age: moment().year() - date.year() } : child) });
+			const dependents = this.form?.getFieldsValue();
+			this.form?.setFieldsValue({ children: dependents?.children?.map((child, i) => i === index ? { ...child, age: moment().year() - date.year() } : child) });
 		}
 	}
 
@@ -238,7 +239,7 @@ class InfoChild extends Component {
 																placeholder={intl.formatMessage(messages.currentGrade)}
 																onChange={v => this.updateReduxValueForDepedent(index, "currentGrade", v)}
 															>
-																{academicLevels?.map((level, index) => (
+																{academicLevels.slice(6)?.map((level, index) => (
 																	<Select.Option key={index} value={level}>{level}</Select.Option>
 																))}
 															</Select>
@@ -286,7 +287,7 @@ class InfoChild extends Component {
 											icon={<BsPlusCircle size={17} className='mr-5' />}
 											onClick={() => {
 												add(this.getDefaultChildObj(registerData.parentInfo));
-												this.props.setRegisterData({ studentInfos: this.form.getFieldsValue()?.children });
+												this.props.setRegisterData({ studentInfos: this.form?.getFieldsValue()?.children });
 											}}
 										>
 											{intl.formatMessage(messages.addDependent)}
