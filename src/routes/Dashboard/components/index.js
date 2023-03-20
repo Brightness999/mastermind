@@ -68,7 +68,7 @@ class Dashboard extends React.Component {
       selectedLocations: [],
       selectedSkills: [],
       listProvider: [],
-      location: '',
+      locations: [],
       selectedEvent: {},
       selectedEventTypes: [],
       intervalId: 0,
@@ -230,6 +230,7 @@ class Dashboard extends React.Component {
           listProvider: data?.providers ?? [],
           SkillSet: data?.skillSet ?? [],
           listDependents: data?.dependents ?? [],
+          locations: data?.locations ?? [],
         });
         this.props.dispatch(setDependents(data?.dependents ?? []));
         this.props.dispatch(setProviders(data?.providers ?? []));
@@ -565,7 +566,7 @@ class Dashboard extends React.Component {
         <Panel
           key="1"
           header={intl.formatMessage(messages.appointments)}
-          extra={this.state.userRole > 3 && (<BsClockHistory size={18} onClick={() => this.onOpenModalSessionsNeedToClose()} />)}
+          extra={this.state.userRole > 3 && (<BsClockHistory size={18} className="cursor" onClick={() => this.onOpenModalSessionsNeedToClose()} />)}
           className='appointment-panel'
           collapsible='header'
         >
@@ -594,17 +595,16 @@ class Dashboard extends React.Component {
     const calendar = this.calendarRef.current;
     const month = calendar?._calendarApi.getDate().getMonth() + 1;
     const year = calendar?._calendarApi.getDate().getFullYear();
-    const { selectedSkills, selectedProviders, SkillSet, listProvider, selectedLocations, selectedEventTypes } = this.state;
-    let skills = [], providers = [];
+    const { selectedSkills, selectedProviders, SkillSet, selectedLocations, selectedEventTypes } = this.state;
+    let skills = [];
     selectedSkills?.forEach(skill => skills.push(SkillSet.find(s => s.name == skill)?._id));
-    selectedProviders?.forEach(provider => providers.push(listProvider.find(p => p.name == provider)._id));
     const dataFetchAppointMonth = {
       role: role,
       data: {
         month: month,
         year: year,
         locations: selectedLocations,
-        providers: providers,
+        providers: selectedProviders,
         skills: skills,
         types: selectedEventTypes,
         dependentId: dependentId,
@@ -633,7 +633,6 @@ class Dashboard extends React.Component {
     if (!this.state.selectedLocations.includes(location)) {
       this.setState({ selectedLocations: [...this.state.selectedLocations, location] });
     }
-    this.setState({ location: '' });
   }
 
   handleRemoveLocation = (index) => {
@@ -744,7 +743,6 @@ class Dashboard extends React.Component {
       selectedLocations,
       listAppointmentsRecent,
       userRole,
-      location,
       calendarEvents,
       calendarWeekends,
       listDependents,
@@ -763,6 +761,7 @@ class Dashboard extends React.Component {
       visibleSubsidy,
       subsidyId,
       loading,
+      locations,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -947,73 +946,54 @@ class Dashboard extends React.Component {
                   <CSSAnimate className="animated-shorter">
                     <Row gutter={10}>
                       <Col xs={12} sm={12} md={4}>
-                        <p className='font-10 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
+                        <p className='font-16 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
                         <Checkbox.Group options={optionsEvent} value={selectedEventTypes} onChange={(v) => this.handleSelectEventType(v)} className="flex flex-col" />
                       </Col>
                       <Col xs={12} sm={12} md={8} className='skillset-checkbox'>
-                        <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
+                        <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
                         <Checkbox.Group options={SkillSet.map(skill => skill.name)} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
                       </Col>
                       {userRole != 30 && (
                         <Col xs={12} sm={12} md={6} className='select-small'>
-                          <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
+                          <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
                           <Select
                             showSearch
                             placeholder={intl.formatMessage(messages.startTypingProvider)}
                             value=''
                             optionFilterProp='children'
-                            filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                            filterOption={(input, option) => option.children.join('').toLowerCase().includes(input.toLowerCase())}
                             onChange={(v) => this.handleSelectProvider(v)}
                           >
                             {listProvider?.map((provider, i) => (
-                              <Select.Option key={i} value={provider.name}>{provider.name}</Select.Option>
+                              <Select.Option key={i} value={provider._id}>{provider.firstName ?? ''} {provider.lastName ?? ''}</Select.Option>
                             ))}
                           </Select>
                           <div className='div-chip'>
-                            {selectedProviders?.map((name, i) => (
-                              <div key={i} className='chip'>
-                                {name}
+                            {selectedProviders?.map((id, i) => (
+                              <div key={i} className='chip font-12'>
+                                {listProvider?.find(a => a._id === id).firstName ?? ''} {listProvider?.find(a => a._id === id).lastName ?? ''}
                                 <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
                             ))}
                           </div>
                         </Col>
                       )}
                       <Col xs={12} sm={12} md={6} className='select-small'>
-                        <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
-                        <PlacesAutocomplete
-                          value={location}
-                          onChange={(value) => this.handelChangeLocation(value)}
-                          onSelect={(value) => this.handleSelectLocation(value)}
+                        <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
+                        <Select
+                          showSearch
+                          placeholder={intl.formatMessage(messages.startTypingLocation)}
+                          value=''
+                          optionFilterProp='children'
+                          filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                          onChange={(v) => this.handleSelectLocation(v)}
                         >
-                          {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-                            <div>
-                              <Input {...getInputProps({
-                                placeholder: 'Service Address',
-                                className: 'location-search-input',
-                              })} />
-                              <div className="autocomplete-dropdown-container">
-                                {loading && <div>Loading...</div>}
-                                {suggestions.map(suggestion => {
-                                  const className = suggestion.active
-                                    ? 'suggestion-item--active'
-                                    : 'suggestion-item';
-                                  // inline style for demonstration purpose
-                                  const style = suggestion.active
-                                    ? { backgroundColor: '#fafafa', cursor: 'pointer' }
-                                    : { backgroundColor: '#ffffff', cursor: 'pointer' };
-                                  return (
-                                    <div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
-                                      <span>{suggestion.description}</span>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-                        </PlacesAutocomplete>
+                          {locations?.map((location, i) => (
+                            <Select.Option key={i} value={location}>{location}</Select.Option>
+                          ))}
+                        </Select>
                         <div className='div-chip'>
                           {selectedLocations?.map((location, i) => (
-                            <div key={i} className='chip'>
+                            <div key={i} className='chip font-12'>
                               {location}
                               <BsX size={16} onClick={() => this.handleRemoveLocation(i)} />
                             </div>
@@ -1067,7 +1047,7 @@ class Dashboard extends React.Component {
                   eventChange={this.handleEventChange} // called for drag-n-drop/resize
                   eventRemove={this.handleEventRemove}
                   dateClick={this.handleClickDate}
-                  height="calc(100vh - 190px)"
+                  height="calc(100vh - 165px)"
                 />
               </div>
             </section>
@@ -1205,7 +1185,7 @@ class Dashboard extends React.Component {
                     key="5"
                     extra={
                       <div className='flex gap-2'>
-                        <BiExpand size={18} onClick={() => this.onOpenModalFlagExpand()} />
+                        <BiExpand size={18} className="cursor" onClick={() => this.onOpenModalFlagExpand()} />
                         <Badge size="small" count={listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.length}>
                           <BsFillFlagFill size={18} />
                         </Badge>

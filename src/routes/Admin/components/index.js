@@ -65,7 +65,7 @@ class SchedulingCenter extends React.Component {
       selectedLocations: [],
       selectedSkills: [],
       listProvider: [],
-      location: '',
+      locations: [],
       selectedEvent: {},
       selectedEventTypes: [],
       selectedDate: undefined,
@@ -130,6 +130,7 @@ class SchedulingCenter extends React.Component {
           SkillSet: data?.skillSet ?? [],
           listProvider: data?.providers ?? [],
           listDependents: data?.dependents ?? [],
+          locations: data?.locations ?? [],
         });
         this.props.dispatch(setDependents(data?.dependents ?? []));
         this.props.dispatch(setProviders(data?.providers ?? []));
@@ -225,7 +226,6 @@ class SchedulingCenter extends React.Component {
   }
 
   modalCreateAndEditSubsidyRequest = () => {
-
     return
   }
 
@@ -237,8 +237,7 @@ class SchedulingCenter extends React.Component {
     const { listAppointmentsRecent } = this.state;
     const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : val;
     const selectedEvent = listAppointmentsRecent?.find(a => a._id == id);
-    this.setState({ selectedEvent: selectedEvent });
-    this.setState({ userDrawerVisible: true });
+    this.setState({ selectedEvent: selectedEvent, userDrawerVisible: true });
   };
 
   onCloseDrawerDetail = () => {
@@ -395,17 +394,16 @@ class SchedulingCenter extends React.Component {
     const calendar = this.calendarRef.current;
     const month = calendar?._calendarApi.getDate().getMonth() + 1;
     const year = calendar?._calendarApi.getDate().getFullYear();
-    const { selectedSkills, selectedProviders, SkillSet, listProvider, selectedLocations, selectedEventTypes } = this.state;
-    let skills = [], providers = [];
+    const { selectedSkills, selectedProviders, SkillSet, selectedLocations, selectedEventTypes } = this.state;
+    let skills = [];
     selectedSkills?.forEach(skill => skills.push(SkillSet.find(s => s.name == skill)?._id));
-    selectedProviders?.forEach(provider => providers.push(listProvider.find(p => p.name == provider)._id));
     const dataFetchAppointMonth = {
       role: role,
       data: {
         month: month,
         year: year,
         locations: selectedLocations,
-        providers: providers,
+        providers: selectedProviders,
         skills: skills,
         types: selectedEventTypes,
         dependentId: dependentId,
@@ -414,9 +412,9 @@ class SchedulingCenter extends React.Component {
     this.props.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
   }
 
-  handleSelectProvider = (name) => {
-    if (!this.state.selectedProviders.includes(name)) {
-      this.setState({ selectedProviders: [...this.state.selectedProviders, name] });
+  handleSelectProvider = (id) => {
+    if (!this.state.selectedProviders.includes(id)) {
+      this.setState({ selectedProviders: [...this.state.selectedProviders, id] });
     }
   }
 
@@ -425,15 +423,10 @@ class SchedulingCenter extends React.Component {
     this.setState({ selectedProviders: this.state.selectedProviders });
   }
 
-  handelChangeLocation = (location) => {
-    this.setState({ location: location });
-  }
-
   handleSelectLocation = (location) => {
     if (!this.state.selectedLocations.includes(location)) {
       this.setState({ selectedLocations: [...this.state.selectedLocations, location] });
     }
-    this.setState({ location: '' });
   }
 
   handleRemoveLocation = (index) => {
@@ -515,7 +508,7 @@ class SchedulingCenter extends React.Component {
       <Panel
         key="1"
         header={intl.formatMessage(messages.appointments)}
-        extra={(<BsClockHistory size={18} onClick={() => this.onOpenModalSessionsNeedToClose()} />)}
+        extra={(<BsClockHistory size={18} className="cursor" onClick={() => this.onOpenModalSessionsNeedToClose()} />)}
         className='appointment-panel'
         collapsible='header'
       >
@@ -571,7 +564,6 @@ class SchedulingCenter extends React.Component {
       selectedLocations,
       listAppointmentsRecent,
       userRole,
-      location,
       calendarEvents,
       calendarWeekends,
       listDependents,
@@ -591,6 +583,7 @@ class SchedulingCenter extends React.Component {
       loading,
       visibleCreateNote,
       visibleFlagAction,
+      locations,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -767,73 +760,52 @@ class SchedulingCenter extends React.Component {
                 <CSSAnimate className="animated-shorter">
                   <Row gutter={10}>
                     <Col xs={12} sm={12} md={4}>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
+                      <p className='font-16 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
                       <Checkbox.Group options={optionsEvent} value={selectedEventTypes} onChange={(v) => this.handleSelectEventType(v)} className="flex flex-col" />
                     </Col>
                     <Col xs={12} sm={12} md={8} className='skillset-checkbox'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
+                      <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
                       <Checkbox.Group options={SkillSet.map(skill => skill.name)} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
                     </Col>
-                    {userRole != 30 && (
-                      <Col xs={12} sm={12} md={6} className='select-small'>
-                        <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
-                        <Select
-                          showSearch
-                          placeholder={intl.formatMessage(messages.startTypingProvider)}
-                          value=''
-                          optionFilterProp='children'
-                          filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-                          onChange={(v) => this.handleSelectProvider(v)}
-                        >
-                          {listProvider?.map((provider, i) => (
-                            <Select.Option key={i} value={provider.name}>{provider.name}</Select.Option>
-                          ))}
-                        </Select>
-                        <div className='div-chip'>
-                          {selectedProviders?.map((name, i) => (
-                            <div key={i} className='chip'>
-                              {name}
-                              <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
-                          ))}
-                        </div>
-                      </Col>
-                    )}
                     <Col xs={12} sm={12} md={6} className='select-small'>
-                      <p className='font-10 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
-                      <PlacesAutocomplete
-                        value={location}
-                        onChange={(value) => this.handelChangeLocation(value)}
-                        onSelect={(value) => this.handleSelectLocation(value)}
+                      <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
+                      <Select
+                        showSearch
+                        placeholder={intl.formatMessage(messages.startTypingProvider)}
+                        value=''
+                        optionFilterProp='children'
+                        filterOption={(input, option) => option.children?.join('').toLowerCase().includes(input.toLowerCase())}
+                        onChange={(v) => this.handleSelectProvider(v)}
                       >
-                        {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-                          <div>
-                            <Input {...getInputProps({
-                              placeholder: 'Service Address',
-                              className: 'location-search-input',
-                            })} />
-                            <div className="autocomplete-dropdown-container">
-                              {loading && <div>Loading...</div>}
-                              {suggestions.map(suggestion => {
-                                const className = suggestion.active
-                                  ? 'suggestion-item--active'
-                                  : 'suggestion-item';
-                                // inline style for demonstration purpose
-                                const style = suggestion.active
-                                  ? { backgroundColor: '#fafafa', cursor: 'pointer' }
-                                  : { backgroundColor: '#ffffff', cursor: 'pointer' };
-                                return (
-                                  <div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
-                                    <span>{suggestion.description}</span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-                      </PlacesAutocomplete>
+                        {listProvider?.map((provider, i) => (
+                          <Select.Option key={i} value={provider._id}>{provider.firstName ?? ''} {provider.lastName ?? ''}</Select.Option>
+                        ))}
+                      </Select>
+                      <div className='div-chip'>
+                        {selectedProviders?.map((id, i) => (
+                          <div key={i} className='chip font-12'>
+                            {listProvider?.find(a => a._id === id).firstName ?? ''} {listProvider?.find(a => a._id === id).lastName ?? ''}
+                            <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
+                        ))}
+                      </div>
+                    </Col>
+                    <Col xs={12} sm={12} md={6} className='select-small'>
+                      <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
+                      <Select
+                        showSearch
+                        placeholder={intl.formatMessage(messages.startTypingLocation)}
+                        value=''
+                        optionFilterProp='children'
+                        filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
+                        onChange={(v) => this.handleSelectLocation(v)}
+                      >
+                        {locations?.map((location, i) => (
+                          <Select.Option key={i} value={location}>{location}</Select.Option>
+                        ))}
+                      </Select>
                       <div className='div-chip'>
                         {selectedLocations?.map((location, i) => (
-                          <div key={i} className='chip'>
+                          <div key={i} className='chip font-12'>
                             {location}
                             <BsX size={16} onClick={() => this.handleRemoveLocation(i)} />
                           </div>
@@ -842,7 +814,7 @@ class SchedulingCenter extends React.Component {
                     </Col>
                   </Row>
                   <div className='text-right'>
-                    <Button size='small' type='primary' onClick={this.handleApplyFilter}>{intl.formatMessage(messages.apply).toUpperCase()}</Button>
+                    <Button type='primary' onClick={this.handleApplyFilter}>{intl.formatMessage(messages.apply).toUpperCase()}</Button>
                   </div>
                 </CSSAnimate>
               </div>
@@ -887,7 +859,7 @@ class SchedulingCenter extends React.Component {
                 eventChange={this.handleEventChange} // called for drag-n-drop/resize
                 eventRemove={this.handleEventRemove}
                 dateClick={this.handleClickDate}
-                height="calc(100vh - 230px)"
+                height="calc(100vh - 220px)"
               />
             </div>
           </section>
@@ -1022,7 +994,7 @@ class SchedulingCenter extends React.Component {
                 key="5"
                 extra={(
                   <div className='flex gap-2'>
-                    <BiExpand size={18} onClick={() => this.onOpenModalFlagExpand()} />
+                    <BiExpand size={18} className="cursor" onClick={() => this.onOpenModalFlagExpand()} />
                     <Badge size="small" count={listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.length}>
                       <BsFillFlagFill size={18} />
                     </Badge>
