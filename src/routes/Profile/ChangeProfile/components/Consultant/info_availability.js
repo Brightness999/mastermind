@@ -162,21 +162,6 @@ class ConsultantAvailability extends Component {
 							dayInWeek: this.getDayOfWeekIndex(day),
 						}
 						manualSchedule.push(times);
-					} else {
-						const times = {
-							fromYear: 0,
-							fromMonth: 0,
-							fromDate: 0,
-							toYear: 0,
-							toMonth: 0,
-							toDate: 0,
-							openHour: 0,
-							openMin: 0,
-							closeHour: 0,
-							closeMin: 0,
-							dayInWeek: this.getDayOfWeekIndex(day),
-						}
-						manualSchedule.push(times);
 					}
 				})
 			});
@@ -395,14 +380,14 @@ class ConsultantAvailability extends Component {
 																	/>
 																</Form.Item>
 															</Col>
-															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
+															<Col xs={24} sm={24} md={12} className='item-remove'>
 																<Form.Item name={[field.name, "to_date"]}>
 																	<DatePicker
 																		format="MM/DD/YYYY"
 																		placeholder={intl.formatMessage(messages.to)}
 																	/>
 																</Form.Item>
-																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day) }} />}
+																<BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day) }} />
 															</Col>
 														</Row>
 														<Row gutter={14}>
@@ -420,7 +405,7 @@ class ConsultantAvailability extends Component {
 																	/>
 																</Form.Item>
 															</Col>
-															<Col xs={24} sm={24} md={12} className={field.key !== 0 && 'item-remove'}>
+															<Col xs={24} sm={24} md={12} className='item-remove'>
 																<Form.Item name={[field.name, "to_time"]}>
 																	<TimePicker
 																		onSelect={(time) => {
@@ -433,7 +418,7 @@ class ConsultantAvailability extends Component {
 																		placeholder={intl.formatMessage(messages.to)}
 																	/>
 																</Form.Item>
-																{field.key !== 0 && <BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day) }} />}
+																<BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day) }} />
 															</Col>
 														</Row>
 														<Col offset={12} span={12}>

@@ -92,20 +92,6 @@ class ConsultantAvailability extends Component {
               "closeHour": scheduleItem.to_time.hour() ?? 0,
               "closeMin": scheduleItem.to_time.minutes() ?? 0,
             })
-          } else {
-            manualSchedule.push({
-              "dayInWeek": i,
-              "fromYear": 0,
-              "fromMonth": 0,
-              "fromDate": 0,
-              "toYear": 0,
-              "toMonth": 0,
-              "toDate": 0,
-              "openHour": 0,
-              "openMin": 0,
-              "closeHour": 0,
-              "closeMin": 0,
-            })
           }
         }
       }

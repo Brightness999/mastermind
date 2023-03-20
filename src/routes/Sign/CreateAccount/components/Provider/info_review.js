@@ -80,22 +80,6 @@ class InfoReview extends Component {
 						closeHour: scheduleItem.to_time.hour(),
 						closeMin: scheduleItem.to_time.minutes()
 					})
-				} else {
-					manualSchedule.push({
-						isPrivate: false,
-						location: '',
-						dayInWeek: i,
-						fromYear: 0,
-						fromMonth: 0,
-						fromDate: 0,
-						toYear: 0,
-						toMonth: 0,
-						toDate: 0,
-						openHour: 0,
-						openMin: 0,
-						closeHour: 0,
-						closeMin: 0,
-					})
 				}
 			}
 		}

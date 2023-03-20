@@ -213,23 +213,6 @@ class InfoAvailability extends Component {
 						location: t.location ?? '',
 					}
 					manualSchedule.push(times);
-				} else {
-					const times = {
-						fromYear: 0,
-						fromMonth: 0,
-						fromDate: 0,
-						toYear: 0,
-						toMonth: 0,
-						toDate: 0,
-						openHour: 0,
-						openMin: 0,
-						closeHour: 0,
-						closeMin: 0,
-						dayInWeek: this.getDayOfWeekIndex(day),
-						isPrivate: false,
-						location: '',
-					}
-					manualSchedule.push(times);
 				}
 			})
 		});
