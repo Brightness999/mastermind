@@ -1047,7 +1047,7 @@ class Dashboard extends React.Component {
                   eventClick={this.onShowDrawerDetail}
                   eventChange={this.handleEventChange} // called for drag-n-drop/resize
                   eventRemove={this.handleEventRemove}
-                  dateClick={this.handleClickDate}
+                  dateClick={userRole !== 30 && this.handleClickDate}
                   height="calc(100vh - 165px)"
                 />
               </div>
