@@ -374,6 +374,7 @@
   "components.Modal.editInvoice": "Edit Invoice",
 
   "components.sidebar.userManager": "User Manager",
+  "components.sidebar.editUser": "Edit User",
   "components.sidebar.subsidyManager": "Subsidy Request",
   "components.sidebar.systemSetting": "System Setting",
   "components.sidebar.statistics": "Statistics",

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'dva/router';
-import './index.less';
-import { Menu } from 'antd';
+import { Divider, Menu } from 'antd';
+import intl from 'react-intl-universal';
+
 import InfoProfile from '../../../Profile/ChangeProfile/components/Provider/info_profile';
 import InfoServices from '../../../Profile/ChangeProfile/components/Provider/info_services';
 import InfoAvailability from '../../../Profile/ChangeProfile/components/Provider/info_availability';
@@ -19,6 +20,8 @@ import SubsidyProgram from '../../../Profile/ChangeProfile/components/Provider/s
 import { MENU_ADMIN, MENU_CONSULTANT, MENU_PARENT, MENU_PROVIDER, MENU_SCHOOL } from '../constant';
 import { setKeyDefault } from '../service';
 import { store } from '../../../../redux/store';
+import mgsSidebar from '../../../../components/SideBar/messages';
+import './index.less';
 
 export default class extends React.Component {
   constructor(props) {
@@ -213,6 +216,10 @@ export default class extends React.Component {
 
     return (
       <div className="full-layout page admin-page">
+        <div className='div-title-admin'>
+          <p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.editUser)}</p>
+          <Divider />
+        </div>
         <div className='div-content'>
           <section className='div-activity-feed box-card'>
             <Menu theme="light" mode="inline" defaultSelectedKeys={[keyActive]} rootClassName="h-100 overflow-x-hidden overflow-y-scroll" items={listMenu} />

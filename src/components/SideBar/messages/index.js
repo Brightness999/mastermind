@@ -9,6 +9,10 @@ export default {
     id: `${scope}.appointments`,
     defaultMessage: 'Appointments',
   },
+  editUser: {
+    id: `${scope}.editUser`,
+    defaultMessage: 'Edit User',
+  },
   userManager: {
     id: `${scope}.userManager`,
     defaultMessage: 'Users Center',
