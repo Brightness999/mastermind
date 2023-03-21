@@ -83,7 +83,7 @@ class ModalCurrentAppointment extends React.Component {
 						return a;
 					}, []);
 
-					timeArr.forEach(a => {
+					timeArr?.sort((a, b) => a?.[0] - b?.[0]).forEach(a => {
 						let startTime = moment().set({ hours: a?.[0], minutes: 0, seconds: 0, milliseconds: 0 });
 						for (let i = 0; i < (a?.[1] - a?.[0]) * 60 / duration; i++) {
 							arrTime.push({
@@ -473,20 +473,14 @@ class ModalCurrentAppointment extends React.Component {
 													value={selectedDate}
 													dateCellRender={date => {
 														if (userRole > 3) {
-															const availableTime = event?.provider?.manualSchedule?.find(time => time.dayInWeek == date.day() && time.location == address && date.isBetween(moment().set({ years: time.fromYear, months: time.fromMonth, dates: time.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: time.toYear, months: time.toMonth, dates: time.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+															const availableTime = event?.provider?.manualSchedule?.find(time => time.dayInWeek === date.day() && time.location === address && time.isPrivate);
 															if (availableTime) {
 																const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
 																const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 });
-																if (date.isBetween(availableFromDate, availableToDate) && availableTime.isPrivate) {
+																if (date.isBetween(availableFromDate, availableToDate) && !event?.provider?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() === date.year() && moment(blackoutDate).month() === date.month() && moment(blackoutDate).date() === date.date())) {
 																	return (<div className='absolute top-0 left-0 h-100 w-100 border border-1 border-warning rounded-2'></div>)
-																} else {
-																	return null;
 																}
-															} else {
-																return null;
 															}
-														} else {
-															return null;
 														}
 													}}
 													onSelect={this.onSelectDate}
@@ -495,11 +489,11 @@ class ModalCurrentAppointment extends React.Component {
 															return true;
 														}
 
-														if (date.isAfter(moment()) && date.day() == 6) {
+														if (date.isAfter(moment()) && date.day() === 6) {
 															return true;
 														}
 
-														const range = event?.provider?.manualSchedule?.find(d => d.dayInWeek == date.day() && d.location == address && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+														const range = event?.provider?.manualSchedule?.find(d => d.dayInWeek === date.day() && d.location === address && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
 														if (range) {
 															if (userRole < 100 && range.isPrivate) {
 																return true;
@@ -508,7 +502,7 @@ class ModalCurrentAppointment extends React.Component {
 															return true;
 														}
 
-														if (event?.provider?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() == date.year() && moment(blackoutDate).month() == date.month() && moment(blackoutDate).date() == date.date())) {
+														if (event?.provider?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() === date.year() && moment(blackoutDate).month() === date.month() && moment(blackoutDate).date() === date.date())) {
 															return true;
 														}
 
