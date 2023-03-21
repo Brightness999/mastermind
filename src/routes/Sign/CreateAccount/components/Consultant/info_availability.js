@@ -141,7 +141,11 @@ class ConsultantAvailability extends Component {
     const arrToCopy = this.form?.getFieldValue(dayForCopy);
     day_week.map((newDay) => {
       if (newDay != dayForCopy) {
-        this.form?.setFieldValue(newDay, [...this.form?.getFieldValue(newDay), arrToCopy[index]]);
+        if (this.form?.getFieldValue(newDay)) {
+          this.form?.setFieldValue(newDay, [...this.form?.getFieldValue(newDay), arrToCopy[index]]);
+        } else {
+          this.form?.setFieldValue(newDay, [arrToCopy[index]]);
+        }
       }
     })
   }

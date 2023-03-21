@@ -45,7 +45,7 @@ class InfoAvailability extends Component {
 		const { registerData } = this.props.register;
 		const { schools } = this.props.auth.generalData;
 
-		this.setState({loading: true, listSchool: schools?.filter(school => school.communityServed?._id === registerData.profileInfor?.cityConnection) });
+		this.setState({ loading: true, listSchool: schools?.filter(school => school.communityServed?._id === registerData.profileInfor?.cityConnection) });
 		if (!!registerData.availability) {
 			this.form?.setFieldsValue({ ...registerData.availability });
 			const holidays = [...registerData.legalHolidays ?? [], ...registerData.jewishHolidays ?? []];
@@ -110,7 +110,11 @@ class InfoAvailability extends Component {
 		const arrToCopy = this.form?.getFieldValue(dayForCopy);
 		day_week.map((newDay) => {
 			if (newDay != dayForCopy) {
-				this.form.setFieldValue(newDay, [...this.form.getFieldValue(newDay), arrToCopy[index]]);
+				if (this.form?.getFieldValue(newDay)) {
+					this.form?.setFieldValue(newDay, [...this.form?.getFieldValue(newDay), arrToCopy[index]]);
+				} else {
+					this.form?.setFieldValue(newDay, [arrToCopy[index]]);
+				}
 			}
 		})
 	}
@@ -119,7 +123,7 @@ class InfoAvailability extends Component {
 		const arrToCopy = this.form?.getFieldValue(day);
 		day_week.map((newDay) => {
 			if (newDay == day) {
-				this.form.setFieldValue(newDay, arrToCopy);
+				this.form?.setFieldValue(newDay, arrToCopy);
 			}
 		})
 		this.onChangeScheduleValue();
