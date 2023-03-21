@@ -145,7 +145,7 @@ class ModalCurrentReferralService extends React.Component {
 			const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
 
 			this.props.dispatch(setSelectedTime(selectedTime));
-			this.props.dispatch(setSelectedUser(this.props.auth?.dependents?.find(a => a?._id == selectedDependent)?.parent?.[0]?.parentInfo?.[0]));
+			this.props.dispatch(setSelectedUser(this.props.auth?.dependents?.find(a => a?._id == selectedDependent)?.parent));
 			request.post(getAuthorizationUrl).then(res => {
 				window.open(res.data);
 			})

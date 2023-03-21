@@ -18,7 +18,7 @@ class ModalNewScreening extends React.Component {
     if (event) {
       this.form.setFieldsValue({ phoneNumber: event?.phoneNumber, time: event?.screeningTime, notes: notes ? notes : event?.notes });
     } else {
-      this.form.setFieldsValue({ phoneNumber: dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber ? dependent?.parent?.[0]?.parentInfo?.[0]?.fatherPhoneNumber : dependent?.parent?.[0]?.parentInfo?.[0]?.motherPhoneNumber });
+      this.form.setFieldsValue({ phoneNumber: dependent?.parent?.fatherPhoneNumber ? dependent?.parent?.fatherPhoneNumber : dependent?.parent?.motherPhoneNumber });
     }
   }
 
