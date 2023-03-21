@@ -1,22 +1,6 @@
-import $$ from 'cmn-utils';
-
 import { routerLinks } from "../routes/constant";
 import modelEnhance from '../utils/modelEnhance';
 import { DEFAULT_LOCALE } from '../i18n';
-import {
-  DashboardOutlined,
-  DesktopOutlined,
-  ShareAltOutlined,
-  BookOutlined,
-  UserOutlined,
-  BlockOutlined,
-  UserAddOutlined,
-  GoldOutlined,
-  AppstoreOutlined,
-  MessageOutlined,
-  SettingOutlined,
-  PictureOutlined
-} from '@ant-design/icons';
 export default modelEnhance({
   namespace: 'global',
 
@@ -28,13 +12,9 @@ export default modelEnhance({
 
   effects: {
     *getMenu({ payload }, { call, put }) {
-      // const { status, data } = yield call(getMenu, payload);
-      // if (status) {
-
-      // }
       const data = [
         { name: 'Dashboard', icon: 'DashboardOutlined', path: routerLinks['Dashboard'], },
-        
+
       ]
       const loopMenu = (menu, pitem = {}) => {
         menu.forEach(item => {
@@ -53,7 +33,7 @@ export default modelEnhance({
         payload: data,
       });
     },
-    *setLocale({payload}, {put}) {
+    *setLocale({ payload }, { put }) {
       yield put({
         type: 'setLocaleSuccess',
         payload,
@@ -88,7 +68,3 @@ export function getFlatMenu(menus) {
   });
   return menu;
 }
-
-// export async function getMenu(payload) {
-//   return $$.post('/user/menu', payload);
-// }

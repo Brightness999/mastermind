@@ -114,13 +114,13 @@ class Dashboard extends React.Component {
         request.post(checkNotificationForClient).then(res => {
           if (res.success) {
             res.data?.forEach(appointment => {
-              let duration = appointment.provider?.duration;
+              let duration = appointment.provider?.duration ?? 30;
               if (appointment.type == 2) {
                 duration = appointment.provider?.separateEvaluateDuration;
               }
               const key = `open${Date.now()}`;
               const btn = (
-                <Button type="primary" size="small" onClick={() => {
+                <Button type="primary" size='middle' onClick={() => {
                   notification.close(key);
                   this.handleCloseNotification(appointment._id);
                 }}>
@@ -129,14 +129,16 @@ class Dashboard extends React.Component {
               );
               const description = (
                 <div>
-                  <p className='font-10'>{duration ?? ''} minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{`${appointment?.provider?.firstName ?? ''} ${appointment?.provider?.lastName ?? ''}`}</span></p>
-                  <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName ?? ''} ${appointment?.dependent?.lastName ?? ''}`}</p>
-                  {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber ?? ''}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location ?? ''}</p>}
-                  <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
+                  <p className='font-15 text-bold'>{appointment?.type === 2 ? intl.formatMessage(messages.evaluation) : appointment?.type === 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type === 4 ? intl.formatMessage(msgModal.consultation) : appointment?.type === 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</p>
+                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.what)}: </span>{appointment?.skillSet?.name ?? ''}</p>
+                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.who)}: </span>{appointment?.dependent?.firstName ?? ''} {appointment?.dependent?.lastName ?? ''}</p>
+                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.with)}: </span>{appointment?.type === 4 ? intl.formatMessage(msgModal.consultant) : `${appointment?.provider?.firstName ?? ''} ${appointment?.provider?.lastName ?? ''}`}</p>
+                  <p className='font-15 nobr'><span className='text-bold'>{intl.formatMessage(msgDrawer.when)}: </span>{moment(appointment?.date).format('MM/DD/YYYY hh:mm a')} - {moment(appointment?.date).clone().add(duration, 'minutes').format('hh:mm a')}</p>
+                  {appointment?.type === 4 ? appointment?.phoneNumber ? <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.phonenumber)}: </span>{appointment?.phoneNumber ?? ''}</p> : <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.meeting)}: </span>{appointment?.meetingLink ?? ''}</p> : <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.where)}: </span>{appointment?.location ?? ''}</p>}
                 </div>
               )
               notification.open({
-                message: 'Notification',
+                message: "",
                 description,
                 btn,
                 key,
@@ -167,10 +169,11 @@ class Dashboard extends React.Component {
               );
               const description = (
                 <div>
-                  <p className='font-10'>{duration} minutes {intl.formatMessage(msgModal.meetingWith)} <span className='font-11 font-700'>{`${appointment?.provider?.firstName ?? ''} ${appointment?.provider?.lastName ?? ''}`}</span></p>
-                  <p className='font-10'>{intl.formatMessage(msgDrawer.who)}: {`${appointment?.dependent?.firstName ?? ''} ${appointment?.dependent?.lastName ?? ''}`}</p>
-                  {appointment?.type == 1 ? <p className='font-10'>{intl.formatMessage(msgDrawer.phonenumber)}: {appointment?.phoneNumber ?? ''}</p> : <p className='font-10'>{intl.formatMessage(msgDrawer.where)}: {appointment?.location ?? ''}</p>}
-                  <p className='font-10 nobr'>{intl.formatMessage(msgDrawer.when)}: <span className='font-11 font-700'>{this.displayTime(new Date(appointment?.date)?.toLocaleTimeString())}</span> on <span className='font-11 font-700'>{new Date(appointment?.date)?.toLocaleDateString()}</span></p>
+                  <p className='font-15 text-bold'>{appointment?.type === 2 ? intl.formatMessage(messages.evaluation) : appointment?.type === 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type === 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</p>
+                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.what)}: </span>{appointment?.skillSet?.name ?? ''}</p>
+                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.who)}: </span>{appointment?.dependent?.firstName ?? ''} {appointment?.dependent?.lastName ?? ''}</p>
+                  <p className='font-15 nobr'><span className='text-bold'>{intl.formatMessage(msgDrawer.when)}: </span>{moment(appointment?.date).format('MM/DD/YYYY hh:mm a')} - {moment(appointment?.date).clone().add(duration, 'minutes').format('hh:mm a')}</p>
+                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.where)}: </span>{appointment?.location ?? ''}</p>
                 </div>
               )
               notification.open({

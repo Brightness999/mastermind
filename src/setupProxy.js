@@ -14,22 +14,4 @@ module.exports = function(app) {
       }
     })
   );
-  // app.use(
-  //   proxy('/api', {
-  //     target: 'http://aaa:1000',
-  //     changeOrigin: true,
-  //     pathRewrite: {
-  //       '^/api': ''
-  //     }
-  //   })
-  // );
-  // app.use(
-  //   proxy('/xxx', {
-  //     target: 'http://bbb:2000',
-  //     changeOrigin: true,
-  //     pathRewrite: {
-  //       '^/xxx': ''
-  //     }
-  //   })
-  // );
 };
