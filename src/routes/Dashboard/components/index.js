@@ -1,11 +1,8 @@
 import React from 'react';
-import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, Select, message, notification, Input } from 'antd';
+import { Collapse, Badge, Avatar, Tabs, Button, Segmented, Row, Col, Checkbox, Select, message, notification } from 'antd';
 import { FaUser, FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import { MdFormatAlignLeft, MdOutlineEventBusy, MdOutlineRequestQuote } from 'react-icons/md';
 import { BsFilter, BsX, BsFillDashSquareFill, BsFillPlusSquareFill, BsClockHistory, BsFillFlagFill } from 'react-icons/bs';
-import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote } from '../../../components/Modal';
-import CSSAnimate from '../../../components/CSSAnimate';
-import DrawerDetail from '../../../components/DrawerDetail';
 import intl from 'react-intl-universal';
 import FullCalendar from '@fullcalendar/react' // must go before plugins
 import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
@@ -14,28 +11,31 @@ import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClic
 import listPlugin from '@fullcalendar/list';
 import "@fullcalendar/daygrid/main.css";
 import "@fullcalendar/timegrid/main.css";
+import Cookies from 'js-cookie';
+import moment from 'moment';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
+import { GoPrimitiveDot } from 'react-icons/go';
+
+import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote } from '../../../components/Modal';
+import DrawerDetail from '../../../components/DrawerDetail';
 import messages from '../messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
 import msgModal from '../../../components/Modal/messages';
 import msgDrawer from '../../../components/DrawerDetail/messages';
-import './index.less';
-const { Panel } = Collapse;
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
-import moment from 'moment';
 import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
-import PlacesAutocomplete from 'react-places-autocomplete';
 import { setAcademicLevels, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
 import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
-import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
-import { GoPrimitiveDot } from 'react-icons/go';
 import Subsidaries from './school';
 import PageLoading from '../../../components/Loading/PageLoading';
-import Cookies from 'js-cookie';
+import './index.less';
+
+const { Panel } = Collapse;
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -943,68 +943,66 @@ class Dashboard extends React.Component {
               </div>
               {isFilter && (
                 <div className='calendar-filter w-100'>
-                  <CSSAnimate className="animated-shorter">
-                    <Row gutter={10}>
-                      <Col xs={12} sm={12} md={4}>
-                        <p className='font-16 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
-                        <Checkbox.Group options={optionsEvent} value={selectedEventTypes} onChange={(v) => this.handleSelectEventType(v)} className="flex flex-col" />
-                      </Col>
-                      <Col xs={12} sm={12} md={8} className='skillset-checkbox'>
-                        <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
-                        <Checkbox.Group options={SkillSet.map(skill => skill.name)} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
-                      </Col>
-                      {userRole != 30 && (
-                        <Col xs={12} sm={12} md={6} className='select-small'>
-                          <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
-                          <Select
-                            showSearch
-                            placeholder={intl.formatMessage(messages.startTypingProvider)}
-                            value=''
-                            optionFilterProp='children'
-                            filterOption={(input, option) => option.children.join('').toLowerCase().includes(input.toLowerCase())}
-                            onChange={(v) => this.handleSelectProvider(v)}
-                          >
-                            {listProvider?.map((provider, i) => (
-                              <Select.Option key={i} value={provider._id}>{provider.firstName ?? ''} {provider.lastName ?? ''}</Select.Option>
-                            ))}
-                          </Select>
-                          <div className='div-chip'>
-                            {selectedProviders?.map((id, i) => (
-                              <div key={i} className='chip font-12'>
-                                {listProvider?.find(a => a._id === id).firstName ?? ''} {listProvider?.find(a => a._id === id).lastName ?? ''}
-                                <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
-                            ))}
-                          </div>
-                        </Col>
-                      )}
+                  <Row gutter={10}>
+                    <Col xs={12} sm={12} md={4}>
+                      <p className='font-16 font-700 mb-5'>{intl.formatMessage(messages.eventType)}</p>
+                      <Checkbox.Group options={optionsEvent} value={selectedEventTypes} onChange={(v) => this.handleSelectEventType(v)} className="flex flex-col" />
+                    </Col>
+                    <Col xs={12} sm={12} md={8} className='skillset-checkbox'>
+                      <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
+                      <Checkbox.Group options={SkillSet.map(skill => skill.name)} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
+                    </Col>
+                    {userRole != 30 && (
                       <Col xs={12} sm={12} md={6} className='select-small'>
-                        <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
+                        <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
                         <Select
                           showSearch
-                          placeholder={intl.formatMessage(messages.startTypingLocation)}
+                          placeholder={intl.formatMessage(messages.startTypingProvider)}
                           value=''
                           optionFilterProp='children'
-                          filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-                          onChange={(v) => this.handleSelectLocation(v)}
+                          filterOption={(input, option) => option.children.join('').toLowerCase().includes(input.toLowerCase())}
+                          onChange={(v) => this.handleSelectProvider(v)}
                         >
-                          {locations?.map((location, i) => (
-                            <Select.Option key={i} value={location}>{location}</Select.Option>
+                          {listProvider?.map((provider, i) => (
+                            <Select.Option key={i} value={provider._id}>{provider.firstName ?? ''} {provider.lastName ?? ''}</Select.Option>
                           ))}
                         </Select>
                         <div className='div-chip'>
-                          {selectedLocations?.map((location, i) => (
+                          {selectedProviders?.map((id, i) => (
                             <div key={i} className='chip font-12'>
-                              {location}
-                              <BsX size={16} onClick={() => this.handleRemoveLocation(i)} />
-                            </div>
+                              {listProvider?.find(a => a._id === id).firstName ?? ''} {listProvider?.find(a => a._id === id).lastName ?? ''}
+                              <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
                           ))}
                         </div>
                       </Col>
-                    </Row>
-                    <div className='text-right'>
-                      <Button size='small' type='primary' onClick={this.handleApplyFilter}>{intl.formatMessage(messages.apply).toUpperCase()}</Button>
-                    </div>
-                  </CSSAnimate>
+                    )}
+                    <Col xs={12} sm={12} md={6} className='select-small'>
+                      <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
+                      <Select
+                        showSearch
+                        placeholder={intl.formatMessage(messages.startTypingLocation)}
+                        value=''
+                        optionFilterProp='children'
+                        filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                        onChange={(v) => this.handleSelectLocation(v)}
+                      >
+                        {locations?.map((location, i) => (
+                          <Select.Option key={i} value={location}>{location}</Select.Option>
+                        ))}
+                      </Select>
+                      <div className='div-chip'>
+                        {selectedLocations?.map((location, i) => (
+                          <div key={i} className='chip font-12'>
+                            {location}
+                            <BsX size={16} onClick={() => this.handleRemoveLocation(i)} />
+                          </div>
+                        ))}
+                      </div>
+                    </Col>
+                  </Row>
+                  <div className='text-right'>
+                    <Button size='small' type='primary' onClick={this.handleApplyFilter}>{intl.formatMessage(messages.apply).toUpperCase()}</Button>
+                  </div>
                 </div>
               )}
               <div className='calendar-content'>
