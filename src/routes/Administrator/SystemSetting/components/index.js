@@ -1,14 +1,16 @@
 import React from 'react';
 import { Divider, Button, Form, Select, message, Input } from 'antd';
 import intl from 'react-intl-universal';
-import mgsSidebar from '../../../../components/SideBar/messages';
-import './index.less';
-import request from '../../../../utils/api/request';
-import { addCommunity, getCityConnections, updateSettings } from '../../../../utils/api/apiList';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
+import PlacesAutocomplete from 'react-places-autocomplete';
+
+import mgsSidebar from '../../../../components/SideBar/messages';
+import request from '../../../../utils/api/request';
+import { addCommunity, getCityConnections, updateSettings } from '../../../../utils/api/apiList';
 import { setCommunity } from '../../../../redux/features/authSlice';
 import PageLoading from '../../../../components/Loading/PageLoading';
+import './index.less';
 
 class SystemSetting extends React.Component {
 	constructor(props) {
@@ -77,7 +79,7 @@ class SystemSetting extends React.Component {
 	}
 
 	render() {
-		const { cityConnections, loading } = this.state;
+		const { cityConnections, loading, newCity } = this.state;
 		const { user } = this.props;
 		const layout = {
 			labelCol: {
@@ -113,8 +115,38 @@ class SystemSetting extends React.Component {
 							name="newCity"
 							label="New City"
 						>
-							<div className='flex items-center gap-3'>
-								<Input className='h-40' onChange={(e) => this.setState({ newCity: e.target.value })} />
+							<div className='flex gap-3'>
+								<PlacesAutocomplete
+									value={newCity}
+									onChange={(value) => this.setState({ newCity: value })}
+									onSelect={(value) => this.setState({ newCity: value })}
+								>
+									{({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+										<div className='flex-1'>
+											<Input {...getInputProps({
+												placeholder: 'New City',
+												className: 'h-40',
+											})} />
+											<div className="autocomplete-dropdown-container">
+												{loading && <div>Loading...</div>}
+												{suggestions.map(suggestion => {
+													const className = suggestion.active
+														? 'suggestion-item--active'
+														: 'suggestion-item';
+													// inline style for demonstration purpose
+													const style = suggestion.active
+														? { backgroundColor: '#fafafa', cursor: 'pointer' }
+														: { backgroundColor: '#ffffff', cursor: 'pointer' };
+													return (
+														<div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
+															<span>{suggestion.description}</span>
+														</div>
+													);
+												})}
+											</div>
+										</div>
+									)}
+								</PlacesAutocomplete>
 								<Button type="primary" onClick={() => this.handleAddCity()}>Add</Button>
 							</div>
 						</Form.Item>
