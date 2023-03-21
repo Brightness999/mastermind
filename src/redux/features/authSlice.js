@@ -188,11 +188,9 @@ export const authSlice = createSlice({
 			state.generalData = action.payload
 		},
 		logout(state) {
+			state.user = {};
 			helper.history.push('/');
 		},
-		removeUser(state) {
-			state.user = {};
-		}
 	},
 	extraReducers: {
 		[getInfoAuth.fulfilled]: (state, action) => {
@@ -217,7 +215,6 @@ export const authSlice = createSlice({
 export const {
 	logout,
 	setUser,
-	removeUser,
 	setDependents,
 	setProviders,
 	setSkillSet,
