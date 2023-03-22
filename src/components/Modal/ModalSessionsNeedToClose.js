@@ -110,7 +110,7 @@ class ModalSessionsNeedToClose extends React.Component {
 		const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
 		const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
 		const dataFetchAppointMonth = {
-			role: role,
+			role: this.props.user?.role,
 			data: {
 				month: month,
 				year: year

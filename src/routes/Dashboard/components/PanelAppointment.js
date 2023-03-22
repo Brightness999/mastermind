@@ -56,11 +56,16 @@ class PanelAppointment extends React.Component {
   }
 
   renderItemLeft = (event) => {
+    const { user } = this.props;
+
     return (
       <div className={`item-left ${[-2, -3].includes(event.status) ? 'line-through' : ''}`} onClick={() => this.props.onShowDrawerDetail(event._id)}>
         <Avatar size={24} icon={<FaUser size={12} />} />
         <div className='div-service'>
-          <p className='font-09 mb-0'>{`${event.provider.firstName ?? ''} ${event.provider.lastName ?? ''}`}{event?.school?.name}</p>
+          {user?.role === 3 ? <p className='font-09 mb-0'>{`${event.provider.firstName ?? ''} ${event.provider.lastName ?? ''}`}</p>
+            : user?.role === 30 ? <p className='font-09 mb-0'>{`${event.dependent.firstName ?? ''} ${event.dependent.lastName ?? ''}`}</p>
+              : <div><p className='font-09'>{`${event.dependent.firstName ?? ''} ${event.dependent.lastName ?? ''}`}</p><p className='font-09 mb-0'>{`${event.provider.firstName ?? ''} ${event.provider.lastName ?? ''}`}</p></div>}
+
         </div>
         <p className='font-11 mb-0 ml-auto mr-5'>{event.location}</p>
         <div className='ml-auto'>

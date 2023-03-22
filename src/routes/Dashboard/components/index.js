@@ -112,8 +112,9 @@ class Dashboard extends React.Component {
     const notifications = setInterval(() => {
       if (user.role == 3) {
         request.post(checkNotificationForClient).then(res => {
-          if (res.success) {
-            res.data?.forEach(appointment => {
+          const { success, data } = res;
+          if (success) {
+            data?.forEach(appointment => {
               let duration = appointment.provider?.duration ?? 30;
               if (appointment.type == 2) {
                 duration = appointment.provider?.separateEvaluateDuration;
@@ -142,7 +143,6 @@ class Dashboard extends React.Component {
                 description,
                 btn,
                 key,
-                onClose: close(key),
                 duration: 10,
                 placement: 'top',
               });
@@ -152,8 +152,9 @@ class Dashboard extends React.Component {
       }
       if (user.role == 30) {
         request.post(checkNotificationForProvider).then(res => {
-          if (res.success) {
-            res.data?.forEach(appointment => {
+          const { success, data } = res;
+          if (success) {
+            data?.forEach(appointment => {
               let duration = appointment.provider?.duration;
               if (appointment.type == 2) {
                 duration = appointment.provider?.separateEvaluateDuration;
@@ -181,7 +182,6 @@ class Dashboard extends React.Component {
                 description,
                 btn,
                 key,
-                onClose: close(key),
                 duration: 0,
                 placement: 'top',
               });
