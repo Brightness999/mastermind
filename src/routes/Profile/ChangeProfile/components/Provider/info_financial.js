@@ -23,8 +23,9 @@ class InfoFinancial extends Component {
 			academicLevels: [],
 			sameRateForAllLevel: true,
 			billingAddress: '',
-			W9FormPath: this.props.auth.user?.providerInfo?.W9FormPath,
+			W9FormPath: '',
 			loading: false,
+			user: undefined,
 		}
 	}
 
@@ -42,7 +43,7 @@ class InfoFinancial extends Component {
 						{ label: 'By Level', options: academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
 						{ label: 'By Grade', options: academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
 					];
-					this.setState({ academicLevels: levelOptions });
+					this.setState({ academicLevels: levelOptions, user: data?.providerInfo, W9FormPath: data?.providerInfo?.W9FormPath });
 				}
 			}).catch(err => {
 				console.log('get provider info error ---', err);
@@ -60,7 +61,7 @@ class InfoFinancial extends Component {
 						{ label: 'By Level', options: academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
 						{ label: 'By Grade', options: academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
 					];
-					this.setState({ academicLevels: levelOptions });
+					this.setState({ academicLevels: levelOptions, user: data, W9FormPath: data?.W9FormPath });
 				}
 			}).catch(err => {
 				console.log('get provider info error ---', err);
@@ -71,12 +72,12 @@ class InfoFinancial extends Component {
 	}
 
 	onFinish = (values) => {
-		const { W9FormPath } = this.state;
+		const { W9FormPath, user } = this.state;
 		try {
 			this.props.dispatch(setInforProvider({
 				...values,
 				W9FormPath,
-				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
+				_id: user?._id,
 			}))
 		} catch (error) {
 			console.log(error, 'error')
@@ -137,8 +138,7 @@ class InfoFinancial extends Component {
 	}
 
 	render() {
-		const { academicLevels, sameRateForAllLevel, billingAddress, loading } = this.state;
-		const { user } = this.props.auth;
+		const { academicLevels, sameRateForAllLevel, billingAddress, loading, user } = this.state;
 		const uploadProps = {
 			name: 'file',
 			action: url + uploadTempW9FormForProvider,
@@ -310,13 +310,13 @@ class InfoFinancial extends Component {
 							)}
 						</Form.List>
 						<Row gutter={15}>
-							<Col xs={24} sm={24} md={12} className={user?.providerInfo?.isSeparateEvaluationRate ? '' : 'd-none'}>
+							<Col xs={24} sm={24} md={12} className={user?.isSeparateEvaluationRate ? '' : 'd-none'}>
 								<Form.Item
 									name="separateEvaluationRate"
 									label={'Evaluation ' + intl.formatMessage(messages.rate)}
 									className="float-label-item"
 									rules={[{
-										required: user?.providerInfo?.isSeparateEvaluationRate,
+										required: user?.isSeparateEvaluationRate,
 										message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
 										validator: (_, value) => {
 											if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
