@@ -167,6 +167,8 @@ class SubsidyProgram extends Component {
 													>
 														<Input
 															placeholder={intl.formatMessage(messages.rate)}
+															prefix="$"
+															className='h-40'
 															disabled
 														/>
 													</Form.Item>
@@ -186,6 +188,8 @@ class SubsidyProgram extends Component {
 													>
 														<Input
 															type="number"
+															prefix="$"
+															className='h-40'
 															min={0}
 															onChange={e => {
 																if (isSameRate) {

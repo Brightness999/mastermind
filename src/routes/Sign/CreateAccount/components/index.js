@@ -3,6 +3,7 @@ import { Button, Steps } from 'antd';
 import { BiChevronLeft } from 'react-icons/bi';
 import { ModalCreateDone } from '../../../../components/Modal';
 import intl from 'react-intl-universal';
+
 import messages from '../messages';
 import CreateDefault from './create_default';
 import InfoParent from './Parents/info_parent';
@@ -29,8 +30,6 @@ export default class extends React.Component {
     super(props);
     this.state = {
       currentStep: 0,
-      subsidyStep: -1,
-      selectedDependent: -1,
       accountType: intl.formatMessage(messages.parent),
       visibleCreateDone: false,
     }
@@ -122,21 +121,6 @@ export default class extends React.Component {
     }
   }
 
-  onOpenSubsidyStep = (step, selectedDependent) => {
-    this.setState({
-      subsidyStep: step,
-      selectedDependent: selectedDependent
-    })
-  }
-
-  changeSelectedDependent = (selectedDependent) => {
-    this.setState({ selectedDependent: selectedDependent })
-  }
-
-  getSelectedDependent = () => {
-    return this.state.selectedDependent
-  }
-
   openModalCreateDone = () => {
     this.setState({ visibleCreateDone: true });
   }
@@ -166,7 +150,7 @@ export default class extends React.Component {
       case 2:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<InfoChild onOpenSubsidyStep={this.onOpenSubsidyStep} changeSelectedDependent={this.changeSelectedDependent} onContinue={this.handleContinue} />)
+            return (<InfoChild onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoServices onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.consultant):

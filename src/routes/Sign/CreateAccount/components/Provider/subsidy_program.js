@@ -159,7 +159,6 @@ class SubsidyProgram extends Component {
 													<Form.Item
 														name={[field.name, "level"]}
 														label={intl.formatMessage(messages.level)}
-														className='select-small'
 														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.level) }]}
 													>
 														<Select
@@ -176,13 +175,12 @@ class SubsidyProgram extends Component {
 													<Form.Item
 														name={[field.name, "rate"]}
 														label={'Standard ' + intl.formatMessage(messages.rate)}
-														className='select-small'
-														style={{ height: "25px !important" }}
 														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
 													>
 														<Input
 															disabled
-															className='input-with-select-small'
+															prefix="$"
+															className='h-40'
 															placeholder={intl.formatMessage(messages.rate)}
 														/>
 													</Form.Item>
@@ -191,7 +189,6 @@ class SubsidyProgram extends Component {
 													<Form.Item
 														name={[field.name, "subsidizedRate"]}
 														label={'Subsidized ' + intl.formatMessage(messages.rate)}
-														className='select-small'
 														rules={[{
 															required: isAcceptReduceRate,
 															message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced),
@@ -203,7 +200,9 @@ class SubsidyProgram extends Component {
 													>
 														<Input
 															type="number"
+															prefix="$"
 															min={0}
+															className="h-40"
 															onChange={e => {
 																if (isSameRate) {
 																	let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));
@@ -212,7 +211,6 @@ class SubsidyProgram extends Component {
 																this.handleSelectChange();
 															}}
 															disabled={!isAcceptReduceRate}
-															className='input-with-select-small'
 															placeholder={intl.formatMessage(messages.rate)}
 														/>
 													</Form.Item>

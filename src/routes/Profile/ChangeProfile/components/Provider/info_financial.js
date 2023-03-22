@@ -260,6 +260,7 @@ class InfoFinancial extends Component {
 															placeholder={intl.formatMessage(messages.rate)}
 															type="number"
 															min={0}
+															prefix="$"
 															onChange={(event => {
 																const value = event.target.value;
 																let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));
@@ -323,7 +324,7 @@ class InfoFinancial extends Component {
 										},
 									}]}
 								>
-									<Input type='number' min={0} placeholder={intl.formatMessage(messages.rate)} />
+									<Input type='number' prefix="$" min={0} placeholder={intl.formatMessage(messages.rate)} />
 								</Form.Item>
 							</Col>
 							<Col xs={24} sm={24} md={12}>
@@ -340,7 +341,7 @@ class InfoFinancial extends Component {
 									}]}
 									className='w-100 float-label-item'
 								>
-									<Input type='number' min={0} placeholder={intl.formatMessage(messages.cancellationFee)} />
+									<Input type='number' prefix="$" min={0} placeholder={intl.formatMessage(messages.cancellationFee)} />
 								</Form.Item>
 							</Col>
 						</Row>

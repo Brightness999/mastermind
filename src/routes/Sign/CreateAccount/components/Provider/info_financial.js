@@ -257,6 +257,7 @@ class InfoFinancial extends Component {
 														<Input
 															placeholder={intl.formatMessage(messages.rate)}
 															type='number'
+															prefix="$"
 															min={0}
 															onChange={(event => {
 																const value = event.target.value;
@@ -319,6 +320,7 @@ class InfoFinancial extends Component {
 									>
 										<Input
 											type='number'
+											prefix="$"
 											min={0}
 											onChange={(e) => this.setValueToReduxRegisterData('separateEvaluationRate', e.target.value)}
 											placeholder={intl.formatMessage(messages.rate)}
@@ -342,6 +344,7 @@ class InfoFinancial extends Component {
 								>
 									<Input
 										type='number'
+										prefix="$"
 										min={0}
 										onChange={(e) => this.setValueToReduxRegisterData('cancellationFee', e.target.value)}
 										placeholder={intl.formatMessage(messages.cancellationFee)}
