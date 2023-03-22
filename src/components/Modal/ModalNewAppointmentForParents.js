@@ -7,10 +7,10 @@ import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import 'moment/locale/en-au';
+import { MdAdminPanelSettings } from 'react-icons/md';
 
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import request from '../../utils/api/request';
 import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils/api/apiList';
 import ModalNewScreening from './ModalNewScreening';
@@ -18,7 +18,6 @@ import { store } from '../../redux/store';
 import ModalConfirm from './ModalConfirm';
 import './style/index.less';
 import '../../assets/styles/login.less';
-import { MdAdminPanelSettings } from 'react-icons/md';
 
 const { Paragraph } = Typography;
 moment.locale('en');
@@ -797,7 +796,7 @@ class ModalNewAppointmentForParents extends React.Component {
 						{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
 						<Row className='justify-end gap-2 mt-10'>
 							<Button key="back" onClick={this.props.onCancel}>
-								{intl.formatMessage(msgReview.goBack).toUpperCase()}
+								{intl.formatMessage(messages.goBack).toUpperCase()}
 							</Button>
 							<Button key="submit" type="primary" htmlType='submit'>
 								{intl.formatMessage(messages.schedule)?.toUpperCase()}

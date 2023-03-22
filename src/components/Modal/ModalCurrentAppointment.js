@@ -12,7 +12,6 @@ import 'moment/locale/en-au';
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import msgDrawer from '../../components/DrawerDetail/messages';
-import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { rescheduleAppointmentForParent } from '../../utils/api/apiList';
@@ -552,7 +551,7 @@ class ModalCurrentAppointment extends React.Component {
 						{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
 						<Row className='justify-end gap-2 mt-10'>
 							<Button key="back" onClick={this.props.onCancel}>
-								{intl.formatMessage(msgReview.goBack).toUpperCase()}
+								{intl.formatMessage(messages.goBack).toUpperCase()}
 							</Button>
 							{isConfirm ? (
 								<Popover

@@ -1,27 +1,27 @@
 @import '../../../assets/styles/variables.less';
 @import './screenLock.less';
-@import './coming.less';
-@import './403.less';
 @import './404.less';
-@import './500.less';
 @import './result.less';
 
 .backhome {
   border: 1px solid #89949b;
   border-radius: 50%;
   color: #89949b;
-  font-size: 48px;
-  height: 40px;
   left: 20px;
   line-height: 0;
   overflow: hidden;
   position: absolute;
   top: 20px;
-  width: 40px;
+  padding: 10px;
 
   &:hover {
     background: #fff;
     border-color: @primary-color;
     color: @primary-color;
+  }
+
+  .anticon svg {
+    width: 32px;
+    height: 32px;
   }
 }

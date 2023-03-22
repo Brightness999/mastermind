@@ -1,14 +1,14 @@
 import React from 'react';
 import { Modal, Button, Row, Col, Input, Form, Select } from 'antd';
 import intl from 'react-intl-universal';
-import messages from './messages';
-import msgReview from '../../routes/Sign/SubsidyReview/messages';
 import moment from 'moment';
 import 'moment/locale/en-au';
+import TextArea from 'antd/lib/input/TextArea';
+
+import messages from './messages';
+import { store } from '../../redux/store';
 import './style/index.less';
 import '../../assets/styles/login.less';
-import TextArea from 'antd/lib/input/TextArea';
-import { store } from '../../redux/store';
 
 moment.locale('en');
 
@@ -98,7 +98,7 @@ class ModalNewScreening extends React.Component {
             </Row>
             <Row className='justify-end gap-2'>
               <Button key="back" onClick={this.props.onCancel}>
-                {intl.formatMessage(msgReview.goBack).toUpperCase()}
+                {intl.formatMessage(messages.goBack).toUpperCase()}
               </Button>
               <Form.Item>
                 <Button key="submit" type="primary" htmlType="submit">

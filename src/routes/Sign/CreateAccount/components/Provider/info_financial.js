@@ -7,8 +7,8 @@ import { compose } from 'redux'
 import PlacesAutocomplete from 'react-places-autocomplete';
 
 import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
-import messagesRequest from '../../../SubsidyRequest/messages';
+import msgLogin from '../../../Login/messages';
+import msgModal from '../../../../../components/Modal/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 import { url } from '../../../../../utils/api/baseUrl';
 import { uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
@@ -161,14 +161,14 @@ class InfoFinancial extends Component {
 						<Form.Item
 							name="legalName"
 							label={intl.formatMessage(messages.legalName)}
-							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.legalName) }]}
+							rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.legalName) }]}
 						>
 							<Input onChange={e => this.setValueToReduxRegisterData("legalName", e.target.value)} placeholder={intl.formatMessage(messages.legalName)} />
 						</Form.Item>
 						<Form.Item
 							name="billingAddress"
 							label={intl.formatMessage(messages.billingAddress)}
-							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.billingAddress) }]}
+							rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.billingAddress) }]}
 						>
 							<PlacesAutocomplete
 								value={billingAddress}
@@ -227,7 +227,7 @@ class InfoFinancial extends Component {
 													<Form.Item
 														name={[field.name, "level"]}
 														label={intl.formatMessage(messages.level)}
-														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.academicLevel) }]}
+														rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.academicLevel) }]}
 														className='bottom-0'
 														style={{ marginTop: 14 }}
 													>
@@ -245,7 +245,7 @@ class InfoFinancial extends Component {
 														label={'Standard ' + intl.formatMessage(messages.rate)}
 														rules={[{
 															required: true,
-															message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
+															message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
 															validator: (_, value) => {
 																if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
 																return Promise.resolve();
@@ -310,7 +310,7 @@ class InfoFinancial extends Component {
 										label={'Evaluation ' + intl.formatMessage(messages.rate)}
 										rules={[{
 											required: registerData?.scheduling?.isNewClientEvaluation,
-											message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
+											message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
 											validator: (_, value) => {
 												if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
 												return Promise.resolve();
@@ -332,7 +332,7 @@ class InfoFinancial extends Component {
 									label={intl.formatMessage(messages.cancellationFee)}
 									rules={[{
 										required: true,
-										message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee),
+										message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee),
 										validator: (_, value) => {
 											if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
 											return Promise.resolve();
@@ -351,7 +351,7 @@ class InfoFinancial extends Component {
 						</Row>
 						<Form.Item
 							name="upload_w_9"
-							label={intl.formatMessage(messagesRequest.upload)}
+							label={intl.formatMessage(msgModal.upload)}
 							className='input-download'
 							rules={[{ required: true, message: intl.formatMessage(messages.uploadMess) }]}
 						>
@@ -359,7 +359,7 @@ class InfoFinancial extends Component {
 								addonBefore='W-9 Form'
 								suffix={
 									<Upload {...uploadProps}>
-										<a className='font-12 underline'>{intl.formatMessage(messagesRequest.upload)}</a>
+										<a className='font-12 underline'>{intl.formatMessage(msgModal.upload)}</a>
 									</Upload>
 								}
 								readOnly

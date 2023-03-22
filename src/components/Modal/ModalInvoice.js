@@ -132,17 +132,6 @@ class ModalInvoice extends React.Component {
 		})
 	}
 
-	printInvoice = () => {
-		document.querySelector(".add-item").style.display = 'none';
-		document.querySelector(".actions").style.display = 'none';
-		document.querySelector(".ant-modal-mask").style.backgroundColor = 'white';
-		document.querySelector(".ant-modal-content").style.boxShadow = 'none';
-		window.print();
-		document.querySelector(".actions").style.display = '';
-		document.querySelector(".add-item").style.display = '';
-		document.querySelector(".ant-modal-mask").style.backgroundColor = '';
-	}
-
 	render() {
 		const { event, user } = this.props;
 		const { items, selectedItemIndex, subTotal, loadingDownload, loadingEmail } = this.state;
@@ -296,7 +285,16 @@ class ModalInvoice extends React.Component {
 					</Button>
 					{event?.status != 0 ? (
 						<>
-							<Button key="print" onClick={() => this.printInvoice}>
+							<Button key="print" onClick={() => {
+								document.querySelector(".add-item").style.display = 'none';
+								document.querySelector(".actions").style.display = 'none';
+								document.querySelector(".ant-modal-mask").style.backgroundColor = 'white';
+								document.querySelector(".ant-modal-content").style.boxShadow = 'none';
+								window.print();
+								document.querySelector(".actions").style.display = '';
+								document.querySelector(".add-item").style.display = '';
+								document.querySelector(".ant-modal-mask").style.backgroundColor = '';
+							}}>
 								<PrinterTwoTone />
 								{intl.formatMessage(messages.print)}
 							</Button>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'dva/router';
 import { Layout } from 'antd';
-import {HomeOutlined} from '@ant-design/icons'
+import { HomeOutlined } from '@ant-design/icons'
 const { Content } = Layout;
 
 export default () => (
@@ -313,7 +313,7 @@ export default () => (
         </g>
       </svg>
       <Link to="/" className="backhome">
-        <HomeOutlined/>
+        <HomeOutlined size={100} />
       </Link>
     </Content>
   </Layout>

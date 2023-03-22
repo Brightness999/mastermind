@@ -1,8 +1,9 @@
-import { Divider, Tabs, Card, Row, Col, Switch, Button, message } from 'antd';
 import React from 'react';
+import { Divider } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+
 import msgMainHeader from '../../../components/MainHeader/messages';
 import './index.less';
 

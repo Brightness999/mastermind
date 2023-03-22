@@ -33,13 +33,6 @@ application.use({ onError: config.exception.global });
 // -> request
 request.config(config.request);
 
-// Using mock data
-require('./__mocks__');
-// -> Developer mock data
-// if (process.env.NODE_ENV === 'development') {
-//   require('./__mocks__');
-// }
-
 // -> loading
 dynamic.setDefaultLoadingComponent(() => config.router.loading);
 

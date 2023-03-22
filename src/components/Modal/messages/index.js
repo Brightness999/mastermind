@@ -219,7 +219,11 @@ export default {
   },
   phoneNumberValid: {
     id: `${scope}.phoneNumberValid`,
-    defaultMessage: 'Phone number is not a valid',
+    defaultMessage: 'Phone number is not valid',
+  },
+  emailNotValid: {
+    id: `${scope}.emailNotValid`,
+    defaultMessage: 'Email is not valid',
   },
   reSchedule: {
     id: `${scope}.reSchedule`,
@@ -384,6 +388,54 @@ export default {
   ok: {
     id: `${scope}.ok`,
     defaultMessage: 'Ok',
+  },
+  goBack: {
+    id: `${scope}.goBack`,
+    defaultMessage: 'Go Back',
+  },
+  dependentInfo: {
+    id: `${scope}.dependentInfo`,
+    defaultMessage: 'Dependent Information',
+  },
+  otherContacts: {
+    id: `${scope}.otherContacts`,
+    defaultMessage: 'Other Contacts',
+  },
+  upload: {
+    id: `${scope}.upload`,
+    defaultMessage: 'Upload',
+  },
+  skillsetRequested: {
+    id: `${scope}.skillsetRequested`,
+    defaultMessage: 'Skillset requested',
+  },
+  requestRav: {
+    id: `${scope}.requestRav`,
+    defaultMessage: 'I request HMGH contact my Rav',
+  },
+  ravPhone: {
+    id: `${scope}.ravPhone`,
+    defaultMessage: 'Rav’s Phone',
+  },
+  nameOfRav: {
+    id: `${scope}.nameOfRav`,
+    defaultMessage: 'Name of Rav',
+  },
+  ravEmail: {
+    id: `${scope}.ravEmail`,
+    defaultMessage: 'Rav’s Email',
+  },
+  requestContactRav: {
+    id: `${scope}.requestContactRav`,
+    defaultMessage: 'Request contact (optional)',
+  },
+  generalNotes: {
+    id: `${scope}.generalNotes`,
+    defaultMessage: 'General notes',
+  },
+  documents: {
+    id: `${scope}.documents`,
+    defaultMessage: 'Documents',
   },
   editInvoice: {
     id: `${scope}.editInvoice`,

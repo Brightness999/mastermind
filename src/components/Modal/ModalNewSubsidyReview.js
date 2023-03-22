@@ -1,10 +1,9 @@
 import React from 'react';
 import { Row, Button, Divider, Modal } from 'antd';
 import intl from 'react-intl-universal';
+
 import messages from './messages';
 import messagesCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import messagesRequest from '../../routes/Sign/SubsidyRequest/messages';
-import messagesReview from '../../routes/Sign/SubsidyReview/messages';
 import './style/index.less';
 
 class ModalNewSubsidyReview extends React.Component {
@@ -45,7 +44,7 @@ class ModalNewSubsidyReview extends React.Component {
 				<Row justify="center" className="row-form">
 					<div className='col-form col-subsidy-review mt-0'>
 						<div>
-							<p className='font-16 font-700 mb-10'>{intl.formatMessage(messagesReview.dependentInfo)}</p>
+							<p className='font-16 font-700 mb-10'>{intl.formatMessage(messages.dependentInfo)}</p>
 							<div className='review-item'>
 								<p>Dependent name</p>
 								<p>School name</p>
@@ -54,7 +53,7 @@ class ModalNewSubsidyReview extends React.Component {
 						</div>
 						<Divider style={{ marginTop: 15, marginBottom: 15, borderColor: '#d7d7d7' }} />
 						<div>
-							<p className='font-16 font-700 mb-10'>{intl.formatMessage(messagesReview.otherContacts)}</p>
+							<p className='font-16 font-700 mb-10'>{intl.formatMessage(messages.otherContacts)}</p>
 							<div className='review-item'>
 								<p>Raw name</p>
 								<p>Rav phone</p>
@@ -66,14 +65,14 @@ class ModalNewSubsidyReview extends React.Component {
 						</div>
 						<Divider style={{ marginTop: 15, marginBottom: 15, borderColor: '#d7d7d7' }} />
 						<div>
-							<p className='font-16 font-700 mb-10'>{intl.formatMessage(messagesReview.notes)}</p>
+							<p className='font-16 font-700 mb-10'>{intl.formatMessage(messages.notes)}</p>
 							<div>
 								<p>note...</p>
 							</div>
 						</div>
 						<Divider style={{ marginTop: 15, marginBottom: 15, borderColor: '#d7d7d7' }} />
 						<div>
-							<p className='font-16 font-700 mb-10'>{intl.formatMessage(messagesRequest.documents)}</p>
+							<p className='font-16 font-700 mb-10'>{intl.formatMessage(messages.documents)}</p>
 							<div className='review-item'>
 								<p>Document #2 title</p>
 								<p>Document #3 title</p>

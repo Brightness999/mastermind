@@ -6,8 +6,7 @@
   "license": "MIT",
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
-    "generate": "plop --plopfile ./generators/index.js"
+    "build": "react-app-rewired build"
   },
   "overrides": {
     "react-error-overlay": "6.0.9"

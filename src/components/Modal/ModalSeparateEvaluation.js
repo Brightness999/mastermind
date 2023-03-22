@@ -1,16 +1,13 @@
 import React from 'react';
-
 import { Modal, Row, Col, Form, Button, Input, Select, Switch, message, Upload, Rate } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { url } from '../../utils/api/baseUrl';
-
 import intl from 'react-intl-universal';
+
+import { url } from '../../utils/api/baseUrl';
 import messages from './messages';
 import messagesCreate from '../../routes/Sign/CreateAccount/messages';
 import messagesLogin from '../../routes/Sign/Login/messages';
-import messagesRequest from '../../routes/Sign/SubsidyRequest/messages';
-
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -286,7 +283,7 @@ class ModalSeparateEvaluation extends React.Component {
                                     addonBefore='W-9 Form'
                                     suffix={
                                         <Upload {...props}>
-                                            <a className='font-12 underline'>{intl.formatMessage(messagesRequest.upload)}</a>
+                                            <a className='font-12 underline'>{intl.formatMessage(messages.upload)}</a>
                                         </Upload>
                                     }
                                     readOnly

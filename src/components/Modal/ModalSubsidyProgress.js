@@ -9,8 +9,6 @@ import moment from 'moment';
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import msgDashboard from '../../routes/Dashboard/messages';
-import msgReview from '../../routes/Sign/SubsidyReview/messages';
-import msgRequest from '../../routes/Sign/SubsidyRequest/messages';
 import request from '../../utils/api/request'
 import { url, switchPathWithRole } from '../../utils/api/baseUrl'
 import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getAllProviderInSchool, getLastConsulation } from '../../utils/api/apiList';
@@ -371,7 +369,7 @@ class ModalSubsidyProgress extends React.Component {
 			<p className='font-20 font-700'>{intl.formatMessage(messages.parentInformation)}</p>
 			<Row gutter={15}>
 				<Col xs={24} sm={24} md={12}>
-					<p className='font-700'>{intl.formatMessage(msgReview.dependentInfo)}</p>
+					<p className='font-700'>{intl.formatMessage(messages.dependentInfo)}</p>
 					<div className='count-2'>
 						<p className='font-12'>Dependent: <b>{student.firstName} {student.lastName}</b></p>
 						<p className='font-12'>School: {student.school.name}</p>
@@ -382,7 +380,7 @@ class ModalSubsidyProgress extends React.Component {
 					</div>
 				</Col>
 				<Col xs={24} sm={24} md={12}>
-					<p className='font-700'>{intl.formatMessage(msgReview.otherContacts)}</p>
+					<p className='font-700'>{intl.formatMessage(messages.otherContacts)}</p>
 					<p className='font-12'>Rav name: {subsidy.ravName}</p>
 					<p className='font-12'>Rav phone: {subsidy.ravPhone}</p>
 					<p className='font-12'>Rav email: {subsidy.ravEmail}</p>
@@ -395,7 +393,7 @@ class ModalSubsidyProgress extends React.Component {
 					<p className='font-12'>{subsidy.note}</p>
 				</Col>
 				<Col xs={24} sm={24} md={12}>
-					<p className='font-700'>{intl.formatMessage(msgRequest.documents)}</p>
+					<p className='font-700'>{intl.formatMessage(messages.documents)}</p>
 					{documents.map((document, index) => (
 						<a
 							key={index}
@@ -529,7 +527,7 @@ class ModalSubsidyProgress extends React.Component {
 							onChange={v => {
 								this.setState({ decisionExplanation: v.target.value });
 							}}
-							rows={5} placeholder={intl.formatMessage(msgRequest.generalNotes)} />
+							rows={5} placeholder={intl.formatMessage(messages.generalNotes)} />
 					</Col>
 				</Row>
 			</div>

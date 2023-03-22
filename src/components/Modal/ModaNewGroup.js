@@ -1,17 +1,12 @@
-import React, { useState } from 'react';
-import { Modal, Button, Input, List, message } from 'antd';
-import { BsPlus } from 'react-icons/bs';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { ItemTypes } from './ItemTypes.js';
+import React from 'react';
+import { Modal, Button, List, message } from 'antd';
 import intl from 'react-intl-universal';
+import ReactDragListView from "react-drag-listview";
+
 import messages from './messages';
-import msgReview from '../../routes/Sign/SubsidyReview/messages';
+import request from '../../utils/api/request'
 import './style/index.less';
 import '../../assets/styles/login.less';
-import request, { generateSearchStructure } from '../../utils/api/request'
-import { url, switchPathWithRole } from '../../utils/api/baseUrl'
-import ReactDragListView from "react-drag-listview";
 
 class ModalNewGroup extends React.Component {
 	constructor(props) {

@@ -8,7 +8,6 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 
 import messages from '../../messages';
 import messagesLogin from '../../../../Sign/Login/messages';
-import messagesRequest from '../../../../Sign/SubsidyRequest/messages';
 import { getMyProviderInfo, getUserProfile, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
 import request from '../../../../../utils/api/request';
 import { url } from '../../../../../utils/api/baseUrl';
@@ -354,7 +353,7 @@ class InfoFinancial extends Component {
 								addonBefore='W-9 Form'
 								suffix={
 									<Upload {...uploadProps}>
-										<a className='font-12 underline'>{intl.formatMessage(messagesRequest.upload)}</a>
+										<a className='font-12 underline'>{intl.formatMessage(messages.upload)}</a>
 									</Upload>
 								}
 								readOnly

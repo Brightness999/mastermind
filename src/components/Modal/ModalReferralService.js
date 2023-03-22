@@ -10,8 +10,6 @@ import { compose } from 'redux';
 
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import msgReview from '../../routes/Sign/SubsidyReview/messages';
-import msgRequest from '../../routes/Sign/SubsidyRequest/messages';
 import { url } from '../../utils/api/baseUrl'
 import request from '../../utils/api/request'
 import { createAppointmentForParent, getAllConsultantForParent, getAuthorizationUrl } from '../../utils/api/apiList';
@@ -391,7 +389,7 @@ class ModalReferralService extends React.Component {
 									<div className='upload-document flex-1 mb-10'>
 										<Upload {...props}>
 											<Button size='small' type='primary' className='btn-upload'>
-												{intl.formatMessage(msgRequest.upload).toUpperCase()} <BiUpload size={16} />
+												{intl.formatMessage(messages.upload).toUpperCase()} <BiUpload size={16} />
 											</Button>
 										</Upload>
 									</div>
@@ -399,7 +397,7 @@ class ModalReferralService extends React.Component {
 										value={note}
 										onChange={e => { this.setState({ note: e.target.value }) }}
 										rows={6}
-										placeholder={intl.formatMessage(msgReview.notes)}
+										placeholder={intl.formatMessage(messages.notes)}
 										className='font-12'
 									/>
 								</div>
@@ -479,7 +477,7 @@ class ModalReferralService extends React.Component {
 						{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
 						<Row justify='end' className='gap-2 mt-10'>
 							<Button key="back" onClick={this.props.onCancel}>
-								{intl.formatMessage(msgReview.goBack).toUpperCase()}
+								{intl.formatMessage(messages.goBack).toUpperCase()}
 							</Button>
 							<Button key="submit" type="primary" htmlType='submit'>
 								{intl.formatMessage(messages.scheduleConsultation).toUpperCase()}

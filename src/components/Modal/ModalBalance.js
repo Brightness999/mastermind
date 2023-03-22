@@ -1,13 +1,13 @@
 import React from 'react';
 import { Modal, Button, Input, Form, Row } from 'antd';
 import intl from 'react-intl-universal';
-import messages from './messages';
-import msgReview from '../../routes/Sign/SubsidyReview/messages';
-import './style/index.less';
-import '../../assets/styles/login.less';
 import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+
+import messages from './messages';
+import './style/index.less';
+import '../../assets/styles/login.less';
 
 class ModalBalance extends React.Component {
 	componentDidMount() {
@@ -96,7 +96,7 @@ class ModalBalance extends React.Component {
 						</div>
 					</div>
 					<Form.Item name="notes" label={intl.formatMessage(messages.notes)} rules={[{ required: true }]}>
-						<Input.TextArea rows={4} placeholder={intl.formatMessage(msgReview.notes)} disabled={user?.role == 3 || event?.flagStatus == 2} className="notes" />
+						<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.notes)} disabled={user?.role == 3 || event?.flagStatus == 2} className="notes" />
 					</Form.Item>
 					<Row className="justify-end gap-2 mt-10">
 						<Button key="back" onClick={this.props.onCancel}>
