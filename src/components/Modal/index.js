@@ -11,7 +11,6 @@ import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
 import ModalNewGroup from './ModaNewGroup';
 import ModalNewSubsidyReview from './ModalNewSubsidyReview';
 import ModalInputCode from './ModalInputCode';
-import ModalSeparateEvaluation from './ModalSeparateEvaluation';
 import ModalConfirm from './ModalConfirm';
 import ModalCreateNote from './ModalCreateNote';
 import ModalDependentDetail from './ModalDependentDetail';
@@ -29,7 +28,8 @@ export {
   ModalCreateDone,
   ModalCancelAppointment,
   ModalCurrentAppointment,
-  ModalNewAppointment, ModalNewAppointmentForParents,
+  ModalNewAppointment,
+  ModalNewAppointmentForParents,
   ModalSubsidyProgress,
   ModalNoShow,
   ModalBalance,
@@ -38,7 +38,6 @@ export {
   ModalNewGroup,
   ModalNewSubsidyReview,
   ModalInputCode,
-  ModalSeparateEvaluation,
   ModalConfirm,
   ModalCreateNote,
   ModalDependentDetail,

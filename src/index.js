@@ -5,19 +5,18 @@ import createLoading from 'dva-loading';
 import { Router } from 'dva/router';
 import { createBrowserHistory } from 'history';
 import request from 'cmn-utils/lib/request';
-import createRoutes from './routes';
-import config from './config';
-import './assets/styles/index.less';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 import 'moment/locale/vi';
+
 import { homepage } from '../package.json';
 import * as serviceWorker from './serviceWorker';
 import LanguageProvider from './components/LanguageProvider';
-import {persistor, store} from './redux/store';
-import { Provider } from 'react-redux';
+import { persistor, store } from './redux/store';
 import { helper } from './utils/auth/helper';
-import { PersistGate } from 'redux-persist/integration/react';
-// import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-// import { PAYPAL_CLIENT_ID } from './utils';
+import createRoutes from './routes';
+import config from './config';
+import './assets/styles/index.less';
 
 // -> initialization
 const application = dva({
@@ -43,16 +42,15 @@ application.model(require('./models/global').default);
 application.router(({ history, app }) => {
   helper.history = history;
   return (
-  <Provider store={store}>
-    <PersistGate loading={null} persistor={persistor}>
-    <LanguageProvider>
-      {/* <PayPalScriptProvider options= {{"client-id": PAYPAL_CLIENT_ID.clientId }}> */}
-        <Router history={history}  >{createRoutes(app)}</Router>
-      {/* </PayPalScriptProvider> */}
-    </LanguageProvider>
-    </PersistGate>
-  </Provider>
-)});
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <LanguageProvider>
+          <Router history={history}  >{createRoutes(app)}</Router>
+        </LanguageProvider>
+      </PersistGate>
+    </Provider>
+  )
+});
 
 // -> Start
 application.start('#root');

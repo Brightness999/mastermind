@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'dva/router';
-import './index.less';
 import { Menu } from 'antd';
+
 import InfoProfile from './Provider/info_profile';
 import InfoServices from './Provider/info_services';
 import InfoAvailability from './Provider/info_availability';
@@ -21,6 +21,7 @@ import { MENU_ADMIN, MENU_CONSULTANT, MENU_PARENT, MENU_PROVIDER, MENU_SCHOOL } 
 import { setKeyDefault } from '../service';
 import { store } from '../../../../redux/store';
 import SubsidyProgram from './Provider/subsidy_program';
+import './index.less';
 
 export default class extends React.Component {
   constructor(props) {
@@ -284,7 +285,7 @@ export default class extends React.Component {
     const { listMenu, keyActive } = this.state;
 
     return (
-      <div className="full-layout page admin-page">
+      <div className="full-layout page dashboard-page">
         <div className='div-content'>
           <section className='div-activity-feed box-card'>
             <Menu theme="light" mode="inline" defaultSelectedKeys={[keyActive]} rootClassName="h-100 overflow-x-hidden overflow-y-scroll" items={listMenu} />

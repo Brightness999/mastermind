@@ -40,7 +40,6 @@
     "css-element-queries": "^1.2.1",
     "dva": "^2.4.1",
     "dva-loading": "^3.0.14",
-    "enquire.js": "^2.1.6",
     "eslint": "6.6.0",
     "eslint-config-airbnb": "^18.2.0",
     "eslint-config-airbnb-base": "^14.2.0",

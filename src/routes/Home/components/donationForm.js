@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Grid, Box, Button, Typography, FormControlLabel, TextField, Checkbox } from '@mui/material';
+import { Box, Button, Typography, FormControlLabel, TextField, Checkbox } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import toast, { Toaster } from 'react-hot-toast';
+
 import Header from './header';
 import SubHeader from './subHeader';
-// import { Form, Input } from 'antd';
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { PAYPAL_CLIENT_ID } from '../../../utils/index';
-import toast, { Toaster } from 'react-hot-toast';
 import request from '../../../utils/api/request';
 import { monthlyCustomAmount, donationReceipt } from '../../../utils/api/apiList';
 
@@ -19,16 +19,13 @@ const StyledBoxTan = styled(Box)({
 });
 
 const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSelected }) => {
-  // const [form] = Form.useForm();
   const [orderID, setOrderID] = useState(false);
   const [billingDetails, setBillingDetails] = useState("");
-  // const [isFormValid, setIsFormValid] = useState(false);
   const [donorEmail, setDonorEmail] = useState(undefined)
   const [sendReceipt, setSendReceipt] = useState(false)
 
   //paypal events
   const onPayPalButtonClick = (data, actions) => {
-    // if (!isFormValid) {
     if (paymentAmount < 1) {
       toast.error("The form is not valid.")
       return actions.reject();
@@ -108,20 +105,6 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
     })
   }
 
-  // //form events
-  // const onFinish = (values) => {
-  //   toast.success('Success:' + values);
-  // };
-
-  // const onFinishFailed = (errorInfo) => {
-  //   toast.error('Failed:' + errorInfo);
-  // };
-
-  // const validateForm = (values) => {
-  //   if (values[0].name.includes('email') && values[0].errors.length < 1)
-  //     setIsFormValid(true)
-  // };
-
   //we're using undefined for the first argument in place of 'en-US' to use the system locale
   const formatter = new Intl.NumberFormat(undefined, {
     style: 'currency',
@@ -129,104 +112,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
   });
 
   return (
-    // <Form
-    //   form={form}
-    //   layout="vertical"
-    //   onFinish={onFinish}
-    //   onFinishFailed={onFinishFailed}
-    //   onFieldsChange={validateForm}
-    //   style={{ display: "flex", gap: "10%" }}
-    // >
-    //   <StyledBoxTan style={{ width: '60%' }}>
-    //     <Header text="Enter your details:" style={{ fontSize: '52px', paddingBottom: '30px' }} />
-    //     <Grid container spacing={4}>
-    //       <Grid item xs={6}>
-    //         <Form.Item
-    //           label="First Name"
-    //           name="firstName"
-    //         >
-    //           <Input />
-    //         </Form.Item>
-    //       </Grid>
-    //       <Grid item xs={6}>
-    //         <Form.Item
-    //           label="Last Name"
-    //           name="lastName"
-    //         >
-    //           <Input />
-    //         </Form.Item>
-    //       </Grid>
-    //       <Grid item xs={6}>
-    //         <Form.Item
-    //           label="Street Address"
-    //           name="streetAddress"
-    //         >
-    //           <Input />
-    //         </Form.Item>
-    //       </Grid>
-    //       <Grid item xs={6}>
-    //         <Form.Item
-    //           label="City"
-    //           name="city"
-    //         >
-    //           <Input />
-    //         </Form.Item>
-    //       </Grid>
-    //       <Grid item xs={6}>
-    //         <Form.Item
-    //           label="State"
-    //           name="state"
-    //         >
-    //           <Input />
-    //         </Form.Item>
-    //       </Grid>
-    //       <Grid item xs={6}>
-    //         <Form.Item
-    //           label="Zip"
-    //           name="zip"
-    //         >
-    //           <Input />
-    //         </Form.Item>
-    //       </Grid>
-    //       <Grid item xs={6}>
-    //         <Form.Item
-    //           label="Phone Number"
-    //           name="phoneNumber"
-    //         >
-    //           <Input />
-    //         </Form.Item>
-    //       </Grid>
-    //       <Grid item xs={6}>
-    //         <Form.Item
-    //           label="Mobile Number"
-    //           name="mobileNumber"
-    //         >
-    //           <Input />
-    //         </Form.Item>
-    //       </Grid>            
-    //       <Grid item xs={12}>
-    //         <Form.Item
-    //           label="Email Address"
-    //           name="email"
-    //           rules={[
-    //             {
-    //               type: 'email',
-    //               message: 'The input is not valid E-mail!',
-    //             },
-    //             {
-    //               required: true,
-    //               message: 'Please input your E-mail!',
-    //             },
-    //           ]}
-    //         >
-    //           <Input />
-    //         </Form.Item>
-    //       </Grid>
-    //     </Grid>
-    //   </StyledBoxTan>
-    <StyledBoxTan
-    // style={{ width: '36%', height: 'min-content', display: "flex", gap: "30px", flexDirection: "column" }}
-    >
+    <StyledBoxTan>
       <Toaster />
       <Header style={{ fontSize: '52px', whiteSpace: 'noWrap' }} text="Donation Total:" />
       <Header style={{ fontSize: '41px', paddingBottom: '20px' }} text={`${formatter.format(paymentAmount || 0)} / ${frequency}`} />
@@ -245,7 +131,6 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
           hidden={!sendReceipt}
         />
       </Box>
-      {/* <Button onClick={() => sendDonationReceipt(paymentAmount)}>Send Receipt</Button> */}
       <Box display={frequency === 'once' ? 'block' : 'none'}>
         <PayPalScriptProvider
           options={{
@@ -265,7 +150,6 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
             createOrder={createOrder}
             onApprove={onApprove}
             fundingSource="card"
-            // disabled={!isFormValid}
             disabled={paymentAmount < 1}
             forceReRender={[paymentAmount, frequency]}
           />
@@ -291,7 +175,6 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
             createSubscription={createSubscription}
             onApprove={onApprove}
             fundingSource="card"
-            // disabled={!isFormValid}
             disabled={paymentAmount < 1}
             forceReRender={[paymentAmount, frequency]}
             label="Subscribe"
@@ -314,7 +197,6 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
       </Box>
       <SubHeader style={{ paddingTop: '20px', textAlign: 'justify' }} text="Help Me Get Help is a project of the Association for Torah Advancement (AFTA). AFTA is a nonprofit organization. All donations are tax deductible." />
     </StyledBoxTan>
-    // </Form>
   )
 }
 

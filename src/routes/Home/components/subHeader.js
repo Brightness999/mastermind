@@ -7,7 +7,6 @@ const useStyles = makeStyles({
     fontFamily: 'ProximaNova',
     fontSize: '18px',
     lineHeight: '28px',
-    // maxWidth: '332px',
     width: '100%',
     textAlign: "justify"
   }

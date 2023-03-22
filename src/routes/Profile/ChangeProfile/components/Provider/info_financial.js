@@ -353,7 +353,7 @@ class InfoFinancial extends Component {
 								addonBefore='W-9 Form'
 								suffix={
 									<Upload {...uploadProps}>
-										<a className='font-12 underline'>{intl.formatMessage(messages.upload)}</a>
+										<a className='font-12 underline'>{intl.formatMessage(messages.uploadMess)}</a>
 									</Upload>
 								}
 								readOnly

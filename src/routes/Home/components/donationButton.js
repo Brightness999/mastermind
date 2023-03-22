@@ -20,7 +20,7 @@ const useStyles = makeStyles({
   }
 });
 
-const DonationButton = ({...rest}) => {
+const DonationButton = ({ ...rest }) => {
   const classes = useStyles()
   return (
     <Button className={classes.text} {...rest}>

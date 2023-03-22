@@ -1,6 +1,5 @@
 import React from 'react';
-import { Grid, Box, Typography,  } from '@mui/material';
-import DonationButton from './donationButton';
+import { Grid, Box } from '@mui/material';
 import Header from './header';
 import SubHeader from './subHeader'
 import Image5 from '../images/image_5.png';
@@ -21,11 +20,11 @@ const FirstDonateSection = () => {
         <SubHeader text="Sponsor tutoring, speech, or occupational therapy for a child in need." style={{ paddingRight: "40px" }} />
       </Box>
       <img src={Image5} style={{
-         width: "501px",
-         height: "418px"
+        width: "501px",
+        height: "418px"
       }} />
     </Grid>
-    
+
   )
 }
 

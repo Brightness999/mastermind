@@ -232,11 +232,13 @@
   "routes.forgotpass.resetYourPassword": "Reset Your Password",
   "routes.forgotpass.enterYourEmail": "Enter your user account's verified email address and we will new password to email.",
   "routes.forgotpass.send": "Send",
+  "routes.forgotpass.blankPage": "Blank page",
 
   "routes.resetpass.changeYourPassword": "Change Your Password",
   "routes.resetpass.newPassword": "New password",
   "routes.resetpass.confirmNewPass": "Confirm new password",
   "routes.resetpass.submit": "Submit",
+  "routes.resetpass.blankPage": "Blank page",
 
   "components.mainheader.new": "new",
   "components.mainheader.search": "Search",
@@ -361,7 +363,6 @@
   "components.Modal.school": "School",
   "components.Modal.requestContactRav": "Request contact (optional)",
 
-
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.editUser": "Edit User",
   "components.sidebar.subsidyManager": "Subsidy Request",
@@ -372,6 +373,10 @@
   "components.sidebar.flagList": "Flag List",
   "components.sidebar.consultationRequests": "Consultation Requests",
   "components.sidebar.schedulingCenter": "Scheduling Center",
+  "components.SideBar.optionOnline": "Online",
+  "components.SideBar.optionBusy": "Busy",
+  "components.SideBar.optionInvisible": "Invisible",
+  "components.SideBar.optionOffline": "Offline",
   
   "components.drawerdetail.appointmentDetails": "Appointment Details",
   "components.drawerdetail.consultationDetails": "Consultation Details",
@@ -409,36 +414,12 @@
   "components.drawerdetail.payInvoice": "Pay Invoice",
   "components.drawerdetail.clearFlag": "Clear Flag",
   "components.drawerdetail.viewInvoice": "View Invoice",
-  
-  "routes.Blank.blankPage": "Blank page",
-  "routes.Crud.new": "New",
-  "routes.Crud.delete": "Delete",
-  "routes.Crud.companyName": "Company name",
-  "routes.Crud.distribution": "Distribution network",
-  "routes.Crud.city": "City",
-  "routes.Crud.rural": "Rural",
-  "routes.Crud.jobLocation": "Job location",
-  "routes.Crud.jobType": "Job type",
-  "routes.Crud.startingTime": "Starting time",
-  "routes.Crud.completionTime": "Completion time",
-  "routes.Crud.arrivalStaff": "Arrival staff",
-  "routes.Crud.contentsHomework": "Contents of homework",
-  "routes.Crud.operating": "Operating",
-  "routes.Crud.modify": "Modify",
-  "routes.Crud.noticeC": "notice",
- 
-  "routes.Alerts.notification": "Notification",
-  "routes.Alerts.notificationNormal": "Normal notice",
-  "routes.Alerts.notificationText": "We include two notification styles by default. When your component inherits from BaseCompoent, you can use this.notice to issue the default notification style configured in config.js, or you can implement your own notification class by implementing the Notification interface.",
-  "routes.Alerts.success": "Success",
-  "routes.Alerts.failure": "Failure",
-  "routes.Alerts.note": "Note",
-  "routes.Alerts.antdNote": "Antd notice",
-  
+    
   "components.Notification.prompt": "Prompt",
   "components.Notification.success": "Success",
   "components.Notification.error": "Error",
   "components.Notification.warn": "Warn",
+  
   "components.Pages.dontAccess": "Sorry, you don't have access to this page...",
   "components.Pages.errorCode": "Error code:",
   "components.Pages.unexpectedMistake": "Pretty, we have an unexpected mistake...",
@@ -450,22 +431,8 @@
   "components.Pages.useUnlock": "Use patterns to unlock",
   "components.Pages.patternHint": "Pattern hint",
 
-  "components.SideBar.optionOnline": "Online",
-  "components.SideBar.optionBusy": "Busy",
-  "components.SideBar.optionInvisible": "Invisible",
-  "components.SideBar.optionOffline": "Offline",
-  "components.Print.print": "Print",
-  "components.TransferTree.enterSearchContent": "Enter search content",
-  "components.TransferTree.emptyList": "List is empty",
   "components.layout.Closecurrent": "Close current",
   "components.layout.Closeother": "Close other",
   "components.layout.Closeall": "Close all",
-  "components.layout.operating": "Operating",
-  "routes.forgotpass.blankPage": "Blank page",
-  "routes.resetpass.blankPage": "Blank page",
-  "routes.admin.blankPage": "Blank page",
-  "routes.usermanager.blankPage": "Blank page",
-  "routes.subsidymanager.blankPage": "Blank page",
-  "routes.systemsetting.blankPage": "Blank page",
-  "routes.statistics.blankPage": "Blank page"
+  "components.layout.operating": "Operating"
 }
