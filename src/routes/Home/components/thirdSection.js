@@ -7,17 +7,8 @@ import Image3 from '../images/image_3.jpg';
 import Caption from './caption';
 
 const ThirdSection = () => {
-  return (    
-    <Grid item xs={12} style={{
-      padding: "50px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",          
-      width: "75%",
-      minWidth: "1000px",
-      maxWidth: "1440px",
-      margin: "auto",
-    }}>
+  return (
+    <Grid item xs={12} padding="50px" display="flex" alignItems="center" justifyContent="space-between" width="75%" minWidth="1000px" maxWidth="1440px !important" margin="auto">
       <Box>
         <Box style={{
           width: "600px",
@@ -28,12 +19,9 @@ const ThirdSection = () => {
           alignItems: "center",
           justifyContent: "center"
         }}>
-          <img src={Image3} style={{
-            width: "377px",
-            height: "471px"
-          }} />
+          <img src={Image3} width={377} height={471} loading="lazy" />
         </Box>
-      </Box>        
+      </Box>
       <Box display="flex" flexDirection="column" gap="20px">
         <Caption text="Referrals" />
         <Header text="Get the clarity you need to help your child succeed" style={{ fontSize: "52px" }} />

@@ -6,19 +6,10 @@ import Image4 from '../images/image_4.jpg';
 import Caption from './caption';
 
 const FourthSection = () => {
-  return (    
-    <Grid item xs={12} style={{
-      padding: "50px",    
-      width: "75%",
-      minWidth: "1000px",
-      maxWidth: "1440px",
-      margin: "auto",
-    }}>
+  return (
+    <Grid item xs={12} padding="50px" width="75%" minWidth="1000px" maxWidth="1440px !important" margin="auto">
       <Box display="flex" pl="80px" pr="80px">
-        <img src={Image4} style={{
-          width: "387px",
-          height: "553px"
-        }} />
+        <img src={Image4} width={387} height={553} loading="lazy" />
         <Box style={{
           backgroundColor: "#8445C0",
           display: "flex",

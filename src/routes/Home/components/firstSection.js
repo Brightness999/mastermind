@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Box, Typography,  } from '@mui/material';
+import { Grid, Box, Typography } from '@mui/material';
 import DonationButton from './donationButton';
 import Header from './header';
 import SubHeader from './subHeader'
@@ -7,15 +7,7 @@ import Image1 from '../images/image_1.jpg';
 
 const FirstSection = () => {
   return (
-    <Grid item xs={12} style={{ 
-      padding: "50px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      minWidth: "1000px",
-      maxWidth: "1440px",
-      margin: "auto",
-    }}>
+    <Grid item xs={12} padding="50px" display="flex" alignItems="center" justifyContent="space-between" minWidth="1000px" maxWidth="1440px !important" margin="auto">
       <Box display="flex" flexDirection="column" gap="20px">
         <Header text="Give the gift of success." />
         <SubHeader
@@ -27,12 +19,9 @@ const FirstSection = () => {
           <Typography>Donate your services</Typography>
         </Box>
       </Box>
-      <img src={Image1} style={{
-        width: "478px",
-        height: "572px"
-      }} />
+      <img src={Image1} width={478} height={572} loading="lazy" />
     </Grid>
-    
+
   )
 }
 

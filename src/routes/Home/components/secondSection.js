@@ -8,16 +8,7 @@ import Image2 from '../images/image_2.jpg';
 
 const SecondSection = () => {
   return (
-    <Grid item xs={12} style={{
-      padding: "50px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",          
-      width: "75%",
-      minWidth: "1000px",
-      maxWidth: "1440px",
-      margin: "auto",
-    }}>
+    <Grid item xs={12} padding="50px" display="flex" alignItems="center" justifyContent="space-between" width="75%" minWidth="1000px" maxWidth="1440px !important" margin="auto">
       <Box display="flex" flexDirection="column" gap="20px">
         <Caption text="Give the gift of success" />
         <Header text={"Making a child's achievement possible"} style={{ fontSize: "52px" }} />
@@ -34,10 +25,7 @@ const SecondSection = () => {
           alignItems: "center",
           justifyContent: "center"
         }}>
-          <img src={Image2} style={{
-            width: "377px",
-            height: "471px"
-          }} />
+          <img src={Image2} width={377} height={471} loading="lazy" />
         </Box>
       </Box>
     </Grid>
