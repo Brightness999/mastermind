@@ -1,17 +1,17 @@
 import React from 'react';
 import { Link } from 'dva/router';
 import { Row, Form, Button, Input } from 'antd';
-import { routerLinks } from "../../../constant";
 import intl from 'react-intl-universal';
+import Cookies from 'js-cookie';
+import { decode as base64_decode } from 'base-64';
+
+import { routerLinks } from "../../../constant";
 import messages from '../messages';
-import './index.less';
-import { decode as base64_decode, encode as base64_encode } from 'base-64';
 import { getInfoAuth, setUser } from '../../../../redux/features/authSlice';
-import { getAppointmentsData } from "../../../../redux/features/appointmentsSlice"
 import { store } from '../../../../redux/store';
 import request from '../../../../utils/api/request';
 import { userActivate, userLogin } from '../../../../utils/api/apiList';
-import Cookies from 'js-cookie';
+import './index.less';
 
 export default class extends React.Component {
 
@@ -58,9 +58,8 @@ export default class extends React.Component {
 			const { success, data } = response;
 			if (success) {
 				Cookies.set('tk', data.token, { expires: new Date(Date.now() + 10 * 60 * 1000) });
-				store.dispatch(setUser(data.user))
-				store.dispatch(getInfoAuth({ role: data.user.role, token: data.token }));
-				store.dispatch(getAppointmentsData({ role: data.user.role, token: data.token }))
+				store.dispatch(setUser(data.user));
+				store.dispatch(getInfoAuth({ role: data.user.role }));
 				data.user.role > 900 ? this.props.history.push(routerLinks.Admin) : this.props.history.push(routerLinks.Dashboard);
 			}
 		} catch (error) {
