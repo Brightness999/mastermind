@@ -420,19 +420,8 @@
   "components.Notification.error": "Error",
   "components.Notification.warn": "Warn",
   
-  "components.Pages.dontAccess": "Sorry, you don't have access to this page...",
-  "components.Pages.errorCode": "Error code:",
-  "components.Pages.unexpectedMistake": "Pretty, we have an unexpected mistake...",
   "components.Pages.days": "Day",
   "components.Pages.hours": "Hours",
   "components.Pages.minutes": "Minutes",
-  "components.Pages.seconds": "Seconds",
-  "components.Pages.welcomeBack": "Welcome Back",
-  "components.Pages.useUnlock": "Use patterns to unlock",
-  "components.Pages.patternHint": "Pattern hint",
-
-  "components.layout.Closecurrent": "Close current",
-  "components.layout.Closeother": "Close other",
-  "components.layout.Closeall": "Close all",
-  "components.layout.operating": "Operating"
+  "components.Pages.seconds": "Seconds"
 }

@@ -161,7 +161,7 @@ class Dashboard extends React.Component {
               }
               const key = `open${Date.now()}`;
               const btn = (
-                <Button type="primary" size="small" onClick={() => {
+                <Button type="primary" size="middle" onClick={() => {
                   notification.close(key);
                   this.handleCloseNotification(appointment._id);
                 }}>

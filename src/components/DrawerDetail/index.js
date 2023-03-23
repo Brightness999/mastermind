@@ -635,7 +635,6 @@ class DrawerDetail extends Component {
           {event?.flagStatus !== 1 && event?.status === 0 && event?.previousAppointment && (
             <Popover
               content={contentConfirm}
-              className='popup-confirm'
               trigger="click"
             >
               <div className='event-status text-consultation font-20 text-center text-underline cursor'>

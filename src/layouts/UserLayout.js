@@ -1,12 +1,14 @@
 import React from 'react';
 import { Layout } from 'antd';
 import { Switch } from 'dva/router';
-import './styles/user.less';
 import PropTypes from 'prop-types';
-const { Content } = Layout;
+import Cookies from 'js-cookie';
+
 import { checkPermission } from '../utils/auth/checkPermission';
 import { routerLinks } from "../routes/constant";
-import Cookies from 'js-cookie';
+import './styles/user.less';
+
+const { Content } = Layout;
 
 class UserLayout extends React.PureComponent {
   componentDidMount() {

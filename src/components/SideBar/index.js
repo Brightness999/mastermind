@@ -1,4 +1,3 @@
-import './style/index.less';
 import React, { Component } from 'react'
 import { Menu } from 'antd';
 import { FaUsers, FaFileInvoice, FaRegChartBar, FaFlag, FaSchool, FaChild } from 'react-icons/fa';
@@ -6,10 +5,12 @@ import { AiOutlineSchedule } from 'react-icons/ai';
 import { IoSettingsSharp } from 'react-icons/io5';
 import { Link } from 'dva/router';
 import intl from "react-intl-universal";
+
 import { MdContactPhone } from 'react-icons/md';
 import messages from './messages';
 import msgMainHeader from '../MainHeader/messages';
 import { routerLinks } from '../../routes/constant';
+import './style/index.less';
 
 class SideBar extends Component {
   render() {
