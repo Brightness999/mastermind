@@ -414,6 +414,7 @@
   "components.drawerdetail.payInvoice": "Pay Invoice",
   "components.drawerdetail.clearFlag": "Clear Flag",
   "components.drawerdetail.viewInvoice": "View Invoice",
+  "components.drawerdetail.flagDetails": "Flag Details",
     
   "components.Notification.prompt": "Prompt",
   "components.Notification.success": "Success",

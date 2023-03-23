@@ -633,10 +633,7 @@ class DrawerDetail extends Component {
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(msgDashboard.declined)}]</div>
           )}
           {event?.flagStatus !== 1 && event?.status === 0 && event?.previousAppointment && (
-            <Popover
-              content={contentConfirm}
-              trigger="click"
-            >
+            <Popover content={contentConfirm} trigger="click">
               <div className='event-status text-consultation font-20 text-center text-underline cursor'>
                 {intl.formatMessage(msgDashboard.rescheduled)}
               </div>
@@ -697,7 +694,7 @@ class DrawerDetail extends Component {
           {[2, 3, 5].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(msgCreateAccount.rate)}</p>
-              <p className={`font-18 ${(event?.flagStatus === 1 || event?.flagStatus === 2 || (event?.flagStatus === 0 && event?.status === -1)) ? 'text-underline cursor' : ''} ${!event?.isPaid && 'text-red'}`} onClick={() => (event?.flagStatus === 1 || event?.flagStatus === 2 || (event?.flagStatus === 0 && event?.status === -1)) && this.setState({ isModalInvoice: true })}>${event?.items?.length ? event.items?.reduce((a, b) => a += b.rate * 1, 0) : event?.rate}</p>
+              <p className={`font-18 ${event?.status === -1 ? 'text-underline cursor' : ''} ${!event?.isPaid && 'text-red'}`} onClick={() => event?.status === -1 && this.setState({ isModalInvoice: true })}>${event?.items?.length ? event.items?.reduce((a, b) => a += b.rate * 1, 0) : event?.rate}</p>
             </div>
           )}
           {[1, 4].includes(event?.type) && (
@@ -716,48 +713,38 @@ class DrawerDetail extends Component {
             )}
             {event?.flagStatus === 1 ? userRole === 3 ? (
               <div className='flex items-center justify-between gap-2'>
-                {(event?.isPaid || event?.flagItems?.rate == 0) ? (
-                  <Button
-                    type='primary'
-                    block
-                    className='flex-1 h-30 p-0'
-                    onClick={this.onOpenModalCreateNote}
-                  >
+                {(event?.flagItems?.isPaid || event?.flagItems?.rate == 0) ? (
+                  <Button type='primary' block className='flex-1 h-30 p-0' onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
                   </Button>
                 ) : null}
-                {event?.isPaid ? (
-                  <Button
-                    type='primary'
-                    block
-                    className='flex-1 h-30 p-0'
-                    disabled
-                  >
+                {event?.flagItems?.isPaid ? (
+                  <Button type='primary' block className='flex-1 h-30 p-0' disabled>
                     {intl.formatMessage(messages.paid)}
                   </Button>
                 ) : event?.flagItems?.rate == 0 ? null : (
-                  <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                    <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-                    <input type="hidden" name="business" value="office@helpmegethelp.org" />
-                    <input type="hidden" name="cmd" value="_donations" />
-                    <input type="hidden" name="item_name" value="Help Me Get Help" />
-                    <input type="hidden" name="item_number" />
-                    <input type="hidden" name="amount" value={event?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-                    <input type="hidden" name="shipping" value="0.00" />
-                    <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-                    <input type="hidden" name="rm" value="0" />
-                    <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${event?._id}`} />
-                    <input type="hidden" name="cancel_return" value={window.location.href} />
-                    <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                    <Button
-                      type='primary'
-                      block
-                      className='h-30 p-0'
-                      htmlType='submit'
-                    >
-                      {intl.formatMessage(messages.payFlag)}
+                  <div className='flex gap-2 w-100'>
+                    <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagItems?.flagType === 1 ? this.onShowModalBalance() : event?.flagItems?.flagType === 2 ? this.onShowModalNoShow() : {}}>
+                      {intl.formatMessage(messages.flagDetails)}
                     </Button>
-                  </form>
+                    <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                      <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+                      <input type="hidden" name="business" value="office@helpmegethelp.org" />
+                      <input type="hidden" name="cmd" value="_donations" />
+                      <input type="hidden" name="item_name" value="Help Me Get Help" />
+                      <input type="hidden" name="item_number" />
+                      <input type="hidden" name="amount" value={event?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                      <input type="hidden" name="shipping" value="0.00" />
+                      <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+                      <input type="hidden" name="rm" value="0" />
+                      <input type="hidden" name="return" value={`${window.location.href}?success=true&type=flag&id=${event?._id}`} />
+                      <input type="hidden" name="cancel_return" value={window.location.href} />
+                      <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+                      <Button type='primary' block className='h-30 p-0' htmlType='submit'>
+                        {intl.formatMessage(messages.payFlag)}
+                      </Button>
+                    </form>
+                  </div>
                 )}
               </div>
             ) : userRole === 30 ? (
@@ -768,58 +755,44 @@ class DrawerDetail extends Component {
                 cancelText="No"
                 overlayClassName='clear-flag-confirm'
               >
-                <Button
-                  type='primary'
-                  block
-                  className='h-30 p-0'
-                >
+                <Button type='primary' block className='h-30 p-0'>
                   {intl.formatMessage(messages.clearFlag)}
                 </Button>
               </Popconfirm>
             ) : (
               <div className='flex items-center justify-between gap-2'>
-                {(event?.isPaid || event?.flagItems?.rate == 0) ? (
-                  <Button
-                    type='primary'
-                    block
-                    className='flex-1 h-30 p-0 px-5'
-                    onClick={this.onOpenModalCreateNote}
-                  >
+                {(event?.flagItems?.isPaid || event?.flagItems?.rate == 0) ? (
+                  <Button type='primary' block className='flex-1 h-30 p-0 px-5' onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
                   </Button>
                 ) : null}
-                {event?.isPaid ? (
-                  <Button
-                    type='primary'
-                    block
-                    className='flex-1 h-30 p-0'
-                    disabled
-                  >
+                {event?.flagItems?.isPaid ? (
+                  <Button type='primary' block className='flex-1 h-30 p-0' disabled>
                     {intl.formatMessage(messages.paid)}
                   </Button>
                 ) : event?.flagItems?.rate == 0 ? null : (
-                  <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                    <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-                    <input type="hidden" name="business" value="office@helpmegethelp.org" />
-                    <input type="hidden" name="cmd" value="_donations" />
-                    <input type="hidden" name="item_name" value="Help Me Get Help" />
-                    <input type="hidden" name="item_number" />
-                    <input type="hidden" name="amount" value={event?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-                    <input type="hidden" name="shipping" value="0.00" />
-                    <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-                    <input type="hidden" name="rm" value="0" />
-                    <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${event?._id}`} />
-                    <input type="hidden" name="cancel_return" value={window.location.href} />
-                    <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                    <Button
-                      type='primary'
-                      block
-                      className='h-30 p-0'
-                      htmlType='submit'
-                    >
-                      {intl.formatMessage(messages.payFlag)}
+                  <div className='flex gap-2 w-100'>
+                    <Button type='primary' className='flex-1 h-30 p-0' onClick={() => this.setState({ isModalInvoice: true })}>
+                      {intl.formatMessage(messages.flagDetails)}
                     </Button>
-                  </form>
+                    <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                      <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+                      <input type="hidden" name="business" value="office@helpmegethelp.org" />
+                      <input type="hidden" name="cmd" value="_donations" />
+                      <input type="hidden" name="item_name" value="Help Me Get Help" />
+                      <input type="hidden" name="item_number" />
+                      <input type="hidden" name="amount" value={event?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                      <input type="hidden" name="shipping" value="0.00" />
+                      <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+                      <input type="hidden" name="rm" value="0" />
+                      <input type="hidden" name="return" value={`${window.location.href}?success=true&type=flag&id=${event?._id}`} />
+                      <input type="hidden" name="cancel_return" value={window.location.href} />
+                      <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+                      <Button type='primary' block className='h-30 p-0' htmlType='submit'>
+                        {intl.formatMessage(messages.payFlag)}
+                      </Button>
+                    </form>
+                  </div>
                 )}
                 <Popconfirm
                   title="Are you sure to clear this flag?"
@@ -828,11 +801,7 @@ class DrawerDetail extends Component {
                   cancelText="No"
                   overlayClassName='clear-flag-confirm'
                 >
-                  <Button
-                    type='primary'
-                    block
-                    className='flex-1 h-30 p-0'
-                  >
+                  <Button type='primary' block className='flex-1 h-30 p-0'>
                     {intl.formatMessage(messages.clearFlag)}
                   </Button>
                 </Popconfirm>
@@ -844,20 +813,10 @@ class DrawerDetail extends Component {
             <Input.TextArea rows={5} className="appointment-note" disabled={!isShowEditNotes} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />
             {isShowEditNotes && (
               <div className='flex gap-2 mt-10'>
-                <Button
-                  type='primary'
-                  block
-                  onClick={this.handleUpdateNotes}
-                  className='h-30 p-0'
-                >
+                <Button type='primary' block onClick={this.handleUpdateNotes} className='h-30 p-0'>
                   {intl.formatMessage(msgModal.save)}
                 </Button>
-                <Button
-                  type='primary'
-                  block
-                  onClick={this.hideEditNotes}
-                  className='h-30 p-0'
-                >
+                <Button type='primary' block onClick={this.hideEditNotes} className='h-30 p-0'>
                   {intl.formatMessage(messages.cancel)}
                 </Button>
               </div>
@@ -872,22 +831,12 @@ class DrawerDetail extends Component {
               {isShowFeedback && (
                 <Row gutter={15} className="mt-10">
                   <Col span={12}>
-                    <Button
-                      type='primary'
-                      block
-                      onClick={this.handleLeaveFeedback}
-                      className='h-30 p-0'
-                    >
+                    <Button type='primary' block onClick={this.handleLeaveFeedback} className='h-30 p-0'>
                       {intl.formatMessage(msgModal.save)}
                     </Button>
                   </Col>
                   <Col span={12}>
-                    <Button
-                      type='primary'
-                      block
-                      onClick={this.hideFeedback}
-                      className='h-30 p-0'
-                    >
+                    <Button type='primary' block onClick={this.hideFeedback} className='h-30 p-0'>
                       {intl.formatMessage(messages.cancel)}
                     </Button>
                   </Col>
@@ -897,39 +846,21 @@ class DrawerDetail extends Component {
             <Row gutter={15} className='list-btn-detail'>
               {event?.type === 1 && event?.status === 0 && userRole > 3 && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<BsCheckCircle size={15} />}
-                    block
-                    onClick={() => this.openModalProcess()}
-                    className='flex items-center gap-2 h-30'
-                  >
+                  <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={() => this.openModalProcess()} className='flex items-center gap-2 h-30'>
                     {intl.formatMessage(messages.markClosed)}
                   </Button>
                 </Col>
               )}
               {[2, 4].includes(event?.type) && event?.status === 0 && userRole > 3 && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<BsCheckCircle size={15} />}
-                    block
-                    onClick={() => event.type === 2 ? this.openModalProcess() : this.handleMarkAsClosed()}
-                    className='flex items-center gap-2 h-30'
-                  >
+                  <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={() => event.type === 2 ? this.openModalProcess() : this.handleMarkAsClosed()} className='flex items-center gap-2 h-30'>
                     {intl.formatMessage(messages.markClosed)}
                   </Button>
                 </Col>
               )}
               {[3, 5].includes(event?.type) && event?.status === 0 && userRole > 3 && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<BsCheckCircle size={15} />}
-                    block
-                    onClick={() => this.onOpenModalInvoice()}
-                    className='flex items-center gap-2 h-30'
-                  >
+                  <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={() => this.onOpenModalInvoice()} className='flex items-center gap-2 h-30'>
                     {intl.formatMessage(messages.markClosed)}
                   </Button>
                 </Col>
@@ -946,7 +877,7 @@ class DrawerDetail extends Component {
                     <input type="hidden" name="shipping" value="0.00" />
                     <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                     <input type="hidden" name="rm" value="0" />
-                    <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${event?._id}`} />
+                    <input type="hidden" name="return" value={`${window.location.href}?success=true&type=session&id=${event?._id}`} />
                     <input type="hidden" name="cancel_return" value={window.location.href} />
                     <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
                     <Button type='primary' icon={<BsPaypal size={15} color="#fff" />} block htmlType='submit'>
@@ -957,72 +888,42 @@ class DrawerDetail extends Component {
               )}
               {[2, 3, 5].includes(event?.type) && event?.status === -1 && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<ImPencil size={12} />}
-                    block
-                    onClick={this.onOpenModalInvoice}
-                  >
+                  <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.onOpenModalInvoice}>
                     {intl.formatMessage(messages.viewInvoice)}
                   </Button>
                 </Col>
               )}
               {((userRole === 30 || userRole > 900) && event?.status === -3 && event?.type === 1) && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<BsCheckCircle size={15} />}
-                    block
-                    onClick={this.handleAcceptDeclinedScreening}
-                  >
+                  <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={this.handleAcceptDeclinedScreening}>
                     {intl.formatMessage(msgModal.accept)}
                   </Button>
                 </Col>
               )}
               {(userRole === 3 && event?.status === -3 && [2, 3, 5].includes(event?.type)) && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<TbSend size={12} />}
-                    block
-                    onClick={this.openModalMessage}
-                  >
+                  <Button type='primary' icon={<TbSend size={12} />} block onClick={this.openModalMessage}>
                     {intl.formatMessage(msgModal.appeal)}
                   </Button>
                 </Col>
               )}
               {(userRole !== 3 && !isShowFeedback && ![0, -2].includes(event?.status)) && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<ImPencil size={12} />}
-                    block
-                    onClick={this.showFeedback}
-                  >
+                  <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.showFeedback}>
                     {intl.formatMessage(messages.leaveFeedback)}
                   </Button>
                 </Col>
               )}
               {(userRole === 3 && ![0, -2].includes(event?.status) && !isLeftFeedback) && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<ImPencil size={12} />}
-                    block
-                    onClick={this.handleRequestFeedback}
-                  >
+                  <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.handleRequestFeedback}>
                     {intl.formatMessage(messages.requestFeedback)}
                   </Button>
                 </Col>
               )}
               {(event?.status === 0 && moment().isBefore(moment(event?.date))) && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<BsClockHistory size={15} />}
-                    block
-                    onClick={this.openModalCurrent}
-                  >
+                  <Button type='primary' icon={<BsClockHistory size={15} />} block onClick={this.openModalCurrent}>
                     {intl.formatMessage(messages.reschedule)}
                   </Button>
                 </Col>
@@ -1045,47 +946,28 @@ class DrawerDetail extends Component {
               )}
               {event?.status === 0 && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<BsXCircle size={15} />}
-                    block
-                    onClick={this.openModalCancel}
-                  >
+                  <Button type='primary' icon={<BsXCircle size={15} />} block onClick={this.openModalCancel}>
                     {intl.formatMessage(msgModal.cancel)}
                   </Button>
                 </Col>
               )}
               {(userRole === 3 && [2, 3, 5].includes(event?.type) && event?.status === -1 && event?.flagStatus === 0) && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<FaFileContract size={12} />}
-                    block
-                  >
+                  <Button type='primary' icon={<FaFileContract size={12} />} block >
                     {intl.formatMessage(messages.requestInvoice)}
                   </Button>
                 </Col>
               )}
               {(userRole === 3 && [2, 3, 5].includes(event?.type) && event?.flagStatus === 1 && (event?.isPaid || event?.flagItems?.rate == 0)) && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<FaFileContract size={12} />}
-                    block
-                    onClick={this.onOpenModalCreateNote}
-                  >
+                  <Button type='primary' icon={<FaFileContract size={12} />} block onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
                   </Button>
                 </Col>
               )}
               {((userRole === 3 || userRole > 900) && event?.status === 0) && (
                 <Col span={12}>
-                  <Button
-                    type='primary'
-                    icon={<ImPencil size={12} />}
-                    block
-                    onClick={this.showEditNotes}
-                  >
+                  <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.showEditNotes}>
                     {intl.formatMessage(messages.editNotes)}
                   </Button>
                 </Col>

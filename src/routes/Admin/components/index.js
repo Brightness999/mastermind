@@ -88,7 +88,8 @@ class SchedulingCenter extends React.Component {
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true' && params.get('id')) {
       const appointmentId = params.get('id');
-      request.post(payInvoice, { id: appointmentId }).then(res => {
+      const type = params.get('type');
+      request.post(payInvoice, { id: appointmentId, type }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
           window.location.search = '';
@@ -1051,10 +1052,10 @@ class SchedulingCenter extends React.Component {
         {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
         <Modal title="Flag Action" open={visibleFlagAction} footer={null} onCancel={this.closeFlagAction}>
           <div className='flex items-center gap-2'>
-            {(selectedEvent?.isPaid || selectedEvent?.flagItems?.rate == 0) ? (
+            {(selectedEvent?.flagItems?.isPaid || selectedEvent?.flagItems?.rate == 0) ? (
               <Button type='primary' block className='font-16 flag-action whitespace-nowrap' onClick={() => this.onOpenModalCreateNote()}>{intl.formatMessage(msgDrawer.requestClearance)}</Button>
             ) : null}
-            {selectedEvent?.isPaid ? (
+            {selectedEvent?.flagItems?.isPaid ? (
               <Button type='primary' block className='font-16 flag-action whitespace-nowrap' disabled>
                 {intl.formatMessage(msgDrawer.paid)}
               </Button>
@@ -1069,10 +1070,12 @@ class SchedulingCenter extends React.Component {
                 <input type="hidden" name="shipping" value="0.00" />
                 <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                 <input type="hidden" name="rm" value="0" />
-                <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${selectedEvent?._id}`} />
+                <input type="hidden" name="return" value={`${window.location.href}?success=true&type=flag&id=${selectedEvent?._id}`} />
                 <input type="hidden" name="cancel_return" value={window.location.href} />
                 <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                <Button type='primary' htmlType='submit' block className='font-16 flag-action whitespace-nowrap'>{intl.formatMessage(msgDrawer.payFlag)}</Button>
+                <Button type='primary' htmlType='submit' block className='font-16 flag-action whitespace-nowrap'>
+                  {intl.formatMessage(msgDrawer.payFlag)}
+                </Button>
               </form>
             )}
             <Button type='primary' block className='font-16 flag-action whitespace-nowrap' onClick={() => this.onOpenModalConfirm()}>{intl.formatMessage(msgDrawer.clearFlag)}</Button>

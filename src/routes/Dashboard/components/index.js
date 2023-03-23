@@ -93,7 +93,8 @@ class Dashboard extends React.Component {
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true' && params.get('id')) {
       const appointmentId = params.get('id');
-      request.post(payInvoice, { id: appointmentId }).then(res => {
+      const type = params.get('type');
+      request.post(payInvoice, { id: appointmentId, type }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
           window.location.search = '';
@@ -1205,10 +1206,10 @@ class Dashboard extends React.Component {
                             </div>
                             {userRole == 3 ? (
                               <>
-                                {(appointment?.isPaid || appointment?.flagItems?.rate == 0) ? (
+                                {(appointment?.flagItems?.isPaid || appointment?.flagItems?.rate == 0) ? (
                                   <a className='font-12 flag-action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
                                 ) : null}
-                                {appointment?.isPaid ? 'Paid' : appointment?.flagItems?.rate == 0 ? null : (
+                                {appointment?.flagItems?.isPaid ? 'Paid' : appointment?.flagItems?.rate == 0 ? null : (
                                   <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                                     <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                                     <input type="hidden" name="business" value="office@helpmegethelp.org" />
@@ -1219,7 +1220,7 @@ class Dashboard extends React.Component {
                                     <input type="hidden" name="shipping" value="0.00" />
                                     <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                                     <input type="hidden" name="rm" value="0" />
-                                    <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${appointment?._id}`} />
+                                    <input type="hidden" name="return" value={`${window.location.href}?success=true&type=flag&id=${appointment?._id}`} />
                                     <input type="hidden" name="cancel_return" value={window.location.href} />
                                     <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
                                     <button className='font-12 flag-action pay-flag-button'>
