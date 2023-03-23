@@ -760,7 +760,7 @@ class DrawerDetail extends Component {
                 </Button>
               </Popconfirm>
             ) : (
-              <div className='flex items-center justify-between gap-2'>
+              <div className='flex items-center justify-between gap-2 flex-2'>
                 {(event?.flagItems?.isPaid || event?.flagItems?.rate == 0) ? (
                   <Button type='primary' block className='flex-1 h-30 p-0 px-5' onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
