@@ -19,6 +19,9 @@ class InfoNotification extends React.Component {
 			isRescheduleSessionEmail: false,
 			isRescheduleSessionPush: false,
 			isRescheduleSessionText: false,
+			isCloseSessionEmail: false,
+			isCloseSessionPush: false,
+			isCloseSessionText: false,
 			isSessionReminderEmail: false,
 			isSessionReminderPush: false,
 			isSessionReminderText: false,
@@ -48,6 +51,9 @@ class InfoNotification extends React.Component {
 			isRescheduleSessionEmail: this.props.user.notificationSetting?.isRescheduleSessionEmail,
 			isRescheduleSessionPush: this.props.user.notificationSetting?.isRescheduleSessionPush,
 			isRescheduleSessionText: this.props.user.notificationSetting?.isRescheduleSessionText,
+			isCloseSessionEmail: this.props.user.notificationSetting?.isCloseSessionEmail,
+			isCloseSessionPush: this.props.user.notificationSetting?.isCloseSessionPush,
+			isCloseSessionText: this.props.user.notificationSetting?.isCloseSessionText,
 			isSessionReminderEmail: this.props.user.notificationSetting?.isSessionReminderEmail,
 			isSessionReminderPush: this.props.user.notificationSetting?.isSessionReminderPush,
 			isSessionReminderText: this.props.user.notificationSetting?.isSessionReminderText,
@@ -76,6 +82,9 @@ class InfoNotification extends React.Component {
 			isRescheduleSessionEmail: this.state.isRescheduleSessionEmail,
 			isRescheduleSessionPush: this.state.isRescheduleSessionPush,
 			isRescheduleSessionText: this.state.isRescheduleSessionText,
+			isCloseSessionEmail: this.state.isCloseSessionEmail,
+			isCloseSessionPush: this.state.isCloseSessionPush,
+			isCloseSessionText: this.state.isCloseSessionText,
 			isSessionReminderEmail: this.state.isSessionReminderEmail,
 			isSessionReminderPush: this.state.isSessionReminderPush,
 			isSessionReminderText: this.state.isSessionReminderText,
@@ -107,6 +116,9 @@ class InfoNotification extends React.Component {
 				isRescheduleSessionEmail: this.state.isRescheduleSessionEmail,
 				isRescheduleSessionPush: this.state.isRescheduleSessionPush,
 				isRescheduleSessionText: this.state.isRescheduleSessionText,
+				isCloseSessionEmail: this.state.isCloseSessionEmail,
+				isCloseSessionPush: this.state.isCloseSessionPush,
+				isCloseSessionText: this.state.isCloseSessionText,
 				isSessionReminderEmail: this.state.isSessionReminderEmail,
 				isSessionReminderPush: this.state.isSessionReminderPush,
 				isSessionReminderText: this.state.isSessionReminderText,
@@ -144,6 +156,9 @@ class InfoNotification extends React.Component {
 			isRescheduleSessionEmail,
 			isRescheduleSessionPush,
 			isRescheduleSessionText,
+			isCloseSessionEmail,
+			isCloseSessionPush,
+			isCloseSessionText,
 			isSessionReminderEmail,
 			isSessionReminderPush,
 			isSessionReminderText,
@@ -198,6 +213,12 @@ class InfoNotification extends React.Component {
 										<td><div className='text-center'><Switch checked={isRescheduleSessionEmail} onChange={v => this.setState({ isRescheduleSessionEmail: v })} /></div></td>
 										<td><div className='text-center'><Switch checked={isRescheduleSessionText} onChange={v => this.setState({ isRescheduleSessionText: v })} /></div></td>
 										<td><div className='text-center'><Switch checked={isRescheduleSessionPush} onChange={v => this.setState({ isRescheduleSessionPush: v })} /></div></td>
+									</tr>
+									<tr>
+										<td>Close Session</td>
+										<td><div className='text-center'><Switch checked={isCloseSessionEmail} onChange={v => this.setState({ isCloseSessionEmail: v })} /></div></td>
+										<td><div className='text-center'><Switch checked={isCloseSessionText} onChange={v => this.setState({ isCloseSessionText: v })} /></div></td>
+										<td><div className='text-center'><Switch checked={isCloseSessionPush} onChange={v => this.setState({ isCloseSessionPush: v })} /></div></td>
 									</tr>
 									<tr>
 										<td>Cancel Session</td>
