@@ -17,7 +17,7 @@ import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, clearFlag, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, clearFlag, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, remindSession, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -433,6 +433,11 @@ class DrawerDetail extends Component {
     })
   }
 
+  handleSessionReminder = () => {
+    request.post(remindSession, { appointmentId: this.props.event?._id })
+      .catch(err => { message.error(err); console.log(err) });
+  }
+
   render() {
     const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage, visibleCurrentScreen, visibleCreateNote } = this.state;
     const { event, listAppointmentsRecent } = this.props;
@@ -611,7 +616,7 @@ class DrawerDetail extends Component {
         onClose={() => this.props.onClose()}
         open={this.props.visible}
         extra={
-          <Button type='text' icon={<BsBell size={18} />} />
+          <Button type='text' icon={<BsBell size={18} onClick={() => this.handleSessionReminder()} />} />
         }
       >
         <div>
