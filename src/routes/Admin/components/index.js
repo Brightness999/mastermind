@@ -31,6 +31,7 @@ import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../..
 import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
 import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
+import PanelSubsidaries from './PanelSubsidaries';
 import PageLoading from '../../../components/Loading/PageLoading';
 import './index.less';
 
@@ -206,9 +207,6 @@ class SchedulingCenter extends React.Component {
     switch (data.key) {
       case 'new_appoint_from_client':
         this.setState({ providerDrawervisible: true, });
-        return;
-      case 'new_subsidy_request_from_client':
-        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
         return;
       case 'new_subsidy_request_from_client':
         this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
@@ -1031,6 +1029,27 @@ class SchedulingCenter extends React.Component {
                     )}
                   </Tabs.TabPane>
                 </Tabs>
+              </Panel>
+              <Panel
+                key="6"
+                header={intl.formatMessage(messages.subsidaries)}
+                extra={(
+                  <div className='flex flex-row justify-between'>
+                    <Button type='primary' size='small' onClick={this.onShowModalNewSubsidy}>
+                      {intl.formatMessage(messages.requestNewSubsidy).toUpperCase()}
+                    </Button>
+                  </div>
+                )}
+                className='subsidaries-panel'
+                collapsible='header'
+              >
+                <PanelSubsidaries
+                  setReload={reload => this.panelSubsidariesReload = reload}
+                  userRole={userRole}
+                  SkillSet={SkillSet}
+                  onShowModalSubsidyDetail={this.onShowModalSubsidy}
+                  onCancelSubsidy={this.onCancelSubsidy}
+                />
               </Panel>
             </Collapse>
           </section>
