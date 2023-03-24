@@ -271,7 +271,13 @@ class ModalFlagExpand extends React.Component {
 				)
 			});
 		} else if (user.role > 900) {
-			columns.splice(4, 0, {
+			columns.splice(1, 0, {
+				title: 'Provider',
+				key: 'provider',
+				sorter: (a, b) => a.provider?.firstName + a.provider?.lastName > b.provider?.firstName + b.provider?.lastName ? 1 : -1,
+				render: (appointment) => `${appointment?.provider.firstName ?? ''} ${appointment?.provider.lastName ?? ''}`,
+			});
+			columns.splice(5, 0, {
 				title: 'Action', key: 'action', render: (appointment) => (
 					<Space size="small">
 						{(appointment?.flagItems?.isPaid || appointment?.flagItems?.rate == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
