@@ -629,7 +629,7 @@ class DrawerDetail extends Component {
         onClose={() => this.props.onClose()}
         open={this.props.visible}
         extra={
-          <Button type='text' icon={<Popover trigger="click" content={(
+          <Button type='text' icon={<Popover placement="bottomLeft" overlayClassName='notification-time' trigger="click" content={(
             <Radio.Group onChange={e => this.handleSessionReminder(e.target.value)} value={notificationTime} className="box-card p-10 bg-pastel">
               <Space direction="vertical">
                 <Radio value={15} className="nobr">15 min</Radio>
