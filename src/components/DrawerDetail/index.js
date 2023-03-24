@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Typography, Popover, Input, message, Popconfirm } from 'antd';
+import { Drawer, Button, Row, Col, Typography, Popover, Input, message, Popconfirm, Radio, Space } from 'antd';
 import { BsBell, BsCheckCircle, BsClockHistory, BsFillFlagFill, BsPaypal, BsXCircle } from 'react-icons/bs';
 import { BiDollarCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
@@ -17,7 +17,7 @@ import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, clearFlag, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, remindSession, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, clearFlag, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setNotificationTime, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -49,7 +49,18 @@ class DrawerDetail extends Component {
       visibleModalMessage: false,
       visibleCurrentScreen: false,
       visibleCreateNote: false,
+      notificationTime: 1440,
     };
+  }
+
+  componentDidMount() {
+    if (this.state.userRole === 3) {
+      this.setState({ notificationTime: this.props.event?.parentNotificationTime });
+    }
+
+    if (this.state.userRole === 30) {
+      this.setState({ notificationTime: this.props.event?.providerNotificationTime });
+    }
   }
 
   handleProviderHoverChange = (visible) => {
@@ -433,13 +444,15 @@ class DrawerDetail extends Component {
     })
   }
 
-  handleSessionReminder = () => {
-    request.post(remindSession, { appointmentId: this.props.event?._id })
-      .catch(err => { message.error(err); console.log(err) });
+  handleSessionReminder = (time) => {
+    this.setState({ notificationTime: time });
+    request.post(setNotificationTime, { appointmentId: this.props.event?._id, time })
+      .then(res => { res.success && message.success("Updated successfully"); this.updateAppointments(); })
+      .catch(err => { console.log(err); message.error(err.message); });
   }
 
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage, visibleCurrentScreen, visibleCreateNote } = this.state;
+    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage, visibleCurrentScreen, visibleCreateNote, notificationTime } = this.state;
     const { event, listAppointmentsRecent } = this.props;
 
     const providerProfile = (
@@ -616,7 +629,15 @@ class DrawerDetail extends Component {
         onClose={() => this.props.onClose()}
         open={this.props.visible}
         extra={
-          <Button type='text' icon={<BsBell size={18} onClick={() => this.handleSessionReminder()} />} />
+          <Button type='text' icon={<Popover trigger="click" content={(
+            <Radio.Group onChange={e => this.handleSessionReminder(e.target.value)} value={notificationTime} className="box-card p-10 bg-pastel">
+              <Space direction="vertical">
+                <Radio value={15} className="nobr">15 min</Radio>
+                <Radio value={30} className="nobr">30 min</Radio>
+                <Radio value={60} className="nobr">1 hr</Radio>
+              </Space>
+            </Radio.Group>
+          )}><BsBell size={18} /></Popover>} />
         }
       >
         <div>
