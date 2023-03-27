@@ -135,7 +135,7 @@ class ConsultantAvailability extends Component {
 			case intl.formatMessage(messages.wednesday): return 3;
 			case intl.formatMessage(messages.thursday): return 4;
 			case intl.formatMessage(messages.friday): return 5;
-			case intl.formatMessage(messages.friday): return 6;
+			case intl.formatMessage(messages.saturday): return 6;
 			default: return -1;
 		}
 	}
