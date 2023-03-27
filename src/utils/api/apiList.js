@@ -41,6 +41,9 @@ export const getAppointmentsInMonthForConsultant = 'consultants/get_my_appointme
 export const getMyConsultantInfo = 'consultants/get_my_consultant_info'
 export const updateConsultantInfo = 'consultants/update_consultant_info'
 export const updateConsultantAvailability = 'consultants/update_consultant_availability'
+export const claimConsultation = 'consultants/claim_consultation'
+export const switchConsultation = 'consultants/switch_consultation'
+export const removeConsultation = 'consultants/remove_consultation'
 
 export const getCommunitiServer = 'schools/get_list_communites'
 export const getSchoolInfos = 'schools/get_school_infos'

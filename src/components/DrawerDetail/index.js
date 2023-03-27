@@ -5,9 +5,12 @@ import { BiDollarCircle } from 'react-icons/bi';
 import { FaFileContract } from 'react-icons/fa';
 import { ImPencil } from 'react-icons/im';
 import { TbSend } from 'react-icons/tb';
-import { MdOutlineEventBusy, MdOutlineRequestQuote } from 'react-icons/md';
+import { MdOutlineEventBusy, MdOutlineRemove, MdOutlineRequestQuote } from 'react-icons/md';
 import intl from "react-intl-universal";
 import moment from 'moment';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import { AiFillTag, AiOutlineUserSwitch } from 'react-icons/ai';
 
 import { ModalBalance, ModalCancelAppointment, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
 import messages from './messages';
@@ -15,9 +18,8 @@ import msgModal from '../Modal/messages';
 import msgDashboard from '../../routes/Dashboard/messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
-import { store } from '../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, clearFlag, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setNotificationTime, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setNotificationTime, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -37,7 +39,7 @@ class DrawerDetail extends Component {
       publicFeedback: this.props.event?.publicFeedback ?? '',
       isLeftFeedback: !!this.props.event?.publicFeedback,
       isShowFeedback: false,
-      userRole: store.getState().auth.user?.role,
+      userRole: this.props.auth.user?.role,
       visibleProcess: false,
       visibleCurrentReferral: false,
       visibleNoShow: false,
@@ -278,7 +280,7 @@ class DrawerDetail extends Component {
 
   updateAppointments() {
     const { userRole } = this.state;
-    store.dispatch(getAppointmentsData({ role: userRole }));
+    this.props.getAppointmentsData({ role: userRole });
     const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
     const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
     const dataFetchAppointMonth = {
@@ -288,7 +290,7 @@ class DrawerDetail extends Component {
         year: year
       }
     };
-    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+    this.props.getAppointmentsMonthData(dataFetchAppointMonth);
   }
 
   openModalProcess() {
@@ -451,9 +453,47 @@ class DrawerDetail extends Component {
       .catch(err => { console.log(err); message.error(err.message); });
   }
 
+  handleTag = () => {
+    const { auth, event, listAppointmentsRecent } = this.props;
+
+    if (listAppointmentsRecent?.find(a => a?.consultant?._id === auth.user?.consultantInfo?._id && a.date === event?.date)) {
+      message.warning("You already scheduled at this event time.");
+    } else {
+      const appointmentDate = moment(event?.date);
+      const ranges = auth.user?.consultantInfo?.manualSchedule?.filter(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+
+      if (ranges?.length) {
+        request.post(claimConsultation, { appointmentId: this.props.event?._id })
+          .then(res => {
+            if (res.success) {
+              if (res.data.message) {
+                message.warning(res.data.message);
+              } else {
+                message.success("Claimed successfully");
+              }
+            }
+            this.updateAppointments();
+          })
+          .catch(err => { message.error(err.message); console.log(err) });
+      } else {
+        message.warning("You are not available at this event time.");
+      }
+    }
+  }
+
+  handleSwitchTag = () => {
+
+  }
+
+  handleRemoveTag = () => {
+    request.post(removeConsultation, { appointmentId: this.props.event?._id })
+      .then(res => { res.success && this.updateAppointments(); message.success("Removed successfully"); })
+      .catch(err => { message.error(err.message); console.log(err) });
+  }
+
   render() {
     const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage, visibleCurrentScreen, visibleCreateNote, notificationTime } = this.state;
-    const { event, listAppointmentsRecent } = this.props;
+    const { event, listAppointmentsRecent, auth } = this.props;
 
     const providerProfile = (
       <div className='provider-profile'>
@@ -624,7 +664,7 @@ class DrawerDetail extends Component {
 
     return (
       <Drawer
-        title={event?.type === 1 ? intl.formatMessage(messages.screeningDetails) : event?.type === 2 ? intl.formatMessage(messages.evaluationDetails) : event?.type === 3 ? intl.formatMessage(messages.appointmentDetails) : intl.formatMessage(messages.consultationDetails)}
+        title={event?.type === 1 ? intl.formatMessage(messages.screeningDetails) : event?.type === 2 ? intl.formatMessage(messages.evaluationDetails) : event?.type === 4 ? intl.formatMessage(messages.consultationDetails) : intl.formatMessage(messages.appointmentDetails)}
         closable={true}
         onClose={() => this.props.onClose()}
         open={this.props.visible}
@@ -646,6 +686,9 @@ class DrawerDetail extends Component {
           )}
           {event?.flagStatus === 1 && event?.flagItems?.flagType === 2 && (
             <div className='text-center'><MdOutlineEventBusy color="#ff0000" size={32} /></div>
+          )}
+          {event?.flagStatus !== 1 && event?.type === 4 && event?.status === 0 && event?.consultant?._id && event.consultant?._id !== auth.user?.consultantInfo?._id && (
+            <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.claimed)}]</div>
           )}
           {event?.flagStatus !== 1 && event?.status === -1 && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.accepted)}]</div>
@@ -870,6 +913,13 @@ class DrawerDetail extends Component {
               )}
             </div>
             <Row gutter={15} className='list-btn-detail'>
+              {event?.type === 4 && event?.status === 0 && moment().isBefore(moment(event?.date)) && !event?.consultant?._id && userRole === 100 && (
+                <Col span={12}>
+                  <Button type='primary' icon={<AiFillTag size={15} />} block onClick={this.handleTag} className='flex items-center gap-2 h-30'>
+                    {intl.formatMessage(messages.tag)}
+                  </Button>
+                </Col>
+              )}
               {event?.type === 1 && event?.status === 0 && userRole > 3 && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={() => this.openModalProcess()} className='flex items-center gap-2 h-30'>
@@ -877,11 +927,20 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {[2, 4].includes(event?.type) && event?.status === 0 && userRole > 3 && (
+              {event.type === 2 && event?.status === 0 && userRole > 3 && (
                 <Col span={12}>
-                  <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={() => event.type === 2 ? this.openModalProcess() : this.handleMarkAsClosed()} className='flex items-center gap-2 h-30'>
+                  <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={() => this.openModalProcess()} className='flex items-center gap-2 h-30'>
                     {intl.formatMessage(messages.markClosed)}
                   </Button>
+                </Col>
+              )}
+              {event?.type === 4 && event?.status === 0 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900) && (
+                <Col span={12}>
+                  <Popconfirm trigger="click" title="Are you sure to close this consultation?" overlayClassName='consultant' onConfirm={this.handleMarkAsClosed}>
+                    <Button type='primary' icon={<BsCheckCircle size={15} />} block className='flex items-center gap-2 h-30'>
+                      {intl.formatMessage(messages.markClosed)}
+                    </Button>
+                  </Popconfirm>
                 </Col>
               )}
               {[3, 5].includes(event?.type) && event?.status === 0 && userRole > 3 && (
@@ -933,7 +992,14 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(userRole !== 3 && !isShowFeedback && ![0, -2].includes(event?.status)) && (
+              {(userRole !== 3 && !isShowFeedback && [-1, -3].includes(event?.status) && event?.type !== 4) && (
+                <Col span={12}>
+                  <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.showFeedback}>
+                    {intl.formatMessage(messages.leaveFeedback)}
+                  </Button>
+                </Col>
+              )}
+              {(!isShowFeedback && [-1, -3].includes(event?.status) && event?.type === 4 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
                 <Col span={12}>
                   <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.showFeedback}>
                     {intl.formatMessage(messages.leaveFeedback)}
@@ -947,10 +1013,31 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(event?.status === 0 && moment().isBefore(moment(event?.date))) && (
+              {(event?.status === 0 && moment().isBefore(moment(event?.date)) && event?.type !== 4) && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsClockHistory size={15} />} block onClick={this.openModalCurrent}>
                     {intl.formatMessage(messages.reschedule)}
+                  </Button>
+                </Col>
+              )}
+              {(event?.status === 0 && moment().isBefore(moment(event?.date)) && event?.type === 4 && (userRole === 3 || userRole > 900 || (userRole === 100) && event?.consultant?._id && event?.consultant?._id === auth.user?.consultantInfo?._id)) && (
+                <Col span={12}>
+                  <Button type='primary' icon={<BsClockHistory size={15} />} block onClick={this.openModalCurrent}>
+                    {intl.formatMessage(messages.reschedule)}
+                  </Button>
+                </Col>
+              )}
+              {(event?.status === 0 && moment().isBefore(moment(event?.date)) && event?.type === 4 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
+                <Col span={12}>
+                  <Button type='primary' icon={<AiOutlineUserSwitch size={15} />} block onClick={this.handleSwitchTag}>
+                    {intl.formatMessage(messages.switchTag)}
+                  </Button>
+                </Col>
+              )}
+              {(event?.status === 0 && moment().isBefore(moment(event?.date)) && event?.type === 4 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
+                <Col span={12}>
+                  <Button type='primary' icon={<MdOutlineRemove size={15} />} block onClick={this.handleRemoveTag}>
+                    {intl.formatMessage(messages.removeTag)}
                   </Button>
                 </Col>
               )}
@@ -967,13 +1054,6 @@ class DrawerDetail extends Component {
                     }}
                   >
                     {intl.formatMessage(messages.flagDependent)}
-                  </Button>
-                </Col>
-              )}
-              {event?.status === 0 && (
-                <Col span={12}>
-                  <Button type='primary' icon={<BsXCircle size={15} />} block onClick={this.openModalCancel}>
-                    {intl.formatMessage(msgModal.cancel)}
                   </Button>
                 </Col>
               )}
@@ -998,6 +1078,20 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
+              {event?.status === 0 && event?.type !== 4 && (
+                <Col span={12}>
+                  <Button type='primary' icon={<BsXCircle size={15} />} block onClick={this.openModalCancel}>
+                    {intl.formatMessage(msgModal.cancel)}
+                  </Button>
+                </Col>
+              )}
+              {event?.status === 0 && event?.type === 4 && (userRole === 3 || userRole > 900 || (userRole === 100 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id))) && (
+                <Col span={12}>
+                  <Button type='primary' icon={<BsXCircle size={15} />} block onClick={this.openModalCancel}>
+                    {intl.formatMessage(msgModal.cancel)}
+                  </Button>
+                </Col>
+              )}
             </Row>
           </>
         )}
@@ -1018,4 +1112,8 @@ class DrawerDetail extends Component {
   }
 }
 
-export default DrawerDetail;
+const mapStateToProps = state => ({
+  auth: state.auth,
+});
+
+export default compose(connect(mapStateToProps, { getAppointmentsData, getAppointmentsMonthData }))(DrawerDetail);

@@ -153,4 +153,20 @@ export default {
     id: `${scope}.markClosed`,
     defaultMessage: 'Mark as closed',
   },
+  tag: {
+    id: `${scope}.tag`,
+    defaultMessage: 'Tag',
+  },
+  switchTag: {
+    id: `${scope}.switchTag`,
+    defaultMessage: 'Switch Tag',
+  },
+  removeTag: {
+    id: `${scope}.removeTag`,
+    defaultMessage: 'Remove Tag',
+  },
+  claimed: {
+    id: `${scope}.claimed`,
+    defaultMessage: 'Claimed',
+  },
 };
