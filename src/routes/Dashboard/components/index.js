@@ -1066,7 +1066,7 @@ class Dashboard extends React.Component {
                     <Panel header={intl.formatMessage(messages.referrals)} key="2">
                       <Tabs defaultActiveKey="1" type="card" size='small'>
                         <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                          {listAppointmentsRecent?.filter(a => a.type == 4 && a.status == 0 && a.flagStatus != 1)?.map((appointment, index) =>
+                          {listAppointmentsRecent?.filter(a => a.type === 4 && a.status === 0 && a.flagStatus != 1)?.map((appointment, index) =>
                             <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                               <Avatar size={24} icon={<FaUser size={12} />} />
                               <div className='div-service'>
@@ -1085,7 +1085,7 @@ class Dashboard extends React.Component {
                           )}
                         </Tabs.TabPane>
                         <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                          {listAppointmentsRecent?.filter(a => a.type == 4 && a.status != 0 && a.flagStatus != 1)?.map((appointment, index) =>
+                          {listAppointmentsRecent?.filter(a => a.type === 4 && a.status !== 0 && a.flagStatus !== 1)?.map((appointment, index) =>
                             <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                               <Avatar size={24} icon={<FaUser size={12} />} />
                               <div className='div-service'>
@@ -1109,12 +1109,12 @@ class Dashboard extends React.Component {
                   <Panel header={intl.formatMessage(messages.screenings)} key="3">
                     <Tabs defaultActiveKey="1" type="card" size='small'>
                       <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                        {listAppointmentsRecent?.filter(a => a.type == 1 && a.status == 0 && a.flagStatus != 1)?.map((appointment, index) =>
+                        {listAppointmentsRecent?.filter(a => a.type === 1 && a.status === 0 && a.flagStatus !== 1)?.map((appointment, index) =>
                           <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service flex-1'>
                               <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                              <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                              <p className='font-09 mb-0'>{userRole === 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                             </div>
                             <div className='text-center ml-auto mr-5 flex-1'>
                               <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
@@ -1127,12 +1127,12 @@ class Dashboard extends React.Component {
                         )}
                       </Tabs.TabPane>
                       <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                        {listAppointmentsRecent?.filter(a => a.type == 1 && a.status != 0 && a.flagStatus != 1)?.map((appointment, index) =>
+                        {listAppointmentsRecent?.filter(a => a.type === 1 && a.status !== 0 && a.flagStatus !== 1)?.map((appointment, index) =>
                           <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service flex-1'>
                               <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                              <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                              <p className='font-09 mb-0'>{userRole === 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                             </div>
                             <div className='text-center ml-auto mr-5 flex-1'>
                               <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
@@ -1149,12 +1149,12 @@ class Dashboard extends React.Component {
                   <Panel header={intl.formatMessage(messages.evaluations)} key="4">
                     <Tabs defaultActiveKey="1" type="card" size='small'>
                       <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                        {listAppointmentsRecent?.filter(a => a.type == 2 && a.status == 0 && a.flagStatus != 1)?.map((appointment, index) =>
+                        {listAppointmentsRecent?.filter(a => a.type === 2 && a.status === 0 && a.flagStatus !== 1)?.map((appointment, index) =>
                           <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
                               <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                              <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                              <p className='font-09 mb-0'>{userRole === 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                             </div>
                             <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                             <div className='ml-auto'>
@@ -1165,12 +1165,12 @@ class Dashboard extends React.Component {
                         )}
                       </Tabs.TabPane>
                       <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                        {listAppointmentsRecent?.filter(a => a.type == 2 && a.status != 0 && a.flagStatus != 1)?.map((appointment, index) =>
+                        {listAppointmentsRecent?.filter(a => a.type === 2 && a.status !== 0 && a.flagStatus !== 1)?.map((appointment, index) =>
                           <div key={index} className={`list-item padding-item ${[-2, -3].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
                               <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                              <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                              <p className='font-09 mb-0'>{userRole === 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                             </div>
                             <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
                             <div className='ml-auto'>
@@ -1188,7 +1188,7 @@ class Dashboard extends React.Component {
                     extra={
                       <div className='flex gap-2'>
                         <BiExpand size={18} className="cursor" onClick={() => this.onOpenModalFlagExpand()} />
-                        <Badge size="small" count={listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.length}>
+                        <Badge size="small" count={listAppointmentsRecent?.filter(a => a.flagStatus === 1)?.length}>
                           <BsFillFlagFill size={18} />
                         </Badge>
                       </div>
@@ -1197,14 +1197,14 @@ class Dashboard extends React.Component {
                   >
                     <Tabs defaultActiveKey="1" type="card" size='small'>
                       <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                        {listAppointmentsRecent?.filter(a => a.flagStatus == 1)?.map((appointment, index) =>
+                        {listAppointmentsRecent?.filter(a => a.flagStatus === 1)?.map((appointment, index) =>
                           <div key={index} className='list-item padding-item gap-2' onClick={(e) => !e.target.className.includes('font-12 flag-action') && this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
                               <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                              <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                              <p className='font-09 mb-0'>{userRole === 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                             </div>
-                            {userRole == 3 ? (
+                            {userRole === 3 ? (
                               <>
                                 {(appointment?.flagItems?.isPaid || appointment?.flagItems?.rate == 0) ? (
                                   <a className='font-12 flag-action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
@@ -1231,7 +1231,7 @@ class Dashboard extends React.Component {
                               </>
                             ) : (
                               <>
-                                <div className='font-12'>{appointment?.type == 2 ? intl.formatMessage(messages.evaluation) : appointment?.type == 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
+                                <div className='font-12'>{appointment?.type === 2 ? intl.formatMessage(messages.evaluation) : appointment?.type === 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type === 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
                                 <a className='font-12 flag-action' onClick={() => this.onOpenModalConfirm('clear-flag', appointment)}>{intl.formatMessage(msgDrawer.clearFlag)}</a>
                               </>
                             )}
@@ -1239,14 +1239,14 @@ class Dashboard extends React.Component {
                         )}
                       </Tabs.TabPane>
                       <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                        {listAppointmentsRecent?.filter(a => a.flagStatus == 2)?.map((appointment, index) =>
+                        {listAppointmentsRecent?.filter(a => a.flagStatus === 2)?.map((appointment, index) =>
                           <div key={index} className='list-item padding-item gap-2' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
                               <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                              <p className='font-09 mb-0'>{userRole == 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                              <p className='font-09 mb-0'>{userRole === 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                             </div>
-                            <div className='font-12'>{appointment?.type == 2 ? intl.formatMessage(messages.evaluation) : appointment?.type == 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
+                            <div className='font-12'>{appointment?.type === 2 ? intl.formatMessage(messages.evaluation) : appointment?.type === 3 ? intl.formatMessage(msgModal.standardSession) : appointment?.type === 5 ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
                             <div className='ml-auto'>
                               <div className='font-12'>{moment(appointment.date).format("hh:mm a")}</div>
                               <div className='font-12 font-700'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
@@ -1256,13 +1256,13 @@ class Dashboard extends React.Component {
                       </Tabs.TabPane>
                     </Tabs>
                   </Panel>
-                  {(userRole == 3 || userRole == 60) ? (
+                  {(userRole === 3 || userRole === 60) ? (
                     <Panel
                       key="6"
                       header={intl.formatMessage(messages.subsidaries)}
                       extra={(
                         <div className='flex flex-row justify-between'>
-                          {userRole == 3 && (
+                          {userRole === 3 && (
                             <Button type='primary' size='small' onClick={this.onShowModalNewSubsidy}>
                               {intl.formatMessage(messages.requestNewSubsidy).toUpperCase()}
                             </Button>
@@ -1312,31 +1312,29 @@ function renderEventContent(eventInfo, appointments) {
   const event = eventInfo.event.extendedProps;
   const type = event?.type;
   const status = event?.status;
-  const eventType = type == 1 ? 'Screening' : type == 2 ? 'Evaluation' : type == 4 ? 'Consultation' : 'Session';
+  const eventType = type === 1 ? 'Screening' : type === 2 ? 'Evaluation' : type === 4 ? 'Consultation' : 'Session';
 
   return (
-    <div className={`flex flex-col p-3 relative rounded-2 relative text-white bg-${(status == -2 || status == -3) ? 'cancelled' : eventType.toLowerCase()}`}>
+    <div className={`flex flex-col p-3 relative rounded-2 relative text-white bg-${(status === -2 || status === -3) ? 'cancelled' : eventType.toLowerCase()}`}>
       <div className="flex flex-col">
-        <div className={`text-bold flex items-center ${(status == -2 || status == -3) && 'text-cancelled'}`}>{(status == -2 || status == -3) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}{event?.skillSet?.name}</div>
-        <div>{moment(eventInfo.event.start).format('hh:mm a')}</div>
-        <div>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
-        <div>{eventType} with {eventInfo.event.title}</div>
+        <div className={`text-bold flex items-center ${(status === -2 || status === -3) && 'text-cancelled'}`}>{(status === -2 || status === -3) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}<div className='text-ellipsis'>{event?.skillSet?.name}</div></div>
+        <div className='text-ellipsis'>{moment(eventInfo.event.start).format('hh:mm a')}</div>
+        <div className='text-ellipsis'>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
+        <div className='text-ellipsis'>{eventType} with {eventInfo.event.title}</div>
       </div>
-      {event?.type == 5 && <FaHandHoldingUsd size={20} className='text-green500 mr-5' />}
-      {event?.flagStatus == 1 && event?.flagItems?.flagType == 1 && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
-      {event?.status == 0 && appointments?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1)?.flagItems?.flagType == 1 && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
-      {event?.flagStatus == 1 && event?.flagItems?.flagType == 2 && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
-      {event?.status == 0 && appointments?.find(a => a.dependent?._id == event?.dependent?._id && a.provider?._id == event?.provider?._id && a.flagStatus == 1)?.flagItems?.flagType == 2 && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
+      {event?.type === 5 && <FaHandHoldingUsd size={20} className='text-green500 mr-5' />}
+      {event?.flagStatus === 1 && event?.flagItems?.flagType === 1 && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
+      {event?.status === 0 && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === 1)?.flagItems?.flagType === 1 && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
+      {event?.flagStatus === 1 && event?.flagItems?.flagType === 2 && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
+      {event?.status === 0 && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === 1)?.flagItems?.flagType === 2 && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
     </div>
   )
 }
 
-const mapStateToProps = state => {
-  return ({
-    appointments: state.appointments.dataAppointments,
-    appointmentsInMonth: state.appointments.dataAppointmentsMonth,
-    user: state.auth.user,
-  })
-}
+const mapStateToProps = state => ({
+  appointments: state.appointments.dataAppointments,
+  appointmentsInMonth: state.appointments.dataAppointmentsMonth,
+  user: state.auth.user,
+})
 
 export default compose(connect(mapStateToProps))(Dashboard);
