@@ -76,6 +76,12 @@ class ModalReferralService extends React.Component {
 		}
 		this.setState({ errorMessage: '' });
 
+		const existingConsultation = this.props.appointments.find(appointment => appointment.type === 4 && appointment.status === 0 && appointment.dependent?._id === selectedDependent && moment(new Date(appointment.date).toLocaleString()).isSame(arrTime[selectedTimeIndex].value))
+		if (existingConsultation) {
+			message.warn("The consultation already exists");
+			return;
+		}
+
 		const { years, months, date } = selectedDate.toObject();
 		const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
 		const postData = {
@@ -483,6 +489,7 @@ class ModalReferralService extends React.Component {
 
 const mapStateToProps = state => ({
 	auth: state.auth,
+	appointments: state.appointments.dataAppointments,
 });
 
 export default compose(connect(mapStateToProps))(ModalReferralService);
