@@ -20,6 +20,7 @@ const initialState = {
 	selectedTime: undefined,
 	meetingLink: '',
 	durations: [],
+	consultants: [],
 	generalData: {
 		contactNumberTypes: [],
 		emailTypes: [],
@@ -187,6 +188,9 @@ export const authSlice = createSlice({
 		setGeneralData(state, action) {
 			state.generalData = action.payload
 		},
+		setConsultants(state, action) {
+			state.consultants = action.payload
+		},
 		logout(state) {
 			state.user = {};
 			helper.history.push('/');
@@ -226,6 +230,7 @@ export const {
 	setMeetingLink,
 	setDurations,
 	setGeneralData,
+	setConsultants,
 } = authSlice.actions;
 
 export default authSlice.reducer;

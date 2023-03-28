@@ -19,7 +19,7 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setNotificationTime, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setNotificationTime, switchConsultation, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -481,8 +481,10 @@ class DrawerDetail extends Component {
     }
   }
 
-  handleSwitchTag = () => {
-
+  handleSwitchTag = (consultantId) => {
+    request.post(switchConsultation, { appointmentId: this.props.event?._id, consultantId })
+      .then(res => { res.success && this.updateAppointments(); message.success("Switched successfully") })
+      .catch(err => message.error("Something went wrong. Please try again"))
   }
 
   handleRemoveTag = () => {
@@ -494,6 +496,8 @@ class DrawerDetail extends Component {
   render() {
     const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage, visibleCurrentScreen, visibleCreateNote, notificationTime } = this.state;
     const { event, listAppointmentsRecent, auth } = this.props;
+    const appointmentDate = moment(event?.date);
+    const consultants = auth.consultants?.filter(consultant => consultant?._id !== auth.user?._id && !listAppointmentsRecent?.find(a => a?.consultant?._id === consultant?.consultantInfo?._id && a.date === event?.date) && consultant?.consultantInfo?.manualSchedule?.find(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 }))));
 
     const providerProfile = (
       <div className='provider-profile'>
@@ -1029,9 +1033,19 @@ class DrawerDetail extends Component {
               )}
               {(event?.status === 0 && moment().isBefore(moment(event?.date)) && event?.type === 4 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
                 <Col span={12}>
-                  <Button type='primary' icon={<AiOutlineUserSwitch size={15} />} block onClick={this.handleSwitchTag}>
-                    {intl.formatMessage(messages.switchTag)}
-                  </Button>
+                  <Popover trigger="click" placement='bottom' overlayClassName='consultant' content={(
+                    <Radio.Group onChange={e => this.handleSwitchTag(e.target.value)} className="box-card p-10 bg-pastel">
+                      <Space direction="vertical">
+                        {consultants?.map((consultant, i) => (
+                          <Radio key={i} value={consultant?.consultantInfo?._id} className="nobr">{consultant?.username}</Radio>
+                        ))}
+                      </Space>
+                    </Radio.Group>
+                  )}>
+                    <Button type='primary' icon={<AiOutlineUserSwitch size={15} />} block>
+                      {intl.formatMessage(messages.switchTag)}
+                    </Button>
+                  </Popover>
                 </Col>
               )}
               {(event?.status === 0 && moment().isBefore(moment(event?.date)) && event?.type === 4 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (

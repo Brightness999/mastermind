@@ -28,7 +28,7 @@ import msgModal from '../../../components/Modal/messages';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
 import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice'
-import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
+import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants } from '../../../redux/features/authSlice';
 import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
@@ -133,11 +133,12 @@ class SchedulingCenter extends React.Component {
           listDependents: data?.dependents ?? [],
           locations: data?.locations ?? [],
         });
-        this.props.dispatch(setDependents(data?.dependents ?? []));
-        this.props.dispatch(setProviders(data?.providers ?? []));
-        this.props.dispatch(setSkillSet(data?.skillSet ?? []));
-        this.props.dispatch(setAcademicLevels(data?.academicLevels ?? []));
-        this.props.dispatch(setDurations(data?.durations ?? []));
+        this.props.setDependents(data?.dependents ?? []);
+        this.props.setProviders(data?.providers ?? []);
+        this.props.setSkillSet(data?.skillSet ?? []);
+        this.props.setAcademicLevels(data?.academicLevels ?? []);
+        this.props.setDurations(data?.durations ?? []);
+        this.props.setConsultants(data?.consultants ?? []);
       }
     }).catch(err => {
       console.log('get default data error---', err);
@@ -217,7 +218,7 @@ class SchedulingCenter extends React.Component {
         this.showNotificationForSubsidyChange(data.data);
         return;
       case 'meeting_link':
-        this.props.dispatch(setMeetingLink(data.data));
+        this.props.setMeetingLink(data.data);
       case 'appeal_subsidy':
         return;
     }
@@ -357,7 +358,7 @@ class SchedulingCenter extends React.Component {
         date: new Date(obj.start).getTime()
       }
     }
-    this.props.dispatch(changeTime(data))
+    this.props.changeTime(data)
   }
 
   handleEventRemove = (removeInfo) => {
@@ -373,7 +374,7 @@ class SchedulingCenter extends React.Component {
   }
 
   getMyAppointments(userRole, dependentId) {
-    this.props.dispatch(getAppointmentsData({ role: userRole, dependentId: dependentId }));
+    this.props.getAppointmentsData({ role: userRole, dependentId: dependentId });
   }
 
   handleClickPrevMonth = () => {
@@ -407,7 +408,7 @@ class SchedulingCenter extends React.Component {
         dependentId: dependentId,
       }
     };
-    this.props.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+    this.props.getAppointmentsMonthData(dataFetchAppointMonth);
   }
 
   handleSelectProvider = (id) => {
@@ -1140,4 +1141,4 @@ const mapStateToProps = state => ({
   auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps))(SchedulingCenter);
+export default compose(connect(mapStateToProps, { changeTime, getAppointmentsData, getAppointmentsMonthData, setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants }))(SchedulingCenter);

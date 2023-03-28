@@ -26,10 +26,10 @@ import msgModal from '../../../components/Modal/messages';
 import msgDrawer from '../../../components/DrawerDetail/messages';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
-import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
-import { setAcademicLevels, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
+import { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
+import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
 import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import Subsidaries from './school';
 import PageLoading from '../../../components/Loading/PageLoading';
@@ -109,7 +109,7 @@ class Dashboard extends React.Component {
     this.loadDefaultData();
     this.updateCalendarEvents(user.role);
     this.getMyAppointments(user.role);
-    this.props.dispatch(getSubsidyRequests({ role: user.role }));
+    this.props.getSubsidyRequests({ role: user.role });
     const notifications = setInterval(() => {
       if (user.role == 3) {
         request.post(checkNotificationForClient).then(res => {
@@ -236,12 +236,13 @@ class Dashboard extends React.Component {
           listDependents: data?.dependents ?? [],
           locations: data?.locations ?? [],
         });
-        this.props.dispatch(setDependents(data?.dependents ?? []));
-        this.props.dispatch(setProviders(data?.providers ?? []));
-        this.props.dispatch(setSkillSet(data?.skillSet ?? []));
-        this.props.dispatch(setLocations(data?.locations ?? []));
-        this.props.dispatch(setAcademicLevels(data?.academicLevels ?? []));
-        this.props.dispatch(setDurations(data?.durations ?? []));
+        this.props.setDependents(data?.dependents ?? []);
+        this.props.setProviders(data?.providers ?? []);
+        this.props.setSkillSet(data?.skillSet ?? []);
+        this.props.setLocations(data?.locations ?? []);
+        this.props.setAcademicLevels(data?.academicLevels ?? []);
+        this.props.setDurations(data?.durations ?? []);
+        this.props.setConsultants(data?.consultants ?? []);
       }
     }).catch(err => {
       console.log('get default data error ---', err);
@@ -355,7 +356,7 @@ class Dashboard extends React.Component {
         this.showNotificationForSubsidyChange(data.data);
         return;
       case 'meeting_link':
-        this.props.dispatch(setMeetingLink(data.data));
+        this.props.setMeetingLink(data.data);
       case 'appeal_subsidy':
         return;
     }
@@ -442,7 +443,7 @@ class Dashboard extends React.Component {
 
   onSubmitModalNewSubsidy = () => {
     this.setState({ visibleNewSubsidy: false });
-    this.props.dispatch(getSubsidyRequests({ role: this.state.userRole }));
+    this.props.getSubsidyRequests({ role: this.state.userRole });
   };
 
   onCloseModalNewSubsidy = (isNeedReload) => {
@@ -516,7 +517,7 @@ class Dashboard extends React.Component {
         date: new Date(obj.start).getTime()
       }
     }
-    this.props.dispatch(changeTime(data))
+    this.props.changeTime(data)
   }
 
   handleEventRemove = (removeInfo) => {
@@ -532,7 +533,7 @@ class Dashboard extends React.Component {
   }
 
   async getMyAppointments(userRole, dependentId) {
-    const appointments = await this.props.dispatch(getAppointmentsData({ role: userRole, dependentId: dependentId }));
+    const appointments = await this.props.getAppointmentsData({ role: userRole, dependentId: dependentId });
     this.setState({ listAppointmentsRecent: appointments?.payload ?? [] });
   }
 
@@ -614,7 +615,7 @@ class Dashboard extends React.Component {
         dependentId: dependentId,
       }
     };
-    const appointmentsInMonth = await this.props.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+    const appointmentsInMonth = await this.props.getAppointmentsMonthData(dataFetchAppointMonth);
     this.setState({ calendarEvents: appointmentsInMonth?.payload ?? [] });
   }
 
@@ -1337,4 +1338,4 @@ const mapStateToProps = state => ({
   user: state.auth.user,
 })
 
-export default compose(connect(mapStateToProps))(Dashboard);
+export default compose(connect(mapStateToProps, { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests }))(Dashboard);
