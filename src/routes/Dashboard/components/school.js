@@ -4,10 +4,11 @@ import update from 'immutability-helper';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import request from "../../../utils/api/request";
-import { getAllProviderInSchool } from "../../../utils/api/apiList";
+import { getAllProviderInSchool, reorderRequests } from "../../../utils/api/apiList";
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { ModalSubsidyProgress } from "../../../components/Modal";
+import { getSubsidyRequests } from "../../../redux/features/appointmentsSlice";
 
 const Subsidaries = (props) => {
   const type = 'DraggableBodyRow';
@@ -323,14 +324,14 @@ const Subsidaries = (props) => {
   const moveRow = useCallback(
     (dragIndex, hoverIndex) => {
       const dragRow = requests[dragIndex];
-      setRequests(
-        update(requests, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragRow],
-          ],
-        }),
-      );
+      const updatedList = update(requests, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, dragRow],
+        ],
+      });
+      handleReorder(updatedList);
+      setRequests(updatedList);
     },
     [requests],
   );
@@ -452,6 +453,14 @@ const Subsidaries = (props) => {
   const onShowModalReferral = () => { }
 
   const openHierachyModal = () => { }
+
+  const handleReorder = (updatedList) => {
+    const requestIds = updatedList?.map(a => a?._id);
+    const orders = updatedList?.map(a => a.orderPosition)?.sort((a, b) => b - a);
+    if (requestIds?.length > 0 && orders?.length > 0 && requestIds?.length === orders?.length) {
+      request.post(reorderRequests, { requestIds, orders }).then(res => res.success && props.dispatch(getSubsidyRequests({ role: user.role })));
+    }
+  }
 
   useEffect(() => {
     if (user?.schoolInfo?._id) {
