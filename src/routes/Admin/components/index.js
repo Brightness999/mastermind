@@ -27,7 +27,7 @@ import msgDrawer from '../../../components/DrawerDetail/messages';
 import msgModal from '../../../components/Modal/messages';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
-import { changeTime, getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice'
+import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
 import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants } from '../../../redux/features/authSlice';
 import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
@@ -104,6 +104,7 @@ class SchedulingCenter extends React.Component {
     }
     this.updateCalendarEvents(auth?.user?.role);
     this.getMyAppointments(auth?.user?.role);
+    this.props.getSubsidyRequests({ role: auth?.user?.role });
     this.loadDefaultData();
 
     const script = document.createElement("script");
@@ -1141,4 +1142,4 @@ const mapStateToProps = state => ({
   auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps, { changeTime, getAppointmentsData, getAppointmentsMonthData, setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants }))(SchedulingCenter);
+export default compose(connect(mapStateToProps, { changeTime, getAppointmentsData, getAppointmentsMonthData, setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, getSubsidyRequests }))(SchedulingCenter);

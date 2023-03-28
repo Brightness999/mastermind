@@ -1,14 +1,15 @@
 import React from 'react';
 import { Divider, Table, Space, Select, Input, Row, Col, Form, Button, message } from 'antd';
 import intl from 'react-intl-universal';
-import mgsSidebar from '../../../../components/SideBar/messages';
-import './index.less';
-import request, { generateSearchStructureWithPopulateSearch } from '../../../../utils/api/request'
-import { ModalNewGroup, ModalSubsidyProgress } from '../../../../components/Modal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+
+import mgsSidebar from '../../../../components/SideBar/messages';
+import request from '../../../../utils/api/request'
+import { ModalNewGroup, ModalSubsidyProgress } from '../../../../components/Modal';
 import { getAdminSubsidyRequests } from '../../../../utils/api/apiList';
 import PageLoading from '../../../../components/Loading/PageLoading';
+import './index.less';
 
 class SubsidyManager extends React.Component {
   constructor(props) {
@@ -45,17 +46,14 @@ class SubsidyManager extends React.Component {
     this.getSubsidyPerPage();
   }
 
-  generatePostData = (page = 1) => {
+  generatePostData = () => {
     const { isApplyFilter, filterSchool, filterStudent, filterProvider, filterStatus, filterGrade } = this.state;
+    let postData = {
+      "filter": {},
+      "populate": [{ path: 'school' }, { path: 'providers' }, { path: 'student' }, { path: 'selectedProvider' }]
+    };
 
     if (isApplyFilter) {
-      let postData = {
-        "filter": {},
-        "page": page,
-        "limit": 10,
-        "populate": [{ path: 'school' }, { path: 'providers' }, { path: 'student' }, { path: 'selectedProvider' }]
-      };
-
       if (filterSchool != undefined && filterSchool.length > 0) {
         postData['filterSchool'] = filterSchool;
       }
@@ -75,10 +73,8 @@ class SubsidyManager extends React.Component {
       if (filterGrade != undefined) {
         postData['filterGrade'] = parseInt(filterGrade);
       }
-
-      return postData;
     }
-    return generateSearchStructureWithPopulateSearch('', {}, page, 10, [{ path: 'school' }, { path: 'providers' }, { path: 'student' }, { path: 'selectedProvider' }]);
+    return postData;
   }
 
   getSubsidyPerPage = (page = 1) => {

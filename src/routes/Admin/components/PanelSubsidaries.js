@@ -4,9 +4,10 @@ import { FaUser } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
 import { BsXCircle, BsViewList } from 'react-icons/bs';
 import intl from 'react-intl-universal';
-import messages from '../../Dashboard/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+
+import messages from '../../Dashboard/messages';
 import './index.less';
 
 class PanelSubsidaries extends React.Component {
@@ -19,17 +20,23 @@ class PanelSubsidaries extends React.Component {
   }
 
   componentDidMount = () => {
-    this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status == this.state.status) });
+    this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status === this.state.status) });
+  }
+
+  componentDidUpdate = (prevProps) => {
+    if (prevProps.listSubsidaries !== this.props.listSubsidaries) {
+      this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status === this.state.status) });
+    }
   }
 
   handleTabChange = (v) => {
     switch (v) {
       case "1":
-        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status == 0) }); break;
+        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [0, 1, 3].includes(s.status)) }); break;
       case "2":
-        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status == -1) }); break;
+        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [2, 4].includes(s.status)) }); break;
       case "3":
-        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status == 1) }); break;
+        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status === 5) }); break;
       default: break;
     }
   }
