@@ -30,7 +30,7 @@ class ModalSubsidyProgress extends React.Component {
 		isApproved: true,
 		subsidy: {},
 		providers: [],
-		selectedProviders: [],
+		selectedProvider: undefined,
 		isDisableSchoolFields: false,
 		decisionExplanation: "",
 		isFiredButton: false,
@@ -58,45 +58,24 @@ class ModalSubsidyProgress extends React.Component {
 
 	loadSubsidyData = (subsidyId, isNeedLoadSchool = true) => {
 		request.post(switchPathWithRole(this.props.auth.user?.role) + 'get_subsidy_detail', { subsidyId: subsidyId }).then(result => {
-			if (result.success) {
-				this.setState({ subsidy: result.data });
-				if (!!result.data.providers && result.data.providers.length > 0) {
-					this.setState({ selectedProviders: result.data.providers });
-				}
-				if (!!result.data.decisionExplanation && result.data.decisionExplanation.length > 0) {
-					this.setState({ decisionExplanation: result.data.decisionExplanation });
+			const { success, data } = result;
+			if (success) {
+				this.setState({ subsidy: data }, () => this.loadLastReferral());
+				if (!!data.decisionExplanation && data.decisionExplanation.length > 0) {
+					this.setState({ decisionExplanation: data.decisionExplanation });
 				}
 
-				// set consulation
-				// if(!!result.data.consulation){
-				//     var consulation= result.data.consulation;
-				//     var _moment = moment( consulation.date);
-				//     var date = _moment.clone();
-				//     var hour = _moment.format('HH:mm');
-				//     this.setState({
-				//         consulationName:consulation.name,
-				//         meetSolution:consulation.typeForAppointLocation,
-				//         meetLocation:consulation.location,
-				//         consulationDate:date,
-				//         consulationTime:hour,
-				//         selectedDate: date,
-				//         selectedHour: hour,
-				//         consulationPhoneNumber:consulation.phoneNumber,
-				//     })
-				// }
-
-				if (!!result.data.selectedProvider) {
+				if (!!data.selectedProvider) {
 					this.setState({
-						selectProviderFromAdmin: result.data.selectedProvider,
-						numberOfSessions: result.data.numberOfSessions,
-						priceForSession: result.data.priceForSession,
+						selectProviderFromAdmin: data.selectedProvider,
+						numberOfSessions: data.numberOfSessions,
+						priceForSession: data.priceForSession,
+						selectedProvider: data.selectedProvider,
 					})
 				}
 
-				this.loadLastReferral();
-
 				if (isNeedLoadSchool) {
-					this.loadProvidersInSchool(result.data.school._id);
+					this.loadProvidersInSchool(data.school._id);
 				}
 			} else {
 				this.props.onCancel();
@@ -138,7 +117,7 @@ class ModalSubsidyProgress extends React.Component {
 		this.setState({
 			subsidy: {},
 			providers: [],
-			selectedProviders: [],
+			selectedProvider: undefined,
 			isDisableSchoolFields: false,
 			decisionExplanation: "",
 			isFiredButton: false,
@@ -163,7 +142,7 @@ class ModalSubsidyProgress extends React.Component {
 				this.loadSubsidyData(subsidy._id, false);
 				const newSubsidyRequests = JSON.parse(JSON.stringify(this.props.listSubsidaries));
 				this.props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
-					if (s._id == subsidy._id) {
+					if (s._id === subsidy._id) {
 						s.status = data.status;
 					}
 					return s;
@@ -185,94 +164,35 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	schoolAcceptSubsidy(subsidy) {
-		const { selectedProviders, decisionExplanation } = this.state;
+		const { selectedProvider, decisionExplanation } = this.state;
 
-		if (selectedProviders.length == 0 || decisionExplanation.length == 0) {
+		if (!selectedProvider || decisionExplanation.length === 0) {
 			this.setState({ parentWarning: 'Please suggest a provider and fill in decision explaintion' })
 			return;
 		}
-		this.setState({ parentWarning: '' })
+		this.setState({ parentWarning: '' });
 		request.post(acceptSubsidyRequest, {
-			"subsidyId": subsidy._id,
-			"student": subsidy.student._id,
-			"providers": selectedProviders,
-			"decisionExplanation": decisionExplanation,
+			subsidyId: subsidy._id,
+			student: subsidy?.student?._id,
+			selectedProvider: selectedProvider,
+			decisionExplanation: decisionExplanation,
 		}).then(result => {
 			message.success('Approved successfully');
-			if (result.success) {
+			const { success, data } = result;
+			if (success) {
 				this.loadSubsidyData(subsidy._id, false);
+				const newSubsidyRequests = JSON.parse(JSON.stringify(this.props.listSubsidaries));
+				this.props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
+					if (s._id === subsidy._id) {
+						s.status = data.status;
+					}
+					return s;
+				})));
 			}
 		}).catch(err => {
 			console.log('accept_subsidy_request---', err);
 		})
 	}
-
-	// createConsulation(subsidy){
-	//     if(!this.state.consulationName || !this.state.selectedHour || !this.state.consulationPhoneNumber || !this.state.consulationPhoneNumber
-	//         || !this.state.consulationPhoneNumber.length <1
-	//         ||this.state.meetSolution == undefined
-	//         ){
-	//             message.error('please fill all reuired field');
-	//         return;
-	//     }
-	//     if(!!subsidy.consulation){
-	//         this.editConsulation(subsidy);return;
-	//     }
-	//     var str = this.state.selectedDate.format("DD/MM/YYYY")+ " " + this.state.selectedHour;
-	//     var _selectedDay = moment(str , 'DD/MM/YYYY hh:mm' ).valueOf();
-	//     var postData = {
-	//         "subsidyId":subsidy._id ,
-	//         "dependent": subsidy.student._id,
-	//         "skillSet":subsidy.skillSet,
-	//         "school":subsidy.school._id,
-	//         "name":this.state.consulationName,
-	//         "typeForAppointLocation":this.state.meetSolution,
-	//         "location":this.state.meetLocation,
-	//         "date":_selectedDay,
-	//         "phoneNumber": this.state.consulationPhoneNumber,
-	//     };
-
-	//     request.post(switchPathWithRole(this.props.auth.user?.role)+'create_consulation_to_subsidy',postData).then(result=>{
-	//         if(result.success){
-	//             this.loadSubsidyData(subsidy._id , false);
-	//             this.setState({isScheduling:false , consulationWarning:''});
-	//         }else{
-
-	//         }
-	//     }).catch(err=>{
-
-	//     })
-	// }
-
-	// editConsulation(subsidy){
-	//     if(!this.state.consulationName || !this.state.selectedHour || !this.state.consulationPhoneNumber || !this.state.consulationPhoneNumber
-	//         || !this.state.consulationPhoneNumber.length <1
-	//         ||this.state.meetSolution == undefined
-	//         ){
-	//             message.error('please fill all reuired field');
-	//         return;
-	//     }
-	//     var str = this.state.selectedDate.format("DD/MM/YYYY")+ " " + this.state.selectedHour;
-	//     var _selectedDay = moment(str , 'DD/MM/YYYY hh:mm' ).valueOf();
-	//     var postData = {
-	//         "consulationId": subsidy.consulation._id,
-	//         "name":this.state.consulationName,
-	//         "typeForAppointLocation":this.state.meetSolution,
-	//         "location":this.state.meetLocation,
-	//         "date":_selectedDay,
-	//         "phoneNumber": this.state.consulationPhoneNumber,
-	//     }
-	//     request.post(switchPathWithRole(this.props.auth.user?.role)+'change_consulation',postData).then(result=>{
-	//         if(result.success){
-	//             this.loadSubsidyData(subsidy._id , false);
-	//             this.setState({isScheduling:false, consulationWarning:''});
-	//         }else{
-
-	//         }
-	//     }).catch(err=>{
-
-	//     })
-	// }
 
 	submitSubsidyFromAdmin = (subsidy) => {
 		const { selectProviderFromAdmin, numberOfSessions, priceForSession } = this.state;
@@ -394,7 +314,7 @@ class ModalSubsidyProgress extends React.Component {
 				</Col>
 				<Col xs={24} sm={24} md={12}>
 					<p className='font-700'>{intl.formatMessage(messages.documents)}</p>
-					{documents.map((document, index) => (
+					{documents?.map((document, index) => (
 						<a
 							key={index}
 							href={this.getFileUrl(document)}
@@ -419,7 +339,7 @@ class ModalSubsidyProgress extends React.Component {
 					<div className='flex flex-row items-center'>
 						<p>User has sent appeal for this, please choose an action </p>
 					</div>
-					<div className='flex flex-row items-center'>
+					<div className='flex flex-row items-center justify-end'>
 						<Button
 							onClick={() => { this.denyAppeal(subsidy) }}
 							size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button>
@@ -435,10 +355,10 @@ class ModalSubsidyProgress extends React.Component {
 			<div>
 				{this.state.parentWarning.length > 0 ? (
 					<div className='flex flex-row items-center'>
-						<p>{this.state.parentWarning}</p>
+						<p className='text-red'>{this.state.parentWarning}</p>
 					</div>
 				) : null}
-				<div className='flex flex-row items-center'>
+				<div className='flex flex-row items-center justify-end'>
 					{subsidy.status == 0 && (
 						<Button onClick={() => { this.schoolDenySubsidy(subsidy) }} size='small' className='mr-10'>
 							{intl.formatMessage(messages.decline).toUpperCase()}
@@ -490,7 +410,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderSchoolInfo = (data) => {
-		const { selectedProviders, subsidy, providers, decisionExplanation } = this.state;
+		const { subsidy, providers, decisionExplanation, selectedProvider } = this.state;
 		const { user } = this.props.auth;
 
 		if (user?.role == 3 && subsidy.status == 0) {
@@ -508,12 +428,13 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-700 mb-10'>{intl.formatMessage(messages.recommendedProviders)}</p>
 						<div className='select-md'>
 							<Select
-								disabled={user.role == 3 || !(subsidy.status == 0 || subsidy.status == 1)}
-								onChange={v => { }}
+								disabled={user.role === 3 || !(subsidy.status === 0 || subsidy.status === 1)}
+								onChange={v => this.setState({ selectedProvider: v })}
+								value={selectedProvider}
 								className='mb-10'
 								placeholder={intl.formatMessage(msgCreateAccount.provider)}
 							>
-								{providers.map((provider) => (
+								{providers?.map((provider) => (
 									<Select.Option key={provider._id} value={provider._id}>{`${provider.firstName} ${provider.lastName}` || provider.referredToAs}</Select.Option>
 								))}
 							</Select>
@@ -603,7 +524,7 @@ class ModalSubsidyProgress extends React.Component {
 							className='mb-10'
 							placeholder={intl.formatMessage(msgCreateAccount.provider)}
 						>
-							{providers.map((provider) => (
+							{providers?.map((provider) => (
 								<Select.Option key={provider._id} value={provider._id}>{provider.name || provider.referredToAs}</Select.Option>
 							))}
 						</Select>

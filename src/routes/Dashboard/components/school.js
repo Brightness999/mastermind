@@ -65,7 +65,7 @@ const Subsidaries = (props) => {
   }
 
   useEffect(() => {
-    setRequests(props.listSubsidaries?.filter(s => s.status == status));
+    setRequests(props.listSubsidaries?.filter(s => s.status === status));
   }, [props.listSubsidaries]);
 
   const pendingColumns = [
@@ -100,8 +100,8 @@ const Subsidaries = (props) => {
       align: 'center',
       render: (subsidy) => (
         <div>
-          {providers?.filter(provider => provider?.skillSet?.find(skill => skill == subsidy.skillSet?._id))?.map((provider, index) => (
-            <p key={index}>{provider.firstName} {provider.lastName}</p>
+          {providers?.filter(provider => provider?.skillSet?.find(skill => skill === subsidy.skillSet?._id))?.map((provider, index) => (
+            <div key={index}>{provider.firstName} {provider.lastName}</div>
           ))}
         </div>
       )
@@ -146,21 +146,17 @@ const Subsidaries = (props) => {
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: 'Providers',
+      title: 'Recommended Provider',
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
-        <div>
-          {providers?.filter(provider => provider?.skillSet?.find(skill => skill == subsidy.skillSet?._id))?.map((provider, index) => (
-            <p key={index}>{provider.firstName} {provider.lastName}</p>
-          ))}
-        </div>
+        <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
       )
     },
     {
       title: 'Action',
       key: 'action',
-      render: (a) => (
+      render: (subsidy) => (
         <Space size="middle">
           <a className='btn-blue' onClick={() => onShowModalSubsidy(subsidy)}>Edit</a>
         </Space>
@@ -203,7 +199,7 @@ const Subsidaries = (props) => {
       render: (subsidy) => (
         <div>
           {providers?.filter(provider => provider?.skillSet?.find(skill => skill == subsidy.skillSet?._id))?.map((provider, index) => (
-            <p key={index}>{provider.firstName} {provider.lastName}</p>
+            <div key={index}>{provider.firstName} {provider.lastName}</div>
           ))}
         </div>
       )
@@ -237,15 +233,11 @@ const Subsidaries = (props) => {
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: 'Providers',
+      title: 'Recommended Provider',
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
-        <div>
-          {providers?.filter(provider => provider?.skillSet?.find(skill => skill == subsidy.skillSet?._id))?.map((provider, index) => (
-            <p key={index}>{provider.firstName} {provider.lastName}</p>
-          ))}
-        </div>
+        <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
       )
     },
   ];
@@ -277,15 +269,11 @@ const Subsidaries = (props) => {
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: 'Providers',
+      title: 'Recommended Provider',
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
-        <div>
-          {providers?.filter(provider => provider?.skillSet?.find(skill => skill == subsidy.skillSet?._id))?.map((provider, index) => (
-            <p key={index}>{provider.firstName} {provider.lastName}</p>
-          ))}
-        </div>
+        <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
       )
     },
   ];
@@ -317,15 +305,11 @@ const Subsidaries = (props) => {
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: 'Providers',
+      title: 'Recommended Provider',
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
-        <div>
-          {providers?.filter(provider => provider?.skillSet?.find(skill => skill == subsidy.skillSet?._id))?.map((provider, index) => (
-            <p key={index}>{provider.firstName} {provider.lastName}</p>
-          ))}
-        </div>
+        <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
       )
     },
   ];
@@ -470,7 +454,7 @@ const Subsidaries = (props) => {
   const openHierachyModal = () => { }
 
   useEffect(() => {
-    if (user) {
+    if (user?.schoolInfo?._id) {
       request.post(getAllProviderInSchool, { schoolId: user?.schoolInfo?._id }).then(res => {
         const { success, data } = res;
         if (success) {
