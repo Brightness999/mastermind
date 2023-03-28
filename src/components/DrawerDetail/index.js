@@ -63,6 +63,10 @@ class DrawerDetail extends Component {
     if (this.state.userRole === 30) {
       this.setState({ notificationTime: this.props.event?.providerNotificationTime });
     }
+
+    if (this.state.userRole === 100) {
+      this.setState({ notificationTime: this.props.event?.consultantNotificationTime });
+    }
   }
 
   handleProviderHoverChange = (visible) => {
@@ -673,7 +677,7 @@ class DrawerDetail extends Component {
         onClose={() => this.props.onClose()}
         open={this.props.visible}
         extra={
-          <Button type='text' icon={<Popover placement="bottomLeft" overlayClassName='notification-time' trigger={[3, 30].includes(userRole) ? "click" : ""} content={(
+          <Button type='text' icon={<Popover placement="bottomLeft" overlayClassName='notification-time' trigger={([3, 30].includes(userRole) || (userRole === 100 && event?.consultant?._id && event?.consultant?._id === auth.user?.consultantInfo?._id)) ? "click" : ""} content={(
             <Radio.Group onChange={e => this.handleSessionReminder(e.target.value)} value={notificationTime} className="box-card p-10 bg-pastel">
               <Space direction="vertical">
                 <Radio value={15} className="nobr">15 min</Radio>
