@@ -25,7 +25,7 @@ class ModalNewSubsidyRequest extends React.Component {
 	}
 
 	componentDidMount = () => {
-		const { dependent } = this.props;
+		const { dependent, auth } = this.props;
 		if (dependent) {
 			this.setState({
 				documentUploaded: [],
@@ -37,9 +37,9 @@ class ModalNewSubsidyRequest extends React.Component {
 		} else {
 			this.setState({
 				documentUploaded: [],
-				skillSet: this.props.auth.skillSet,
+				skillSet: auth.skillSet,
 				listSchools: [],
-				dependents: this.props.auth.dependents,
+				dependents: auth.dependents,
 			})
 			this.loadSchools();
 		}
@@ -69,20 +69,25 @@ class ModalNewSubsidyRequest extends React.Component {
 	}
 
 	onFinish = (values) => {
+		const { subsidyRequests } = this.props;
 		const { isRequestRav, documentUploaded } = this.state;
 		values.documents = documentUploaded;
 		values.requestContactRav = isRequestRav;
-		request.post(createSubsidyRequest, values).then(result => {
-			if (result.success) {
-				this.form.resetFields();
-				this.props.onSubmit();
-			} else {
+		if (subsidyRequests?.find(s => [0, 1, 3, 5].includes(s.status) && s.student?._id === values?.student && s.skillSet?._id === values.skillSet)) {
+			message.warning("Your subsidy request is still being processed");
+		} else {
+			request.post(createSubsidyRequest, values).then(result => {
+				if (result.success) {
+					this.form.resetFields();
+					this.props.onSubmit();
+				} else {
+					this.form.setFields([{ name: 'documents', errors: ['error from server'] }]);
+				}
+			}).catch(err => {
+				console.log('create subsidy request error---', err);
 				this.form.setFields([{ name: 'documents', errors: ['error from server'] }]);
-			}
-		}).catch(err => {
-			console.log('create subsidy request error---', err);
-			this.form.setFields([{ name: 'documents', errors: ['error from server'] }]);
-		})
+			})
+		}
 	};
 
 	onFinishFailed = (errorInfo) => {
@@ -221,7 +226,7 @@ class ModalNewSubsidyRequest extends React.Component {
 							</Form.Item>
 							<Form.Item
 								name="documents"
-								className='input-download'
+								className='upload-document'
 								rules={[{ required: true }]}
 							>
 								<div className='input-download flex flex-row justify-between'>
@@ -253,6 +258,7 @@ class ModalNewSubsidyRequest extends React.Component {
 
 const mapStateToProps = state => ({
 	auth: state.auth,
+	subsidyRequests: state.appointments.dataSubsidyRequests,
 })
 
 export default compose(connect(mapStateToProps))(ModalNewSubsidyRequest);
