@@ -421,6 +421,18 @@ export default {
     id: `${scope}.ravEmail`,
     defaultMessage: 'Rav’s Email',
   },
+  therapistPhone: {
+    id: `${scope}.therapistPhone`,
+    defaultMessage: 'Therapist’s Phone',
+  },
+  nameOfTherapist: {
+    id: `${scope}.nameOfTherapist`,
+    defaultMessage: 'Name of Therapist',
+  },
+  therapistEmail: {
+    id: `${scope}.therapistEmail`,
+    defaultMessage: 'Therapist’s Email',
+  },
   requestContactRav: {
     id: `${scope}.requestContactRav`,
     defaultMessage: 'Request contact (optional)',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Form, Button, Input, Select, Switch, Upload, message, Modal } from 'antd';
+import { Row, Form, Button, Input, Select, Switch, Upload, message, Modal, Divider } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
@@ -148,7 +148,7 @@ class ModalNewSubsidyRequest extends React.Component {
 								name="skillSet"
 								label={intl.formatMessage(msgCreateAccount.skillsets)}
 								className="float-label-item"
-								rules={[{ required: !isRequestRav }]}
+								rules={[{ required: true }]}
 							>
 								<Select placeholder={intl.formatMessage(messages.skillsetRequested)}>
 									{skillSet?.map((skill, index) => <Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>)}
@@ -166,56 +166,73 @@ class ModalNewSubsidyRequest extends React.Component {
 									</Select>
 								</Form.Item>
 							)}
-							<Row gutter={14}>
-								<Col xs={24} sm={24} md={12}>
-									<div className='flex flex-row items-center pb-10'>
-										<Switch size="small" onChange={() => this.setState({ isRequestRav: !isRequestRav })} />
-										<p className='font-12 ml-10 mb-0'>{intl.formatMessage(messages.requestRav)}</p>
-									</div>
-								</Col>
-								{isRequestRav && (
-									<Col xs={24} sm={24} md={12}>
-										<Form.Item
-											name="ravPhone"
-											label={intl.formatMessage(messages.ravPhone)}
-											className="float-label-item"
-											rules={[
-												{ required: isRequestRav, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.ravPhone) },
-												{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
-											]}
-										>
-											<Input placeholder={intl.formatMessage(messages.ravPhone) + ' #'} />
-										</Form.Item>
-									</Col>
-								)}
-							</Row>
-							{isRequestRav && (
-								<Row gutter={14}>
-									<Col xs={24} sm={24} md={12}>
-										<Form.Item
-											name="ravName"
-											label={intl.formatMessage(messages.nameOfRav)}
-											className="float-label-item"
-											rules={[{ required: isRequestRav, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.nameOfRav) }]}
-										>
-											<Input placeholder={intl.formatMessage(messages.nameOfRav)} />
-										</Form.Item>
-									</Col>
-									<Col xs={24} sm={24} md={12}>
-										<Form.Item
-											name="ravEmail"
-											label={intl.formatMessage(messages.ravEmail)}
-											className="float-label-item"
-											rules={[
-												{ required: isRequestRav, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.ravEmail) },
-												{ type: 'email', message: intl.formatMessage(messages.emailNotValid) }
-											]}
-										>
-											<Input placeholder={intl.formatMessage(messages.ravEmail)} />
-										</Form.Item>
-									</Col>
-								</Row>
-							)}
+							<div className='flex flex-row items-center pb-10'>
+								<Switch size="small" onChange={() => this.setState({ isRequestRav: !isRequestRav })} />
+								<p className='font-12 ml-10 mb-0'>{intl.formatMessage(messages.requestRav)}</p>
+							</div>
+							{isRequestRav ? (
+								<>
+									<Divider />
+									<Form.Item
+										name="ravName"
+										label={intl.formatMessage(messages.nameOfRav)}
+										className="float-label-item"
+										rules={[{ required: isRequestRav, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.nameOfRav) }]}
+									>
+										<Input placeholder={intl.formatMessage(messages.nameOfRav)} />
+									</Form.Item>
+									<Form.Item
+										name="ravEmail"
+										label={intl.formatMessage(messages.ravEmail)}
+										className="float-label-item"
+										rules={[
+											{ required: isRequestRav, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.ravEmail) },
+											{ type: 'email', message: intl.formatMessage(messages.emailNotValid) }
+										]}
+									>
+										<Input placeholder={intl.formatMessage(messages.ravEmail)} />
+									</Form.Item>
+									<Form.Item
+										name="ravPhone"
+										label={intl.formatMessage(messages.ravPhone)}
+										className="float-label-item"
+										rules={[
+											{ required: isRequestRav, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.ravPhone) },
+											{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
+										]}
+									>
+										<Input placeholder={intl.formatMessage(messages.ravPhone) + ' #'} />
+									</Form.Item>
+								</>
+							) : null}
+							<Divider />
+							<Form.Item
+								name="therapistContact"
+								label={intl.formatMessage(messages.nameOfTherapist) + "(optional)"}
+								className="float-label-item"
+							>
+								<Input placeholder={intl.formatMessage(messages.nameOfTherapist)} />
+							</Form.Item>
+							<Form.Item
+								name="therapistEmail"
+								label={intl.formatMessage(messages.therapistEmail) + "(optional)"}
+								className="float-label-item"
+								rules={[
+									{ type: 'email', message: intl.formatMessage(messages.emailNotValid) }
+								]}
+							>
+								<Input placeholder={intl.formatMessage(messages.therapistEmail)} />
+							</Form.Item>
+							<Form.Item
+								name="therapistPhone"
+								label={intl.formatMessage(messages.therapistPhone) + "(optional)"}
+								className="float-label-item"
+								rules={[
+									{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
+								]}
+							>
+								<Input placeholder={intl.formatMessage(messages.therapistPhone) + ' #'} />
+							</Form.Item>
 							<Form.Item
 								name="note"
 								label={intl.formatMessage(messages.generalNotes)}
