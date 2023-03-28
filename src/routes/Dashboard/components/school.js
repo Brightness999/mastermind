@@ -470,18 +470,20 @@ const Subsidaries = (props) => {
   const openHierachyModal = () => { }
 
   useEffect(() => {
-    request.post(getAllProviderInSchool, { schoolId: user?.schoolInfo?._id }).then(res => {
-      const { success, data } = res;
-      if (success) {
-        setProviders(data);
-      } else {
+    if (user) {
+      request.post(getAllProviderInSchool, { schoolId: user?.schoolInfo?._id }).then(res => {
+        const { success, data } = res;
+        if (success) {
+          setProviders(data);
+        } else {
+          setProviders([]);
+        }
+      }).catch(err => {
+        console.log('get providers error---', err);
         setProviders([]);
-      }
-    }).catch(err => {
-      console.log('get providers error---', err);
-      setProviders([]);
-    })
-  }, []);
+      })
+    }
+  }, [user]);
 
   const modalSubsidyProps = {
     visible: visibleSubsidy,
