@@ -93,16 +93,16 @@ class SubsidyManager extends React.Component {
   }
 
   statusType(subsidy) {
-    if (subsidy.status == -1 || subsidy.adminApprovalStatus == -1) {
-      return 'DECLINED';
+    switch (subsidy.status) {
+      case 0: return 'PENDING';
+      case 1: return 'SCHOOL APPROVED';
+      case 2: return 'SCHOOL DECLINED';
+      case 3: return 'PREAPPROVED';
+      case 4: return 'DECLINED';
+      case 5: return 'APPROVED';
+      case -1: return 'CANCELLED';
+      default: return '';
     }
-    if (subsidy.adminApprovalStatus == 1) {
-      return 'APPROVED';
-    }
-    if (subsidy.status == 1) {
-      return 'SCHOOL APPROVED';
-    }
-    return 'PENDING';
   }
 
   clearFilter = () => {
@@ -170,7 +170,6 @@ class SubsidyManager extends React.Component {
       {
         title: 'Student Grade',
         key: 'grade',
-        align: 'center',
         render: (a) => <span>{a.student.currentGrade}</span>
       },
       {
