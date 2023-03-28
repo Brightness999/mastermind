@@ -1,13 +1,15 @@
 import React from 'react';
 import { Row, Form, Button, Input, message } from 'antd';
 import intl from 'react-intl-universal';
-import messages from '../../messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { BsCheck, BsDot, BsX } from 'react-icons/bs';
+import Cookies from 'js-cookie';
+
+import messages from '../../messages';
+import msgLogin from '../../../../Sign/Login/messages';
 import request from '../../../../../utils/api/request';
 import { changePassword } from '../../../../../utils/api/apiList';
-import Cookies from 'js-cookie';
 
 const notCheck = 0;
 const valid = 1;
@@ -61,7 +63,7 @@ class ChangePassword extends React.Component {
         numberStatus: notCheck,
         commonStatus: notCheck,
       });
-      return Promise.reject(intl.formatMessage(messages.passwordMessage));
+      return Promise.reject(intl.formatMessage(msgLogin.passwordMessage));
     }
 
     if (!value || lowercaseRegExp.test(value)) {
@@ -141,7 +143,7 @@ class ChangePassword extends React.Component {
               name="password"
               label="Current Password"
               className='float-label-item'
-              rules={[{ required: true, message: intl.formatMessage(messages.passwordMessage) }]}
+              rules={[{ required: true, message: intl.formatMessage(msgLogin.passwordMessage) }]}
             >
               <Input.Password placeholder={intl.formatMessage(messages.passwordCurrent)} />
             </Form.Item>

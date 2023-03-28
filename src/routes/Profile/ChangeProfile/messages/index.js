@@ -643,10 +643,6 @@ export default ({
     id: `${scope}.passwordValidMessage`,
     defaultMessage: 'Your password is not valid',
   },
-  passwordMessage: {
-    id: `${scope}.passwordMessage`,
-    defaultMessage: 'Please enter your password.',
-  },
   dayWork: {
     id: `${scope}.dayWork`,
     defaultMessage: 'Day work',

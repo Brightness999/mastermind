@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Form, Button, Input, Select, Switch, Divider, Upload, message, Modal } from 'antd';
+import { Row, Col, Form, Button, Input, Select, Switch, Upload, message, Modal } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
@@ -102,7 +102,7 @@ class ModalNewSubsidyRequest extends React.Component {
 		const { skillSet, listSchools, dependents, isRequestRav } = this.state;
 		const modalProps = {
 			className: 'modal-new-subsidy',
-			title: intl.formatMessage(msgCreateAccount.subsidyRequest),
+			title: (<span className='font-20'>{intl.formatMessage(msgCreateAccount.subsidyRequest)}</span>),
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
@@ -211,14 +211,6 @@ class ModalNewSubsidyRequest extends React.Component {
 									</Col>
 								</Row>
 							)}
-							<Form.Item
-								name="requestContactRav"
-								label={intl.formatMessage(messages.requestContactRav)}
-								className="float-label-item"
-							>
-								<Input placeholder={intl.formatMessage(messages.requestContactRav)} />
-							</Form.Item>
-							<Divider style={{ marginTop: 0, marginBottom: 15, borderColor: '#d7d7d7' }} />
 							<Form.Item
 								name="note"
 								label={intl.formatMessage(messages.generalNotes)}

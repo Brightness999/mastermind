@@ -10,6 +10,7 @@ import { compose } from 'redux';
 
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
+import msgLogin from '../../routes/Sign/Login/messages';
 import { url } from '../../utils/api/baseUrl';
 import request from '../../utils/api/request';
 import { getAllConsultantForParent, getAuthorizationUrl, rescheduleAppointmentForParent } from '../../utils/api/apiList';
@@ -364,7 +365,7 @@ class ModalCurrentReferralService extends React.Component {
 									name='phoneNumber'
 									label={intl.formatMessage(msgCreateAccount.contactNumber)}
 									rules={[
-										{ required: !isGoogleMeet, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
+										{ required: !isGoogleMeet, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
 										{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
 									]}
 									className={`${isGoogleMeet ? 'd-none' : ''}`}

@@ -201,10 +201,6 @@ export default {
     id: `${scope}.notes`,
     defaultMessage: 'Notes',
   },
-  pleaseEnter: {
-    id: `${scope}.pleaseEnter`,
-    defaultMessage: 'Please enter your',
-  },
   pleaseSelect: {
     id: `${scope}.pleaseSelect`,
     defaultMessage: 'Please select your',

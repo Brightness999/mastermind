@@ -6,6 +6,7 @@ import 'moment/locale/en-au';
 import TextArea from 'antd/lib/input/TextArea';
 
 import messages from './messages';
+import msgLogin from '../../routes/Sign/Login/messages';
 import { store } from '../../redux/store';
 import './style/index.less';
 import '../../assets/styles/login.less';
@@ -63,7 +64,7 @@ class ModalNewScreening extends React.Component {
                   name="phoneNumber"
                   label={intl.formatMessage(messages.phone)}
                   rules={[
-                    { required: true, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
+                    { required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.contactNumber) },
                     { pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
                   ]}
                 >
@@ -90,7 +91,7 @@ class ModalNewScreening extends React.Component {
                 <Form.Item
                   name="notes"
                   label={intl.formatMessage(messages.notes)}
-                  rules={[{ required: true, message: intl.formatMessage(messages.pleaseEnter) + ' ' + intl.formatMessage(messages.notes) }]}
+                  rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.notes) }]}
                 >
                   <TextArea placeholder={intl.formatMessage(messages.notes)} rows={5} />
                 </Form.Item>
