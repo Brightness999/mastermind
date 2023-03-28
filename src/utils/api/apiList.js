@@ -1,4 +1,3 @@
-
 export const userSignUp = 'users/signup'
 export const checkEmailRegistered = 'users/check_email_registered'
 export const getDependents = 'users/get_dependents'
@@ -18,6 +17,7 @@ export const forgotPassword = 'users/forgot_password'
 export const confirmForgotPassword = 'users/confirm_forgot_password'
 export const getDataForCreatingUser = 'users/get_data_for_creating_user'
 export const setNotificationTime = 'users/set_notification_time'
+export const closeNotification = 'users/close_notification'
 
 export const getAppointmentsForAdmin = 'admin/get_appointments'
 export const getAppointmentsInMonthForAdmin = 'admin/get_appointments_in_month'
@@ -44,6 +44,7 @@ export const updateConsultantAvailability = 'consultants/update_consultant_avail
 export const claimConsultation = 'consultants/claim_consultation'
 export const switchConsultation = 'consultants/switch_consultation'
 export const removeConsultation = 'consultants/remove_consultation'
+export const checkNotificationForConsultant = 'consultants/check_notification'
 
 export const getCommunitiServer = 'schools/get_list_communites'
 export const getSchoolInfos = 'schools/get_school_infos'
@@ -82,7 +83,6 @@ export const createAppointmentForParent = 'clients/create_appoinment'
 export const getAllSchoolsForParent = 'clients/get_all_schools'
 export const getDefaultValueForClient = 'clients/get_default_value_for_client'
 export const checkNotificationForClient = 'clients/check_notification'
-export const closeNotificationForClient = 'clients/close_notification'
 export const cancelAppointmentForParent = 'clients/cancel_appoint'
 export const changeTimeAppointForParent = 'clients/change_time_appoint'
 export const updateAppointmentNotesForParent = 'clients/update_appointment_notes'

@@ -30,7 +30,7 @@ import PanelAppointment from './PanelAppointment';
 import PanelSubsidaries from './PanelSubsidaries';
 import { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
 import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
-import { checkNotificationForClient, checkNotificationForProvider, clearFlag, closeNotificationForClient, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
+import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import Subsidaries from './school';
 import PageLoading from '../../../components/Loading/PageLoading';
 import './index.less';
@@ -111,13 +111,13 @@ class Dashboard extends React.Component {
     this.getMyAppointments(user.role);
     this.props.getSubsidyRequests({ role: user.role });
     const notifications = setInterval(() => {
-      if (user.role == 3) {
+      if (user.role === 3) {
         request.post(checkNotificationForClient).then(res => {
           const { success, data } = res;
           if (success) {
             data?.forEach(appointment => {
               let duration = appointment.provider?.duration ?? 30;
-              if (appointment.type == 2) {
+              if (appointment.type === 2) {
                 duration = appointment.provider?.separateEvaluateDuration;
               }
               const key = `open${Date.now()}`;
@@ -151,13 +151,13 @@ class Dashboard extends React.Component {
           }
         })
       }
-      if (user.role == 30) {
+      if (user.role === 30) {
         request.post(checkNotificationForProvider).then(res => {
           const { success, data } = res;
           if (success) {
             data?.forEach(appointment => {
               let duration = appointment.provider?.duration;
-              if (appointment.type == 2) {
+              if (appointment.type === 2) {
                 duration = appointment.provider?.separateEvaluateDuration;
               }
               const key = `open${Date.now()}`;
@@ -175,11 +175,47 @@ class Dashboard extends React.Component {
                   <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.what)}: </span>{appointment?.skillSet?.name ?? ''}</p>
                   <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.who)}: </span>{appointment?.dependent?.firstName ?? ''} {appointment?.dependent?.lastName ?? ''}</p>
                   <p className='font-15 nobr'><span className='text-bold'>{intl.formatMessage(msgDrawer.when)}: </span>{moment(appointment?.date).format('MM/DD/YYYY hh:mm a')} - {moment(appointment?.date).clone().add(duration, 'minutes').format('hh:mm a')}</p>
-                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.where)}: </span>{appointment?.location ?? ''}</p>
+                  <p className='font-15'><span className='text-bold'>{appointment?.type === 2 ? intl.formatMessage(msgDrawer.phonenumber) : intl.formatMessage(msgDrawer.where)}: </span>{appointment?.type === 2 ? appointment.phoneNumber ?? '' : appointment?.location ?? ''}</p>
                 </div>
               )
               notification.open({
-                message: 'Notification',
+                message: '',
+                description,
+                btn,
+                key,
+                duration: 0,
+                placement: 'top',
+              });
+            })
+          }
+        })
+      }
+      if (user.role === 100) {
+        request.post(checkNotificationForConsultant).then(res => {
+          const { success, data } = res;
+          if (success) {
+            data?.forEach(appointment => {
+              let duration = 30;
+              const key = `open${Date.now()}`;
+              const btn = (
+                <Button type="primary" size="middle" onClick={() => {
+                  notification.close(key);
+                  this.handleCloseNotification(appointment._id);
+                }}>
+                  Confirm
+                </Button>
+              );
+              const description = (
+                <div>
+                  <p className='font-15 text-bold'>{intl.formatMessage(msgModal.consultation)}</p>
+                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.what)}: </span>{appointment?.skillSet?.name ?? ''}</p>
+                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.who)}: </span>{appointment?.dependent?.firstName ?? ''} {appointment?.dependent?.lastName ?? ''}</p>
+                  <p className='font-15 nobr'><span className='text-bold'>{intl.formatMessage(msgDrawer.when)}: </span>{moment(appointment?.date).format('MM/DD/YYYY hh:mm a')} - {moment(appointment?.date).clone().add(duration, 'minutes').format('hh:mm a')}</p>
+                  <p className='font-15'><span className='text-bold'>{appointment?.meetingLink ? intl.formatMessage(msgDrawer.meeting) : intl.formatMessage(msgDrawer.phonenumber)}: </span>{appointment?.meetingLink ? appointment?.meetingLink ?? '' : appointment?.phoneNumber ?? ''}</p>
+                </div>
+              )
+              notification.open({
+                message: '',
                 description,
                 btn,
                 key,
@@ -220,7 +256,7 @@ class Dashboard extends React.Component {
   }
 
   handleCloseNotification = (id) => {
-    request.post(closeNotificationForClient, { appointmentId: id }).catch(err => {
+    request.post(closeNotification, { appointmentId: id }).catch(err => {
       console.log('close notification error---', err);
     })
   }
