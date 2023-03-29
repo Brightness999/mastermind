@@ -71,32 +71,32 @@ const Subsidaries = (props) => {
 
   const pendingColumns = [
     {
-      title: 'Name',
+      title: <span className="font-16">Name</span>,
       key: 'name',
       align: 'center',
       fixed: 'left',
       render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
     },
     {
-      title: 'Student Grade',
+      title: <span className="font-16">Student Grade</span>,
       key: 'grade',
       align: 'center',
       render: (subsidy) => <span>{subsidy.student.currentGrade}</span>
     },
     {
-      title: 'Service requested',
+      title: <span className="font-16">Service Requested</span>,
       key: 'skillSet',
       align: 'center',
       render: (subsidy) => <span>{subsidy.skillSet.name}</span>
     },
     {
-      title: 'Note',
+      title: <span className="font-16">Note</span>,
       key: 'note',
       align: 'center',
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: 'Providers',
+      title: <span className="font-16">Providers</span>,
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
@@ -108,7 +108,7 @@ const Subsidaries = (props) => {
       )
     },
     {
-      title: 'Action',
+      title: <span className="font-16">Action</span>,
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
@@ -122,32 +122,32 @@ const Subsidaries = (props) => {
 
   const schoolApprovedColumns = [
     {
-      title: 'Name',
+      title: <span className="font-16">Name</span>,
       key: 'name',
       align: 'center',
       fixed: 'left',
       render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
     },
     {
-      title: 'Student Grade',
+      title: <span className="font-16">Student Grade</span>,
       key: 'grade',
       align: 'center',
       render: (subsidy) => <span>{subsidy.student.currentGrade}</span>
     },
     {
-      title: 'Service requested',
+      title: <span className="font-16">Service Requested</span>,
       key: 'skillSet',
       align: 'center',
       render: (subsidy) => <span>{subsidy.skillSet.name}</span>
     },
     {
-      title: 'Note',
+      title: <span className="font-16">Note</span>,
       key: 'note',
       align: 'center',
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: 'Recommended Provider',
+      title: <span className="font-16">Recommended Provider</span>,
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
@@ -155,7 +155,7 @@ const Subsidaries = (props) => {
       )
     },
     {
-      title: 'Action',
+      title: <span className="font-16">Action</span>,
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
@@ -169,32 +169,32 @@ const Subsidaries = (props) => {
 
   const schoolDeclinedColumns = [
     {
-      title: 'Name',
+      title: <span className="font-16">Name</span>,
       key: 'name',
       align: 'center',
       fixed: 'left',
       render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
     },
     {
-      title: 'Student Grade',
+      title: <span className="font-16">Student Grade</span>,
       key: 'grade',
       align: 'center',
       render: (subsidy) => <span>{subsidy.student.currentGrade}</span>
     },
     {
-      title: 'Service requested',
+      title: <span className="font-16">Service Requested</span>,
       key: 'skillSet',
       align: 'center',
       render: (subsidy) => <span>{subsidy.skillSet.name}</span>
     },
     {
-      title: 'Note',
+      title: <span className="font-16">Note</span>,
       key: 'note',
       align: 'center',
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: 'Providers',
+      title: <span className="font-16">Providers</span>,
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
@@ -209,32 +209,32 @@ const Subsidaries = (props) => {
 
   const adminPreApprovedColumns = [
     {
-      title: 'Name',
+      title: <span className="font-16">Name</span>,
       key: 'name',
       align: 'center',
       fixed: 'left',
       render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
     },
     {
-      title: 'Student Grade',
+      title: <span className="font-16">Student Grade</span>,
       key: 'grade',
       align: 'center',
       render: (subsidy) => <span>{subsidy.student.currentGrade}</span>
     },
     {
-      title: 'Service requested',
+      title: <span className="font-16">Service Requested</span>,
       key: 'skillSet',
       align: 'center',
       render: (subsidy) => <span>{subsidy.skillSet.name}</span>
     },
     {
-      title: 'Note',
+      title: <span className="font-16">Note</span>,
       key: 'note',
       align: 'center',
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: 'Recommended Provider',
+      title: <span className="font-16">Recommended Provider</span>,
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
@@ -245,32 +245,32 @@ const Subsidaries = (props) => {
 
   const adminApprovedColumns = [
     {
-      title: 'Name',
+      title: <span className="font-16">Name</span>,
       key: 'name',
       align: 'center',
       fixed: 'left',
       render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
     },
     {
-      title: 'Student Grade',
+      title: <span className="font-16">Student Grade</span>,
       key: 'grade',
       align: 'center',
       render: (subsidy) => <span>{subsidy.student.currentGrade}</span>
     },
     {
-      title: 'Service requested',
+      title: <span className="font-16">Service Requested</span>,
       key: 'skillSet',
       align: 'center',
       render: (subsidy) => <span>{subsidy.skillSet.name}</span>
     },
     {
-      title: 'Note',
+      title: <span className="font-16">Note</span>,
       key: 'note',
       align: 'center',
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: 'Recommended Provider',
+      title: <span className="font-16">Recommended Provider</span>,
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
@@ -281,32 +281,32 @@ const Subsidaries = (props) => {
 
   const adminDeclinedColumns = [
     {
-      title: 'Name',
+      title: <span className="font-16">Name</span>,
       key: 'name',
       align: 'center',
       fixed: 'left',
       render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
     },
     {
-      title: 'Student Grade',
+      title: <span className="font-16">Student Grade</span>,
       key: 'grade',
       align: 'center',
       render: (subsidy) => <span>{subsidy.student.currentGrade}</span>
     },
     {
-      title: 'Service requested',
+      title: <span className="font-16">Service Requested</span>,
       key: 'skillSet',
       align: 'center',
       render: (subsidy) => <span>{subsidy.skillSet.name}</span>
     },
     {
-      title: 'Note',
+      title: <span className="font-16">Note</span>,
       key: 'note',
       align: 'center',
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: 'Recommended Provider',
+      title: <span className="font-16">Recommended Provider</span>,
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
@@ -339,7 +339,7 @@ const Subsidaries = (props) => {
   const items = [
     {
       key: '1',
-      label: 'Pending',
+      label: <span className="font-16">Pending</span>,
       children: (
         <Table
           bordered
@@ -347,14 +347,14 @@ const Subsidaries = (props) => {
           dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={pendingColumns}
           scroll={{ x: 1300 }}
-          className='mt-2'
+          className='mt-2 pb-10'
           pagination={false}
         />
       ),
     },
     {
       key: '2',
-      label: 'Approved',
+      label: <span className="font-16">Approved</span>,
       children: (
         <div className="approved-list">
           <DndProvider backend={HTML5Backend}>
@@ -372,7 +372,7 @@ const Subsidaries = (props) => {
                 return attr;
               }}
               scroll={{ x: 1300 }}
-              className='mt-2'
+              className='mt-2 pb-10'
               pagination={false}
             />
           </DndProvider>
@@ -381,7 +381,7 @@ const Subsidaries = (props) => {
     },
     {
       key: '3',
-      label: 'Declined',
+      label: <span className="font-16">Declined</span>,
       children: (
         <Table
           bordered
@@ -389,14 +389,14 @@ const Subsidaries = (props) => {
           dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={schoolDeclinedColumns}
           scroll={{ x: 1300 }}
-          className='mt-2'
+          className='mt-2 pb-10'
           pagination={false}
         />
       ),
     },
     {
       key: '4',
-      label: 'Admin Pre-Approved',
+      label: <span className="font-16">Admin Pre-Approved</span>,
       children: (
         <Table
           bordered
@@ -404,14 +404,14 @@ const Subsidaries = (props) => {
           dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={adminPreApprovedColumns}
           scroll={{ x: 1300 }}
-          className='mt-2'
+          className='mt-2 pb-10'
           pagination={false}
         />
       ),
     },
     {
       key: '5',
-      label: 'Admin Declined',
+      label: <span className="font-16">Admin Declined</span>,
       children: (
         <Table
           bordered
@@ -419,14 +419,14 @@ const Subsidaries = (props) => {
           dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={adminDeclinedColumns}
           scroll={{ x: 1300 }}
-          className='mt-2'
+          className='mt-2 pb-10'
           pagination={false}
         />
       ),
     },
     {
       key: '6',
-      label: 'Admin Approved',
+      label: <span className="font-16">Admin Approved</span>,
       children: (
         <Table
           bordered
@@ -434,7 +434,7 @@ const Subsidaries = (props) => {
           dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={adminApprovedColumns}
           scroll={{ x: 1300 }}
-          className='mt-2'
+          className='mt-2 pb-10'
           pagination={false}
         />
       ),
