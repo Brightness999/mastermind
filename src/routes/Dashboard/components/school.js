@@ -16,7 +16,7 @@ const Subsidaries = (props) => {
   const [requests, setRequests] = useState(props.listSubsidaries?.filter(s => s.status == 0));
   const [status, setStatus] = useState(0);
   const [providers, setProviders] = useState([]);
-  const [selectedSubsidy, setSelectedSubsidy] = useState({});
+  const [selectedSubsidyId, setSelectedSubsidyId] = useState({});
   const [visibleSubsidy, setVisibleSubsidy] = useState(false);
 
   const DraggableBodyRow = ({ index, moveRow, className, style, ...restProps }) => {
@@ -60,8 +60,8 @@ const Subsidaries = (props) => {
     );
   };
 
-  const onShowModalSubsidy = (subsidy) => {
-    setSelectedSubsidy(subsidy);
+  const onShowModalSubsidy = (subsidyId) => {
+    setSelectedSubsidyId(subsidyId);
     setVisibleSubsidy(true);
   }
 
@@ -112,7 +112,7 @@ const Subsidaries = (props) => {
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => onShowModalSubsidy(subsidy)}>Edit</a>
+          <a className='btn-blue' onClick={() => onShowModalSubsidy(subsidy._id)}>Edit</a>
         </Space>
       ),
       align: 'center',
@@ -159,7 +159,7 @@ const Subsidaries = (props) => {
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => onShowModalSubsidy(subsidy)}>Edit</a>
+          <a className='btn-blue' onClick={() => onShowModalSubsidy(subsidy._id)}>Edit</a>
         </Space>
       ),
       align: 'center',
@@ -478,11 +478,17 @@ const Subsidaries = (props) => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (props.subsidyId) {
+      onShowModalSubsidy(props.subsidyId)
+    }
+  }, [props.subsidyId]);
+
   const modalSubsidyProps = {
     visible: visibleSubsidy,
     onSubmit: onCloseModalSubsidy,
     onCancel: onCloseModalSubsidy,
-    subsidyId: selectedSubsidy?._id,
+    subsidyId: selectedSubsidyId,
     openReferral: onShowModalReferral,
     openHierachy: openHierachyModal,
   }

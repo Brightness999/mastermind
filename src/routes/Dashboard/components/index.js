@@ -309,7 +309,7 @@ class Dashboard extends React.Component {
     });
 
     this.socket.on('socket_result', data => {
-      console.log('socket result', data);
+      console.log('socket result');
       this.handleSocketResult(data);
     })
 
@@ -322,11 +322,11 @@ class Dashboard extends React.Component {
     notification.open({
       message: 'You have new Subsidy',
       duration: 10,
-      description:
-        'A parent has sent 1 subsidy request, press for view.',
+      description: 'A parent has sent 1 subsidy request, press for view.',
       onClick: () => {
         console.log('Notification Clicked!');
         this.onShowModalSubsidy(data.data._id);
+        notification.destroy();
       },
     });
   }
@@ -335,11 +335,11 @@ class Dashboard extends React.Component {
     notification.open({
       message: 'Subsidy Status changed',
       duration: 10,
-      description:
-        'Press for check subsidy progress.',
+      description: 'Press for check subsidy progress.',
       onClick: () => {
         console.log('Notification Clicked!');
         this.onShowModalSubsidy(data);
+        notification.destroy();
       },
     });
   }
@@ -348,8 +348,7 @@ class Dashboard extends React.Component {
     notification.open({
       message: 'You have new Appointment',
       duration: 10,
-      description:
-        `A parent has sent 1 ${data.type == 1 ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data.type == 1 ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data.type == 3 ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data.type == 4 ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data.type == 5 ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''}, press for view.`,
+      description: `A parent has sent 1 ${data.type == 1 ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data.type == 1 ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data.type == 3 ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data.type == 4 ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data.type == 5 ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''}, press for view.`,
       onClick: () => {
         this.setState({ userDrawerVisible: true, selectedEvent: this.state.listAppointmentsRecent?.find(a => a._id == data?._id) });
         notification.destroy();
@@ -361,8 +360,7 @@ class Dashboard extends React.Component {
     notification.open({
       message: data.type.toUpperCase(),
       duration: 10,
-      description:
-        `1 ${data?.appointment?.type == 1 ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data?.appointment?.type == 1 ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data?.appointment?.type == 3 ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data?.appointment?.type == 4 ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data?.appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''} has been ${data.type}, press for view.`,
+      description: `1 ${data?.appointment?.type == 1 ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data?.appointment?.type == 1 ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data?.appointment?.type == 3 ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data?.appointment?.type == 4 ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data?.appointment?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''} has been ${data.type}, press for view.`,
       onClick: () => {
         this.setState({ userDrawerVisible: true, selectedEvent: this.state.listAppointmentsRecent?.find(a => a._id == data?.appointment?._id) });
         notification.destroy();
@@ -384,10 +382,12 @@ class Dashboard extends React.Component {
         this.showNotificationForAppointmentUpdate(data.data);
         return;
       case 'new_subsidy_request_from_client':
+        this.props.getSubsidyRequests({ role: userRole });
         this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true);
         this.showNotificationForSubsidy(data);
         return;
       case 'subsidy_change_status':
+        this.props.getSubsidyRequests({ role: userRole });
         this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true);
         this.showNotificationForSubsidyChange(data.data);
         return;
@@ -930,7 +930,7 @@ class Dashboard extends React.Component {
     }
 
     if (userRole == 60) {
-      return <Subsidaries />
+      return <Subsidaries subsidyId={subsidyId} />
     } else {
       return (
         <div className="full-layout page dashboard-page">
