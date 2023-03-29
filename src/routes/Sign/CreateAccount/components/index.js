@@ -78,7 +78,7 @@ export default class extends React.Component {
     switch (type) {
       case intl.formatMessage(messages.parent):
         return (
-          <Steps current={this.state.currentStep} responsive={true} style={{ maxWidth: 450 }} items={[
+          <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 450 }} items={[
             { title: intl.formatMessage(messages.accountInfo), icon: (<p>1</p>) },
             { title: intl.formatMessage(messages.contactInfo), icon: (<p>2</p>) },
             { title: intl.formatMessage(messages.dependentsInfo), icon: (<p>3</p>) },

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal, Button } from 'antd';
 import intl from 'react-intl-universal';
+
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import './style/index.less';
@@ -13,7 +14,7 @@ class ModalConfirm extends React.Component {
 			title: "Confirm",
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
-			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
+			onCancel: this.props.onCancel,
 			footer: [
 				<Button key="back" onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel)}

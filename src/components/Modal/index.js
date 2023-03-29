@@ -23,6 +23,7 @@ import ModalPayment from './ModalPayment';
 import ModalFeedback from './ModalFeedback';
 import ModalEvaluationProcess from './ModalEvaluationProcess';
 import ModalNewScreening from './ModalNewScreening';
+import ModalSchoolSubsidyApproval from './ModalSchoolSubsidyApproval';
 
 export {
   ModalCreateDone,
@@ -50,4 +51,5 @@ export {
   ModalFeedback,
   ModalEvaluationProcess,
   ModalNewScreening,
+  ModalSchoolSubsidyApproval,
 }

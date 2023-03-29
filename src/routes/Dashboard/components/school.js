@@ -1,14 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Space, Table, Tabs } from "antd";
+import { message, Space, Table, Tabs } from "antd";
 import update from 'immutability-helper';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import request from "../../../utils/api/request";
-import { getAllProviderInSchool, reorderRequests } from "../../../utils/api/apiList";
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { ModalSubsidyProgress } from "../../../components/Modal";
-import { getSubsidyRequests } from "../../../redux/features/appointmentsSlice";
+import moment from 'moment';
+
+import request from "../../../utils/api/request";
+import { acceptSubsidyRequest, denySubsidyRequest, getAllProviderInSchool, reorderRequests } from "../../../utils/api/apiList";
+import { ModalConfirm, ModalSchoolSubsidyApproval, ModalSubsidyProgress } from "../../../components/Modal";
+import { getSubsidyRequests, setSubsidyRequests } from "../../../redux/features/appointmentsSlice";
 
 const Subsidaries = (props) => {
   const type = 'DraggableBodyRow';
@@ -18,6 +20,8 @@ const Subsidaries = (props) => {
   const [providers, setProviders] = useState([]);
   const [selectedSubsidyId, setSelectedSubsidyId] = useState({});
   const [visibleSubsidy, setVisibleSubsidy] = useState(false);
+  const [visibleConfirm, setVisibleConfirm] = useState(false);
+  const [visibleSchoolApproval, setVisibleSchoolApproval] = useState(false);
 
   const DraggableBodyRow = ({ index, moveRow, className, style, ...restProps }) => {
     const ref = useRef(null);
@@ -96,23 +100,18 @@ const Subsidaries = (props) => {
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: <span className="font-16">Providers</span>,
-      key: 'provider',
+      title: <span className="font-16">Request Date</span>,
+      key: 'createdAt',
       align: 'center',
-      render: (subsidy) => (
-        <div>
-          {providers?.filter(provider => provider?.skillSet?.find(skill => skill === subsidy.skillSet?._id))?.map((provider, index) => (
-            <div key={index}>{provider.firstName} {provider.lastName}</div>
-          ))}
-        </div>
-      )
+      render: (subsidy) => <span>{moment(subsidy.createdAt).format('MM/DD/YYYY hh:mm A')}</span>
     },
     {
       title: <span className="font-16">Action</span>,
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => onShowModalSubsidy(subsidy._id)}>Edit</a>
+          <a className='btn-blue' onClick={() => onShowModalSchoolApproval(subsidy?._id)}>Approve</a>
+          <a className='btn-blue' onClick={() => onShowModalConfirm(subsidy?._id)}>Decline</a>
         </Space>
       ),
       align: 'center',
@@ -147,12 +146,18 @@ const Subsidaries = (props) => {
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: <span className="font-16">Recommended Provider</span>,
+      title: <span className="font-16">Provider</span>,
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
         <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
       )
+    },
+    {
+      title: <span className="font-16">Approval Date</span>,
+      key: 'approvalDate',
+      align: 'center',
+      render: (subsidy) => <span>{moment(subsidy.schoolApprovalDate).format('MM/DD/YYYY hh:mm A')}</span>
     },
     {
       title: <span className="font-16">Action</span>,
@@ -193,18 +198,6 @@ const Subsidaries = (props) => {
       align: 'center',
       render: (subsidy) => <span>{subsidy.note}</span>
     },
-    {
-      title: <span className="font-16">Providers</span>,
-      key: 'provider',
-      align: 'center',
-      render: (subsidy) => (
-        <div>
-          {providers?.filter(provider => provider?.skillSet?.find(skill => skill == subsidy.skillSet?._id))?.map((provider, index) => (
-            <div key={index}>{provider.firstName} {provider.lastName}</div>
-          ))}
-        </div>
-      )
-    },
   ];
 
   const adminPreApprovedColumns = [
@@ -234,7 +227,7 @@ const Subsidaries = (props) => {
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: <span className="font-16">Recommended Provider</span>,
+      title: <span className="font-16">Provider</span>,
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
@@ -270,7 +263,13 @@ const Subsidaries = (props) => {
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: <span className="font-16">Recommended Provider</span>,
+      title: <span className="font-16">Approval Date</span>,
+      key: 'approvalDate',
+      align: 'center',
+      render: (subsidy) => <span>{moment(subsidy.approvalDate).format('MM/DD/YYYY hh:mm A')}</span>
+    },
+    {
+      title: <span className="font-16">Provider</span>,
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
@@ -306,7 +305,7 @@ const Subsidaries = (props) => {
       render: (subsidy) => <span>{subsidy.note}</span>
     },
     {
-      title: <span className="font-16">Recommended Provider</span>,
+      title: <span className="font-16">Provider</span>,
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
@@ -348,6 +347,10 @@ const Subsidaries = (props) => {
           columns={pendingColumns}
           scroll={{ x: 1300 }}
           className='mt-2 pb-10'
+          onRow={(subsidy) => ({
+            onClick: (e) => e.target.className !== 'btn-blue' && onShowModalSubsidy(subsidy?._id),
+            onDoubleClick: (e) => e.target.className !== 'btn-blue' && onShowModalSubsidy(subsidy?._id),
+          })}
           pagination={false}
         />
       ),
@@ -404,6 +407,10 @@ const Subsidaries = (props) => {
           dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={adminPreApprovedColumns}
           scroll={{ x: 1300 }}
+          onRow={(subsidy) => ({
+            onClick: (e) => e.target.className !== 'btn-blue' && onShowModalSubsidy(subsidy?._id),
+            onDoubleClick: (e) => e.target.className !== 'btn-blue' && onShowModalSubsidy(subsidy?._id),
+          })}
           className='mt-2 pb-10'
           pagination={false}
         />
@@ -434,6 +441,10 @@ const Subsidaries = (props) => {
           dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={adminApprovedColumns}
           scroll={{ x: 1300 }}
+          onRow={(subsidy) => ({
+            onClick: (e) => e.target.className !== 'btn-blue' && onShowModalSubsidy(subsidy?._id),
+            onDoubleClick: (e) => e.target.className !== 'btn-blue' && onShowModalSubsidy(subsidy?._id),
+          })}
           className='mt-2 pb-10'
           pagination={false}
         />
@@ -460,6 +471,67 @@ const Subsidaries = (props) => {
     if (requestIds?.length > 0 && orders?.length > 0 && requestIds?.length === orders?.length) {
       request.post(reorderRequests, { requestIds, orders }).then(res => res.success && props.dispatch(getSubsidyRequests({ role: user.role })));
     }
+  }
+
+  const onShowModalConfirm = (subsidyId) => {
+    setVisibleConfirm(true);
+    setSelectedSubsidyId(subsidyId);
+  }
+
+  const onCloseModalConfirm = () => {
+    setVisibleConfirm(false);
+  }
+
+  const onShowModalSchoolApproval = (subsidyId) => {
+    setVisibleSchoolApproval(true);
+    setSelectedSubsidyId(subsidyId);
+  }
+
+  const onCloseModalSchoolApproval = () => {
+    setVisibleSchoolApproval(false);
+  }
+
+  const schoolAcceptSubsidy = (data) => {
+    const { selectedProvider, decisionExplanation } = data;
+    setVisibleSchoolApproval(false);
+
+    request.post(acceptSubsidyRequest, {
+      subsidyId: selectedSubsidyId,
+      student: requests?.find(a => a._id === selectedSubsidyId)?.student?._id,
+      selectedProvider,
+      decisionExplanation,
+    }).then(result => {
+      const { success, data } = result;
+      if (success) {
+        const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidaries));
+        props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
+          if (s._id === selectedSubsidyId) {
+            s.status = data.status;
+          }
+          return s;
+        })));
+      }
+    }).catch(err => {
+      message.error(err.message);
+    })
+  }
+
+  const schoolDenySubsidy = () => {
+    setVisibleConfirm(false);
+    request.post(denySubsidyRequest, { subsidyId: selectedSubsidyId }).then(result => {
+      const { success, data } = result;
+      if (success) {
+        const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidaries));
+        props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
+          if (s._id === selectedSubsidyId) {
+            s.status = data.status;
+          }
+          return s;
+        })));
+      }
+    }).catch(err => {
+      message.error(err.message);
+    })
   }
 
   useEffect(() => {
@@ -491,6 +563,22 @@ const Subsidaries = (props) => {
     subsidyId: selectedSubsidyId,
     openReferral: onShowModalReferral,
     openHierachy: openHierachyModal,
+    providers: providers,
+  }
+
+  const modalSchoolApprovalProps = {
+    visible: visibleSchoolApproval,
+    onSubmit: schoolAcceptSubsidy,
+    onCancel: onCloseModalSchoolApproval,
+    providers: providers,
+    subsidy: requests?.find(a => a._id === selectedSubsidyId),
+  }
+
+  const modalConfirmProps = {
+    visible: visibleConfirm,
+    onSubmit: schoolDenySubsidy,
+    onCancel: onCloseModalConfirm,
+    message: "Are you sure to decline this request?",
   }
 
   return (
@@ -505,6 +593,8 @@ const Subsidaries = (props) => {
       >
       </Tabs>
       {visibleSubsidy && <ModalSubsidyProgress {...modalSubsidyProps} />}
+      {visibleSchoolApproval && <ModalSchoolSubsidyApproval {...modalSchoolApprovalProps} />}
+      {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
     </div>
   );
 }
