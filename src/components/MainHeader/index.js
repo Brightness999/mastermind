@@ -101,7 +101,7 @@ class MainHeader extends Component {
       <div className='component-mainheader'>
         <div className='div-account'>
           <div className='account-icon'>
-            <Dropdown menu={{ items }} placement="bottomLeft">
+            <Dropdown menu={{ items }} placement="bottomLeft" trigger="click">
               <Badge size="small" count={6}>
                 <Avatar icon={<FaUserAlt size={17} className='text-white' />} />
               </Badge>
