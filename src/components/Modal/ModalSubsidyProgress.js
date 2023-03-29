@@ -29,7 +29,6 @@ class ModalSubsidyProgress extends React.Component {
 		currentStep: 2,
 		isApproved: true,
 		subsidy: {},
-		providers: [],
 		selectedProvider: undefined,
 		isDisableSchoolFields: false,
 		decisionExplanation: "",
@@ -56,7 +55,7 @@ class ModalSubsidyProgress extends React.Component {
 		this.loadSubsidyData(this.props.subsidyId);
 	}
 
-	loadSubsidyData = (subsidyId, isNeedLoadSchool = true) => {
+	loadSubsidyData = (subsidyId) => {
 		request.post(switchPathWithRole(this.props.auth.user?.role) + 'get_subsidy_detail', { subsidyId: subsidyId }).then(result => {
 			const { success, data } = result;
 			if (success) {
@@ -73,30 +72,12 @@ class ModalSubsidyProgress extends React.Component {
 						selectedProvider: data.selectedProvider,
 					})
 				}
-
-				if (isNeedLoadSchool) {
-					this.loadProvidersInSchool(data.school._id);
-				}
 			} else {
 				this.props.onCancel();
 			}
 		}).catch(err => {
 			console.log('get_subsidy_detail-----', err);
 			this.props.onCancel();
-		})
-	}
-
-	loadProvidersInSchool = (schoolId) => {
-		this.setState({ providers: [] });
-		request.post(getAllProviderInSchool, { schoolId: schoolId }).then(result => {
-			if (result.success) {
-				this.setState({ providers: result.data });
-			} else {
-				this.props.onCancel();
-			}
-		}).catch(err => {
-			console.log('get_all_provider_in_school-----', err);
-			this.setState({ providers: [] });
 		})
 	}
 
@@ -116,7 +97,6 @@ class ModalSubsidyProgress extends React.Component {
 	clearData = () => {
 		this.setState({
 			subsidy: {},
-			providers: [],
 			selectedProvider: undefined,
 			isDisableSchoolFields: false,
 			decisionExplanation: "",
@@ -139,7 +119,7 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(denySubsidyRequest, { subsidyId: subsidy._id }).then(result => {
 			const { success, data } = result;
 			if (success) {
-				this.loadSubsidyData(subsidy._id, false);
+				this.loadSubsidyData(subsidy._id);
 				const newSubsidyRequests = JSON.parse(JSON.stringify(this.props.listSubsidaries));
 				this.props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
 					if (s._id === subsidy._id) {
@@ -147,6 +127,7 @@ class ModalSubsidyProgress extends React.Component {
 					}
 					return s;
 				})));
+				this.props.onSubmit();
 			}
 		}).catch(err => {
 			console.log('deny_subsidy_request---', err);
@@ -156,7 +137,7 @@ class ModalSubsidyProgress extends React.Component {
 	adminDenySubsidy(subsidy) {
 		request.post(switchPathWithRole(this.props.auth.user?.role) + 'deny_subsidy_request', { subsidyId: subsidy._id }).then(result => {
 			if (result.success) {
-				this.loadSubsidyData(subsidy._id, false);
+				this.loadSubsidyData(subsidy._id);
 			}
 		}).catch(err => {
 			console.log('deny_subsidy_request---', err);
@@ -174,13 +155,13 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(acceptSubsidyRequest, {
 			subsidyId: subsidy._id,
 			student: subsidy?.student?._id,
-			selectedProvider: selectedProvider,
-			decisionExplanation: decisionExplanation,
+			selectedProvider,
+			decisionExplanation,
 		}).then(result => {
 			message.success('Approved successfully');
 			const { success, data } = result;
 			if (success) {
-				this.loadSubsidyData(subsidy._id, false);
+				this.loadSubsidyData(subsidy._id);
 				const newSubsidyRequests = JSON.parse(JSON.stringify(this.props.listSubsidaries));
 				this.props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
 					if (s._id === subsidy._id) {
@@ -188,6 +169,7 @@ class ModalSubsidyProgress extends React.Component {
 					}
 					return s;
 				})));
+				this.props.onSubmit();
 			}
 		}).catch(err => {
 			console.log('accept_subsidy_request---', err);
@@ -210,7 +192,7 @@ class ModalSubsidyProgress extends React.Component {
 		}
 		request.post(switchPathWithRole(this.props.auth.user?.role) + 'select_final_provider_for_subsidy', postData).then(result => {
 			if (result.success) {
-				this.loadSubsidyData(subsidy._id, false);
+				this.loadSubsidyData(subsidy._id);
 				this.setState({ isScheduling: false });
 			}
 		}).catch(err => {
@@ -223,7 +205,7 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(appealSubsidy, postData).then(result => {
 			message.success('Your appeal has been sent successfully');
 			if (result.success) {
-				this.loadSubsidyData(subsidy._id, false);
+				this.loadSubsidyData(subsidy._id);
 				this.setState({ isScheduling: false });
 			}
 		}).catch(err => {
@@ -276,7 +258,7 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(denyAppealSubsidy, postData).then(result => {
 			message.success('Denied successfully');
 			if (result.success) {
-				this.loadSubsidyData(subsidy._id, false);
+				this.loadSubsidyData(subsidy._id);
 			}
 		}).catch(err => {
 			console.log('deny_appeal_subsidy', err)
@@ -369,11 +351,6 @@ class ModalSubsidyProgress extends React.Component {
 							{intl.formatMessage(messages.approve).toUpperCase()}
 						</Button>
 					)}
-					{subsidy.status == 1 && this.props.auth.user?.role < 100 && subsidy.adminApprovalStatus == 0 && (
-						<Button onClick={() => { this.openHierachy(subsidy) }} size='small' type='primary'>
-							{'Hierachi'.toUpperCase()}
-						</Button>
-					)}
 				</div>
 			</div>
 		)
@@ -410,7 +387,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderSchoolInfo = (data) => {
-		const { subsidy, providers, decisionExplanation, selectedProvider } = this.state;
+		const { subsidy, decisionExplanation, selectedProvider } = this.state;
 		const { user } = this.props.auth;
 
 		if (user?.role == 3 && subsidy.status == 0) {
@@ -434,7 +411,7 @@ class ModalSubsidyProgress extends React.Component {
 								className='mb-10'
 								placeholder={intl.formatMessage(msgCreateAccount.provider)}
 							>
-								{providers?.map((provider) => (
+								{this.props.providers?.filter(provider => provider?.skillSet?.find(skill => skill === subsidy?.skillSet?._id))?.map((provider) => (
 									<Select.Option key={provider._id} value={provider._id}>{`${provider.firstName} ${provider.lastName}` || provider.referredToAs}</Select.Option>
 								))}
 							</Select>
@@ -458,7 +435,7 @@ class ModalSubsidyProgress extends React.Component {
 	renderConsulation = (data) => {
 		const { referral, subsidy } = this.state;
 
-		if (data.status == 1) {
+		if ([3, 5].includes(data.status)) {
 			if (referral.typeForAppointLocation == undefined || referral.location == undefined) {
 				return (
 					<div className='consulation-appoint'>
@@ -500,8 +477,8 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderDecision(subsidy) {
-		const { selectProviderFromAdmin, providers, numberOfSessions, priceForSession } = this.state;
-		const isNotAdmin = this.props.auth.user?.role < 999;
+		const { selectProviderFromAdmin, numberOfSessions, priceForSession } = this.state;
+		const isNotAdmin = this.props.auth.user?.role < 900;
 		if (isNotAdmin && subsidy.adminApprovalStatus != 1) {
 			return;
 		}
@@ -524,7 +501,7 @@ class ModalSubsidyProgress extends React.Component {
 							className='mb-10'
 							placeholder={intl.formatMessage(msgCreateAccount.provider)}
 						>
-							{providers?.map((provider) => (
+							{this.props.providers?.map((provider) => (
 								<Select.Option key={provider._id} value={provider._id}>{provider.name || provider.referredToAs}</Select.Option>
 							))}
 						</Select>
@@ -624,11 +601,12 @@ class ModalSubsidyProgress extends React.Component {
 					)}
 				</div>
 				<div className={subsidy.status != -2 ? '' : 'step-declined'}>
-					<Steps current={this.checkCurrentStep(subsidy)} responsive={false} style={{ maxWidth: 600 }}>
-						<Step key='request' title={intl.formatMessage(messages.request)} icon={<p>1</p>} />
-						<Step key='school' title={intl.formatMessage(msgCreateAccount.school)} icon={<p>2</p>} />
-						<Step key='consultation' title={intl.formatMessage(messages.consultation)} icon={<p>3</p>} />
-						<Step key='decision' title={intl.formatMessage(messages.decision)} icon={<p>4</p>} />
+					<Steps current={this.checkCurrentStep(subsidy)} responsive={false} style={{ maxWidth: 600 }} items={[
+						{ title: intl.formatMessage(messages.request), icon: (<p>1</p>) },
+						{ title: intl.formatMessage(msgCreateAccount.school), icon: (<p>2</p>) },
+						{ title: intl.formatMessage(messages.consultation), icon: (<p>3</p>) },
+						{ title: intl.formatMessage(messages.decision), icon: (<p>4</p>) },
+					]}>
 					</Steps>
 				</div>
 				{this.renderSubsidyData(subsidy)}
