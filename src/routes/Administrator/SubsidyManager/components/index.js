@@ -15,10 +15,7 @@ class SubsidyManager extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      listSubsidy: [],
-      currentPage: 0,
-      limit: 10,
-      totalPages: 1,
+      listSubsidy: this.props.listSubsidy,
       visibleSubsidy: false,
       visibleNewGroup: false,
       skillSet: [],
@@ -43,7 +40,6 @@ class SubsidyManager extends React.Component {
       skillSet: skillSet,
       academicLevels: academicLevels,
     });
-    this.getSubsidyPerPage();
   }
 
   generatePostData = () => {
@@ -77,14 +73,14 @@ class SubsidyManager extends React.Component {
     return postData;
   }
 
-  getSubsidyPerPage = (page = 1) => {
+  getSubsidyRequests = () => {
     const postData = this.generatePostData();
     this.setState({ loading: true });
     request.post(getAdminSubsidyRequests, postData).then(result => {
       this.setState({ loading: false });
       const { success, data } = result;
       if (success) {
-        this.setState({ currentPage: page, listSubsidy: data?.docs, totalPages: data?.docs });
+        this.setState({ listSubsidy: data?.docs });
       }
     }).catch(err => {
       this.setState({ loading: false });
@@ -115,11 +111,11 @@ class SubsidyManager extends React.Component {
       filterStatus: undefined,
       filterGrade: undefined,
       isApplyFilter: false,
-    }, this.getSubsidyPerPage);
+    }, this.getSubsidyRequests);
   }
 
   applyFilter = () => {
-    this.setState({ isApplyFilter: true }, this.getSubsidyPerPage);
+    this.setState({ isApplyFilter: true }, this.getSubsidyRequests);
   }
 
   onCloseModalSubsidy = () => {
@@ -289,7 +285,7 @@ class SubsidyManager extends React.Component {
                 <Col span={12}>
                   <Form.Item name="skillset" >
                     <Select
-                      placeholder='skillSet'
+                      placeholder='Skill'
                       onChange={v => { this.setState({ filterSkillSet: v }) }}
                     >
                       {skillSet?.map((skill, index) => (<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>))}
@@ -337,6 +333,9 @@ class SubsidyManager extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({ auth: state.auth });
+const mapStateToProps = state => ({
+  auth: state.auth,
+  listSubsidy: state.appointments.dataSubsidyRequests,
+});
 
 export default compose(connect(mapStateToProps))(SubsidyManager);
