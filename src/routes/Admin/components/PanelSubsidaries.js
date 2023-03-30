@@ -1,13 +1,16 @@
 import React from 'react';
-import { Avatar, Tabs } from 'antd';
+import { Avatar, message, Tabs } from 'antd';
 import { FaUser } from 'react-icons/fa';
-import { GiBackwardTime } from 'react-icons/gi';
 import { BsXCircle, BsViewList } from 'react-icons/bs';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
 import messages from '../../Dashboard/messages';
+import request from '../../../utils/api/request'
+import { cancelSubsidyRequest } from '../../../utils/api/apiList';
+import { getSubsidyRequests } from '../../../redux/features/appointmentsSlice';
+import { ModalCancelAppointment } from '../../../components/Modal';
 import './index.less';
 
 class PanelSubsidaries extends React.Component {
@@ -16,6 +19,8 @@ class PanelSubsidaries extends React.Component {
     this.state = {
       listSubsidaries: [],
       status: 1,
+      visibleCancel: false,
+      subsidyId: undefined,
     };
   }
 
@@ -26,18 +31,18 @@ class PanelSubsidaries extends React.Component {
   componentDidUpdate = (prevProps) => {
     if (prevProps.listSubsidaries !== this.props.listSubsidaries) {
       const { status } = this.state;
-      this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => status == 1 ? [0, 1, 3].includes(s.status) : status == 1 ? [2, 4].includes(s.status) : s.status === 5) });
+      this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => status == 1 ? [0, 1, 3].includes(s.status) : status == 1 ? [2, 4].includes(s.status) : s.status === 5) ?? [] });
     }
   }
 
   handleTabChange = (v) => {
     switch (v) {
       case "1":
-        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [0, 1, 3].includes(s.status)), status: v }); break;
+        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [0, 1, 3].includes(s.status)) ?? [], status: v }); break;
       case "2":
-        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [2, 4].includes(s.status)), status: v }); break;
+        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [2, 4].includes(s.status)) ?? [], status: v }); break;
       case "3":
-        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status === 5), status: v }); break;
+        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status === 5) ?? [], status: v }); break;
       default: break;
     }
   }
@@ -51,6 +56,29 @@ class PanelSubsidaries extends React.Component {
       case -1: return 'CANCELLED';
     }
     return '';
+  }
+
+  closeModalCancel = () => {
+    this.setState({ visibleCancel: false });
+  }
+
+  openModalCancel = (subsidyId) => {
+    this.setState({ visibleCancel: true, subsidyId });
+  }
+
+  handleConfirmCancel = () => {
+    this.setState({ visibleCancel: false }, () => {
+      const { subsidyId } = this.state;
+      if (subsidyId) {
+        request.post(cancelSubsidyRequest, { subsidyId }).then(result => {
+          if (result.success) {
+            this.props.getSubsidyRequests({ role: this.props.user?.role });
+          }
+        }).catch(error => {
+          message.error(error.message);
+        })
+      }
+    });
   }
 
   renderLeftContent(subsidy) {
@@ -74,22 +102,27 @@ class PanelSubsidaries extends React.Component {
     if (type == 0) {
       return (
         <div className='item-right'>
-          <GiBackwardTime size={19} onClick={() => { this.callOpenSubsidyDetail(subsidy) }} />
-          <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => { }} />
+          <BsViewList size={19} onClick={() => this.callOpenSubsidyDetail(subsidy)} />
+          <BsXCircle style={{ marginTop: 4 }} size={15} onClick={() => this.openModalCancel(subsidy?._id)} />
         </div>
       )
     }
     if (type == 1 || type == 2) {
       return (
         <div className='item-right'>
-          <BsViewList size={19} onClick={() => { this.callOpenSubsidyDetail(subsidy) }} />
+          <BsViewList size={19} onClick={() => this.callOpenSubsidyDetail(subsidy)} />
         </div>
       )
     }
   }
 
   render() {
-    const { listSubsidaries } = this.state;
+    const { listSubsidaries, visibleCancel } = this.state;
+    const modalCancelProps = {
+      visible: visibleCancel,
+      onSubmit: this.handleConfirmCancel,
+      onCancel: this.closeModalCancel,
+    };
 
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
@@ -105,6 +138,7 @@ class PanelSubsidaries extends React.Component {
               <span>No pending subisdy</span>
             </div>
           )}
+          {visibleCancel && <ModalCancelAppointment {...modalCancelProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.declined)} key="2">
           {listSubsidaries.length > 0 && listSubsidaries.map((subsidy, index) => (
@@ -142,7 +176,8 @@ class PanelSubsidaries extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  listSubsidaries: state.appointments.dataSubsidyRequests
+  listSubsidaries: state.appointments.dataSubsidyRequests,
+  user: state.auth.user,
 })
 
-export default compose(connect(mapStateToProps))(PanelSubsidaries);
+export default compose(connect(mapStateToProps, { getSubsidyRequests }))(PanelSubsidaries);

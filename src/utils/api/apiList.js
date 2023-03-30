@@ -106,6 +106,7 @@ export const getParentSubsidyRequests = 'clients/get_my_subsidy_requests'
 export const appealSubsidy = 'clients/appeal_subsidy'
 export const getMeetingLink = 'clients/get_meeting_link'
 export const appealRequest = 'clients/appeal_request'
+export const cancelSubsidyRequest = 'clients/cancel_subsidy_request'
 
 export const monthlyCustomAmount = 'donations/monthly_custom_amount'
 export const donationReceipt = 'donations/donation_receipt'
