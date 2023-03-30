@@ -530,8 +530,8 @@ class ModalSubsidyProgress extends React.Component {
 					</div>
 					{subsidy.status != 0 && (
 						<div style={{ width: 110, textAlign: 'right' }}>
-							{subsidy.status == 1 && subsidy.adminApprovalStatus != -1 && <p className='text-green500 font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.approved)}</p>}
-							{(subsidy.status == -1 || subsidy.adminApprovalStatus == -1) && <p className='text-red font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.declined)}</p>}
+							{[1, 3, 5].includes(subsidy.status) && <p className='text-green500 font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.approved)}</p>}
+							{[2, 4].includes(subsidy.status) && <p className='text-red font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.declined)}</p>}
 						</div>
 					)}
 				</div>

@@ -15,28 +15,29 @@ class PanelSubsidaries extends React.Component {
     super(props);
     this.state = {
       listSubsidaries: [],
-      status: 0,
+      status: 1,
     };
   }
 
   componentDidMount = () => {
-    this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status === this.state.status) });
+    this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [0, 1, 3].includes(s.status)) });
   }
 
   componentDidUpdate = (prevProps) => {
     if (prevProps.listSubsidaries !== this.props.listSubsidaries) {
-      this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status === this.state.status) });
+      const { status } = this.state;
+      this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => status == 1 ? [0, 1, 3].includes(s.status) : status == 1 ? [2, 4].includes(s.status) : s.status === 5) });
     }
   }
 
   handleTabChange = (v) => {
     switch (v) {
       case "1":
-        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [0, 1, 3].includes(s.status)) }); break;
+        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [0, 1, 3].includes(s.status)), status: v }); break;
       case "2":
-        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [2, 4].includes(s.status)) }); break;
+        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [2, 4].includes(s.status)), status: v }); break;
       case "3":
-        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status === 5) }); break;
+        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status === 5), status: v }); break;
       default: break;
     }
   }
