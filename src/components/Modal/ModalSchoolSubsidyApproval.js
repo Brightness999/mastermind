@@ -19,7 +19,7 @@ class ModalSchoolSubsidyApproval extends React.Component {
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: this.props.onCancel,
-			footer: [],
+			footer: null,
 			width: 500,
 		};
 
@@ -32,7 +32,7 @@ class ModalSchoolSubsidyApproval extends React.Component {
 						rules={[{ required: true }]}
 					>
 						<Select className='mb-10' placeholder={intl.formatMessage(messages.selectProvider)}>
-							{this.props.providers?.filter(provider => provider?.skillSet?.find(skill => skill === this.props.subsidy?.skillSet?._id))?.map((provider) => (
+							{this.props.providers?.filter(provider => provider?.skillSet?.find(skill => skill?._id === this.props.subsidy?.skillSet?._id))?.map((provider) => (
 								<Select.Option key={provider._id} value={provider._id}>{`${provider.firstName} ${provider.lastName}` || provider.referredToAs}</Select.Option>
 							))}
 						</Select>

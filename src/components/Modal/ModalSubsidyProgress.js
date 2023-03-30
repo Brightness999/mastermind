@@ -76,7 +76,6 @@ class ModalSubsidyProgress extends React.Component {
 				this.setState({ referral: {} });
 			}
 		}).catch(err => {
-			console.log('get_last_consulation-------', err);
 			this.setState({ referral: {} });
 		})
 	}
@@ -108,7 +107,7 @@ class ModalSubsidyProgress extends React.Component {
 				this.props.onSubmit();
 			}
 		}).catch(err => {
-			console.log('deny_subsidy_request---', err);
+			message.error(err.message);
 		})
 	}
 
@@ -118,7 +117,7 @@ class ModalSubsidyProgress extends React.Component {
 				this.loadSubsidyData(subsidy._id);
 			}
 		}).catch(err => {
-			console.log('deny_subsidy_request---', err);
+			message.error(err.message);
 		})
 	}
 
@@ -150,7 +149,7 @@ class ModalSubsidyProgress extends React.Component {
 				this.props.onSubmit();
 			}
 		}).catch(err => {
-			console.log('accept_subsidy_request---', err);
+			message.error(err.message);
 		})
 	}
 
@@ -173,7 +172,7 @@ class ModalSubsidyProgress extends React.Component {
 				this.loadSubsidyData(subsidy._id);
 			}
 		}).catch(err => {
-			console.log('select_final_provider_for_subsidy', err);
+			message.error(err.message);
 		})
 	}
 
@@ -185,7 +184,7 @@ class ModalSubsidyProgress extends React.Component {
 				this.loadSubsidyData(subsidy._id);
 			}
 		}).catch(err => {
-			console.log('appeal_subsidy', err)
+			message.error(err.message);
 		})
 	}
 
@@ -205,7 +204,7 @@ class ModalSubsidyProgress extends React.Component {
 				this.loadSubsidyData(subsidy._id);
 			}
 		}).catch(err => {
-			console.log('deny_appeal_subsidy', err)
+			message.error(err.message);
 		})
 	}
 
@@ -355,7 +354,7 @@ class ModalSubsidyProgress extends React.Component {
 								className='mb-10'
 								placeholder={intl.formatMessage(msgCreateAccount.provider)}
 							>
-								{this.props.providers?.filter(provider => provider?.skillSet?.find(skill => skill === subsidy?.skillSet?._id))?.map((provider) => (
+								{this.props.providers?.filter(provider => provider?.skillSet?.find(skill => skill?._id === subsidy?.skillSet?._id))?.map((provider) => (
 									<Select.Option key={provider._id} value={provider._id}>{`${provider.firstName} ${provider.lastName}` || provider.referredToAs}</Select.Option>
 								))}
 							</Select>
