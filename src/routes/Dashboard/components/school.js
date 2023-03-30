@@ -6,19 +6,21 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import moment from 'moment';
+import intl from 'react-intl-universal';
 
+import messages from '../messages';
+import msgCreateAccount from '../../Sign/CreateAccount/messages';
 import request from "../../../utils/api/request";
-import { acceptSubsidyRequest, denySubsidyRequest, getAllProviderInSchool, reorderRequests } from "../../../utils/api/apiList";
+import { acceptSubsidyRequest, denySubsidyRequest, reorderRequests } from "../../../utils/api/apiList";
 import { ModalConfirm, ModalSchoolSubsidyApproval, ModalSubsidyProgress } from "../../../components/Modal";
 import { getSubsidyRequests, setSubsidyRequests } from "../../../redux/features/appointmentsSlice";
 
 const Subsidaries = (props) => {
   const type = 'DraggableBodyRow';
-  const { user } = props.auth;
-  const [requests, setRequests] = useState(props.listSubsidaries?.filter(s => s.status == 0));
+  const { user, providers } = props.auth;
+  const [requests, setRequests] = useState(props.listSubsidaries?.filter(s => s.status === 0));
   const [status, setStatus] = useState(0);
-  const [providers, setProviders] = useState([]);
-  const [selectedSubsidyId, setSelectedSubsidyId] = useState({});
+  const [selectedSubsidyId, setSelectedSubsidyId] = useState(undefined);
   const [visibleSubsidy, setVisibleSubsidy] = useState(false);
   const [visibleConfirm, setVisibleConfirm] = useState(false);
   const [visibleSchoolApproval, setVisibleSchoolApproval] = useState(false);
@@ -75,38 +77,38 @@ const Subsidaries = (props) => {
 
   const pendingColumns = [
     {
-      title: <span className="font-16">Name</span>,
+      title: <span className="font-16">{intl.formatMessage(msgCreateAccount.name)}</span>,
       key: 'name',
       align: 'center',
       fixed: 'left',
-      render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
+      render: (subsidy) => <span>{subsidy?.student.firstName ?? ''} {subsidy?.student.lastName ?? ''}</span>,
     },
     {
-      title: <span className="font-16">Student Grade</span>,
+      title: <span className="font-16">{intl.formatMessage(messages.studentGrade)}</span>,
       key: 'grade',
       align: 'center',
-      render: (subsidy) => <span>{subsidy.student.currentGrade}</span>
+      render: (subsidy) => <span>{subsidy?.student.currentGrade}</span>
     },
     {
-      title: <span className="font-16">Service Requested</span>,
+      title: <span className="font-16">{intl.formatMessage(messages.serviceRequested)}</span>,
       key: 'skillSet',
       align: 'center',
-      render: (subsidy) => <span>{subsidy.skillSet.name}</span>
+      render: (subsidy) => <span>{subsidy?.skillSet.name}</span>
     },
     {
-      title: <span className="font-16">Note</span>,
+      title: <span className="font-16">{intl.formatMessage(msgCreateAccount.notes)}</span>,
       key: 'note',
       align: 'center',
-      render: (subsidy) => <span>{subsidy.note}</span>
+      render: (subsidy) => <span>{subsidy?.note}</span>
     },
     {
-      title: <span className="font-16">Request Date</span>,
+      title: <span className="font-16">{intl.formatMessage(messages.requestDate)}</span>,
       key: 'createdAt',
       align: 'center',
-      render: (subsidy) => <span>{moment(subsidy.createdAt).format('MM/DD/YYYY hh:mm A')}</span>
+      render: (subsidy) => <span>{moment(subsidy?.createdAt).format('MM/DD/YYYY hh:mm A')}</span>
     },
     {
-      title: <span className="font-16">Action</span>,
+      title: <span className="font-16">{intl.formatMessage(messages.action)}</span>,
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
@@ -121,32 +123,32 @@ const Subsidaries = (props) => {
 
   const schoolApprovedColumns = [
     {
-      title: <span className="font-16">Name</span>,
+      title: <span className="font-16">{intl.formatMessage(msgCreateAccount.name)}</span>,
       key: 'name',
       align: 'center',
       fixed: 'left',
-      render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
+      render: (subsidy) => <span>{subsidy?.student.firstName ?? ''} {subsidy?.student.lastName ?? ''}</span>,
     },
     {
-      title: <span className="font-16">Student Grade</span>,
+      title: <span className="font-16">{intl.formatMessage(messages.studentGrade)}</span>,
       key: 'grade',
       align: 'center',
-      render: (subsidy) => <span>{subsidy.student.currentGrade}</span>
+      render: (subsidy) => <span>{subsidy?.student.currentGrade}</span>
     },
     {
-      title: <span className="font-16">Service Requested</span>,
+      title: <span className="font-16">{intl.formatMessage(messages.serviceRequested)}</span>,
       key: 'skillSet',
       align: 'center',
-      render: (subsidy) => <span>{subsidy.skillSet.name}</span>
+      render: (subsidy) => <span>{subsidy?.skillSet.name}</span>
     },
     {
-      title: <span className="font-16">Note</span>,
+      title: <span className="font-16">{intl.formatMessage(msgCreateAccount.notes)}</span>,
       key: 'note',
       align: 'center',
-      render: (subsidy) => <span>{subsidy.note}</span>
+      render: (subsidy) => <span>{subsidy?.note}</span>
     },
     {
-      title: <span className="font-16">Provider</span>,
+      title: <span className="font-16">{intl.formatMessage(msgCreateAccount.provider)}</span>,
       key: 'provider',
       align: 'center',
       render: (subsidy) => (
@@ -154,17 +156,17 @@ const Subsidaries = (props) => {
       )
     },
     {
-      title: <span className="font-16">Approval Date</span>,
+      title: <span className="font-16">{intl.formatMessage(messages.approvalDate)}</span>,
       key: 'approvalDate',
       align: 'center',
-      render: (subsidy) => <span>{moment(subsidy.schoolApprovalDate).format('MM/DD/YYYY hh:mm A')}</span>
+      render: (subsidy) => <span>{moment(subsidy?.schoolApprovalDate).format('MM/DD/YYYY hh:mm A')}</span>
     },
     {
-      title: <span className="font-16">Action</span>,
+      title: <span className="font-16">{intl.formatMessage(messages.action)}</span>,
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => onShowModalSubsidy(subsidy._id)}>Edit</a>
+          <a className='btn-blue' onClick={() => onShowModalSubsidy(subsidy?._id)}>Edit</a>
         </Space>
       ),
       align: 'center',
@@ -174,143 +176,29 @@ const Subsidaries = (props) => {
 
   const schoolDeclinedColumns = [
     {
-      title: <span className="font-16">Name</span>,
+      title: <span className="font-16">{intl.formatMessage(msgCreateAccount.name)}</span>,
       key: 'name',
       align: 'center',
       fixed: 'left',
-      render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
+      render: (subsidy) => <span>{subsidy?.student.firstName ?? ''} {subsidy?.student.lastName ?? ''}</span>,
     },
     {
-      title: <span className="font-16">Student Grade</span>,
+      title: <span className="font-16">{intl.formatMessage(messages.studentGrade)}</span>,
       key: 'grade',
       align: 'center',
-      render: (subsidy) => <span>{subsidy.student.currentGrade}</span>
+      render: (subsidy) => <span>{subsidy?.student.currentGrade}</span>
     },
     {
-      title: <span className="font-16">Service Requested</span>,
+      title: <span className="font-16">{intl.formatMessage(messages.serviceRequested)}</span>,
       key: 'skillSet',
       align: 'center',
-      render: (subsidy) => <span>{subsidy.skillSet.name}</span>
+      render: (subsidy) => <span>{subsidy?.skillSet.name}</span>
     },
     {
-      title: <span className="font-16">Note</span>,
+      title: <span className="font-16">{intl.formatMessage(msgCreateAccount.notes)}</span>,
       key: 'note',
       align: 'center',
-      render: (subsidy) => <span>{subsidy.note}</span>
-    },
-  ];
-
-  const adminPreApprovedColumns = [
-    {
-      title: <span className="font-16">Name</span>,
-      key: 'name',
-      align: 'center',
-      fixed: 'left',
-      render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
-    },
-    {
-      title: <span className="font-16">Student Grade</span>,
-      key: 'grade',
-      align: 'center',
-      render: (subsidy) => <span>{subsidy.student.currentGrade}</span>
-    },
-    {
-      title: <span className="font-16">Service Requested</span>,
-      key: 'skillSet',
-      align: 'center',
-      render: (subsidy) => <span>{subsidy.skillSet.name}</span>
-    },
-    {
-      title: <span className="font-16">Note</span>,
-      key: 'note',
-      align: 'center',
-      render: (subsidy) => <span>{subsidy.note}</span>
-    },
-    {
-      title: <span className="font-16">Provider</span>,
-      key: 'provider',
-      align: 'center',
-      render: (subsidy) => (
-        <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
-      )
-    },
-  ];
-
-  const adminApprovedColumns = [
-    {
-      title: <span className="font-16">Name</span>,
-      key: 'name',
-      align: 'center',
-      fixed: 'left',
-      render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
-    },
-    {
-      title: <span className="font-16">Student Grade</span>,
-      key: 'grade',
-      align: 'center',
-      render: (subsidy) => <span>{subsidy.student.currentGrade}</span>
-    },
-    {
-      title: <span className="font-16">Service Requested</span>,
-      key: 'skillSet',
-      align: 'center',
-      render: (subsidy) => <span>{subsidy.skillSet.name}</span>
-    },
-    {
-      title: <span className="font-16">Note</span>,
-      key: 'note',
-      align: 'center',
-      render: (subsidy) => <span>{subsidy.note}</span>
-    },
-    {
-      title: <span className="font-16">Approval Date</span>,
-      key: 'approvalDate',
-      align: 'center',
-      render: (subsidy) => <span>{moment(subsidy.approvalDate).format('MM/DD/YYYY hh:mm A')}</span>
-    },
-    {
-      title: <span className="font-16">Provider</span>,
-      key: 'provider',
-      align: 'center',
-      render: (subsidy) => (
-        <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
-      )
-    },
-  ];
-
-  const adminDeclinedColumns = [
-    {
-      title: <span className="font-16">Name</span>,
-      key: 'name',
-      align: 'center',
-      fixed: 'left',
-      render: (subsidy) => <span>{subsidy.student.firstName ?? ''} {subsidy.student.lastName ?? ''}</span>,
-    },
-    {
-      title: <span className="font-16">Student Grade</span>,
-      key: 'grade',
-      align: 'center',
-      render: (subsidy) => <span>{subsidy.student.currentGrade}</span>
-    },
-    {
-      title: <span className="font-16">Service Requested</span>,
-      key: 'skillSet',
-      align: 'center',
-      render: (subsidy) => <span>{subsidy.skillSet.name}</span>
-    },
-    {
-      title: <span className="font-16">Note</span>,
-      key: 'note',
-      align: 'center',
-      render: (subsidy) => <span>{subsidy.note}</span>
-    },
-    {
-      title: <span className="font-16">Provider</span>,
-      key: 'provider',
-      align: 'center',
-      render: (subsidy) => (
-        <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
-      )
+      render: (subsidy) => <span>{subsidy?.note}</span>
     },
   ];
 
@@ -338,7 +226,7 @@ const Subsidaries = (props) => {
   const items = [
     {
       key: '1',
-      label: <span className="font-16">Pending</span>,
+      label: <span className="font-16">{intl.formatMessage(messages.pending)}</span>,
       children: (
         <Table
           bordered
@@ -357,7 +245,7 @@ const Subsidaries = (props) => {
     },
     {
       key: '2',
-      label: <span className="font-16">Approved</span>,
+      label: <span className="font-16">{intl.formatMessage(messages.approved)}</span>,
       children: (
         <div className="approved-list">
           <DndProvider backend={HTML5Backend}>
@@ -384,7 +272,7 @@ const Subsidaries = (props) => {
     },
     {
       key: '3',
-      label: <span className="font-16">Declined</span>,
+      label: <span className="font-16">{intl.formatMessage(messages.declined)}</span>,
       children: (
         <Table
           bordered
@@ -392,59 +280,6 @@ const Subsidaries = (props) => {
           dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={schoolDeclinedColumns}
           scroll={{ x: 1300 }}
-          className='mt-2 pb-10'
-          pagination={false}
-        />
-      ),
-    },
-    {
-      key: '4',
-      label: <span className="font-16">Admin Pre-Approved</span>,
-      children: (
-        <Table
-          bordered
-          size='middle'
-          dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
-          columns={adminPreApprovedColumns}
-          scroll={{ x: 1300 }}
-          onRow={(subsidy) => ({
-            onClick: (e) => e.target.className !== 'btn-blue' && onShowModalSubsidy(subsidy?._id),
-            onDoubleClick: (e) => e.target.className !== 'btn-blue' && onShowModalSubsidy(subsidy?._id),
-          })}
-          className='mt-2 pb-10'
-          pagination={false}
-        />
-      ),
-    },
-    {
-      key: '5',
-      label: <span className="font-16">Admin Declined</span>,
-      children: (
-        <Table
-          bordered
-          size='middle'
-          dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
-          columns={adminDeclinedColumns}
-          scroll={{ x: 1300 }}
-          className='mt-2 pb-10'
-          pagination={false}
-        />
-      ),
-    },
-    {
-      key: '6',
-      label: <span className="font-16">Admin Approved</span>,
-      children: (
-        <Table
-          bordered
-          size='middle'
-          dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
-          columns={adminApprovedColumns}
-          scroll={{ x: 1300 }}
-          onRow={(subsidy) => ({
-            onClick: (e) => e.target.className !== 'btn-blue' && onShowModalSubsidy(subsidy?._id),
-            onDoubleClick: (e) => e.target.className !== 'btn-blue' && onShowModalSubsidy(subsidy?._id),
-          })}
           className='mt-2 pb-10'
           pagination={false}
         />
@@ -461,15 +296,11 @@ const Subsidaries = (props) => {
     setVisibleSubsidy(false);
   }
 
-  const onShowModalReferral = () => { }
-
-  const openHierachyModal = () => { }
-
   const handleReorder = (updatedList) => {
     const requestIds = updatedList?.map(a => a?._id);
     const orders = updatedList?.map(a => a.orderPosition)?.sort((a, b) => b - a);
     if (requestIds?.length > 0 && orders?.length > 0 && requestIds?.length === orders?.length) {
-      request.post(reorderRequests, { requestIds, orders }).then(res => res.success && props.dispatch(getSubsidyRequests({ role: user.role })));
+      request.post(reorderRequests, { requestIds, orders }).then(res => res.success && props.getSubsidyRequests({ role: user.role }));
     }
   }
 
@@ -504,12 +335,12 @@ const Subsidaries = (props) => {
       const { success, data } = result;
       if (success) {
         const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidaries));
-        props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
+        props.setSubsidyRequests(newSubsidyRequests?.map(s => {
           if (s._id === selectedSubsidyId) {
             s.status = data.status;
           }
           return s;
-        })));
+        }));
       }
     }).catch(err => {
       message.error(err.message);
@@ -522,33 +353,17 @@ const Subsidaries = (props) => {
       const { success, data } = result;
       if (success) {
         const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidaries));
-        props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
+        props.setSubsidyRequests(newSubsidyRequests?.map(s => {
           if (s._id === selectedSubsidyId) {
             s.status = data.status;
           }
           return s;
-        })));
+        }));
       }
     }).catch(err => {
       message.error(err.message);
     })
   }
-
-  useEffect(() => {
-    if (user?.schoolInfo?._id) {
-      request.post(getAllProviderInSchool, { schoolId: user?.schoolInfo?._id }).then(res => {
-        const { success, data } = res;
-        if (success) {
-          setProviders(data);
-        } else {
-          setProviders([]);
-        }
-      }).catch(err => {
-        console.log('get providers error---', err);
-        setProviders([]);
-      })
-    }
-  }, [user]);
 
   useEffect(() => {
     if (props.subsidyId) {
@@ -561,8 +376,6 @@ const Subsidaries = (props) => {
     onSubmit: onCloseModalSubsidy,
     onCancel: onCloseModalSubsidy,
     subsidyId: selectedSubsidyId,
-    openReferral: onShowModalReferral,
-    openHierachy: openHierachyModal,
     providers: providers,
   }
 
@@ -605,4 +418,4 @@ const mapStateToProps = state => ({
   auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps))(Subsidaries);
+export default compose(connect(mapStateToProps, { getSubsidyRequests, setSubsidyRequests }))(Subsidaries);

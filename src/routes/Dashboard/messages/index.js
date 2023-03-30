@@ -122,6 +122,10 @@ export default ({
     id: `${scope}.approved`,
     defaultMessage: 'Approved',
   },
+  preApproved: {
+    id: `${scope}.preApproved`,
+    defaultMessage: 'Pre-Approved',
+  },
   appointmentScheduled: {
     id: `${scope}.appointmentScheduled`,
     defaultMessage: 'Appointment Scheduled',
@@ -145,5 +149,33 @@ export default ({
   action: {
     id: `${scope}.action`,
     defaultMessage: 'Action',
+  },
+  studentGrade: {
+    id: `${scope}.studentGrade`,
+    defaultMessage: 'Student Grade',
+  },
+  serviceRequested: {
+    id: `${scope}.serviceRequested`,
+    defaultMessage: 'Service Requested',
+  },
+  requestDate: {
+    id: `${scope}.requestDate`,
+    defaultMessage: 'Request Date',
+  },
+  approvalDate: {
+    id: `${scope}.approvalDate`,
+    defaultMessage: 'Approval Date',
+  },
+  recentSessionDate: {
+    id: `${scope}.recentSessionDate`,
+    defaultMessage: 'Recent Session Date',
+  },
+  lastSessionDate: {
+    id: `${scope}.lastSessionDate`,
+    defaultMessage: 'Last Session Date',
+  },
+  consultationDate: {
+    id: `${scope}.consultationDate`,
+    defaultMessage: 'Consultation Date',
   },
 });
