@@ -240,7 +240,7 @@ const SchoolApproved = (props) => {
     },
   ];
 
-  const DraggableBodyRow = ({ index, moveRow, className, style, ...restProps }) => {
+  const DraggableBodyRow = ({ index, moveRow, className, style, onClick, ...restProps }) => {
     const ref = useRef(null);
     const [{ isOver, dropClassName }, drop] = useDrop({
       accept: type,
@@ -272,6 +272,8 @@ const SchoolApproved = (props) => {
       <tr
         ref={ref}
         className={`${className}${isOver ? dropClassName : ''}`}
+        onClick={(e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(restProps?.children?.[0]?.props?.record?._id)}
+        onDoubleClick={(e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(restProps?.children?.[0]?.props?.record?._id)}
         style={{
           cursor: 'move',
           ...style,
