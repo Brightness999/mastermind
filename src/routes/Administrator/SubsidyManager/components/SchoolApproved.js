@@ -296,8 +296,10 @@ const SchoolApproved = (props) => {
           [hoverIndex, 0, dragRow],
         ],
       });
-      props.handleReorder(updatedList);
-      props.setRequests(updatedList);
+      if (dragIndex !== hoverIndex) {
+        props.handleReorder(updatedList);
+        props.setRequests(updatedList);
+      }
     },
     [requests],
   );
