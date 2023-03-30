@@ -277,6 +277,8 @@
   "components.Modal.keepAppoitment": "Keep Appointment",
   "components.Modal.keepScreening": "Keep Screening",
   "components.Modal.keepEvaluation": "Keep Evaluation",
+  "components.Modal.keepConsultation": "Keep Consultation",
+  "components.Modal.keepApplication": "Keep Application",
   "components.Modal.confirmCancellation": "Confirm Cancellation",
   "components.Modal.currentAppointment": "Current appointment",
   "components.Modal.newAppointment": "New Appointment",

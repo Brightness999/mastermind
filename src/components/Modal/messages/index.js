@@ -61,6 +61,14 @@ export default {
     id: `${scope}.keepEvaluation`,
     defaultMessage: 'Keep Evaluation',
   },
+  keepConsultation: {
+    id: `${scope}.keepConsultation`,
+    defaultMessage: 'Keep Consultation',
+  },
+  keepApplication: {
+    id: `${scope}.keepApplication`,
+    defaultMessage: 'Keep Application',
+  },
   confirmCancellation: {
     id: `${scope}.confirmCancellation`,
     defaultMessage: 'Confirm Cancellation',
