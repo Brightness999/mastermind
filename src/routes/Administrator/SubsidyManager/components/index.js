@@ -21,7 +21,7 @@ import AdminApproved from './AdminApproved';
 import './index.less';
 
 const SubsidyManager = (props) => {
-  const { user, providers, skillSet, academicLevels, schools } = props.auth;
+  const { user, skillSet, academicLevels, schools } = props.auth;
   const skills = JSON.parse(JSON.stringify(skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
   const grades = JSON.parse(JSON.stringify(academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
   const schoolInfos = JSON.parse(JSON.stringify(schools ?? []))?.map(s => s?.schoolInfo)?.map(school => { school['text'] = school.name, school['value'] = school._id; return school; });
@@ -274,14 +274,12 @@ const SubsidyManager = (props) => {
     onSubmit: onCloseModalSubsidy,
     onCancel: onCloseModalSubsidy,
     subsidyId: selectedSubsidyId,
-    providers: providers,
   }
 
   const modalSchoolApprovalProps = {
     visible: visibleSchoolApproval,
     onSubmit: schoolAcceptSubsidy,
     onCancel: onCloseModalSchoolApproval,
-    providers: providers,
     subsidy: requests?.find(a => a._id === selectedSubsidyId),
   }
 

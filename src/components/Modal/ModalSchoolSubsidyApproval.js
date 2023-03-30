@@ -1,6 +1,8 @@
 import React from 'react';
 import { Modal, Button, Input, Form, Row, Select } from 'antd';
 import intl from 'react-intl-universal';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
@@ -32,7 +34,7 @@ class ModalSchoolSubsidyApproval extends React.Component {
 						rules={[{ required: true }]}
 					>
 						<Select className='mb-10' placeholder={intl.formatMessage(messages.selectProvider)}>
-							{this.props.providers?.filter(provider => provider?.skillSet?.find(skill => skill?._id === this.props.subsidy?.skillSet?._id))?.map((provider) => (
+							{this.props.auth.providers?.filter(provider => provider?.skillSet?.find(skill => skill?._id === this.props.subsidy?.skillSet?._id))?.map((provider) => (
 								<Select.Option key={provider._id} value={provider._id}>{`${provider.firstName} ${provider.lastName}` || provider.referredToAs}</Select.Option>
 							))}
 						</Select>
@@ -58,4 +60,9 @@ class ModalSchoolSubsidyApproval extends React.Component {
 	}
 };
 
-export default ModalSchoolSubsidyApproval;
+
+const mapStateToProps = state => ({
+	auth: state.auth,
+})
+
+export default compose(connect(mapStateToProps))(ModalSchoolSubsidyApproval);

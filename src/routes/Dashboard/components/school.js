@@ -14,7 +14,7 @@ import Declined from "./declined";
 import Approved from "./approved";
 
 const Subsidaries = (props) => {
-  const { user, providers, skillSet, academicLevels } = props.auth;
+  const { user, skillSet, academicLevels } = props.auth;
   const skills = JSON.parse(JSON.stringify(skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
   const grades = JSON.parse(JSON.stringify(academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
   const [requests, setRequests] = useState(props.listSubsidaries?.filter(s => s.status === 0));
@@ -165,14 +165,12 @@ const Subsidaries = (props) => {
     onSubmit: onCloseModalSubsidy,
     onCancel: onCloseModalSubsidy,
     subsidyId: selectedSubsidyId,
-    providers: providers,
   }
 
   const modalSchoolApprovalProps = {
     visible: visibleSchoolApproval,
     onSubmit: schoolAcceptSubsidy,
     onCancel: onCloseModalSchoolApproval,
-    providers: providers,
     subsidy: requests?.find(a => a._id === selectedSubsidyId),
   }
 

@@ -331,9 +331,9 @@ class ModalSubsidyProgress extends React.Component {
 
 	renderSchoolInfo = (data) => {
 		const { subsidy, decisionExplanation, selectedProvider } = this.state;
-		const { user } = this.props.auth;
+		const { user, providers } = this.props.auth;
 
-		if (user?.role == 3 && subsidy.status == 0) {
+		if (user?.role === 3 && subsidy.status === 0) {
 			return null;
 		}
 
@@ -348,13 +348,13 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-700 mb-10'>{intl.formatMessage(messages.recommendedProviders)}</p>
 						<div className='select-md'>
 							<Select
-								disabled={user.role === 3 || !(subsidy.status === 0 || subsidy.status === 1)}
+								disabled={user.role === 3 || [2, 4].includes(subsidy.status)}
 								onChange={v => this.setState({ selectedProvider: v })}
 								value={selectedProvider}
 								className='mb-10'
 								placeholder={intl.formatMessage(msgCreateAccount.provider)}
 							>
-								{this.props.providers?.filter(provider => provider?.skillSet?.find(skill => skill?._id === subsidy?.skillSet?._id))?.map((provider) => (
+								{providers?.filter(provider => provider?.skillSet?.find(skill => skill?._id === subsidy?.skillSet?._id))?.map((provider) => (
 									<Select.Option key={provider._id} value={provider._id}>{`${provider.firstName} ${provider.lastName}` || provider.referredToAs}</Select.Option>
 								))}
 							</Select>
@@ -364,7 +364,7 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-700 mb-10'>{intl.formatMessage(messages.decisionExplanation)}</p>
 						<Input.TextArea
 							value={decisionExplanation}
-							disabled={subsidy.status == 1 || subsidy.status == -1}
+							disabled={user.role === 3 || [2, 4].includes(subsidy.status)}
 							onChange={v => this.setState({ decisionExplanation: v.target.value })}
 							rows={5} placeholder={intl.formatMessage(messages.generalNotes)} />
 					</Col>
@@ -415,8 +415,9 @@ class ModalSubsidyProgress extends React.Component {
 
 	renderDecision(subsidy) {
 		const { selectProviderFromAdmin, numberOfSessions, priceForSession } = this.state;
-		const isNotAdmin = this.props.auth.user?.role < 900;
-		if (isNotAdmin && subsidy.adminApprovalStatus != 1) {
+		const { user, providers } = this.props.auth;
+		const isNotAdmin = user?.role < 900;
+		if (isNotAdmin || (!isNotAdmin && ![3, 5].includes(subsidy.status))) {
 			return;
 		}
 
@@ -436,7 +437,7 @@ class ModalSubsidyProgress extends React.Component {
 							className='mb-10'
 							placeholder={intl.formatMessage(msgCreateAccount.provider)}
 						>
-							{this.props.providers?.map((provider) => (
+							{providers?.map((provider) => (
 								<Select.Option key={provider._id} value={provider._id}>{provider.name || provider.referredToAs}</Select.Option>
 							))}
 						</Select>
@@ -494,7 +495,7 @@ class ModalSubsidyProgress extends React.Component {
 	footerButton() {
 		const { subsidy } = this.state;
 
-		if ((subsidy.status == -1 || subsidy.adminApprovalStatus == -1) && this.props.auth.user?.role == 3) {
+		if ([2, 4].includes(subsidy.status) && this.props.auth.user?.role === 3) {
 			return [
 				<Button key="back" onClick={this.props.onCancel}>
 					CLOSE
@@ -506,7 +507,7 @@ class ModalSubsidyProgress extends React.Component {
 				</Button>
 			]
 		}
-		return []
+		return null
 	}
 
 	render() {
