@@ -11,12 +11,10 @@ import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import msgDashboard from '../../routes/Dashboard/messages';
 import request from '../../utils/api/request'
 import { url, switchPathWithRole } from '../../utils/api/baseUrl'
-import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getAllProviderInSchool, getLastConsulation } from '../../utils/api/apiList';
+import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation } from '../../utils/api/apiList';
 import { setSubsidyRequests } from '../../redux/features/appointmentsSlice';
 import './style/index.less';
 import '../../assets/styles/login.less';
-
-const { Step } = Steps;
 
 const arrMeetSolution = [
 	'Google meet',
@@ -26,20 +24,9 @@ const arrMeetSolution = [
 
 class ModalSubsidyProgress extends React.Component {
 	state = {
-		currentStep: 2,
-		isApproved: true,
 		subsidy: {},
 		selectedProvider: undefined,
-		isDisableSchoolFields: false,
 		decisionExplanation: "",
-		isFiredButton: false,
-		isScheduling: false,
-		consulationName: '',
-		meetSolution: undefined,
-		meetLocation: undefined,
-		consulationDate: undefined,
-		consulationTime: undefined,
-		consulationPhoneNumber: undefined,
 		selectedDate: moment(),
 		selectedHour: undefined,
 		selectProviderFromAdmin: undefined,
@@ -98,16 +85,7 @@ class ModalSubsidyProgress extends React.Component {
 		this.setState({
 			subsidy: {},
 			selectedProvider: undefined,
-			isDisableSchoolFields: false,
 			decisionExplanation: "",
-			isFiredButton: false,
-			isScheduling: false,
-			consulationName: '',
-			meetSolution: undefined,
-			meetLocation: undefined,
-			consulationDate: undefined,
-			consulationTime: undefined,
-			consulationPhoneNumber: undefined,
 			selectProviderFromAdmin: undefined,
 			numberOfSessions: undefined,
 			priceForSession: undefined,
@@ -193,7 +171,6 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(switchPathWithRole(this.props.auth.user?.role) + 'select_final_provider_for_subsidy', postData).then(result => {
 			if (result.success) {
 				this.loadSubsidyData(subsidy._id);
-				this.setState({ isScheduling: false });
 			}
 		}).catch(err => {
 			console.log('select_final_provider_for_subsidy', err);
@@ -206,43 +183,10 @@ class ModalSubsidyProgress extends React.Component {
 			message.success('Your appeal has been sent successfully');
 			if (result.success) {
 				this.loadSubsidyData(subsidy._id);
-				this.setState({ isScheduling: false });
 			}
 		}).catch(err => {
 			console.log('appeal_subsidy', err)
 		})
-	}
-
-	openHierachy(subsidy) {
-		!!this.props.openHierachy && this.props.openHierachy(subsidy, this.callbackHierachy);
-	}
-
-	openReferral() {
-		!!this.props.openReferral && this.props.openReferral(subsidy, this.callbackReferral);
-	}
-
-	callbackHierachy = (hierachyId) => {
-		const { subsidy } = this.state;
-		subsidy.hierachy = hierachyId
-		this.setState({ subsidy: subsidy });
-	}
-
-	callbackReferral(appoiment) {
-		this.loadLastReferral();
-	}
-
-	nextStep = () => {
-		this.setState({ currentStep: this.state.currentStep + 1 });
-	};
-
-	prevStep = () => {
-		this.setState({ currentStep: this.state.currentStep - 1 });
-	};
-
-	handleContinue = () => {
-		if (this.state.currentStep <= 4) {
-			this.nextStep();
-		}
 	}
 
 	getFileName(path) {
@@ -323,10 +267,10 @@ class ModalSubsidyProgress extends React.Component {
 					</div>
 					<div className='flex flex-row items-center justify-end'>
 						<Button
-							onClick={() => { this.denyAppeal(subsidy) }}
+							onClick={() => this.denyAppeal(subsidy)}
 							size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button>
 						<Button
-							onClick={() => { this.schoolAcceptAcceptSubsidy(subsidy) }}
+							onClick={() => this.schoolAcceptAcceptSubsidy(subsidy)}
 							size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>
 					</div>
 				</div>
@@ -342,12 +286,12 @@ class ModalSubsidyProgress extends React.Component {
 				) : null}
 				<div className='flex flex-row items-center justify-end'>
 					{subsidy.status == 0 && (
-						<Button onClick={() => { this.schoolDenySubsidy(subsidy) }} size='small' className='mr-10'>
+						<Button onClick={() => this.schoolDenySubsidy(subsidy)} size='small' className='mr-10'>
 							{intl.formatMessage(messages.decline).toUpperCase()}
 						</Button>
 					)}
 					{subsidy.status == 0 && (
-						<Button onClick={() => { this.schoolAcceptSubsidy(subsidy) }} size='small' type='primary'>
+						<Button onClick={() => this.schoolAcceptSubsidy(subsidy)} size='small' type='primary'>
 							{intl.formatMessage(messages.approve).toUpperCase()}
 						</Button>
 					)}
@@ -362,7 +306,7 @@ class ModalSubsidyProgress extends React.Component {
 				<div className='flex flex-row items-center'>
 					<a
 						className='text-primary'
-						onClick={() => { !!this.props.openReferral && this.props.openReferral(this.state.subsidy, this.loadLastReferral); }}
+						onClick={() => { }}
 					>
 						<FaRegCalendarAlt />{intl.formatMessage(messages.reSchedule)}
 					</a>
@@ -376,10 +320,10 @@ class ModalSubsidyProgress extends React.Component {
 			return (
 				<div className='flex flex-row items-center'>
 					<Button
-						onClick={() => { this.adminDenySubsidy(subsidy) }}
+						onClick={() => this.adminDenySubsidy(subsidy)}
 						size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button>
 					<Button
-						onClick={() => { this.submitSubsidyFromAdmin(subsidy) }}
+						onClick={() => this.submitSubsidyFromAdmin(subsidy)}
 						size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>
 				</div>
 			)
@@ -422,9 +366,7 @@ class ModalSubsidyProgress extends React.Component {
 						<Input.TextArea
 							value={decisionExplanation}
 							disabled={subsidy.status == 1 || subsidy.status == -1}
-							onChange={v => {
-								this.setState({ decisionExplanation: v.target.value });
-							}}
+							onChange={v => this.setState({ decisionExplanation: v.target.value })}
 							rows={5} placeholder={intl.formatMessage(messages.generalNotes)} />
 					</Col>
 				</Row>
@@ -433,7 +375,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderConsulation = (data) => {
-		const { referral, subsidy } = this.state;
+		const { referral } = this.state;
 
 		if ([3, 5].includes(data.status)) {
 			if (referral.typeForAppointLocation == undefined || referral.location == undefined) {
@@ -459,11 +401,7 @@ class ModalSubsidyProgress extends React.Component {
 								</p>
 							)}
 							<div className='flex flex-row items-center'>
-								<a className='text-primary'
-									onClick={() => {
-										!!this.props.openReferral && this.props.openReferral(subsidy, this.loadLastReferral);
-									}}
-								><FaRegCalendarAlt />{intl.formatMessage(messages.reSchedule)}</a>
+								<a className='text-primary' onClick={() => { }}><FaRegCalendarAlt />{intl.formatMessage(messages.reSchedule)}</a>
 							</div>
 						</div>
 						<div className='flex flex-row justify-between'>
@@ -495,9 +433,7 @@ class ModalSubsidyProgress extends React.Component {
 						<Select
 							disabled={isNotAdmin}
 							value={selectProviderFromAdmin}
-							onChange={v => {
-								this.setState({ selectProviderFromAdmin: v });
-							}}
+							onChange={v => this.setState({ selectProviderFromAdmin: v })}
 							className='mb-10'
 							placeholder={intl.formatMessage(msgCreateAccount.provider)}
 						>
@@ -512,7 +448,7 @@ class ModalSubsidyProgress extends React.Component {
 							disabled={isNotAdmin}
 							value={numberOfSessions}
 							type="number"
-							onChange={v => { this.setState({ numberOfSessions: v.target.value }) }}
+							onChange={v => this.setState({ numberOfSessions: v.target.value })}
 						/>
 					</Col>
 					<Col xs={24} sm={24} md={8}>
@@ -520,7 +456,7 @@ class ModalSubsidyProgress extends React.Component {
 						<Input
 							value={priceForSession}
 							type="number"
-							onChange={v => { this.setState({ priceForSession: v.target.value }) }}
+							onChange={v => this.setState({ priceForSession: v.target.value })}
 							disabled={isNotAdmin}
 						/>
 					</Col>
