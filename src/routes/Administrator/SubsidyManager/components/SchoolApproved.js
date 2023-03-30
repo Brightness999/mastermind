@@ -12,7 +12,7 @@ import msgCreateAccount from '../../../Sign/CreateAccount/messages';
 
 const SchoolApproved = (props) => {
   const type = 'DraggableBodyRow';
-  const { skills, grades, requests } = props;
+  const { skills, grades, requests, schools } = props;
   const searchInput = createRef(null);
   const schoolApprovedColumns = [
     {
@@ -64,9 +64,11 @@ const SchoolApproved = (props) => {
     },
     {
       title: <span className="font-16">{intl.formatMessage(msgCreateAccount.school)}</span>,
-      key: 'name',
+      key: 'school',
       align: 'center',
-      fixed: 'left',
+      filters: schools,
+      onFilter: (value, record) => record.school?._id === value,
+      sorter: (a, b) => (a?.school?.name ?? '').toLowerCase() > (b?.school?.name ?? '').toLowerCase() ? 1 : -1,
       render: (subsidy) => <span>{subsidy?.school?.name ?? ''}</span>,
     },
     {

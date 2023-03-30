@@ -21,9 +21,10 @@ import AdminApproved from './AdminApproved';
 import './index.less';
 
 const SubsidyManager = (props) => {
-  const { user, providers, skillSet, academicLevels } = props.auth;
-  const skills = JSON.parse(JSON.stringify(skillSet))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
-  const grades = JSON.parse(JSON.stringify(academicLevels))?.slice(6)?.map(level => ({ text: level, value: level }));
+  const { user, providers, skillSet, academicLevels, schools } = props.auth;
+  const skills = JSON.parse(JSON.stringify(skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
+  const grades = JSON.parse(JSON.stringify(academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
+  const schoolInfos = JSON.parse(JSON.stringify(schools ?? []))?.map(s => s?.schoolInfo)?.map(school => { school['text'] = school.name, school['value'] = school._id; return school; });
   const [visibleSubsidy, setVisibleSubsidy] = useState(false);
   const [filterSchool, setFilterSchool] = useState(undefined);
   const [filterStudent, setFilterStudent] = useState(undefined);
@@ -184,6 +185,7 @@ const SubsidyManager = (props) => {
           requests={requests}
           skills={skills}
           grades={grades}
+          schools={schoolInfos}
           onShowModalSubsidy={onShowModalSubsidy}
           onShowModalSchoolApproval={onShowModalSchoolApproval}
           onShowModalConfirm={onShowModalConfirm}
@@ -198,6 +200,7 @@ const SubsidyManager = (props) => {
           requests={requests}
           skills={skills}
           grades={grades}
+          schools={schoolInfos}
           setRequests={setRequests}
           onShowModalSubsidy={onShowModalSubsidy}
           handleReorder={handleReorder}
@@ -212,6 +215,7 @@ const SubsidyManager = (props) => {
           requests={requests}
           skills={skills}
           grades={grades}
+          schools={schoolInfos}
           onShowModalSubsidy={onShowModalSubsidy}
         />
       ),
@@ -224,6 +228,7 @@ const SubsidyManager = (props) => {
           requests={requests}
           skills={skills}
           grades={grades}
+          schools={schoolInfos}
           onShowModalSubsidy={onShowModalSubsidy}
         />
       ),
@@ -236,6 +241,7 @@ const SubsidyManager = (props) => {
           requests={requests}
           skills={skills}
           grades={grades}
+          schools={schoolInfos}
           onShowModalSubsidy={onShowModalSubsidy}
         />
       ),
@@ -248,6 +254,7 @@ const SubsidyManager = (props) => {
           requests={requests}
           skills={skills}
           grades={grades}
+          schools={schoolInfos}
           onShowModalSubsidy={onShowModalSubsidy}
         />
       ),
