@@ -57,6 +57,7 @@ export const getAllProviderInSchool = 'schools/get_all_provider_in_school'
 export const denySubsidyRequest = 'schools/deny_subsidy_request'
 export const acceptSubsidyRequest = 'schools/accept_subsidy_request'
 export const denyAppealSubsidy = 'schools/deny_appeal_subsidy'
+export const schoolAcceptAppealSubsidy = 'schools/accept_appeal_subsidy'
 export const reorderRequests = 'schools/reorder_requests'
 
 export const getAppointmentsForProvider = 'providers/get_my_appointments'

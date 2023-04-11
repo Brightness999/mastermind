@@ -11,7 +11,7 @@ import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import msgDashboard from '../../routes/Dashboard/messages';
 import request from '../../utils/api/request'
 import { url, switchPathWithRole } from '../../utils/api/baseUrl'
-import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation } from '../../utils/api/apiList';
+import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation, schoolAcceptAppeal, schoolAcceptAppealSubsidy } from '../../utils/api/apiList';
 import { setSubsidyRequests } from '../../redux/features/appointmentsSlice';
 import './style/index.less';
 import '../../assets/styles/login.less';
@@ -97,13 +97,7 @@ class ModalSubsidyProgress extends React.Component {
 			const { success, data } = result;
 			if (success) {
 				this.loadSubsidyData(subsidy._id);
-				const newSubsidyRequests = JSON.parse(JSON.stringify(this.props.listSubsidaries));
-				this.props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
-					if (s._id === subsidy._id) {
-						s.status = data.status;
-					}
-					return s;
-				})));
+				this.updateSubsidaries(subsidy, data);
 				this.props.onSubmit();
 			}
 		}).catch(err => {
@@ -139,13 +133,7 @@ class ModalSubsidyProgress extends React.Component {
 			const { success, data } = result;
 			if (success) {
 				this.loadSubsidyData(subsidy._id);
-				const newSubsidyRequests = JSON.parse(JSON.stringify(this.props.listSubsidaries));
-				this.props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
-					if (s._id === subsidy._id) {
-						s.status = data.status;
-					}
-					return s;
-				})));
+				this.updateSubsidaries(subsidy, data);
 				this.props.onSubmit();
 			}
 		}).catch(err => {
@@ -176,8 +164,8 @@ class ModalSubsidyProgress extends React.Component {
 		})
 	}
 
-	appealSubsidy = () => {
-		const postData = { subsidyId: this.state.subsidy._id };
+	appealSubsidy = (subsidy) => {
+		const postData = { subsidyId: subsidy._id };
 		request.post(appealSubsidy, postData).then(result => {
 			message.success('Your appeal has been sent successfully');
 			if (result.success) {
@@ -197,7 +185,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	denyAppeal = (subsidy) => {
-		const postData = { subsidyId: this.state.subsidy._id };
+		const postData = { subsidyId: subsidy._id };
 		request.post(denyAppealSubsidy, postData).then(result => {
 			message.success('Denied successfully');
 			if (result.success) {
@@ -206,6 +194,32 @@ class ModalSubsidyProgress extends React.Component {
 		}).catch(err => {
 			message.error(err.message);
 		})
+	}
+
+	schoolAcceptAppeal = (subsidy) => {
+		const postData = { subsidyId: subsidy._id };
+		request.post(schoolAcceptAppealSubsidy, postData).then(result => {
+			message.success('Accepted successfully');
+			const { success, data } = result;
+			if (success) {
+				this.loadSubsidyData(subsidy._id);
+				this.updateSubsidaries(subsidy, data);
+				this.props.onSubmit();
+			}
+		}).catch(err => {
+			message.error(err.message);
+		})
+	}
+
+	updateSubsidaries(subsidy, data) {
+		const newSubsidyRequests = JSON.parse(JSON.stringify(this.props.listSubsidaries));
+		this.props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
+			if (s._id === subsidy._id) {
+				s.status = data.status;
+				s.isAppeal = data.isAppeal;
+			}
+			return s;
+		})));
 	}
 
 	renderStudentParentInfo(subsidy) {
@@ -255,10 +269,10 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderButtonsForSchoolInfo(subsidy) {
-		if (this.props.auth.user?.role == 3) {
+		if (this.props.auth.user?.role === 3) {
 			return;
 		}
-		if (subsidy.isAppeal && (subsidy.status == -1 || subsidy.adminApprovalStatus == -1)) {
+		if (subsidy.isAppeal > 0 && [2, 4].includes(subsidy.status)) {
 			return (
 				<div>
 					<div className='flex flex-row items-center'>
@@ -269,7 +283,7 @@ class ModalSubsidyProgress extends React.Component {
 							onClick={() => this.denyAppeal(subsidy)}
 							size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button>
 						<Button
-							onClick={() => this.schoolAcceptAcceptSubsidy(subsidy)}
+							onClick={() => this.schoolAcceptAppeal(subsidy)}
 							size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>
 					</div>
 				</div>
@@ -495,14 +509,14 @@ class ModalSubsidyProgress extends React.Component {
 	footerButton() {
 		const { subsidy } = this.state;
 
-		if ([2, 4].includes(subsidy.status) && this.props.auth.user?.role === 3) {
+		if ([2, 4].includes(subsidy.status) && subsidy.isAppeal >= 0 && (this.props.auth.user?.role === 3 || this.props.auth.user?.role > 900)) {
 			return [
 				<Button key="back" onClick={this.props.onCancel}>
 					CLOSE
 				</Button>,
 				<Button
 					disabled={subsidy.isAppeal != 0}
-					key="submit" type="primary" onClick={this.appealSubsidy} style={{ padding: '7.5px 30px' }}>
+					key="submit" type="primary" onClick={() => this.appealSubsidy(subsidy)} style={{ padding: '7.5px 30px' }}>
 					{intl.formatMessage(messages.appeal).toUpperCase()}
 				</Button>
 			]

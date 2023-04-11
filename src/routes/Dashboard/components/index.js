@@ -394,6 +394,9 @@ class Dashboard extends React.Component {
       case 'meeting_link':
         this.props.setMeetingLink(data.data);
       case 'appeal_subsidy':
+        this.props.getSubsidyRequests({ role: userRole });
+        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true);
+        this.showNotificationForSubsidyChange(data.data);
         return;
     }
   }
