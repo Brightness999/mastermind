@@ -111,8 +111,8 @@ const SubsidyManager = (props) => {
   }
 
   const handleChangeTab = v => {
-    setRequests(props.listSubsidy?.filter(s => s.status == v - 1));
-    setStatus(v - 1);
+    setRequests(props.listSubsidy?.filter(s => s.status == v));
+    setStatus(v);
   }
 
   const onShowModalConfirm = (subsidyId) => {
@@ -178,7 +178,7 @@ const SubsidyManager = (props) => {
 
   const items = [
     {
-      key: '1',
+      key: '0',
       label: <span className="font-16">{intl.formatMessage(msgCreateAccount.school)} {intl.formatMessage(messages.pending)}</span>,
       children: (
         <SchoolPending
@@ -193,7 +193,7 @@ const SubsidyManager = (props) => {
       ),
     },
     {
-      key: '2',
+      key: '1',
       label: <span className="font-16">{intl.formatMessage(msgCreateAccount.school)} {intl.formatMessage(messages.approved)}</span>,
       children: (
         <SchoolApproved
@@ -208,7 +208,7 @@ const SubsidyManager = (props) => {
       ),
     },
     {
-      key: '3',
+      key: '2',
       label: <span className="font-16">{intl.formatMessage(msgCreateAccount.school)} {intl.formatMessage(messages.declined)}</span>,
       children: (
         <SchoolDeclined
@@ -221,7 +221,7 @@ const SubsidyManager = (props) => {
       ),
     },
     {
-      key: '4',
+      key: '3',
       label: <span className="font-16">{intl.formatMessage(messages.preApproved)}</span>,
       children: (
         <AdminPreApproved
@@ -234,7 +234,7 @@ const SubsidyManager = (props) => {
       ),
     },
     {
-      key: '5',
+      key: '4',
       label: <span className="font-16">{intl.formatMessage(messages.declined)}</span>,
       children: (
         <AdminDeclined
@@ -247,7 +247,7 @@ const SubsidyManager = (props) => {
       ),
     },
     {
-      key: '6',
+      key: '5',
       label: <span className="font-16">{intl.formatMessage(messages.approved)}</span>,
       children: (
         <AdminApproved
@@ -374,7 +374,7 @@ const SubsidyManager = (props) => {
         </Col>
       </Row>
       <Tabs
-        defaultActiveKey="1"
+        defaultActiveKey="0"
         type="card"
         size='small'
         items={items}

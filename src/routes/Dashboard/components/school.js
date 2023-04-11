@@ -34,8 +34,8 @@ const Subsidaries = (props) => {
   }, [props.listSubsidaries]);
 
   const handleChangeTab = v => {
-    setRequests(props.listSubsidaries?.filter(s => s.status == v - 1));
-    setStatus(v - 1);
+    setRequests(props.listSubsidaries?.filter(s => s.status == v));
+    setStatus(v);
   }
 
   const onCloseModalSubsidy = () => {
@@ -84,6 +84,7 @@ const Subsidaries = (props) => {
         props.setSubsidyRequests(newSubsidyRequests?.map(s => {
           if (s._id === selectedSubsidyId) {
             s.status = data.status;
+            s.selectedProvider = data.selectedProvider;
           }
           return s;
         }));
@@ -113,7 +114,7 @@ const Subsidaries = (props) => {
 
   const items = [
     {
-      key: '1',
+      key: '0',
       label: <span className="font-16">{intl.formatMessage(messages.pending)}</span>,
       children: (
         <Pending
@@ -127,7 +128,7 @@ const Subsidaries = (props) => {
       ),
     },
     {
-      key: '2',
+      key: '1',
       label: <span className="font-16">{intl.formatMessage(messages.approved)}</span>,
       children: (
         <Approved
@@ -141,7 +142,7 @@ const Subsidaries = (props) => {
       ),
     },
     {
-      key: '3',
+      key: '2',
       label: <span className="font-16">{intl.formatMessage(messages.declined)}</span>,
       children: (
         <Declined
@@ -184,7 +185,7 @@ const Subsidaries = (props) => {
   return (
     <div className="full-layout page school-dashboard h-100">
       <Tabs
-        defaultActiveKey="1"
+        defaultActiveKey="0"
         type="card"
         size='small'
         items={items}
