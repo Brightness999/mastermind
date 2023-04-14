@@ -262,7 +262,7 @@ const SubsidyManager = (props) => {
   ];
 
   useEffect(() => {
-    setRequests(props.listSubsidy?.filter(s => s.status === status));
+    setRequests(props.listSubsidy?.filter(s => s.status == status));
   }, [props.listSubsidy]);
 
   useEffect(() => {

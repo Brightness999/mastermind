@@ -30,7 +30,7 @@ const Subsidaries = (props) => {
   }
 
   useEffect(() => {
-    setRequests(props.listSubsidaries?.filter(s => s.status === status));
+    setRequests(props.listSubsidaries?.filter(s => s.status == status));
   }, [props.listSubsidaries]);
 
   const handleChangeTab = v => {
