@@ -93,7 +93,7 @@ const SchoolDeclined = (props) => {
         <div style={{ padding: 8 }}>
           <Input
             ref={searchInput}
-            placeholder={`Search Dependent Name`}
+            placeholder={`Search Notes`}
             value={selectedKeys[0]}
             onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
             onPressEnter={() => confirm()}

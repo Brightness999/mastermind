@@ -94,7 +94,7 @@ const AdminPreApproved = (props) => {
         <div style={{ padding: 8 }}>
           <Input
             ref={searchInput}
-            placeholder={`Search Dependent Name`}
+            placeholder={`Search Notes`}
             value={selectedKeys[0]}
             onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
             onPressEnter={() => confirm()}
@@ -140,7 +140,7 @@ const AdminPreApproved = (props) => {
         <div style={{ padding: 8 }}>
           <Input
             ref={searchInput}
-            placeholder={`Search Dependent Name`}
+            placeholder={`Search Provider Name`}
             value={selectedKeys[0]}
             onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
             onPressEnter={() => confirm()}
@@ -188,7 +188,7 @@ const AdminPreApproved = (props) => {
         <div style={{ padding: 8 }}>
           <Input
             ref={searchInput}
-            placeholder={`Search Dependent Name`}
+            placeholder={`Search Consultation Date`}
             value={selectedKeys[0]}
             onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
             onPressEnter={() => confirm()}
@@ -223,7 +223,7 @@ const AdminPreApproved = (props) => {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
-      render: (subsidy) => <span>{moment(subsidy?.consultation?.date).format('MM/DD/YYYY hh:mm A')}</span>
+      render: (subsidy) => <span>{subsidy?.consultation?.date ? moment(subsidy?.consultation?.date).format('MM/DD/YYYY hh:mm A') : ''}</span>
     },
   ];
 
