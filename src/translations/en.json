@@ -302,6 +302,7 @@
   "components.Modal.schoolInformation": "School information",
   "components.Modal.decline": "Decline",
   "components.Modal.approve": "Approve",
+  "components.Modal.preapprove": "Pre-Approve",
   "components.Modal.recommendedProviders": "Recommended providers",
   "components.Modal.decisionExplanation": "Decision explanation",
   "components.Modal.consulationAppointment": "Consulation appointment",
@@ -371,7 +372,6 @@
   "components.Modal.documents": "Documents",
   "components.Modal.emailNotValid": "Email is not a valid",
   "components.Modal.dependent": "Dependent",
-  "components.Modal.school": "School",
   "components.Modal.requestContactRav": "Request contact (optional)",
 
   "components.sidebar.userManager": "User Manager",

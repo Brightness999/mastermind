@@ -11,7 +11,7 @@ import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import msgDashboard from '../../routes/Dashboard/messages';
 import request from '../../utils/api/request'
 import { url, switchPathWithRole } from '../../utils/api/baseUrl'
-import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation, schoolAcceptAppeal, schoolAcceptAppealSubsidy } from '../../utils/api/apiList';
+import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation, preApproveSubsidy, schoolAcceptAppeal, schoolAcceptAppealSubsidy } from '../../utils/api/apiList';
 import { setSubsidyRequests } from '../../redux/features/appointmentsSlice';
 import './style/index.less';
 import '../../assets/styles/login.less';
@@ -94,6 +94,19 @@ class ModalSubsidyProgress extends React.Component {
 
 	schoolDenySubsidy(subsidy) {
 		request.post(denySubsidyRequest, { subsidyId: subsidy._id }).then(result => {
+			const { success, data } = result;
+			if (success) {
+				this.loadSubsidyData(subsidy._id);
+				this.updateSubsidaries(subsidy, data);
+				this.props.onSubmit();
+			}
+		}).catch(err => {
+			message.error(err.message);
+		})
+	}
+
+	adminPreApproveSubsidy(subsidy) {
+		request.post(preApproveSubsidy, { subsidyId: subsidy?._id }).then(result => {
 			const { success, data } = result;
 			if (success) {
 				this.loadSubsidyData(subsidy._id);
@@ -269,7 +282,8 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderButtonsForSchoolInfo(subsidy) {
-		if (this.props.auth.user?.role === 3) {
+		const { user } = this.props.auth;
+		if (user?.role === 3) {
 			return;
 		}
 		if (subsidy.isAppeal > 0 && [2, 4].includes(subsidy.status)) {
@@ -298,15 +312,20 @@ class ModalSubsidyProgress extends React.Component {
 					</div>
 				) : null}
 				<div className='flex flex-row items-center justify-end'>
-					{subsidy.status == 0 && (
-						<Button onClick={() => this.schoolDenySubsidy(subsidy)} size='small' className='mr-10'>
-							{intl.formatMessage(messages.decline).toUpperCase()}
+					{subsidy?.status === 1 && user.role > 900 && (
+						<Button onClick={() => this.adminPreApproveSubsidy(subsidy)} size='small' type='primary' className='mr-10'>
+							{intl.formatMessage(messages.preapprove).toUpperCase()}
 						</Button>
 					)}
-					{subsidy.status == 0 && (
-						<Button onClick={() => this.schoolAcceptSubsidy(subsidy)} size='small' type='primary'>
-							{intl.formatMessage(messages.approve).toUpperCase()}
-						</Button>
+					{subsidy?.status === 0 && (
+						<>
+							<Button onClick={() => this.schoolDenySubsidy(subsidy)} size='small' className='mr-10'>
+								{intl.formatMessage(messages.decline).toUpperCase()}
+							</Button>
+							<Button onClick={() => this.schoolAcceptSubsidy(subsidy)} size='small' type='primary'>
+								{intl.formatMessage(messages.approve).toUpperCase()}
+							</Button>
+						</>
 					)}
 				</div>
 			</div>
@@ -539,14 +558,14 @@ class ModalSubsidyProgress extends React.Component {
 
 		return (
 			<Modal {...modalProps}>
-				<div className='flex flex-row mb-20'>
+				<div className='relative flex flex-row mb-20'>
 					<div className='flex-1 text-center'>
 						<p className='font-30 font-30-sm'>{intl.formatMessage(messages.subsidyProgress)}</p>
 					</div>
 					{subsidy.status != 0 && (
-						<div style={{ width: 110, textAlign: 'right' }}>
-							{[1, 3, 5].includes(subsidy.status) && <p className='text-green500 font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.approved)}</p>}
-							{[2, 4].includes(subsidy.status) && <p className='text-red font-24 font-700 ml-auto'>{intl.formatMessage(msgDashboard.declined)}</p>}
+						<div className='absolute right-0 top-0'>
+							{[1, 3, 5].includes(subsidy.status) && <p className='text-green500 font-24 font-700 ml-auto'>{(subsidy?.status === 1 && this.props.auth.user?.role > 900) ? intl.formatMessage(msgCreateAccount.school) : ''} {subsidy?.status === 3 ? intl.formatMessage(msgDashboard.preApproved) : intl.formatMessage(msgDashboard.approved)}</p>}
+							{[2, 4].includes(subsidy.status) && <p className='text-red font-24 font-700 ml-auto'>{(subsidy?.status === 2 && this.props.auth.user?.role > 900) ? intl.formatMessage(msgCreateAccount.school) : ''} {intl.formatMessage(msgDashboard.declined)}</p>}
 						</div>
 					)}
 				</div>

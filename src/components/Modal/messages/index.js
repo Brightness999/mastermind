@@ -177,6 +177,10 @@ export default {
     id: `${scope}.approve`,
     defaultMessage: 'Approve',
   },
+  preapprove: {
+    id: `${scope}.preapprove`,
+    defaultMessage: 'Pre-Approve',
+  },
   recommendedProviders: {
     id: `${scope}.recommendedProviders`,
     defaultMessage: 'Recommended providers',
