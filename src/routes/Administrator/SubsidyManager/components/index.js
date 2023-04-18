@@ -22,6 +22,7 @@ import './index.less';
 
 const SubsidyManager = (props) => {
   const { user, skillSet, academicLevels, schools } = props.auth;
+  const [form] = Form.useForm();
   const skills = JSON.parse(JSON.stringify(skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
   const grades = JSON.parse(JSON.stringify(academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
   const schoolInfos = JSON.parse(JSON.stringify(schools ?? []))?.map(s => s?.schoolInfo)?.map(school => { school['text'] = school.name, school['value'] = school._id; return school; });
@@ -83,9 +84,17 @@ const SubsidyManager = (props) => {
   }
 
   const clearFilter = () => {
-    setFilterSchool('');
-    setFilterStudent('');
-    setFilterProvider('');
+    form.setFieldsValue({
+      student_name: undefined,
+      provider_name: undefined,
+      school_name: undefined,
+      grade: undefined,
+      skillset: undefined,
+      status: undefined,
+    })
+    setFilterSchool(undefined);
+    setFilterStudent(undefined);
+    setFilterProvider(undefined);
     setfilterSkillSet(undefined);
     setFilterStatus(undefined);
     setFilterGrade(undefined);
@@ -298,7 +307,7 @@ const SubsidyManager = (props) => {
       </div>
       <Row >
         <Col xs={24} sm={24} md={20} lg={18} xl={12} className='col-form col-subsidy-manager'>
-          <Form name="form_subsidy">
+          <Form name="form_subsidy" form={form}>
             <Row gutter={10}>
               <Col span={12}>
                 <Form.Item name="student_name">

@@ -35,6 +35,24 @@
   }
 }
 
+.float-label-item {
+  position: relative;
+  margin-top: 5px;
+
+  .ant-form-item-label {
+    position: absolute;
+    top: -9px;
+    left: 20px;
+    z-index: 2;
+
+    label {
+      background-color: @white;
+      display: inline-block;
+      height: auto;
+    }
+  }
+}
+
 .col-form {
   background-color: @white;
   padding: 30px 20px;
@@ -249,24 +267,6 @@
     .anticon svg {
       width: 15px;
       height: 15px;
-    }
-  }
-
-  .float-label-item {
-    position: relative;
-    margin-top: 5px;
-
-    .ant-form-item-label {
-      position: absolute;
-      top: -9px;
-      left: 20px;
-      z-index: 2;
-
-      label {
-        background-color: @white;
-        display: inline-block;
-        height: auto;
-      }
     }
   }
 

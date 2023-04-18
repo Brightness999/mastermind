@@ -35,14 +35,35 @@ class ModalReferralService extends React.Component {
 		appointments: [],
 		consultants: [],
 		skillSet: this.props.auth.skillSet,
+		selectedSubsidy: undefined,
 	}
 
 	componentDidMount = () => {
-		const { user } = this.props.auth;
+		const { subsidy, auth } = this.props;
 
-		if (user.role == 3) {
-			this.setState({ phoneNumber: user?.parentInfo?.fatherPhoneNumber ? user?.parentInfo?.fatherPhoneNumber : user?.parentInfo?.motherPhoneNumber });
-			this.form?.setFieldsValue({ phoneNumber: user?.parentInfo?.fatherPhoneNumber ? user?.parentInfo?.fatherPhoneNumber : user?.parentInfo?.motherPhoneNumber });
+		if (auth.user.role == 3) {
+			this.setState({ phoneNumber: auth.user?.parentInfo?.fatherPhoneNumber ? auth.user?.parentInfo?.fatherPhoneNumber : auth.user?.parentInfo?.motherPhoneNumber });
+			this.form?.setFieldsValue({ phoneNumber: auth.user?.parentInfo?.fatherPhoneNumber ? auth.user?.parentInfo?.fatherPhoneNumber : auth.user?.parentInfo?.motherPhoneNumber });
+		}
+
+		if (subsidy) {
+			const dependent = this.props.auth.dependents?.find(d => d._id == subsidy?.student?._id);
+			this.setState({
+				selectedSubsidy: subsidy?._id,
+				selectedDependent: subsidy?.student?._id,
+				skillSet: subsidy?.student?.services,
+				selectedSkillSet: subsidy?.skillSet?._id,
+			})
+			if (this.props.auth.user?.role > 3) {
+				this.form.setFieldsValue({
+					selectedSubsidy: subsidy?._id,
+					selectedDependent: subsidy?.student?._id,
+					phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber,
+					selectedSkillSet: subsidy?.skillSet?._id,
+				});
+				this.setState({ phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber });
+			}
+			this.getConsultationData(subsidy?.student?._id);
 		}
 		this.props.dispatch(setMeetingLink(''));
 	}
@@ -69,6 +90,7 @@ class ModalReferralService extends React.Component {
 
 	createConsulation = () => {
 		const { selectedDependent, selectedSkillSet, phoneNumber, fileList, note, selectedTimeIndex, selectedDate, arrTime, isGoogleMeet } = this.state;
+		const { subsidy } = this.props;
 		const meetingLink = this.form.getFieldValue("meetingLink");
 
 		if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
@@ -95,6 +117,7 @@ class ModalReferralService extends React.Component {
 			notes: note,
 			type: 4,
 			status: 0,
+			subsidy: subsidy?._id,
 		};
 
 		request.post(createAppointmentForParent, postData).then(result => {
@@ -105,8 +128,9 @@ class ModalReferralService extends React.Component {
 					arrTime: [],
 					selectedDependent: undefined,
 					selectedSkillSet: undefined,
+					selectedSubsidy: undefined,
 				})
-				this.form.setFieldsValue({ selectedDependent: undefined, selectedSkillSet: undefined, meetingLink: undefined });
+				this.form.setFieldsValue({ selectedDependent: undefined, selectedSkillSet: undefined, meetingLink: undefined, selectedSubsidy: undefined });
 				this.props.dispatch(setMeetingLink(''));
 				this.props.onSubmit();
 			} else {
@@ -187,6 +211,25 @@ class ModalReferralService extends React.Component {
 			this.setState({ phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber });
 		}
 		this.getConsultationData(dependentId);
+	}
+
+	handleSelectSubsidy = (subsidyId) => {
+		const subsidy = this.props.listSubsidy?.find(s => s._id === subsidyId);
+		const dependent = this.props.auth.dependents?.find(d => d._id == subsidy?.student?._id);
+		this.setState({
+			selectedDependent: subsidy?.student?._id,
+			skillSet: subsidy?.student?.services,
+			selectedSkillSet: subsidy?.skillSet?._id,
+		})
+		if (this.props.auth.user?.role > 3) {
+			this.form.setFieldsValue({
+				selectedDependent: subsidy?.student?._id,
+				phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber,
+				selectedSkillSet: subsidy?.skillSet?._id,
+			});
+			this.setState({ phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber });
+		}
+		this.getConsultationData(subsidy?.student?._id);
 	}
 
 	onSelectDate = (newValue) => {
@@ -280,8 +323,10 @@ class ModalReferralService extends React.Component {
 	}
 
 	render() {
-		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, skillSet, consultants } = this.state;
-		const { dependents } = this.props.auth;
+		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, skillSet, consultants, selectedSubsidy } = this.state;
+		const { auth, listSubsidy, subsidy } = this.props;
+		console.log(this.props.listSubsidy)
+		const subsidaries = listSubsidy?.filter(s => s.status === 3 && !s.consultation?.date) ?? [];
 
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -317,9 +362,24 @@ class ModalReferralService extends React.Component {
 						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
+						<p className='font-16 mb-5'>{intl.formatMessage(messages.selectOptions)}</p>
 						<Row gutter={20} className='mb-10' align="bottom">
 							<Col xs={24} sm={24} md={8} className='select-small'>
-								<p className='font-16 mb-5'>{intl.formatMessage(messages.selectOptions)}</p>
+								<Form.Item
+									name='selectedSubsidy'
+									label={intl.formatMessage(msgCreateAccount.subsidyRequest)}
+								>
+									<Select
+										placeholder={intl.formatMessage(msgCreateAccount.subsidyRequest)}
+										value={selectedSubsidy}
+										onChange={v => this.handleSelectSubsidy(v)}
+										disabled={!!subsidy}
+									>
+										{subsidaries?.map((s, index) => (
+											<Select.Option key={index} value={s._id}>{s?.student?.firstName ?? ''} {s?.student?.lastName ?? ''}({s?.skillSet?.name ?? ''})</Select.Option>
+										))}
+									</Select>
+								</Form.Item>
 								<Form.Item
 									name='selectedDependent'
 									label={intl.formatMessage(msgCreateAccount.dependent)}
@@ -329,8 +389,9 @@ class ModalReferralService extends React.Component {
 										placeholder={intl.formatMessage(msgCreateAccount.dependent)}
 										value={selectedDependent}
 										onChange={v => this.handleSelectDependent(v)}
+										disabled={!!subsidy}
 									>
-										{dependents?.map((dependent, index) => (
+										{auth.dependents?.map((dependent, index) => (
 											<Select.Option key={index} value={dependent._id}>{dependent.firstName} {dependent.lastName}</Select.Option>
 										))}
 									</Select>
@@ -346,6 +407,7 @@ class ModalReferralService extends React.Component {
 										placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
 										value={selectedSkillSet}
 										onChange={v => this.setState({ selectedSkillSet: v })}
+										disabled={!!subsidy}
 									>
 										{skillSet?.map((skill, index) => (
 											<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
@@ -491,6 +553,7 @@ class ModalReferralService extends React.Component {
 const mapStateToProps = state => ({
 	auth: state.auth,
 	appointments: state.appointments.dataAppointments,
+	listSubsidy: state.appointments.dataSubsidyRequests,
 });
 
 export default compose(connect(mapStateToProps))(ModalReferralService);

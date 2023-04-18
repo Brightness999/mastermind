@@ -113,7 +113,6 @@ class ModalCurrentReferralService extends React.Component {
 				message.error('cannot create referral');
 			}
 		}).catch(err => {
-			console.log(err);
 			message.error('cannot create referral');
 		})
 	}
@@ -265,7 +264,6 @@ class ModalCurrentReferralService extends React.Component {
 
 	render() {
 		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, dependents, skillSet, consultants } = this.state;
-		console.log(arrTime)
 		const { event } = this.props;
 		const modalProps = {
 			className: 'modal-referral-service',

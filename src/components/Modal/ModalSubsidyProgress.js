@@ -9,18 +9,15 @@ import moment from 'moment';
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import msgDashboard from '../../routes/Dashboard/messages';
+import msgDrawer from '../DrawerDetail/messages';
 import request from '../../utils/api/request'
 import { url, switchPathWithRole } from '../../utils/api/baseUrl'
 import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation, preApproveSubsidy, schoolAcceptAppeal, schoolAcceptAppealSubsidy } from '../../utils/api/apiList';
 import { setSubsidyRequests } from '../../redux/features/appointmentsSlice';
+import ModalReferralService from './ModalReferralService';
+import ModalCurrentReferralService from './ModalCurrentReferralService';
 import './style/index.less';
 import '../../assets/styles/login.less';
-
-const arrMeetSolution = [
-	'Google meet',
-	'Zoom',
-	'Direction',
-]
 
 class ModalSubsidyProgress extends React.Component {
 	state = {
@@ -35,6 +32,8 @@ class ModalSubsidyProgress extends React.Component {
 		parentWarning: '',
 		consulationWarning: '',
 		referral: {},
+		visiblReferralService: false,
+		visibleCurrentReferral: false,
 	}
 
 	componentDidMount = () => {
@@ -235,6 +234,30 @@ class ModalSubsidyProgress extends React.Component {
 		})));
 	}
 
+	onShowModalReferral = () => {
+		this.setState({ visiblReferralService: true });
+	};
+
+	onCloseModalReferral = () => {
+		this.setState({ visiblReferralService: false });
+	};
+
+	onSubmitModalReferral = () => {
+		this.onCloseModalReferral();
+		message.success({
+			content: intl.formatMessage(msgDashboard.appointmentScheduled),
+			className: 'popup-scheduled',
+		});
+	}
+
+	onShowModalCurrentReferral = () => {
+		this.setState({ visibleCurrentReferral: true });
+	};
+
+	onCloseModalCurrentReferral = () => {
+		this.setState({ visibleCurrentReferral: false });
+	};
+
 	renderStudentParentInfo(subsidy) {
 		const { student, documents } = subsidy;
 		return (<div className='parent-info'>
@@ -338,9 +361,9 @@ class ModalSubsidyProgress extends React.Component {
 				<div className='flex flex-row items-center'>
 					<a
 						className='text-primary'
-						onClick={() => { }}
+						onClick={this.onShowModalReferral}
 					>
-						<FaRegCalendarAlt />{intl.formatMessage(messages.reSchedule)}
+						<FaRegCalendarAlt /> {intl.formatMessage(messages.reSchedule)}
 					</a>
 				</div>
 			</div>
@@ -381,7 +404,7 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-700 mb-10'>{intl.formatMessage(messages.recommendedProviders)}</p>
 						<div className='select-md'>
 							<Select
-								disabled={user.role === 3 || [2, 4].includes(subsidy.status)}
+								disabled={user.role === 3 || subsidy.status > 1}
 								onChange={v => this.setState({ selectedProvider: v })}
 								value={selectedProvider}
 								className='mb-10'
@@ -397,7 +420,7 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-700 mb-10'>{intl.formatMessage(messages.decisionExplanation)}</p>
 						<Input.TextArea
 							value={decisionExplanation}
-							disabled={user.role === 3 || [2, 4].includes(subsidy.status)}
+							disabled={user.role === 3 || subsidy.status > 1}
 							onChange={v => this.setState({ decisionExplanation: v.target.value })}
 							rows={5} placeholder={intl.formatMessage(messages.generalNotes)} />
 					</Col>
@@ -410,7 +433,7 @@ class ModalSubsidyProgress extends React.Component {
 		const { referral } = this.state;
 
 		if ([3, 5].includes(data.status)) {
-			if (referral.typeForAppointLocation == undefined || referral.location == undefined) {
+			if (!referral?.meetingLink && !referral?.phoneNumber) {
 				return (
 					<div className='consulation-appoint'>
 						<div className='flex flex-row justify-between'>
@@ -427,18 +450,22 @@ class ModalSubsidyProgress extends React.Component {
 					</Col>
 					<Col xs={24} sm={24} md={14}>
 						<div className='flex flex-row justify-between'>
-							{referral.typeForAppointLocation != undefined && (
+							{referral.meetingLink ? (
 								<p>
-									<span className='font-700'>{arrMeetSolution[referral.typeForAppointLocation]}</span>: <a>{referral.location}</a>
+									<span className='font-700'>{intl.formatMessage(msgDrawer.meeting)}</span>: <a>{referral.meetingLink}</a>
 								</p>
-							)}
+							) : null}
+							{referral.phoneNumber ? (
+								<p>
+									<span className='font-700'>{intl.formatMessage(msgDrawer.phonenumber)}</span>: {referral.phoneNumber}
+								</p>
+							) : null}
 							<div className='flex flex-row items-center'>
-								<a className='text-primary' onClick={() => { }}><FaRegCalendarAlt />{intl.formatMessage(messages.reSchedule)}</a>
+								<a className='text-primary' onClick={this.onShowModalCurrentReferral}><FaRegCalendarAlt /> {intl.formatMessage(messages.reSchedule)}</a>
 							</div>
 						</div>
 						<div className='flex flex-row justify-between'>
-							{referral.date != undefined && <p><span className='font-700'>{intl.formatMessage(messages.dateTime)}</span>: {moment(referral.date).format('YYYY-MM-DD')} | {referral.date != undefined ? moment(referral.date).format('HH:mm A') : ''}</p>}
-							<p><span className='font-700'>{intl.formatMessage(messages.phone)}</span>: {referral.phoneNumber}</p>
+							{referral.date ? <p><span className='font-700'>{intl.formatMessage(messages.dateTime)}</span>: {moment(referral.date).format('YYYY-MM-DD HH:mm A')}</p> : null}
 						</div>
 					</Col>
 				</div>
@@ -450,7 +477,7 @@ class ModalSubsidyProgress extends React.Component {
 		const { selectProviderFromAdmin, numberOfSessions, priceForSession } = this.state;
 		const { user, providers } = this.props.auth;
 		const isNotAdmin = user?.role < 900;
-		if (isNotAdmin || (!isNotAdmin && ![3, 5].includes(subsidy.status))) {
+		if (isNotAdmin || (!isNotAdmin && subsidy?.consultation?.status != -1)) {
 			return;
 		}
 
@@ -470,8 +497,8 @@ class ModalSubsidyProgress extends React.Component {
 							className='mb-10'
 							placeholder={intl.formatMessage(msgCreateAccount.provider)}
 						>
-							{providers?.map((provider) => (
-								<Select.Option key={provider._id} value={provider._id}>{provider.name || provider.referredToAs}</Select.Option>
+							{providers?.map((provider, index) => (
+								<Select.Option key={index} value={provider?._id}>{provider?.firstName ?? ''} {provider?.lastName ?? ''}</Select.Option >
 							))}
 						</Select>
 					</Col>
@@ -513,15 +540,12 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	checkCurrentStep = (subsidy) => {
-		if (subsidy.status == 1) {
-			if (!!subsidy.adminApprovalStatus) {
-				return 3;
-			}
-			return 2;
-		} else if (subsidy.status == -1) {
-			return 1;
-		} else {
-			return 0;
+		switch (subsidy?.status) {
+			case 0: return 0;
+			case 1: case 2: return 1;
+			case 3: case 4: return 2;
+			case 5: return 3;
+			default: return 0;
 		}
 	}
 
@@ -544,7 +568,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	render() {
-		const { subsidy } = this.state;
+		const { subsidy, visiblReferralService, visibleCurrentReferral, referral } = this.state;
 		const modalProps = {
 			className: 'modal-subsidy-progress',
 			title: "",
@@ -555,6 +579,18 @@ class ModalSubsidyProgress extends React.Component {
 			width: 900,
 			footer: this.footerButton(),
 		};
+		const modalReferralServiceProps = {
+			visible: visiblReferralService,
+			onSubmit: this.onSubmitModalReferral,
+			onCancel: this.onCloseModalReferral,
+			subsidy: subsidy,
+		};
+		const modalCurrentReferralProps = {
+      visible: visibleCurrentReferral,
+      onSubmit: this.onCloseModalCurrentReferral,
+      onCancel: this.onCloseModalCurrentReferral,
+      event: referral,
+    }
 
 		return (
 			<Modal {...modalProps}>
@@ -569,7 +605,7 @@ class ModalSubsidyProgress extends React.Component {
 						</div>
 					)}
 				</div>
-				<div className={subsidy.status != -2 ? '' : 'step-declined'}>
+				<div className={[2, 4].includes(subsidy.status) ? 'step-declined' : ''}>
 					<Steps current={this.checkCurrentStep(subsidy)} responsive={false} style={{ maxWidth: 600 }} items={[
 						{ title: intl.formatMessage(messages.request), icon: (<p>1</p>) },
 						{ title: intl.formatMessage(msgCreateAccount.school), icon: (<p>2</p>) },
@@ -578,6 +614,8 @@ class ModalSubsidyProgress extends React.Component {
 					]}>
 					</Steps>
 				</div>
+				{visiblReferralService && <ModalReferralService {...modalReferralServiceProps} />}
+        {visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
 				{this.renderSubsidyData(subsidy)}
 			</Modal>
 		);
