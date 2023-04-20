@@ -492,10 +492,10 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='text-red'>{parentWarning}</p>
 					</div>
 				) : null}</>,
-				<Button onClick={() => this.schoolDenySubsidy(subsidy)} className='mr-10'>
+				<Button key="decline" onClick={() => this.schoolDenySubsidy(subsidy)} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
-				<Button onClick={() => this.schoolAcceptSubsidy(subsidy)} type='primary'>
+				<Button key="approve" onClick={() => this.schoolAcceptSubsidy(subsidy)} type='primary'>
 					{intl.formatMessage(messages.approve).toUpperCase()}
 				</Button>
 			]
@@ -508,10 +508,10 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='text-red'>{parentWarning}</p>
 					</div>
 				) : null}</>,
-				<Button onClick={() => this.adminDenySubsidy(subsidy)} className='mr-10'>
+				<Button key="decline" onClick={() => this.adminDenySubsidy(subsidy)} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
-				<Button onClick={() => this.adminPreApproveSubsidy(subsidy)} type='primary' className='mr-10'>
+				<Button key="preapprove" onClick={() => this.adminPreApproveSubsidy(subsidy)} type='primary' className='mr-10'>
 					{intl.formatMessage(messages.preapprove).toUpperCase()}
 				</Button>
 			]
@@ -531,10 +531,10 @@ class ModalSubsidyProgress extends React.Component {
 		if ([2, 4].includes(subsidy?.status) && subsidy?.isAppeal > 0 && (user?.role === 60 || user?.role > 900)) {
 			return [
 				<p>User has sent appeal for this, please choose an action </p>,
-				<Button onClick={() => this.denyAppeal(subsidy)} className='mr-10'>
+				<Button key="decline" onClick={() => this.denyAppeal(subsidy)} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
-				<Button onClick={() => this.schoolAcceptAppeal(subsidy)} type='primary'>
+				<Button key="approve" onClick={() => this.schoolAcceptAppeal(subsidy)} type='primary'>
 					{intl.formatMessage(messages.approve).toUpperCase()}
 				</Button>
 			]
@@ -542,10 +542,10 @@ class ModalSubsidyProgress extends React.Component {
 
 		if (subsidy?.status === 3 && user?.role > 900 && subsidy?.consultation?.status === -1) {
 			return [
-				<Button onClick={() => this.adminDenySubsidy(subsidy)} size='small' className='mr-10'>
+				<Button key="decline" onClick={() => this.adminDenySubsidy(subsidy)} size='small' className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
-				<Button onClick={() => this.submitSubsidyFromAdmin(subsidy)} size='small' type='primary'>
+				<Button key="approve" onClick={() => this.submitSubsidyFromAdmin(subsidy)} size='small' type='primary'>
 					{intl.formatMessage(messages.approve).toUpperCase()}
 				</Button>
 			]

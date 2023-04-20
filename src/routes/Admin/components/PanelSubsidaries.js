@@ -83,7 +83,7 @@ class PanelSubsidaries extends React.Component {
 
   renderLeftContent(subsidy) {
     return (
-      <div className='item-left'>
+      <div className='item-left' onClick={() => this.callOpenSubsidyDetail(subsidy)}>
         <Avatar size={24} icon={<FaUser size={12} />} />
         <div className='div-service' >
           <p className='font-11 mb-0'>{subsidy?.skillSet?.name}</p>
