@@ -118,9 +118,12 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	adminDenySubsidy(subsidy) {
-		request.post(switchPathWithRole(this.props.auth.user?.role) + 'deny_subsidy_request', { subsidyId: subsidy._id }).then(result => {
-			if (result.success) {
+		request.post(denySubsidyRequest, { subsidyId: subsidy._id }).then(result => {
+			const { success, data } = result;
+			if (success) {
 				this.loadSubsidyData(subsidy._id);
+				this.updateSubsidaries(subsidy, data);
+				this.props.onSubmit();
 			}
 		}).catch(err => {
 			message.error(err.message);
@@ -304,87 +307,6 @@ class ModalSubsidyProgress extends React.Component {
 		</div>)
 	}
 
-	renderButtonsForSchoolInfo(subsidy) {
-		const { user } = this.props.auth;
-		if (user?.role === 3) {
-			return;
-		}
-		if (subsidy.isAppeal > 0 && [2, 4].includes(subsidy.status)) {
-			return (
-				<div>
-					<div className='flex flex-row items-center'>
-						<p>User has sent appeal for this, please choose an action </p>
-					</div>
-					<div className='flex flex-row items-center justify-end'>
-						<Button
-							onClick={() => this.denyAppeal(subsidy)}
-							size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button>
-						<Button
-							onClick={() => this.schoolAcceptAppeal(subsidy)}
-							size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>
-					</div>
-				</div>
-			)
-		}
-
-		return (
-			<div>
-				{this.state.parentWarning.length > 0 ? (
-					<div className='flex flex-row items-center'>
-						<p className='text-red'>{this.state.parentWarning}</p>
-					</div>
-				) : null}
-				<div className='flex flex-row items-center justify-end'>
-					{subsidy?.status === 1 && user.role > 900 && (
-						<Button onClick={() => this.adminPreApproveSubsidy(subsidy)} size='small' type='primary' className='mr-10'>
-							{intl.formatMessage(messages.preapprove).toUpperCase()}
-						</Button>
-					)}
-					{subsidy?.status === 0 && (
-						<>
-							<Button onClick={() => this.schoolDenySubsidy(subsidy)} size='small' className='mr-10'>
-								{intl.formatMessage(messages.decline).toUpperCase()}
-							</Button>
-							<Button onClick={() => this.schoolAcceptSubsidy(subsidy)} size='small' type='primary'>
-								{intl.formatMessage(messages.approve).toUpperCase()}
-							</Button>
-						</>
-					)}
-				</div>
-			</div>
-		)
-	}
-
-	renderButtonsForConsulation(subsidy) {
-		return (
-			<div className='flex flex-row items-center'>
-				<div className='flex flex-row items-center'>
-					<a
-						className='text-primary'
-						onClick={this.onShowModalReferral}
-					>
-						<FaRegCalendarAlt /> {intl.formatMessage(messages.reSchedule)}
-					</a>
-				</div>
-			</div>
-		)
-	}
-
-	renderButtonsForDecision(subsidy) {
-		if (this.props.auth.user?.role > 900) {
-			return (
-				<div className='flex flex-row items-center'>
-					<Button
-						onClick={() => this.adminDenySubsidy(subsidy)}
-						size='small' className='mr-10'>{intl.formatMessage(messages.decline).toUpperCase()}</Button>
-					<Button
-						onClick={() => this.submitSubsidyFromAdmin(subsidy)}
-						size='small' type='primary'>{intl.formatMessage(messages.approve).toUpperCase()}</Button>
-				</div>
-			)
-		}
-	}
-
 	renderSchoolInfo = (data) => {
 		const { subsidy, decisionExplanation, selectedProvider } = this.state;
 		const { user, providers } = this.props.auth;
@@ -397,7 +319,6 @@ class ModalSubsidyProgress extends React.Component {
 			<div className='school-info'>
 				<div className='flex flex-row justify-between'>
 					<p className='font-20 font-700'>{intl.formatMessage(messages.schoolInformation)}</p>
-					{this.renderButtonsForSchoolInfo(data)}
 				</div>
 				<Row gutter={15}>
 					<Col xs={24} sm={24} md={8}>
@@ -437,19 +358,27 @@ class ModalSubsidyProgress extends React.Component {
 				return (
 					<div className='consulation-appoint'>
 						<div className='flex flex-row justify-between'>
-							<p className='font-20 font-700 mb-10'>{intl.formatMessage(messages.consulationAppointment)}</p>
-							{this.renderButtonsForConsulation(data)}
+							<Col xs={24} sm={24} md={12}>
+								<p className='font-20 font-700 mb-10'>{intl.formatMessage(messages.consulationAppointment)}</p>
+							</Col>
+							<Col xs={24} sm={24} md={12}>
+								<div className='flex flex-row items-center'>
+									<div className='flex flex-row items-center'>
+										<a className='text-primary' onClick={this.onShowModalReferral}>
+											<FaRegCalendarAlt /> {intl.formatMessage(messages.schedule)}
+										</a>
+									</div>
+								</div>
+							</Col>
 						</div>
 					</div>
 				);
 			}
 			return (
 				<div className='consulation-appoint'>
-					<Col xs={24} sm={24} md={10}>
-						<p className='font-20 font-700'>{intl.formatMessage(messages.consulationAppointment)}</p>
-					</Col>
-					<Col xs={24} sm={24} md={14}>
-						<div className='flex flex-row justify-between'>
+					<p className='font-20 font-700'>{intl.formatMessage(messages.consulationAppointment)}</p>
+					<div className='flex flex-row justify-between'>
+						<Col xs={24} sm={24} md={12}>
 							{referral.meetingLink ? (
 								<p>
 									<span className='font-700'>{intl.formatMessage(msgDrawer.meeting)}</span>: <a>{referral.meetingLink}</a>
@@ -460,14 +389,18 @@ class ModalSubsidyProgress extends React.Component {
 									<span className='font-700'>{intl.formatMessage(msgDrawer.phonenumber)}</span>: {referral.phoneNumber}
 								</p>
 							) : null}
+						</Col>
+						<Col xs={24} sm={24} md={12}>
 							<div className='flex flex-row items-center'>
-								<a className='text-primary' onClick={this.onShowModalCurrentReferral}><FaRegCalendarAlt /> {intl.formatMessage(messages.reSchedule)}</a>
+								<a className='text-primary' onClick={this.onShowModalCurrentReferral}>
+									<FaRegCalendarAlt /> {intl.formatMessage(msgDrawer.reschedule)}
+								</a>
 							</div>
-						</div>
-						<div className='flex flex-row justify-between'>
-							{referral.date ? <p><span className='font-700'>{intl.formatMessage(messages.dateTime)}</span>: {moment(referral.date).format('YYYY-MM-DD HH:mm A')}</p> : null}
-						</div>
-					</Col>
+						</Col>
+					</div>
+					<div className='flex flex-row justify-between'>
+						{referral.date ? <p><span className='font-700'>{intl.formatMessage(messages.dateTime)}</span>: {moment(referral.date).format('YYYY-MM-DD HH:mm A')}</p> : null}
+					</div>
 				</div>
 			)
 		}
@@ -485,7 +418,6 @@ class ModalSubsidyProgress extends React.Component {
 			<div className='subsidy-detail'>
 				<div className='flex flex-row justify-between'>
 					<p className='font-20 font-700'>{intl.formatMessage(messages.subsidyDetails)}</p>
-					{this.renderButtonsForDecision(subsidy)}
 				</div>
 				<Row gutter={15}>
 					<Col xs={24} sm={24} md={8}>
@@ -550,21 +482,76 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	footerButton() {
-		const { subsidy } = this.state;
+		const { subsidy, parentWarning } = this.state;
+		const { user } = this.props.auth;
 
-		if ([2, 4].includes(subsidy.status) && subsidy.isAppeal >= 0 && (this.props.auth.user?.role === 3 || this.props.auth.user?.role > 900)) {
+		if (subsidy?.status === 0 && (user?.role === 60 || user?.role > 900)) {
+			return [
+				<>{parentWarning.length > 0 ? (
+					<div className='flex flex-row items-center'>
+						<p className='text-red'>{parentWarning}</p>
+					</div>
+				) : null}</>,
+				<Button onClick={() => this.schoolDenySubsidy(subsidy)} className='mr-10'>
+					{intl.formatMessage(messages.decline).toUpperCase()}
+				</Button>,
+				<Button onClick={() => this.schoolAcceptSubsidy(subsidy)} type='primary'>
+					{intl.formatMessage(messages.approve).toUpperCase()}
+				</Button>
+			]
+		}
+
+		if (subsidy?.status === 1 && user.role > 900) {
+			return [
+				<>{parentWarning.length > 0 ? (
+					<div className='flex flex-row items-center'>
+						<p className='text-red'>{parentWarning}</p>
+					</div>
+				) : null}</>,
+				<Button onClick={() => this.adminDenySubsidy(subsidy)} className='mr-10'>
+					{intl.formatMessage(messages.decline).toUpperCase()}
+				</Button>,
+				<Button onClick={() => this.adminPreApproveSubsidy(subsidy)} type='primary' className='mr-10'>
+					{intl.formatMessage(messages.preapprove).toUpperCase()}
+				</Button>
+			]
+		}
+
+		if ([2, 4].includes(subsidy?.status) && subsidy?.isAppeal === 0 && (user?.role === 3 || user?.role > 900)) {
 			return [
 				<Button key="back" onClick={this.props.onCancel}>
 					CLOSE
 				</Button>,
-				<Button
-					disabled={subsidy.isAppeal != 0}
-					key="submit" type="primary" onClick={() => this.appealSubsidy(subsidy)} style={{ padding: '7.5px 30px' }}>
+				<Button key="submit" type="primary" onClick={() => this.appealSubsidy(subsidy)} style={{ padding: '7.5px 30px' }}>
 					{intl.formatMessage(messages.appeal).toUpperCase()}
 				</Button>
 			]
 		}
-		return null
+
+		if ([2, 4].includes(subsidy?.status) && subsidy?.isAppeal > 0 && (user?.role === 60 || user?.role > 900)) {
+			return [
+				<p>User has sent appeal for this, please choose an action </p>,
+				<Button onClick={() => this.denyAppeal(subsidy)} className='mr-10'>
+					{intl.formatMessage(messages.decline).toUpperCase()}
+				</Button>,
+				<Button onClick={() => this.schoolAcceptAppeal(subsidy)} type='primary'>
+					{intl.formatMessage(messages.approve).toUpperCase()}
+				</Button>
+			]
+		}
+
+		if (subsidy?.status === 3 && user?.role > 900 && subsidy?.consultation?.status === -1) {
+			return [
+				<Button onClick={() => this.adminDenySubsidy(subsidy)} size='small' className='mr-10'>
+					{intl.formatMessage(messages.decline).toUpperCase()}
+				</Button>,
+				<Button onClick={() => this.submitSubsidyFromAdmin(subsidy)} size='small' type='primary'>
+					{intl.formatMessage(messages.approve).toUpperCase()}
+				</Button>
+			]
+		}
+
+		return null;
 	}
 
 	render() {
@@ -586,11 +573,11 @@ class ModalSubsidyProgress extends React.Component {
 			subsidy: subsidy,
 		};
 		const modalCurrentReferralProps = {
-      visible: visibleCurrentReferral,
-      onSubmit: this.onCloseModalCurrentReferral,
-      onCancel: this.onCloseModalCurrentReferral,
-      event: referral,
-    }
+			visible: visibleCurrentReferral,
+			onSubmit: this.onCloseModalCurrentReferral,
+			onCancel: this.onCloseModalCurrentReferral,
+			event: referral,
+		}
 
 		return (
 			<Modal {...modalProps}>
@@ -615,7 +602,7 @@ class ModalSubsidyProgress extends React.Component {
 					</Steps>
 				</div>
 				{visiblReferralService && <ModalReferralService {...modalReferralServiceProps} />}
-        {visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
+				{visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
 				{this.renderSubsidyData(subsidy)}
 			</Modal>
 		);
