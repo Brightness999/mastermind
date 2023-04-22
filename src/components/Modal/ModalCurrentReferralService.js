@@ -67,7 +67,6 @@ class ModalCurrentReferralService extends React.Component {
 				this.setState({ consultants: [], appointments: [] });
 			}
 		}).catch(err => {
-			console.log('get all consultants error---', err);
 			this.setState({ consultants: [], appointments: [] });
 		});
 	}
@@ -294,8 +293,8 @@ class ModalCurrentReferralService extends React.Component {
 							<p className='font-16'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
 						</Col>
 						<Col xs={24} sm={24} md={8}>
-							<p className={`font-16 ${event?.type != 3 ? 'display-none' : ''}`}>{intl.formatMessage(msgCreateAccount.subsidy)}</p>
-							<p className={`font-16 font-700 ${event?.type != 2 ? 'display-none' : ''}`}>{event?.separateEvaluationDuration ?? ''} {intl.formatMessage(messages.evaluation)}</p>
+							<p className={`font-16 ${event?.subsidy ? '' : 'd-none'}`}>{intl.formatMessage(msgCreateAccount.subsidy)}</p>
+							<p className={`font-16 font-700 ${event?.type != 2 ? 'd-none' : ''}`}>{event?.separateEvaluationDuration ?? ''} {intl.formatMessage(messages.evaluation)}</p>
 							<p className='font-16'>{(event?.type == 1 || event?.type == 4) ? event?.phoneNumber ?? '' : event?.location ?? ''}</p>
 						</Col>
 						<Col xs={24} sm={24} md={8}>

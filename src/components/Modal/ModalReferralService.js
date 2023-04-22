@@ -54,13 +54,13 @@ class ModalReferralService extends React.Component {
 				skillSet: subsidy?.student?.services,
 				selectedSkillSet: subsidy?.skillSet?._id,
 			})
+			this.form.setFieldsValue({
+				selectedSubsidy: subsidy?._id,
+				selectedDependent: subsidy?.student?._id,
+				phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber,
+				selectedSkillSet: subsidy?.skillSet?._id,
+			});
 			if (this.props.auth.user?.role > 3) {
-				this.form.setFieldsValue({
-					selectedSubsidy: subsidy?._id,
-					selectedDependent: subsidy?.student?._id,
-					phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber,
-					selectedSkillSet: subsidy?.skillSet?._id,
-				});
 				this.setState({ phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber });
 			}
 			this.getConsultationData(subsidy?.student?._id);
@@ -84,12 +84,12 @@ class ModalReferralService extends React.Component {
 				});
 			}
 		}).catch(err => {
-			console.log('get all consultants error---', err);
+			this.setState({ consultants: [], appointments: [] });
 		});
 	}
 
 	createConsulation = () => {
-		const { selectedDependent, selectedSkillSet, phoneNumber, fileList, note, selectedTimeIndex, selectedDate, arrTime, isGoogleMeet } = this.state;
+		const { selectedDependent, selectedSkillSet, phoneNumber, fileList, note, selectedTimeIndex, selectedDate, arrTime, isGoogleMeet, selectedSubsidy } = this.state;
 		const { subsidy } = this.props;
 		const meetingLink = this.form.getFieldValue("meetingLink");
 
@@ -117,7 +117,7 @@ class ModalReferralService extends React.Component {
 			notes: note,
 			type: 4,
 			status: 0,
-			subsidy: subsidy?._id,
+			subsidy: subsidy ? subsidy?._id : selectedSubsidy,
 		};
 
 		request.post(createAppointmentForParent, postData).then(result => {
@@ -137,7 +137,6 @@ class ModalReferralService extends React.Component {
 				message.error('cannot create referral');
 			}
 		}).catch(err => {
-			console.log(err);
 			message.error(err.message);
 		})
 	}
@@ -203,6 +202,8 @@ class ModalReferralService extends React.Component {
 			skillSet: dependent?.services,
 			selectedSkillSet: undefined,
 		});
+
+		this.form.setFieldsValue({ selectedSubsidy: undefined });
 		if (this.props.auth.user?.role > 3) {
 			this.form.setFieldsValue({
 				phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber,
@@ -213,6 +214,21 @@ class ModalReferralService extends React.Component {
 		this.getConsultationData(dependentId);
 	}
 
+	handleSelectSkillSet = (skill) => {
+		this.setState({ selectedSkillSet: skill });
+		this.form.setFieldsValue({ selectedSubsidy: undefined });
+	}
+
+	handleSwitchMeeting = (status) => {
+		this.setState({ isGoogleMeet: status });
+		this.form.setFieldsValue({ selectedSubsidy: undefined });
+	}
+
+	handleChangePhonenumber = (phoneNumber) => {
+		this.setState({ phoneNumber: phoneNumber });
+		this.form.setFieldsValue({ selectedSubsidy: undefined });
+	}
+
 	handleSelectSubsidy = (subsidyId) => {
 		const subsidy = this.props.listSubsidy?.find(s => s._id === subsidyId);
 		const dependent = this.props.auth.dependents?.find(d => d._id == subsidy?.student?._id);
@@ -220,13 +236,14 @@ class ModalReferralService extends React.Component {
 			selectedDependent: subsidy?.student?._id,
 			skillSet: subsidy?.student?.services,
 			selectedSkillSet: subsidy?.skillSet?._id,
+			selectedSubsidy: subsidyId,
 		})
+		this.form.setFieldsValue({
+			selectedDependent: subsidy?.student?._id,
+			phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber,
+			selectedSkillSet: subsidy?.skillSet?._id,
+		});
 		if (this.props.auth.user?.role > 3) {
-			this.form.setFieldsValue({
-				selectedDependent: subsidy?.student?._id,
-				phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber,
-				selectedSkillSet: subsidy?.skillSet?._id,
-			});
 			this.setState({ phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber });
 		}
 		this.getConsultationData(subsidy?.student?._id);
@@ -303,11 +320,9 @@ class ModalReferralService extends React.Component {
 							if (consultant_length - appointment_length > 0) {
 								time.active = true;
 							} else {
-								console.log('appointment limit', time)
 								time.active = false;
 							}
 						} else {
-							console.log('no dependent', time)
 							time.active = false;
 						}
 						return time;
@@ -325,7 +340,6 @@ class ModalReferralService extends React.Component {
 	render() {
 		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, skillSet, consultants, selectedSubsidy } = this.state;
 		const { auth, listSubsidy, subsidy } = this.props;
-		console.log(this.props.listSubsidy)
 		const subsidaries = listSubsidy?.filter(s => s.status === 3 && !s.consultation?.date) ?? [];
 
 		const modalProps = {
@@ -406,7 +420,7 @@ class ModalReferralService extends React.Component {
 									<Select
 										placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
 										value={selectedSkillSet}
-										onChange={v => this.setState({ selectedSkillSet: v })}
+										onChange={v => this.handleSelectSkillSet(v)}
 										disabled={!!subsidy}
 									>
 										{skillSet?.map((skill, index) => (
@@ -418,7 +432,7 @@ class ModalReferralService extends React.Component {
 							<Col xs={24} sm={24} md={8}>
 								<div className='flex gap-2 pb-10'>
 									<div>{intl.formatMessage(messages.byPhone)}</div>
-									<Switch className='phone-googlemeet-switch' checked={isGoogleMeet} onChange={(status) => this.setState({ isGoogleMeet: status })} />
+									<Switch className='phone-googlemeet-switch' checked={isGoogleMeet} onChange={(status) => this.handleSwitchMeeting(status)} />
 									<div>{intl.formatMessage(messages.googleMeet)}</div>
 								</div>
 								<Form.Item
@@ -433,7 +447,7 @@ class ModalReferralService extends React.Component {
 									<Input
 										placeholder={intl.formatMessage(msgCreateAccount.contactNumber)}
 										value={phoneNumber}
-										onChange={v => this.setState({ phoneNumber: v.target.value })}
+										onChange={e => this.handleChangePhonenumber(e.target.value)}
 									/>
 								</Form.Item>
 								<Form.Item
