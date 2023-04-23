@@ -944,7 +944,7 @@ class DrawerDetail extends Component {
               )}
               {event?.type === 4 && event?.status === 0 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900) && (
                 <Col span={12}>
-                  <Popconfirm trigger="click" title="Are you sure to close this consultation?" overlayClassName='consultant' onConfirm={this.handleMarkAsClosed}>
+                  <Popconfirm trigger="click" title="Are you sure to close this consultation?" overlayClassName='consultant' onConfirm={() => this.handleMarkAsClosed(undefined, false, '', '')}>
                     <Button type='primary' icon={<BsCheckCircle size={15} />} block className='flex items-center gap-2 h-30'>
                       {intl.formatMessage(messages.markClosed)}
                     </Button>
