@@ -12,7 +12,7 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgDrawer from '../DrawerDetail/messages';
 import request from '../../utils/api/request'
 import { url, switchPathWithRole } from '../../utils/api/baseUrl'
-import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation, preApproveSubsidy, schoolAcceptAppealSubsidy, selectFinalProviderForSubsidy } from '../../utils/api/apiList';
+import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation, preApproveSubsidy, schoolAcceptAppealSubsidy, searchProvidersForAdmin, selectFinalProviderForSubsidy } from '../../utils/api/apiList';
 import { setSubsidyRequests } from '../../redux/features/appointmentsSlice';
 import ModalReferralService from './ModalReferralService';
 import ModalCurrentReferralService from './ModalCurrentReferralService';
@@ -34,6 +34,7 @@ class ModalSubsidyProgress extends React.Component {
 		referral: {},
 		visiblReferralService: false,
 		visibleCurrentReferral: false,
+		providers: [],
 	}
 
 	componentDidMount = () => {
@@ -45,7 +46,9 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(switchPathWithRole(this.props.auth.user?.role) + 'get_subsidy_detail', { subsidyId: subsidyId }).then(result => {
 			const { success, data } = result;
 			if (success) {
-				this.setState({ subsidy: data }, () => this.loadLastReferral());
+				this.setState({ subsidy: data });
+				this.loadLastReferral(data);
+				this.searchProvider(data);
 				if (!!data.decisionExplanation && data.decisionExplanation.length > 0) {
 					this.setState({ decisionExplanation: data.decisionExplanation });
 				}
@@ -66,8 +69,19 @@ class ModalSubsidyProgress extends React.Component {
 		})
 	}
 
-	loadLastReferral = () => {
-		request.post(getLastConsulation, { subsidyId: this.state.subsidy._id }).then(result => {
+	searchProvider(subsidy) {
+		request.post(searchProvidersForAdmin, { skill: subsidy?.skillSet?._id, dependentId: subsidy?.student?._id }).then(result => {
+			const { data, success } = result;
+			if (success) {
+				this.setState({ providers: data.providers ?? [] });
+			}
+		}).catch(() => {
+			this.setState({ providers: [] });
+		})
+	}
+
+	loadLastReferral = (subsidy) => {
+		request.post(getLastConsulation, { subsidyId: subsidy?._id }).then(result => {
 			if (result.success) {
 				this.setState({ referral: result.data });
 			} else {
@@ -307,9 +321,9 @@ class ModalSubsidyProgress extends React.Component {
 		</div>)
 	}
 
-	renderSchoolInfo = (data) => {
-		const { subsidy, decisionExplanation, selectedProvider } = this.state;
-		const { user, providers } = this.props.auth;
+	renderSchoolInfo = (subsidy) => {
+		const { decisionExplanation, selectedProvider, providers } = this.state;
+		const { user } = this.props.auth;
 
 		if (user?.role === 3 && subsidy.status === 0) {
 			return null;
@@ -350,10 +364,10 @@ class ModalSubsidyProgress extends React.Component {
 		)
 	}
 
-	renderConsulation = (data) => {
+	renderConsulation = (subsidy) => {
 		const { referral } = this.state;
 
-		if ([3, 5].includes(data.status)) {
+		if ([3, 5].includes(subsidy.status)) {
 			if (!referral?.meetingLink && !referral?.phoneNumber) {
 				return (
 					<div className='consulation-appoint'>
@@ -410,8 +424,8 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderDecision(subsidy) {
-		const { selectProviderFromAdmin, numberOfSessions, priceForSession, referral } = this.state;
-		const { user, providers } = this.props.auth;
+		const { selectProviderFromAdmin, numberOfSessions, priceForSession, referral, providers } = this.state;
+		const { user } = this.props.auth;
 		const isNotAdmin = user?.role < 900;
 		if (isNotAdmin || (!isNotAdmin && referral?.status != -1)) {
 			return;
@@ -570,7 +584,7 @@ class ModalSubsidyProgress extends React.Component {
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: this.props.onCancel,
-			closable: false,
+			closable: true,
 			width: 900,
 			footer: this.footerButton(),
 		};
