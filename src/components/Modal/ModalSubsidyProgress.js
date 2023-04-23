@@ -495,11 +495,11 @@ class ModalSubsidyProgress extends React.Component {
 
 		if (subsidy?.status === 0 && (user?.role === 60 || user?.role > 900)) {
 			return [
-				<>{parentWarning.length > 0 ? (
+				<div key="warning">{parentWarning.length > 0 ? (
 					<div className='flex flex-row items-center'>
 						<p className='text-red'>{parentWarning}</p>
 					</div>
-				) : null}</>,
+				) : null}</div>,
 				<Button key="decline" onClick={() => this.schoolDenySubsidy(subsidy)} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
@@ -511,11 +511,11 @@ class ModalSubsidyProgress extends React.Component {
 
 		if (subsidy?.status === 1 && user.role > 900) {
 			return [
-				<>{parentWarning.length > 0 ? (
+				<div key="warning">{parentWarning.length > 0 ? (
 					<div className='flex flex-row items-center'>
 						<p className='text-red'>{parentWarning}</p>
 					</div>
-				) : null}</>,
+				) : null}</div>,
 				<Button key="decline" onClick={() => this.adminDenySubsidy(subsidy)} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
