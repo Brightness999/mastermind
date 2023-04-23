@@ -313,6 +313,7 @@
   "components.Modal.subsidyDetails": "Subsidy details",
   "components.Modal.numberApprovedSessions": "Number of approved sessions",
   "components.Modal.totalRemaining": "Total remaining",
+  "components.Modal.totalPayment": "Total payment",
   "components.Modal.appeal": "Appeal",
   "components.Modal.submitFlag": "Submit Flag",
   "components.Modal.noShowPenalty": "No show penalty",

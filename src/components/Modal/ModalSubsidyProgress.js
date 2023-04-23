@@ -12,7 +12,7 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgDrawer from '../DrawerDetail/messages';
 import request from '../../utils/api/request'
 import { url, switchPathWithRole } from '../../utils/api/baseUrl'
-import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation, preApproveSubsidy, schoolAcceptAppeal, schoolAcceptAppealSubsidy } from '../../utils/api/apiList';
+import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation, preApproveSubsidy, schoolAcceptAppealSubsidy, selectFinalProviderForSubsidy } from '../../utils/api/apiList';
 import { setSubsidyRequests } from '../../redux/features/appointmentsSlice';
 import ModalReferralService from './ModalReferralService';
 import ModalCurrentReferralService from './ModalCurrentReferralService';
@@ -62,7 +62,6 @@ class ModalSubsidyProgress extends React.Component {
 				this.props.onCancel();
 			}
 		}).catch(err => {
-			console.log('get_subsidy_detail-----', err);
 			this.props.onCancel();
 		})
 	}
@@ -159,20 +158,20 @@ class ModalSubsidyProgress extends React.Component {
 	submitSubsidyFromAdmin = (subsidy) => {
 		const { selectProviderFromAdmin, numberOfSessions, priceForSession } = this.state;
 		const postData = {
-			"selectedProvider": selectProviderFromAdmin,
-			"numberOfSessions": numberOfSessions,
-			"priceForSession": priceForSession,
-			"subsidyId": subsidy._id,
-			"student": subsidy.student._id,
-			"school": subsidy.school._id,
+			selectedProvider: selectProviderFromAdmin,
+			numberOfSessions: numberOfSessions,
+			priceForSession: priceForSession,
+			subsidyId: subsidy?._id,
 		}
 		if (!selectProviderFromAdmin || !numberOfSessions || !priceForSession) {
 			message.error('please fill all reuired field');
 			return;
 		}
-		request.post(switchPathWithRole(this.props.auth.user?.role) + 'select_final_provider_for_subsidy', postData).then(result => {
+		request.post(selectFinalProviderForSubsidy, postData).then(result => {
 			if (result.success) {
 				this.loadSubsidyData(subsidy._id);
+				this.updateSubsidaries(subsidy, result.data);
+				this.props.onSubmit();
 			}
 		}).catch(err => {
 			message.error(err.message);
@@ -185,6 +184,7 @@ class ModalSubsidyProgress extends React.Component {
 			message.success('Your appeal has been sent successfully');
 			if (result.success) {
 				this.loadSubsidyData(subsidy._id);
+				this.props.onSubmit();
 			}
 		}).catch(err => {
 			message.error(err.message);
@@ -392,9 +392,12 @@ class ModalSubsidyProgress extends React.Component {
 						</Col>
 						<Col xs={24} sm={24} md={12}>
 							<div className='flex flex-row items-center'>
-								<a className='text-primary' onClick={this.onShowModalCurrentReferral}>
-									<FaRegCalendarAlt /> {intl.formatMessage(msgDrawer.reschedule)}
-								</a>
+								{referral?.status === 0 ? (
+									<a className='text-primary' onClick={this.onShowModalCurrentReferral}>
+										<FaRegCalendarAlt /> {intl.formatMessage(msgDrawer.reschedule)}
+									</a>
+								) : referral?.status === -1 ? <span className='font-16'>{intl.formatMessage(msgDrawer.closed)}</span>
+									: <span className='font-16'>{intl.formatMessage(msgDrawer.cancelled)}</span>}
 							</div>
 						</Col>
 					</div>
@@ -407,10 +410,10 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderDecision(subsidy) {
-		const { selectProviderFromAdmin, numberOfSessions, priceForSession } = this.state;
+		const { selectProviderFromAdmin, numberOfSessions, priceForSession, referral } = this.state;
 		const { user, providers } = this.props.auth;
 		const isNotAdmin = user?.role < 900;
-		if (isNotAdmin || (!isNotAdmin && subsidy?.consultation?.status != -1)) {
+		if (isNotAdmin || (!isNotAdmin && referral?.status != -1)) {
 			return;
 		}
 
@@ -421,9 +424,9 @@ class ModalSubsidyProgress extends React.Component {
 				</div>
 				<Row gutter={15}>
 					<Col xs={24} sm={24} md={8}>
-						<p className='font-700'>{intl.formatMessage(msgCreateAccount.provider)}:</p>
+						<p className='font-700'>*{intl.formatMessage(msgCreateAccount.provider)}:</p>
 						<Select
-							disabled={isNotAdmin}
+							disabled={isNotAdmin || subsidy.status === 5}
 							value={selectProviderFromAdmin}
 							onChange={v => this.setState({ selectProviderFromAdmin: v })}
 							className='mb-10'
@@ -435,21 +438,26 @@ class ModalSubsidyProgress extends React.Component {
 						</Select>
 					</Col>
 					<Col xs={24} sm={24} md={8}>
-						<p className='font-700'>{intl.formatMessage(messages.numberApprovedSessions)}:</p>
+						<p className='font-700'>*{intl.formatMessage(messages.numberApprovedSessions)}:</p>
 						<Input
-							disabled={isNotAdmin}
+							disabled={isNotAdmin || subsidy.status === 5}
 							value={numberOfSessions}
 							type="number"
-							onChange={v => this.setState({ numberOfSessions: v.target.value })}
+							className='h-40'
+							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract') && e.preventDefault()}
+							onChange={e => this.setState({ numberOfSessions: e.target.value })}
 						/>
 					</Col>
 					<Col xs={24} sm={24} md={8}>
-						<p className='font-700'>{intl.formatMessage(messages.totalRemaining)}:</p>
+						<p className='font-700'>*{intl.formatMessage(messages.totalPayment)}:</p>
 						<Input
 							value={priceForSession}
 							type="number"
-							onChange={v => this.setState({ priceForSession: v.target.value })}
-							disabled={isNotAdmin}
+							prefix="$"
+							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract') && e.preventDefault()}
+							onChange={e => this.setState({ priceForSession: e.target.value })}
+							className='h-40'
+							disabled={isNotAdmin || subsidy.status === 5}
 						/>
 					</Col>
 				</Row>
@@ -482,7 +490,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	footerButton() {
-		const { subsidy, parentWarning } = this.state;
+		const { subsidy, parentWarning, referral } = this.state;
 		const { user } = this.props.auth;
 
 		if (subsidy?.status === 0 && (user?.role === 60 || user?.role > 900)) {
@@ -540,12 +548,12 @@ class ModalSubsidyProgress extends React.Component {
 			]
 		}
 
-		if (subsidy?.status === 3 && user?.role > 900 && subsidy?.consultation?.status === -1) {
+		if (subsidy?.status === 3 && user?.role > 900 && referral?.status === -1) {
 			return [
-				<Button key="decline" onClick={() => this.adminDenySubsidy(subsidy)} size='small' className='mr-10'>
+				<Button key="decline" onClick={() => this.adminDenySubsidy(subsidy)} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
-				<Button key="approve" onClick={() => this.submitSubsidyFromAdmin(subsidy)} size='small' type='primary'>
+				<Button key="approve" onClick={() => this.submitSubsidyFromAdmin(subsidy)} type='primary'>
 					{intl.formatMessage(messages.approve).toUpperCase()}
 				</Button>
 			]

@@ -249,6 +249,10 @@ export default {
     id: `${scope}.totalRemaining`,
     defaultMessage: 'Total remaining',
   },
+  totalPayment: {
+    id: `${scope}.totalPayment`,
+    defaultMessage: 'Total payment',
+  },
   appeal: {
     id: `${scope}.appeal`,
     defaultMessage: 'Appeal',

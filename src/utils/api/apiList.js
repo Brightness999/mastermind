@@ -35,6 +35,7 @@ export const getAdminSubsidyRequests = 'admin/get_subsidy_requests'
 export const getAdminInfo = 'admin/get_admin_info'
 export const updateAdminInfo = 'admin/update_admin_info'
 export const preApproveSubsidy = 'admin/pre_approve_subsidy'
+export const selectFinalProviderForSubsidy = 'admin/select_final_provider_for_subsidy'
 
 export const getDefaultValuesForConsultant = 'consultants/get_default_values_for_consultant'
 export const getAppointmentsForConsultant = 'consultants/get_my_appointments'
