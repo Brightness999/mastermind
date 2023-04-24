@@ -345,7 +345,7 @@ class PanelAppointment extends React.Component {
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
         <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-          {appointments?.filter(a => a.type == 3 && a.flagStatus != 1 && a.status == 0 && moment().isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => (a.type === 3 || a.type === 5) && a.flagStatus != 1 && a.status == 0 && moment().isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {data.status == 0 && (
@@ -356,7 +356,7 @@ class PanelAppointment extends React.Component {
               )}
             </div>
           ))}
-          {(appointments?.filter(a => a.type == 3 && a.flagStatus != 1 && a.status == 0 && moment().isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
+          {(appointments?.filter(a => (a.type === 3 || a.type === 5) && a.flagStatus != 1 && a.status == 0 && moment().isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
             <div key={1} className='list-item p-10 justify-center'>
               <span>No upcoming appoiment</span>
             </div>
@@ -365,7 +365,7 @@ class PanelAppointment extends React.Component {
           {visibleCurrent && <ModalCurrentAppointment {...modalCurrentProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
-          {appointments?.filter(a => a.type == 3 && a.flagStatus != 1 && [0, -2].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => (a.type === 3 || a.type === 5) && a.flagStatus != 1 && [0, -2].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {this.props.user?.role > 3 ? (
@@ -376,7 +376,7 @@ class PanelAppointment extends React.Component {
               ) : null}
             </div>
           ))}
-          {(appointments?.filter(a => a.type == 3 && [0, -2].includes(a.status) && a.flagStatus != 1 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
+          {(appointments?.filter(a => (a.type === 3 || a.type === 5) && [0, -2].includes(a.status) && a.flagStatus != 1 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
             <div key={1} className='list-item p-10 justify-center'>
               <span>No unprocess appoiment</span>
             </div>
@@ -386,7 +386,7 @@ class PanelAppointment extends React.Component {
           {visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="3">
-          {appointments?.filter(a => a.type == 3 && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => (a.type === 3 || a.type === 5) && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {(this.props.user?.role == 3 && !data?.isPaid) ? (
@@ -418,7 +418,7 @@ class PanelAppointment extends React.Component {
               ) : null}
             </div>
           ))}
-          {(appointments?.filter(a => a.type == 3 && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
+          {(appointments?.filter(a => (a.type === 3 || a.type === 5) && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
             <div key={1} className='list-item p-10 justify-center'>
               <span>No past appoiment</span>
             </div>

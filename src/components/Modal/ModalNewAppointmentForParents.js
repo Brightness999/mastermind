@@ -51,6 +51,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		duration: 30,
 		visibleModalConfirm: false,
 		confirmMessage: '',
+		isSubsidyOnly: false,
 	}
 
 	getArrTime = (type, providerIndex, date) => {
@@ -159,7 +160,7 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	createAppointment = (data) => {
-		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, standardRate, subsidizedRate, duration } = this.state;
+		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, standardRate, subsidizedRate, subsidyAvailable, isSubsidyOnly } = this.state;
 		const { durations } = store.getState().auth;
 
 		if (selectedProvider == undefined) {
@@ -183,7 +184,8 @@ class ModalNewAppointmentForParents extends React.Component {
 			location: appointmentType > 1 ? address : '',
 			phoneNumber: appointmentType === 1 ? data.phoneNumber : '',
 			notes: appointmentType === 1 ? data.notes : notes,
-			type: appointmentType,
+			type: (appointmentType === 3 && subsidyAvailable && isSubsidyOnly) ? 5 : appointmentType,
+			subsidyOnly: isSubsidyOnly && subsidyAvailable,
 			status: 0,
 			rate: appointmentType === 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType === 3 ? standardRate : appointmentType === 5 ? subsidizedRate : 0,
 			screeningTime: appointmentType === 1 ? data.time : '',
@@ -226,7 +228,7 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	handleChangeAddress = address => {
 		const { searchKey, selectedSkillSet, selectedDependent } = this.state;
-		this.setState({ address: address });
+		this.setState({ address: address, subsidyAvailable: false, isSubsidyOnly: false });
 		this.searchProvider(searchKey, address, selectedSkillSet, selectedDependent);
 	};
 
@@ -402,9 +404,12 @@ class ModalNewAppointmentForParents extends React.Component {
 			}
 
 			if (selectedSkillSet) {
-				const subsidy = this.props.listDependents?.find(d => d._id === selectedDependent)?.subsidy?.find(s => s.skillSet === selectedSkillSet);
-				if (subsidy?.status && subsidy?.adminApprovalStatus) {
-					this.setState({ subsidyAvailable: true, restSessions: subsidy?.numberOfSessions });
+				const dependent = this.props.listDependents?.find(d => d._id === selectedDependent);
+				const subsidy = dependent?.subsidy?.find(s => s.skillSet === selectedSkillSet && s.status === 5);
+				if (subsidy) {
+					const subsidyAppointments = dependent?.appointments?.filter(a => a.skillSet === selectedSkillSet && a.type === 5 && [0, -1].includes(a.status))?.length ?? 0;
+					const totalSessions = subsidy.numberOfSessions ?? 0;
+					this.setState({ subsidyAvailable: true, restSessions: totalSessions - subsidyAppointments, isSubsidyOnly: true });
 				}
 			}
 		}
@@ -449,13 +454,15 @@ class ModalNewAppointmentForParents extends React.Component {
 			selectedDependent: dependentId,
 			skillSet: dependents?.find(dependent => dependent._id === dependentId)?.services,
 			addressOptions: ['Dependent Home', 'Provider Office', dependents?.find(dependent => dependent._id === dependentId)?.school?.name],
+			subsidyAvailable: false,
+			isSubsidyOnly: false,
 		});
 		this.searchProvider(searchKey, address, selectedSkillSet, dependentId);
 	}
 
 	handleSelectSkill = (skill) => {
 		const { searchKey, address, selectedDependent } = this.state;
-		this.setState({ selectedSkillSet: skill });
+		this.setState({ selectedSkillSet: skill, subsidyAvailable: false, isSubsidyOnly: false });
 		this.searchProvider(searchKey, address, skill, selectedDependent);
 	}
 
@@ -507,7 +514,9 @@ class ModalNewAppointmentForParents extends React.Component {
 			address,
 			visibleModalConfirm,
 			confirmMessage,
+			isSubsidyOnly,
 		} = this.state;
+		console.log(isSubsidyOnly)
 		const modalProps = {
 			className: 'modal-new',
 			title: "",
@@ -551,7 +560,7 @@ class ModalNewAppointmentForParents extends React.Component {
 								<div className='flex flex-row items-center ml-20 gap-5'>
 									<p className='mb-0'>Number of Sessions: {restSessions}</p>
 									<div className='flex items-center gap-2'>
-										<Switch size="small" />
+										<Switch size="small" checked={isSubsidyOnly} onChange={v => this.setState({ isSubsidyOnly: v })} />
 										<p className='mb-0'>{intl.formatMessage(messages.subsidyOnly)}</p>
 									</div>
 								</div>

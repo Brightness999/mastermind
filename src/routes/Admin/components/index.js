@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Segmented, Row, Col, Checkbox, Select, message, notification, Divider, Collapse, Tabs, Avatar, Badge, Modal } from 'antd';
-import { FaCalendarAlt, FaUser } from 'react-icons/fa';
+import { FaCalendarAlt, FaHandHoldingUsd, FaUser } from 'react-icons/fa';
 import { MdFormatAlignLeft, MdOutlineEventBusy, MdOutlineRequestQuote } from 'react-icons/md';
 import { BsClockHistory, BsFillDashSquareFill, BsFillFlagFill, BsFillPlusSquareFill, BsFilter, BsX } from 'react-icons/bs';
 import intl from 'react-intl-universal';
@@ -1130,9 +1130,9 @@ function renderEventContent(eventInfo, appointments) {
       </div>
       {event?.type === 5 && <FaHandHoldingUsd size={20} className='text-green500 mr-5' />}
       {event?.flagStatus === 1 && event?.flagItems?.flagType === 1 && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
-      {event?.status === 0 && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === 1)?.flagItems?.flagType === 1 && <MdOutlineRequestQuote size={20} className="flag-icons text-white" />}
+      {event?.status === 0 && event?.flagStatus === 0 && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === 1)?.flagItems?.flagType === 1 && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
       {event?.flagStatus === 1 && event?.flagItems?.flagType === 2 && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
-      {event?.status === 0 && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === 1)?.flagItems?.flagType === 2 && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
+      {event?.status === 0 && event?.flagStatus === 0 && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === 1)?.flagItems?.flagType === 2 && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
     </div>
   )
 }

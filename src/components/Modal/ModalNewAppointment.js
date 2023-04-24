@@ -49,6 +49,7 @@ class ModalNewAppointment extends React.Component {
 		loading: false,
 		visibleModalConfirm: false,
 		confirmMessage: '',
+		isSubsidyOnly: true,
 	}
 
 	getArrTime = (type, providerIndex, date) => {
@@ -152,7 +153,7 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	createAppointment = (data) => {
-		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration, standardRate, subsidizedRate } = this.state;
+		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration, standardRate, subsidizedRate, subsidyAvailable, isSubsidyOnly } = this.state;
 		const { durations } = store.getState().auth;
 
 		if (selectedProvider == undefined) {
@@ -177,7 +178,8 @@ class ModalNewAppointment extends React.Component {
 			phoneNumber: appointmentType === 1 ? data?.phoneNumber : '',
 			notes: appointmentType === 1 ? data?.notes : notes,
 			duration: duration,
-			type: appointmentType,
+			type: (appointmentType === 3 && subsidyAvailable && isSubsidyOnly) ? 5 : appointmentType,
+			subsidyOnly: isSubsidyOnly && subsidyAvailable,
 			status: 0,
 			rate: appointmentType === 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType === 3 ? standardRate : appointmentType === 5 ? subsidizedRate : 0,
 			screeningTime: appointmentType === 1 ? data.time : '',
@@ -220,7 +222,7 @@ class ModalNewAppointment extends React.Component {
 
 	handleChangeAddress = address => {
 		const { searchKey, selectedSkill, selectedDependent } = this.state;
-		this.setState({ address: address });
+		this.setState({ address: address, subsidyAvailable: false, isSubsidyOnly: false });
 		this.searchProvider(searchKey, address, selectedSkill, selectedDependent);
 	};
 
@@ -384,9 +386,12 @@ class ModalNewAppointment extends React.Component {
 			}
 
 			if (selectedSkill) {
-				const subsidy = this.props.listDependents?.find(d => d._id == selectedDependent)?.subsidy?.find(s => s.skillSet == selectedSkill);
-				if (subsidy?.status && subsidy?.adminApprovalStatus) {
-					this.setState({ subsidyAvailable: true, restSessions: subsidy?.numberOfSessions });
+				const dependent = this.props.listDependents?.find(d => d._id === selectedDependent);
+				const subsidy = dependent?.subsidy?.find(s => s.skillSet === selectedSkill && s.status === 5);
+				if (subsidy) {
+					const subsidyAppointments = dependent?.appointments?.filter(a => a.skillSet === selectedSkill && a.type === 5 && [0, -1].includes(a.status))?.length ?? 0;
+					const totalSessions = subsidy.numberOfSessions ?? 0;
+					this.setState({ subsidyAvailable: true, restSessions: totalSessions - subsidyAppointments, isSubsidyOnly: true });
 				}
 			}
 		}
@@ -431,13 +436,15 @@ class ModalNewAppointment extends React.Component {
 			selectedDependent: dependentId,
 			skillSet: dependents?.find(dependent => dependent._id === dependentId)?.services,
 			addressOptions: ['Dependent Home', 'Provider Office', dependents?.find(dependent => dependent._id === dependentId)?.school?.name],
+			subsidyAvailable: false,
+			isSubsidyOnly: false,
 		});
 		this.searchProvider(searchKey, address, selectedSkill, dependentId);
 	}
 
 	handleSelectSkill = (skill) => {
 		const { searchKey, address, selectedDependent } = this.state;
-		this.setState({ selectedSkill: skill });
+		this.setState({ selectedSkill: skill, subsidyAvailable: false, isSubsidyOnly: false });
 		this.searchProvider(searchKey, address, skill, selectedDependent);
 	}
 
@@ -488,6 +495,7 @@ class ModalNewAppointment extends React.Component {
 			address,
 			visibleModalConfirm,
 			confirmMessage,
+			isSubsidyOnly,
 		} = this.state;
 		const modalProps = {
 			className: 'modal-new',
@@ -532,7 +540,7 @@ class ModalNewAppointment extends React.Component {
 								<div className='flex flex-row items-center ml-20 gap-5'>
 									<p className='mb-0'>Number of Sessions: {restSessions}</p>
 									<div className='flex items-center gap-2'>
-										<Switch size="small" />
+										<Switch size="small" checked={isSubsidyOnly} onChange={v => this.setState({ isSubsidyOnly: v })} />
 										<p className='mb-0'>{intl.formatMessage(messages.subsidyOnly)}</p>
 									</div>
 								</div>
