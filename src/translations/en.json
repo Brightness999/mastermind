@@ -359,6 +359,7 @@
   "components.Modal.goBack": "Go Back",
   "components.Modal.dependentInfo": "Dependent Information",
   "components.Modal.otherContacts": "Other Contacts",
+  "components.Modal.otherProvider": "Other provider",
   "components.Modal.upload": "Upload",
   "components.Modal.skillsetRequested": "Skillset requested",
   "components.Modal.editInvoice": "Edit Invoice",

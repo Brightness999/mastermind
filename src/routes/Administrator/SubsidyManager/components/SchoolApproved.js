@@ -139,7 +139,14 @@ const SchoolApproved = (props) => {
       title: <span className="font-16">{intl.formatMessage(msgCreateAccount.provider)}</span>,
       key: 'provider',
       align: 'center',
-      sorter: (a, b) => (a?.selectedProvider?.firstName ?? '' + a?.selectedProvider?.lastName ?? '').toLowerCase() > (b?.selectedProvider?.firstName ?? '' + b?.selectedProvider?.lastName ?? '').toLowerCase() ? 1 : -1,
+      sorter: (a, b) => {
+        const prevName = a?.selectedProvider ? a.selectedProvider.firstName + a.selectedProvider.lastName : a.otherProvider;
+        const nextName = b?.selectedProvider ? b.selectedProvider.firstName + b.selectedProvider.lastName : b.otherProvider;
+        if (prevName.toLowerCase() > nextName.toLowerCase())
+          return 1;
+        else
+          return -1;
+      },
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
           <Input
@@ -173,14 +180,15 @@ const SchoolApproved = (props) => {
       filterIcon: (filtered) => (
         <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
       ),
-      onFilter: (value, record) => record.selectedProvider?.firstName?.toLowerCase()?.includes((value).toLowerCase()) || record.selectedProvider?.lastName?.toLowerCase()?.includes((value).toLowerCase()),
+      onFilter: (value, record) => record.selectedProvider?.firstName?.toLowerCase()?.includes((value).toLowerCase()) || record.selectedProvider?.lastName?.toLowerCase()?.includes((value).toLowerCase()) || record.otherProvider?.toLowerCase()?.includes((value).toLowerCase()),
       onFilterDropdownOpenChange: visible => {
         if (visible) {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
       render: (subsidy) => (
-        <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
+        subsidy?.selectedProvider ? <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
+          : <div>{subsidy?.otherProvider}</div>
       )
     },
     {

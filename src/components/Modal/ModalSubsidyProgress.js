@@ -35,6 +35,7 @@ class ModalSubsidyProgress extends React.Component {
 		visiblReferralService: false,
 		visibleCurrentReferral: false,
 		providers: [],
+		otherProvider: '',
 	}
 
 	componentDidMount = () => {
@@ -53,12 +54,13 @@ class ModalSubsidyProgress extends React.Component {
 					this.setState({ decisionExplanation: data.decisionExplanation });
 				}
 
-				if (!!data.selectedProvider) {
+				if (!!data.selectedProvider || !!data.otherProvider) {
 					this.setState({
 						selectProviderFromAdmin: data.selectedProvider,
 						numberOfSessions: data.numberOfSessions,
 						priceForSession: data.priceForSession,
 						selectedProvider: data.selectedProvider,
+						otherProvider: data.otherProvider,
 					})
 				}
 			} else {
@@ -144,18 +146,25 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	schoolAcceptSubsidy(subsidy) {
-		const { selectedProvider, decisionExplanation } = this.state;
+		const { selectedProvider, decisionExplanation, otherProvider } = this.state;
 
-		if (!selectedProvider || decisionExplanation.length === 0) {
-			this.setState({ parentWarning: 'Please suggest a provider and fill in decision explaintion' })
+		if ((!selectedProvider && !otherProvider) || decisionExplanation.length === 0) {
+			this.setState({ parentWarning: 'Please suggest a provider and fill in decision explaintion' });
 			return;
 		}
+
+		if (selectedProvider && otherProvider) {
+			this.setState({ parentWarning: 'Please select only one provider' });
+			return;
+		}
+
 		this.setState({ parentWarning: '' });
 		request.post(acceptSubsidyRequest, {
 			subsidyId: subsidy._id,
 			student: subsidy?.student?._id,
 			selectedProvider,
 			decisionExplanation,
+			otherProvider,
 		}).then(result => {
 			message.success('Approved successfully');
 			const { success, data } = result;
@@ -322,7 +331,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderSchoolInfo = (subsidy) => {
-		const { decisionExplanation, selectedProvider, providers } = this.state;
+		const { decisionExplanation, selectedProvider, providers, otherProvider } = this.state;
 		const { user } = this.props.auth;
 
 		if (user?.role === 3 && subsidy.status === 0) {
@@ -349,6 +358,10 @@ class ModalSubsidyProgress extends React.Component {
 									<Select.Option key={provider._id} value={provider._id}>{`${provider.firstName} ${provider.lastName}` || provider.referredToAs}</Select.Option>
 								))}
 							</Select>
+						</div>
+						<p className='font-700 mb-10'>{intl.formatMessage(messages.otherProvider)}</p>
+						<div className='select-md'>
+							<Input value={otherProvider} onChange={e => this.setState({ otherProvider: e.target.value })} />
 						</div>
 					</Col>
 					<Col xs={24} sm={24} md={16}>
@@ -510,9 +523,7 @@ class ModalSubsidyProgress extends React.Component {
 		if (subsidy?.status === 0 && (user?.role === 60 || user?.role > 900)) {
 			return [
 				<div key="warning">{parentWarning.length > 0 ? (
-					<div className='flex flex-row items-center'>
-						<p className='text-red'>{parentWarning}</p>
-					</div>
+					<p className='text-red'>{parentWarning}</p>
 				) : null}</div>,
 				<Button key="decline" onClick={() => this.schoolDenySubsidy(subsidy)} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
@@ -526,10 +537,8 @@ class ModalSubsidyProgress extends React.Component {
 		if (subsidy?.status === 1 && user.role > 900) {
 			return [
 				<div key="warning">{parentWarning.length > 0 ? (
-					<div className='flex flex-row items-center'>
-						<p className='text-red'>{parentWarning}</p>
-					</div>
-				) : null}</div>,
+					<p className='text-red'>{parentWarning}</p>
+				) : null}</div >,
 				<Button key="decline" onClick={() => this.adminDenySubsidy(subsidy)} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
@@ -552,7 +561,7 @@ class ModalSubsidyProgress extends React.Component {
 
 		if ([2, 4].includes(subsidy?.status) && subsidy?.isAppeal > 0 && (user?.role === 60 || user?.role > 900)) {
 			return [
-				<p>User has sent appeal for this, please choose an action </p>,
+				<div key="warning">User has sent appeal for this, please choose an action </div>,
 				<Button key="decline" onClick={() => this.denyAppeal(subsidy)} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,

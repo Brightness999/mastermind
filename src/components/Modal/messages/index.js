@@ -413,6 +413,10 @@ export default {
     id: `${scope}.otherContacts`,
     defaultMessage: 'Other Contacts',
   },
+  otherProvider: {
+    id: `${scope}.otherProvider`,
+    defaultMessage: 'Other provider',
+  },
   upload: {
     id: `${scope}.upload`,
     defaultMessage: 'Upload',
