@@ -18,7 +18,7 @@ import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import { ModalNewGroup, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm, ModalCreateNote } from '../../../components/Modal';
+import { ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm, ModalCreateNote } from '../../../components/Modal';
 import DrawerDetail from '../../../components/DrawerDetail';
 import messages from '../../Dashboard/messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
@@ -48,8 +48,6 @@ class SchedulingCenter extends React.Component {
       visibleSubsidy: false,
       visiblReferralService: false,
       visibleNewSubsidy: false,
-      visibleNewReview: false,
-      visibleNewGroup: false,
       isMonth: 1,
       isGridDayView: 'Grid',
       calendarWeekends: true,
@@ -226,10 +224,6 @@ class SchedulingCenter extends React.Component {
     }
   }
 
-  modalCreateAndEditSubsidyRequest = () => {
-    return
-  }
-
   onShowFilter = () => {
     this.setState({ isFilter: !this.state.isFilter });
   }
@@ -267,20 +261,9 @@ class SchedulingCenter extends React.Component {
     this.setState({ visibleSubsidy: true, subsidyId: subsidyId });
   };
 
-  onCancelSubsidy = () => { }
-
   onCloseModalSubsidy = () => {
     this.setState({ visibleSubsidy: false, subsidyId: '' });
   };
-
-  onSubmitModalSubsidy = () => {
-    this.setState({ visibleSubsidy: false });
-  };
-
-  openHierachyModal = (subsidy, callbackAfterChanged) => {
-    this.setState({ visibleNewGroup: true });
-    !!this.loadDataModalNewGroup && this.loadDataModalNewGroup(subsidy, callbackAfterChanged);
-  }
 
   onShowModalReferral = (subsidy, callbackForReload) => {
     this.setState({ visiblReferralService: true });
@@ -308,32 +291,10 @@ class SchedulingCenter extends React.Component {
     this.setState({ visibleNewSubsidy: true });
   };
 
-  onSubmitModalNewSubsidy = () => {
-    this.setState({ visibleNewSubsidy: false });
-    this.setState({ visibleNewReview: true });
-  };
-
   onCloseModalNewSubsidy = (isNeedReload) => {
     this.setState({ visibleNewSubsidy: false });
     !!this.panelSubsidariesReload && this.panelSubsidariesReload(isNeedReload);
   };
-
-  onSubmitModalNewReview = () => {
-    this.setState({ visibleNewReview: false });
-  };
-
-  onCloseModalNewReview = () => {
-    this.setState({ visibleNewReview: false });
-    this.setState({ visibleNewSubsidy: true });
-  };
-
-  onShowModalGroup = () => {
-    this.setState({ visibleNewGroup: true });
-  }
-
-  onCloseModalGroup = () => {
-    this.setState({ visibleNewGroup: false });
-  }
 
   handleMonthToWeek = () => {
     if (this.state.isMonth === 1) {
@@ -557,8 +518,6 @@ class SchedulingCenter extends React.Component {
       visiblReferralService,
       isMonth,
       isGridDayView,
-      visibleNewReview,
-      visibleNewGroup,
       SkillSet,
       listProvider,
       selectedProviders,
@@ -637,18 +596,6 @@ class SchedulingCenter extends React.Component {
       setLoadData: reload => { this.loadDataModalReferral = reload },
     };
 
-    const modalNewReviewProps = {
-      visible: visibleNewReview,
-      onSubmit: this.onSubmitModalNewReview,
-      onCancel: this.onCloseModalNewReview,
-    }
-
-    const modalNewGroupProps = {
-      visible: visibleNewGroup,
-      onSubmit: this.onCloseModalGroup,
-      onCancel: this.onCloseModalGroup,
-    }
-
     const modalNewAppointProps = {
       visible: visibleNewAppoint,
       onSubmit: this.onSubmitModalNewAppoint,
@@ -700,8 +647,6 @@ class SchedulingCenter extends React.Component {
       subsidyId: subsidyId,
       onSubmit: this.onCloseModalSubsidy,
       onCancel: this.onCloseModalSubsidy,
-      openReferral: this.onShowModalReferral,
-      openHierachy: this.openHierachyModal,
     }
 
     const modalCreateNoteProps = {
@@ -1046,13 +991,7 @@ class SchedulingCenter extends React.Component {
                 className='subsidaries-panel'
                 collapsible='header'
               >
-                <PanelSubsidaries
-                  setReload={reload => this.panelSubsidariesReload = reload}
-                  userRole={userRole}
-                  SkillSet={SkillSet}
-                  onShowModalSubsidyDetail={this.onShowModalSubsidy}
-                  onCancelSubsidy={this.onCancelSubsidy}
-                />
+                <PanelSubsidaries onShowModalSubsidyDetail={this.onShowModalSubsidy} />
               </Panel>
             </Collapse>
           </section>
@@ -1063,12 +1002,7 @@ class SchedulingCenter extends React.Component {
         {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
         {visibleSubsidy && <ModalSubsidyProgress {...modalSubsidyProps} />}
         {visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
-        <ModalNewGroup {...modalNewGroupProps}
-          SkillSet={SkillSet}
-          setLoadData={reload => this.loadDataModalNewGroup = reload}
-        />
         {visiblReferralService && <ModalReferralService {...modalReferralServiceProps} />}
-        <ModalNewSubsidyReview {...modalNewReviewProps} />
         {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
         {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
         {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}

@@ -18,7 +18,7 @@ import { compose } from 'redux';
 import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 
-import { ModalNewGroup, ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewSubsidyReview, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote } from '../../../components/Modal';
+import { ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote } from '../../../components/Modal';
 import DrawerDetail from '../../../components/DrawerDetail';
 import messages from '../messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
@@ -48,8 +48,6 @@ class Dashboard extends React.Component {
       visibleSubsidy: false,
       visiblReferralService: false,
       visibleNewSubsidy: false,
-      visibleNewReview: false,
-      visibleNewGroup: false,
       isMonth: 1,
       isGridDayView: 'Grid',
       canDrop: true,
@@ -439,20 +437,9 @@ class Dashboard extends React.Component {
     this.setState({ visibleSubsidy: true, subsidyId: subsidyId });
   };
 
-  onCancelSubsidy = () => { }
-
   onCloseModalSubsidy = () => {
     this.setState({ visibleSubsidy: false, subsidyId: '' });
   };
-
-  onSubmitModalSubsidy = () => {
-    this.setState({ visibleSubsidy: false });
-  };
-
-  openHierachyModal = (subsidy, callbackAfterChanged) => {
-    this.setState({ visibleNewGroup: true });
-    !!this.loadDataModalNewGroup && this.loadDataModalNewGroup(subsidy, callbackAfterChanged);
-  }
 
   onShowModalReferral = (subsidy, callbackForReload) => {
     this.setState({ visiblReferralService: true });
@@ -489,23 +476,6 @@ class Dashboard extends React.Component {
     this.setState({ visibleNewSubsidy: false });
     !!this.panelSubsidariesReload && this.panelSubsidariesReload(isNeedReload);
   };
-
-  onSubmitModalNewReview = () => {
-    this.setState({ visibleNewReview: false });
-  };
-
-  onCloseModalNewReview = () => {
-    this.setState({ visibleNewReview: false });
-    this.setState({ visibleNewSubsidy: true });
-  };
-
-  onShowModalGroup = () => {
-    this.setState({ visibleNewGroup: true });
-  }
-
-  onCloseModalGroup = () => {
-    this.setState({ visibleNewGroup: false });
-  }
 
   handleMonthToWeek = () => {
     if (this.state.isMonth === 1) {
@@ -779,8 +749,6 @@ class Dashboard extends React.Component {
       visiblReferralService,
       isMonth,
       isGridDayView,
-      visibleNewReview,
-      visibleNewGroup,
       SkillSet,
       listProvider,
       selectedProviders,
@@ -857,20 +825,6 @@ class Dashboard extends React.Component {
       setLoadData: reload => this.loadDataModalReferral = reload,
     };
 
-    const modalNewReviewProps = {
-      visible: visibleNewReview,
-      onSubmit: this.onSubmitModalNewReview,
-      onCancel: this.onCloseModalNewReview,
-    }
-
-    const modalNewGroupProps = {
-      visible: visibleNewGroup,
-      onSubmit: this.onCloseModalGroup,
-      onCancel: this.onCloseModalGroup,
-      SkillSet: SkillSet,
-      setLoadData: (reload) => this.loadDataModalNewGroup = reload,
-    }
-
     const modalNewAppointProps = {
       visible: visibleNewAppoint,
       onSubmit: this.onSubmitModalNewAppoint,
@@ -928,8 +882,6 @@ class Dashboard extends React.Component {
       subsidyId: subsidyId,
       onSubmit: this.onCloseModalSubsidy,
       onCancel: this.onCloseModalSubsidy,
-      openReferral: this.onShowModalReferral,
-      openHierachy: this.openHierachyModal,
     }
 
     if (userRole == 60) {
@@ -1312,13 +1264,7 @@ class Dashboard extends React.Component {
                       className='subsidaries-panel'
                       collapsible='header'
                     >
-                      <PanelSubsidaries
-                        setReload={reload => this.panelSubsidariesReload = reload}
-                        userRole={userRole}
-                        SkillSet={SkillSet}
-                        onShowModalSubsidyDetail={this.onShowModalSubsidy}
-                        onCancelSubsidy={this.onCancelSubsidy}
-                      />
+                      <PanelSubsidaries onShowModalSubsidyDetail={this.onShowModalSubsidy} />
                     </Panel>
                   ) : null}
                 </Collapse>
@@ -1331,9 +1277,7 @@ class Dashboard extends React.Component {
           {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
           {visibleSubsidy && <ModalSubsidyProgress {...modalSubsidyProps} />}
           {visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
-          <ModalNewGroup {...modalNewGroupProps} />
           {visiblReferralService && <ModalReferralService {...modalReferralServiceProps} />}
-          <ModalNewSubsidyReview {...modalNewReviewProps} />
           {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
           {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
           {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}

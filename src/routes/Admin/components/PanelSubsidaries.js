@@ -17,7 +17,7 @@ class PanelSubsidaries extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      listSubsidaries: [],
+      listSubsidiaries: [],
       status: 1,
       visibleCancel: false,
       subsidyId: undefined,
@@ -25,24 +25,25 @@ class PanelSubsidaries extends React.Component {
   }
 
   componentDidMount = () => {
-    this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [0, 1, 3].includes(s.status)) });
+    this.setState({ listSubsidiaries: this.props.listSubsidiaries?.filter(s => [0, 1, 3].includes(s.status)) });
   }
 
   componentDidUpdate = (prevProps) => {
-    if (prevProps.listSubsidaries !== this.props.listSubsidaries) {
+    if (prevProps.listSubsidiaries !== this.props.listSubsidiaries) {
       const { status } = this.state;
-      this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => status == 1 ? [0, 1, 3].includes(s.status) : status == 1 ? [2, 4].includes(s.status) : s.status === 5) ?? [] });
+      this.setState({ listSubsidiaries: this.props.listSubsidiaries?.filter(s => status == 1 ? [0, 1, 3].includes(s.status) : status == 1 ? [2, 4].includes(s.status) : s.status === 5) ?? [] });
     }
   }
 
   handleTabChange = (v) => {
+    const { listSubsidiaries } = this.props;
     switch (v) {
       case "1":
-        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [0, 1, 3].includes(s.status)) ?? [], status: v }); break;
+        this.setState({ listSubsidiaries: listSubsidiaries?.filter(s => [0, 1, 3].includes(s.status)) ?? [], status: v }); break;
       case "2":
-        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => [2, 4].includes(s.status)) ?? [], status: v }); break;
+        this.setState({ listSubsidiaries: listSubsidiaries?.filter(s => [2, 4].includes(s.status)) ?? [], status: v }); break;
       case "3":
-        this.setState({ listSubsidaries: this.props.listSubsidaries?.filter(s => s.status === 5) ?? [], status: v }); break;
+        this.setState({ listSubsidiaries: listSubsidiaries?.filter(s => s.status === 5) ?? [], status: v }); break;
       default: break;
     }
   }
@@ -117,7 +118,7 @@ class PanelSubsidaries extends React.Component {
   }
 
   render() {
-    const { listSubsidaries, visibleCancel } = this.state;
+    const { listSubsidiaries, visibleCancel } = this.state;
     const modalCancelProps = {
       visible: visibleCancel,
       onSubmit: this.handleConfirmCancel,
@@ -127,13 +128,13 @@ class PanelSubsidaries extends React.Component {
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
         <Tabs.TabPane tab={intl.formatMessage(messages.pending)} key="1">
-          {listSubsidaries.length > 0 && listSubsidaries.map((subsidy, index) => (
+          {listSubsidiaries.length > 0 && listSubsidiaries.map((subsidy, index) => (
             <div key={index} className='list-item'>
               {this.renderLeftContent(subsidy)}
               {this.renderRighContent(0, subsidy)}
             </div>
           ))}
-          {listSubsidaries.length == 0 && (
+          {listSubsidiaries.length == 0 && (
             <div key={1} className='list-item p-10 justify-center'>
               <span>No pending subisdy</span>
             </div>
@@ -141,7 +142,7 @@ class PanelSubsidaries extends React.Component {
           {visibleCancel && <ModalCancelAppointment {...modalCancelProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.declined)} key="2">
-          {listSubsidaries.length > 0 && listSubsidaries.map((subsidy, index) => (
+          {listSubsidiaries.length > 0 && listSubsidiaries.map((subsidy, index) => (
             <div key={index} className='list-item'>
               {this.renderLeftContent(subsidy)}
               <div className='item-right'>
@@ -150,21 +151,21 @@ class PanelSubsidaries extends React.Component {
             </div>
           )
           )}
-          {listSubsidaries.length == 0 && (
+          {listSubsidiaries.length == 0 && (
             <div key={2} className='list-item p-10 justify-center'>
               <span>No declined subisdy</span>
             </div>
           )}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.approved)} key="3">
-          {listSubsidaries.length > 0 && listSubsidaries.map((subsidy, index) => (
+          {listSubsidiaries.length > 0 && listSubsidiaries.map((subsidy, index) => (
             <div key={index} className='list-item'>
               {this.renderLeftContent(subsidy)}
               {this.renderRighContent(2, subsidy)}
             </div>
           )
           )}
-          {listSubsidaries.length == 0 && (
+          {listSubsidiaries.length == 0 && (
             <div key={3} className='list-item p-10 justify-center'>
               <span>No approved subisdy</span>
             </div>
@@ -176,7 +177,7 @@ class PanelSubsidaries extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  listSubsidaries: state.appointments.dataSubsidyRequests,
+  listSubsidiaries: state.appointments.dataSubsidyRequests,
   user: state.auth.user,
 })
 

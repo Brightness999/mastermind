@@ -8,8 +8,6 @@ import ModalNoShow from './ModalNoShow';
 import ModalBalance from './ModalBalance';
 import ModalReferralService from './ModalReferralService';
 import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
-import ModalNewGroup from './ModaNewGroup';
-import ModalNewSubsidyReview from './ModalNewSubsidyReview';
 import ModalInputCode from './ModalInputCode';
 import ModalConfirm from './ModalConfirm';
 import ModalCreateNote from './ModalCreateNote';
@@ -36,8 +34,6 @@ export {
   ModalBalance,
   ModalReferralService,
   ModalNewSubsidyRequest,
-  ModalNewGroup,
-  ModalNewSubsidyReview,
   ModalInputCode,
   ModalConfirm,
   ModalCreateNote,
