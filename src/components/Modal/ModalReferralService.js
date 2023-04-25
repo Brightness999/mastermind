@@ -221,12 +221,10 @@ class ModalReferralService extends React.Component {
 
 	handleSwitchMeeting = (status) => {
 		this.setState({ isGoogleMeet: status });
-		this.form.setFieldsValue({ selectedSubsidy: undefined });
 	}
 
 	handleChangePhonenumber = (phoneNumber) => {
 		this.setState({ phoneNumber: phoneNumber });
-		this.form.setFieldsValue({ selectedSubsidy: undefined });
 	}
 
 	handleSelectSubsidy = (subsidyId) => {
