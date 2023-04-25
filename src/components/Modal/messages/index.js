@@ -189,9 +189,9 @@ export default {
     id: `${scope}.decisionExplanation`,
     defaultMessage: 'Decision explanation',
   },
-  consulationAppointment: {
-    id: `${scope}.consulationAppointment`,
-    defaultMessage: 'Consulation appointment',
+  consultationAppointment: {
+    id: `${scope}.consultationAppointment`,
+    defaultMessage: 'Consultation appointment',
   },
   consultant: {
     id: `${scope}.consultant`,

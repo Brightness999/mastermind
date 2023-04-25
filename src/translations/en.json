@@ -305,7 +305,7 @@
   "components.Modal.preapprove": "Pre-Approve",
   "components.Modal.recommendedProviders": "Recommended providers",
   "components.Modal.decisionExplanation": "Decision explanation",
-  "components.Modal.consulationAppointment": "Consulation appointment",
+  "components.Modal.consultationAppointment": "Consultation appointment",
   "components.Modal.consultant": "Consultant",
   "components.Modal.dateTime": "Date & Time",
   "components.Modal.phone": "Phone",

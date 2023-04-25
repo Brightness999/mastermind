@@ -56,10 +56,10 @@ class ModalSubsidyProgress extends React.Component {
 
 				if (!!data.selectedProvider || !!data.otherProvider) {
 					this.setState({
-						selectProviderFromAdmin: data.selectedProvider,
+						selectProviderFromAdmin: data.selectedProvider?._id,
 						numberOfSessions: data.numberOfSessions,
 						priceForSession: data.priceForSession,
-						selectedProvider: data.selectedProvider,
+						selectedProvider: data.selectedProvider?._id,
 						otherProvider: data.otherProvider,
 					})
 				}
@@ -386,7 +386,7 @@ class ModalSubsidyProgress extends React.Component {
 					<div className='consulation-appoint'>
 						<div className='flex flex-row justify-between'>
 							<Col xs={24} sm={24} md={12}>
-								<p className='font-20 font-700 mb-10'>{intl.formatMessage(messages.consulationAppointment)}</p>
+								<p className='font-20 font-700 mb-10'>{intl.formatMessage(messages.consultationAppointment)}</p>
 							</Col>
 							<Col xs={24} sm={24} md={12}>
 								<div className='flex flex-row items-center'>
@@ -403,7 +403,7 @@ class ModalSubsidyProgress extends React.Component {
 			}
 			return (
 				<div className='consulation-appoint'>
-					<p className='font-20 font-700'>{intl.formatMessage(messages.consulationAppointment)}</p>
+					<p className='font-20 font-700'>{intl.formatMessage(messages.consultationAppointment)}</p>
 					<div className='flex flex-row justify-between'>
 						<Col xs={24} sm={24} md={12}>
 							{referral.meetingLink ? (
@@ -444,6 +444,30 @@ class ModalSubsidyProgress extends React.Component {
 			return;
 		}
 
+		if (subsidy.status === 5) {
+			return (
+				<div className='subsidy-detail'>
+					<div className='flex flex-row justify-between'>
+						<p className='font-20 font-700'>{intl.formatMessage(messages.subsidyDetails)}</p>
+					</div>
+					<Row gutter={15}>
+						<Col xs={24} sm={24} md={8}>
+							<p className='font-700'>{intl.formatMessage(msgCreateAccount.provider)}</p>
+							<p className='font-700'>{subsidy.selectedProvider?.firstName ?? ''} {subsidy.selectedProvider?.lastName ?? ''}</p>
+						</Col>
+						<Col xs={24} sm={24} md={8}>
+							<p className='font-700'>{intl.formatMessage(messages.numberApprovedSessions)}</p>
+							<p className='font-700'>{numberOfSessions}</p>
+						</Col>
+						<Col xs={24} sm={24} md={8}>
+							<p className='font-700'>{intl.formatMessage(messages.totalPayment)}</p>
+							<p className='font-700'>${priceForSession}</p>
+						</Col>
+					</Row>
+				</div >
+			)
+		}
+
 		return (
 			<div className='subsidy-detail'>
 				<div className='flex flex-row justify-between'>
@@ -451,7 +475,7 @@ class ModalSubsidyProgress extends React.Component {
 				</div>
 				<Row gutter={15}>
 					<Col xs={24} sm={24} md={8}>
-						<p className='font-700'>*{intl.formatMessage(msgCreateAccount.provider)}:</p>
+						<p className='font-700'>*{intl.formatMessage(msgCreateAccount.provider)}</p>
 						<Select
 							disabled={isNotAdmin || subsidy.status === 5}
 							value={selectProviderFromAdmin}
@@ -465,7 +489,7 @@ class ModalSubsidyProgress extends React.Component {
 						</Select>
 					</Col>
 					<Col xs={24} sm={24} md={8}>
-						<p className='font-700'>*{intl.formatMessage(messages.numberApprovedSessions)}:</p>
+						<p className='font-700'>*{intl.formatMessage(messages.numberApprovedSessions)}</p>
 						<Input
 							disabled={isNotAdmin || subsidy.status === 5}
 							value={numberOfSessions}
@@ -476,7 +500,7 @@ class ModalSubsidyProgress extends React.Component {
 						/>
 					</Col>
 					<Col xs={24} sm={24} md={8}>
-						<p className='font-700'>*{intl.formatMessage(messages.totalPayment)}:</p>
+						<p className='font-700'>*{intl.formatMessage(messages.totalPayment)}</p>
 						<Input
 							value={priceForSession}
 							type="number"
@@ -538,12 +562,29 @@ class ModalSubsidyProgress extends React.Component {
 			return [
 				<div key="warning">{parentWarning.length > 0 ? (
 					<p className='text-red'>{parentWarning}</p>
-				) : null}</div >,
+				) : null}</div>,
 				<Button key="decline" onClick={() => this.adminDenySubsidy(subsidy)} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
+				<Button key="edit" onClick={() => this.schoolAcceptAppeal(subsidy)} type='primary' className='mr-10'>
+					{intl.formatMessage(messages.edit).toUpperCase()}
+				</Button>,
 				<Button key="preapprove" onClick={() => this.adminPreApproveSubsidy(subsidy)} type='primary' className='mr-10'>
 					{intl.formatMessage(messages.preapprove).toUpperCase()}
+				</Button>
+			]
+		}
+
+		if (subsidy?.status === 1 && user.role === 60) {
+			return [
+				<div key="warning">{parentWarning.length > 0 ? (
+					<p className='text-red'>{parentWarning}</p>
+				) : null}</div>,
+				<Button key="decline" onClick={() => this.schoolDenySubsidy(subsidy)} className='mr-10'>
+					{intl.formatMessage(messages.decline).toUpperCase()}
+				</Button>,
+				<Button key="edit" onClick={() => this.schoolAcceptAppeal(subsidy)} type='primary' className='mr-10'>
+					{intl.formatMessage(messages.edit).toUpperCase()}
 				</Button>
 			]
 		}
