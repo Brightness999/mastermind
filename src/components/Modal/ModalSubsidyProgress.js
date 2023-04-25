@@ -348,7 +348,7 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-700 mb-10'>{intl.formatMessage(messages.recommendedProviders)}</p>
 						<div className='select-md'>
 							<Select
-								disabled={user.role === 3 || subsidy.status > 1}
+								disabled={user.role === 3 || subsidy.status > 1 || (subsidy.status === 1 && user.role > 900)}
 								onChange={v => this.setState({ selectedProvider: v })}
 								value={selectedProvider}
 								className='mb-10'
@@ -361,14 +361,14 @@ class ModalSubsidyProgress extends React.Component {
 						</div>
 						<p className='font-700 mb-10'>{intl.formatMessage(messages.otherProvider)}</p>
 						<div className='select-md'>
-							<Input value={otherProvider} onChange={e => this.setState({ otherProvider: e.target.value })} />
+							<Input value={otherProvider} onChange={e => this.setState({ otherProvider: e.target.value })} disabled={user.role === 3 || subsidy.status > 1 || (subsidy.status === 1 && user.role > 900)} />
 						</div>
 					</Col>
 					<Col xs={24} sm={24} md={16}>
 						<p className='font-700 mb-10'>{intl.formatMessage(messages.decisionExplanation)}</p>
 						<Input.TextArea
 							value={decisionExplanation}
-							disabled={user.role === 3 || subsidy.status > 1}
+							disabled={user.role === 3 || subsidy.status > 1 || (subsidy.status === 1 && user.role > 900)}
 							onChange={v => this.setState({ decisionExplanation: v.target.value })}
 							rows={5} placeholder={intl.formatMessage(messages.generalNotes)} />
 					</Col>
