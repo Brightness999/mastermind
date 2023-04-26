@@ -11,7 +11,7 @@ const Declined = (props) => {
   const searchInput = createRef(null);
   const declinedColumns = [
     {
-      title: <span className="font-16">{intl.formatMessage(msgCreateAccount.name)}</span>,
+      title: <span className="font-16">{intl.formatMessage(messages.studentName)}</span>,
       key: 'name',
       align: 'center',
       fixed: 'left',

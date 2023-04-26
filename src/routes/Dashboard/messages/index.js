@@ -154,6 +154,10 @@ export default ({
     id: `${scope}.studentGrade`,
     defaultMessage: 'Student Grade',
   },
+  studentName: {
+    id: `${scope}.studentName`,
+    defaultMessage: 'Student Name',
+  },
   serviceRequested: {
     id: `${scope}.serviceRequested`,
     defaultMessage: 'Service Requested',

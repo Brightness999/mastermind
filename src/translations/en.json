@@ -229,6 +229,7 @@
   "routes.dashboard.schedule": "Schedule",
   "routes.dashboard.screening": "Screening",
   "routes.dashboard.studentGrade": "Student Grade",
+  "routes.dashboard.studentName": "Student Name",
   "routes.dashboard.serviceRequested": "Service Requested",
   "routes.dashboard.requestDate": "Request Date",
   "routes.dashboard.approvalDate": "Approval Date",

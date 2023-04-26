@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Divider, Select, Input, Row, Col, Form, Button, message, Tabs } from 'antd';
+import { Divider, message, Tabs } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -9,7 +9,7 @@ import messages from '../../../Dashboard/messages';
 import msgCreateAccount from '../../../Sign/CreateAccount/messages';
 import request from '../../../../utils/api/request'
 import { ModalConfirm, ModalSchoolSubsidyApproval, ModalSubsidyProgress } from '../../../../components/Modal';
-import { acceptSubsidyRequest, denySubsidyRequest, getAdminSubsidyRequests, reorderRequests } from '../../../../utils/api/apiList';
+import { acceptSubsidyRequest, denySubsidyRequest, reorderRequests } from '../../../../utils/api/apiList';
 import PageLoading from '../../../../components/Loading/PageLoading';
 import { getSubsidyRequests, setSubsidyRequests } from "../../../../redux/features/appointmentsSlice";
 import SchoolPending from './SchoolPending';
@@ -22,84 +22,16 @@ import './index.less';
 
 const SubsidyManager = (props) => {
   const { user, skillSet, academicLevels, schools } = props.auth;
-  const [form] = Form.useForm();
   const skills = JSON.parse(JSON.stringify(skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
   const grades = JSON.parse(JSON.stringify(academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
   const schoolInfos = JSON.parse(JSON.stringify(schools ?? []))?.map(s => s?.schoolInfo)?.map(school => { school['text'] = school.name, school['value'] = school._id; return school; });
   const [visibleSubsidy, setVisibleSubsidy] = useState(false);
-  const [filterSchool, setFilterSchool] = useState(undefined);
-  const [filterStudent, setFilterStudent] = useState(undefined);
-  const [filterProvider, setFilterProvider] = useState(undefined);
-  const [filterSkillSet, setfilterSkillSet] = useState(undefined);
-  const [filterStatus, setFilterStatus] = useState(undefined);
-  const [filterGrade, setFilterGrade] = useState(undefined);
   const [loading, setLoading] = useState(false);
   const [requests, setRequests] = useState(props.listSubsidy?.filter(s => s.status === 0));
   const [status, setStatus] = useState(0);
   const [selectedSubsidyId, setSelectedSubsidyId] = useState(undefined);
   const [visibleConfirm, setVisibleConfirm] = useState(false);
   const [visibleSchoolApproval, setVisibleSchoolApproval] = useState(false);
-
-  const generatePostData = () => {
-    let postData = {
-      "filter": {},
-      "populate": [{ path: 'school' }, { path: 'providers' }, { path: 'student' }, { path: 'selectedProvider' }]
-    };
-
-    if (filterSchool != undefined && filterSchool.length > 0) {
-      postData['filterSchool'] = filterSchool;
-    }
-
-    if (filterStudent != undefined && filterStudent.length > 0) {
-      postData['filterStudent'] = filterStudent;
-    }
-
-    if (filterProvider != undefined && filterProvider.length > 0) {
-      postData['filterProvider'] = filterProvider;
-    }
-
-    if (filterStatus != undefined) {
-      postData['filterStatus'] = parseInt(filterStatus);
-    }
-
-    if (filterGrade != undefined) {
-      postData['filterGrade'] = parseInt(filterGrade);
-    }
-    return postData;
-  }
-
-  const getSubsidyRequests = () => {
-    const postData = generatePostData();
-    setLoading(true);
-    request.post(getAdminSubsidyRequests, postData).then(result => {
-      setLoading(false);
-      const { success, data } = result;
-      if (success) {
-        setRequests(data?.docs?.filter(s => s.status === status));
-      }
-    }).catch(err => {
-      setLoading(false);
-      message.error(err.message);
-    });
-  }
-
-  const clearFilter = () => {
-    form.setFieldsValue({
-      student_name: undefined,
-      provider_name: undefined,
-      school_name: undefined,
-      grade: undefined,
-      skillset: undefined,
-      status: undefined,
-    })
-    setFilterSchool(undefined);
-    setFilterStudent(undefined);
-    setFilterProvider(undefined);
-    setfilterSkillSet(undefined);
-    setFilterStatus(undefined);
-    setFilterGrade(undefined);
-    getSubsidyRequests();
-  }
 
   const onShowModalSubsidy = (subsidyId) => {
     setSelectedSubsidyId(subsidyId);
@@ -305,83 +237,6 @@ const SubsidyManager = (props) => {
         <p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.subsidyManager)}</p>
         <Divider />
       </div>
-      <Row >
-        <Col xs={24} sm={24} md={20} lg={18} xl={12} className='col-form col-subsidy-manager'>
-          <Form name="form_subsidy" form={form}>
-            <Row gutter={10}>
-              <Col span={12}>
-                <Form.Item name="student_name">
-                  <Input
-                    placeholder='Student name'
-                    value={filterStudent}
-                    onChange={e => setFilterStudent(e.target.value)}
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item name="provider_name">
-                  <Input
-                    placeholder='Provider name'
-                    value={filterProvider}
-                    onChange={e => setFilterProvider(e.target.value)}
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={10}>
-              <Col span={12}>
-                <Form.Item name="school_name">
-                  <Input
-                    placeholder='School name'
-                    value={filterSchool}
-                    onChange={e => setFilterSchool(e.target.value)}
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item name="grade" >
-                  <Select
-                    placeholder='Grade'
-                    onChange={v => setFilterGrade(v)}
-                  >
-                    {academicLevels?.map((level, index) => (<Select.Option key={index} value={level}>{level}</Select.Option>))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={10}>
-              <Col span={12}>
-                <Form.Item name="skillset" >
-                  <Select
-                    placeholder='Skill'
-                    onChange={v => setfilterSkillSet(v)}
-                  >
-                    {skillSet?.map((skill, index) => (<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item name="status" >
-                  <Select
-                    placeholder='Status'
-                    onChange={v => setFilterStatus(v)}
-                  >
-                    <Select.Option value='0'>PENDING</Select.Option>
-                    <Select.Option value='-1'>DECLINE</Select.Option>
-                    <Select.Option value='1'>APPROVED</Select.Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Form.Item>
-              <div className="flex flex-row">
-                <Button onClick={() => clearFilter()} className='mr-10'>Clear</Button>
-                <Button type='primary' onClick={() => getSubsidyRequests()} htmlType="submit">Apply Search</Button>
-              </div>
-            </Form.Item>
-          </Form>
-        </Col>
-      </Row>
       <Tabs
         defaultActiveKey="0"
         type="card"
