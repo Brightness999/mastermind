@@ -244,8 +244,7 @@ const SubsidyManager = (props) => {
         items={items}
         className="bg-white p-10 h-100 overflow-y-scroll overflow-x-hidden"
         onChange={(v) => handleChangeTab(v)}
-      >
-      </Tabs>
+      />
       {visibleSubsidy && <ModalSubsidyProgress {...modalSubsidyProps} />}
       {visibleSchoolApproval && <ModalSchoolSubsidyApproval {...modalSchoolApprovalProps} />}
       {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}

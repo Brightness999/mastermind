@@ -1,4 +1,4 @@
-import React, { createRef, useCallback, useRef } from 'react';
+import React, { createRef, useCallback, useRef, useState } from 'react';
 import { Table, Space, Input, Button } from 'antd';
 import intl from 'react-intl-universal';
 import moment from 'moment';
@@ -6,6 +6,8 @@ import update from 'immutability-helper';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { SearchOutlined } from '@ant-design/icons';
+import { CSVLink } from "react-csv";
+import { FaFileDownload } from 'react-icons/fa';
 
 import messages from '../../../Dashboard/messages';
 import msgCreateAccount from '../../../Sign/CreateAccount/messages';
@@ -13,6 +15,7 @@ import msgCreateAccount from '../../../Sign/CreateAccount/messages';
 const SchoolApproved = (props) => {
   const type = 'DraggableBodyRow';
   const { skills, grades, requests, schools } = props;
+  const [csvData, setCsvData] = useState([]);
   const searchInput = createRef(null);
   const schoolApprovedColumns = [
     {
@@ -316,8 +319,23 @@ const SchoolApproved = (props) => {
     [requests],
   );
 
+  const exportToExcel = () => {
+    const data = requests?.map(r => ({
+      "Student Name": `${r?.student?.firstName ?? ''} ${r?.student?.lastName ?? ''}`,
+      "School": r?.school?.name ?? '',
+      "Student Grade": r?.student?.currentGrade,
+      "Service Requested": r?.skillSet?.name,
+      "Notes": r?.note,
+      "Provider": r?.selectedProvider ? `${r?.selectedProvider?.firstName ?? ''} ${r?.selectedProvider?.lastName ?? ''}` : r?.otherProvider,
+      "Approval Date": moment(r?.schoolApprovalDate).format('MM/DD/YYYY hh:mm A'),
+    }))
+    setCsvData(data);
+    return true;
+  }
+
   return (
     <div className="approved-list">
+      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="School Approved Requests"><Button type='primary' className='flex items-center gap-2' icon={<FaFileDownload size={24} />}>Export to excel</Button></CSVLink>
       <DndProvider backend={HTML5Backend}>
         <Table
           bordered
@@ -333,7 +351,7 @@ const SchoolApproved = (props) => {
             return attr;
           }}
           scroll={{ x: 1300 }}
-          className='mt-2 pb-10'
+          className='mt-1 pb-10'
           pagination={false}
         />
       </DndProvider>

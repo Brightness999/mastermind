@@ -1,14 +1,17 @@
-import React, { createRef } from 'react';
+import React, { createRef, useState } from 'react';
 import { Table, Space, Input, Button } from 'antd';
 import intl from 'react-intl-universal';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
+import { CSVLink } from "react-csv";
+import { FaFileDownload } from 'react-icons/fa';
 
 import messages from '../../../Dashboard/messages';
 import msgCreateAccount from '../../../Sign/CreateAccount/messages';
 
 const AdminApproved = (props) => {
   const { skills, grades, requests, schools } = props;
+  const [csvData, setCsvData] = useState([]);
   const searchInput = createRef(null);
   const adminApprovedColumns = [
     {
@@ -319,20 +322,40 @@ const AdminApproved = (props) => {
     },
   ];
 
+  const exportToExcel = () => {
+    const data = requests?.map(r => ({
+      "Student Name": `${r?.student?.firstName ?? ''} ${r?.student?.lastName ?? ''}`,
+      "School": r?.school?.name ?? '',
+      "Student Grade": r?.student?.currentGrade,
+      "Service Requested": r?.skillSet?.name,
+      "Notes": r?.note,
+      "Provider": r?.selectedProvider ? `${r?.selectedProvider?.firstName ?? ''} ${r?.selectedProvider?.lastName ?? ''}` : r?.otherProvider,
+      "Approval Date": moment(r?.approvalDate).format('MM/DD/YYYY hh:mm A'),
+      "Recent Session Date": moment(r?.appointments?.[0]?.date).format('MM/DD/YYYY hh:mm A'),
+      "Last Session Date": r?.numberOfSessions === r?.appointments?.length ? moment(r?.appointments?.[0]?.date).format('MM/DD/YYYY hh:mm A') : '',
+    }))
+    setCsvData(data);
+    return true;
+  }
+
   return (
-    <Table
-      bordered
-      size='middle'
-      dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
-      columns={adminApprovedColumns}
-      scroll={{ x: 1300 }}
-      onRow={(subsidy) => ({
-        onClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
-        onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
-      })}
-      className='mt-2 pb-10'
-      pagination={false}
-    />)
+    <div>
+      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="Approved Requests"><Button type='primary' className='flex items-center gap-2' icon={<FaFileDownload size={24} />}>Export to excel</Button></CSVLink>
+      <Table
+        bordered
+        size='middle'
+        dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
+        columns={adminApprovedColumns}
+        scroll={{ x: 1300 }}
+        onRow={(subsidy) => ({
+          onClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
+          onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
+        })}
+        className='mt-1 pb-10'
+        pagination={false}
+      />
+    </div>
+  )
 }
 
 export default AdminApproved;
