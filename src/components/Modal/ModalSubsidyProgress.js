@@ -329,7 +329,7 @@ class ModalSubsidyProgress extends React.Component {
 
 		return (
 			<div className='school-info'>
-				<div className='flex flex-row justify-between'>
+				<div className={`flex flex-row justify-between ${subsidy.status === 2 ? 'd-none' : ''}`}>
 					<p className='font-20 font-700'>{intl.formatMessage(messages.schoolInformation)}</p>
 				</div>
 				{[0, 1].includes(subsidy.status) ? (
@@ -457,6 +457,16 @@ class ModalSubsidyProgress extends React.Component {
 		const { selectProviderFromAdmin, numberOfSessions, priceForSession, referral, providers } = this.state;
 		const { user } = this.props.auth;
 		const isNotAdmin = user?.role < 900;
+
+		if (subsidy.status === 4) {
+			return (
+				<div className='subsidy-detail'>
+					<p className='font-700 mb-10'>{intl.formatMessage(messages.declineExplanation)}:</p>
+					<p className='mb-0'>{subsidy.declineExplanation}</p>
+				</div >
+			)
+		}
+
 		if (isNotAdmin || (!isNotAdmin && referral?.status != -1)) {
 			return;
 		}
