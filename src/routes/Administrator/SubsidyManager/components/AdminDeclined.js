@@ -198,7 +198,7 @@ const AdminDeclined = (props) => {
 
   return (
     <div>
-      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="Admin Declined Requests"><Button type='primary' className='flex items-center gap-2' icon={<FaFileDownload size={24} />}>Export to excel</Button></CSVLink>
+      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="Admin Declined Requests"><Button type='primary' className='flex items-center gap-2' icon={<FaFileDownload size={24} />}>Download CSV</Button></CSVLink>
       <Table
         bordered
         size='middle'
