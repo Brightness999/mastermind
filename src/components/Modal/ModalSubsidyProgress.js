@@ -16,6 +16,7 @@ import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequ
 import { setSubsidyRequests } from '../../redux/features/appointmentsSlice';
 import ModalReferralService from './ModalReferralService';
 import ModalCurrentReferralService from './ModalCurrentReferralService';
+import ModalCreateNote from './ModalCreateNote';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -32,10 +33,11 @@ class ModalSubsidyProgress extends React.Component {
 		parentWarning: '',
 		consulationWarning: '',
 		referral: {},
-		visiblReferralService: false,
+		visibleReferralService: false,
 		visibleCurrentReferral: false,
 		providers: [],
 		otherProvider: '',
+		visibleDeclineExplanation: false,
 	}
 
 	componentDidMount = () => {
@@ -90,15 +92,16 @@ class ModalSubsidyProgress extends React.Component {
 		})
 	}
 
-	schoolDenySubsidy(subsidy) {
-		const { decisionExplanation } = this.state;
+	declineSubsidy = (declineExplanation) => {
+		this.onCloseModalDeclineExplantion();
+		const { subsidy } = this.state;
 
-		if (!decisionExplanation?.trim()?.length) {
-			this.setState({ parentWarning: 'Please fill in the decision explaintion' });
+		if (!declineExplanation?.trim()?.length) {
+			this.setState({ parentWarning: 'Please fill in the decline explaintion' });
 			return;
 		}
 
-		request.post(denySubsidyRequest, { subsidyId: subsidy._id, decisionExplanation }).then(result => {
+		request.post(denySubsidyRequest, { subsidyId: subsidy._id, declineExplanation }).then(result => {
 			const { success, data } = result;
 			if (success) {
 				this.updateSubsidaries(subsidy, data);
@@ -111,25 +114,6 @@ class ModalSubsidyProgress extends React.Component {
 
 	adminPreApproveSubsidy(subsidy) {
 		request.post(preApproveSubsidy, { subsidyId: subsidy?._id }).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.updateSubsidaries(subsidy, data);
-				this.props.onSubmit();
-			}
-		}).catch(err => {
-			message.error(err.message);
-		})
-	}
-
-	adminDenySubsidy(subsidy) {
-		const { decisionExplanation } = this.state;
-
-		if (!decisionExplanation?.trim()?.length) {
-			this.setState({ parentWarning: 'Please fill in the decision explaintion' });
-			return;
-		}
-
-		request.post(denySubsidyRequest, { subsidyId: subsidy._id, decisionExplanation }).then(result => {
 			const { success, data } = result;
 			if (success) {
 				this.updateSubsidaries(subsidy, data);
@@ -233,7 +217,6 @@ class ModalSubsidyProgress extends React.Component {
 	schoolAcceptAppeal = (subsidy) => {
 		const postData = { subsidyId: subsidy._id };
 		request.post(schoolAcceptAppealSubsidy, postData).then(result => {
-			message.success('Accepted successfully');
 			const { success, data } = result;
 			if (success) {
 				this.updateSubsidaries(subsidy, data);
@@ -258,11 +241,11 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	onShowModalReferral = () => {
-		this.setState({ visiblReferralService: true });
+		this.setState({ visibleReferralService: true });
 	};
 
 	onCloseModalReferral = () => {
-		this.setState({ visiblReferralService: false });
+		this.setState({ visibleReferralService: false });
 	};
 
 	onSubmitModalReferral = () => {
@@ -279,6 +262,15 @@ class ModalSubsidyProgress extends React.Component {
 
 	onCloseModalCurrentReferral = () => {
 		this.setState({ visibleCurrentReferral: false });
+	};
+
+	onShowModalDeclineExplanation = () => {
+		this.setState({ visibleDeclineExplanation: true });
+	};
+
+	onCloseModalDeclineExplantion = () => {
+		console.log(this)
+		this.setState({ visibleDeclineExplanation: false });
 	};
 
 	renderStudentParentInfo(subsidy) {
@@ -373,7 +365,7 @@ class ModalSubsidyProgress extends React.Component {
 					</Row >
 				) : subsidy.status === 2 ? (
 					<>
-						<p className='font-700 mb-10'>{intl.formatMessage(messages.decisionExplanation)}:</p>
+						<p className='font-700 mb-10'>{intl.formatMessage(messages.declineExplanation)}:</p>
 						<p className='mb-0'>{subsidy.declineExplanation}</p>
 					</>
 				) : (
@@ -577,7 +569,7 @@ class ModalSubsidyProgress extends React.Component {
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
-				<Button key="decline" onClick={() => this.schoolDenySubsidy(subsidy)} className='mr-10'>
+				<Button key="decline" onClick={() => this.onShowModalDeclineExplanation()} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
 				<Button key="approve" onClick={() => this.schoolAcceptSubsidy(subsidy)} type='primary'>
@@ -594,7 +586,7 @@ class ModalSubsidyProgress extends React.Component {
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
-				<Button key="decline" onClick={() => this.adminDenySubsidy(subsidy)} className='mr-10'>
+				<Button key="decline" onClick={() => this.onShowModalDeclineExplanation()} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
 				<Button key="edit" onClick={() => this.schoolAcceptAppeal(subsidy)} type='primary' className='mr-10'>
@@ -614,7 +606,7 @@ class ModalSubsidyProgress extends React.Component {
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
-				<Button key="decline" onClick={() => this.schoolDenySubsidy(subsidy)} className='mr-10'>
+				<Button key="decline" onClick={() => this.onShowModalDeclineExplanation()} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
 				<Button key="edit" onClick={() => this.schoolAcceptAppeal(subsidy)} type='primary' className='mr-10'>
@@ -654,7 +646,7 @@ class ModalSubsidyProgress extends React.Component {
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
-				<Button key="decline" onClick={() => this.adminDenySubsidy(subsidy)} className='mr-10'>
+				<Button key="decline" onClick={() => this.onShowModalDeclineExplanation()} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
 				<Button key="approve" onClick={() => this.submitSubsidyFromAdmin(subsidy)} type='primary'>
@@ -667,7 +659,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	render() {
-		const { subsidy, visiblReferralService, visibleCurrentReferral, referral } = this.state;
+		const { subsidy, visibleReferralService, visibleCurrentReferral, referral, visibleDeclineExplanation } = this.state;
 		const modalProps = {
 			className: 'modal-subsidy-progress',
 			title: "",
@@ -679,7 +671,7 @@ class ModalSubsidyProgress extends React.Component {
 			footer: this.footerButton(),
 		};
 		const modalReferralServiceProps = {
-			visible: visiblReferralService,
+			visible: visibleReferralService,
 			onSubmit: this.onSubmitModalReferral,
 			onCancel: this.onCloseModalReferral,
 			subsidy: subsidy,
@@ -689,6 +681,12 @@ class ModalSubsidyProgress extends React.Component {
 			onSubmit: this.onCloseModalCurrentReferral,
 			onCancel: this.onCloseModalCurrentReferral,
 			event: referral,
+		}
+		const modalDeclineExplanationProps = {
+			visible: visibleDeclineExplanation,
+			onSubmit: this.declineSubsidy,
+			onCancel: this.onCloseModalDeclineExplantion,
+			title: intl.formatMessage(messages.declineExplanation),
 		}
 
 		return (
@@ -713,8 +711,9 @@ class ModalSubsidyProgress extends React.Component {
 					]}>
 					</Steps>
 				</div>
-				{visiblReferralService && <ModalReferralService {...modalReferralServiceProps} />}
+				{visibleReferralService && <ModalReferralService {...modalReferralServiceProps} />}
 				{visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
+				{visibleDeclineExplanation && <ModalCreateNote {...modalDeclineExplanationProps} />}
 				{this.renderSubsidyData(subsidy)}
 			</Modal>
 		);

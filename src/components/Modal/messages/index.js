@@ -189,6 +189,10 @@ export default {
     id: `${scope}.decisionExplanation`,
     defaultMessage: 'Decision explanation',
   },
+  declineExplanation: {
+    id: `${scope}.declineExplanation`,
+    defaultMessage: 'Decline explanation',
+  },
   consultationAppointment: {
     id: `${scope}.consultationAppointment`,
     defaultMessage: 'Consultation appointment',
