@@ -1,13 +1,16 @@
-import React, { createRef } from 'react';
+import React, { createRef, useState } from 'react';
 import { Table, Space, Input, Button } from 'antd';
 import intl from 'react-intl-universal';
 import { SearchOutlined } from '@ant-design/icons';
+import { CSVLink } from "react-csv";
+import { FaFileDownload } from 'react-icons/fa';
 
 import messages from '../messages';
 import msgCreateAccount from '../../Sign/CreateAccount/messages';
 
 const Declined = (props) => {
   const { skills, grades, requests } = props;
+  const [csvData, setCsvData] = useState([]);
   const searchInput = createRef(null);
   const declinedColumns = [
     {
@@ -123,20 +126,35 @@ const Declined = (props) => {
     },
   ];
 
+  const exportToExcel = () => {
+    const data = requests?.map(r => ({
+      "Student Name": `${r?.student?.firstName ?? ''} ${r?.student?.lastName ?? ''}`,
+      "School": r?.school?.name ?? '',
+      "Student Grade": r?.student?.currentGrade,
+      "Service Requested": r?.skillSet?.name,
+      "Notes": r?.note,
+    }))
+    setCsvData(data);
+    return true;
+  }
+
   return (
-    <Table
-      bordered
-      size='middle'
-      dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
-      columns={declinedColumns}
-      scroll={{ x: 1300 }}
-      className='mt-2 pb-10'
-      onRow={(subsidy) => ({
-        onClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
-        onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
-      })}
-      pagination={false}
-    />
+    <div>
+      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="School Declined Requests"><Button type='primary' className='flex items-center gap-2' icon={<FaFileDownload size={24} />}>Export to excel</Button></CSVLink>
+      <Table
+        bordered
+        size='middle'
+        dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
+        columns={declinedColumns}
+        scroll={{ x: 1300 }}
+        className='mt-2 pb-10'
+        onRow={(subsidy) => ({
+          onClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
+          onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
+        })}
+        pagination={false}
+      />
+    </div>
   )
 }
 
