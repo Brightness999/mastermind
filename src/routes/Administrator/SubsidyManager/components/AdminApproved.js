@@ -330,9 +330,10 @@ const AdminApproved = (props) => {
       "Service Requested": r?.skillSet?.name,
       "Notes": r?.note,
       "Provider": r?.selectedProvider ? `${r?.selectedProvider?.firstName ?? ''} ${r?.selectedProvider?.lastName ?? ''}` : r?.otherProvider,
-      "Approval Date": moment(r?.approvalDate).format('MM/DD/YYYY hh:mm A'),
-      "Recent Session Date": moment(r?.appointments?.[0]?.date).format('MM/DD/YYYY hh:mm A'),
-      "Last Session Date": r?.numberOfSessions === r?.appointments?.length ? moment(r?.appointments?.[0]?.date).format('MM/DD/YYYY hh:mm A') : '',
+      "HMGH Expense per session": r.priceForSession ?? '',
+      "# of approved sessions": r.numberOfSessions ?? '',
+      "# of sessions paid to DATE": r?.appointments?.filter(a => a.status === -1 && a.isPaid)?.length ?? '',
+      "total HMGH payments": r.priceForSession * r.numberOfSessions,
     }))
     setCsvData(data);
     return true;
