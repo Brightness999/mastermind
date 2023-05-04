@@ -234,8 +234,10 @@
   "routes.dashboard.requestDate": "Request Date",
   "routes.dashboard.approvalDate": "Approval Date",
   "routes.dashboard.recentSessionDate": "Recent Session Date",
-  "routes.dashboard.lastSessionDate": "Last Session Date",
   "routes.dashboard.consultationDate": "Consultation Date",
+  "routes.dashboard.HMGHExpensePerSession": "HMGH expense per session",
+  "routes.dashboard.totalHMGHExpense": "Total HMGH expense",
+  "routes.dashboard.status": "Status",
 
   "routes.forgotpass.resetYourPassword": "Reset Your Password",
   "routes.forgotpass.enterYourEmail": "Enter your user account's verified email address and we will new password to email.",

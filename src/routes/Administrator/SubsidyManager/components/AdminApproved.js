@@ -275,50 +275,26 @@ const AdminApproved = (props) => {
       render: (subsidy) => <span>{subsidy?.appointments?.length ? moment(subsidy?.appointments?.[0]?.date).format('MM/DD/YYYY hh:mm A') : ''}</span>
     },
     {
-      title: <span className="font-16">{intl.formatMessage(messages.lastSessionDate)}</span>,
-      key: 'lastSessionDate',
+      title: <span className="font-16">{intl.formatMessage(messages.HMGHExpensePerSession)}</span>,
+      key: 'HMGHExpensePerSession',
       align: 'center',
-      sorter: (a, b) => a?.appointments?.[0]?.date > b?.appointments?.[0]?.date ? 1 : -1,
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            ref={searchInput}
-            placeholder={`Search Last Session Date`}
-            value={selectedKeys[0]}
-            onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-            onPressEnter={() => confirm()}
-            style={{ marginBottom: 8, display: 'block' }}
-          />
-          <Space>
-            <Button
-              type="primary"
-              onClick={() => confirm()}
-              icon={<SearchOutlined />}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Search
-            </Button>
-            <Button
-              onClick={() => { clearFilters(); confirm(); }}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Reset
-            </Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered) => (
-        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
-      ),
-      onFilter: (value, record) => (moment(record.appointments?.[0]?.date).format('MM/DD/YYY hh:mm A') ?? '')?.toLowerCase()?.includes((value).toLowerCase()) || (moment(record.appointments?.[0]?.date).format('MM/DD/YYY hh:mm A') ?? '')?.toLowerCase()?.includes((value).toLowerCase()),
-      onFilterDropdownOpenChange: visible => {
-        if (visible) {
-          setTimeout(() => searchInput.current?.select(), 100);
-        }
-      },
-      render: (subsidy) => <span>{subsidy?.numberOfSessions === subsidy?.appointments?.length ? moment(subsidy?.appointments?.[0]?.date).format('MM/DD/YYYY hh:mm A') : ''}</span>
+      sorter: (a, b) => a?.priceForSession > b?.priceForSession ? 1 : -1,
+      render: (subsidy) => <span>{subsidy?.priceForSession ?? ''}</span>
+    },
+    {
+      title: <span className="font-16">{intl.formatMessage(messages.totalHMGHExpense)}</span>,
+      key: 'totalHMGHExpense',
+      align: 'center',
+      sorter: (a, b) => a?.priceForSession * a?.numberOfSessions > b?.priceForSession * b?.numberOfSessions ? 1 : -1,
+      render: (subsidy) => <span>{subsidy?.priceForSession * subsidy?.numberOfSessions ? subsidy?.priceForSession * subsidy?.numberOfSessions : ''}</span>
+    },
+    {
+      title: <span className="font-16">{intl.formatMessage(messages.status)}</span>,
+      key: 'status',
+      align: 'center',
+      fixed: 'right',
+      sorter: (a, b) => a?.appointments?.length > b?.appointments?.length ? 1 : -1,
+      render: (subsidy) => <span>{subsidy?.appointments?.length ?? 0} / {subsidy?.numberOfSessions}</span>
     },
   ];
 
@@ -330,10 +306,10 @@ const AdminApproved = (props) => {
       "Service Requested": r?.skillSet?.name,
       "Notes": r?.note,
       "Provider": r?.selectedProvider ? `${r?.selectedProvider?.firstName ?? ''} ${r?.selectedProvider?.lastName ?? ''}` : r?.otherProvider,
-      "HMGH Expense per session": r.priceForSession ?? '',
+      "HMGH expense per session": r.priceForSession ?? '',
       "# of approved sessions": r.numberOfSessions ?? '',
       "# of sessions paid to DATE": r?.appointments?.filter(a => a.status === -1 && a.isPaid)?.length ?? '',
-      "total HMGH payments": r.priceForSession * r.numberOfSessions,
+      "Total HMGH expense": r.priceForSession * r.numberOfSessions,
     }))
     setCsvData(data);
     return true;

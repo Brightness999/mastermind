@@ -174,12 +174,20 @@ export default ({
     id: `${scope}.recentSessionDate`,
     defaultMessage: 'Recent Session Date',
   },
-  lastSessionDate: {
-    id: `${scope}.lastSessionDate`,
-    defaultMessage: 'Last Session Date',
-  },
   consultationDate: {
     id: `${scope}.consultationDate`,
     defaultMessage: 'Consultation Date',
+  },
+  HMGHExpensePerSession: {
+    id: `${scope}.HMGHExpensePerSession`,
+    defaultMessage: 'HMGH expense per session',
+  },
+  totalHMGHExpense: {
+    id: `${scope}.totalHMGHExpense`,
+    defaultMessage: 'Total HMGH expense',
+  },
+  status: {
+    id: `${scope}.status`,
+    defaultMessage: 'Status',
   },
 });
