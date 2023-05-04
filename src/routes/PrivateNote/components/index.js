@@ -341,7 +341,7 @@ class PrivateNote extends React.Component {
           }
         },
         render: (subsidy) => (
-          <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
+          <div>{subsidy?.selectedProviderFromAdmin?.firstName ?? ''} {subsidy?.selectedProviderFromAdmin?.lastName ?? ''}</div>
         )
       },
       {
