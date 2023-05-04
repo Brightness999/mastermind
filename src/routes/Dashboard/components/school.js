@@ -13,11 +13,11 @@ import Pending from "./pending";
 import Declined from "./declined";
 import Approved from "./approved";
 
-const Subsidaries = (props) => {
+const Subsidiaries = (props) => {
   const { user, skillSet, academicLevels } = props.auth;
   const skills = JSON.parse(JSON.stringify(skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
   const grades = JSON.parse(JSON.stringify(academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
-  const [requests, setRequests] = useState(props.listSubsidaries?.filter(s => s.status === 0));
+  const [requests, setRequests] = useState(props.listSubsidiaries?.filter(s => s.status === 0));
   const [status, setStatus] = useState(0);
   const [selectedSubsidyId, setSelectedSubsidyId] = useState(undefined);
   const [visibleSubsidy, setVisibleSubsidy] = useState(false);
@@ -30,11 +30,11 @@ const Subsidaries = (props) => {
   }
 
   useEffect(() => {
-    setRequests(props.listSubsidaries?.filter(s => s.status == status));
-  }, [props.listSubsidaries]);
+    setRequests(props.listSubsidiaries?.filter(s => s.status == status));
+  }, [props.listSubsidiaries]);
 
   const handleChangeTab = v => {
-    setRequests(props.listSubsidaries?.filter(s => s.status == v));
+    setRequests(props.listSubsidiaries?.filter(s => s.status == v));
     setStatus(v);
   }
 
@@ -80,7 +80,7 @@ const Subsidaries = (props) => {
     }).then(result => {
       const { success, data } = result;
       if (success) {
-        const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidaries));
+        const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidiaries));
         props.setSubsidyRequests(newSubsidyRequests?.map(s => {
           if (s._id === selectedSubsidyId) {
             s.status = data.status;
@@ -99,7 +99,7 @@ const Subsidaries = (props) => {
     request.post(denySubsidyRequest, { subsidyId: selectedSubsidyId }).then(result => {
       const { success, data } = result;
       if (success) {
-        const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidaries));
+        const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidiaries));
         props.setSubsidyRequests(newSubsidyRequests?.map(s => {
           if (s._id === selectedSubsidyId) {
             s.status = data.status;
@@ -201,8 +201,8 @@ const Subsidaries = (props) => {
 }
 
 const mapStateToProps = state => ({
-  listSubsidaries: state.appointments.dataSubsidyRequests,
+  listSubsidiaries: state.appointments.dataSubsidyRequests,
   auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps, { getSubsidyRequests, setSubsidyRequests }))(Subsidaries);
+export default compose(connect(mapStateToProps, { getSubsidyRequests, setSubsidyRequests }))(Subsidiaries);

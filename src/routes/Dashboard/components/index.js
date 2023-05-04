@@ -27,11 +27,11 @@ import msgDrawer from '../../../components/DrawerDetail/messages';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
 import PanelAppointment from './PanelAppointment';
-import PanelSubsidaries from './PanelSubsidaries';
+import PanelSubsidiaries from './PanelSubsidiaries';
 import { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
 import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
 import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
-import Subsidaries from './school';
+import Subsidiaries from './school';
 import PageLoading from '../../../components/Loading/PageLoading';
 import './index.less';
 
@@ -381,19 +381,19 @@ class Dashboard extends React.Component {
         return;
       case 'new_subsidy_request_from_client':
         this.props.getSubsidyRequests({ role: userRole });
-        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true);
+        this.panelSubsidiariesReload && typeof this.panelSubsidiariesReload == 'function' && this.panelSubsidiariesReload(true);
         this.showNotificationForSubsidy(data);
         return;
       case 'subsidy_change_status':
         this.props.getSubsidyRequests({ role: userRole });
-        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true);
+        this.panelSubsidiariesReload && typeof this.panelSubsidiariesReload == 'function' && this.panelSubsidiariesReload(true);
         this.showNotificationForSubsidyChange(data.data);
         return;
       case 'meeting_link':
         this.props.setMeetingLink(data.data);
       case 'appeal_subsidy':
         this.props.getSubsidyRequests({ role: userRole });
-        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true);
+        this.panelSubsidiariesReload && typeof this.panelSubsidiariesReload == 'function' && this.panelSubsidiariesReload(true);
         this.showNotificationForSubsidyChange(data.data);
         return;
     }
@@ -474,7 +474,7 @@ class Dashboard extends React.Component {
 
   onCloseModalNewSubsidy = (isNeedReload) => {
     this.setState({ visibleNewSubsidy: false });
-    !!this.panelSubsidariesReload && this.panelSubsidariesReload(isNeedReload);
+    !!this.panelSubsidiariesReload && this.panelSubsidiariesReload(isNeedReload);
   };
 
   handleMonthToWeek = () => {
@@ -548,7 +548,7 @@ class Dashboard extends React.Component {
 
   onCollapseChange = (v => {
     if (v.length > 0 && v[v.length - 1] == 6) {
-      this.panelSubsidariesReload && this.panelSubsidariesReload();
+      this.panelSubsidiariesReload && this.panelSubsidiariesReload();
     }
   })
 
@@ -885,7 +885,7 @@ class Dashboard extends React.Component {
     }
 
     if (userRole == 60) {
-      return <Subsidaries subsidyId={subsidyId} />
+      return <Subsidiaries subsidyId={subsidyId} />
     } else {
       return (
         <div className="full-layout page dashboard-page">
@@ -1251,7 +1251,7 @@ class Dashboard extends React.Component {
                   {(userRole === 3 || userRole === 60) ? (
                     <Panel
                       key="6"
-                      header={intl.formatMessage(messages.subsidaries)}
+                      header={intl.formatMessage(messages.subsidiaries)}
                       extra={(
                         <div className='flex flex-row justify-between'>
                           {userRole === 3 && (
@@ -1261,10 +1261,10 @@ class Dashboard extends React.Component {
                           )}
                         </div>
                       )}
-                      className='subsidaries-panel'
+                      className='subsidiaries-panel'
                       collapsible='header'
                     >
-                      <PanelSubsidaries onShowModalSubsidyDetail={this.onShowModalSubsidy} />
+                      <PanelSubsidiaries onShowModalSubsidyDetail={this.onShowModalSubsidy} />
                     </Panel>
                   ) : null}
                 </Collapse>

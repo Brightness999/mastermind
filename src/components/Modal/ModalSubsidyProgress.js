@@ -123,7 +123,7 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(denySubsidyRequest, { subsidyId: subsidy._id, declineExplanation }).then(result => {
 			const { success, data } = result;
 			if (success) {
-				this.updateSubsidaries(subsidy, data);
+				this.updateSubsidiaries(subsidy, data);
 				this.props.onSubmit();
 			}
 		}).catch(err => {
@@ -135,7 +135,7 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(preApproveSubsidy, { subsidyId: subsidy?._id }).then(result => {
 			const { success, data } = result;
 			if (success) {
-				this.updateSubsidaries(subsidy, data);
+				this.updateSubsidiaries(subsidy, data);
 				this.props.onSubmit();
 			}
 		}).catch(err => {
@@ -167,7 +167,7 @@ class ModalSubsidyProgress extends React.Component {
 			message.success('Approved successfully');
 			const { success, data } = result;
 			if (success) {
-				this.updateSubsidaries(subsidy, data);
+				this.updateSubsidiaries(subsidy, data);
 				this.props.onSubmit();
 			}
 		}).catch(err => {
@@ -190,7 +190,7 @@ class ModalSubsidyProgress extends React.Component {
 		}
 		request.post(selectFinalProviderForSubsidy, postData).then(result => {
 			if (result.success) {
-				this.updateSubsidaries(subsidy, result.data);
+				this.updateSubsidiaries(subsidy, result.data);
 				this.props.onSubmit();
 			}
 		}).catch(err => {
@@ -204,7 +204,7 @@ class ModalSubsidyProgress extends React.Component {
 			message.success('Your appeal has been sent successfully');
 			const { success, data } = result;
 			if (success) {
-				this.updateSubsidaries(subsidy, data);
+				this.updateSubsidiaries(subsidy, data);
 				this.props.onSubmit();
 			}
 		}).catch(err => {
@@ -226,7 +226,7 @@ class ModalSubsidyProgress extends React.Component {
 			message.success('Denied successfully');
 			const { success, data } = result;
 			if (success) {
-				this.updateSubsidaries(subsidy, data);
+				this.updateSubsidiaries(subsidy, data);
 				this.loadSubsidyData(subsidy._id);
 			}
 		}).catch(err => {
@@ -239,7 +239,7 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(schoolAcceptAppealSubsidy, postData).then(result => {
 			const { success, data } = result;
 			if (success) {
-				this.updateSubsidaries(subsidy, data);
+				this.updateSubsidiaries(subsidy, data);
 				this.props.onSubmit();
 			}
 		}).catch(err => {
@@ -247,8 +247,8 @@ class ModalSubsidyProgress extends React.Component {
 		})
 	}
 
-	updateSubsidaries(subsidy, data) {
-		const newSubsidyRequests = JSON.parse(JSON.stringify(this.props.listSubsidaries));
+	updateSubsidiaries(subsidy, data) {
+		const newSubsidyRequests = JSON.parse(JSON.stringify(this.props.listSubsidiaries));
 		this.props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
 			if (s._id === subsidy._id) {
 				s.status = data.status;
@@ -796,7 +796,7 @@ class ModalSubsidyProgress extends React.Component {
 };
 
 const mapStateToProps = state => ({
-	listSubsidaries: state.appointments.dataSubsidyRequests,
+	listSubsidiaries: state.appointments.dataSubsidyRequests,
 	auth: state.auth,
 })
 

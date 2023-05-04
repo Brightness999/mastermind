@@ -58,9 +58,9 @@ export default ({
     id: `${scope}.flags`,
     defaultMessage: 'Flags',
   },
-  subsidaries: {
-    id: `${scope}.subsidaries`,
-    defaultMessage: 'Subsidaries',
+  subsidiaries: {
+    id: `${scope}.subsidiaries`,
+    defaultMessage: 'Subsidiaries',
   },
   upcoming: {
     id: `${scope}.upcoming`,

@@ -338,7 +338,7 @@ class ModalReferralService extends React.Component {
 	render() {
 		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, skillSet, consultants, selectedSubsidy } = this.state;
 		const { auth, listSubsidy, subsidy } = this.props;
-		const subsidaries = listSubsidy?.filter(s => s.status === 3 && !s.consultation?.date) ?? [];
+		const subsidiaries = listSubsidy?.filter(s => s.status === 3 && !s.consultation?.date) ?? [];
 
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -387,7 +387,7 @@ class ModalReferralService extends React.Component {
 										onChange={v => this.handleSelectSubsidy(v)}
 										disabled={!!subsidy}
 									>
-										{subsidaries?.map((s, index) => (
+										{subsidiaries?.map((s, index) => (
 											<Select.Option key={index} value={s._id}>{s?.student?.firstName ?? ''} {s?.student?.lastName ?? ''}({s?.skillSet?.name ?? ''})</Select.Option>
 										))}
 									</Select>

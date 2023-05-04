@@ -31,7 +31,7 @@ import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRe
 import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, setSchools } from '../../../redux/features/authSlice';
 import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
-import PanelSubsidaries from './PanelSubsidaries';
+import PanelSubsidiaries from './PanelSubsidiaries';
 import PageLoading from '../../../components/Loading/PageLoading';
 import './index.less';
 
@@ -210,11 +210,11 @@ class SchedulingCenter extends React.Component {
         this.setState({ providerDrawervisible: true, });
         return;
       case 'new_subsidy_request_from_client':
-        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
+        this.panelSubsidiariesReload && typeof this.panelSubsidiariesReload == 'function' && this.panelSubsidiariesReload(true)
         this.showNotificationForSubsidy(data);
         return;
       case 'subsidy_change_status':
-        this.panelSubsidariesReload && typeof this.panelSubsidariesReload == 'function' && this.panelSubsidariesReload(true)
+        this.panelSubsidiariesReload && typeof this.panelSubsidiariesReload == 'function' && this.panelSubsidiariesReload(true)
         this.showNotificationForSubsidyChange(data.data);
         return;
       case 'meeting_link':
@@ -293,7 +293,7 @@ class SchedulingCenter extends React.Component {
 
   onCloseModalNewSubsidy = (isNeedReload) => {
     this.setState({ visibleNewSubsidy: false });
-    !!this.panelSubsidariesReload && this.panelSubsidariesReload(isNeedReload);
+    !!this.panelSubsidiariesReload && this.panelSubsidiariesReload(isNeedReload);
   };
 
   handleMonthToWeek = () => {
@@ -980,7 +980,7 @@ class SchedulingCenter extends React.Component {
               </Panel>
               <Panel
                 key="6"
-                header={intl.formatMessage(messages.subsidaries)}
+                header={intl.formatMessage(messages.subsidiaries)}
                 extra={(
                   <div className='flex flex-row justify-between'>
                     <Button type='primary' size='small' onClick={this.onShowModalNewSubsidy}>
@@ -988,10 +988,10 @@ class SchedulingCenter extends React.Component {
                     </Button>
                   </div>
                 )}
-                className='subsidaries-panel'
+                className='subsidiaries-panel'
                 collapsible='header'
               >
-                <PanelSubsidaries onShowModalSubsidyDetail={this.onShowModalSubsidy} />
+                <PanelSubsidiaries onShowModalSubsidyDetail={this.onShowModalSubsidy} />
               </Panel>
             </Collapse>
           </section>

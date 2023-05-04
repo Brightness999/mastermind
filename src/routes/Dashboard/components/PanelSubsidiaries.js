@@ -6,14 +6,14 @@ import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import messages from '../../Dashboard/messages';
+import messages from '../messages';
 import request from '../../../utils/api/request'
 import { cancelSubsidyRequest } from '../../../utils/api/apiList';
 import { getSubsidyRequests } from '../../../redux/features/appointmentsSlice';
 import { ModalCancelAppointment } from '../../../components/Modal';
 import './index.less';
 
-class PanelSubsidaries extends React.Component {
+class PanelSubsidiaries extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -181,4 +181,4 @@ const mapStateToProps = state => ({
   user: state.auth.user,
 })
 
-export default compose(connect(mapStateToProps, { getSubsidyRequests }))(PanelSubsidaries);
+export default compose(connect(mapStateToProps, { getSubsidyRequests }))(PanelSubsidiaries);
