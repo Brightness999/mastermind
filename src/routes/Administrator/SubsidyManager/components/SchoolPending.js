@@ -209,7 +209,7 @@ const SchoolPending = (props) => {
 
   return (
     <div>
-      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="Pending Requests"><Button type='primary' className='flex items-center gap-2' icon={<FaFileDownload size={24} />}>Download CSV</Button></CSVLink>
+      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="Pending Requests"><Button type='primary' className='inline-flex items-center gap-2' icon={<FaFileDownload size={24} />}>Download CSV</Button></CSVLink>
       <Table
         bordered
         size='middle'

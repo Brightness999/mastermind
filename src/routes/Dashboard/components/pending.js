@@ -200,14 +200,14 @@ const Pending = (props) => {
 
   return (
     <div>
-      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="Pending Requests"><Button type='primary' className='flex items-center gap-2' icon={<FaFileDownload size={24} />}>Download CSV</Button></CSVLink>
+      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="Pending Requests"><Button type='primary' className='inline-flex items-center gap-2' icon={<FaFileDownload size={24} />}>Download CSV</Button></CSVLink>
       <Table
         bordered
         size='middle'
         dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
         columns={pendingColumns}
         scroll={{ x: 1300 }}
-        className='mt-2 pb-10'
+        className='mt-1 pb-10'
         onRow={(subsidy) => ({
           onClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
           onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
