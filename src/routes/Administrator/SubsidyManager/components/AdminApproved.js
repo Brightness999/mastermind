@@ -230,7 +230,7 @@ const AdminApproved = (props) => {
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.recentSessionDate)}</span>,
-      key: 'approvalDate',
+      key: 'recentSessionDate',
       align: 'center',
       sorter: (a, b) => a?.appointments?.[0]?.date > b?.appointments?.[0]?.date ? 1 : -1,
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -272,11 +272,11 @@ const AdminApproved = (props) => {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
-      render: (subsidy) => <span>{moment(subsidy?.appointments?.[0]?.date).format('MM/DD/YYYY hh:mm A')}</span>
+      render: (subsidy) => <span>{subsidy?.appointments?.length ? moment(subsidy?.appointments?.[0]?.date).format('MM/DD/YYYY hh:mm A') : ''}</span>
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.lastSessionDate)}</span>,
-      key: 'approvalDate',
+      key: 'lastSessionDate',
       align: 'center',
       sorter: (a, b) => a?.appointments?.[0]?.date > b?.appointments?.[0]?.date ? 1 : -1,
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (

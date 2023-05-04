@@ -249,6 +249,10 @@ export default {
     id: `${scope}.numberApprovedSessions`,
     defaultMessage: 'Number of approved sessions',
   },
+  hmghExpensePerSession: {
+    id: `${scope}.hmghExpensePerSession`,
+    defaultMessage: 'HMGH expense per session',
+  },
   totalRemaining: {
     id: `${scope}.totalRemaining`,
     defaultMessage: 'Total remaining',
@@ -364,6 +368,10 @@ export default {
   subsidizedSession: {
     id: `${scope}.subsidizedSession`,
     defaultMessage: 'Subsidized Session',
+  },
+  subsidizedRate: {
+    id: `${scope}.subsidizedRate`,
+    defaultMessage: 'Subsidized Rate',
   },
   appointment: {
     id: `${scope}.appointment`,

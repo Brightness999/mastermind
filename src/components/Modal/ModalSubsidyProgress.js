@@ -38,6 +38,8 @@ class ModalSubsidyProgress extends React.Component {
 		providers: [],
 		otherProvider: '',
 		visibleDeclineExplanation: false,
+		totalPayment: undefined,
+		subsidizedRate: undefined,
 	}
 
 	componentDidMount = () => {
@@ -52,6 +54,7 @@ class ModalSubsidyProgress extends React.Component {
 					subsidy: data,
 					numberOfSessions: data.numberOfSessions,
 					priceForSession: data.priceForSession,
+					totalPayment: data.priceForSession * data.numberOfSessions,
 					otherProvider: data.otherProvider,
 					decisionExplanation: data.decisionExplanation ?? '',
 				});
@@ -69,10 +72,26 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(searchProvidersForAdmin, { skill: subsidy?.skillSet?._id, dependentId: subsidy?.student?._id }).then(result => {
 			const { data, success } = result;
 			if (success) {
+				const provider = data.providers?.find(p => p._id === subsidy.selectedProvider?._id);
+				let level;
+
+				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(subsidy?.student?.currentGrade)) {
+					level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Early Education']?.includes(a.level));
+				} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(subsidy?.student?.currentGrade)) {
+					level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8']?.includes(a.level));
+				} else if (['Grades 7', 'Grades 8'].includes(subsidy?.student?.currentGrade)) {
+					level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8']?.includes(a.level));
+				} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(subsidy?.student?.currentGrade)) {
+					level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'High School Grades 9-12']?.includes(a.level));
+				} else {
+					level = provider?.academicLevel?.find(a => a.level === subsidy?.student?.currentGrade);
+				}
+
 				this.setState({
 					providers: data.providers ?? [],
 					selectProviderFromAdmin: subsidy.selectedProvider?._id,
 					selectedProvider: subsidy.selectedProvider?._id,
+					subsidizedRate: level?.subsidizedRate ?? level?.rate,
 				});
 			}
 		}).catch(() => {
@@ -162,6 +181,7 @@ class ModalSubsidyProgress extends React.Component {
 			selectedProvider: selectProviderFromAdmin,
 			numberOfSessions: numberOfSessions,
 			priceForSession: priceForSession,
+			approvalDate: moment(),
 			subsidyId: subsidy?._id,
 		}
 		if (!selectProviderFromAdmin || !numberOfSessions || !priceForSession) {
@@ -254,6 +274,7 @@ class ModalSubsidyProgress extends React.Component {
 			content: intl.formatMessage(msgDashboard.appointmentScheduled),
 			className: 'popup-scheduled',
 		});
+		this.props.onSubmit();
 	}
 
 	onShowModalCurrentReferral = () => {
@@ -272,6 +293,25 @@ class ModalSubsidyProgress extends React.Component {
 		console.log(this)
 		this.setState({ visibleDeclineExplanation: false });
 	};
+
+	handleSelectProvider = (providerId) => {
+		const { providers, subsidy } = this.state;
+		const provider = providers?.find(p => p._id === providerId);
+		let level;
+
+		if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(subsidy?.student?.currentGrade)) {
+			level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Early Education']?.includes(a.level));
+		} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(subsidy?.student?.currentGrade)) {
+			level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8']?.includes(a.level));
+		} else if (['Grades 7', 'Grades 8'].includes(subsidy?.student?.currentGrade)) {
+			level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8']?.includes(a.level));
+		} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(subsidy?.student?.currentGrade)) {
+			level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'High School Grades 9-12']?.includes(a.level));
+		} else {
+			level = provider?.academicLevel?.find(a => a.level === subsidy?.student?.currentGrade);
+		}
+		this.setState({ selectProviderFromAdmin: providerId, subsidizedRate: level?.subsidizedRate ?? level?.rate });
+	}
 
 	renderStudentParentInfo(subsidy) {
 		const { student, documents } = subsidy;
@@ -454,7 +494,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderDecision(subsidy) {
-		const { selectProviderFromAdmin, numberOfSessions, priceForSession, referral, providers } = this.state;
+		const { selectProviderFromAdmin, numberOfSessions, priceForSession, referral, providers, totalPayment, subsidizedRate } = this.state;
 		const { user } = this.props.auth;
 		const isNotAdmin = user?.role < 900;
 
@@ -478,17 +518,21 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-20 font-700'>{intl.formatMessage(messages.subsidyDetails)}</p>
 					</div>
 					<Row gutter={15}>
-						<Col xs={24} sm={24} md={8}>
+						<Col xs={24} sm={24} md={8} className='flex flex-col justify-end'>
 							<p className='font-700'>{intl.formatMessage(msgCreateAccount.provider)}</p>
 							<p className='font-700'>{subsidy.selectedProvider?.firstName ?? ''} {subsidy.selectedProvider?.lastName ?? ''}</p>
+							<p className='font-700'>{intl.formatMessage(messages.subsidizedRate)}</p>
+							<p className='font-700'>${subsidizedRate}</p>
 						</Col>
-						<Col xs={24} sm={24} md={8}>
+						<Col xs={24} sm={24} md={8} className='flex flex-col justify-end'>
 							<p className='font-700'>{intl.formatMessage(messages.numberApprovedSessions)}</p>
 							<p className='font-700'>{numberOfSessions}</p>
-						</Col>
-						<Col xs={24} sm={24} md={8}>
-							<p className='font-700'>{intl.formatMessage(messages.totalPayment)}</p>
+							<p className='font-700'>{intl.formatMessage(messages.hmghExpensePerSession)}</p>
 							<p className='font-700'>${priceForSession}</p>
+						</Col>
+						<Col xs={24} sm={24} md={8} className='flex flex-col justify-end'>
+							<p className='font-700'>{intl.formatMessage(messages.totalPayment)}</p>
+							<p className='font-700'>${priceForSession * numberOfSessions}</p>
 						</Col>
 					</Row>
 				</div >
@@ -501,39 +545,51 @@ class ModalSubsidyProgress extends React.Component {
 					<p className='font-20 font-700'>{intl.formatMessage(messages.subsidyDetails)}</p>
 				</div>
 				<Row gutter={15}>
-					<Col xs={24} sm={24} md={8}>
+					<Col xs={24} sm={24} md={8} className='flex flex-col justify-between'>
 						<p className='font-700'>*{intl.formatMessage(msgCreateAccount.provider)}</p>
 						<Select
 							disabled={isNotAdmin || subsidy.status === 5}
 							value={selectProviderFromAdmin}
-							onChange={v => this.setState({ selectProviderFromAdmin: v })}
-							className='mb-10'
+							onChange={v => this.handleSelectProvider(v)}
 							placeholder={intl.formatMessage(msgCreateAccount.provider)}
+							className='pb-10'
 						>
 							{providers?.map((provider, index) => (
 								<Select.Option key={index} value={provider?._id}>{provider?.firstName ?? ''} {provider?.lastName ?? ''}</Select.Option >
 							))}
 						</Select>
+						<p className='font-700'>*{intl.formatMessage(messages.subsidizedRate)}</p>
+						<p className='h-40 flex items-center mb-0 ml-10'>$ {subsidizedRate}</p>
 					</Col>
-					<Col xs={24} sm={24} md={8}>
+					<Col xs={24} sm={24} md={8} className='flex flex-col justify-between'>
 						<p className='font-700'>*{intl.formatMessage(messages.numberApprovedSessions)}</p>
 						<Input
 							disabled={isNotAdmin || subsidy.status === 5}
 							value={numberOfSessions}
 							type="number"
-							className='h-40'
+							className='h-40 pb-10'
 							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract') && e.preventDefault()}
-							onChange={e => this.setState({ numberOfSessions: e.target.value })}
+							onChange={e => this.setState({ numberOfSessions: e.target.value, totalPayment: e.target.value * priceForSession })}
+						/>
+						<p className='font-700'>*{intl.formatMessage(messages.hmghExpensePerSession)}</p>
+						<Input
+							disabled={isNotAdmin || subsidy.status === 5}
+							value={priceForSession}
+							type="number"
+							className='h-40'
+							prefix="$"
+							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract') && e.preventDefault()}
+							onChange={e => this.setState({ priceForSession: e.target.value, totalPayment: e.target.value * numberOfSessions })}
 						/>
 					</Col>
-					<Col xs={24} sm={24} md={8}>
+					<Col xs={24} sm={24} md={8} className='flex flex-col justify-end'>
 						<p className='font-700'>*{intl.formatMessage(messages.totalPayment)}</p>
 						<Input
-							value={priceForSession}
+							value={totalPayment}
 							type="number"
 							prefix="$"
 							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract') && e.preventDefault()}
-							onChange={e => this.setState({ priceForSession: e.target.value })}
+							onChange={e => this.setState({ totalPayment: e.target.value, priceForSession: numberOfSessions > 0 ? e.target.value / numberOfSessions : 0 })}
 							className='h-40'
 							disabled={isNotAdmin || subsidy.status === 5}
 						/>
