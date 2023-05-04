@@ -145,7 +145,6 @@ class ModalNewAppointmentForParents extends React.Component {
 				arrTime: [],
 			});
 		}).catch(err => {
-			console.log('provider list error-----', err);
 			this.setState({
 				loading: false,
 				listProvider: [],
@@ -176,6 +175,9 @@ class ModalNewAppointmentForParents extends React.Component {
 
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
+		const dependent = this.props.listDependents?.find(d => d._id === selectedDependent);
+		const subsidy = dependent?.subsidy?.find(s => s.skillSet === selectedSkillSet && s.status === 5);
+
 		const postData = {
 			skillSet: selectedSkillSet,
 			dependent: selectedDependent,
@@ -185,7 +187,8 @@ class ModalNewAppointmentForParents extends React.Component {
 			phoneNumber: appointmentType === 1 ? data.phoneNumber : '',
 			notes: appointmentType === 1 ? data.notes : notes,
 			type: (appointmentType === 3 && subsidyAvailable && isSubsidyOnly) ? 5 : appointmentType,
-			subsidyOnly: isSubsidyOnly && subsidyAvailable,
+			subsidyOnly: appointmentType === 3 && subsidyAvailable && isSubsidyOnly,
+			subsidy: (appointmentType === 3 && isSubsidyOnly && subsidyAvailable) ? subsidy?._id : undefined,
 			status: 0,
 			rate: appointmentType === 2 ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType === 3 ? standardRate : appointmentType === 5 ? subsidizedRate : 0,
 			screeningTime: appointmentType === 1 ? data.time : '',
@@ -516,7 +519,6 @@ class ModalNewAppointmentForParents extends React.Component {
 			confirmMessage,
 			isSubsidyOnly,
 		} = this.state;
-		console.log(isSubsidyOnly)
 		const modalProps = {
 			className: 'modal-new',
 			title: "",
