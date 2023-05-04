@@ -285,6 +285,12 @@ class ModalSubsidyProgress extends React.Component {
 		this.setState({ visibleCurrentReferral: false });
 	};
 
+	onSubmitModalCurrentReferral = () => {
+		this.onCloseModalCurrentReferral();
+		message.success("Rescheduled successfully");
+		this.props.onSubmit();
+	}
+
 	onShowModalDeclineExplanation = () => {
 		this.setState({ visibleDeclineExplanation: true });
 	};
@@ -372,7 +378,7 @@ class ModalSubsidyProgress extends React.Component {
 				<div className={`flex flex-row justify-between ${subsidy.status === 2 ? 'd-none' : ''}`}>
 					<p className='font-20 font-700'>{intl.formatMessage(messages.schoolInformation)}</p>
 				</div>
-				{[0, 1].includes(subsidy.status) ? (
+				{((subsidy.status === 0) || (subsidy.status === 1 && user?.role > 3)) ? (
 					<Row gutter={15}>
 						<Col xs={24} sm={24} md={8}>
 							<p className='font-700 mb-10'>{intl.formatMessage(messages.recommendedProviders)}</p>
@@ -507,10 +513,6 @@ class ModalSubsidyProgress extends React.Component {
 			)
 		}
 
-		if (isNotAdmin || (!isNotAdmin && referral?.status != -1)) {
-			return;
-		}
-
 		if (subsidy.status === 5) {
 			return (
 				<div className='subsidy-detail'>
@@ -537,6 +539,10 @@ class ModalSubsidyProgress extends React.Component {
 					</Row>
 				</div >
 			)
+		}
+
+		if (isNotAdmin || (!isNotAdmin && referral?.status != -1)) {
+			return;
 		}
 
 		return (
@@ -614,10 +620,13 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	checkCurrentStep = (subsidy) => {
+		const { referral } = this.state;
+
 		switch (subsidy?.status) {
 			case 0: return 0;
 			case 1: case 2: return 1;
-			case 3: case 4: return 2;
+			case 3: return referral?.status === -1 ? 3 : 2;
+			case 4: return 2;
 			case 5: return 3;
 			default: return 0;
 		}
@@ -744,7 +753,7 @@ class ModalSubsidyProgress extends React.Component {
 		};
 		const modalCurrentReferralProps = {
 			visible: visibleCurrentReferral,
-			onSubmit: this.onCloseModalCurrentReferral,
+			onSubmit: this.onSubmitModalCurrentReferral,
 			onCancel: this.onCloseModalCurrentReferral,
 			event: referral,
 		}
@@ -763,8 +772,8 @@ class ModalSubsidyProgress extends React.Component {
 					</div>
 					{subsidy.status != 0 && (
 						<div className='absolute right-0 top-0'>
-							{[1, 3, 5].includes(subsidy.status) && <p className='text-green500 font-24 font-700 ml-auto'>{(subsidy?.status === 1 && this.props.auth.user?.role > 900) ? intl.formatMessage(msgCreateAccount.school) : ''} {subsidy?.status === 3 ? intl.formatMessage(msgDashboard.preApproved) : intl.formatMessage(msgDashboard.approved)}</p>}
-							{[2, 4].includes(subsidy.status) && <p className='text-red font-24 font-700 ml-auto'>{(subsidy?.status === 2 && this.props.auth.user?.role > 900) ? intl.formatMessage(msgCreateAccount.school) : ''} {intl.formatMessage(msgDashboard.declined)}</p>}
+							{[1, 3, 5].includes(subsidy.status) && <p className='text-green500 font-24 font-700 ml-auto'>{(subsidy?.status === 1) ? intl.formatMessage(msgCreateAccount.school) : intl.formatMessage(msgCreateAccount.admin)} {subsidy?.status === 3 ? intl.formatMessage(msgDashboard.preApproved) : intl.formatMessage(msgDashboard.approved)}</p>}
+							{[2, 4].includes(subsidy.status) && <p className='text-red font-24 font-700 ml-auto'>{(subsidy?.status === 2) ? intl.formatMessage(msgCreateAccount.school) : intl.formatMessage(msgCreateAccount.admin)} {intl.formatMessage(msgDashboard.declined)}</p>}
 						</div>
 					)}
 				</div>
