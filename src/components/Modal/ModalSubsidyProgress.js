@@ -471,12 +471,12 @@ class ModalSubsidyProgress extends React.Component {
 						<Col xs={24} sm={24} md={12}>
 							{referral.meetingLink ? (
 								<p>
-									<span className='font-700'>{intl.formatMessage(msgDrawer.meeting)}</span>: <a>{referral.meetingLink}</a>
+									<span className='font-700'>{intl.formatMessage(msgDrawer.meeting)}:</span> <a>{referral.meetingLink}</a>
 								</p>
 							) : null}
 							{referral.phoneNumber ? (
 								<p>
-									<span className='font-700'>{intl.formatMessage(msgDrawer.phonenumber)}</span>: {referral.phoneNumber}
+									<span className='font-700'>{intl.formatMessage(msgDrawer.phonenumber)}:</span> {referral.phoneNumber}
 								</p>
 							) : null}
 						</Col>
@@ -492,7 +492,7 @@ class ModalSubsidyProgress extends React.Component {
 						</Col>
 					</div>
 					<div className='flex flex-row justify-between'>
-						{referral.date ? <p><span className='font-700'>{intl.formatMessage(messages.dateTime)}</span>: {moment(referral.date).format('YYYY-MM-DD HH:mm A')}</p> : null}
+						{referral.date ? <p><span className='font-700'>{intl.formatMessage(messages.dateTime)}:</span> {moment(referral.date).format('MM/DD/YYYY HH:mm A')}</p> : null}
 					</div>
 				</div>
 			)
