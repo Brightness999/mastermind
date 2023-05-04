@@ -72,7 +72,7 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(searchProvidersForAdmin, { skill: subsidy?.skillSet?._id, dependentId: subsidy?.student?._id }).then(result => {
 			const { data, success } = result;
 			if (success) {
-				const provider = data.providers?.find(p => p._id === subsidy.selectedProvider?._id);
+				const provider = data.providers?.find(p => p._id === subsidy.selectedProviderFromAdmin?._id);
 				let level;
 
 				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(subsidy?.student?.currentGrade)) {
@@ -91,7 +91,7 @@ class ModalSubsidyProgress extends React.Component {
 					providers: data.providers ?? [],
 					selectedProviderFromAdmin: subsidy.selectedProviderFromAdmin?._id,
 					selectedProvider: subsidy.selectedProvider?._id,
-					subsidizedRate: level?.subsidizedRate ?? level?.rate,
+					subsidizedRate: level ? level?.subsidizedRate ?? level?.rate : '',
 				});
 			}
 		}).catch(() => {
