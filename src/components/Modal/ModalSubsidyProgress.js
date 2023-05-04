@@ -707,7 +707,7 @@ class ModalSubsidyProgress extends React.Component {
 			]
 		}
 
-		if (subsidy?.status === 3 && user?.role > 900 && referral?.status != 0) {
+		if (subsidy?.status === 3 && user?.role > 900 && referral?.status) {
 			return [
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel).toUpperCase()}
