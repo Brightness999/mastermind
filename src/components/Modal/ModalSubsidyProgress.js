@@ -27,7 +27,7 @@ class ModalSubsidyProgress extends React.Component {
 		decisionExplanation: "",
 		selectedDate: moment(),
 		selectedHour: undefined,
-		selectProviderFromAdmin: undefined,
+		selectedProviderFromAdmin: undefined,
 		numberOfSessions: undefined,
 		priceForSession: undefined,
 		parentWarning: '',
@@ -89,7 +89,7 @@ class ModalSubsidyProgress extends React.Component {
 
 				this.setState({
 					providers: data.providers ?? [],
-					selectProviderFromAdmin: subsidy.selectedProvider?._id,
+					selectedProviderFromAdmin: subsidy.selectedProviderFromAdmin?._id,
 					selectedProvider: subsidy.selectedProvider?._id,
 					subsidizedRate: level?.subsidizedRate ?? level?.rate,
 				});
@@ -176,15 +176,15 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	submitSubsidyFromAdmin = (subsidy) => {
-		const { selectProviderFromAdmin, numberOfSessions, priceForSession } = this.state;
+		const { selectedProviderFromAdmin, numberOfSessions, priceForSession } = this.state;
 		const postData = {
-			selectedProvider: selectProviderFromAdmin,
-			numberOfSessions: numberOfSessions,
-			priceForSession: priceForSession,
+			selectedProviderFromAdmin,
+			numberOfSessions,
+			priceForSession,
 			approvalDate: moment(),
 			subsidyId: subsidy?._id,
 		}
-		if (!selectProviderFromAdmin || !numberOfSessions || !priceForSession) {
+		if (!selectedProviderFromAdmin || !numberOfSessions || !priceForSession) {
 			message.error('please fill all reuired field');
 			return;
 		}
@@ -316,7 +316,7 @@ class ModalSubsidyProgress extends React.Component {
 		} else {
 			level = provider?.academicLevel?.find(a => a.level === subsidy?.student?.currentGrade);
 		}
-		this.setState({ selectProviderFromAdmin: providerId, subsidizedRate: level?.subsidizedRate ?? level?.rate });
+		this.setState({ selectedProviderFromAdmin: providerId, subsidizedRate: level?.subsidizedRate ?? level?.rate });
 	}
 
 	renderStudentParentInfo(subsidy) {
@@ -500,7 +500,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderDecision(subsidy) {
-		const { selectProviderFromAdmin, numberOfSessions, priceForSession, referral, providers, totalPayment, subsidizedRate } = this.state;
+		const { selectedProviderFromAdmin, numberOfSessions, priceForSession, referral, providers, totalPayment, subsidizedRate } = this.state;
 		const { user } = this.props.auth;
 		const isNotAdmin = user?.role < 900;
 
@@ -522,7 +522,7 @@ class ModalSubsidyProgress extends React.Component {
 					<Row gutter={15}>
 						<Col xs={24} sm={24} md={8} className='flex flex-col justify-end'>
 							<p className='font-700'>{intl.formatMessage(msgCreateAccount.provider)}</p>
-							<p className='font-700'>{subsidy.selectedProvider?.firstName ?? ''} {subsidy.selectedProvider?.lastName ?? ''}</p>
+							<p className='font-700'>{subsidy.selectedProviderFromAdmin?.firstName ?? ''} {subsidy.selectedProviderFromAdmin?.lastName ?? ''}</p>
 							<p className='font-700'>{intl.formatMessage(messages.subsidizedRate)}</p>
 							<p className='font-700'>${subsidizedRate}</p>
 						</Col>
@@ -555,7 +555,7 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-700'>*{intl.formatMessage(msgCreateAccount.provider)}</p>
 						<Select
 							disabled={isNotAdmin || subsidy.status === 5}
-							value={selectProviderFromAdmin}
+							value={selectedProviderFromAdmin}
 							onChange={v => this.handleSelectProvider(v)}
 							placeholder={intl.formatMessage(msgCreateAccount.provider)}
 							className='pb-10'
