@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import request from '../../utils/api/request'
-import { cancelAppointmentForParent, cancelAppointmentForProvider, changeTimeAppointForParent, changeTimeAppointForProvider, getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getParentSubsidyRequests, getSchoolSubsidyRequests } from '../../utils/api/apiList';
+import { cancelAppointmentForParent, cancelAppointmentForProvider, changeTimeAppointForParent, changeTimeAppointForProvider, getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getParentSubsidyRequests, getProviderSubsidyRequests, getSchoolSubsidyRequests } from '../../utils/api/apiList';
 
 const initialState = {
 	dataAppointments: [],
@@ -50,6 +50,9 @@ export const getSubsidyRequests = createAsyncThunk(
 					return result.data.docs;
 				case 60:
 					result = await request.post(getSchoolSubsidyRequests, data);
+					return result.data.docs;
+				case 30:
+					result = await request.post(getProviderSubsidyRequests, data);
 					return result.data.docs;
 				case 3:
 					result = await request.post(getParentSubsidyRequests, data);

@@ -80,6 +80,7 @@ export const updateMyProviderAvailability = 'providers/update_my_provider_availa
 export const setFlag = 'providers/set_flag'
 export const acceptDeclinedScreening = 'providers/accept_declined_screening'
 export const sendEmailInvoice = 'providers/send_email_invoice'
+export const getProviderSubsidyRequests = 'providers/get_my_subsidy_requests'
 
 export const getAppointmentsForParent = 'clients/get_my_appointments'
 export const getAppointmentsInMonthForParent = 'clients/get_my_appointments_in_month'
