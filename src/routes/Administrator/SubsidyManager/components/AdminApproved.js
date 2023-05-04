@@ -138,7 +138,7 @@ const AdminApproved = (props) => {
       title: <span className="font-16">{intl.formatMessage(msgCreateAccount.provider)}</span>,
       key: 'provider',
       align: 'center',
-      sorter: (a, b) => (a?.selectedProvider?.firstName ?? '' + a?.selectedProvider?.lastName ?? '').toLowerCase() > (b?.selectedProvider?.firstName ?? '' + b?.selectedProvider?.lastName ?? '').toLowerCase() ? 1 : -1,
+      sorter: (a, b) => (a?.selectedProviderFromAdmin?.firstName ?? '' + a?.selectedProviderFromAdmin?.lastName ?? '').toLowerCase() > (b?.selectedProviderFromAdmin?.firstName ?? '' + b?.selectedProviderFromAdmin?.lastName ?? '').toLowerCase() ? 1 : -1,
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
           <Input
@@ -172,14 +172,14 @@ const AdminApproved = (props) => {
       filterIcon: (filtered) => (
         <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
       ),
-      onFilter: (value, record) => record.selectedProvider?.firstName?.toLowerCase()?.includes((value).toLowerCase()) || record.selectedProvider?.lastName?.toLowerCase()?.includes((value).toLowerCase()),
+      onFilter: (value, record) => record.selectedProviderFromAdmin?.firstName?.toLowerCase()?.includes((value).toLowerCase()) || record.selectedProviderFromAdmin?.lastName?.toLowerCase()?.includes((value).toLowerCase()),
       onFilterDropdownOpenChange: visible => {
         if (visible) {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
       render: (subsidy) => (
-        <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
+        <div>{subsidy?.selectedProviderFromAdmin?.firstName ?? ''} {subsidy?.selectedProviderFromAdmin?.lastName ?? ''}</div>
       )
     },
     {
@@ -305,7 +305,7 @@ const AdminApproved = (props) => {
       "Student Grade": r?.student?.currentGrade,
       "Service Requested": r?.skillSet?.name,
       "Notes": r?.note,
-      "Provider": r?.selectedProvider ? `${r?.selectedProvider?.firstName ?? ''} ${r?.selectedProvider?.lastName ?? ''}` : r?.otherProvider,
+      "Provider": r?.selectedProviderFromAdmin ? `${r?.selectedProviderFromAdmin?.firstName ?? ''} ${r?.selectedProviderFromAdmin?.lastName ?? ''}` : r?.otherProvider,
       "HMGH expense per session": r.priceForSession ?? '',
       "# of approved sessions": r.numberOfSessions ?? '',
       "# of sessions paid to DATE": r?.appointments?.filter(a => a.status === -1 && a.isPaid)?.length ?? '',
