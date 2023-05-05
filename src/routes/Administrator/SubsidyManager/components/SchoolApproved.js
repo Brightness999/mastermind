@@ -16,6 +16,7 @@ const SchoolApproved = (props) => {
   const type = 'DraggableBodyRow';
   const { skills, grades, requests, schools } = props;
   const [csvData, setCsvData] = useState([]);
+  const csvHeaders = ["Student Name", "School", "Student Grade", "Service Requested", "Notes", "Provider", "Approval Date"];
   const searchInput = createRef(null);
   const schoolApprovedColumns = [
     {
@@ -335,7 +336,11 @@ const SchoolApproved = (props) => {
 
   return (
     <div className="approved-list">
-      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="School Approved Requests"><Button type='primary' className='inline-flex items-center gap-2' icon={<FaFileDownload size={24} />}>Download CSV</Button></CSVLink>
+      <CSVLink onClick={exportToExcel} data={csvData} headers={csvHeaders} filename="School Approved Requests">
+        <Button type='primary' className='inline-flex items-center gap-2' icon={<FaFileDownload size={24} />}>
+          Download CSV
+        </Button>
+      </CSVLink>
       <DndProvider backend={HTML5Backend}>
         <Table
           bordered

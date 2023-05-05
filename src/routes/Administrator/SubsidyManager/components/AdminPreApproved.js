@@ -12,6 +12,7 @@ import msgCreateAccount from '../../../Sign/CreateAccount/messages';
 const AdminPreApproved = (props) => {
   const { skills, grades, requests, schools } = props;
   const [csvData, setCsvData] = useState([]);
+  const csvHeaders = ["Student Name", "School", "Student Grade", "Service Requested", "Notes", "Provider", "Consultation Date"];
   const searchInput = createRef(null);
   const adminPreApprovedColumns = [
     {
@@ -246,7 +247,11 @@ const AdminPreApproved = (props) => {
 
   return (
     <div>
-      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="Pre-approved Requests"><Button type='primary' className='inline-flex items-center gap-2' icon={<FaFileDownload size={24} />}>Download CSV</Button></CSVLink>
+      <CSVLink onClick={exportToExcel} data={csvData} headers={csvHeaders} filename="Pre-approved Requests">
+        <Button type='primary' className='inline-flex items-center gap-2' icon={<FaFileDownload size={24} />}>
+          Download CSV
+        </Button>
+      </CSVLink>
       <Table
         bordered
         size='middle'

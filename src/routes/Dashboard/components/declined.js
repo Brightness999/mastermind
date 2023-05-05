@@ -11,6 +11,7 @@ import msgCreateAccount from '../../Sign/CreateAccount/messages';
 const Declined = (props) => {
   const { skills, grades, requests } = props;
   const [csvData, setCsvData] = useState([]);
+  const csvHeaders = ["Student Name", "School", "Student Grade", "Service Requested", "Notes"];
   const searchInput = createRef(null);
   const declinedColumns = [
     {
@@ -140,7 +141,11 @@ const Declined = (props) => {
 
   return (
     <div>
-      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="School Declined Requests"><Button type='primary' className='inline-flex items-center gap-2' icon={<FaFileDownload size={24} />}>Download CSV</Button></CSVLink>
+      <CSVLink onClick={exportToExcel} data={csvData} headers={csvHeaders} filename="School Declined Requests">
+        <Button type='primary' className='inline-flex items-center gap-2' icon={<FaFileDownload size={24} />}>
+          Download CSV
+        </Button>
+      </CSVLink>
       <Table
         bordered
         size='middle'

@@ -12,6 +12,7 @@ import msgCreateAccount from '../../Sign/CreateAccount/messages';
 const Pending = (props) => {
   const { skills, grades, requests } = props;
   const [csvData, setCsvData] = useState([]);
+  const csvHeaders = ["Student Name", "School", "Student Grade", "Service Requested", "Notes", "Request Date"];
   const searchInput = createRef(null);
   const pendingColumns = [
     {
@@ -200,7 +201,11 @@ const Pending = (props) => {
 
   return (
     <div>
-      <CSVLink onClick={() => exportToExcel()} data={csvData} filename="Pending Requests"><Button type='primary' className='inline-flex items-center gap-2' icon={<FaFileDownload size={24} />}>Download CSV</Button></CSVLink>
+      <CSVLink onClick={exportToExcel} headers={csvHeaders} data={csvData} filename="Pending Requests">
+        <Button type='primary' className='inline-flex items-center gap-2' icon={<FaFileDownload size={24} />}>
+          Download CSV
+        </Button>
+      </CSVLink>
       <Table
         bordered
         size='middle'
@@ -214,7 +219,7 @@ const Pending = (props) => {
         })}
         pagination={false}
       />
-    </div>
+    </div >
   )
 }
 
