@@ -384,7 +384,7 @@ class ModalSubsidyProgress extends React.Component {
 							<div className='select-md'>
 								<Select
 									disabled={user.role === 3}
-									onChange={v => this.setState({ selectedProvider: v })}
+									onChange={v => this.setState({ selectedProvider: v, otherProvider: undefined })}
 									value={selectedProvider}
 									className='mb-10'
 									placeholder={intl.formatMessage(msgCreateAccount.provider)}
@@ -396,7 +396,7 @@ class ModalSubsidyProgress extends React.Component {
 							</div>
 							<p className='font-700 mb-10'>{intl.formatMessage(messages.otherProvider)}</p>
 							<div className='select-md'>
-								<Input value={otherProvider} onChange={e => this.setState({ otherProvider: e.target.value })} disabled={user.role === 3} placeholder={intl.formatMessage(messages.otherProvider)} />
+								<Input value={otherProvider} onChange={e => this.setState({ otherProvider: e.target.value, selectedProvider: undefined })} disabled={user.role === 3} placeholder={intl.formatMessage(messages.otherProvider)} />
 							</div>
 						</Col >
 						<Col xs={24} sm={24} md={16}>
