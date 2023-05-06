@@ -296,7 +296,6 @@ class ModalSubsidyProgress extends React.Component {
 	};
 
 	onCloseModalDeclineExplantion = () => {
-		console.log(this)
 		this.setState({ visibleDeclineExplanation: false });
 	};
 
@@ -612,7 +611,7 @@ class ModalSubsidyProgress extends React.Component {
 		return (
 			<div className="steps-content mt-1">
 				{this.renderStudentParentInfo(subsidy)}
-				{this.renderSchoolInfo(subsidy)}
+				{subsidy.school && this.renderSchoolInfo(subsidy)}
 				{this.renderConsulation(subsidy)}
 				{this.renderDecision(subsidy)}
 			</div>
@@ -647,8 +646,8 @@ class ModalSubsidyProgress extends React.Component {
 				<Button key="decline" onClick={() => this.onShowModalDeclineExplanation()} className='mr-10'>
 					{intl.formatMessage(messages.decline).toUpperCase()}
 				</Button>,
-				<Button key="approve" onClick={() => this.schoolAcceptSubsidy(subsidy)} type='primary'>
-					{intl.formatMessage(messages.approve).toUpperCase()}
+				<Button key="approve" onClick={() => subsidy.school ? this.schoolAcceptSubsidy(subsidy) : this.adminPreApproveSubsidy(subsidy)} type='primary'>
+					{subsidy?.school ? intl.formatMessage(messages.approve).toUpperCase() : intl.formatMessage(messages.preapprove).toUpperCase()}
 				</Button>
 			]
 		}
