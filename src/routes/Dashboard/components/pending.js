@@ -180,7 +180,7 @@ const Pending = (props) => {
       render: (subsidy) => (
         <Space size="middle">
           <a className='btn-blue' onClick={() => props.onShowModalSchoolApproval(subsidy?._id)}>Approve</a>
-          <a className='btn-blue' onClick={() => props.onShowModalConfirm(subsidy?._id)}>Decline</a>
+          <a className='btn-blue' onClick={() => props.onShowModalDeclineExplanation(subsidy?._id)}>Decline</a>
         </Space>
       ),
     },
