@@ -900,7 +900,7 @@ class Dashboard extends React.Component {
             </section>
             <section className='div-calendar box-card'>
               <div className='flex justify-end items-center gap-5'>
-                <div className='div-trans flex flex-row'>
+                <div className='div-trans flex flex-row my-10'>
                   <Avatar size={36} className='trans-all' onClick={() => this.handleClickAllDependent()}>All</Avatar>
                   <Button
                     type='text'
@@ -925,13 +925,12 @@ class Dashboard extends React.Component {
                     onClick={() => this.scrollTrans(42)}
                   />
                 </div>
-                <div className='btn-appointment'>
+                <div className={`btn-appointment ${userRole === 100 && 'd-none'}`}>
                   <Button
                     type='primary'
                     block
                     icon={<FaCalendarAlt size={19} />}
-                    disabled={userRole == 30 || userRole == 60}
-                    onClick={() => (userRole == 3 || userRole == 100) && this.onShowModalNewAppoint()}
+                    onClick={() => (userRole == 3 || userRole == 30) && this.onShowModalNewAppoint()}
                   >
                     {intl.formatMessage(messages.makeAppointment)}
                   </Button>
@@ -1248,7 +1247,7 @@ class Dashboard extends React.Component {
                       </Tabs.TabPane>
                     </Tabs>
                   </Panel>
-                  {(userRole === 3 || userRole === 60) ? (
+                  {(userRole === 3) ? (
                     <Panel
                       key="6"
                       header={intl.formatMessage(messages.subsidiaries)}
