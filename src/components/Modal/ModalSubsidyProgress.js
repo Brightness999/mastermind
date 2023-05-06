@@ -112,23 +112,21 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	declineSubsidy = (declineExplanation) => {
-		this.onCloseModalDeclineExplantion();
-		const { subsidy } = this.state;
-
-		if (!declineExplanation?.trim()?.length) {
-			this.setState({ parentWarning: 'Please fill in the decline explaintion' });
-			return;
+		if (declineExplanation?.trim()?.length) {
+			this.onCloseModalDeclineExplanation();
+			const { subsidy } = this.state;
+			request.post(denySubsidyRequest, { subsidyId: subsidy._id, declineExplanation }).then(result => {
+				const { success, data } = result;
+				if (success) {
+					this.updateSubsidiaries(subsidy, data);
+					this.props.onSubmit();
+				}
+			}).catch(err => {
+				message.error(err.message);
+			})
+		} else {
+			message.warn("Please fill in the decline explaintion");
 		}
-
-		request.post(denySubsidyRequest, { subsidyId: subsidy._id, declineExplanation }).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.updateSubsidiaries(subsidy, data);
-				this.props.onSubmit();
-			}
-		}).catch(err => {
-			message.error(err.message);
-		})
 	}
 
 	adminPreApproveSubsidy(subsidy) {
@@ -295,7 +293,7 @@ class ModalSubsidyProgress extends React.Component {
 		this.setState({ visibleDeclineExplanation: true });
 	};
 
-	onCloseModalDeclineExplantion = () => {
+	onCloseModalDeclineExplanation = () => {
 		this.setState({ visibleDeclineExplanation: false });
 	};
 
@@ -759,7 +757,7 @@ class ModalSubsidyProgress extends React.Component {
 		const modalDeclineExplanationProps = {
 			visible: visibleDeclineExplanation,
 			onSubmit: this.declineSubsidy,
-			onCancel: this.onCloseModalDeclineExplantion,
+			onCancel: this.onCloseModalDeclineExplanation,
 			title: intl.formatMessage(messages.declineExplanation),
 		}
 
