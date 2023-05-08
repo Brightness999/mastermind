@@ -14,6 +14,7 @@ import { setInforClientChild } from '../../../../../redux/features/authSlice';
 import request from '../../../../../utils/api/request';
 import { getChildProfile, getDefaultValueForClient, getUserProfile } from '../../../../../utils/api/apiList';
 import PageLoading from '../../../../../components/Loading/PageLoading';
+import { CloseCircleFilled } from '@ant-design/icons';
 
 class InfoChild extends Component {
 	constructor(props) {
@@ -106,9 +107,10 @@ class InfoChild extends Component {
 				id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?._id : this.props.auth.user?._id,
 				studentInfos: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.studentInfos : this.props.auth.user?.studentInfos,
 			};
+			console.log(params)
 
-			const result = await this.props.dispatch(setInforClientChild(params));
-			this.form?.setFieldsValue({ children: result.payload.data?.map(item => ({ ...item, birthday: moment(item.birthday) })) });
+			// const result = await this.props.dispatch(setInforClientChild(params));
+			// this.form?.setFieldsValue({ children: result.payload.data?.map(item => ({ ...item, birthday: moment(item.birthday) })) });
 		} catch (error) {
 			console.log('update children error ---', error)
 		}
@@ -211,12 +213,12 @@ class InfoChild extends Component {
 														name={[field.name, "school"]}
 														label={intl.formatMessage(messages.school)}
 														className='float-label-item'
-														rules={[{ required: true }]}
 													>
 														<Select
 															showArrow
 															placeholder={intl.formatMessage(messages.school)}
 															optionLabelProp="label"
+															allowClear={true}
 														>
 															{listSchools?.map((school, index) => (
 																<Select.Option key={index} label={school.name} value={school._id}>{school.name}</Select.Option>

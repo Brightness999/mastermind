@@ -178,13 +178,13 @@ class InfoChild extends Component {
 														<Form.Item
 															name={[field.name, "school"]}
 															label={intl.formatMessage(messages.school)}
-															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.school) }]}
 														>
 															<Select
 																showArrow
 																placeholder={intl.formatMessage(messages.school)}
 																optionLabelProp="label"
 																onChange={v => this.updateReduxValueForDepedent(index, "school", v)}
+																allowClear={true}
 															>
 																{listSchools?.map((school, index) => (
 																	<Select.Option key={index} label={school.name} value={school._id}>{school.name}</Select.Option>

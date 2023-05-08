@@ -63,7 +63,7 @@ class ModalNewSubsidyRequest extends React.Component {
 		const { dependents } = this.state;
 		this.setState({
 			skillSet: dependents?.find(d => d._id == dependentId)?.services,
-			listSchools: [dependents?.find(d => d._id == dependentId)?.school],
+			listSchools: dependents?.find(d => d._id == dependentId)?.school ? [dependents?.find(d => d._id == dependentId)?.school] : undefined,
 		})
 		this.form.setFieldsValue({ school: dependents?.find(d => d._id == dependentId)?.school?._id });
 	}
@@ -163,7 +163,7 @@ class ModalNewSubsidyRequest extends React.Component {
 									rules={[{ required: true }]}
 								>
 									<Select placeholder={intl.formatMessage(msgCreateAccount.school)}>
-										{listSchools?.map((school, index) => <Select.Option key={index} value={school._id}>{school.name}</Select.Option>)}
+										{listSchools?.map((school, index) => <Select.Option key={index} value={school?._id}>{school?.name}</Select.Option>)}
 									</Select>
 								</Form.Item>
 							)}

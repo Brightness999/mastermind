@@ -317,7 +317,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderStudentParentInfo(subsidy) {
-		const { student, documents } = subsidy;
+		const { student, documents, skillSet, ravEmail, ravName, ravPhone } = subsidy;
 		return (<div className='parent-info'>
 			<p className='font-20 font-700'>{intl.formatMessage(messages.parentInformation)}</p>
 			<Row gutter={15}>
@@ -325,8 +325,8 @@ class ModalSubsidyProgress extends React.Component {
 					<p className='font-700'>{intl.formatMessage(messages.dependentInfo)}</p>
 					<div className='count-2'>
 						<p className='font-12'>Dependent: <b>{student.firstName} {student.lastName}</b></p>
-						<p className='font-12'>School: {student.school.name}</p>
-						<p className='font-12'>Service: {subsidy?.skillSet?.name}</p>
+						<p className='font-12'>School: {student.school?.name}</p>
+						<p className='font-12'>Service: {skillSet?.name}</p>
 						<p className='font-12'>Age: {moment().year() - moment(student.birthday).year()}</p>
 						<p className='font-12'>Grade: {student.currentGrade}</p>
 						<p className='font-12'>Teacher: {student.primaryTeacher}</p>
@@ -334,9 +334,9 @@ class ModalSubsidyProgress extends React.Component {
 				</Col>
 				<Col xs={24} sm={24} md={12}>
 					<p className='font-700'>{intl.formatMessage(messages.otherContacts)}</p>
-					<p className='font-12'>Rav name: {subsidy.ravName}</p>
-					<p className='font-12'>Rav phone: {subsidy.ravPhone}</p>
-					<p className='font-12'>Rav email: {subsidy.ravEmail}</p>
+					<p className='font-12'>Rav name: {ravName}</p>
+					<p className='font-12'>Rav phone: {ravPhone}</p>
+					<p className='font-12'>Rav email: {ravEmail}</p>
 				</Col>
 			</Row>
 			<Divider style={{ margin: '12px 0', borderColor: '#d7d7d7' }} />
