@@ -47,7 +47,7 @@ class ModalCurrentReferralService extends React.Component {
 		event?.dependent?._id && this.getConsultationData(event?.dependent?._id, event?.date);
 	}
 
-	componentDidUpdate(_, prevProps) {
+	componentDidUpdate(prevProps) {
 		if (prevProps?.auth?.meetingLink != this.props.auth?.meetingLink) {
 			this.form?.setFieldValue('meetingLink', this.props.auth?.meetingLink);
 		}

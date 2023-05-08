@@ -68,7 +68,7 @@ class ModalReferralService extends React.Component {
 		this.props.dispatch(setMeetingLink(''));
 	}
 
-	componentDidUpdate(_, prevProps) {
+	componentDidUpdate(prevProps) {
 		if (prevProps?.auth?.meetingLink != this.props.auth?.meetingLink) {
 			this.form?.setFieldValue('meetingLink', this.props.auth?.meetingLink);
 		}
