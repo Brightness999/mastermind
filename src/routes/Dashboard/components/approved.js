@@ -237,7 +237,7 @@ const Approved = (props) => {
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => onShowModalSubsidy(subsidy?._id)}>Edit</a>
+          <a className='btn-blue' onClick={() => props.onShowModalDeclineExplanation(subsidy?._id)}>Decline</a>
         </Space>
       ),
       align: 'center',

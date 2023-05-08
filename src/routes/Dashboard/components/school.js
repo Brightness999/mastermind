@@ -145,6 +145,7 @@ const Subsidiaries = (props) => {
           grades={grades}
           setRequests={setRequests}
           onShowModalSubsidy={onShowModalSubsidy}
+          onShowModalDeclineExplanation={onShowModalDeclineExplanation}
           handleReorder={handleReorder}
         />
       ),
