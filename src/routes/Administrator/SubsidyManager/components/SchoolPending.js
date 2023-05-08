@@ -8,6 +8,7 @@ import { FaFileDownload } from 'react-icons/fa';
 
 import messages from '../../../Dashboard/messages';
 import msgCreateAccount from '../../../Sign/CreateAccount/messages';
+import msgModal from '../../../../components/Modal/messages';
 
 const SchoolPending = (props) => {
   const { skills, grades, requests, schools } = props;
@@ -188,8 +189,8 @@ const SchoolPending = (props) => {
       fixed: 'right',
       render: (subsidy) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => props.onShowModalSchoolApproval(subsidy?._id)}>Approve</a>
-          <a className='btn-blue' onClick={() => props.onShowModalConfirm(subsidy?._id)}>Decline</a>
+          <a className='btn-blue' onClick={() => subsidy?.school ? props.onShowModalSchoolApproval(subsidy?._id) : props.adminPreApproveSubsidy(subsidy?._id)}>{intl.formatMessage(msgModal.approve)}</a>
+          <a className='btn-blue' onClick={() => props.onShowModalDeclineExplanation(subsidy?._id)}>{intl.formatMessage(msgModal.decline)}</a>
         </Space>
       ),
     },

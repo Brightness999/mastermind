@@ -7,9 +7,10 @@ import { compose } from 'redux';
 import mgsSidebar from '../../../../components/SideBar/messages';
 import messages from '../../../Dashboard/messages';
 import msgCreateAccount from '../../../Sign/CreateAccount/messages';
+import msgModal from '../../../../components/Modal/messages';
 import request from '../../../../utils/api/request'
-import { ModalConfirm, ModalSchoolSubsidyApproval, ModalSubsidyProgress } from '../../../../components/Modal';
-import { acceptSubsidyRequest, denySubsidyRequest, reorderRequests } from '../../../../utils/api/apiList';
+import { ModalCreateNote, ModalSchoolSubsidyApproval, ModalSubsidyProgress } from '../../../../components/Modal';
+import { acceptSubsidyRequest, denySubsidyRequest, preApproveSubsidy, reorderRequests } from '../../../../utils/api/apiList';
 import PageLoading from '../../../../components/Loading/PageLoading';
 import { getSubsidyRequests, setSubsidyRequests } from "../../../../redux/features/appointmentsSlice";
 import SchoolPending from './SchoolPending';
@@ -30,8 +31,8 @@ const SubsidyManager = (props) => {
   const [requests, setRequests] = useState(props.listSubsidy?.filter(s => s.status === 0));
   const [status, setStatus] = useState(0);
   const [selectedSubsidyId, setSelectedSubsidyId] = useState(undefined);
-  const [visibleConfirm, setVisibleConfirm] = useState(false);
   const [visibleSchoolApproval, setVisibleSchoolApproval] = useState(false);
+  const [visibleDeclineExplanation, setVisibleDeclineExplanation] = useState(false);
 
   const onShowModalSubsidy = (subsidyId) => {
     setSelectedSubsidyId(subsidyId);
@@ -56,26 +57,41 @@ const SubsidyManager = (props) => {
     setStatus(v);
   }
 
-  const onShowModalConfirm = (subsidyId) => {
-    setVisibleConfirm(true);
-    setSelectedSubsidyId(subsidyId);
-  }
-
-  const onCloseModalConfirm = () => {
-    setVisibleConfirm(false);
-  }
-
   const onShowModalSchoolApproval = (subsidyId) => {
-    setVisibleSchoolApproval(true);
     setSelectedSubsidyId(subsidyId);
+    setVisibleSchoolApproval(true);
   }
 
   const onCloseModalSchoolApproval = () => {
     setVisibleSchoolApproval(false);
+    setSelectedSubsidyId(undefined);
+  }
+
+  const onShowModalDeclineExplanation = (subsidyId) => {
+    setSelectedSubsidyId(subsidyId);
+    setVisibleDeclineExplanation(true);
+  }
+
+  const onCloseModalDeclineExplanation = () => {
+    setVisibleDeclineExplanation(false);
+    setSelectedSubsidyId(undefined);
+  }
+
+  const updateSubsidiaries = (subsidyId, data) => {
+    const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidy));
+    props.setSubsidyRequests(newSubsidyRequests?.map(s => {
+      if (s._id === subsidyId) {
+        s.status = data.status;
+        s.isAppeal = data.isAppeal;
+        s.selectedProvider = data.selectedProvider;
+        s.otherProvider = data.otherProvider;
+      }
+      return s;
+    }));
   }
 
   const schoolAcceptSubsidy = (data) => {
-    const { selectedProvider, decisionExplanation } = data;
+    const { selectedProvider, decisionExplanation, otherProvider } = data;
     setVisibleSchoolApproval(false);
 
     request.post(acceptSubsidyRequest, {
@@ -83,16 +99,11 @@ const SubsidyManager = (props) => {
       student: requests?.find(a => a._id === selectedSubsidyId)?.student?._id,
       selectedProvider,
       decisionExplanation,
+      otherProvider,
     }).then(result => {
       const { success, data } = result;
       if (success) {
-        const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidy));
-        props.setSubsidyRequests(newSubsidyRequests?.map(s => {
-          if (s._id === selectedSubsidyId) {
-            s.status = data.status;
-          }
-          return s;
-        }));
+        updateSubsidiaries(selectedSubsidyId, data);
       }
     }).catch(err => {
       message.error(err.message);
@@ -100,17 +111,22 @@ const SubsidyManager = (props) => {
   }
 
   const schoolDenySubsidy = () => {
-    setVisibleConfirm(false);
+    setVisibleDeclineExplanation(false);
     request.post(denySubsidyRequest, { subsidyId: selectedSubsidyId }).then(result => {
       const { success, data } = result;
       if (success) {
-        const newSubsidyRequests = JSON.parse(JSON.stringify(props.listSubsidy));
-        props.setSubsidyRequests(newSubsidyRequests?.map(s => {
-          if (s._id === selectedSubsidyId) {
-            s.status = data.status;
-          }
-          return s;
-        }));
+        updateSubsidiaries(selectedSubsidyId, data);
+      }
+    }).catch(err => {
+      message.error(err.message);
+    })
+  }
+
+  const adminPreApproveSubsidy = (subsidyId) => {
+    request.post(preApproveSubsidy, { subsidyId }).then(result => {
+      const { success, data } = result;
+      if (success) {
+        updateSubsidiaries(subsidyId, data);
       }
     }).catch(err => {
       message.error(err.message);
@@ -129,7 +145,8 @@ const SubsidyManager = (props) => {
           schools={schoolInfos}
           onShowModalSubsidy={onShowModalSubsidy}
           onShowModalSchoolApproval={onShowModalSchoolApproval}
-          onShowModalConfirm={onShowModalConfirm}
+          onShowModalDeclineExplanation={onShowModalDeclineExplanation}
+          adminPreApproveSubsidy={adminPreApproveSubsidy}
         />
       ),
     },
@@ -224,11 +241,11 @@ const SubsidyManager = (props) => {
     subsidy: requests?.find(a => a._id === selectedSubsidyId),
   }
 
-  const modalConfirmProps = {
-    visible: visibleConfirm,
+  const modalDeclineExplanationProps = {
+    visible: visibleDeclineExplanation,
     onSubmit: schoolDenySubsidy,
-    onCancel: onCloseModalConfirm,
-    message: "Are you sure to decline this request?",
+    onCancel: onCloseModalDeclineExplanation,
+    title: intl.formatMessage(msgModal.declineExplanation),
   }
 
   return (
@@ -247,7 +264,7 @@ const SubsidyManager = (props) => {
       />
       {visibleSubsidy && <ModalSubsidyProgress {...modalSubsidyProps} />}
       {visibleSchoolApproval && <ModalSchoolSubsidyApproval {...modalSchoolApprovalProps} />}
-      {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
+      {visibleDeclineExplanation && <ModalCreateNote {...modalDeclineExplanationProps} />}
       <PageLoading loading={loading} isBackground={true} />
     </div>
   );
