@@ -110,9 +110,9 @@ const SubsidyManager = (props) => {
     })
   }
 
-  const schoolDenySubsidy = () => {
+  const schoolDenySubsidy = (declineExplanation) => {
     setVisibleDeclineExplanation(false);
-    request.post(denySubsidyRequest, { subsidyId: selectedSubsidyId }).then(result => {
+    request.post(denySubsidyRequest, { subsidyId: selectedSubsidyId, declineExplanation }).then(result => {
       const { success, data } = result;
       if (success) {
         updateSubsidiaries(selectedSubsidyId, data);
