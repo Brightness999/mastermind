@@ -468,7 +468,7 @@ class ModalSubsidyProgress extends React.Component {
 						<Col xs={24} sm={24} md={12}>
 							{referral.meetingLink ? (
 								<p>
-									<span className='font-700'>{intl.formatMessage(msgDrawer.meeting)}:</span> <a>{referral.meetingLink}</a>
+									<span className='font-700'>{intl.formatMessage(msgDrawer.meeting)}:</span> <a href={referral.meetingLink} target='_blank'>{referral.meetingLink}</a>
 								</p>
 							) : null}
 							{referral.phoneNumber ? (
