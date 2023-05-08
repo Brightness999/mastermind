@@ -442,11 +442,13 @@ class Dashboard extends React.Component {
   };
 
   onShowModalReferral = (subsidy, callbackForReload) => {
-    this.setState({ visiblReferralService: true });
-    if (callbackForReload == undefined) {
-      callbackForReload = this.panelAppoimentsReload;
+    if (!this.state.loading) {
+      this.setState({ visiblReferralService: true });
+      if (callbackForReload == undefined) {
+        callbackForReload = this.panelAppoimentsReload;
+      }
+      !!this.loadDataModalReferral && this.loadDataModalReferral(subsidy, callbackForReload);
     }
-    !!this.loadDataModalReferral && this.loadDataModalReferral(subsidy, callbackForReload);
   };
 
   onCloseModalReferral = () => {

@@ -381,9 +381,9 @@
   "components.Modal.emailNotValid": "Email is not a valid",
   "components.Modal.dependent": "Dependent",
   "components.Modal.requestContactRav": "Request contact (optional)",
-  "components.Modal.therapistPhone": "Rav’s Phone",
-  "components.Modal.nameOfTherapist": "Name of Rav",
-  "components.Modal.therapistEmail": "Rav’s Email",
+  "components.Modal.therapistPhone": "Therapist’s Phone",
+  "components.Modal.nameOfTherapist": "Name of Therapist",
+  "components.Modal.therapistEmail": "Therapist’s Email",
   
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.editUser": "Edit User",
