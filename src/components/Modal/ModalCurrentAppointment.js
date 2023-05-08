@@ -354,11 +354,11 @@ class ModalCurrentAppointment extends React.Component {
 							<Col xs={24} sm={24} md={8} className='select-small'>
 								<Form.Item
 									name="skill"
-									label={intl.formatMessage(msgCreateAccount.skillsets)}
-									rules={[{ required: true, message: 'Please select a skill.' }]}
+									label={intl.formatMessage(msgCreateAccount.services)}
+									rules={[{ required: true, message: 'Please select a service.' }]}
 								>
 									<Select
-										placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
+										placeholder={intl.formatMessage(msgCreateAccount.services)}
 										disabled
 									>
 										{skillSet?.map((skill, index) => (
@@ -441,7 +441,7 @@ class ModalCurrentAppointment extends React.Component {
 									</div>
 									<div className='flex mt-10'>
 										<div className='flex-1'>
-											<p className='text-bold'>Skillset(s):</p>
+											<p className='text-bold'>{intl.formatMessage(msgCreateAccount.services)}:</p>
 											{event?.provider?.skillSet?.map((skill, index) => (
 												<p key={index} className='font-12'>{skill.name}</p>
 											))}

@@ -182,10 +182,6 @@ export default ({
     id: `${scope}.dependents`,
     defaultMessage: 'Dependents',
   },
-  hasIEP: {
-    id: `${scope}.hasIEP`,
-    defaultMessage: 'Has an IEP?',
-  },
   firstName: {
     id: `${scope}.firstName`,
     defaultMessage: 'First name',
@@ -253,10 +249,6 @@ export default ({
   availability: {
     id: `${scope}.availability`,
     defaultMessage: 'Availability',
-  },
-  doHaveIEP: {
-    id: `${scope}.doHaveIEP`,
-    defaultMessage: 'Do they have an IEP?',
   },
   sameAllDependents: {
     id: `${scope}.sameAllDependents`,
@@ -681,5 +673,53 @@ export default ({
   blackoutDates: {
     id: `${scope}.blackoutDates`,
     defaultMessage: 'Blackout Dates',
+  },
+  newClient: {
+    id: `${scope}.newClient`,
+    defaultMessage: 'New client screening',
+  },
+  update: {
+    id: `${scope}.update`,
+    defaultMessage: 'Update',
+  },
+  schoolAvailability: {
+    id: `${scope}.schoolAvailability`,
+    defaultMessage: 'School availability',
+  },
+  titleChangePassword: {
+    id: `${scope}.titleChangePassword`,
+    defaultMessage: 'Change Password',
+  },
+  passwordOld: {
+    id: `${scope}.passwordOld`,
+    defaultMessage: 'Old Password',
+  },
+  passwordNew: {
+    id: `${scope}.passwordNew`,
+    defaultMessage: 'New Password',
+  },
+  passwordCurrent: {
+    id: `${scope}.passwordCurrent`,
+    defaultMessage: 'Current Password',
+  },
+  passwordConfirm: {
+    id: `${scope}.passwordConfirm`,
+    defaultMessage: 'Confirm Password',
+  },
+  password: {
+    id: `${scope}.password`,
+    defaultMessage: 'Password',
+  },
+  passwordValidMessage: {
+    id: `${scope}.passwordValidMessage`,
+    defaultMessage: 'Your password is not valid',
+  },
+  dayWork: {
+    id: `${scope}.dayWork`,
+    defaultMessage: 'Day work',
+  },
+  notificationSetting: {
+    id: `${scope}.notificationSetting`,
+    defaultMessage: 'Notification Setting',
   },
 });

@@ -6,7 +6,7 @@ import { compose } from 'redux';
 import { BsCheck, BsDot, BsX } from 'react-icons/bs';
 import Cookies from 'js-cookie';
 
-import messages from '../../messages';
+import messages from '../../../../Sign/CreateAccount/messages';
 import msgLogin from '../../../../Sign/Login/messages';
 import request from '../../../../../utils/api/request';
 import { changePassword } from '../../../../../utils/api/apiList';

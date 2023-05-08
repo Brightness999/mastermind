@@ -78,6 +78,7 @@ class ModalNewSubsidyRequest extends React.Component {
 		} else {
 			request.post(createSubsidyRequest, values).then(result => {
 				if (result.success) {
+					message.success('Requested successfully.');
 					this.form.resetFields();
 					this.props.onSubmit();
 				} else {
@@ -146,11 +147,11 @@ class ModalNewSubsidyRequest extends React.Component {
 							</Form.Item>
 							<Form.Item
 								name="skillSet"
-								label={intl.formatMessage(msgCreateAccount.skillsets)}
+								label={intl.formatMessage(msgCreateAccount.services)}
 								className="float-label-item"
 								rules={[{ required: true }]}
 							>
-								<Select placeholder={intl.formatMessage(messages.skillsetRequested)}>
+								<Select placeholder={intl.formatMessage(msgCreateAccount.services)}>
 									{skillSet?.map((skill, index) => <Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>)}
 								</Select>
 							</Form.Item>

@@ -93,7 +93,7 @@ class ConsultationRequest extends React.Component {
       { title: 'Grade', key: 'grade', render: (appointment) => appointment.dependent?.currentGrade },
       { title: 'School', key: 'school', render: appointment => appointment?.dependent?.school?.name },
       {
-        title: 'Skill', dataIndex: 'skillSet', key: 'skillSet', filters: skillSet,
+        title: 'Service', dataIndex: 'skillSet', key: 'skillSet', filters: skillSet,
         onFilter: (value, record) => record.skillSet?._id == value,
         render: skill => skill?.name,
       },

@@ -3,7 +3,8 @@ import { Row, Form, Button, Input, Select, message } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import messages from '../../messages';
+
+import messages from '../../../../Sign/CreateAccount/messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import request from '../../../../../utils/api/request';
 import { getAdminInfo, getCityConnections, getUserProfile, updateAdminInfo } from '../../../../../utils/api/apiList';

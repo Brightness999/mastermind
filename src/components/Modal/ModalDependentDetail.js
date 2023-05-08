@@ -7,6 +7,7 @@ import { compose } from 'redux';
 import { CheckCircleTwoTone, CloseCircleTwoTone, DeleteTwoTone, EditTwoTone } from '@ant-design/icons';
 
 import messages from './messages';
+import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import { createPrivateNote, deletePrivateNote, updatePrivateNote } from '../../utils/api/apiList';
 import request from '../../utils/api/request';
 import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
@@ -149,7 +150,7 @@ class ModalDependentDetail extends React.Component {
 					<Divider />
 					<div className='flex'>
 						<div className='flex-1'>
-							<div className='text-bold'>Skillsets:</div>
+							<div className='text-bold'>{intl.formatMessage(msgCreateAccount.services)}:</div>
 							{dependent?.services?.map((service, index) => (
 								<div key={index}>{service.name}</div>
 							))}

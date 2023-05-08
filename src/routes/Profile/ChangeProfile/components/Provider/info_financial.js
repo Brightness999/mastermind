@@ -6,7 +6,7 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import PlacesAutocomplete from 'react-places-autocomplete';
 
-import messages from '../../messages';
+import messages from '../../../../Sign/CreateAccount/messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import { getMyProviderInfo, getUserProfile, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
 import request from '../../../../../utils/api/request';

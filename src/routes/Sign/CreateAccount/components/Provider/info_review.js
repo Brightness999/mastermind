@@ -145,7 +145,7 @@ class InfoReview extends Component {
 								</div>
 								<div className='mt-10'>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.professionalInformation)}</p>
-									<div className='flex gap-2'><span className='font-700'>Skillset:</span><div>{registerData?.serviceInfor?.skillSet?.map(id => skillSets?.find(skill => skill._id == id)?.name)}</div></div>
+									<div className='flex gap-2'><span className='font-700'>Service:</span><div>{registerData?.serviceInfor?.skillSet?.map(id => skillSets?.find(skill => skill._id == id)?.name)}</div></div>
 									<div><span className='font-700'>Years of Experience:</span> {registerData?.serviceInfor?.yearExp}</div>
 									<div className='mb-10'>
 										<div className='font-700'>Public profile:</div>

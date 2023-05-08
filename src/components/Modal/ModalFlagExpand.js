@@ -206,7 +206,7 @@ class ModalFlagExpand extends React.Component {
 				},
 			},
 			{
-				title: 'Skill', key: 'skillSet', filters: skillSet,
+				title: 'Service', key: 'skillSet', filters: skillSet,
 				onFilter: (value, record) => record.skillSet?._id == value,
 				render: (record) => record.skillSet?.name,
 			},

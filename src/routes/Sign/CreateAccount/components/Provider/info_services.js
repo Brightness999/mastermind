@@ -66,10 +66,10 @@ class InfoServices extends Component {
 					>
 						<Form.Item
 							name="skillSet"
-							label={intl.formatMessage(messages.skillsets)}
-							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
+							label={intl.formatMessage(messages.services)}
+							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.services) }]}
 						>
-							<Select mode="multiple" showArrow placeholder={intl.formatMessage(messages.skillsets)} onChange={skill => this.setValueToReduxRegisterData("skillSet", skill)}>
+							<Select mode="multiple" showArrow placeholder={intl.formatMessage(messages.services)} onChange={skill => this.setValueToReduxRegisterData("skillSet", skill)}>
 								{skillSets?.map((skill, index) => (
 									<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
 								))}

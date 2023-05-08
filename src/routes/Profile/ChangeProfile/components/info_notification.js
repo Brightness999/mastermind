@@ -1,7 +1,7 @@
 import React from 'react';
 import { Row, Col, Button, message, Card, Switch } from 'antd';
 import intl from 'react-intl-universal';
-import messages from '../messages';
+import messages from '../../../Sign/CreateAccount/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import request from '../../../../utils/api/request';

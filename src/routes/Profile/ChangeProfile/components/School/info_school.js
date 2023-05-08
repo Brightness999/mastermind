@@ -6,7 +6,7 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import messages from '../../messages';
+import messages from '../../../../Sign/CreateAccount/messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import { getCommunitiServer, getDefaultValueForProvider, getMySchoolInfo, getUserProfile } from '../../../../../utils/api/apiList'
 import { setInforSchool } from '../../../../../redux/features/authSlice';

@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { BsDashCircle, BsPlusCircle } from 'react-icons/bs';
 
-import messages from '../../messages';
+import messages from '../../../../Sign/CreateAccount/messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import { setInforProvider } from '../../../../../redux/features/authSlice';
 import { getDefaultValueForProvider, getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
@@ -97,11 +97,11 @@ class InfoServices extends Component {
 					>
 						<Form.Item
 							name="skillSet"
-							label={intl.formatMessage(messages.skillsets)}
+							label={intl.formatMessage(messages.services)}
 							className="float-label-item"
-							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
+							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
 						>
-							<Select mode="multiple" showArrow placeholder={intl.formatMessage(messages.skillsets)}>
+							<Select mode="multiple" showArrow placeholder={intl.formatMessage(messages.services)}>
 								{SkillSet?.map((skill, index) => (
 									<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
 								))}

@@ -5,7 +5,7 @@ import intl from 'react-intl-universal';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 
-import messages from '../../messages';
+import messages from '../../../../Sign/CreateAccount/messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import request from '../../../../../utils/api/request';
 import { getDefaultValuesForConsultant, getMyConsultantInfo, getUserProfile, updateConsultantInfo } from '../../../../../utils/api/apiList';
@@ -134,12 +134,12 @@ class InfoConsultant extends Component {
 						</Form.Item>
 						<Form.Item
 							name="skillSet"
-							label={intl.formatMessage(messages.skillsets)}
+							label={intl.formatMessage(messages.services)}
 							className="float-label-item"
-							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
+							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
 						>
 							<Select
-								placeholder={intl.formatMessage(messages.skillsets)}
+								placeholder={intl.formatMessage(messages.services)}
 								value={0}
 								disabled
 								className='consultant-skill'

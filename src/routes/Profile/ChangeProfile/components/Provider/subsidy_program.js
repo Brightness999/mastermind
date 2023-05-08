@@ -5,7 +5,7 @@ import intl from 'react-intl-universal';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 
-import messages from '../../messages';
+import messages from '../../../../Sign/CreateAccount/messages';
 import messagesLogin from '../../../../Sign/Login/messages';
 import { setInforProvider } from '../../../../../redux/features/authSlice';
 import request from '../../../../../utils/api/request';

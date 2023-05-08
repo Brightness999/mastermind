@@ -521,7 +521,7 @@ class DrawerDetail extends Component {
         </div>
         <div className='flex'>
           <div className='flex-1'>
-            <p className='font-16 mb-0 text-bold'>Skillset(s):</p>
+            <p className='font-16 mb-0 text-bold'>{intl.formatMessage(msgCreateAccount.services)}:</p>
             {event?.provider?.skillSet?.map((skill, index) => (
               <p key={index} className='font-16 mb-0'>{skill.name}</p>
             ))}
@@ -553,7 +553,7 @@ class DrawerDetail extends Component {
             <p className='font-16 mb-0'>{event?.dependent?.guardianEmail ?? ''}</p>
           </div>
           <div className='flex-1 font-16'>
-            <div className='text-bold'>Skillset</div>
+            <div className='text-bold'>{intl.formatMessage(msgCreateAccount.services)}</div>
             {event?.dependent?.services?.map((service, i) => (<div key={i}>{service.name}</div>))}
           </div>
         </div>

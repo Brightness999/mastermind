@@ -711,7 +711,7 @@ class SchedulingCenter extends React.Component {
                     <Checkbox.Group options={optionsEvent} value={selectedEventTypes} onChange={(v) => this.handleSelectEventType(v)} className="flex flex-col" />
                   </Col>
                   <Col xs={12} sm={12} md={8} className='skillset-checkbox'>
-                    <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.skillsets)}</p>
+                    <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.services)}</p>
                     <Checkbox.Group options={SkillSet.map(skill => skill.name)} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
                   </Col>
                   <Col xs={12} sm={12} md={6} className='select-small'>

@@ -7,7 +7,7 @@ import moment from 'moment';
 import { TbTrash } from 'react-icons/tb';
 import { BsPlusCircle } from 'react-icons/bs';
 
-import messages from '../../messages';
+import messages from '../../../../Sign/CreateAccount/messages';
 import msgLogin from '../../../../Sign/Login/messages';
 import msgCreateAccount from '../../../../Sign/CreateAccount/messages';
 import { setInforClientChild } from '../../../../../redux/features/authSlice';
@@ -280,14 +280,14 @@ class InfoChild extends Component {
 												<Col span={24}>
 													<Form.Item
 														name={[field.name, 'services']}
-														label={intl.formatMessage(messages.skillsets)}
+														label={intl.formatMessage(messages.services)}
 														className='add-services flex-1 float-label-item'
 														rules={[{ required: true }]}
 													>
 														<Select
 															mode="multiple"
 															showArrow
-															placeholder={intl.formatMessage(messages.skillsets)}
+															placeholder={intl.formatMessage(messages.servicesRequested)}
 															optionLabelProp="label"
 														>
 															{listServices?.map((service, index) => (

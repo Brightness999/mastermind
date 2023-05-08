@@ -107,11 +107,11 @@ class InfoConsultant extends Component {
             </Form.Item>
             <Form.Item
               name="skillSet"
-              label={intl.formatMessage(messages.skillsets)}
-              rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.skillsets) }]}
+              label={intl.formatMessage(messages.services)}
+              rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' your ' + intl.formatMessage(messages.services) }]}
             >
               <Select
-                placeholder={intl.formatMessage(messages.skillsets)}
+                placeholder={intl.formatMessage(messages.services)}
                 onChange={v => this.handelChange('skillSet', v)}
                 value={0}
                 disabled

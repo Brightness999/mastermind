@@ -592,15 +592,15 @@ class ModalNewAppointmentForParents extends React.Component {
 							<Col xs={24} sm={24} md={8} className='select-small'>
 								<Form.Item
 									name="skill"
-									label={intl.formatMessage(msgCreateAccount.skillsets)}
-									rules={[{ required: true, message: 'Please select a skill.' }]}
+									label={intl.formatMessage(msgCreateAccount.services)}
+									rules={[{ required: true, message: 'Please select a service.' }]}
 								>
 									<Select
 										showSearch
 										optionFilterProp="children"
 										filterOption={(input, option) => option.children?.includes(input)}
 										onChange={v => this.handleSelectSkill(v)}
-										placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
+										placeholder={intl.formatMessage(msgCreateAccount.services)}
 									>
 										{skillSet?.map((skill, index) => (
 											<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
@@ -694,7 +694,7 @@ class ModalNewAppointmentForParents extends React.Component {
 									</div>
 									<div className='flex mt-10'>
 										<div className='flex-1'>
-											<p className='text-bold'>Skillset(s):</p>
+											<p className='text-bold'>{intl.formatMessage(msgCreateAccount.services)}:</p>
 											{listProvider[selectedProviderIndex]?.skillSet?.map((skill, index) => (
 												<p key={index} className='font-12'>{skill.name}</p>
 											))}

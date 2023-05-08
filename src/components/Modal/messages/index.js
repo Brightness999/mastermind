@@ -433,10 +433,6 @@ export default {
     id: `${scope}.upload`,
     defaultMessage: 'Upload',
   },
-  skillsetRequested: {
-    id: `${scope}.skillsetRequested`,
-    defaultMessage: 'Skillset requested',
-  },
   requestRav: {
     id: `${scope}.requestRav`,
     defaultMessage: 'I request HMGH contact my Rav',

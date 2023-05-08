@@ -4,7 +4,8 @@ import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
 import moment from 'moment';
-import messages from '../../messages';
+
+import messages from '../../../../Sign/CreateAccount/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import request from '../../../../../utils/api/request';

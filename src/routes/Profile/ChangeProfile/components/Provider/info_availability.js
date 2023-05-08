@@ -9,7 +9,7 @@ import moment from 'moment';
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
 
-import messages from '../../messages';
+import messages from '../../../../Sign/CreateAccount/messages';
 import msgSidebar from '../../../../../components/SideBar/messages';
 import request from '../../../../../utils/api/request';
 import { getAllSchoolsForParent, getMyProviderInfo, getUserProfile, updateMyProviderAvailability } from '../../../../../utils/api/apiList';

@@ -412,11 +412,11 @@ class ModalReferralService extends React.Component {
 							<Col xs={24} sm={24} md={8} className='select-small'>
 								<Form.Item
 									name='selectedSkillSet'
-									label={intl.formatMessage(msgCreateAccount.skillsets)}
-									rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.skillsets).slice(0, -1) }]}
+									label={intl.formatMessage(msgCreateAccount.services)}
+									rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.services).slice(0, -1) }]}
 								>
 									<Select
-										placeholder={intl.formatMessage(msgCreateAccount.skillsets)}
+										placeholder={intl.formatMessage(msgCreateAccount.services)}
 										value={selectedSkillSet}
 										onChange={v => this.handleSelectSkillSet(v)}
 										disabled={!!subsidy}

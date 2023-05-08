@@ -155,7 +155,7 @@ class FlagList extends React.Component {
         render: (appointment) => `${appointment?.provider.firstName ?? ''} ${appointment?.provider.lastName ?? ''}`,
       },
       {
-        title: 'Skill', dataIndex: 'skillSet', key: 'skillSet', filters: skillSet,
+        title: 'Service', dataIndex: 'skillSet', key: 'skillSet', filters: skillSet,
         onFilter: (value, record) => record.skillSet?._id == value,
         render: skill => skill?.name,
       },

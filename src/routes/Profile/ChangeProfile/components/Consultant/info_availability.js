@@ -9,7 +9,7 @@ import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
 import moment from 'moment';
 
-import messages from '../../messages';
+import messages from '../../../../Sign/CreateAccount/messages';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
 import request from '../../../../../utils/api/request';
 import { getMyConsultantInfo, getUserProfile, updateConsultantAvailability } from '../../../../../utils/api/apiList';

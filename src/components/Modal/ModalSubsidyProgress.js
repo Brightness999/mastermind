@@ -326,7 +326,7 @@ class ModalSubsidyProgress extends React.Component {
 					<div className='count-2'>
 						<p className='font-12'>Dependent: <b>{student.firstName} {student.lastName}</b></p>
 						<p className='font-12'>School: {student.school.name}</p>
-						<p className='font-12'>Skillset: {subsidy?.skillSet?.name}</p>
+						<p className='font-12'>Service: {subsidy?.skillSet?.name}</p>
 						<p className='font-12'>Age: {moment().year() - moment(student.birthday).year()}</p>
 						<p className='font-12'>Grade: {student.currentGrade}</p>
 						<p className='font-12'>Teacher: {student.primaryTeacher}</p>
