@@ -11,6 +11,7 @@ import { FaFileDownload } from 'react-icons/fa';
 
 import messages from '../../../Dashboard/messages';
 import msgCreateAccount from '../../../Sign/CreateAccount/messages';
+import msgModal from '../../../../components/Modal/messages';
 
 const SchoolApproved = (props) => {
   const type = 'DraggableBodyRow';
@@ -246,7 +247,8 @@ const SchoolApproved = (props) => {
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => props.onShowModalSubsidy(subsidy?._id)}>Edit</a>
+          <a className='btn-blue' onClick={() => props.adminPreApproveSubsidy(subsidy?._id)}>{intl.formatMessage(msgModal.preapprove)}</a>
+          <a className='btn-blue' onClick={() => props.onShowModalDeclineExplanation(subsidy?._id)}>{intl.formatMessage(msgModal.decline)}</a>
         </Space>
       ),
       align: 'center',

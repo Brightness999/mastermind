@@ -162,6 +162,8 @@ const SubsidyManager = (props) => {
           setRequests={setRequests}
           onShowModalSubsidy={onShowModalSubsidy}
           handleReorder={handleReorder}
+          onShowModalDeclineExplanation={onShowModalDeclineExplanation}
+          adminPreApproveSubsidy={adminPreApproveSubsidy}
         />
       ),
     },
