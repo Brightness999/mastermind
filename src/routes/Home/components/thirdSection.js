@@ -19,7 +19,7 @@ const ThirdSection = () => {
           alignItems: "center",
           justifyContent: "center"
         }}>
-          <img src={Image3} width={377} height={471} loading="lazy" />
+          <img src={Image3} alt='child_with_smile' width={377} height={471} loading="lazy" />
         </Box>
       </Box>
       <Box display="flex" flexDirection="column" gap="20px">

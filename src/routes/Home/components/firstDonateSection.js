@@ -19,7 +19,7 @@ const FirstDonateSection = () => {
         <Header text="Your donation will help a child succeed" />
         <SubHeader text="Sponsor tutoring, speech, or occupational therapy for a child in need." style={{ paddingRight: "40px" }} />
       </Box>
-      <img src={Image5} style={{
+      <img src={Image5} alt='child_with_tablet' style={{
         width: "501px",
         height: "418px"
       }} />

@@ -9,7 +9,7 @@ const FourthSection = () => {
   return (
     <Grid item xs={12} padding="50px" width="75%" minWidth="1000px" maxWidth="1440px !important" margin="auto">
       <Box display="flex" pl="80px" pr="80px">
-        <img src={Image4} width={387} height={553} loading="lazy" />
+        <img src={Image4} alt='child_with_swing' width={387} height={553} loading="lazy" />
         <Box style={{
           backgroundColor: "#8445C0",
           display: "flex",

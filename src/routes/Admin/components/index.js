@@ -998,7 +998,7 @@ class SchedulingCenter extends React.Component {
             </Collapse>
           </section>
         </div>
-        <img src='../images/call.png' className='btn-call' width="6%" onClick={this.onShowModalReferral} />
+        <img src='../images/call.png' alt='hand-up-call' className='btn-call' width="6%" onClick={this.onShowModalReferral} />
         {userDrawerVisible && <DrawerDetail {...drawerDetailProps} />}
         {visibleNewAppoint && <ModalNewAppointment {...modalNewAppointProps} />}
         {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}

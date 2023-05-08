@@ -307,7 +307,7 @@ class ModalCurrentReferralService extends React.Component {
 				<div className='new-appointment'>
 					<div className='flex mt-10'>
 						<p className='font-30'>{intl.formatMessage(messages.referralService)}</p>
-						<img src='../images/hands.png' className='hands-img' />
+						<img src='../images/hands.png' alt='hands-up' className='hands-img' />
 					</div>
 					<Form
 						name='consultation-form'

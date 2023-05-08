@@ -25,7 +25,7 @@ const SecondSection = () => {
           alignItems: "center",
           justifyContent: "center"
         }}>
-          <img src={Image2} width={377} height={471} loading="lazy" />
+          <img src={Image2} alt='child_with_book' width={377} height={471} loading="lazy" />
         </Box>
       </Box>
     </Grid>

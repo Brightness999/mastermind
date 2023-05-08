@@ -19,7 +19,7 @@ const FirstSection = () => {
           <Typography>Donate your services</Typography>
         </Box>
       </Box>
-      <img src={Image1} width={478} height={572} loading="lazy" />
+      <img src={Image1} alt='child_with_bag' width={478} height={572} loading="lazy" />
     </Grid>
 
   )
