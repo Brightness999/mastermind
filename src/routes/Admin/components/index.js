@@ -566,7 +566,7 @@ class SchedulingCenter extends React.Component {
     const btnFilter = (
       <div className='header-left flex flex-row' onClick={this.onShowFilter}>
         {userRole != 100 && (
-          <p className='font-15'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
+          <p className='font-15 inline-flex items-center'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
         )}
       </div>
     );
