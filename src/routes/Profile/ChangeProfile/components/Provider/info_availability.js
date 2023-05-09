@@ -334,15 +334,20 @@ class InfoAvailability extends Component {
 		if (state) {
 			this.setState({ isSchools: state });
 		} else {
-			message.warning('All availability for those school will also be deleted.').then(() => {
-				day_week.forEach(day => {
-					this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a.location == 'Provider Office' || a.location == 'Dependent Home'));
-				})
-			});
-			this.setState({
-				isSchools: state,
-				locations: this.state.locations?.filter(location => location == 'Provider Office' || location == 'Dependent Home'),
-			});
+			const { locations } = this.state;
+			const selectedSchools = locations?.filter(location => location !== 'Provider Office' && location !== 'Dependent Home');
+
+			if (selectedSchools?.length) {
+				message.warning('All availability for those school will also be deleted.').then(() => {
+					day_week.forEach(day => {
+						this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a.location == 'Provider Office' || a.location == 'Dependent Home'));
+					})
+				});
+				this.setState({
+					locations: this.state.locations?.filter(location => location == 'Provider Office' || location == 'Dependent Home'),
+				});
+			}
+			this.setState({ isSchools: state });
 		}
 	}
 
