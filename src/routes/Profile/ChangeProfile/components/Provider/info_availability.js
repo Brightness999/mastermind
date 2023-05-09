@@ -64,7 +64,7 @@ class InfoAvailability extends Component {
 					await this.updateBlackoutDates(data?.providerInfo?.blackoutDates?.map(date => new Date(date)));
 					document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
 						let name = document.createElement("div");
-						name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
+						name.textContent = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary ?? '';
 						el.after(name);
 					})
 
@@ -110,7 +110,7 @@ class InfoAvailability extends Component {
 					await this.updateBlackoutDates(data?.blackoutDates?.map(date => new Date(date)));
 					document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
 						let name = document.createElement("div");
-						name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
+						name.textContent = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary ?? '';
 						el.after(name);
 					})
 
@@ -219,41 +219,49 @@ class InfoAvailability extends Component {
 		values.manualSchedule = manualSchedule.flat();
 		values.blackoutDates = values.blackoutDates?.map(date => date.toString());
 
-		const invalidDay = Object.values(values?.manualSchedule)?.find(v => moment().set({ years: v?.fromYear, months: v?.fromMonth, dates: v?.fromDate })?.isAfter(moment().set({ years: v?.toYear, months: v?.toMonth, dates: v?.toDate })) || moment().set({ hours: v?.openHour, minutes: v?.openMin })?.isAfter(moment().set({ hours: v?.closeHour, minutes: v?.closeMin })));
-		if (invalidDay) {
-			message.error(`The selected date or time is not valid on ${day_week[invalidDay.dayInWeek]}`);
+		const invalidDateDay = Object.values(values?.manualSchedule)?.findIndex(v => moment().set({ years: v?.fromYear, months: v?.fromMonth, dates: v?.fromDate })?.isAfter(moment().set({ years: v?.toYear, months: v?.toMonth, dates: v?.toDate })));
+		const invalidTimeDay = Object.values(values?.manualSchedule)?.findIndex(v => moment().set({ hours: v?.openHour, minutes: v?.openMin })?.isAfter(moment().set({ hours: v?.closeHour, minutes: v?.closeMin })));
+
+		if (invalidDateDay > -1) {
+			message.error(`The selected date is not valid on ${day_week[invalidDateDay]}`);
+			return;
+		}
+
+		if (invalidTimeDay > -1) {
+			message.error(`The selected time is not valid on ${day_week[invalidTimeDay]}`);
+			return;
+		}
+
+		if (window.location.pathname?.includes('changeuserprofile')) {
+			request.post(updateMyProviderAvailability, { ...values, isJewishHolidays, isLegalHolidays, _id: this.props.auth.selectedUser?.providerInfo?._id }).then(result => {
+				const { success } = result;
+				if (success) {
+					message.success('Updated successfully');
+				}
+			}).catch(err => {
+				message.error("Can't update availability");
+				console.log('update provider availability error---', err);
+			})
 		} else {
-			if (window.location.pathname?.includes('changeuserprofile')) {
-				request.post(updateMyProviderAvailability, { ...values, isJewishHolidays, isLegalHolidays, _id: this.props.auth.selectedUser?.providerInfo?._id }).then(result => {
-					const { success } = result;
-					if (success) {
-						message.success('Updated successfully');
-					}
-				}).catch(err => {
-					message.error("Can't update availability");
-					console.log('update provider availability error---', err);
-				})
-			} else {
-				request.post(updateMyProviderAvailability, { ...values, isJewishHolidays, isLegalHolidays, _id: this.props.auth.user.providerInfo?._id }).then(result => {
-					const { success } = result;
-					if (success) {
-						message.success('Updated successfully');
-						let newUser = {
-							...this.props.auth.user,
-							providerInfo: {
-								...this.props.auth.user.providerInfo,
-								isHomeVisit: values.isHomeVisit,
-								privateOffice: values.privateOffice,
-								serviceableSchool: listSchool?.filter(school => values.serviceableSchool?.find(id => id == school._id)),
-							}
+			request.post(updateMyProviderAvailability, { ...values, isJewishHolidays, isLegalHolidays, _id: this.props.auth.user.providerInfo?._id }).then(result => {
+				const { success } = result;
+				if (success) {
+					message.success('Updated successfully');
+					let newUser = {
+						...this.props.auth.user,
+						providerInfo: {
+							...this.props.auth.user.providerInfo,
+							isHomeVisit: values.isHomeVisit,
+							privateOffice: values.privateOffice,
+							serviceableSchool: listSchool?.filter(school => values.serviceableSchool?.find(id => id == school._id)),
 						}
-						this.props.dispatch(setUser(newUser));
 					}
-				}).catch(err => {
-					message.error("Can't update availability");
-					console.log('update provider availability error---', err);
-				})
-			}
+					this.props.dispatch(setUser(newUser));
+				}
+			}).catch(err => {
+				message.error("Can't update availability");
+				console.log('update provider availability error---', err);
+			})
 		}
 	};
 
@@ -451,7 +459,7 @@ class InfoAvailability extends Component {
 		}
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = holidays?.find(a => a?.start?.date == el.innerText)?.summary;
+			const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
@@ -499,7 +507,7 @@ class InfoAvailability extends Component {
 		}
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = holidays?.find(a => a?.start?.date == el.innerText)?.summary;
+			const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;

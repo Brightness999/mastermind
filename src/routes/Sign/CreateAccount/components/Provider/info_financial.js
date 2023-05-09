@@ -133,6 +133,18 @@ class InfoFinancial extends Component {
 		this.setState({ academicLevels: levelOptions });
 	}
 
+	handleDeselectLevel = () => {
+		const { academicLevels } = this.props.auth.generalData;
+		const arr = this.form?.getFieldValue('academicLevel');
+		const selectedLevels = arr?.map(item => item.level);
+
+		const levelOptions = [
+			{ label: 'By Level', options: academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+			{ label: 'By Grade', options: academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+		];
+		this.setState({ academicLevels: levelOptions });
+	}
+
 	render() {
 		const { sameRateForAllLevel, billingAddress, academicLevels } = this.state;
 		const { registerData } = this.props.register;
@@ -243,14 +255,7 @@ class InfoFinancial extends Component {
 													<Form.Item
 														name={[field.name, "rate"]}
 														label={'Standard ' + intl.formatMessage(messages.rate)}
-														rules={[{
-															required: true,
-															message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
-															validator: (_, value) => {
-																if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
-																return Promise.resolve();
-															},
-														}]}
+														rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
 														className='bottom-0'
 														style={{ marginTop: 14 }}
 													>
@@ -259,6 +264,7 @@ class InfoFinancial extends Component {
 															type='number'
 															prefix="$"
 															min={0}
+															onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()}
 															onChange={(event => {
 																const value = event.target.value;
 																let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));
@@ -275,7 +281,7 @@ class InfoFinancial extends Component {
 															})}
 														/>
 													</Form.Item>
-													<BsDashCircle size={16} className='text-red icon-remove' onClick={() => remove(field.name)} />
+													<BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleDeselectLevel(); }} />
 												</Col>
 											</Row>
 										);
@@ -285,7 +291,7 @@ class InfoFinancial extends Component {
 											type="text"
 											className='add-level-btn'
 											icon={<BsPlusCircle size={17} className='mr-5' />}
-											onClick={() => add(null)}
+											onClick={() => add({ level: undefined, rate: undefined })}
 										>
 											{intl.formatMessage(messages.addLevel)}
 										</Button>
@@ -309,19 +315,13 @@ class InfoFinancial extends Component {
 									<Form.Item
 										name="separateEvaluationRate"
 										label={'Evaluation ' + intl.formatMessage(messages.rate)}
-										rules={[{
-											required: registerData?.scheduling?.isNewClientEvaluation,
-											message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
-											validator: (_, value) => {
-												if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
-												return Promise.resolve();
-											},
-										}]}
+										rules={[{ required: registerData?.scheduling?.isNewClientEvaluation, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
 									>
 										<Input
 											type='number'
 											prefix="$"
 											min={0}
+											onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()}
 											onChange={(e) => this.setValueToReduxRegisterData('separateEvaluationRate', e.target.value)}
 											placeholder={intl.formatMessage(messages.rate)}
 										/>
@@ -332,20 +332,14 @@ class InfoFinancial extends Component {
 								<Form.Item
 									name="cancellationFee"
 									label={intl.formatMessage(messages.cancellationFee)}
-									rules={[{
-										required: true,
-										message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee),
-										validator: (_, value) => {
-											if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
-											return Promise.resolve();
-										},
-									}]}
+									rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
 									className='w-100'
 								>
 									<Input
 										type='number'
 										prefix="$"
 										min={0}
+										onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()}
 										onChange={(e) => this.setValueToReduxRegisterData('cancellationFee', e.target.value)}
 										placeholder={intl.formatMessage(messages.cancellationFee)}
 									/>

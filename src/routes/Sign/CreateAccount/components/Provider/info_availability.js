@@ -53,7 +53,7 @@ class InfoAvailability extends Component {
 			await this.updateBlackoutDates(registerData?.availability?.blackoutDates?.map(date => new Date(date)));
 			document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
 				let name = document.createElement("div");
-				name.textContent = holidays?.find(a => a?.start?.date == el.innerText)?.summary ?? '';
+				name.textContent = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary ?? '';
 				el.after(name);
 			})
 
@@ -83,14 +83,22 @@ class InfoAvailability extends Component {
 	}
 
 	onFinish = (values) => {
-		const invalidDayInWeek = Object.values(values).findIndex(times => times?.find(v => (v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)) || (v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time))));
-		if (invalidDayInWeek < 0) {
-			const { isHomeVisit, isSchools, isPrivateOffice, isLegalHolidays, isJewishHolidays } = this.state;
-			this.props.setRegisterData({ availability: { ...values, isHomeVisit, isSchools, isPrivateOffice, isLegalHolidays, isJewishHolidays } });
-			this.props.onContinue();
-		} else {
-			message.error(`The selected date or time is not valid on ${day_week[invalidDayInWeek]}`);
+		const invalidTimeDay = Object.values(values).findIndex(times => times?.find(v => v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time)));
+		const invalidDateDay = Object.values(values).findIndex(times => times?.find(v => v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)));
+
+		if (invalidDateDay > -1) {
+			message.error(`The selected date is not valid on ${day_week[invalidDateDay]}`);
+			return;
 		}
+
+		if (invalidTimeDay > -1) {
+			message.error(`The selected time is not valid on ${day_week[invalidTimeDay]}`);
+			return;
+		}
+
+		const { isHomeVisit, isSchools, isPrivateOffice, isLegalHolidays, isJewishHolidays } = this.state;
+		this.props.setRegisterData({ availability: { ...values, isHomeVisit, isSchools, isPrivateOffice, isLegalHolidays, isJewishHolidays } });
+		this.props.onContinue();
 	};
 
 	onFinishFailed = (errorInfo) => {
@@ -352,7 +360,7 @@ class InfoAvailability extends Component {
 		}
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = holidays?.find(a => a.start.date == el.innerText)?.summary;
+			const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
@@ -401,7 +409,7 @@ class InfoAvailability extends Component {
 		}
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = holidays?.find(a => a.start.date == el.innerText)?.summary;
+			const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;

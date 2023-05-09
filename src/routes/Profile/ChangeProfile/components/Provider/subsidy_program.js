@@ -177,20 +177,14 @@ class SubsidyProgram extends Component {
 													<Form.Item
 														name={[field.name, "subsidizedRate"]}
 														label={'Subsidized' + intl.formatMessage(messages.rate)}
-														rules={[{
-															required: isAcceptReduceRate,
-															message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced),
-															validator: (_, value) => {
-																if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
-																return Promise.resolve();
-															},
-														}]}
+														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced) }]}
 													>
 														<Input
 															type="number"
+															min={0}
 															prefix="$"
 															className='h-40'
-															min={0}
+															onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()}
 															onChange={e => {
 																if (isSameRate) {
 																	let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));

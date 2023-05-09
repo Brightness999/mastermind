@@ -28,7 +28,7 @@ class InfoScheduling extends Component {
 				isNewClientScreening: registerData.scheduling.isNewClientScreening,
 			});
 		} else {
-			this.form?.setFieldsValue({ chidren: [this.getDefaultObj()] });
+			this.form?.setFieldsValue(this.getDefaultObj());
 			this.props.setRegisterData({ scheduling: this.getDefaultObj() });
 		}
 	}

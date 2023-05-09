@@ -245,14 +245,7 @@ class InfoFinancial extends Component {
 													<Form.Item
 														name={[field.name, "rate"]}
 														label={intl.formatMessage(messages.rate)}
-														rules={[{
-															required: true,
-															message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
-															validator: (_, value) => {
-																if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
-																return Promise.resolve();
-															},
-														}]}
+														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
 														className='bottom-0 float-label-item'
 														style={{ marginTop: 14 }}
 													>
@@ -261,6 +254,7 @@ class InfoFinancial extends Component {
 															type="number"
 															min={0}
 															prefix="$"
+															onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()}
 															onChange={(event => {
 																const value = event.target.value;
 																let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));
@@ -280,8 +274,8 @@ class InfoFinancial extends Component {
 														remove(field.name);
 														const selectedLevels = this.form?.getFieldValue('academicLevel');
 														const levelOptions = [
-															{ label: 'By Level', options: this.props.auth.academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
-															{ label: 'By Grade', options: this.props.auth.academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l == level))?.map(a => ({ label: a, value: a })) ?? [] },
+															{ label: 'By Level', options: this.props.auth.academicLevels.slice(0, 6)?.filter(level => !selectedLevels?.find(l => l?.level === level))?.map(a => ({ label: a, value: a })) ?? [] },
+															{ label: 'By Grade', options: this.props.auth.academicLevels.slice(6)?.filter(level => !selectedLevels?.find(l => l?.level === level))?.map(a => ({ label: a, value: a })) ?? [] },
 														];
 														this.setState({ academicLevels: levelOptions });
 													}} />
@@ -294,7 +288,7 @@ class InfoFinancial extends Component {
 											type="text"
 											className='add-level-btn'
 											icon={<BsPlusCircle size={17} className='mr-5' />}
-											onClick={() => add(null)}
+											onClick={() => add({ level: undefined, rate: undefined })}
 										>
 											{intl.formatMessage(messages.addLevel)}
 										</Button>
@@ -315,33 +309,19 @@ class InfoFinancial extends Component {
 									name="separateEvaluationRate"
 									label={'Evaluation ' + intl.formatMessage(messages.rate)}
 									className="float-label-item"
-									rules={[{
-										required: user?.isSeparateEvaluationRate,
-										message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate),
-										validator: (_, value) => {
-											if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
-											return Promise.resolve();
-										},
-									}]}
+									rules={[{ required: user?.isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
 								>
-									<Input type='number' prefix="$" min={0} placeholder={intl.formatMessage(messages.rate)} />
+									<Input type='number' min={0} prefix="$" placeholder={intl.formatMessage(messages.rate)} onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()} />
 								</Form.Item>
 							</Col>
 							<Col xs={24} sm={24} md={12}>
 								<Form.Item
 									name="cancellationFee"
 									label={intl.formatMessage(messages.cancellationFee)}
-									rules={[{
-										required: true,
-										message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee),
-										validator: (_, value) => {
-											if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
-											return Promise.resolve();
-										},
-									}]}
+									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
 									className='w-100 float-label-item'
 								>
-									<Input type='number' prefix="$" min={0} placeholder={intl.formatMessage(messages.cancellationFee)} />
+									<Input type='number' min={0} prefix="$" placeholder={intl.formatMessage(messages.cancellationFee)} onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()} />
 								</Form.Item>
 							</Col>
 						</Row>

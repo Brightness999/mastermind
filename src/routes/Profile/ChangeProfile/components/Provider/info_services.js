@@ -101,7 +101,7 @@ class InfoServices extends Component {
 							className="float-label-item"
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
 						>
-							<Select mode="multiple" showArrow placeholder={intl.formatMessage(messages.services)}>
+							<Select mode="multiple" showArrow placeholder={intl.formatMessage(messages.services)} filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
 								{SkillSet?.map((skill, index) => (
 									<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
 								))}
@@ -113,16 +113,9 @@ class InfoServices extends Component {
 									name="yearExp"
 									label={intl.formatMessage(messages.yearsExperience)}
 									className="float-label-item"
-									rules={[{
-										required: true,
-										message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.yearsExperience),
-										validator: (_, value) => {
-											if (_.required && (value < 0 || value == '' || value == undefined)) return Promise.reject('Must be value greater than 0');
-											return Promise.resolve();
-										},
-									}]}
+									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.yearsExperience) }]}
 								>
-									<Input type='number' min={0} placeholder={intl.formatMessage(messages.yearsExperience)} />
+									<Input type='number' min={0} placeholder={intl.formatMessage(messages.yearsExperience)} onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()} />
 								</Form.Item>
 							</Col>
 						</Row>
