@@ -7,6 +7,7 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
+import moment from 'moment';
 
 import messages from '../../messages';
 import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
@@ -50,7 +51,7 @@ class ConsultantAvailability extends Component {
       await this.updateBlackoutDates(registerData?.step2?.blackoutDates?.map(date => new Date(date)));
       document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
         let name = document.createElement("div");
-        name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
+        name.textContent = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary ?? '';
         el.after(name);
       })
 
@@ -74,53 +75,61 @@ class ConsultantAvailability extends Component {
     const { registerData } = this.props.register;
     const { isLegalHolidays, isJewishHolidays } = this.state;
     let manualSchedule = [];
-    const invalidDayInWeek = Object.values(values).findIndex(times => times?.find(v => (v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)) || (v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time))));
-    if (invalidDayInWeek < 0) {
-      for (let i = 0; i < day_week.length; i++) {
-        for (let j = 0; j < values['' + day_week[i]].length; j++) {
-          let scheduleItem = values['' + day_week[i]][j];
-          if (scheduleItem.from_time && scheduleItem.to_time) {
-            manualSchedule.push({
-              "dayInWeek": i,
-              "fromYear": scheduleItem.from_date.year() ?? 1,
-              "fromMonth": scheduleItem.from_date.month() ?? 0,
-              "fromDate": scheduleItem.from_date.date() ?? 1,
-              "toYear": scheduleItem.to_date.year() ?? 10000,
-              "toMonth": scheduleItem.to_date.month() ?? 0,
-              "toDate": scheduleItem.to_date.date() ?? 0,
-              "openHour": scheduleItem.from_time.hour() ?? 0,
-              "openMin": scheduleItem.from_time.minutes() ?? 0,
-              "closeHour": scheduleItem.to_time.hour() ?? 0,
-              "closeMin": scheduleItem.to_time.minutes() ?? 0,
-            })
-          }
+    const invalidTimeDay = Object.values(values).findIndex(times => times?.find(v => v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time)));
+    const invalidDateDay = Object.values(values).findIndex(times => times?.find(v => v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)));
+
+    if (invalidDateDay > -1) {
+      message.error(`The selected date is not valid on ${day_week[invalidDateDay]}`);
+      return;
+    }
+
+    if (invalidTimeDay > -1) {
+      message.error(`The selected time is not valid on ${day_week[invalidTimeDay]}`);
+      return;
+    }
+
+    for (let i = 0; i < day_week.length; i++) {
+      for (let j = 0; j < values['' + day_week[i]].length; j++) {
+        let scheduleItem = values['' + day_week[i]][j];
+        if (scheduleItem.from_time && scheduleItem.to_time) {
+          manualSchedule.push({
+            "dayInWeek": i,
+            "fromYear": scheduleItem.from_date.year() ?? 1,
+            "fromMonth": scheduleItem.from_date.month() ?? 0,
+            "fromDate": scheduleItem.from_date.date() ?? 1,
+            "toYear": scheduleItem.to_date.year() ?? 10000,
+            "toMonth": scheduleItem.to_date.month() ?? 0,
+            "toDate": scheduleItem.to_date.date() ?? 0,
+            "openHour": scheduleItem.from_time.hour() ?? 0,
+            "openMin": scheduleItem.from_time.minutes() ?? 0,
+            "closeHour": scheduleItem.to_time.hour() ?? 0,
+            "closeMin": scheduleItem.to_time.minutes() ?? 0,
+          })
         }
       }
-      const newRegisterData = {
-        email: registerData.email,
-        password: registerData.password,
-        role: registerData.role,
-        username: registerData.username,
-        manualSchedule: manualSchedule,
-        isLegalHolidays,
-        isJewishHolidays,
-        blackoutDates: values?.blackoutDates?.map(d => d.toString()),
-        ...registerData.consultantInfo
-      }
+    }
+    const newRegisterData = {
+      email: registerData.email,
+      password: registerData.password,
+      role: registerData.role,
+      username: registerData.username,
+      manualSchedule: manualSchedule,
+      isLegalHolidays,
+      isJewishHolidays,
+      blackoutDates: values?.blackoutDates?.map(d => d.toString()),
+      ...registerData.consultantInfo
+    }
 
-      // post to server
-      this.setState({ isSubmit: true });
-      const response = await request.post(userSignUp, newRegisterData);
-      this.setState({ isSubmit: false });
-      const { success } = response;
-      if (success) {
-        this.props.removeRegisterData();
-        this.props.onContinue(true);
-      } else {
-        message.error(error?.response?.data?.data ?? error.message);
-      }
+    // post to server
+    this.setState({ isSubmit: true });
+    const response = await request.post(userSignUp, newRegisterData);
+    this.setState({ isSubmit: false });
+    const { success } = response;
+    if (success) {
+      this.props.removeRegisterData();
+      this.props.onContinue(true);
     } else {
-      message.error(`The selected date or time is not valid on ${day_week[invalidDayInWeek]}`);
+      message.error(error?.response?.data?.data ?? error.message);
     }
   };
 
@@ -217,7 +226,7 @@ class ConsultantAvailability extends Component {
     }
 
     document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-      const name = holidays?.find(a => a.start.date == el.innerText)?.summary;
+      const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
       if (name) {
         if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
           el.nextElementSibling.innerText = name;
@@ -266,7 +275,7 @@ class ConsultantAvailability extends Component {
     }
 
     document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-      const name = holidays?.find(a => a.start.date == el.innerText)?.summary;
+      const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
       if (name) {
         if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
           el.nextElementSibling.innerText = name;

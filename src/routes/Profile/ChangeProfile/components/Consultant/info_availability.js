@@ -49,7 +49,7 @@ class ConsultantAvailability extends Component {
 					await this.updateBlackoutDates(data?.consultantInfo?.blackoutDates?.map(date => new Date(date)));
 					document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
 						let name = document.createElement("div");
-						name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
+						name.textContent = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary ?? '';
 						el.after(name);
 					})
 
@@ -81,7 +81,7 @@ class ConsultantAvailability extends Component {
 					await this.updateBlackoutDates(data?.blackoutDates?.map(date => new Date(date)));
 					document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
 						let name = document.createElement("div");
-						name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
+						name.textContent = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary ?? '';
 						el.after(name);
 					})
 
@@ -143,48 +143,56 @@ class ConsultantAvailability extends Component {
 	onFinish = (values) => {
 		let manualSchedule = [];
 		const { isLegalHolidays, isJewishHolidays } = this.state
-		const invalidDayInWeek = Object.values(values).findIndex(times => times?.find(v => (v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)) || (v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time))));
-		if (invalidDayInWeek < 0) {
-			day_week.map(day => {
-				values[day]?.forEach(t => {
-					if (t.from_time && t.to_time) {
-						const times = {
-							fromYear: t.from_date?.year() ?? 1,
-							fromMonth: t.from_date?.month() ?? 0,
-							fromDate: t.from_date?.date() ?? 1,
-							toYear: t.to_date?.year() ?? 10000,
-							toMonth: t.to_date?.month() ?? 0,
-							toDate: t.to_date?.date() ?? 0,
-							openHour: t.from_time?.hours() ?? 0,
-							openMin: t.from_time?.minutes() ?? 0,
-							closeHour: t.to_time?.hours() ?? 0,
-							closeMin: t.to_time?.minutes() ?? 0,
-							dayInWeek: this.getDayOfWeekIndex(day),
-						}
-						manualSchedule.push(times);
-					}
-				})
-			});
-			values.manualSchedule = manualSchedule.flat();
-			values.blackoutDates = values.blackoutDates?.map(date => date.toString());
+		const invalidTimeDay = Object.values(values).findIndex(times => times?.find(v => v?.from_time && v?.to_time && v?.from_time?.isAfter(v.to_time)));
+		const invalidDateDay = Object.values(values).findIndex(times => times?.find(v => v?.from_date && v?.to_date && v?.from_date?.isAfter(v.to_date)));
 
-			const params = {
-				...values,
-				isLegalHolidays,
-				isJewishHolidays,
-				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.consultantInfo?._id : this.props.auth.user?.consultantInfo
-			};
-
-			request.post(updateConsultantAvailability, params).then(res => {
-				if (res.success) {
-					message.success('Updated successfully');
-				}
-			}).catch(err => {
-				message.error(err.message);
-			})
-		} else {
-			message.error(`The selected date or time is not valid on ${day_week[invalidDayInWeek]}`);
+		if (invalidDateDay > -1) {
+			message.error(`The selected date is not valid on ${day_week[invalidDateDay]}`);
+			return;
 		}
+
+		if (invalidTimeDay > -1) {
+			message.error(`The selected time is not valid on ${day_week[invalidTimeDay]}`);
+			return;
+		}
+
+		day_week.map(day => {
+			values[day]?.forEach(t => {
+				if (t.from_time && t.to_time) {
+					const times = {
+						fromYear: t.from_date?.year() ?? 1,
+						fromMonth: t.from_date?.month() ?? 0,
+						fromDate: t.from_date?.date() ?? 1,
+						toYear: t.to_date?.year() ?? 10000,
+						toMonth: t.to_date?.month() ?? 0,
+						toDate: t.to_date?.date() ?? 0,
+						openHour: t.from_time?.hours() ?? 0,
+						openMin: t.from_time?.minutes() ?? 0,
+						closeHour: t.to_time?.hours() ?? 0,
+						closeMin: t.to_time?.minutes() ?? 0,
+						dayInWeek: this.getDayOfWeekIndex(day),
+					}
+					manualSchedule.push(times);
+				}
+			})
+		});
+		values.manualSchedule = manualSchedule.flat();
+		values.blackoutDates = values.blackoutDates?.map(date => date.toString());
+
+		const params = {
+			...values,
+			isLegalHolidays,
+			isJewishHolidays,
+			_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.consultantInfo?._id : this.props.auth.user?.consultantInfo
+		};
+
+		request.post(updateConsultantAvailability, params).then(res => {
+			if (res.success) {
+				message.success('Updated successfully');
+			}
+		}).catch(err => {
+			message.error(err.message);
+		})
 	};
 
 	onFinishFailed = (errorInfo) => {
@@ -252,7 +260,7 @@ class ConsultantAvailability extends Component {
 		}
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = holidays?.find(a => a?.start?.date == el.innerText)?.summary;
+			const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
@@ -300,7 +308,7 @@ class ConsultantAvailability extends Component {
 		}
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = holidays?.find(a => a.start.date == el.innerText)?.summary;
+			const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
