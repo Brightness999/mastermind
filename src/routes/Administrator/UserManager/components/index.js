@@ -75,7 +75,7 @@ class UserManager extends React.Component {
 	handleActivate = (id, state) => {
 		this.setState({
 			isConfirmModal: true,
-			confirmMessage: `Are you sure you want to ${state ? 'activate' : 'deactivate'} this user?`,
+			confirmMessage: <span>Are you sure you want to <span className='text-bold'>{state ? 'activate' : 'deactivate'}</span> this user?</span>,
 			userId: id,
 			userState: state,
 		});

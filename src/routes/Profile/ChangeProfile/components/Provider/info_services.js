@@ -101,7 +101,7 @@ class InfoServices extends Component {
 							className="float-label-item"
 							rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
 						>
-							<Select mode="multiple" showArrow placeholder={intl.formatMessage(messages.services)} filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+							<Select mode="multiple" showArrow allowClear={true} placeholder={intl.formatMessage(messages.services)} filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
 								{SkillSet?.map((skill, index) => (
 									<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
 								))}

@@ -97,13 +97,11 @@ class InfoAvailability extends Component {
 			}).catch(err => {
 				this.setState({ loading: false });
 				message.error("Getting Profile: " + err.message);
-				console.log(err);
 			})
 		} else {
 			request.post(getMyProviderInfo).then(async result => {
 				this.setState({ loading: false });
 				const { success, data } = result;
-				const { user } = this.props.auth;
 				if (success) {
 					this.form?.setFieldsValue(data);
 
@@ -125,19 +123,19 @@ class InfoAvailability extends Component {
 						}));
 					});
 					let locations = [];
-					user?.providerInfo?.isHomeVisit && locations.push('Dependent Home');
-					user?.providerInfo?.privateOffice && locations.push('Provider Office');
-					user?.providerInfo?.serviceableSchool?.length && user?.providerInfo?.serviceableSchool?.forEach(school => locations.push(school.name));
+					data?.isHomeVisit && locations.push('Dependent Home');
+					data?.privateOffice && locations.push('Provider Office');
+					data?.serviceableSchool?.length && data?.serviceableSchool?.forEach(school => locations.push(school.name));
 
 					this.setState({
-						isHomeVisit: user?.providerInfo?.isHomeVisit,
-						isPrivateOffice: user?.providerInfo?.privateOffice,
-						isSchools: !!user?.providerInfo?.serviceableSchool?.length,
-						isPrivateForHmgh: user?.providerInfo?.isPrivateForHmgh,
+						isHomeVisit: data?.isHomeVisit,
+						isPrivateOffice: data?.privateOffice,
+						isSchools: !!data?.serviceableSchool?.length,
+						isPrivateForHmgh: data?.isPrivateForHmgh,
 						locations: locations,
-						isWillingOpenPrivate: user?.providerInfo?.isWillingOpenPrivate,
-						isLegalHolidays: user?.providerInfo?.isLegalHolidays,
-						isJewishHolidays: user?.providerInfo?.isJewishHolidays,
+						isWillingOpenPrivate: data?.isWillingOpenPrivate,
+						isLegalHolidays: data?.isLegalHolidays,
+						isJewishHolidays: data?.isJewishHolidays,
 					})
 				}
 			}).catch(err => {
@@ -254,6 +252,7 @@ class InfoAvailability extends Component {
 							isHomeVisit: values.isHomeVisit,
 							privateOffice: values.privateOffice,
 							serviceableSchool: listSchool?.filter(school => values.serviceableSchool?.find(id => id == school._id)),
+							isJewishHolidays, isLegalHolidays,
 						}
 					}
 					this.props.dispatch(setUser(newUser));
