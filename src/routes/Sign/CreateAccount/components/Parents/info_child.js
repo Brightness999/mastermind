@@ -259,6 +259,8 @@ class InfoChild extends Component {
 															placeholder={intl.formatMessage(messages.servicesRequired)}
 															optionLabelProp="label"
 															onChange={v => this.updateReduxValueForDepedent(index, "services", v)}
+															filterOption={(input, option) => option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+															allowClear={true}
 														>
 															{skillSets?.map((service, index) => (
 																<Select.Option key={index} label={service.name} value={service._id}>{service.name}</Select.Option>

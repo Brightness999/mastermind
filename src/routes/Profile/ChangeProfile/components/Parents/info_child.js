@@ -107,10 +107,9 @@ class InfoChild extends Component {
 				id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?._id : this.props.auth.user?._id,
 				studentInfos: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.studentInfos : this.props.auth.user?.studentInfos,
 			};
-			console.log(params)
 
-			// const result = await this.props.dispatch(setInforClientChild(params));
-			// this.form?.setFieldsValue({ children: result.payload.data?.map(item => ({ ...item, birthday: moment(item.birthday) })) });
+			const result = await this.props.dispatch(setInforClientChild(params));
+			this.form?.setFieldsValue({ children: result.payload.data?.map(item => ({ ...item, birthday: moment(item.birthday) })) });
 		} catch (error) {
 			console.log('update children error ---', error)
 		}
@@ -291,6 +290,8 @@ class InfoChild extends Component {
 															showArrow
 															placeholder={intl.formatMessage(messages.servicesRequested)}
 															optionLabelProp="label"
+															filterOption={(input, option) => option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+															allowClear={true}
 														>
 															{listServices?.map((service, index) => (
 																<Select.Option key={index} label={service.name} value={service._id}>{service.name}</Select.Option>
