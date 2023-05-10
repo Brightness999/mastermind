@@ -262,9 +262,9 @@ class InfoFinancial extends Component {
 														<Input
 															placeholder={intl.formatMessage(messages.rate)}
 															type='number'
-															prefix="$"
+															addonBefore="$"
 															min={0}
-															onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()}
+															onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
 															onChange={(event => {
 																const value = event.target.value;
 																let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));
@@ -319,9 +319,9 @@ class InfoFinancial extends Component {
 									>
 										<Input
 											type='number'
-											prefix="$"
+											addonBefore="$"
 											min={0}
-											onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()}
+											onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
 											onChange={(e) => this.setValueToReduxRegisterData('separateEvaluationRate', e.target.value)}
 											placeholder={intl.formatMessage(messages.rate)}
 										/>
@@ -337,9 +337,9 @@ class InfoFinancial extends Component {
 								>
 									<Input
 										type='number'
-										prefix="$"
+										addonBefore="$"
 										min={0}
-										onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()}
+										onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
 										onChange={(e) => this.setValueToReduxRegisterData('cancellationFee', e.target.value)}
 										placeholder={intl.formatMessage(messages.cancellationFee)}
 									/>

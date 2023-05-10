@@ -36,7 +36,13 @@ class ModalPayment extends React.Component {
 							}
 						}]}
 					>
-						<Input type='number' addonBefore="$" className='font-16 penalty' />
+						<Input
+							type='number'
+							min={0}
+							addonBefore="$"
+							className='font-16 penalty'
+							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+						/>
 					</Form.Item>
 					<Row className="justify-end gap-2 mt-10">
 						<Button key="back" onClick={this.props.onCancel}>

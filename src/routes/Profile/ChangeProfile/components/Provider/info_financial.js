@@ -253,8 +253,8 @@ class InfoFinancial extends Component {
 															placeholder={intl.formatMessage(messages.rate)}
 															type="number"
 															min={0}
-															prefix="$"
-															onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()}
+															addonBefore="$"
+															onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
 															onChange={(event => {
 																const value = event.target.value;
 																let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));
@@ -311,7 +311,13 @@ class InfoFinancial extends Component {
 									className="float-label-item"
 									rules={[{ required: user?.isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
 								>
-									<Input type='number' min={0} prefix="$" placeholder={intl.formatMessage(messages.rate)} onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()} />
+									<Input
+										type='number'
+										min={0}
+										addonBefore="$"
+										placeholder={intl.formatMessage(messages.rate)}
+										onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+									/>
 								</Form.Item>
 							</Col>
 							<Col xs={24} sm={24} md={12}>
@@ -321,7 +327,13 @@ class InfoFinancial extends Component {
 									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.cancellationFee) }]}
 									className='w-100 float-label-item'
 								>
-									<Input type='number' min={0} prefix="$" placeholder={intl.formatMessage(messages.cancellationFee)} onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()} />
+									<Input
+										type='number'
+										min={0}
+										addonBefore="$"
+										placeholder={intl.formatMessage(messages.cancellationFee)}
+										onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+									/>
 								</Form.Item>
 							</Col>
 						</Row>

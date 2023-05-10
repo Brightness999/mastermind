@@ -167,7 +167,7 @@ class SubsidyProgram extends Component {
 													>
 														<Input
 															placeholder={intl.formatMessage(messages.rate)}
-															prefix="$"
+															addonBefore="$"
 															className='h-40'
 															disabled
 														/>
@@ -182,9 +182,9 @@ class SubsidyProgram extends Component {
 														<Input
 															type="number"
 															min={0}
-															prefix="$"
+															addonBefore="$"
 															className='h-40'
-															onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()}
+															onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
 															onChange={e => {
 																if (isSameRate) {
 																	let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));

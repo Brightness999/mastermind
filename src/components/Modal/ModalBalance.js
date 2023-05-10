@@ -83,7 +83,15 @@ class ModalBalance extends React.Component {
 									}
 								}]}
 							>
-								<Input type='number' addonBefore="$" style={{ width: 100 }} className='font-16 late' disabled={user?.role == 3 || event?.flagStatus == 2} />
+								<Input
+									type='number'
+									min={0}
+									addonBefore="$"
+									style={{ width: 100 }}
+									className='font-16 late'
+									disabled={user?.role == 3 || event?.flagStatus == 2}
+									onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+								/>
 							</Form.Item>
 						</div>
 						<div className='mr-10 flex-1'>

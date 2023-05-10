@@ -79,7 +79,15 @@ class ModalNoShow extends React.Component {
 									}
 								}]}
 							>
-								<Input type='number' style={{ width: 100 }} addonBefore="$" className='font-16 penalty' disabled={user?.role == 3 || event?.flagStatus == 2} />
+								<Input
+									type='number'
+									min={0}
+									style={{ width: 100 }}
+									addonBefore="$"
+									className='font-16 penalty'
+									disabled={user?.role == 3 || event?.flagStatus == 2}
+									onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+								/>
 							</Form.Item>
 						</div>
 						<div className='flex-1'>
@@ -94,7 +102,15 @@ class ModalNoShow extends React.Component {
 									}
 								}]}
 							>
-								<Input type='number' style={{ width: 100 }} addonBefore="$" className='font-16 program' disabled={user?.role == 3 || event?.flagStatus == 2} />
+								<Input
+									type='number'
+									min={0}
+									style={{ width: 100 }}
+									addonBefore="$"
+									className='font-16 program'
+									disabled={user?.role == 3 || event?.flagStatus == 2}
+									onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+								/>
 							</Form.Item>
 						</div>
 					</div>

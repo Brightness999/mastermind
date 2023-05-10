@@ -115,7 +115,12 @@ class InfoServices extends Component {
 									className="float-label-item"
 									rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.yearsExperience) }]}
 								>
-									<Input type='number' min={0} placeholder={intl.formatMessage(messages.yearsExperience)} onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key === '0' && e.target.value === '')) && e.preventDefault()} />
+									<Input
+										type='number'
+										min={0}
+										placeholder={intl.formatMessage(messages.yearsExperience)}
+										onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+									/>
 								</Form.Item>
 							</Col>
 						</Row>

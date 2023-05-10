@@ -570,8 +570,9 @@ class ModalSubsidyProgress extends React.Component {
 							disabled={isNotAdmin || subsidy.status === 5}
 							value={numberOfSessions}
 							type="number"
+							min={0}
 							className='h-40 pb-10'
-							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract') && e.preventDefault()}
+							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
 							onChange={e => this.setState({ numberOfSessions: e.target.value, totalPayment: e.target.value * priceForSession })}
 						/>
 						<p className='font-700'>*{intl.formatMessage(messages.hmghExpensePerSession)}</p>
@@ -579,9 +580,10 @@ class ModalSubsidyProgress extends React.Component {
 							disabled={isNotAdmin || subsidy.status === 5}
 							value={priceForSession}
 							type="number"
+							min={0}
 							className='h-40'
-							prefix="$"
-							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract') && e.preventDefault()}
+							addonBefore="$"
+							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
 							onChange={e => this.setState({ priceForSession: e.target.value, totalPayment: e.target.value * numberOfSessions })}
 						/>
 					</Col>
@@ -590,8 +592,9 @@ class ModalSubsidyProgress extends React.Component {
 						<Input
 							value={totalPayment}
 							type="number"
-							prefix="$"
-							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract') && e.preventDefault()}
+							min={0}
+							addonBefore="$"
+							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
 							onChange={e => this.setState({ totalPayment: e.target.value, priceForSession: numberOfSessions > 0 ? e.target.value / numberOfSessions : 0 })}
 							className='h-40'
 							disabled={isNotAdmin || subsidy.status === 5}

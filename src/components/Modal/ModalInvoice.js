@@ -252,7 +252,16 @@ class ModalInvoice extends React.Component {
 															<Input disabled={selectedItemIndex != index} value={item.locationDate} className="text-center item-input font-16 p-10" placeholder="date and location" onChange={(e) => this.handleChangeItem('locationDate', e.target.value)} />
 														</td>
 														<td colSpan={2} className='border border-1 border-black -mb-1 -mr-1'>
-															<Input type='number' disabled={selectedItemIndex != index} value={item.rate} className="text-center item-input font-16 p-10" placeholder="Rate" onChange={(e) => this.handleChangeItem('rate', e.target.value)} />
+															<Input
+																type='number'
+																min={0}
+																disabled={selectedItemIndex != index}
+																value={item.rate}
+																className="text-center item-input font-16 p-10"
+																placeholder={intl.formatMessage(msgCreateAccount.rate)}
+																onChange={(e) => this.handleChangeItem('rate', e.target.value)}
+																onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+															/>
 														</td>
 														<td colSpan={2} className='border border-1 border-black -mb-1 -mr-1'>
 															<div className='text-center font-16'>{item.rate}</div>
