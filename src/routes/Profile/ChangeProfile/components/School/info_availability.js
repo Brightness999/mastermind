@@ -57,13 +57,16 @@ class InfoAvailability extends React.Component {
 					await this.updateBlackoutDates(data?.schoolInfo?.blackoutDates?.map(date => new Date(date)));
 					document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
 						let name = document.createElement("div");
-						name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
+						name.textContent = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary ?? '';
 						el.after(name);
 					})
 
+					const sessionsInSchool = data?.schoolInfo?.sessionsInSchool?.filter(s => s.dayInWeek === 0 || s.dayInWeek === 1 || s.dayInWeek === 5);
+					const sessionsAfterSchool = data?.schoolInfo?.sessionsAfterSchool?.filter(s => s.dayInWeek === 0 || s.dayInWeek === 1 || s.dayInWeek === 5);
+
 					this.setState({
-						sessionsInSchool: data?.schoolInfo?.sessionsInSchool ?? [this.defaultTimeRangeItem(), this.defaultTimeRangeItem(), this.defaultTimeRangeItem()],
-						sessionsAfterSchool: data?.schoolInfo?.sessionsAfterSchool ?? [this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false)],
+						sessionsInSchool: sessionsInSchool?.length ? sessionsInSchool : [this.defaultTimeRangeItem(), this.defaultTimeRangeItem(), this.defaultTimeRangeItem()],
+						sessionsAfterSchool: sessionsAfterSchool?.length ? sessionsAfterSchool : [this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false)],
 						isLegalHolidays: data?.schoolInfo?.isLegalHolidays,
 						isJewishHolidays: data?.schoolInfo?.isJewishHolidays,
 					})
@@ -82,13 +85,16 @@ class InfoAvailability extends React.Component {
 					await this.updateBlackoutDates(data?.blackoutDates?.map(date => new Date(date)));
 					document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
 						let name = document.createElement("div");
-						name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
+						name.textContent = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary ?? '';
 						el.after(name);
 					})
 
+					const sessionsInSchool = data?.sessionsInSchool?.filter(s => s.dayInWeek === 0 || s.dayInWeek === 1 || s.dayInWeek === 5);
+					const sessionsAfterSchool = data?.sessionsAfterSchool?.filter(s => s.dayInWeek === 0 || s.dayInWeek === 1 || s.dayInWeek === 5);
+
 					this.setState({
-						sessionsInSchool: data.sessionsInSchool ?? [this.defaultTimeRangeItem(), this.defaultTimeRangeItem(), this.defaultTimeRangeItem()],
-						sessionsAfterSchool: data.sessionsAfterSchool ?? [this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false)],
+						sessionsInSchool: sessionsInSchool?.length ? sessionsInSchool : [this.defaultTimeRangeItem(), this.defaultTimeRangeItem(), this.defaultTimeRangeItem()],
+						sessionsAfterSchool: sessionsAfterSchool?.length ? sessionsAfterSchool : [this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false), this.defaultTimeRangeItem(false)],
 						isLegalHolidays: data?.isLegalHolidays,
 						isJewishHolidays: data?.isJewishHolidays,
 					})
@@ -153,30 +159,54 @@ class InfoAvailability extends React.Component {
 	onFinish = (values) => {
 		const { sessionsInSchool, sessionsAfterSchool, isLegalHolidays, isJewishHolidays } = this.state
 		const { blackoutDates } = values;
-		const invalidInSchoolDay = sessionsInSchool?.findIndex(times => moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin })));
-		const invalidAfterSchoolDay = sessionsAfterSchool?.findIndex(times => moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin })));
-		if (invalidAfterSchoolDay < 0 && invalidInSchoolDay < 0) {
-			const params = {
-				sessionsAfterSchool,
-				sessionsInSchool,
-				isJewishHolidays,
-				isLegalHolidays,
-				blackoutDates: blackoutDates?.map(date => date.toString()),
-				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.schoolInfo?._id : this.props.auth.user?.schoolInfo?._id,
-			}
+		const invalidInSchoolDay = sessionsInSchool?.findIndex(times => (times.openHour == undefined && times.closeHour != undefined) || (times.openHour != undefined && times.closeHour == undefined) || (times.openHour != undefined && times.closeHour != undefined && moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin }))));
+		const invalidAfterSchoolDay = sessionsAfterSchool?.findIndex(times => (times.openHour == undefined && times.closeHour != undefined) || (times.openHour != undefined && times.closeHour == undefined) || (times.openHour != undefined && times.closeHour != undefined && moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin }))));
 
-			request.post(updateSchoolAvailability, params).then(res => {
-				if (res.success) {
-					message.success('Updated successfully');
-				}
-			}).catch(err => {
-				console.log('update school availability error---', err);
-			})
-		} else {
-			invalidAfterSchoolDay > -1 && message.error(`The selected After-school session time is not valid on ${day_week[invalidAfterSchoolDay]?.label}`);
-			invalidInSchoolDay > -1 && message.error(`The selected In-school session time is not valid on ${day_week[invalidInSchoolDay]?.label}`);
+		if (invalidAfterSchoolDay > -1) {
+			message.error(`The selected After-school session time is not valid on ${day_week[invalidAfterSchoolDay]?.label}`);
+			return;
 		}
+
+		if (invalidInSchoolDay > -1) {
+			message.error(`The selected In-school session time is not valid on ${day_week[invalidInSchoolDay]?.label}`);
+			return;
+		}
+
+		const params = {
+			sessionsAfterSchool: this.arrDayScheduleFormat(sessionsAfterSchool),
+			sessionsInSchool: this.arrDayScheduleFormat(sessionsInSchool),
+			isJewishHolidays,
+			isLegalHolidays,
+			blackoutDates: blackoutDates?.map(date => date.toString()),
+			_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.schoolInfo?._id : this.props.auth.user?.schoolInfo?._id,
+		}
+
+		request.post(updateSchoolAvailability, params).then(res => {
+			if (res.success) {
+				message.success('Updated successfully');
+			}
+		}).catch(err => {
+			console.log('update school availability error---', err);
+		})
 	};
+
+	arrDayScheduleFormat = (arr) => {
+		const newArr = [];
+		for (let i = 0; i < arr.length; i++) {
+			if (i == 1) {
+				for (let z = 1; z < 5; z++) {
+					let newSche = { ...arr[i] };
+					newSche.dayInWeek = z;
+					newArr.push(newSche);
+				}
+			} else {
+				let newSche = { ...arr[i] };
+				newSche.dayInWeek = i == 0 ? 0 : 5;
+				newArr.push(newSche);
+			}
+		}
+		return newArr;
+	}
 
 	onFinishFailed = (errorInfo) => {
 		console.log('Failed:', errorInfo);
@@ -244,7 +274,7 @@ class InfoAvailability extends React.Component {
 		}
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = holidays?.find(a => a?.start?.date == el.innerText)?.summary;
+			const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
@@ -292,7 +322,7 @@ class InfoAvailability extends React.Component {
 		}
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = holidays?.find(a => a?.start?.date == el.innerText)?.summary;
+			const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;

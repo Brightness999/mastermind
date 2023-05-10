@@ -71,7 +71,7 @@ class SchoolAvailability extends React.Component {
 				await this.updateBlackoutDates(registerData?.blackoutDates?.map(date => new Date(date)));
 				document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
 					let name = document.createElement("div");
-					name.textContent = holidays?.find(a => a.start.date == el.innerText)?.summary ?? '';
+					name.textContent = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary ?? '';
 					el.after(name);
 				})
 			}
@@ -115,29 +115,35 @@ class SchoolAvailability extends React.Component {
 	onFinish = async () => {
 		const { registerData } = this.props.register;
 		const { sessionsAfterSchool, sessionsInSchool, isLegalHolidays, isJewishHolidays } = this.state;
-		const invalidInSchoolDay = sessionsInSchool?.findIndex(times => moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin })));
-		const invalidAfterSchoolDay = sessionsAfterSchool?.findIndex(times => moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin })));
-		if (invalidAfterSchoolDay < 0 && invalidInSchoolDay < 0) {
-			let newRegisterData = JSON.parse(JSON.stringify(registerData));
+		const invalidInSchoolDay = sessionsInSchool?.findIndex(times => (times.openHour == undefined && times.closeHour != undefined) || (times.openHour != undefined && times.closeHour == undefined) || (times.openHour != undefined && times.closeHour != undefined && moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin }))));
+		const invalidAfterSchoolDay = sessionsAfterSchool?.findIndex(times => (times.openHour == undefined && times.closeHour != undefined) || (times.openHour != undefined && times.closeHour == undefined) || (times.openHour != undefined && times.closeHour != undefined && moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin }))));
 
-			// update in school - after school
-			newRegisterData.sessionsInSchool = this.arrDayScheduleFormat(sessionsInSchool);
-			newRegisterData.sessionsAfterSchool = this.arrDayScheduleFormat(sessionsAfterSchool);
+		if (invalidAfterSchoolDay > -1) {
+			message.error(`The selected After-school session time is not valid on ${day_week[invalidAfterSchoolDay]?.label}`);
+			return;
+		}
 
-			// post to server
-			this.setState({ isSubmit: true });
-			const response = await request.post(userSignUp, { ...newRegisterData, isJewishHolidays, isLegalHolidays });
-			this.setState({ isSubmit: false });
-			const { success } = response;
-			if (success) {
-				this.props.onContinue(true);
-				this.props.removeRegisterData();
-			} else {
-				message.error(error?.response?.data?.data ?? error.message);
-			}
+		if (invalidInSchoolDay > -1) {
+			message.error(`The selected In-school session time is not valid on ${day_week[invalidInSchoolDay]?.label}`);
+			return;
+		}
+
+		let newRegisterData = JSON.parse(JSON.stringify(registerData));
+
+		// update in school - after school
+		newRegisterData.sessionsInSchool = this.arrDayScheduleFormat(sessionsInSchool);
+		newRegisterData.sessionsAfterSchool = this.arrDayScheduleFormat(sessionsAfterSchool);
+
+		// post to server
+		this.setState({ isSubmit: true });
+		const response = await request.post(userSignUp, { ...newRegisterData, isJewishHolidays, isLegalHolidays });
+		this.setState({ isSubmit: false });
+		const { success } = response;
+		if (success) {
+			this.props.onContinue(true);
+			this.props.removeRegisterData();
 		} else {
-			invalidAfterSchoolDay > -1 && message.error(`The selected After-school session time is not valid on ${day_week[invalidAfterSchoolDay]?.label}`);
-			invalidInSchoolDay > -1 && message.error(`The selected In-school session time is not valid on ${day_week[invalidInSchoolDay]?.label}`);
+			message.error(error?.response?.data?.data ?? error.message);
 		}
 	};
 
@@ -261,7 +267,7 @@ class SchoolAvailability extends React.Component {
 		}
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = holidays?.find(a => a.start.date == el.innerText)?.summary;
+			const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
@@ -310,7 +316,7 @@ class SchoolAvailability extends React.Component {
 		}
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = holidays?.find(a => a.start.date == el.innerText)?.summary;
+			const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
