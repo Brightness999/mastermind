@@ -800,7 +800,7 @@ class DrawerDetail extends Component {
                     {intl.formatMessage(messages.paid)}
                   </Button>
                 ) : event?.flagItems?.rate == 0 ? null : (
-                  <div className='flex gap-2 w-100'>
+                  <>
                     <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagItems?.flagType === 1 ? this.onShowModalBalance() : event?.flagItems?.flagType === 2 ? this.onShowModalNoShow() : {}}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
@@ -821,7 +821,7 @@ class DrawerDetail extends Component {
                         {intl.formatMessage(messages.payFlag)}
                       </Button>
                     </form>
-                  </div>
+                  </>
                 )}
               </div>
             ) : userRole === 30 ? (
@@ -848,7 +848,7 @@ class DrawerDetail extends Component {
                     {intl.formatMessage(messages.paid)}
                   </Button>
                 ) : event?.flagItems?.rate == 0 ? null : (
-                  <div className='flex gap-2 w-100'>
+                  <>
                     <Button type='primary' className='flex-1 h-30 p-0' onClick={() => this.setState({ isModalInvoice: true })}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
@@ -869,7 +869,7 @@ class DrawerDetail extends Component {
                         {intl.formatMessage(messages.payFlag)}
                       </Button>
                     </form>
-                  </div>
+                  </>
                 )}
                 <Popconfirm
                   title="Are you sure to clear this flag?"
