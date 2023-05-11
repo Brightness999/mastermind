@@ -101,7 +101,7 @@ class DrawerDetail extends Component {
             this.setState({ errorMessage: result.data });
           }
         }).catch(error => {
-          console.log('closed error---', error);
+          console.log('cancel error---', error);
           this.setState({ errorMessage: error.message });
         })
       }
@@ -224,7 +224,7 @@ class DrawerDetail extends Component {
           this.setState({ errorMessage: result.data });
         }
       }).catch(error => {
-        console.log('closed error---', error);
+        console.log('decline error---', error);
         this.setState({ errorMessage: error.message });
       })
     }
@@ -233,6 +233,8 @@ class DrawerDetail extends Component {
   confirmModalProcess = (note, publicFeedback) => {
     if (this.props.event?.type == 2) {
       this.setState({ visibleProcess: false, isModalInvoice: true, note: note, publicFeedback: publicFeedback });
+    } else if (this.props.event?.type == 4) {
+      this.handleMarkAsClosed(undefined, false, note, publicFeedback);
     } else {
       this.handleMarkAsClosed(this.state.items, false, note, publicFeedback);
     }
@@ -453,8 +455,14 @@ class DrawerDetail extends Component {
   handleSessionReminder = (time) => {
     this.setState({ notificationTime: time });
     request.post(setNotificationTime, { appointmentId: this.props.event?._id, time })
-      .then(res => { res.success && message.success("Updated successfully"); this.updateAppointments(); })
-      .catch(err => { console.log(err); message.error(err.message); });
+      .then(res => {
+        if (res.success) {
+          this.setState({ errorMessage: '' });
+          message.success("Updated successfully");
+          this.updateAppointments();
+        }
+      })
+      .catch(err => { console.log(err); this.setState({ errorMessage: err.message }); });
   }
 
   handleTag = () => {
@@ -470,6 +478,7 @@ class DrawerDetail extends Component {
         request.post(claimConsultation, { appointmentId: this.props.event?._id })
           .then(res => {
             if (res.success) {
+              this.setState({ errorMessage: '' });
               if (res.data.message) {
                 message.warning(res.data.message);
               } else {
@@ -478,7 +487,7 @@ class DrawerDetail extends Component {
             }
             this.updateAppointments();
           })
-          .catch(err => { message.error(err.message); console.log(err) });
+          .catch(err => { this.setState({ errorMessage: err.message }); console.log(err); });
       } else {
         message.warning("You are not available at this event time.");
       }
@@ -487,14 +496,26 @@ class DrawerDetail extends Component {
 
   handleSwitchTag = (consultantId) => {
     request.post(switchConsultation, { appointmentId: this.props.event?._id, consultantId })
-      .then(res => { res.success && this.updateAppointments(); message.success("Switched successfully") })
-      .catch(err => message.error("Something went wrong. Please try again"))
+      .then(res => {
+        if (res.success) {
+          this.setState({ errorMessage: '' });
+          this.updateAppointments();
+          message.success("Switched successfully");
+        }
+      })
+      .catch(err => { this.setState({ errorMessage: err.message }); console.log(err) });
   }
 
   handleRemoveTag = () => {
     request.post(removeConsultation, { appointmentId: this.props.event?._id })
-      .then(res => { res.success && this.updateAppointments(); message.success("Removed successfully"); })
-      .catch(err => { message.error(err.message); console.log(err) });
+      .then(res => {
+        if (res.success) {
+          this.setState({ errorMessage: '' });
+          this.updateAppointments();
+          message.success("Removed successfully");
+        }
+      })
+      .catch(err => { this.setState({ errorMessage: err.message }); console.log(err) });
   }
 
   render() {
@@ -944,11 +965,9 @@ class DrawerDetail extends Component {
               )}
               {event?.type === 4 && event?.status === 0 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900) && (
                 <Col span={12}>
-                  <Popconfirm trigger="click" title="Are you sure to close this consultation?" overlayClassName='consultant' onConfirm={() => this.handleMarkAsClosed(undefined, false, '', '')}>
-                    <Button type='primary' icon={<BsCheckCircle size={15} />} block className='flex items-center gap-2 h-30'>
-                      {intl.formatMessage(messages.markClosed)}
-                    </Button>
-                  </Popconfirm>
+                  <Button type='primary' icon={<BsCheckCircle size={15} />} block className='flex items-center gap-2 h-30' onClick={() => this.openModalProcess()}>
+                    {intl.formatMessage(messages.markClosed)}
+                  </Button>
                 </Col>
               )}
               {[3, 5].includes(event?.type) && event?.status === 0 && userRole > 3 && (
@@ -1037,7 +1056,7 @@ class DrawerDetail extends Component {
               )}
               {(event?.status === 0 && moment().isBefore(moment(event?.date)) && event?.type === 4 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
                 <Col span={12}>
-                  <Popover trigger="click" placement='bottom' overlayClassName='consultant' content={(
+                  <Popover trigger="click" placement='bottom' overlayClassName='consultant' content={consultants?.length ? (
                     <Radio.Group onChange={e => this.handleSwitchTag(e.target.value)} className="box-card p-10 bg-pastel">
                       <Space direction="vertical">
                         {consultants?.map((consultant, i) => (
@@ -1045,7 +1064,7 @@ class DrawerDetail extends Component {
                         ))}
                       </Space>
                     </Radio.Group>
-                  )}>
+                  ) : <div className='p-10 bg-pastel'>No consultants to switch</div>}>
                     <Button type='primary' icon={<AiOutlineUserSwitch size={15} />} block>
                       {intl.formatMessage(messages.switchTag)}
                     </Button>
