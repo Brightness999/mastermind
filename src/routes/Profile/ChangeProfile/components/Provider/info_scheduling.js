@@ -169,8 +169,8 @@ class InfoScheduling extends Component {
 								className='w-100 float-label-item'
 							>
 								<Select placeholder={intl.formatMessage(messages.cancellationWindow)}>
-									{cancellationWindow?.map((value, index) => (
-										<Select.Option key={index} value={value}>{value}</Select.Option>
+									{cancellationWindow?.map((c, index) => (
+										<Select.Option key={index} value={c.value}>{c.label}</Select.Option>
 									))}
 								</Select>
 							</Form.Item>

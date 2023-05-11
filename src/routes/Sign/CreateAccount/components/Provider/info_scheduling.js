@@ -139,8 +139,8 @@ class InfoScheduling extends Component {
 								className='w-100'
 							>
 								<Select placeholder={intl.formatMessage(messages.cancellationWindow)} onChange={cancellationWindow => this.setValueToReduxRegisterData("cancellationWindow", cancellationWindow)}>
-									{cancellationWindow?.map((value, index) => (
-										<Select.Option key={index} value={value}>{value}</Select.Option>
+									{cancellationWindow?.map((c, index) => (
+										<Select.Option key={index} value={c.value}>{c.label}</Select.Option>
 									))}
 								</Select>
 							</Form.Item>
