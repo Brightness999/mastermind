@@ -101,11 +101,9 @@ class ModalNewScreening extends React.Component {
               <Button key="back" onClick={this.props.onCancel}>
                 {intl.formatMessage(messages.goBack).toUpperCase()}
               </Button>
-              <Form.Item>
-                <Button key="submit" type="primary" htmlType="submit">
-                  {intl.formatMessage(messages.screening).toUpperCase()}
-                </Button>
-              </Form.Item>
+              <Button key="submit" type="primary" htmlType="submit">
+                {intl.formatMessage(messages.screening).toUpperCase()}
+              </Button>
             </Row>
           </Form>
         </div>
