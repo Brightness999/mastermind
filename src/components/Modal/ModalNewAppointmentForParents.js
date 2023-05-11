@@ -573,7 +573,7 @@ class ModalNewAppointmentForParents extends React.Component {
 								<Form.Item
 									name="dependent"
 									label={intl.formatMessage(msgCreateAccount.dependent)}
-									rules={[{ required: true, message: 'Please select a dependent' }]}
+									rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.dependent) }]}
 								>
 									<Select
 										showSearch
@@ -593,7 +593,7 @@ class ModalNewAppointmentForParents extends React.Component {
 								<Form.Item
 									name="skill"
 									label={intl.formatMessage(msgCreateAccount.services)}
-									rules={[{ required: true, message: 'Please select a service.' }]}
+									rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.servicesRequired) }]}
 								>
 									<Select
 										showSearch
@@ -612,7 +612,7 @@ class ModalNewAppointmentForParents extends React.Component {
 								<Form.Item
 									name="address"
 									label={intl.formatMessage(msgCreateAccount.location)}
-									rules={[{ required: [2, 3, 5].includes(appointmentType), message: "Select a location." }]}
+									rules={[{ required: [2, 3, 5].includes(appointmentType), message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.location) }]}
 								>
 									<Select
 										showSearch
