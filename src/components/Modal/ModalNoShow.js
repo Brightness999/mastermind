@@ -5,16 +5,17 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 
 import messages from './messages';
+import { APPOINTMENT, EVALUATION, NOFLAG, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
 class ModalNoShow extends React.Component {
 	componentDidMount() {
 		const { event } = this.props;
-		if (event?.flagStatus == 0) {
-			if (event?.type == 2) {
+		if (event?.flagStatus === NOFLAG) {
+			if (event?.type ===EVALUATION) {
 				this.form?.setFieldsValue({ penalty: event?.provider?.separateEvaluationRate, program: 5 });
-			} else if (event?.type == 3) {
+			} else if (event?.type === APPOINTMENT) {
 				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(event?.dependent?.currentGrade)) {
 					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level))?.rate, program: 5 });
 				} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(event?.dependent?.currentGrade)) {
@@ -26,7 +27,7 @@ class ModalNoShow extends React.Component {
 				} else {
 					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate, program: 5 });
 				}
-			} else if (event?.type == 5) {
+			} else if (event?.type === SUBSIDY) {
 				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(event?.dependent?.currentGrade)) {
 					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level))?.subsidizedRate, program: 5 });
 				} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(event?.dependent?.currentGrade)) {

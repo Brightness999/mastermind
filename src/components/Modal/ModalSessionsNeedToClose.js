@@ -13,6 +13,7 @@ import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/featu
 import { store } from '../../redux/store';
 import ModalProcessAppointment from './ModalProcessAppointment';
 import ModalInvoice from './ModalInvoice';
+import { APPOINTMENT, BALANCE, EVALUATION, PENDING, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -31,7 +32,7 @@ class ModalSessionsNeedToClose extends React.Component {
 	}
 
 	componentDidMount() {
-		const appointments = JSON.parse(JSON.stringify(this.props.appointments?.filter(appointment => [2, 3, 5].includes(appointment.type) && appointment.status == 0 && moment(appointment.date).isBefore(moment()))));
+		const appointments = JSON.parse(JSON.stringify(this.props.appointments?.filter(appointment => [EVALUATION, APPOINTMENT, SUBSIDY].includes(appointment.type) && appointment.status === PENDING && moment(appointment.date).isBefore(moment()))));
 		this.setState({ appointments: appointments?.map(a => ({ ...a, key: a._id })) });
 	}
 
@@ -188,7 +189,7 @@ class ModalSessionsNeedToClose extends React.Component {
 					{ text: 'Subsidized Session', value: 5 },
 				],
 				onFilter: (value, record) => record.type == value,
-				render: (type) => type == 2 ? intl.formatMessage(messages.evaluation) : type == 3 ? intl.formatMessage(messages.standardSession) : type == 5 ? intl.formatMessage(messages.subsidizedSession) : '',
+				render: (type) => type === EVALUATION ? intl.formatMessage(messages.evaluation) : type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
 			},
 			{ title: 'Session Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm a') },
 		];
@@ -201,14 +202,14 @@ class ModalSessionsNeedToClose extends React.Component {
 				render: (appointment) => `${appointment?.provider.firstName ?? ''} ${appointment?.provider.lastName ?? ''}`,
 			});
 			columns.splice(5, 0, {
-				title: 'Action', key: 'action', render: (appointment) => this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus == 1)
+				title: 'Action', key: 'action', render: (appointment) => this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus === BALANCE)
 					? (<div>Suspending</div>) : (
 						<a className='btn-blue action' onClick={() => this.handleClose(appointment)}>Close</a>
 					)
 			});
 		} else {
 			columns.splice(4, 0, {
-				title: 'Action', key: 'action', render: (appointment) => this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus == 1)
+				title: 'Action', key: 'action', render: (appointment) => this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus === BALANCE)
 					? (<div>Suspending</div>) : (
 						<a className='btn-blue action' onClick={() => this.handleClose(appointment)}>Close</a>
 					)

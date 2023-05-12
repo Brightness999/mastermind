@@ -31,3 +31,34 @@ export const BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY = "holiday@group.v.calendar.goo
 export const GOOGLE_CALENDAR_API_KEY = "AIzaSyA77lKHRvtdisK7_UhwalO8Hzgd4P_kaDk";
 export const USA_CALENDAR_REGION = "en.usa";
 export const JEWISH_CALENDAR_REGION = "en.jewish";
+
+// APPOINTMENT STATUS
+export const DECLINED = -3;
+export const CANCELLED = -2;
+export const CLOSED = -1;
+// export const PENDING = 0;
+
+// APPOINTMENT TYPE
+export const SCREEN = 1;
+export const EVALUATION = 2;
+export const APPOINTMENT = 3;
+export const CONSULTATION = 4;
+export const SUBSIDY = 5;
+
+// FLAG TYPE
+export const BALANCE = 1;
+export const NOSHOW = 2;
+
+// FLAG STATUS
+export const NOFLAG = 0;
+export const ACTIVE = 1;
+export const CLEAR = 2;
+
+// SUBSIDY STATUS
+// export const CANCELLED = -2;
+export const PENDING = 0;
+export const SCHOOLAPPROVED = 1;
+export const SCHOOLDECLINED = 2;
+export const ADMINPREAPPROVED = 3;
+export const ADMINDECLINED = 4;
+export const ADMINAPPROVED = 5;

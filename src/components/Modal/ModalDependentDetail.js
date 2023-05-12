@@ -11,6 +11,7 @@ import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import { createPrivateNote, deletePrivateNote, updatePrivateNote } from '../../utils/api/apiList';
 import request from '../../utils/api/request';
 import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
+import { CONSULTATION } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -155,8 +156,8 @@ class ModalDependentDetail extends React.Component {
 								<div key={index}>{service.name}</div>
 							))}
 							<br />
-							<div className='text-bold'>Providers:</div>
-							{[...new Set(dependent?.appointments?.filter(a => a.type != 4)?.map(a => `${a.provider?.firstName} ${a.provider?.lastName}`))].map((name, index) => (
+							<div className='text-bold'>{intl.formatMessage(messages.providers)}:</div>
+							{[...new Set(dependent?.appointments?.filter(a => a.type != CONSULTATION)?.map(a => `${a.provider?.firstName} ${a.provider?.lastName}`))].map((name, index) => (
 								<div key={index}>{name}</div>
 							))}
 						</div>

@@ -11,6 +11,7 @@ import request from '../../../utils/api/request'
 import { cancelSubsidyRequest } from '../../../utils/api/apiList';
 import { getSubsidyRequests } from '../../../redux/features/appointmentsSlice';
 import { ModalCancelAppointment } from '../../../components/Modal';
+import { ADMINAPPROVED, ADMINDECLINED, ADMINPREAPPROVED, CANCELLED, PENDING, SCHOOLAPPROVED, SCHOOLDECLINED } from '../../constant';
 import './index.less';
 
 class PanelSubsidiaries extends React.Component {
@@ -25,13 +26,13 @@ class PanelSubsidiaries extends React.Component {
   }
 
   componentDidMount = () => {
-    this.setState({ listSubsidiaries: this.props.listSubsidiaries?.filter(s => [0, 1, 3].includes(s.status)) });
+    this.setState({ listSubsidiaries: this.props.listSubsidiaries?.filter(s => [PENDING, SCHOOLAPPROVED, ADMINPREAPPROVED].includes(s.status)) });
   }
 
   componentDidUpdate = (prevProps) => {
     if (prevProps.listSubsidiaries !== this.props.listSubsidiaries) {
       const { status } = this.state;
-      this.setState({ listSubsidiaries: this.props.listSubsidiaries?.filter(s => status == 1 ? [0, 1, 3].includes(s.status) : status == 1 ? [2, 4].includes(s.status) : s.status === 5) ?? [] });
+      this.setState({ listSubsidiaries: this.props.listSubsidiaries?.filter(s => status == 1 ? [PENDING, SCHOOLAPPROVED, ADMINPREAPPROVED].includes(s.status) : status == 2 ? [SCHOOLDECLINED, ADMINDECLINED].includes(s.status) : s.status === ADMINAPPROVED) ?? [] });
     }
   }
 
@@ -39,11 +40,11 @@ class PanelSubsidiaries extends React.Component {
     const { listSubsidiaries } = this.props;
     switch (v) {
       case "1":
-        this.setState({ listSubsidiaries: listSubsidiaries?.filter(s => [0, 1, 3].includes(s.status)) ?? [], status: v }); break;
+        this.setState({ listSubsidiaries: listSubsidiaries?.filter(s => [PENDING, SCHOOLAPPROVED, ADMINPREAPPROVED].includes(s.status)) ?? [], status: v }); break;
       case "2":
-        this.setState({ listSubsidiaries: listSubsidiaries?.filter(s => [2, 4].includes(s.status)) ?? [], status: v }); break;
+        this.setState({ listSubsidiaries: listSubsidiaries?.filter(s => [SCHOOLDECLINED, ADMINDECLINED].includes(s.status)) ?? [], status: v }); break;
       case "3":
-        this.setState({ listSubsidiaries: listSubsidiaries?.filter(s => s.status === 5) ?? [], status: v }); break;
+        this.setState({ listSubsidiaries: listSubsidiaries?.filter(s => s.status === ADMINAPPROVED) ?? [], status: v }); break;
       default: break;
     }
   }
@@ -51,10 +52,10 @@ class PanelSubsidiaries extends React.Component {
   renderStatus(status) {
     let value = parseInt(status)
     switch (value) {
-      case 0: case 1: case 3: return 'PENDING';
-      case 2: case 4: return 'DECLINED';
-      case 5: return 'APPROVED';
-      case -1: return 'CANCELLED';
+      case PENDING: case SCHOOLAPPROVED: case ADMINPREAPPROVED: return 'PENDING';
+      case SCHOOLDECLINED: case ADMINDECLINED: return 'DECLINED';
+      case ADMINAPPROVED: return 'APPROVED';
+      case CANCELLED: return 'CANCELLED';
     }
     return '';
   }

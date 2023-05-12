@@ -4,24 +4,24 @@ import { FaUser } from 'react-icons/fa';
 import { GiBackwardTime } from 'react-icons/gi';
 import { BsEnvelope, BsXCircle, BsFillFlagFill, BsCheckCircleFill, BsPaypal } from 'react-icons/bs';
 import intl from 'react-intl-universal';
-import messages from '../messages';
-import msgModal from '../../../components/Modal/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import './index.less';
 import moment from 'moment';
+
+import messages from '../messages';
+import msgModal from '../../../components/Modal/messages';
 import request from '../../../utils/api/request'
 import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../../components/Modal';
-import { store } from '../../../redux/store';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
 import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag } from '../../../utils/api/apiList';
+import './index.less';
+import { ACTIVE, APPOINTMENT, BALANCE, CLOSED, DECLINED, EVALUATION, NOSHOW, PENDING, SUBSIDY } from '../../constant';
 
 class PanelAppointment extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       appointments: this.props.appointments,
-      type: 0,
       currentTab: 1,
       visibleCancel: false,
       visibleCurrent: false,
@@ -185,7 +185,7 @@ class PanelAppointment extends React.Component {
   }
 
   updateAppointments() {
-    store.dispatch(getAppointmentsData({ role: this.props.user?.role }));
+    this.props.dispatch(getAppointmentsData({ role: this.props.user?.role }));
     const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
     const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
     const dataFetchAppointMonth = {
@@ -195,7 +195,7 @@ class PanelAppointment extends React.Component {
         year: year
       }
     };
-    store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+    this.props.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
   }
 
   openModalNoShow = (appointment) => {
@@ -220,10 +220,10 @@ class PanelAppointment extends React.Component {
       _id: event?._id,
       flagItems: {
         ...values,
-        type: event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.standardSession) : event?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : '',
+        type: event?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
         locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
         rate: values?.late,
-        flagType: 1,
+        flagType: BALANCE,
       }
     }
     request.post(setFlag, data).then(result => {
@@ -241,10 +241,10 @@ class PanelAppointment extends React.Component {
       _id: event?._id,
       flagItems: {
         ...values,
-        type: event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.standardSession) : event?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : '',
+        type: event?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
         locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
         rate: values?.penalty + values?.program,
-        flagType: 2,
+        flagType: NOSHOW,
       }
     }
     request.post(setFlag, data).then(result => {
@@ -345,10 +345,10 @@ class PanelAppointment extends React.Component {
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
         <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-          {appointments?.filter(a => (a.type === 3 || a.type === 5) && a.flagStatus != 1 && a.status == 0 && moment().isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && a.flagStatus != ACTIVE && a.status === PENDING && moment().isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
-              {data.status == 0 && (
+              {data.status === PENDING && (
                 <div className='item-right gap-1'>
                   <GiBackwardTime size={19} cursor='pointer' onClick={() => this.openModalCurrent(data)} />
                   <BsXCircle size={15} cursor='pointer' onClick={() => this.openModalCancel(data)} />
@@ -356,7 +356,7 @@ class PanelAppointment extends React.Component {
               )}
             </div>
           ))}
-          {(appointments?.filter(a => (a.type === 3 || a.type === 5) && a.flagStatus != 1 && a.status == 0 && moment().isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
+          {(appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && a.flagStatus != ACTIVE && a.status === PENDING && moment().isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
             <div key={1} className='list-item p-10 justify-center'>
               <span>No upcoming appoiment</span>
             </div>
@@ -365,7 +365,7 @@ class PanelAppointment extends React.Component {
           {visibleCurrent && <ModalCurrentAppointment {...modalCurrentProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
-          {appointments?.filter(a => (a.type === 3 || a.type === 5) && a.flagStatus != 1 && [0, -2].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && a.flagStatus != ACTIVE && [0, -2].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {this.props.user?.role > 3 ? (
@@ -376,7 +376,7 @@ class PanelAppointment extends React.Component {
               ) : null}
             </div>
           ))}
-          {(appointments?.filter(a => (a.type === 3 || a.type === 5) && [0, -2].includes(a.status) && a.flagStatus != 1 && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
+          {(appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && [0, -2].includes(a.status) && a.flagStatus != ACTIVE && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
             <div key={1} className='list-item p-10 justify-center'>
               <span>No unprocess appoiment</span>
             </div>
@@ -386,11 +386,11 @@ class PanelAppointment extends React.Component {
           {visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="3">
-          {appointments?.filter(a => (a.type === 3 || a.type === 5) && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && [-1, -3].includes(a.status) && a.flagStatus != ACTIVE && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {(this.props.user?.role == 3 && !data?.isPaid) ? (
-                <div className={`item-right cursor gap-1 ${data?.status == -3 && 'display-none'}`}>
+                <div className={`item-right cursor gap-1 ${data?.status === DECLINED && 'display-none'}`}>
                   <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                     <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                     <input type="hidden" name="business" value="office@helpmegethelp.org" />
@@ -411,14 +411,14 @@ class PanelAppointment extends React.Component {
                 </div>
               ) : null}
               {this.props.user?.role > 3 ? (
-                <div className={`item-right gap-1 ${data?.status == -3 && 'display-none'}`}>
+                <div className={`item-right gap-1 ${data?.status === DECLINED && 'display-none'}`}>
                   <BsEnvelope size={15} onClick={() => this.openModalFeedback(data)} />
                   <BsFillFlagFill size={15} onClick={() => this.openModalBalance(data)} />
                 </div>
               ) : null}
             </div>
           ))}
-          {(appointments?.filter(a => (a.type === 3 || a.type === 5) && [-1, -3].includes(a.status) && a.flagStatus != 1 && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
+          {(appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && [CLOSED, DECLINED].includes(a.status) && a.flagStatus != ACTIVE && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
             <div key={1} className='list-item p-10 justify-center'>
               <span>No past appoiment</span>
             </div>

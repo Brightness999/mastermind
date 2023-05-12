@@ -3,7 +3,7 @@ import { Divider, Table, Space, Input, Button, message } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
-import { routerLinks } from '../../../constant';
+import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, PENDING, routerLinks } from '../../../constant';
 import { ModalDependentDetail } from '../../../../components/Modal';
 import intl from 'react-intl-universal';
 import msgMainHeader from '../../../../components/MainHeader/messages';
@@ -128,9 +128,9 @@ export default class extends React.Component {
       { title: 'Age', dataIndex: 'birthday', key: 'age', sorter: (a, b) => a.birthday > b.birthday ? 1 : -1, render: (birthday) => moment().year() - moment(birthday).year() },
       { title: 'Grade', dataIndex: 'currentGrade', key: 'grade' },
       { title: 'School', dataIndex: 'school', key: 'school', render: school => school?.name },
-      { title: 'Count of Sessions Past', dataIndex: 'appointments', key: 'countOfSessionsPast', render: appointments => appointments?.filter(a => [2, 3].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == -1)?.length },
-      { title: 'Count of Sessions Future', dataIndex: 'appointments', key: 'countOfSessionsFuture', render: appointments => appointments?.filter(a => [2, 3].includes(a.type) && moment().isBefore(moment(a.date)) && a.status == 0)?.length },
-      { title: 'Count of Referrals', dataIndex: 'appointments', key: 'countOfReferrals', render: appointments => appointments?.filter(a => a.type == 4 && moment().isAfter(moment(a.date)) && a.status == -1)?.length },
+      { title: 'Count of Sessions Past', dataIndex: 'appointments', key: 'countOfSessionsPast', render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length },
+      { title: 'Count of Sessions Future', dataIndex: 'appointments', key: 'countOfSessionsFuture', render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status === PENDING)?.length },
+      { title: 'Count of Referrals', dataIndex: 'appointments', key: 'countOfReferrals', render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length },
       { title: 'Subsidy', dataIndex: 'subsidy', key: 'subsidy', render: subsidy => subsidy?.length ? subsidy.length : 'No Subsidy' },
     ];
 

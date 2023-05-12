@@ -20,6 +20,7 @@ import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
 import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setNotificationTime, switchConsultation, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PENDING, SCREEN, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -119,11 +120,11 @@ class DrawerDetail extends Component {
   }
 
   closeModalCurrent = () => {
-    this.props.event?.type == 1 ? this.setState({ visibleCurrentScreen: false }) : this.props.event?.type == 4 ? this.setState({ visibleCurrentReferral: false }) : this.setState({ visibleCurrent: false });
+    this.props.event?.type == SCREEN ? this.setState({ visibleCurrentScreen: false }) : this.props.event?.type == CONSULTATION ? this.setState({ visibleCurrentReferral: false }) : this.setState({ visibleCurrent: false });
   }
 
   openModalCurrent = () => {
-    this.props.event?.type == 1 ? this.setState({ visibleCurrentScreen: true }) : this.props.event?.type == 4 ? this.setState({ visibleCurrentReferral: true }) : this.setState({ visibleCurrent: true });
+    this.props.event?.type == SCREEN ? this.setState({ visibleCurrentScreen: true }) : this.props.event?.type == CONSULTATION ? this.setState({ visibleCurrentReferral: true }) : this.setState({ visibleCurrent: true });
   }
 
   showEditNotes = () => {
@@ -175,7 +176,7 @@ class DrawerDetail extends Component {
 
   displayDuration = (event) => {
     let duration = event?.provider?.duration ?? 30;
-    if (event?.type == 2) {
+    if (event?.type == EVALUATION) {
       duration = event?.provider?.separateEvaluationDuration;
     }
     return `${moment(event?.date).format('MM/DD/YYYY hh:mm a')} - ${moment(event?.date).clone().add(duration, 'minutes').format('hh:mm a')}`;
@@ -231,9 +232,9 @@ class DrawerDetail extends Component {
   }
 
   confirmModalProcess = (note, publicFeedback) => {
-    if (this.props.event?.type == 2) {
+    if (this.props.event?.type == EVALUATION) {
       this.setState({ visibleProcess: false, isModalInvoice: true, note: note, publicFeedback: publicFeedback });
-    } else if (this.props.event?.type == 4) {
+    } else if (this.props.event?.type == CONSULTATION) {
       this.handleMarkAsClosed(undefined, false, note, publicFeedback);
     } else {
       this.handleMarkAsClosed(this.state.items, false, note, publicFeedback);
@@ -241,7 +242,7 @@ class DrawerDetail extends Component {
   }
 
   confirmModalInvoice = (items) => {
-    if (this.props.event?.type == 2) {
+    if (this.props.event?.type == EVALUATION) {
       this.setState({ isModalInvoice: false, visibleEvaluationProcess: true, items: items });
     } else {
       this.setState({ isModalInvoice: false, visibleProcess: true, items: items });
@@ -321,10 +322,10 @@ class DrawerDetail extends Component {
       _id: event?._id,
       flagItems: {
         ...values,
-        type: event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.standardSession) : event?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : '',
+        type: event?.type == EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type == APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : event?.type == SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
         locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
         rate: values?.penalty + values?.program,
-        flagType: 2,
+        flagType: NOSHOW,
       }
     }
     request.post(setFlag, data).then(result => {
@@ -350,10 +351,10 @@ class DrawerDetail extends Component {
       _id: event?._id,
       flagItems: {
         ...values,
-        type: event?.type == 2 ? intl.formatMessage(msgModal.evaluation) : event?.type == 3 ? intl.formatMessage(msgModal.standardSession) : event?.type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : '',
+        type: event?.type == EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type == APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : event?.type == SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
         locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
         rate: values?.late,
-        flagType: 1,
+        flagType: BALANCE,
       }
     }
     request.post(setFlag, data).then(result => {
@@ -658,33 +659,33 @@ class DrawerDetail extends Component {
           <Col xs={24} sm={24} md={12} className="flex flex-col">
             <p className='font-16 text-center mb-0'>{intl.formatMessage(msgModal.old)}</p>
             <div className='new-content flex-1'>
-              <p className='font-16 font-700'>{event?.previousAppointment?.type === 1 ? intl.formatMessage(msgModal.screening) : event?.previousAppointment?.type === 2 ? intl.formatMessage(msgModal.evaluation) : event?.previousAppointment?.type === 3 ? intl.formatMessage(msgModal.appointment) : event?.previousAppointment?.type === 4 ? intl.formatMessage(msgModal.consultation) : ''}</p>
+              <p className='font-16 font-700'>{event?.previousAppointment?.type === SCREEN ? intl.formatMessage(msgModal.screening) : event?.previousAppointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.previousAppointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.appointment) : event?.previousAppointment?.type === CONSULTATION ? intl.formatMessage(msgModal.consultation) : ''}</p>
               <p className='font-16'>{`${event?.previousAppointment?.dependent?.firstName ?? ''} ${event?.previousAppointment?.dependent?.lastName ?? ''}`}</p>
               <p className='font-16'>{`${event?.previousAppointment?.provider?.firstName ?? ''} ${event?.previousAppointment?.provider?.lastName ?? ''}`}</p>
-              {event?.previousAppointment?.type === 1 ? (
+              {event?.previousAppointment?.type === SCREEN ? (
                 <p className='font-16 whitespace-nowrap'>{intl.formatMessage(messages.phonenumber)}: {event?.previousAppointment?.phoneNumber}</p>
-              ) : event?.previousAppointment?.type === 4 ? (
+              ) : event?.previousAppointment?.type === CONSULTATION ? (
                 <p className='font-16'>{event?.previousAppointment?.meetingLink ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}: {event?.previousAppointment?.meetingLink ? event?.previousAppointment?.meetingLink : event?.previousAppointment?.phoneNumber}</p>
               ) : (
                 <p className='font-16'>{intl.formatMessage(messages.where)}: {event?.previousAppointment?.location}</p>
               )}
-              <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.previousAppointment?.type === 1 ? event?.previousAppointment?.screeningTime ?? '' : this.displayDuration(event?.previousAppointment)}</span></p>
+              <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.previousAppointment?.type === SCREEN ? event?.previousAppointment?.screeningTime ?? '' : this.displayDuration(event?.previousAppointment)}</span></p>
             </div>
           </Col>
           <Col xs={24} sm={24} md={12} className="flex flex-col">
             <p className='font-16 text-center mb-0'>{intl.formatMessage(msgModal.current)}</p>
             <div className='current-content flex-1'>
-              <p className='font-16 font-700'>{event?.type === 1 ? intl.formatMessage(msgModal.screening) : event?.type === 2 ? intl.formatMessage(msgModal.evaluation) : event?.type === 3 ? intl.formatMessage(msgModal.appointment) : event?.type === 4 ? intl.formatMessage(msgModal.consultation) : ''}</p>
+              <p className='font-16 font-700'>{event?.type === SCREEN ? intl.formatMessage(msgModal.screening) : event?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(msgModal.appointment) : event?.type === CONSULTATION ? intl.formatMessage(msgModal.consultation) : ''}</p>
               <p className='font-16'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
               <p className='font-16'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
-              {event?.type === 1 ? (
+              {event?.type === SCREEN ? (
                 <p className='font-16 whitespace-nowrap'>{intl.formatMessage(messages.phonenumber)}: {event?.phoneNumber}</p>
-              ) : event?.type === 4 ? (
+              ) : event?.type === CONSULTATION ? (
                 <p className='font-16'>{event?.meetingLink ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}: {event?.meetingLink ? event?.meetingLink : event?.phoneNumber}</p>
               ) : (
                 <p className='font-16'>{intl.formatMessage(messages.where)}: {event?.location}</p>
               )}
-              <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.type === 1 ? event?.screeningTime ?? '' : this.displayDuration(event)}</span></p>
+              <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.type === SCREEN ? event?.screeningTime ?? '' : this.displayDuration(event)}</span></p>
             </div>
           </Col>
         </Row>
@@ -693,7 +694,7 @@ class DrawerDetail extends Component {
 
     return (
       <Drawer
-        title={event?.type === 1 ? intl.formatMessage(messages.screeningDetails) : event?.type === 2 ? intl.formatMessage(messages.evaluationDetails) : event?.type === 4 ? intl.formatMessage(messages.consultationDetails) : intl.formatMessage(messages.appointmentDetails)}
+        title={event?.type === SCREEN ? intl.formatMessage(messages.screeningDetails) : event?.type === EVALUATION ? intl.formatMessage(messages.evaluationDetails) : event?.type === CONSULTATION ? intl.formatMessage(messages.consultationDetails) : intl.formatMessage(messages.appointmentDetails)}
         closable={true}
         onClose={() => this.props.onClose()}
         open={this.props.visible}
@@ -710,27 +711,27 @@ class DrawerDetail extends Component {
         }
       >
         <div>
-          {event?.flagStatus === 1 && event?.flagItems?.flagType === 1 && (
+          {event?.flagStatus === ACTIVE && event?.flagItems?.flagType === BALANCE && (
             <div className='text-center'><MdOutlineRequestQuote color="#ff0000" size={32} /></div>
           )}
-          {event?.flagStatus === 1 && event?.flagItems?.flagType === 2 && (
+          {event?.flagStatus === ACTIVE && event?.flagItems?.flagType === NOSHOW && (
             <div className='text-center'><MdOutlineEventBusy color="#ff0000" size={32} /></div>
           )}
-          {event?.flagStatus !== 1 && event?.type === 4 && event?.status === 0 && event?.consultant?._id && event.consultant?._id !== auth.user?.consultantInfo?._id && (
+          {event?.flagStatus !== ACTIVE&& event?.type === CONSULTATION && event?.status === PENDING && event?.consultant?._id && event.consultant?._id !== auth.user?.consultantInfo?._id && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.claimed)}]</div>
           )}
-          {event?.flagStatus !== 1 && event?.status === -1 && (
+          {event?.flagStatus !== ACTIVE && event?.status === CLOSED && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.accepted)}]</div>
           )}
-          {event?.flagStatus !== 1 && event?.status === -2 ? event?.dependent?.isRemoved ? (
+          {event?.flagStatus !== ACTIVE && event?.status === CANCELLED ? event?.dependent?.isRemoved ? (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.graduated)}]</div>
           ) : (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.cancelled)}]</div>
           ) : null}
-          {event?.flagStatus !== 1 && event?.status === -3 && (
+          {event?.flagStatus !== BALANCE && event?.status === DECLINED && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(msgDashboard.declined)}]</div>
           )}
-          {event?.flagStatus !== 1 && event?.status === 0 && event?.previousAppointment && (
+          {event?.flagStatus !== BALANCE && event?.status === PENDING && event?.previousAppointment && (
             <Popover content={contentConfirm} trigger="click">
               <div className='event-status text-consultation font-20 text-center text-underline cursor'>
                 {intl.formatMessage(msgDashboard.rescheduled)}
@@ -742,7 +743,7 @@ class DrawerDetail extends Component {
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.what)}</p>
               <BiDollarCircle size={18} className='mx-10 text-green500' />
             </div>
-            <p className='font-16 flex flex-col'><span>{event?.skillSet?.name}</span><span>{event.type === 4 ? '(HMGH Consultation)' : ''}</span></p>
+            <p className='font-16 flex flex-col'><span>{event?.skillSet?.name}</span><span>{event.type === CONSULTATION ? '(HMGH Consultation)' : ''}</span></p>
           </div>
           <Popover
             placement="leftTop"
@@ -756,7 +757,7 @@ class DrawerDetail extends Component {
               <a className='font-18 underline text-primary'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</a>
             </div>
           </Popover>
-          {event?.type === 4 ? (
+          {event?.type === CONSULTATION ? (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.with)}</p>
               <div className='flex flex-row flex-1'>
@@ -781,35 +782,35 @@ class DrawerDetail extends Component {
           )}
           <div className='detail-item flex'>
             <p className='font-18 font-700 title'>{intl.formatMessage(messages.when)}</p>
-            <p className='font-16'>{event?.type === 1 ? event?.screeningTime ?? '' : this.displayDuration(event)}</p>
+            <p className='font-16'>{event?.type === SCREEN ? event?.screeningTime ?? '' : this.displayDuration(event)}</p>
           </div>
-          {[2, 3, 5].includes(event?.type) && (
+          {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.where)}</p>
               <p className='font-18'>{event?.location}</p>
             </div>
           )}
-          {[2, 3, 5].includes(event?.type) && (
+          {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(msgCreateAccount.rate)}</p>
-              <p className={`font-18 ${event?.status === -1 ? 'text-underline cursor' : ''} ${!event?.isPaid && 'text-red'}`} onClick={() => event?.status === -1 && this.setState({ isModalInvoice: true })}>${event?.items?.length ? event.items?.reduce((a, b) => a += b.rate * 1, 0) : event?.rate}</p>
+              <p className={`font-18 ${event?.status === CLOSED ? 'text-underline cursor' : ''} ${!event?.isPaid && 'text-red'}`} onClick={() => event?.status === CLOSED && this.setState({ isModalInvoice: true })}>${event?.items?.length ? event.items?.reduce((a, b) => a += b.rate * 1, 0) : event?.rate}</p>
             </div>
           )}
-          {[1, 4].includes(event?.type) && (
+          {[SCREEN, CONSULTATION].includes(event?.type) && (
             <div className='detail-item flex'>
-              <p className='font-18 font-700 title'>{(event?.type === 4 && event?.meetingLink) ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}</p>
-              <p className={`font-18 cursor ${(event?.type === 4 && event?.meetingLink) ? 'text-underline text-primary' : ''}`} onClick={() => (event?.type === 4 && event?.meetingLink) && window.open(event?.meetingLink)} >{(event?.type === 4 && event?.meetingLink) ? event?.meetingLink : event?.phoneNumber}</p>
+              <p className='font-18 font-700 title'>{(event?.type === CONSULTATION && event?.meetingLink) ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}</p>
+              <p className={`font-18 cursor ${(event?.type === CONSULTATION && event?.meetingLink) ? 'text-underline text-primary' : ''}`} onClick={() => (event?.type === CONSULTATION && event?.meetingLink) && window.open(event?.meetingLink)} >{(event?.type === CONSULTATION && event?.meetingLink) ? event?.meetingLink : event?.phoneNumber}</p>
             </div>
           )}
         </div>
-        {listAppointmentsRecent?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === 1) ? (
+        {listAppointmentsRecent?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE) ? (
           <div className='text-center font-18 mt-2'>
-            {listAppointmentsRecent?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === 1).flagItems?.flagType === 1 ? (
+            {listAppointmentsRecent?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE).flagItems?.flagType === BALANCE ? (
               <MdOutlineRequestQuote color="#ff0000" size={32} />
             ) : (
               <MdOutlineEventBusy color="#ff0000" size={32} />
             )}
-            {event?.flagStatus === 1 ? userRole === 3 ? (
+            {event?.flagStatus === ACTIVE ? userRole === 3 ? (
               <div className='flex items-center justify-between gap-2'>
                 {(event?.flagItems?.isPaid || event?.flagItems?.rate == 0) ? (
                   <Button type='primary' block className='flex-1 h-30 p-0' onClick={this.onOpenModalCreateNote}>
@@ -822,7 +823,7 @@ class DrawerDetail extends Component {
                   </Button>
                 ) : event?.flagItems?.rate == 0 ? null : (
                   <>
-                    <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagItems?.flagType === 1 ? this.onShowModalBalance() : event?.flagItems?.flagType === 2 ? this.onShowModalNoShow() : {}}>
+                    <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagItems?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagItems?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
                     <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
@@ -942,42 +943,42 @@ class DrawerDetail extends Component {
               )}
             </div>
             <Row gutter={15} className='list-btn-detail'>
-              {event?.type === 4 && event?.status === 0 && moment().isBefore(moment(event?.date)) && !event?.consultant?._id && userRole === 100 && (
+              {event?.type === CONSULTATION && event?.status === PENDING && moment().isBefore(moment(event?.date)) && !event?.consultant?._id && userRole === 100 && (
                 <Col span={12}>
                   <Button type='primary' icon={<AiFillTag size={15} />} block onClick={this.handleTag} className='flex items-center gap-2 h-30'>
                     {intl.formatMessage(messages.tag)}
                   </Button>
                 </Col>
               )}
-              {event?.type === 1 && event?.status === 0 && userRole > 3 && (
+              {event?.type === SCREEN && event?.status === PENDING && userRole > 3 && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={() => this.openModalProcess()} className='flex items-center gap-2 h-30'>
                     {intl.formatMessage(messages.markClosed)}
                   </Button>
                 </Col>
               )}
-              {event.type === 2 && event?.status === 0 && userRole > 3 && (
+              {event?.type === EVALUATION && event?.status === PENDING && userRole > 3 && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={() => this.openModalProcess()} className='flex items-center gap-2 h-30'>
                     {intl.formatMessage(messages.markClosed)}
                   </Button>
                 </Col>
               )}
-              {event?.type === 4 && event?.status === 0 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900) && (
+              {event?.type === CONSULTATION && event?.status === PENDING && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900) && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsCheckCircle size={15} />} block className='flex items-center gap-2 h-30' onClick={() => this.openModalProcess()}>
                     {intl.formatMessage(messages.markClosed)}
                   </Button>
                 </Col>
               )}
-              {[3, 5].includes(event?.type) && event?.status === 0 && userRole > 3 && (
+              {[APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === PENDING && userRole > 3 && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={() => this.onOpenModalInvoice()} className='flex items-center gap-2 h-30'>
                     {intl.formatMessage(messages.markClosed)}
                   </Button>
                 </Col>
               )}
-              {[2, 3, 5].includes(event?.type) && event?.status === -1 && !event?.isPaid && (userRole === 3 || userRole > 900) && (
+              {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === CLOSED && !event?.isPaid && (userRole === 3 || userRole > 900) && (
                 <Col span={12}>
                   <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                     <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
@@ -998,63 +999,63 @@ class DrawerDetail extends Component {
                   </form>
                 </Col>
               )}
-              {[2, 3, 5].includes(event?.type) && event?.status === -1 && (
+              {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === CLOSED && (
                 <Col span={12}>
                   <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.onOpenModalInvoice}>
                     {intl.formatMessage(messages.viewInvoice)}
                   </Button>
                 </Col>
               )}
-              {((userRole === 30 || userRole > 900) && event?.status === -3 && event?.type === 1) && (
+              {((userRole === 30 || userRole > 900) && event?.status === DECLINED && event?.type === SCREEN) && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={this.handleAcceptDeclinedScreening}>
                     {intl.formatMessage(msgModal.accept)}
                   </Button>
                 </Col>
               )}
-              {(userRole === 3 && event?.status === -3 && [2, 3, 5].includes(event?.type)) && (
+              {(userRole === 3 && event?.status === DECLINED && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type)) && (
                 <Col span={12}>
                   <Button type='primary' icon={<TbSend size={12} />} block onClick={this.openModalMessage}>
                     {intl.formatMessage(msgModal.appeal)}
                   </Button>
                 </Col>
               )}
-              {(userRole !== 3 && !isShowFeedback && [-1, -3].includes(event?.status) && event?.type !== 4) && (
+              {(userRole !== 3 && !isShowFeedback && [CLOSED, DECLINED].includes(event?.status) && event?.type !== CONSULTATION) && (
                 <Col span={12}>
                   <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.showFeedback}>
                     {intl.formatMessage(messages.leaveFeedback)}
                   </Button>
                 </Col>
               )}
-              {(!isShowFeedback && [-1, -3].includes(event?.status) && event?.type === 4 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
+              {(!isShowFeedback && [CLOSED, DECLINED].includes(event?.status) && event?.type === CONSULTATION && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
                 <Col span={12}>
                   <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.showFeedback}>
                     {intl.formatMessage(messages.leaveFeedback)}
                   </Button>
                 </Col>
               )}
-              {(userRole === 3 && ![0, -2].includes(event?.status) && !isLeftFeedback) && (
+              {(userRole === 3 && [CLOSED, DECLINED].includes(event?.status) && !isLeftFeedback) && (
                 <Col span={12}>
                   <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.handleRequestFeedback}>
                     {intl.formatMessage(messages.requestFeedback)}
                   </Button>
                 </Col>
               )}
-              {(event?.status === 0 && moment().isBefore(moment(event?.date)) && event?.type !== 4) && (
+              {(event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type !== CONSULTATION) && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsClockHistory size={15} />} block onClick={this.openModalCurrent}>
                     {intl.formatMessage(messages.reschedule)}
                   </Button>
                 </Col>
               )}
-              {(event?.status === 0 && moment().isBefore(moment(event?.date)) && event?.type === 4 && (userRole === 3 || userRole > 900 || (userRole === 100) && event?.consultant?._id && event?.consultant?._id === auth.user?.consultantInfo?._id)) && (
+              {(event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && (userRole === 3 || userRole > 900 || (userRole === 100) && event?.consultant?._id && event?.consultant?._id === auth.user?.consultantInfo?._id)) && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsClockHistory size={15} />} block onClick={this.openModalCurrent}>
                     {intl.formatMessage(messages.reschedule)}
                   </Button>
                 </Col>
               )}
-              {(event?.status === 0 && moment().isBefore(moment(event?.date)) && event?.type === 4 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
+              {(event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
                 <Col span={12}>
                   <Popover trigger="click" placement='bottom' overlayClassName='consultant' content={consultants?.length ? (
                     <Radio.Group onChange={e => this.handleSwitchTag(e.target.value)} className="box-card p-10 bg-pastel">
@@ -1071,58 +1072,58 @@ class DrawerDetail extends Component {
                   </Popover>
                 </Col>
               )}
-              {(event?.status === 0 && moment().isBefore(moment(event?.date)) && event?.type === 4 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
+              {(event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
                 <Col span={12}>
                   <Button type='primary' icon={<MdOutlineRemove size={15} />} block onClick={this.handleRemoveTag}>
                     {intl.formatMessage(messages.removeTag)}
                   </Button>
                 </Col>
               )}
-              {(!isFlag && userRole > 3 && [2, 3, 5].includes(event?.type) && (event?.status === -1 || event?.status === 0)) && (
+              {(!isFlag && userRole > 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && (event?.status === CLOSED || event?.status === PENDING)) && (
                 <Col span={12}>
                   <Button
                     type='primary'
                     icon={<BsFillFlagFill size={15} />}
                     block
                     onClick={() => {
-                      event?.status === 0 && moment().isBefore(moment(event?.date)) && this.onShowModalBalance();
-                      event?.status === 0 && moment().isAfter(moment(event?.date)) && this.onShowModalNoShow();
-                      event?.status === -1 && this.onShowModalBalance();
+                      event?.status === PENDING && moment().isBefore(moment(event?.date)) && this.onShowModalBalance();
+                      event?.status === PENDING && moment().isAfter(moment(event?.date)) && this.onShowModalNoShow();
+                      event?.status === CLOSED && this.onShowModalBalance();
                     }}
                   >
                     {intl.formatMessage(messages.flagDependent)}
                   </Button>
                 </Col>
               )}
-              {(userRole === 3 && [2, 3, 5].includes(event?.type) && event?.status === -1 && event?.flagStatus === 0) && (
+              {(userRole === 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === CLOSED && event?.flagStatus === NOFLAG) && (
                 <Col span={12}>
                   <Button type='primary' icon={<FaFileContract size={12} />} block >
                     {intl.formatMessage(messages.requestInvoice)}
                   </Button>
                 </Col>
               )}
-              {(userRole === 3 && [2, 3, 5].includes(event?.type) && event?.flagStatus === 1 && (event?.isPaid || event?.flagItems?.rate == 0)) && (
+              {(userRole === 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.flagStatus === ACTIVE && (event?.isPaid || event?.flagItems?.rate == 0)) && (
                 <Col span={12}>
                   <Button type='primary' icon={<FaFileContract size={12} />} block onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
                   </Button>
                 </Col>
               )}
-              {((userRole === 3 || userRole > 900) && event?.status === 0) && (
+              {((userRole === 3 || userRole > 900) && event?.status === PENDING) && (
                 <Col span={12}>
                   <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.showEditNotes}>
                     {intl.formatMessage(messages.editNotes)}
                   </Button>
                 </Col>
               )}
-              {event?.status === 0 && event?.type !== 4 && (
+              {event?.status === PENDING && event?.type !== CONSULTATION && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsXCircle size={15} />} block onClick={this.openModalCancel}>
                     {intl.formatMessage(msgModal.cancel)}
                   </Button>
                 </Col>
               )}
-              {event?.status === 0 && event?.type === 4 && (userRole === 3 || userRole > 900 || (userRole === 100 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id))) && (
+              {event?.status === PENDING && event?.type === CONSULTATION && (userRole === 3 || userRole > 900 || (userRole === 100 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id))) && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsXCircle size={15} />} block onClick={this.openModalCancel}>
                     {intl.formatMessage(msgModal.cancel)}

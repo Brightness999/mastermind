@@ -8,7 +8,7 @@ import { compose } from 'redux';
 import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
 
-import { routerLinks } from '../../constant';
+import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, PENDING, routerLinks } from '../../constant';
 import { ModalDependentDetail, ModalSubsidyProgress } from '../../../components/Modal';
 import msgMainHeader from '../../../components/MainHeader/messages';
 import messages from '../../Dashboard/messages';
@@ -100,7 +100,7 @@ class PrivateNote extends React.Component {
       "Provider": r?.selectedProvider ? `${r?.selectedProvider?.firstName ?? ''} ${r?.selectedProvider?.lastName ?? ''}` : r?.otherProvider,
       "HMGH expense per session": r.priceForSession ?? '',
       "# of approved sessions": r.numberOfSessions ?? '',
-      "# of sessions paid to DATE": r?.appointments?.filter(a => a.status === -1 && a.isPaid)?.length ?? '',
+      "# of sessions paid to DATE": r?.appointments?.filter(a => a.status === CLOSED && a.isPaid)?.length ?? '',
       "Total HMGH expense": r.priceForSession * r.numberOfSessions,
     }))
     this.setState({ csvData: data });
@@ -166,9 +166,9 @@ class PrivateNote extends React.Component {
       { title: 'Age', dataIndex: 'birthday', key: 'age', sorter: (a, b) => a.birthday > b.birthday ? 1 : -1, render: (birthday) => moment().year() - moment(birthday).year() },
       { title: 'Grade', dataIndex: 'currentGrade', key: 'grade' },
       { title: 'School', dataIndex: 'school', key: 'school', render: school => school?.name },
-      { title: 'Count of Sessions Past', dataIndex: 'appointments', key: 'countOfSessionsPast', render: appointments => appointments?.filter(a => [2, 3].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == -1)?.length },
-      { title: 'Count of Sessions Future', dataIndex: 'appointments', key: 'countOfSessionsFuture', render: appointments => appointments?.filter(a => [2, 3].includes(a.type) && moment().isBefore(moment(a.date)) && a.status == 0)?.length },
-      { title: 'Count of Referrals', dataIndex: 'appointments', key: 'countOfReferrals', render: appointments => appointments?.filter(a => a.type == 4 && moment().isAfter(moment(a.date)) && a.status == -1)?.length },
+      { title: 'Count of Sessions Past', dataIndex: 'appointments', key: 'countOfSessionsPast', render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length },
+      { title: 'Count of Sessions Future', dataIndex: 'appointments', key: 'countOfSessionsFuture', render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status == PENDING)?.length },
+      { title: 'Count of Referrals', dataIndex: 'appointments', key: 'countOfReferrals', render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length },
       { title: 'Subsidy', dataIndex: 'subsidy', key: 'subsidy', render: subsidy => subsidy?.length ? subsidy.length : 'No Subsidy' },
     ];
     const skills = JSON.parse(JSON.stringify(auth.skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });

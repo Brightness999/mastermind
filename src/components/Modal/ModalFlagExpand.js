@@ -1,21 +1,23 @@
 import React from 'react';
 import { Modal, Button, Input, Tabs, Table, Space, Popconfirm, message } from 'antd';
 import intl from 'react-intl-universal';
-import messages from './messages';
-import msgDrawer from '../DrawerDetail/messages';
-import './style/index.less';
-import '../../assets/styles/login.less';
-import request from '../../utils/api/request'
-import { clearFlag, requestClearance, setFlag } from '../../utils/api/apiList';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { SearchOutlined } from '@ant-design/icons';
+import moment from 'moment';
+
+import messages from './messages';
+import msgDrawer from '../DrawerDetail/messages';
+import request from '../../utils/api/request'
+import { clearFlag, requestClearance, setFlag } from '../../utils/api/apiList';
 import ModalBalance from './ModalBalance';
 import ModalNoShow from './ModalNoShow';
-import moment from 'moment';
 import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/features/appointmentsSlice';
+import { APPOINTMENT, BALANCE, EVALUATION, NOSHOW, SUBSIDY } from '../../routes/constant';
 import { store } from '../../redux/store';
 import ModalCreateNote from './ModalCreateNote';
+import './style/index.less';
+import '../../assets/styles/login.less';
 
 class ModalFlagExpand extends React.Component {
 	constructor(props) {
@@ -69,10 +71,10 @@ class ModalFlagExpand extends React.Component {
 	}
 
 	openModalFlag = (appointment) => {
-		if (appointment?.flagItems?.flagType == 1) {
+		if (appointment?.flagItems?.flagType === BALANCE) {
 			this.setState({ visibleBalance: true, event: appointment });
 		}
-		if (appointment?.flagItems?.flagType == 2) {
+		if (appointment?.flagItems?.flagType === NOSHOW) {
 			this.setState({ visibleNoShow: true, event: appointment });
 		}
 	}
@@ -87,10 +89,10 @@ class ModalFlagExpand extends React.Component {
 			_id: event?._id,
 			flagItems: {
 				...values,
-				type: event?.type == 2 ? intl.formatMessage(messages.evaluation) : event?.type == 3 ? intl.formatMessage(messages.standardSession) : event?.type == 5 ? intl.formatMessage(messages.subsidizedSession) : '',
+				type: event?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
 				locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
 				rate: values?.penalty * 1 + values?.program * 1,
-				flagType: 2,
+				flagType: NOSHOW,
 			}
 		}
 		request.post(setFlag, data).then(result => {
@@ -111,10 +113,10 @@ class ModalFlagExpand extends React.Component {
 			_id: event?._id,
 			flagItems: {
 				...values,
-				type: event?.type == 2 ? intl.formatMessage(messages.evaluation) : event?.type == 3 ? intl.formatMessage(messages.standardSession) : event?.type == 5 ? intl.formatMessage(messages.subsidizedSession) : '',
+				type: event?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
 				locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
 				rate: values?.late,
-				flagType: 1,
+				flagType: BALANCE,
 			}
 		}
 		request.post(setFlag, data).then(result => {
@@ -218,7 +220,7 @@ class ModalFlagExpand extends React.Component {
 					{ text: 'Subsidized Session', value: 5 },
 				],
 				onFilter: (value, record) => record.type == value,
-				render: (type) => type == 2 ? intl.formatMessage(messages.evaluation) : type == 3 ? intl.formatMessage(messages.standardSession) : type == 5 ? intl.formatMessage(messages.subsidizedSession) : '',
+				render: (type) => type === EVALUATION ? intl.formatMessage(messages.evaluation) : type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
 			},
 			{ title: 'Session Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm A') },
 		];

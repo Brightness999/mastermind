@@ -15,6 +15,7 @@ import { url } from '../../utils/api/baseUrl';
 import request from '../../utils/api/request';
 import { getAllConsultantForParent, getAuthorizationUrl, rescheduleAppointmentForParent } from '../../utils/api/apiList';
 import { setMeetingLink, setSelectedTime, setSelectedUser } from '../../redux/features/authSlice';
+import { APPOINTMENT, CONSULTATION, EVALUATION, PENDING, SCREEN } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -92,8 +93,8 @@ class ModalCurrentReferralService extends React.Component {
 			meetingLink: isGoogleMeet ? meetingLink : undefined,
 			addtionalDocuments: fileList.length > 0 ? [fileList[0].response.data] : [],
 			notes: note,
-			type: 4,
-			status: 0,
+			type: CONSULTATION,
+			status: PENDING,
 		};
 
 		request.post(rescheduleAppointmentForParent, postData).then(result => {
@@ -288,14 +289,14 @@ class ModalCurrentReferralService extends React.Component {
 				<div className='header-current'>
 					<Row gutter="15" align="bottom">
 						<Col xs={24} sm={24} md={8}>
-							<p className='font-24 font-700'>{intl.formatMessage(messages.current)} {event?.type == 3 && intl.formatMessage(messages.appointment)}{event?.type == 2 && intl.formatMessage(messages.evaluation)}{event?.type == 1 && intl.formatMessage(messages.screening)}{event?.type == 4 && intl.formatMessage(messages.consultation)}</p>
+							<p className='font-24 font-700'>{intl.formatMessage(messages.current)} {event?.type === APPOINTMENT && intl.formatMessage(messages.appointment)}{event?.type === EVALUATION && intl.formatMessage(messages.evaluation)}{event?.type === SCREEN && intl.formatMessage(messages.screening)}{event?.type === CONSULTATION && intl.formatMessage(messages.consultation)}</p>
 							<p className='font-16'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
 							<p className='font-16'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
 						</Col>
 						<Col xs={24} sm={24} md={8}>
 							<p className={`font-16 ${event?.subsidy ? '' : 'd-none'}`}>{intl.formatMessage(msgCreateAccount.subsidy)}</p>
-							<p className={`font-16 font-700 ${event?.type != 2 ? 'd-none' : ''}`}>{event?.separateEvaluationDuration ?? ''} {intl.formatMessage(messages.evaluation)}</p>
-							<p className='font-16'>{(event?.type == 1 || event?.type == 4) ? event?.phoneNumber ?? '' : event?.location ?? ''}</p>
+							<p className={`font-16 font-700 ${event?.type != EVALUATION ? 'd-none' : ''}`}>{event?.separateEvaluationDuration ?? ''} {intl.formatMessage(messages.evaluation)}</p>
+							<p className='font-16'>{(event?.type === SCREEN || event?.type === CONSULTATION) ? event?.phoneNumber ?? '' : event?.location ?? ''}</p>
 						</Col>
 						<Col xs={24} sm={24} md={8}>
 							<p></p>

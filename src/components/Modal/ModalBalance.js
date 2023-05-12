@@ -6,16 +6,17 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 
 import messages from './messages';
+import { APPOINTMENT, EVALUATION, NOFLAG, NOSHOW, SCREEN, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
 class ModalBalance extends React.Component {
 	componentDidMount() {
 		const { event } = this.props;
-		if (event?.flagStatus == 0) {
-			if (event?.type == 2) {
+		if (event?.flagStatus === NOFLAG) {
+			if (event?.type === EVALUATION) {
 				this.form?.setFieldsValue({ late: event?.provider?.separateEvaluationRate });
-			} else if (event?.type == 3) {
+			} else if (event?.type === APPOINTMENT) {
 				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(event?.dependent?.currentGrade)) {
 					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level))?.rate });
 				} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(event?.dependent?.currentGrade)) {
@@ -27,7 +28,7 @@ class ModalBalance extends React.Component {
 				} else {
 					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate });
 				}
-			} else if (event?.type == 5) {
+			} else if (event?.type === SUBSIDY) {
 				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(event?.dependent?.currentGrade)) {
 					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level))?.subsidizedRate });
 				} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(event?.dependent?.currentGrade)) {
@@ -63,7 +64,7 @@ class ModalBalance extends React.Component {
 			footer: []
 		};
 		const pastDays = `${moment().diff(moment(event?.date), 'hours') / 24 >= 1 ? Math.floor(moment().diff(moment(event?.date), 'hours') / 24) + 'Days' : ''} ${moment().diff(moment(event?.date), 'hours') % 24 > 0 ? Math.floor(moment().diff(moment(event?.date), 'hours') % 24) + 'Hours' : ''}`
-		const currentBalance = event?.type == 2 ? event?.provider?.separateEvaluationRate : event?.type == 3 ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate : event?.type == 5 ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.subsidizedRate : '';
+		const currentBalance = event?.type === SCREEN ? event?.provider?.separateEvaluationRate : event?.type === APPOINTMENT ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate : event?.type === SUBSIDY ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.subsidizedRate : '';
 
 		return (
 			<Modal {...modalProps}>
@@ -89,7 +90,7 @@ class ModalBalance extends React.Component {
 									addonBefore="$"
 									style={{ width: 100 }}
 									className='font-16 late'
-									disabled={user?.role == 3 || event?.flagStatus == 2}
+									disabled={user?.role == 3 || event?.flagStatus === NOSHOW}
 									onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
 								/>
 							</Form.Item>
@@ -104,13 +105,13 @@ class ModalBalance extends React.Component {
 						</div>
 					</div>
 					<Form.Item name="notes" label={intl.formatMessage(messages.notes)} rules={[{ required: true }]}>
-						<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.notes)} disabled={user?.role == 3 || event?.flagStatus == 2} className="notes" />
+						<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.notes)} disabled={user?.role == 3 || event?.flagStatus === NOSHOW} className="notes" />
 					</Form.Item>
 					<Row className="justify-end gap-2 mt-10">
 						<Button key="back" onClick={this.props.onCancel}>
 							{intl.formatMessage(messages.cancel)}
 						</Button>
-						{user?.role == 3 || event?.flagStatus == 2 ? (
+						{user?.role == 3 || event?.flagStatus === NOSHOW ? (
 							<Button key="submit" type="primary" onClick={this.props.onCancel} className="px-20">OK</Button>
 						) : (
 							<Button key="submit" type="primary" htmlType='submit'>

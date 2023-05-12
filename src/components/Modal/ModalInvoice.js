@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { downloadInvoice, sendEmailInvoice } from '../../utils/api/apiList';
 import request from '../../utils/api/request';
+import { APPOINTMENT, CONSULTATION, EVALUATION } from '../../routes/constant';
 
 class ModalInvoice extends React.Component {
 	constructor(props) {
@@ -32,7 +33,7 @@ class ModalInvoice extends React.Component {
 			this.setState({ items: event.items, subTotal: event.items?.reduce((a, b) => a += b.rate * 1, 0) });
 		} else {
 			const initItems = [{
-				type: event?.type == 2 ? intl.formatMessage(messages.evaluation) : event?.type == 3 ? intl.formatMessage(messages.standardSession) : event?.type == 4 ? intl.formatMessage(messages.subsidizedSession) : '',
+				type: event?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : event?.type === CONSULTATION ? intl.formatMessage(messages.subsidizedSession) : '',
 				locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
 				rate: event?.rate,
 			}]

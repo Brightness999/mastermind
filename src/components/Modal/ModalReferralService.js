@@ -15,6 +15,7 @@ import { url } from '../../utils/api/baseUrl'
 import request from '../../utils/api/request'
 import { createAppointmentForParent, getAllConsultantForParent, getAuthorizationUrl } from '../../utils/api/apiList';
 import { setMeetingLink, setSelectedTime, setSelectedUser } from '../../redux/features/authSlice';
+import { ADMINPREAPPROVED, CONSULTATION, PENDING } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -99,7 +100,7 @@ class ModalReferralService extends React.Component {
 		}
 		this.setState({ errorMessage: '' });
 
-		const existingConsultation = this.props.appointments.find(appointment => appointment.type === 4 && appointment.status === 0 && appointment.dependent?._id === selectedDependent && moment(new Date(appointment.date).toLocaleString()).isSame(arrTime[selectedTimeIndex].value))
+		const existingConsultation = this.props.appointments.find(appointment => appointment.type === CONSULTATION && appointment.status === PENDING && appointment.dependent?._id === selectedDependent && moment(new Date(appointment.date).toLocaleString()).isSame(arrTime[selectedTimeIndex].value))
 		if (existingConsultation) {
 			message.warn("The consultation already exists");
 			return;
@@ -115,8 +116,8 @@ class ModalReferralService extends React.Component {
 			meetingLink: isGoogleMeet ? meetingLink : undefined,
 			addtionalDocuments: fileList.length > 0 ? [fileList[0].response.data] : [],
 			notes: note,
-			type: 4,
-			status: 0,
+			type: CONSULTATION,
+			status: PENDING,
 			subsidy: subsidy ? subsidy?._id : selectedSubsidy,
 		};
 
@@ -338,7 +339,7 @@ class ModalReferralService extends React.Component {
 	render() {
 		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, skillSet, consultants, selectedSubsidy } = this.state;
 		const { auth, listSubsidy, subsidy } = this.props;
-		const subsidiaries = listSubsidy?.filter(s => s.status === 3 && !s.consultation?.date) ?? [];
+		const subsidiaries = listSubsidy?.filter(s => s.status === ADMINPREAPPROVED && !s.consultation?.date) ?? [];
 
 		const modalProps = {
 			className: 'modal-referral-service',

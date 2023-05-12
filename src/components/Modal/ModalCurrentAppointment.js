@@ -15,6 +15,7 @@ import msgDrawer from '../../components/DrawerDetail/messages';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { rescheduleAppointmentForParent } from '../../utils/api/apiList';
+import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, PENDING, SCREEN, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -46,7 +47,7 @@ class ModalCurrentAppointment extends React.Component {
 		const { address, userRole } = this.state;
 		const { event } = this.props;
 
-		if (event?.type == 2) {
+		if (event?.type === EVALUATION) {
 			duration = event?.provider?.separateEvaluationDuration;
 		} else {
 			duration = event?.provider?.duration;
@@ -106,9 +107,9 @@ class ModalCurrentAppointment extends React.Component {
 			skillSet: store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.services ?? [],
 			selectedDate: moment(event?.date),
 			addressOptions: ['Dependent Home', 'Provider Office', store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.school?.name],
-			standardRate: event?.type == 3 ? event?.rate : '',
-			subsidizedRate: event?.type == 5 ? event?.rate : '',
-			duration: event?.type == 2 ? event?.provider?.separateEvaluationDuration : event?.provider?.duration,
+			standardRate: event?.type == APPOINTMENT ? event?.rate : '',
+			subsidizedRate: event?.type == SUBSIDY ? event?.rate : '',
+			duration: event?.type === EVALUATION ? event?.provider?.separateEvaluationDuration : event?.provider?.duration,
 		});
 		this.form?.setFieldsValue({ dependent: event?.dependent?._id, skill: event?.skillSet?._id, address: event?.location });
 		this.onSelectDate(moment(event?.date));
@@ -192,8 +193,8 @@ class ModalCurrentAppointment extends React.Component {
 			return;
 		}
 		this.setState({ errorMessage: '' })
-		if (event?.type == 2) {
-			const appointment = event?.provider?.appointments?.find(a => a._id != event?._id && a.dependent == event?.dependent?._id && a.type == 2 && a.status == 0);
+		if (event?.type === EVALUATION) {
+			const appointment = event?.provider?.appointments?.find(a => a._id != event?._id && a.dependent == event?.dependent?._id && a.type === EVALUATION && a.status === PENDING);
 			if (appointment) {
 				message.warning("You can't create more evaluation.");
 				return;
@@ -207,13 +208,13 @@ class ModalCurrentAppointment extends React.Component {
 			date: hour?.valueOf(),
 			location: address,
 			notes: notes,
-			status: 0,
+			status: PENDING,
 		};
 
 		request.post(rescheduleAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
-				if (postData?.type == 2) {
+				if (postData?.type == EVALUATION) {
 					message.success(`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''} requires a ${durations?.find(a => a.value == this.state.duration)?.label} evaluation. Please proceed to schedule.`);
 				}
 				this.props.onSubmit();
@@ -289,19 +290,19 @@ class ModalCurrentAppointment extends React.Component {
 				<div className='header-current'>
 					<Row gutter="15" align="bottom">
 						<Col xs={24} sm={24} md={8}>
-							<p className='font-24 font-700'>{intl.formatMessage(messages.current)} {event?.type == 3 && intl.formatMessage(messages.appointment)}{event?.type == 2 && intl.formatMessage(messages.evaluation)}{event?.type == 1 && intl.formatMessage(messages.screening)}{event?.type == 4 && intl.formatMessage(messages.consultation)}</p>
+							<p className='font-24 font-700'>{intl.formatMessage(messages.current)} {event?.type == APPOINTMENT && intl.formatMessage(messages.appointment)}{event?.type === EVALUATION && intl.formatMessage(messages.evaluation)}{event?.type === SCREEN && intl.formatMessage(messages.screening)}{event?.type === CONSULTATION && intl.formatMessage(messages.consultation)}</p>
 							<p className='font-16'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
 							<p className='font-16'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
 						</Col>
 						<Col xs={24} sm={24} md={8}>
-							<p className={`font-16 ${event?.type != 3 ? 'display-none' : ''}`}>{intl.formatMessage(msgCreateAccount.subsidy)}</p>
-							<p className={`font-16 font-700 ${event?.type != 2 ? 'display-none' : ''}`}>{event?.separateEvaluationDuration ?? ''} {intl.formatMessage(messages.evaluation)}</p>
-							<p className='font-16'>{(event?.type == 1 || event?.type == 4) ? event?.phoneNumber ?? '' : event?.location ?? ''}</p>
+							<p className={`font-16 ${event?.type != APPOINTMENT ? 'display-none' : ''}`}>{intl.formatMessage(msgCreateAccount.subsidy)}</p>
+							<p className={`font-16 font-700 ${event?.type != EVALUATION ? 'display-none' : ''}`}>{event?.separateEvaluationDuration ?? ''} {intl.formatMessage(messages.evaluation)}</p>
+							<p className='font-16'>{(event?.type === SCREEN || event?.type === CONSULTATION) ? event?.phoneNumber ?? '' : event?.location ?? ''}</p>
 						</Col>
 						<Col xs={24} sm={24} md={8}>
 							<p></p>
 							<p className='font-16'>{event?.skillSet?.name ?? ''}</p>
-							<p className='font-16'>{event?.type == 1 ? event?.screeningTime ?? '' : this.displayDuration()}</p>
+							<p className='font-16'>{event?.type === SCREEN ? event?.screeningTime ?? '' : this.displayDuration()}</p>
 						</Col>
 					</Row>
 				</div>
@@ -314,8 +315,8 @@ class ModalCurrentAppointment extends React.Component {
 						ref={ref => this.form = ref}
 					>
 						<div className='flex gap-5 items-center'>
-							<p className='font-30 mb-10'>{event?.type == 3 && intl.formatMessage(messages.newAppointment)}{event?.type == 2 && intl.formatMessage(messages.newEvaluation)}{event?.type == 1 && intl.formatMessage(messages.newScreening)}</p>
-							{event?.type == 2 && (
+							<p className='font-30 mb-10'>{event?.type == APPOINTMENT && intl.formatMessage(messages.newAppointment)}{event?.type === EVALUATION && intl.formatMessage(messages.newEvaluation)}{event?.type === SCREEN && intl.formatMessage(messages.newScreening)}</p>
+							{event?.type === EVALUATION && (
 								<div className='font-20'>
 									<div>{store.getState().auth.durations?.find(a => a.value == event?.provider?.separateEvaluationDuration)?.label} evaluation</div>
 									<div>Rate: ${event?.provider?.separateEvaluationRate}</div>
@@ -324,7 +325,7 @@ class ModalCurrentAppointment extends React.Component {
 						</div>
 						<div className='flex flex-row items-center mb-10'>
 							<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}<sup>*</sup></p>
-							{event?.type == 3 && subsidyAvailable && (
+							{event?.type == APPOINTMENT && subsidyAvailable && (
 								<div className='flex flex-row items-center ml-20 gap-5'>
 									<p className='mb-0'>Number of Sessions: {restSessions}</p>
 									<div className='flex items-center gap-2'>
@@ -371,7 +372,7 @@ class ModalCurrentAppointment extends React.Component {
 								<Form.Item
 									name="address"
 									label={intl.formatMessage(msgCreateAccount.location)}
-									rules={[{ required: [2, 3, 5].includes(event?.type), message: "Select an appointment location." }]}
+									rules={[{ required: [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type), message: "Select an appointment location." }]}
 								>
 									<Select
 										showSearch
@@ -420,7 +421,7 @@ class ModalCurrentAppointment extends React.Component {
 											{!!event?.provider?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
 											{userRole > 3 && (event?.provider?.isPrivateForHmgh || event?.provider?.manualSchedule?.find(a => a.isPrivate && a.location === address && selectedDate?.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })))) ? <FaCalendarAlt size={16} className="text-green500" /> : null}
 										</p>
-										<p className='font-700 ml-auto text-primary'>{event?.provider?.isNewClientScreening ? event?.provider?.appointments?.find(a => a.dependent == event?.dependent?._id && a.type == 1 && a.status == -1) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
+										<p className='font-700 ml-auto text-primary'>{event?.provider?.isNewClientScreening ? event?.provider?.appointments?.find(a => a.dependent == event?.dependent?._id && a.type === SCREEN && a.status === CLOSED) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
 									<div className='flex'>
 										<div className='flex-1'>

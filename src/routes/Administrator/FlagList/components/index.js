@@ -1,17 +1,18 @@
-import { Divider, Table, Space, Button, Input, message, Popconfirm } from 'antd';
-import { routerLinks } from '../../../constant';
-import { ModalConfirm } from '../../../../components/Modal';
 import React, { createRef } from 'react';
 import intl from 'react-intl-universal';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import moment from 'moment';
+import { Divider, Table, Space, Button, Input, message, Popconfirm } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+
+import { APPOINTMENT, EVALUATION, SUBSIDY, routerLinks } from '../../../constant';
+import { ModalConfirm } from '../../../../components/Modal';
 import mgsSidebar from '../../../../components/SideBar/messages';
 import msgModal from '../../../../components/Modal/messages';
 import msgDrawer from '../../../../components/DrawerDetail/messages';
 import request from '../../../../utils/api/request';
-import { SearchOutlined } from '@ant-design/icons';
 import { activateUser, clearFlag, getFlagList } from '../../../../utils/api/apiList';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
-import moment from 'moment';
 import PageLoading from '../../../../components/Loading/PageLoading';
 
 class FlagList extends React.Component {
@@ -162,12 +163,12 @@ class FlagList extends React.Component {
       {
         title: 'Session Type', dataIndex: 'type', key: 'sessionType',
         filters: [
-          { text: 'Evaluation', value: 2 },
-          { text: 'Standard Session', value: 3 },
-          { text: 'Subsidized Session', value: 5 },
+          { text: 'Evaluation', value: EVALUATION },
+          { text: 'Standard Session', value: APPOINTMENT },
+          { text: 'Subsidized Session', value: SUBSIDY },
         ],
         onFilter: (value, record) => record.type == value,
-        render: (type) => type == 2 ? intl.formatMessage(msgModal.evaluation) : type == 3 ? intl.formatMessage(msgModal.standardSession) : type == 5 ? intl.formatMessage(msgModal.subsidizedSession) : '',
+        render: (type) => type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
       },
       { title: 'Session Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm a') },
       {
