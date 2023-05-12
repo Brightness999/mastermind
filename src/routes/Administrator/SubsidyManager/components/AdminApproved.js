@@ -140,8 +140,8 @@ const AdminApproved = (props) => {
       key: 'provider',
       align: 'center',
       sorter: (a, b) => {
-        const prevName = a?.selectedProvider ? a.selectedProvider.firstName + a.selectedProvider.lastName : a.otherProvider;
-        const nextName = b?.selectedProvider ? b.selectedProvider.firstName + b.selectedProvider.lastName : b.otherProvider;
+        const prevName = a?.selectedProviderFromAdmin ? a.selectedProviderFromAdmin.firstName + a.selectedProviderFromAdmin.lastName : a.otherProvider;
+        const nextName = b?.selectedProviderFromAdmin ? b.selectedProviderFromAdmin.firstName + b.selectedProviderFromAdmin.lastName : b.otherProvider;
         if (prevName.toLowerCase() > nextName.toLowerCase())
           return 1;
         else
@@ -180,14 +180,14 @@ const AdminApproved = (props) => {
       filterIcon: (filtered) => (
         <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
       ),
-      onFilter: (value, record) => record.selectedProvider?.firstName?.toLowerCase()?.includes((value).toLowerCase()) || record.selectedProvider?.lastName?.toLowerCase()?.includes((value).toLowerCase()) || record.otherProvider?.toLowerCase()?.includes((value).toLowerCase()),
+      onFilter: (value, record) => record.selectedProviderFromAdmin?.firstName?.toLowerCase()?.includes((value).toLowerCase()) || record.selectedProviderFromAdmin?.lastName?.toLowerCase()?.includes((value).toLowerCase()) || record.otherProvider?.toLowerCase()?.includes((value).toLowerCase()),
       onFilterDropdownOpenChange: visible => {
         if (visible) {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
       render: (subsidy) => (
-        subsidy?.selectedProvider ? <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
+        subsidy?.selectedProviderFromAdmin ? <div>{subsidy?.selectedProviderFromAdmin?.firstName ?? ''} {subsidy?.selectedProviderFromAdmin?.lastName ?? ''}</div>
           : <div>{subsidy?.otherProvider}</div>
       )
     },
