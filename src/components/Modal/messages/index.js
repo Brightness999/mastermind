@@ -476,5 +476,13 @@ export default {
   editInvoice: {
     id: `${scope}.editInvoice`,
     defaultMessage: 'Edit Invoice',
+  },
+  profile: {
+    id: `${scope}.profile`,
+    defaultMessage: 'Profile',
+  },
+  gradeLevels: {
+    id: `${scope}.gradeLevels`,
+    defaultMessage: 'Grade level(s)',
   }
 };

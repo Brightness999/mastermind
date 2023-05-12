@@ -50,6 +50,7 @@ class ModalNewAppointment extends React.Component {
 		visibleModalConfirm: false,
 		confirmMessage: '',
 		isSubsidyOnly: true,
+		cancellationFee: '',
 	}
 
 	getArrTime = (type, providerIndex, date) => {
@@ -136,6 +137,7 @@ class ModalNewAppointment extends React.Component {
 				standardRate: '',
 				subsidizedRate: '',
 				arrTime: [],
+				cancellationFee: '',
 			});
 		}).catch(err => {
 			message.error(err.message);
@@ -148,6 +150,7 @@ class ModalNewAppointment extends React.Component {
 				standardRate: '',
 				subsidizedRate: '',
 				arrTime: [],
+				cancellationFee: '',
 			});
 		})
 	}
@@ -406,6 +409,7 @@ class ModalNewAppointment extends React.Component {
 			arrTime: newArrTime,
 			standardRate: standardRate,
 			subsidizedRate: subsidizedRate,
+			cancellationFee: listProvider[providerIndex].cancellationFee,
 		});
 	}
 
@@ -500,6 +504,7 @@ class ModalNewAppointment extends React.Component {
 			visibleModalConfirm,
 			confirmMessage,
 			isSubsidyOnly,
+			cancellationFee,
 		} = this.state;
 		const modalProps = {
 			className: 'modal-new',
@@ -670,25 +675,26 @@ class ModalNewAppointment extends React.Component {
 											)}
 										</div>
 										<div className='flex-1 font-12'>
-											{standardRate && <p>Rate: ${standardRate}</p>}
-											{subsidizedRate && <p>Subsidized Rate: ${subsidizedRate}</p>}
+											{standardRate && <p>{intl.formatMessage(msgCreateAccount.rate)}: ${standardRate}</p>}
+											{(subsidizedRate && subsidizedRate != standardRate) && <p>{intl.formatMessage(messages.subsidizedRate)}: ${subsidizedRate}</p>}
+											{standardRate && <p>{intl.formatMessage(msgCreateAccount.cancellationFee)}: ${cancellationFee}</p>}
 										</div>
 									</div>
 									<div className='flex mt-10'>
 										<div className='flex-1'>
-											<p className='text-bold'>{intl.formatMessage(msgCreateAccount.services)}:</p>
+											<p className='text-bold'>{intl.formatMessage(msgCreateAccount.services)}</p>
 											{listProvider[selectedProviderIndex]?.skillSet?.map((skill, i) => (
 												<p className='font-12' key={i}>{skill.name}</p>
 											))}
 										</div>
 										<div className='flex-1'>
-											<p className='text-bold'>Grade level(s)</p>
+											<p className='text-bold'>{intl.formatMessage(messages.gradeLevels)}</p>
 											{listProvider[selectedProviderIndex]?.academicLevel?.map((level, i) => (
 												<p className='font-12' key={i}>{level.level}</p>
 											))}
 										</div>
 									</div>
-									<p className='text-bold mt-10'>Profile</p>
+									<p className='text-bold mt-10'>{intl.formatMessage(messages.profile)}</p>
 									<div className='profile-text'>
 										<Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
 											{listProvider[selectedProviderIndex]?.publicProfile}

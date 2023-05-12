@@ -381,6 +381,8 @@
   "components.Modal.therapistPhone": "Therapist’s Phone",
   "components.Modal.nameOfTherapist": "Name of Therapist",
   "components.Modal.therapistEmail": "Therapist’s Email",
+  "components.Modal.profile": "Profile",
+  "components.Modal.gradeLevels": "Grade level(s)",
   
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.editUser": "Edit User",

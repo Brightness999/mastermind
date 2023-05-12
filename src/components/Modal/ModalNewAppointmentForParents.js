@@ -43,6 +43,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		appointments: [],
 		standardRate: '',
 		subsidizedRate: '',
+		cancellationFee: '',
 		visibleModalScreening: false,
 		userRole: store.getState().auth.user.role,
 		subsidyAvailable: false,
@@ -142,6 +143,7 @@ class ModalNewAppointmentForParents extends React.Component {
 				selectedTimeIndex: -1,
 				standardRate: '',
 				subsidizedRate: '',
+				cancellationFee: '',
 				arrTime: [],
 			});
 		}).catch(err => {
@@ -153,6 +155,7 @@ class ModalNewAppointmentForParents extends React.Component {
 				selectedTimeIndex: -1,
 				standardRate: '',
 				subsidizedRate: '',
+				cancellationFee: '',
 				arrTime: [],
 			});
 		})
@@ -423,6 +426,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			arrTime: newArrTime,
 			standardRate: standardRate,
 			subsidizedRate: subsidizedRate,
+			cancellationFee: listProvider[providerIndex].cancellationFee,
 		});
 	}
 
@@ -518,6 +522,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			visibleModalConfirm,
 			confirmMessage,
 			isSubsidyOnly,
+			cancellationFee,
 		} = this.state;
 		const modalProps = {
 			className: 'modal-new',
@@ -688,25 +693,26 @@ class ModalNewAppointmentForParents extends React.Component {
 											)}
 										</div>
 										<div className='flex-1 font-12'>
-											{standardRate && <p>Rate: ${standardRate}</p>}
-											{subsidizedRate && <p>Subsidized Rate: ${subsidizedRate}</p>}
+											{standardRate && <p>{intl.formatMessage(msgCreateAccount.rate)}: ${standardRate}</p>}
+											{(subsidizedRate && subsidizedRate != standardRate) && <p>{intl.formatMessage(messages.subsidizedRate)}: ${subsidizedRate}</p>}
+											{cancellationFee && <p>{intl.formatMessage(msgCreateAccount.cancellationFee)}: ${cancellationFee}</p>}
 										</div>
 									</div>
 									<div className='flex mt-10'>
 										<div className='flex-1'>
-											<p className='text-bold'>{intl.formatMessage(msgCreateAccount.services)}:</p>
+											<p className='text-bold'>{intl.formatMessage(msgCreateAccount.services)}</p>
 											{listProvider[selectedProviderIndex]?.skillSet?.map((skill, index) => (
 												<p key={index} className='font-12'>{skill.name}</p>
 											))}
 										</div>
 										<div className='flex-1'>
-											<p className='text-bold'>Grade level(s)</p>
+											<p className='text-bold'>{intl.formatMessage(messages.gradeLevels)}</p>
 											{listProvider[selectedProviderIndex]?.academicLevel?.map((level, i) => (
 												<p className='font-12' key={i}>{level.level}</p>
 											))}
 										</div>
 									</div>
-									<p className='text-bold mt-10'>Profile</p>
+									<p className='text-bold mt-10'>{intl.formatMessage(messages.profile)}</p>
 									<div className='profile-text'>
 										<Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
 											{listProvider[selectedProviderIndex]?.publicProfile}
