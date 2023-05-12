@@ -461,6 +461,7 @@ class ModalSubsidyProgress extends React.Component {
 					</div>
 				);
 			}
+			console.log(referral.status)
 			return (
 				<div className='consulation-appoint'>
 					<p className='font-20 font-700'>{intl.formatMessage(messages.consultationAppointment)}</p>
@@ -479,12 +480,12 @@ class ModalSubsidyProgress extends React.Component {
 						</Col>
 						<Col xs={24} sm={24} md={12}>
 							<div className='flex flex-row items-center'>
-								{referral?.status === 0 && moment().isBefore(moment(referral.date)) ? (
+								{[0, -2].includes(referral?.status) ? (
 									<a className='text-primary' onClick={this.onShowModalCurrentReferral}>
 										<FaRegCalendarAlt /> {intl.formatMessage(msgDrawer.reschedule)}
 									</a>
 								) : referral?.status === -1 ? <span className='font-16'>{intl.formatMessage(msgDrawer.closed)}</span>
-									: <span className='font-16'>{intl.formatMessage(msgDrawer.cancelled)}</span>}
+									: <span className='font-16'>{intl.formatMessage(msgDashboard.declined)}</span>}
 							</div>
 						</Col>
 					</div>
@@ -716,7 +717,7 @@ class ModalSubsidyProgress extends React.Component {
 			]
 		}
 
-		if (subsidy?.status === 3 && user?.role > 900 && referral?.status) {
+		if (subsidy?.status === 3 && user?.role > 900 && [-1, -2].includes(referral?.status)) {
 			return [
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel).toUpperCase()}
