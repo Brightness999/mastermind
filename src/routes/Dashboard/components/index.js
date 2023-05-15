@@ -26,6 +26,7 @@ import msgModal from '../../../components/Modal/messages';
 import msgDrawer from '../../../components/DrawerDetail/messages';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
+import { store } from '../../../redux/store';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
 import { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
@@ -1295,6 +1296,7 @@ function reportNetworkError() {
 }
 
 function renderEventContent(eventInfo, appointments) {
+  const { user } = store.getState().auth;
   const event = eventInfo.event.extendedProps;
   const type = event?.type;
   const status = event?.status;
@@ -1306,7 +1308,7 @@ function renderEventContent(eventInfo, appointments) {
         <div className={`text-bold flex items-center ${[DECLINED, CANCELLED].includes(status) && 'text-cancelled'}`}>{[DECLINED, CANCELLED].includes(status) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}<div className='text-ellipsis'>{event?.skillSet?.name}</div></div>
         <div className='text-ellipsis'>{moment(eventInfo.event.start).format('hh:mm a')}</div>
         <div className='text-ellipsis'>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
-        <div className='text-ellipsis'>{eventType} with {eventInfo.event.title}</div>
+        {user.role === 30 ? null : <div className='text-ellipsis'>{eventType} with {eventInfo.event.title}</div>}
       </div>
       {type === SUBSIDY && <FaHandHoldingUsd size={20} className='text-green500 mr-5' />}
       {event?.flagStatus === ACTIVE && event?.flagItems?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
