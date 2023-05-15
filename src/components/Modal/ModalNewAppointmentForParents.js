@@ -474,7 +474,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		const { searchKey, address, selectedSkillSet, user } = this.state;
 		this.setState({
 			selectedDependent: dependentId,
-			skillSet: dependents?.find(dependent => dependent._id === dependentId)?.services?.filter(s => user.providerInfo?.skillSet?.find(skill => skill?._id === s?._id)),
+			skillSet: user.role === 30 ? dependents?.find(dependent => dependent._id === dependentId)?.services?.filter(s => user.providerInfo?.skillSet?.find(skill => skill?._id === s?._id)) : dependents?.find(dependent => dependent._id === dependentId)?.services,
 			addressOptions: dependents?.find(dependent => dependent._id === dependentId)?.school?.name ? ['Dependent Home', 'Provider Office', dependents?.find(dependent => dependent._id === dependentId)?.school?.name] : ['Dependent Home', 'Provider Office'],
 			subsidyAvailable: false,
 			isSubsidyOnly: false,
