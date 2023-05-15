@@ -796,9 +796,9 @@ class Dashboard extends React.Component {
     );
 
     const btnFilter = (
-      <div className='header-left flex flex-row' onClick={this.onShowFilter}>
+      <div onClick={this.onShowFilter}>
         {userRole != 100 && (
-          <p className='font-15'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
+          <p className='font-15 flex items-center'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
         )}
       </div>
     );
@@ -956,51 +956,53 @@ class Dashboard extends React.Component {
                         <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
                         <Select
                           showSearch
+                          mode='multiple'
+                          allowClear={true}
                           placeholder={intl.formatMessage(messages.startTypingProvider)}
-                          value=''
                           optionFilterProp='children'
                           filterOption={(input, option) => option.children.join('').toLowerCase().includes(input.toLowerCase())}
-                          onChange={(v) => this.handleSelectProvider(v)}
+                          onChange={(v) => this.setState({ selectedProviders: v })}
                         >
                           {listProvider?.map((provider, i) => (
                             <Select.Option key={i} value={provider._id}>{provider.firstName ?? ''} {provider.lastName ?? ''}</Select.Option>
                           ))}
                         </Select>
-                        <div className='div-chip'>
+                        {/* <div className='div-chip'>
                           {selectedProviders?.map((id, i) => (
                             <div key={i} className='chip font-12'>
                               {listProvider?.find(a => a._id === id).firstName ?? ''} {listProvider?.find(a => a._id === id).lastName ?? ''}
                               <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
                           ))}
-                        </div>
+                        </div> */}
                       </Col>
                     )}
                     <Col xs={12} sm={12} md={6} className='select-small'>
                       <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
                       <Select
                         showSearch
+                        mode='multiple'
+                        allowClear={true}
                         placeholder={intl.formatMessage(messages.startTypingLocation)}
-                        value=''
                         optionFilterProp='children'
                         filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-                        onChange={(v) => this.handleSelectLocation(v)}
+                        onChange={(v) => this.setState({ selectedLocations: v })}
                       >
                         {locations?.map((location, i) => (
                           <Select.Option key={i} value={location}>{location}</Select.Option>
                         ))}
                       </Select>
-                      <div className='div-chip'>
+                      {/* <div className='div-chip'>
                         {selectedLocations?.map((location, i) => (
                           <div key={i} className='chip font-12'>
                             {location}
                             <BsX size={16} onClick={() => this.handleRemoveLocation(i)} />
                           </div>
                         ))}
-                      </div>
+                      </div> */}
                     </Col>
                   </Row>
                   <div className='text-right'>
-                    <Button size='small' type='primary' onClick={this.handleApplyFilter}>{intl.formatMessage(messages.apply).toUpperCase()}</Button>
+                    <Button type='primary' onClick={this.handleApplyFilter}>{intl.formatMessage(messages.apply).toUpperCase()}</Button>
                   </div>
                 </div>
               )}
