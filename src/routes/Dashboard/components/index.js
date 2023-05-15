@@ -1308,7 +1308,7 @@ function renderEventContent(eventInfo, appointments) {
         <div className={`text-bold flex items-center ${[DECLINED, CANCELLED].includes(status) && 'text-cancelled'}`}>{[DECLINED, CANCELLED].includes(status) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}<div className='text-ellipsis'>{event?.skillSet?.name}</div></div>
         <div className='text-ellipsis'>{moment(eventInfo.event.start).format('hh:mm a')}</div>
         <div className='text-ellipsis'>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
-        {user.role === 30 ? null : <div className='text-ellipsis'>{eventType} with {eventInfo.event.title}</div>}
+        {(user.role === 30 || user.role === 100) ? null : <div className='text-ellipsis'>{eventType} with {eventInfo.event.title}</div>}
       </div>
       {type === SUBSIDY && <FaHandHoldingUsd size={20} className='text-green500 mr-5' />}
       {event?.flagStatus === ACTIVE && event?.flagItems?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
