@@ -461,7 +461,7 @@ class ModalSubsidyProgress extends React.Component {
 					</div>
 				);
 			}
-			console.log(referral.status)
+
 			return (
 				<div className='consulation-appoint'>
 					<p className='font-20 font-700'>{intl.formatMessage(messages.consultationAppointment)}</p>

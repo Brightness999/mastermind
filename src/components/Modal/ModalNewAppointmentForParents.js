@@ -1,4 +1,6 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Form, message, Popover, Spin } from 'antd';
 import { BiChevronLeft, BiChevronRight, BiSearch } from 'react-icons/bi';
 import { BsCheck } from 'react-icons/bs';
@@ -14,7 +16,6 @@ import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils/api/apiList';
 import ModalNewScreening from './ModalNewScreening';
-import { store } from '../../redux/store';
 import ModalConfirm from './ModalConfirm';
 import { ADMINAPPROVED, APPOINTMENT, CLOSED, EVALUATION, PENDING, SCREEN, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
@@ -46,7 +47,6 @@ class ModalNewAppointmentForParents extends React.Component {
 		subsidizedRate: '',
 		cancellationFee: '',
 		visibleModalScreening: false,
-		userRole: store.getState().auth.user.role,
 		subsidyAvailable: false,
 		restSessions: 0,
 		loading: false,
@@ -54,12 +54,13 @@ class ModalNewAppointmentForParents extends React.Component {
 		visibleModalConfirm: false,
 		confirmMessage: '',
 		isSubsidyOnly: false,
+		user: this.props.auth.user,
 	}
 
 	getArrTime = (type, providerIndex, date) => {
 		let arrTime = [];
 		let duration = 30;
-		const { listProvider, address, userRole } = this.state;
+		const { listProvider, address, user } = this.state;
 		const provider = listProvider[providerIndex];
 		if (type === SCREEN || type === APPOINTMENT) {
 			duration = provider?.duration;
@@ -76,7 +77,7 @@ class ModalNewAppointmentForParents extends React.Component {
 				return [];
 			} else {
 				let ranges = [];
-				if (userRole === 3 || userRole === 60) {
+				if (user.role === 3 || user.role === 60) {
 					ranges = provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && !a.isPrivate && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
 				} else {
 					ranges = provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
@@ -116,10 +117,18 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	componentDidMount() {
+		const { user } = this.state;
 		this.setState({
 			skillSet: this.props.SkillSet,
 			selectedDate: moment(this.props.selectedDate),
 		});
+		if (user.role === 30) {
+			this.setState({
+				selectedProvider: user.providerInfo._id,
+				listProvider: [user.providerInfo],
+				selectedProviderIndex: 0,
+			})
+		}
 	}
 
 	searchProvider(searchKey, address, selectedSkillSet, dependentId) {
@@ -164,7 +173,7 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	createAppointment = (data) => {
 		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, standardRate, subsidizedRate, subsidyAvailable, isSubsidyOnly } = this.state;
-		const { durations } = store.getState().auth;
+		const { durations } = this.props.auth;
 
 		if (selectedProvider == undefined) {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
@@ -234,9 +243,14 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	handleChangeAddress = address => {
-		const { searchKey, selectedSkillSet, selectedDependent } = this.state;
-		this.setState({ address: address, subsidyAvailable: false, isSubsidyOnly: false });
-		this.searchProvider(searchKey, address, selectedSkillSet, selectedDependent);
+		const { searchKey, selectedSkillSet, selectedDependent, user } = this.state;
+		this.setState({ address: address, subsidyAvailable: false, isSubsidyOnly: false }, () => {
+			if (user.role === 30) {
+				this.onChooseProvider(0);
+			} else {
+				this.searchProvider(searchKey, address, selectedSkillSet, selectedDependent);
+			}
+		});
 	};
 
 	onSelectDate = (newValue) => {
@@ -457,21 +471,31 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	handleSelectDependent = (dependentId) => {
 		const dependents = this.props.listDependents;
-		const { searchKey, address, selectedSkillSet } = this.state;
+		const { searchKey, address, selectedSkillSet, user } = this.state;
 		this.setState({
 			selectedDependent: dependentId,
-			skillSet: dependents?.find(dependent => dependent._id === dependentId)?.services,
+			skillSet: dependents?.find(dependent => dependent._id === dependentId)?.services?.filter(s => user.providerInfo?.skillSet?.find(skill => skill?._id === s?._id)),
 			addressOptions: dependents?.find(dependent => dependent._id === dependentId)?.school?.name ? ['Dependent Home', 'Provider Office', dependents?.find(dependent => dependent._id === dependentId)?.school?.name] : ['Dependent Home', 'Provider Office'],
 			subsidyAvailable: false,
 			isSubsidyOnly: false,
+		}, () => {
+			if (user.role === 30) {
+				this.onChooseProvider(0);
+			} else {
+				this.searchProvider(searchKey, address, selectedSkillSet, dependentId);
+			}
 		});
-		this.searchProvider(searchKey, address, selectedSkillSet, dependentId);
 	}
 
 	handleSelectSkill = (skill) => {
-		const { searchKey, address, selectedDependent } = this.state;
-		this.setState({ selectedSkillSet: skill, subsidyAvailable: false, isSubsidyOnly: false });
-		this.searchProvider(searchKey, address, skill, selectedDependent);
+		const { searchKey, address, selectedDependent, user } = this.state;
+		this.setState({ selectedSkillSet: skill, subsidyAvailable: false, isSubsidyOnly: false }, () => {
+			if (user.role === 30) {
+				this.onChooseProvider(0);
+			} else {
+				this.searchProvider(searchKey, address, skill, selectedDependent);
+			}
+		});
 	}
 
 	handleChangeNote = (notes) => {
@@ -514,7 +538,6 @@ class ModalNewAppointmentForParents extends React.Component {
 			subsidizedRate,
 			visibleModalScreening,
 			selectedDependent,
-			userRole,
 			subsidyAvailable,
 			restSessions,
 			loading,
@@ -524,7 +547,9 @@ class ModalNewAppointmentForParents extends React.Component {
 			confirmMessage,
 			isSubsidyOnly,
 			cancellationFee,
+			user,
 		} = this.state;
+		const { durations } = this.props.auth;
 		const modalProps = {
 			className: 'modal-new',
 			title: "",
@@ -557,7 +582,7 @@ class ModalNewAppointmentForParents extends React.Component {
 							<p className='font-30 mb-10'>{appointmentType === APPOINTMENT && intl.formatMessage(messages.newAppointment)}{appointmentType === EVALUATION && intl.formatMessage(messages.newEvaluation)}{appointmentType === SCREEN && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType === EVALUATION && selectedProviderIndex > -1 && (
 								<div className='font-20'>
-									<div>{store.getState().auth.durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
+									<div>{durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
 									<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
 								</div>
 							)}
@@ -641,35 +666,37 @@ class ModalNewAppointmentForParents extends React.Component {
 								</Form.Item>
 							</Col>
 						</Row>
-						<div className='choose-doctor'>
-							<p className='font-16 mt-10'>{intl.formatMessage(messages.selectProvider)}<sup>*</sup></p>
-							<div className='doctor-content'>
-								<Row>
-									<Col xs={24} sm={24} md={8} className='select-small'>
-										<Input
-											onChange={e => this.handleSearchProvider(e.target.value)}
-											placeholder={intl.formatMessage(messages.searchProvider)}
-											suffix={<BiSearch size={17} />}
-										/>
-									</Col>
-								</Row>
-								<div className='doctor-list'>
-									{loading ? <Spin spinning={loading} /> : listProvider?.length > 0 ? listProvider?.map((provider, index) => (
-										<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
-											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
-											<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
-											{selectedProvider === provider._id ? (
-												<BsCheck size={12} className='selected-doctor' />
-											) : null}
-											{userRole === 100 && provider.isPrivateForHmgh ? (
-												<MdAdminPanelSettings size={12} className='selected-private-provider' />
-											) : null}
-										</div>
-									)) : "No matching providers found. Please update the options to find an available provider."}
+						{user.role === 30 ? null : (
+							<div className='choose-doctor'>
+								<p className='font-16 mt-10'>{intl.formatMessage(messages.selectProvider)}<sup>*</sup></p>
+								<div className='doctor-content'>
+									<Row>
+										<Col xs={24} sm={24} md={8} className='select-small'>
+											<Input
+												onChange={e => this.handleSearchProvider(e.target.value)}
+												placeholder={intl.formatMessage(messages.searchProvider)}
+												suffix={<BiSearch size={17} />}
+											/>
+										</Col>
+									</Row>
+									<div className='doctor-list'>
+										{loading ? <Spin spinning={loading} /> : listProvider?.length > 0 ? listProvider?.map((provider, index) => (
+											<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
+												<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
+												<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
+												{selectedProvider === provider._id ? (
+													<BsCheck size={12} className='selected-doctor' />
+												) : null}
+												{user.role === 100 && provider.isPrivateForHmgh ? (
+													<MdAdminPanelSettings size={12} className='selected-private-provider' />
+												) : null}
+											</div>
+										)) : "No matching providers found. Please update the options to find an available provider."}
+									</div>
+									{providerErrorMessage.length > 0 && (<p className='text-left text-red mr-5'>{providerErrorMessage}</p>)}
 								</div>
-								{providerErrorMessage.length > 0 && (<p className='text-left text-red mr-5'>{providerErrorMessage}</p>)}
 							</div>
-						</div>
+						)}
 						<Row gutter={10}>
 							<Col xs={24} sm={24} md={10}>
 								<div className='provider-profile'>
@@ -677,7 +704,7 @@ class ModalNewAppointmentForParents extends React.Component {
 										<p className='font-16 font-700'>
 											{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}
 											{!!listProvider[selectedProviderIndex]?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
-											{userRole > 3 && (listProvider[selectedProviderIndex]?.isPrivateForHmgh || listProvider[selectedProviderIndex]?.manualSchedule?.find(a => a.isPrivate && a.location === address && selectedDate?.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })))) ? <FaCalendarAlt size={16} className="text-green500" /> : null}
+											{user.role > 3 && (listProvider[selectedProviderIndex]?.isPrivateForHmgh || listProvider[selectedProviderIndex]?.manualSchedule?.find(a => a.isPrivate && a.location === address && selectedDate?.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })))) ? <FaCalendarAlt size={16} className="text-green500" /> : null}
 										</p>
 										<p className='font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent === selectedDependent && a.type === SCREEN && a.status === CLOSED) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
 									</div>
@@ -731,7 +758,7 @@ class ModalNewAppointmentForParents extends React.Component {
 													fullscreen={false}
 													value={selectedDate}
 													dateCellRender={date => {
-														if (selectedProviderIndex > -1 && userRole > 3) {
+														if (selectedProviderIndex > -1 && user.role > 3) {
 															const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek === date.day() && time.location === address && time.isPrivate);
 															if (availableTime) {
 																const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
@@ -755,7 +782,7 @@ class ModalNewAppointmentForParents extends React.Component {
 														if (selectedProviderIndex > -1) {
 															const range = listProvider[selectedProviderIndex]?.manualSchedule?.find(d => d.dayInWeek === date.day() && d.location === address && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
 															if (range) {
-																if (userRole < 100 && range.isPrivate) {
+																if (user.role < 100 && range.isPrivate) {
 																	return true;
 																}
 															} else {
@@ -827,4 +854,8 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 };
 
-export default ModalNewAppointmentForParents;
+const mapStateToProps = state => ({
+	auth: state.auth,
+});
+
+export default compose(connect(mapStateToProps))(ModalNewAppointmentForParents);
