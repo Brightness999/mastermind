@@ -368,6 +368,18 @@ class Dashboard extends React.Component {
     });
   }
 
+  showNotificationForMissedConsultation(data) {
+    notification.open({
+      message: data.type.toUpperCase(),
+      duration: 10,
+      description: `${data?.appoinment?.dependent?.firstName} ${data?.appoinment?.dependent?.lastName}'s consultation has been canceled. Please reschedule again.`,
+      onClick: () => {
+        this.setState({ userDrawerVisible: true, selectedEvent: this.state.listAppointmentsRecent?.find(a => a._id == data?.appointment?._id) });
+        notification.destroy();
+      },
+    });
+  }
+
   handleSocketResult(data) {
     const { userRole } = this.state;
     switch (data.key) {
@@ -380,6 +392,11 @@ class Dashboard extends React.Component {
         this.updateCalendarEvents(userRole);
         this.getMyAppointments(userRole);
         this.showNotificationForAppointmentUpdate(data.data);
+        return;
+      case 'missed_consultation':
+        this.updateCalendarEvents(userRole);
+        this.getMyAppointments(userRole);
+        this.showNotificationForMissedConsultation(data.data);
         return;
       case 'new_subsidy_request_from_client':
         this.props.getSubsidyRequests({ role: userRole });
