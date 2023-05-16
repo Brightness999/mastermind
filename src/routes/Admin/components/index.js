@@ -1014,14 +1014,14 @@ class SchedulingCenter extends React.Component {
         <Modal title="Flag Action" open={visibleFlagAction} footer={null} onCancel={this.closeFlagAction}>
           <div className='flex items-center gap-2'>
             {(selectedEvent?.flagItems?.isPaid || selectedEvent?.flagItems?.rate == 0) ? (
-              <Button type='primary' block className='font-16 flag-action whitespace-nowrap' onClick={() => this.onOpenModalCreateNote()}>{intl.formatMessage(msgDrawer.requestClearance)}</Button>
+              <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' onClick={() => this.onOpenModalCreateNote()}>{intl.formatMessage(msgDrawer.requestClearance)}</Button>
             ) : null}
             {selectedEvent?.flagItems?.isPaid ? (
-              <Button type='primary' block className='font-16 flag-action whitespace-nowrap' disabled>
+              <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' disabled>
                 {intl.formatMessage(msgDrawer.paid)}
               </Button>
             ) : selectedEvent?.flagItems?.rate == 0 ? null : (
-              <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+              <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post" className='flex-1'>
                 <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                 <input type="hidden" name="business" value="office@helpmegethelp.org" />
                 <input type="hidden" name="cmd" value="_donations" />
@@ -1039,7 +1039,7 @@ class SchedulingCenter extends React.Component {
                 </Button>
               </form>
             )}
-            <Button type='primary' block className='font-16 flag-action whitespace-nowrap' onClick={() => this.onOpenModalConfirm()}>{intl.formatMessage(msgDrawer.clearFlag)}</Button>
+            <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' onClick={() => this.onOpenModalConfirm()}>{intl.formatMessage(msgDrawer.clearFlag)}</Button>
           </div>
         </Modal>
         <PageLoading loading={loading} isBackground={true} />
