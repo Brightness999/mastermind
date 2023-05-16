@@ -62,3 +62,12 @@ export const SCHOOLDECLINED = 2;
 export const ADMINPREAPPROVED = 3;
 export const ADMINDECLINED = 4;
 export const ADMINAPPROVED = 5;
+
+// USER TYPE
+export const SUPERADMIN = 1000;
+export const ADMIN = 999;
+export const CONSULTANT = 100;
+export const SCHOOL = 60;
+export const PROVIDER = 30;
+export const PARENT = 3;
+export const BANNED = 1;

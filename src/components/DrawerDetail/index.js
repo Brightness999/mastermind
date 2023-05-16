@@ -19,7 +19,7 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setNotificationTime, switchConsultation, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setNotificationTime, switchConsultation, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PENDING, SCREEN, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
 
@@ -194,6 +194,29 @@ class DrawerDetail extends Component {
         note: note,
       }
       request.post(closeAppointmentForProvider, data).then(result => {
+        if (result.success) {
+          this.setState({ errorMessage: '' });
+          this.updateAppointments();
+        } else {
+          this.setState({ errorMessage: result.data });
+        }
+      }).catch(error => {
+        console.log('closed error---', error);
+        this.setState({ errorMessage: error.message });
+      })
+    }
+  }
+
+  handleMarkAsNoShow = (note, publicFeedback) => {
+    this.setState({ visibleProcess: false, isModalInvoice: false });
+
+    if (this.props.event?._id) {
+      const data = {
+        appointmentId: this.props.event._id,
+        publicFeedback: publicFeedback ? publicFeedback : this.state.publicFeedback,
+        note: note,
+      }
+      request.post(closeAppointmentAsNoshow, data).then(result => {
         if (result.success) {
           this.setState({ errorMessage: '' });
           this.updateAppointments();
@@ -592,6 +615,7 @@ class DrawerDetail extends Component {
       onDecline: this.handleDecline,
       onSubmit: this.handleMarkAsClosed,
       onConfirm: this.confirmModalProcess,
+      onConfirmNoShow: this.handleMarkAsNoShow,
       onCancel: this.closeModalProcess,
       event: listAppointmentsRecent?.find(a => a?._id === event?._id),
     };
@@ -717,11 +741,14 @@ class DrawerDetail extends Component {
           {event?.flagStatus === ACTIVE && event?.flagItems?.flagType === NOSHOW && (
             <div className='text-center'><MdOutlineEventBusy color="#ff0000" size={32} /></div>
           )}
-          {event?.flagStatus !== ACTIVE&& event?.type === CONSULTATION && event?.status === PENDING && event?.consultant?._id && event.consultant?._id !== auth.user?.consultantInfo?._id && (
+          {event?.flagStatus !== ACTIVE && event?.type === CONSULTATION && event?.status === PENDING && event?.consultant?._id && event.consultant?._id !== auth.user?.consultantInfo?._id && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.claimed)}]</div>
           )}
           {event?.flagStatus !== ACTIVE && event?.status === CLOSED && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.accepted)}]</div>
+          )}
+          {event?.flagStatus !== ACTIVE && event?.status === NOSHOW && (
+            <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.noShow)}]</div>
           )}
           {event?.flagStatus !== ACTIVE && event?.status === CANCELLED ? event?.dependent?.isRemoved ? (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.graduated)}]</div>

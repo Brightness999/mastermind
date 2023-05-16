@@ -109,13 +109,9 @@ export default {
     id: `${scope}.feedback`,
     defaultMessage: 'Feedback',
   },
-  pastDueBalance: {
-    id: `${scope}.pastDueBalance`,
-    defaultMessage: 'Past due balance',
-  },
   noShow: {
     id: `${scope}.noShow`,
-    defaultMessage: 'No show / cancellation',
+    defaultMessage: 'No show',
   },
   flagDependent: {
     id: `${scope}.flagDependent`,
@@ -152,6 +148,10 @@ export default {
   markClosed: {
     id: `${scope}.markClosed`,
     defaultMessage: 'Mark as closed',
+  },
+  markAsNoShow: {
+    id: `${scope}.markAsNoShow`,
+    defaultMessage: 'Mark as no show',
   },
   tag: {
     id: `${scope}.tag`,

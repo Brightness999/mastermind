@@ -1305,7 +1305,7 @@ function renderEventContent(eventInfo, appointments) {
   const eventType = type === SCREEN ? 'Screening' : type === EVALUATION ? 'Evaluation' : type === CONSULTATION ? 'Consultation' : 'Session';
 
   return (
-    <div className={`flex flex-col p-3 relative rounded-2 relative text-white bg-${[DECLINED, CANCELLED].includes(status) ? 'cancelled' : eventType.toLowerCase()}`}>
+    <div className={`flex flex-col p-3 relative rounded-2 relative text-white bg-${[DECLINED, CANCELLED, NOSHOW].includes(status) ? 'cancelled' : eventType.toLowerCase()}`}>
       <div className="flex flex-col">
         <div className={`text-bold flex items-center ${[DECLINED, CANCELLED].includes(status) && 'text-cancelled'}`}>{[DECLINED, CANCELLED].includes(status) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}<div className='text-ellipsis'>{event?.skillSet?.name}</div></div>
         <div className='text-ellipsis'>{moment(eventInfo.event.start).format('hh:mm a')}</div>

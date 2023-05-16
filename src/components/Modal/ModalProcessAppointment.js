@@ -53,6 +53,7 @@ class ModalProcessAppointment extends React.Component {
                 <Button type='primary' block onClick={() => this.props.onDecline(note, publicFeedback)}>{intl.formatMessage(messages.decline)}</Button>
                 {(event?.type === SCREEN && event?.provider?.isSeparateEvaluationRate) ? <Button type='primary' block onClick={() => this.props.onSubmit([], false, note, publicFeedback)}>{intl.formatMessage(messages.toEvaluation)}</Button> : null}
                 {event?.type === SCREEN ? <Button type='primary' block onClick={() => this.props.onSubmit([], true, note, publicFeedback)}>{intl.formatMessage(messages.toStandardSession)}</Button> : null}
+                {event?.type === CONSULTATION ? <Button type='primary' block onClick={() => this.props.onConfirmNoShow(note, publicFeedback)}>{intl.formatMessage(msgDrawer.markAsNoShow)}</Button> : null}
                 {(event?.type === APPOINTMENT || event?.type === CONSULTATION || event?.type === SUBSIDY) ? <Button type='primary' block onClick={() => this.props.onConfirm(note, publicFeedback)}>{intl.formatMessage(msgDrawer.markClosed)}</Button> : null}
               </>
             )}
