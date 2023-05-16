@@ -197,7 +197,7 @@ export const authSlice = createSlice({
 		},
 		logout(state) {
 			state.user = {};
-			helper.history.push('/');
+			window.location.href = '/';
 		},
 	},
 	extraReducers: {

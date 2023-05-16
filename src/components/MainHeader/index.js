@@ -81,7 +81,7 @@ class MainHeader extends Component {
         key: '5',
         icon: <BiLogOutCircle size={18} color='#495057' />,
         label: (
-          <Link to='/' onClick={this.logout}>
+          <Link to='#' onClick={this.logout}>
             {intl.formatMessage(messages.logOut)}
           </Link>
         ),
