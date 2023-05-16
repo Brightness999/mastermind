@@ -5,6 +5,8 @@ import { SearchOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import moment from 'moment';
+import { CSVLink } from "react-csv";
+import { FaFileDownload } from 'react-icons/fa';
 
 import mgsSidebar from '../../../../components/SideBar/messages';
 import request from '../../../../utils/api/request';
@@ -18,6 +20,7 @@ class ConsultationRequest extends React.Component {
       consultationList: [],
       skillSet: [],
       loading: false,
+      csvData: [],
     };
     this.searchInput = createRef(null);
   }
@@ -42,8 +45,23 @@ class ConsultationRequest extends React.Component {
     })
   }
 
+  exportToExcel = () => {
+    const { consultationList } = this.state;
+    const data = consultationList?.map(c => ({
+      "Student Name": `${c?.dependent?.firstName ?? ''} ${c?.dependent?.lastName ?? ''}`,
+      "Referrer": c?.consultant?.referredToAs ?? '',
+      "Student Grade": c?.dependent?.currentGrade,
+      "Service Requested": c?.skillSet?.name,
+      "PhoneNumber/Google Meet": c?.meetingLink ? c.meetingLink : c.phoneNumber ? c.phoneNumber : '',
+      "Date": c?.date ? moment(c?.date).format('MM/DD/YYYY hh:mm A') : '',
+    }))
+    this.setState({ csvData: data });
+    return true;
+  }
+
   render() {
-    const { consultationList, skillSet, loading } = this.state;
+    const { consultationList, skillSet, loading, csvData } = this.state;
+    const csvHeaders = ["Student Name", "Referrer", "Student Grade", "Service Requested", "PhoneNumber/Google Meet", "Date"];
     const columns = [
       {
         title: 'Dependent', key: 'dependent',
@@ -110,6 +128,11 @@ class ConsultationRequest extends React.Component {
           <p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.flagList)}</p>
           <Divider />
         </div>
+        <CSVLink onClick={this.exportToExcel} data={csvData} headers={csvHeaders} filename="Approved Requests">
+          <Button type='primary' className='inline-flex items-center gap-2 mb-10' icon={<FaFileDownload size={24} />}>
+            Download CSV
+          </Button>
+        </CSVLink>
         <Table bordered size='middle' dataSource={consultationList} columns={columns} />
         <PageLoading loading={loading} isBackground={true} />
       </div>
