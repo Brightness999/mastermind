@@ -58,12 +58,13 @@ class ModalInvoice extends React.Component {
 	}
 
 	onCancelEdit = () => {
-		this.state.items[this.state.selectedItemIndex] = {
+		let newItems = [...this.state.items];
+		newItems[this.state.selectedItemIndex] = {
 			type: '',
 			locationDate: '',
 			rate: '',
 		}
-		this.setState({ selectedItemIndex: -1, items: this.state.items });
+		this.setState({ selectedItemIndex: -1, items: newItems });
 	}
 
 	onSaveItem = () => {
