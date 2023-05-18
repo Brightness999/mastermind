@@ -39,7 +39,7 @@ class ModalCreateNote extends React.Component {
 
     return (
       <Modal {...modalProps}>
-        <Input.TextArea rows={7} value={note} onChange={e => this.setState({ note: e.target.value })} placeholder={this.props.title} />
+        <Input.TextArea name='note' rows={7} value={note} onChange={e => this.setState({ note: e.target.value })} placeholder={this.props.title} />
       </Modal>
     );
   }

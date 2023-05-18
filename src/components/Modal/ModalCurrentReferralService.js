@@ -396,6 +396,7 @@ class ModalCurrentReferralService extends React.Component {
 										</Upload>
 									</div>
 									<Input.TextArea
+										name='ReferralNote'
 										value={note}
 										onChange={e => { this.setState({ note: e.target.value }) }}
 										rows={6}

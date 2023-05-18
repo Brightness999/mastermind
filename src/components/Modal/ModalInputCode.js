@@ -31,7 +31,7 @@ const ModalInputCode = (props) => {
 
 	return (
 		<Modal {...modalProps}>
-			<Input ref={inputRef} placeholder={intl.formatMessage(messages.verificationCode)} onKeyUp={(e) => e.key == 'Enter' && props.onSubmit(code)} onChange={(e) => setcode(e.target.value)} />
+			<Input name='PassCode' ref={inputRef} placeholder={intl.formatMessage(messages.verificationCode)} onKeyUp={(e) => e.key == 'Enter' && props.onSubmit(code)} onChange={(e) => setcode(e.target.value)} />
 		</Modal>
 	);
 };

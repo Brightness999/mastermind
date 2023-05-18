@@ -32,11 +32,11 @@ class ModalFeedback extends React.Component {
         <div className='flex flex-col gap-5'>
           <div>
             <p className='mb-0 font-12'>Internal notes</p>
-            <Input.TextArea rows={3} value={note} onChange={e => this.setState({ note: e.target.value })} placeholder="Internal notes" />
+            <Input.TextArea name='PrivateNote' rows={3} value={note} onChange={e => this.setState({ note: e.target.value })} placeholder="Internal notes" />
           </div>
           <div>
             <p className='mb-0 font-12'>Public feedback</p>
-            <Input.TextArea rows={3} value={publicFeedback} onChange={e => this.setState({ publicFeedback: e.target.value })} placeholder="Public feedback" />
+            <Input.TextArea name='PublicFeedback' rows={3} value={publicFeedback} onChange={e => this.setState({ publicFeedback: e.target.value })} placeholder="Public feedback" />
           </div>
           <div className='flex gap-2 btn-footer'>
             <Button block onClick={() => this.props.onCancel()}>{intl.formatMessage(messages.cancel)}</Button>

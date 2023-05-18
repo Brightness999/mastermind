@@ -117,6 +117,7 @@ class UserManager extends React.Component {
 				filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
 					<div style={{ padding: 8 }}>
 						<Input
+							name='SearchName'
 							ref={this.searchInput}
 							placeholder={`Search User Name`}
 							value={selectedKeys[0]}

@@ -394,12 +394,13 @@ class ModalSubsidyProgress extends React.Component {
 							</div>
 							<p className='font-700 mb-10'>{intl.formatMessage(messages.otherProvider)}</p>
 							<div className='select-md'>
-								<Input value={otherProvider} onChange={e => this.setState({ otherProvider: e.target.value, selectedProvider: undefined })} disabled={user.role === 3} placeholder={intl.formatMessage(messages.otherProvider)} />
+								<Input name='OtherProvider' value={otherProvider} onChange={e => this.setState({ otherProvider: e.target.value, selectedProvider: undefined })} disabled={user.role === 3} placeholder={intl.formatMessage(messages.otherProvider)} />
 							</div>
 						</Col >
 						<Col xs={24} sm={24} md={16}>
 							<p className='font-700 mb-10'>{intl.formatMessage(messages.decisionExplanation)}</p>
 							<Input.TextArea
+								name='DecisionExplanation'
 								value={decisionExplanation}
 								disabled={user.role === 3}
 								onChange={e => this.setState({ decisionExplanation: e.target.value })}
@@ -568,6 +569,7 @@ class ModalSubsidyProgress extends React.Component {
 					<Col xs={24} sm={24} md={8} className='flex flex-col justify-between'>
 						<p className='font-700'>*{intl.formatMessage(messages.numberApprovedSessions)}</p>
 						<Input
+							name='NumberOfSessions'
 							disabled={isNotAdmin || subsidy.status === 5}
 							value={numberOfSessions}
 							type="number"
@@ -578,6 +580,7 @@ class ModalSubsidyProgress extends React.Component {
 						/>
 						<p className='font-700'>*{intl.formatMessage(messages.hmghExpensePerSession)}</p>
 						<Input
+							name='PricePerSession'
 							disabled={isNotAdmin || subsidy.status === 5}
 							value={priceForSession}
 							type="number"
@@ -591,6 +594,7 @@ class ModalSubsidyProgress extends React.Component {
 					<Col xs={24} sm={24} md={8} className='flex flex-col justify-end'>
 						<p className='font-700'>*{intl.formatMessage(messages.totalPayment)}</p>
 						<Input
+							name='TotalPayment'
 							value={totalPayment}
 							type="number"
 							min={0}

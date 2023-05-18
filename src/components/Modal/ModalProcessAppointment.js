@@ -36,11 +36,11 @@ class ModalProcessAppointment extends React.Component {
         <div className='flex flex-col gap-5'>
           <div>
             <p className='mb-0 font-12'>{intl.formatMessage(messages.privateNote)}</p>
-            <Input.TextArea rows={3} value={note} onChange={e => this.setState({ note: e.target.value })} placeholder={intl.formatMessage(messages.privateNote)} />
+            <Input.TextArea name='PrivateNote' rows={3} value={note} onChange={e => this.setState({ note: e.target.value })} placeholder={intl.formatMessage(messages.privateNote)} />
           </div>
           <div>
             <p className='mb-0 font-12'>{intl.formatMessage(messages.publicFeedback)}</p>
-            <Input.TextArea rows={3} value={publicFeedback} onChange={e => this.setState({ publicFeedback: e.target.value })} placeholder={intl.formatMessage(messages.publicFeedback)} />
+            <Input.TextArea name='PublicFeedback' rows={3} value={publicFeedback} onChange={e => this.setState({ publicFeedback: e.target.value })} placeholder={intl.formatMessage(messages.publicFeedback)} />
           </div>
           <div className='flex gap-2 btn-footer'>
             {event?.type === EVALUATION ? (

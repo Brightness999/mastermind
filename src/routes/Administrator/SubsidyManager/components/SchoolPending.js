@@ -25,6 +25,7 @@ const SchoolPending = (props) => {
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
           <Input
+            name='SearchName'
             ref={searchInput}
             placeholder={`Search Dependent Name`}
             value={selectedKeys[0]}
@@ -98,6 +99,7 @@ const SchoolPending = (props) => {
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
           <Input
+            name='SearchName'
             ref={searchInput}
             placeholder={`Search Notes`}
             value={selectedKeys[0]}
@@ -144,6 +146,7 @@ const SchoolPending = (props) => {
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
           <Input
+            name='SearchName'
             ref={searchInput}
             placeholder={`Search Request Date`}
             value={selectedKeys[0]}

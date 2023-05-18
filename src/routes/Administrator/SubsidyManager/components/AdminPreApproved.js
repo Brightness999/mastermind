@@ -24,6 +24,7 @@ const AdminPreApproved = (props) => {
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
           <Input
+            name='SearchName'
             ref={searchInput}
             placeholder={`Search Dependent Name`}
             value={selectedKeys[0]}
@@ -97,6 +98,7 @@ const AdminPreApproved = (props) => {
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
           <Input
+            name='SearchName'
             ref={searchInput}
             placeholder={`Search Notes`}
             value={selectedKeys[0]}
@@ -150,6 +152,7 @@ const AdminPreApproved = (props) => {
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
           <Input
+            name='SearchName'
             ref={searchInput}
             placeholder={`Search Provider Name`}
             value={selectedKeys[0]}
@@ -199,6 +202,7 @@ const AdminPreApproved = (props) => {
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
           <Input
+            name='SearchName'
             ref={searchInput}
             placeholder={`Search Consultation Date`}
             value={selectedKeys[0]}

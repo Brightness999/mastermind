@@ -172,6 +172,7 @@ class ModalDependentDetail extends React.Component {
 								{dependent?.notes?.map((note, index) => (
 									<div key={index} className="mt-2">
 										<Input.TextArea
+											name='PrivateNote'
 											rows={3}
 											defaultValue={note.note}
 											disabled={selectedNoteId != note._id}
@@ -207,6 +208,7 @@ class ModalDependentDetail extends React.Component {
 						{isNew && (
 							<div className="mt-2">
 								<Input.TextArea
+									name='NewPrivateNote'
 									rows={3}
 									onChange={e => this.setState({ note: e.target.value })}
 									placeholder={intl.formatMessage(messages.privateNote)}

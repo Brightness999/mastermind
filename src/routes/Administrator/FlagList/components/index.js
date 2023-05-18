@@ -112,6 +112,7 @@ class FlagList extends React.Component {
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
+              name='SearchName'
               ref={this.searchInput}
               placeholder={`Search Dependent Name`}
               value={selectedKeys[0]}

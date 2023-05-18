@@ -126,6 +126,7 @@ class PrivateNote extends React.Component {
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
+              name='SearchName'
               ref={this.searchInput}
               placeholder={`Search Dependent Name`}
               value={selectedKeys[0]}
@@ -185,6 +186,7 @@ class PrivateNote extends React.Component {
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
+              name='SearchName'
               ref={this.searchInput}
               placeholder={`Search Dependent Name`}
               value={selectedKeys[0]}
@@ -258,6 +260,7 @@ class PrivateNote extends React.Component {
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
+              name='SearchName'
               ref={this.searchInput}
               placeholder={`Search Notes`}
               value={selectedKeys[0]}
@@ -304,6 +307,7 @@ class PrivateNote extends React.Component {
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
+              name='SearchName'
               ref={this.searchInput}
               placeholder={`Search Provider Name`}
               value={selectedKeys[0]}
@@ -352,6 +356,7 @@ class PrivateNote extends React.Component {
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
+              name='SearchName'
               ref={this.searchInput}
               placeholder={`Search Approval Date`}
               value={selectedKeys[0]}
@@ -398,6 +403,7 @@ class PrivateNote extends React.Component {
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
+              name='SearchName'
               ref={this.searchInput}
               placeholder={`Search Recent Session Date`}
               value={selectedKeys[0]}

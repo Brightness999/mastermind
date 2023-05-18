@@ -994,7 +994,7 @@ class DrawerDetail extends Component {
           </div>
         ) : (
           <>
-            <Input.TextArea rows={5} className="appointment-note" disabled={!isShowEditNotes} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />
+            <Input.TextArea name='AppointmentNote' rows={5} className="appointment-note" disabled={!isShowEditNotes} value={notes} onChange={(e) => this.handleChangeNotes(e.target.value)} />
             {isShowEditNotes && (
               <div className='flex gap-2 mt-10'>
                 <Button type='primary' block onClick={this.handleUpdateNotes} className='h-30 p-0'>
@@ -1009,7 +1009,7 @@ class DrawerDetail extends Component {
               {event?.status !== 0 && (
                 <>
                   <p className='font-18 font-700 mb-5'>{intl.formatMessage(messages.feedback)}</p>
-                  <Input.TextArea rows={7} className="appointment-feedback" disabled={userRole === 3 ? true : !isShowFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
+                  <Input.TextArea name='AppointmentFeedback' rows={7} className="appointment-feedback" disabled={userRole === 3 ? true : !isShowFeedback} value={publicFeedback} onChange={e => this.handleChangeFeedback(e.target.value)} placeholder={intl.formatMessage(messages.feedback)} />
                 </>
               )}
               {isShowFeedback && (

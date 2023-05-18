@@ -673,6 +673,7 @@ class ModalNewAppointmentForParents extends React.Component {
 									<Row>
 										<Col xs={24} sm={24} md={8} className='select-small'>
 											<Input
+												name='SearchProvider'
 												onChange={e => this.handleSearchProvider(e.target.value)}
 												placeholder={intl.formatMessage(messages.searchProvider)}
 												suffix={<BiSearch size={17} />}

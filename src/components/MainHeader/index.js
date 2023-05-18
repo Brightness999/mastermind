@@ -114,7 +114,7 @@ class MainHeader extends Component {
         </div>
         <div className='div-search'>
           <BsSearch size={18} />
-          <Input placeholder={`${intl.formatMessage(messages.search)}...`} />
+          <Input name='search' placeholder={`${intl.formatMessage(messages.search)}...`} />
         </div>
       </div>
     );
