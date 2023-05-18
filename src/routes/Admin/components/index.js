@@ -327,14 +327,6 @@ class SchedulingCenter extends React.Component {
     this.props.changeTime(data)
   }
 
-  handleEventRemove = (removeInfo) => {
-    this.props.deleteEvent(removeInfo.event.id)
-      .catch(() => {
-        reportNetworkError()
-        removeInfo.revert()
-      })
-  }
-
   handleClickDate = (date) => {
     this.setState({ visibleNewAppoint: true, selectedDate: moment(date.date) });
   }
@@ -806,7 +798,6 @@ class SchedulingCenter extends React.Component {
                 eventContent={(info) => renderEventContent(info, listAppointmentsRecent)}
                 eventClick={this.onShowDrawerDetail}
                 eventChange={this.handleEventChange} // called for drag-n-drop/resize
-                eventRemove={this.handleEventRemove}
                 dateClick={this.handleClickDate}
                 height="calc(100vh - 220px)"
               />
