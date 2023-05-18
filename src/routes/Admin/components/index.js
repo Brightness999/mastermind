@@ -1057,14 +1057,14 @@ function renderEventContent(eventInfo, appointments) {
   const type = event?.type;
   const status = event?.status;
   const eventType = type === SCREEN ? 'Screening' : type === EVALUATION ? 'Evaluation' : type === CONSULTATION ? 'Consultation' : 'Session';
-  const provider = () => type === CONSULTATION ? null : (<div className='text-ellipsis'>Provider: {`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</div>)
+  const provider = () => type === CONSULTATION ? null : (<div className='text-ellipsis' title={`Provider: ${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}>Provider: {`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</div>)
 
   return (
     <div className={`flex flex-col p-3 relative rounded-2 text-white bg-${[CANCELLED, DECLINED, NOSHOW].includes(status) ? 'cancelled' : eventType.toLowerCase()}`}>
       <div className="flex flex-col">
-        <div className={`text-bold flex items-center ${[CANCELLED, DECLINED, NOSHOW].includes(status) && 'text-cancelled'}`}>{[CANCELLED, DECLINED, NOSHOW].includes(status) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}<div className='text-ellipsis'>{event?.skillSet?.name}</div></div>
-        <div className='text-ellipsis'>{moment(eventInfo.event.start).format('hh:mm a')}</div>
-        <div className='text-ellipsis'>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
+        <div className={`text-bold flex items-center ${[CANCELLED, DECLINED, NOSHOW].includes(status) && 'text-cancelled'}`} title={event?.skillSet?.name}>{[CANCELLED, DECLINED, NOSHOW].includes(status) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}<div className='text-ellipsis'>{event?.skillSet?.name}</div></div>
+        <div className='text-ellipsis' title={moment(eventInfo.event.start).format('hh:mm a')}>{moment(eventInfo.event.start).format('hh:mm a')}</div>
+        <div className='text-ellipsis' title={`Dependent: ${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
         {provider()}
       </div>
       {event?.type === SUBSIDY && <FaHandHoldingUsd size={20} className='text-green500 mr-5' />}
