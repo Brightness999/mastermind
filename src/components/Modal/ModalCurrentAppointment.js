@@ -39,6 +39,7 @@ class ModalCurrentAppointment extends React.Component {
 		restSessions: 0,
 		duration: 30,
 		address: this.props.event?.location,
+		cancellationFee: '',
 	}
 
 	getArrTime = (date) => {
@@ -103,13 +104,35 @@ class ModalCurrentAppointment extends React.Component {
 	componentDidMount() {
 		this.setState({ arrTime: this.getArrTime(0) });
 		const { event } = this.props;
+		const currentGrade = event.dependent.currentGrade;
+		let standardRate = 0;
+		let subsidizedRate = 0;
+
+		if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(currentGrade)) {
+			standardRate = event.provider?.academicLevel?.find(level => [currentGrade, 'Early Education'].includes(level.level))?.rate;
+			subsidizedRate = event.provider?.academicLevel?.find(level => [currentGrade, 'Early Education'].includes(level.level))?.subsidizedRate;
+		} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(currentGrade)) {
+			standardRate = event.provider?.academicLevel?.find(level => [currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(level.level))?.rate;
+			subsidizedRate = event.provider?.academicLevel?.find(level => [currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(level.level))?.subsidizedRate;
+		} else if (['Grades 7', 'Grades 8'].includes(currentGrade)) {
+			standardRate = event.provider?.academicLevel?.find(level => [currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(level.level))?.rate;
+			subsidizedRate = event.provider?.academicLevel?.find(level => [currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(level.level))?.subsidizedRate;
+		} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(currentGrade)) {
+			standardRate = event.provider?.academicLevel?.find(level => [currentGrade, 'High School Grades 9-12'].includes(level.level))?.rate;
+			subsidizedRate = event.provider?.academicLevel?.find(level => [currentGrade, 'High School Grades 9-12'].includes(level.level))?.subsidizedRate;
+		} else {
+			standardRate = event.provider?.academicLevel?.find(level => level.level === currentGrade)?.rate;
+			subsidizedRate = event.provider?.academicLevel?.find(level => level.level === currentGrade)?.subsidizedRate;
+		}
+
 		this.setState({
 			skillSet: store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.services ?? [],
 			selectedDate: moment(event?.date),
 			addressOptions: ['Dependent Home', 'Provider Office', store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.school?.name],
-			standardRate: event?.type == APPOINTMENT ? event?.rate : '',
-			subsidizedRate: event?.type == SUBSIDY ? event?.rate : '',
+			standardRate: standardRate ? standardRate : '',
+			subsidizedRate: subsidizedRate ? subsidizedRate : '',
 			duration: event?.type === EVALUATION ? event?.provider?.separateEvaluationDuration : event?.provider?.duration,
+			cancellationFee: event.provider.cancellationFee,
 		});
 		this.form?.setFieldsValue({ dependent: event?.dependent?._id, skill: event?.skillSet?._id, address: event?.location });
 		this.onSelectDate(moment(event?.date));
@@ -247,6 +270,7 @@ class ModalCurrentAppointment extends React.Component {
 			userRole,
 			subsidyAvailable,
 			restSessions,
+			cancellationFee,
 		} = this.state;
 		const { event } = this.props;
 		const modalProps = {
@@ -436,8 +460,9 @@ class ModalCurrentAppointment extends React.Component {
 											)}
 										</div>
 										<div className='flex-1 font-12'>
-											{standardRate && <p>Rate: ${standardRate}</p>}
-											{subsidizedRate && <p>Subsidized Rate: ${subsidizedRate}</p>}
+											{standardRate && <p>{intl.formatMessage(msgCreateAccount.rate)}: ${standardRate}</p>}
+											{(subsidizedRate && subsidizedRate != standardRate) && <p> {intl.formatMessage(messages.subsidizedRate)}: ${subsidizedRate}</p>}
+											{cancellationFee && <p>{intl.formatMessage(msgCreateAccount.cancellationFee)}: ${cancellationFee}</p>}
 										</div>
 									</div>
 									<div className='flex mt-10'>
@@ -573,7 +598,7 @@ class ModalCurrentAppointment extends React.Component {
 						</Row>
 					</Form>
 				</div>
-			</Modal>
+			</Modal >
 		);
 	}
 };
