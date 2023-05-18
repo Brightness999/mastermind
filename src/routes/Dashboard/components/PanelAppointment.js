@@ -91,7 +91,7 @@ class PanelAppointment extends React.Component {
     const { user } = this.props;
 
     if (user.role === PARENT && moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
-      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid</span>
+      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
       this.setState({ paymentDescription: desc, event: event });
       message.warn(desc).then(() => {
         this.setState({ visiblePayment: true });
@@ -109,8 +109,18 @@ class PanelAppointment extends React.Component {
     this.setState({ visibleCancel: false });
   }
 
-  openModalCancel = (data) => {
-    this.setState({ visibleCancel: true, event: data });
+  openModalCancel = (event) => {
+    const { user } = this.props;
+
+    if (user.role === PARENT && moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
+      this.setState({ paymentDescription: desc, event: event });
+      message.warn(desc).then(() => {
+        this.setState({ visiblePayment: true });
+      })
+    } else {
+      this.setState({ visibleCancel: true, event: event });
+    }
   }
 
   handleConfirmCancel = () => {

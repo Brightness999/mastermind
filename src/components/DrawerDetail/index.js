@@ -85,7 +85,18 @@ class DrawerDetail extends Component {
   }
 
   openModalCancel = () => {
-    this.setState({ visibleCancel: true });
+    const { event } = this.props;
+    const { user } = this.props.auth;
+
+    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && user.role === PARENT && moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
+      this.setState({ paymentDescription: desc });
+      message.warn(desc).then(() => {
+        this.setState({ visiblePayment: true });
+      });
+    } else {
+      this.setState({ visibleCancel: true });
+    }
   }
 
   handleChangeFeedback = feedback => {
@@ -130,7 +141,7 @@ class DrawerDetail extends Component {
     const { user } = this.props.auth;
 
     if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && user.role === PARENT && moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
-      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid</span>
+      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
       this.setState({ paymentDescription: desc });
       message.warn(desc).then(() => {
         this.setState({ visiblePayment: true });
@@ -1192,14 +1203,14 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {event?.status === PENDING && event?.type !== CONSULTATION && (
+              {event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type !== CONSULTATION && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsXCircle size={15} />} block onClick={this.openModalCancel}>
                     {intl.formatMessage(msgModal.cancel)}
                   </Button>
                 </Col>
               )}
-              {event?.status === PENDING && event?.type === CONSULTATION && (userRole === 3 || userRole > 900 || (userRole === 100 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id))) && (
+              {event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && (userRole === 3 || userRole > 900 || (userRole === 100 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id))) && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsXCircle size={15} />} block onClick={this.openModalCancel}>
                     {intl.formatMessage(msgModal.cancel)}
