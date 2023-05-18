@@ -739,40 +739,38 @@ class DrawerDetail extends Component {
 
     const contentConfirm = (
       <div className='confirm-content'>
-        <Row gutter={10}>
-          <Col xs={24} sm={24} md={12} className="flex flex-col">
-            <p className='font-16 text-center mb-0'>{intl.formatMessage(msgModal.old)}</p>
-            <div className='new-content flex-1'>
-              <p className='font-16 font-700'>{event?.previousAppointment?.type === SCREEN ? intl.formatMessage(msgModal.screening) : event?.previousAppointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.previousAppointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.appointment) : event?.previousAppointment?.type === CONSULTATION ? intl.formatMessage(msgModal.consultation) : ''}</p>
-              <p className='font-16'>{`${event?.previousAppointment?.dependent?.firstName ?? ''} ${event?.previousAppointment?.dependent?.lastName ?? ''}`}</p>
-              <p className='font-16'>{`${event?.previousAppointment?.provider?.firstName ?? ''} ${event?.previousAppointment?.provider?.lastName ?? ''}`}</p>
-              {event?.previousAppointment?.type === SCREEN ? (
-                <p className='font-16 whitespace-nowrap'>{intl.formatMessage(messages.phonenumber)}: {event?.previousAppointment?.phoneNumber}</p>
-              ) : event?.previousAppointment?.type === CONSULTATION ? (
-                <p className='font-16'>{event?.previousAppointment?.meetingLink ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}: {event?.previousAppointment?.meetingLink ? event?.previousAppointment?.meetingLink : event?.previousAppointment?.phoneNumber}</p>
-              ) : (
-                <p className='font-16'>{intl.formatMessage(messages.where)}: {event?.previousAppointment?.location}</p>
-              )}
-              <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.previousAppointment?.type === SCREEN ? event?.previousAppointment?.screeningTime ?? '' : this.displayDuration(event?.previousAppointment)}</span></p>
-            </div>
-          </Col>
-          <Col xs={24} sm={24} md={12} className="flex flex-col">
-            <p className='font-16 text-center mb-0'>{intl.formatMessage(msgModal.current)}</p>
-            <div className='current-content flex-1'>
-              <p className='font-16 font-700'>{event?.type === SCREEN ? intl.formatMessage(msgModal.screening) : event?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(msgModal.appointment) : event?.type === CONSULTATION ? intl.formatMessage(msgModal.consultation) : ''}</p>
-              <p className='font-16'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
-              <p className='font-16'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
-              {event?.type === SCREEN ? (
-                <p className='font-16 whitespace-nowrap'>{intl.formatMessage(messages.phonenumber)}: {event?.phoneNumber}</p>
-              ) : event?.type === CONSULTATION ? (
-                <p className='font-16'>{event?.meetingLink ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}: {event?.meetingLink ? event?.meetingLink : event?.phoneNumber}</p>
-              ) : (
-                <p className='font-16'>{intl.formatMessage(messages.where)}: {event?.location}</p>
-              )}
-              <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.type === SCREEN ? event?.screeningTime ?? '' : this.displayDuration(event)}</span></p>
-            </div>
-          </Col>
-        </Row>
+        <Col xs={24} sm={24} md={24} className="flex flex-col">
+          <p className='font-16 text-center mb-0'>{intl.formatMessage(msgModal.old)}</p>
+          <div className='new-content flex-1'>
+            <p className='font-16 font-700'>{event?.previousAppointment?.type === SCREEN ? intl.formatMessage(msgModal.screening) : event?.previousAppointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.previousAppointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.appointment) : event?.previousAppointment?.type === CONSULTATION ? intl.formatMessage(msgModal.consultation) : ''}</p>
+            <p className='font-16'>{`${event?.previousAppointment?.dependent?.firstName ?? ''} ${event?.previousAppointment?.dependent?.lastName ?? ''}`}</p>
+            <p className='font-16'>{`${event?.previousAppointment?.provider?.firstName ?? ''} ${event?.previousAppointment?.provider?.lastName ?? ''}`}</p>
+            {event?.previousAppointment?.type === SCREEN ? (
+              <p className='font-16 whitespace-nowrap'>{intl.formatMessage(messages.phonenumber)}: {event?.previousAppointment?.phoneNumber}</p>
+            ) : event?.previousAppointment?.type === CONSULTATION ? (
+              <p className='font-16'>{event?.previousAppointment?.meetingLink ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}: {event?.previousAppointment?.meetingLink ? event?.previousAppointment?.meetingLink : event?.previousAppointment?.phoneNumber}</p>
+            ) : (
+              <p className='font-16'>{intl.formatMessage(messages.where)}: {event?.previousAppointment?.location}</p>
+            )}
+            <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.previousAppointment?.type === SCREEN ? event?.previousAppointment?.screeningTime ?? '' : this.displayDuration(event?.previousAppointment)}</span></p>
+          </div>
+        </Col>
+        <Col xs={24} sm={24} md={24} className="flex flex-col">
+          <p className='font-16 text-center mb-0'>{intl.formatMessage(msgModal.current)}</p>
+          <div className='current-content flex-1'>
+            <p className='font-16 font-700'>{event?.type === SCREEN ? intl.formatMessage(msgModal.screening) : event?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(msgModal.appointment) : event?.type === CONSULTATION ? intl.formatMessage(msgModal.consultation) : ''}</p>
+            <p className='font-16'>{`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</p>
+            <p className='font-16'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</p>
+            {event?.type === SCREEN ? (
+              <p className='font-16 whitespace-nowrap'>{intl.formatMessage(messages.phonenumber)}: {event?.phoneNumber}</p>
+            ) : event?.type === CONSULTATION ? (
+              <p className='font-16'>{event?.meetingLink ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}: {event?.meetingLink ? event?.meetingLink : event?.phoneNumber}</p>
+            ) : (
+              <p className='font-16'>{intl.formatMessage(messages.where)}: {event?.location}</p>
+            )}
+            <p className='font-16 nobr'>{intl.formatMessage(messages.when)}: <span className='font-16 font-700'>{event?.type === SCREEN ? event?.screeningTime ?? '' : this.displayDuration(event)}</span></p>
+          </div>
+        </Col>
       </div>
     );
 
