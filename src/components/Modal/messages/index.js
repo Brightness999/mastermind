@@ -285,9 +285,9 @@ export default {
     id: `${scope}.unpaidBalance`,
     defaultMessage: 'Unpaid balance',
   },
-  lateFreeAmount: {
-    id: `${scope}.lateFreeAmount`,
-    defaultMessage: 'Late free amount',
+  lateFeeAmount: {
+    id: `${scope}.lateFeeAmount`,
+    defaultMessage: 'Late fee amount',
   },
   currentBalanceDue: {
     id: `${scope}.currentBalanceDue`,

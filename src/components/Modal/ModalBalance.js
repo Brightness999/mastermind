@@ -6,43 +6,55 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 
 import messages from './messages';
-import { APPOINTMENT, EVALUATION, NOFLAG, NOSHOW, SCREEN, SUBSIDY } from '../../routes/constant';
+import { APPOINTMENT, EVALUATION, NOFLAG, NOSHOW, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
 class ModalBalance extends React.Component {
+	state = {
+		currentBalance: undefined,
+	}
+
 	componentDidMount() {
 		const { event } = this.props;
 		if (event?.flagStatus === NOFLAG) {
+			let balance;
 			if (event?.type === EVALUATION) {
-				this.form?.setFieldsValue({ late: event?.provider?.separateEvaluationRate });
+				balance = event?.provider?.separateEvaluationRate;
 			} else if (event?.type === APPOINTMENT) {
 				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level))?.rate });
+					balance = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level))?.rate;
 				} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(a.level))?.rate });
+					balance = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(a.level))?.rate;
 				} else if (['Grades 7', 'Grades 8'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(a.level))?.rate });
+					balance = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(a.level))?.rate;
 				} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'High School Grades 9-12'].includes(a.level))?.rate });
+					balance = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'High School Grades 9-12'].includes(a.level))?.rate;
 				} else {
-					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate });
+					balance = event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate;
 				}
 			} else if (event?.type === SUBSIDY) {
 				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level))?.subsidizedRate });
+					const level = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level));
+					balance = level?.subsidizedRate ? level.subsidizedRate : level.rate;
 				} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(a.level))?.subsidizedRate });
+					const level = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(a.level));
+					balance = level?.subsidizedRate ? level.subsidizedRate : level.rate;
 				} else if (['Grades 7', 'Grades 8'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(a.level))?.subsidizedRate });
+					const level = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(a.level));
+					balance = level?.subsidizedRate ? level.subsidizedRate : level.rate;
 				} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'High School Grades 9-12'].includes(a.level))?.subsidizedRate });
+					const level = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'High School Grades 9-12'].includes(a.level));
+					balance = level?.subsidizedRate ? level.subsidizedRate : level.rate;
 				} else {
-					this.form?.setFieldsValue({ late: event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.subsidizedRate });
+					const level = event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade);
+					balance = level?.subsidizedRate ? level.subsidizedRate : level.rate;
 				}
 			} else {
-				this.form?.setFieldsValue({ late: '' });
+				balance = '';
 			}
+			this.setState({ currentBalance: balance });
+			this.form?.setFieldsValue({ late: balance });
 		} else {
 			this.form?.setFieldsValue({ late: event?.flagItems?.late, notes: event?.flagItems?.notes });
 		}
@@ -55,6 +67,7 @@ class ModalBalance extends React.Component {
 	render() {
 		const { event } = this.props;
 		const { user } = this.props.auth;
+		const { currentBalance } = this.state;
 		const modalProps = {
 			className: 'modal-balance',
 			title: "",
@@ -64,7 +77,6 @@ class ModalBalance extends React.Component {
 			footer: null,
 		};
 		const pastDays = `${moment().diff(moment(event?.date), 'hours') / 24 >= 1 ? Math.floor(moment().diff(moment(event?.date), 'hours') / 24) + 'Days' : ''} ${moment().diff(moment(event?.date), 'hours') % 24 > 0 ? Math.floor(moment().diff(moment(event?.date), 'hours') % 24) + 'Hours' : ''}`
-		const currentBalance = event?.type === SCREEN ? event?.provider?.separateEvaluationRate : event?.type === APPOINTMENT ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate : event?.type === SUBSIDY ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.subsidizedRate : '';
 
 		return (
 			<Modal {...modalProps}>
@@ -74,15 +86,9 @@ class ModalBalance extends React.Component {
 						<div className='mr-10 flex-1'>
 							<Form.Item
 								name="late"
-								label={intl.formatMessage(messages.lateFreeAmount)}
+								label={intl.formatMessage(messages.lateFeeAmount)}
 								className="mb-0"
-								rules={[{
-									required: true,
-									validator: (_, value) => {
-										if (value < 0) return Promise.reject('Must be value greater than 0');
-										return Promise.resolve();
-									}
-								}]}
+								rules={[{ required: true }]}
 							>
 								<Input
 									type='number'

@@ -323,7 +323,7 @@
   "components.Modal.penaltyAmount": "Penalty amount",
   "components.Modal.programPenalty": "Program penalty",
   "components.Modal.unpaidBalance": "Unpaid balance",
-  "components.Modal.lateFreeAmount": "Late free amount",
+  "components.Modal.lateFeeAmount": "Late fee amount",
   "components.Modal.currentBalanceDue": "Current balance due",
   "components.Modal.daysPastDue": "Days past due",
   "components.Modal.scheduleConsultation": "Schedule Consultation",

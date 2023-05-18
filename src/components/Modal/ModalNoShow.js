@@ -13,35 +13,42 @@ class ModalNoShow extends React.Component {
 	componentDidMount() {
 		const { event } = this.props;
 		if (event?.flagStatus === NOFLAG) {
+			let balance;
 			if (event?.type === EVALUATION) {
-				this.form?.setFieldsValue({ penalty: event?.provider?.separateEvaluationRate, program: 5 });
+				balance = event?.provider?.separateEvaluationRate;
 			} else if (event?.type === APPOINTMENT) {
 				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level))?.rate, program: 5 });
+					balance = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level))?.rate;
 				} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(a.level))?.rate, program: 5 });
+					balance = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(a.level))?.rate;
 				} else if (['Grades 7', 'Grades 8'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(a.level))?.rate, program: 5 });
+					balance = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(a.level))?.rate;
 				} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'High School Grades 9-12'].includes(a.level))?.rate, program: 5 });
+					balance = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'High School Grades 9-12'].includes(a.level))?.rate;
 				} else {
-					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate, program: 5 });
+					balance = event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate;
 				}
 			} else if (event?.type === SUBSIDY) {
 				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level))?.subsidizedRate, program: 5 });
+					const level = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Early Education'].includes(a.level));
+					balance = level?.subsidizedRate ? level.subsidizedRate : level.rate;
 				} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(a.level))?.subsidizedRate, program: 5 });
+					const level = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8'].includes(a.level));
+					balance = level?.subsidizedRate ? level.subsidizedRate : level.rate;
 				} else if (['Grades 7', 'Grades 8'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(a.level))?.subsidizedRate, program: 5 });
+					const level = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8'].includes(a.level));
+					balance = level?.subsidizedRate ? level.subsidizedRate : level.rate;
 				} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(event?.dependent?.currentGrade)) {
-					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'High School Grades 9-12'].includes(a.level))?.subsidizedRate, program: 5 });
+					const level = event?.provider?.academicLevel?.find(a => [event?.dependent?.currentGrade, 'High School Grades 9-12'].includes(a.level));
+					balance = level?.subsidizedRate ? level.subsidizedRate : level.rate;
 				} else {
-					this.form?.setFieldsValue({ penalty: event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.subsidizedRate, program: 5 });
+					const level = event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade);
+					balance = level?.subsidizedRate ? level.subsidizedRate : level.rate;
 				}
 			} else {
-				this.form?.setFieldsValue({ penalty: '', program: 5 });
+				balance = '';
 			}
+			this.form?.setFieldsValue({ penalty: balance, program: 5 });
 		} else {
 			this.form?.setFieldsValue({ penalty: event?.flagItems?.penalty, program: event?.flagItems?.program, notes: event?.flagItems?.notes });
 		}
@@ -72,13 +79,7 @@ class ModalNoShow extends React.Component {
 							<Form.Item
 								name="penalty"
 								label={intl.formatMessage(messages.penaltyAmount)}
-								rules={[{
-									required: true,
-									validator: (_, value) => {
-										if (value < 0) return Promise.reject('Must be value greater than 0');
-										return Promise.resolve();
-									}
-								}]}
+								rules={[{ required: true }]}
 							>
 								<Input
 									type='number'
@@ -95,13 +96,7 @@ class ModalNoShow extends React.Component {
 							<Form.Item
 								name="program"
 								label={intl.formatMessage(messages.programPenalty)}
-								rules={[{
-									required: true,
-									validator: (_, value) => {
-										if (value < 0) return Promise.reject('Must be value greater than 0');
-										return Promise.resolve();
-									}
-								}]}
+								rules={[{ required: true }]}
 							>
 								<Input
 									type='number'
