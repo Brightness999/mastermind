@@ -1,9 +1,9 @@
 import React from 'react';
-import { Modal, Button, Input, Form, Row } from 'antd';
+import { Modal, Button } from 'antd';
 import intl from 'react-intl-universal';
+
 import messages from './messages';
 import './style/index.less';
-import '../../assets/styles/login.less';
 
 class ModalPayment extends React.Component {
 	onFinish = (values) => {
@@ -13,46 +13,43 @@ class ModalPayment extends React.Component {
 	render() {
 		const modalProps = {
 			className: 'modal-payment',
-			title: "Payment",
+			title: (<span className='font-16'>Payment</span>),
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
-			footer: [],
-			width: 300,
+			footer: [
+				<Button key="back" onClick={this.props.onCancel}>
+					{intl.formatMessage(messages.close)}
+				</Button>,
+				<Button className='p-0' type='text'>
+					<form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+						<input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+						<input type="hidden" name="business" value="office@helpmegethelp.org" />
+						<input type="hidden" name="cmd" value="_donations" />
+						<input type="hidden" name="item_name" value="Help Me Get Help" />
+						<input type="hidden" name="item_number" />
+						<input type="hidden" name="amount" value={this.props.appointment?.provider?.cancellationFee} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+						<input type="hidden" name="shipping" value="0.00" />
+						<input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+						<input type="hidden" name="rm" value="0" />
+						<input type="hidden" name="return" value={`${window.location.href}?success=true&type=cancel&id=${this.props.appointment?._id}`} />
+						<input type="hidden" name="cancel_return" value={window.location.href} />
+						<input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+						<Button key="submit" type="primary" htmlType='submit'>
+							{intl.formatMessage(messages.paynow)}
+						</Button>
+					</form>
+				</Button>
+			],
+			width: 400,
 		};
 
 		return (
 			<Modal {...modalProps}>
-				<p className='font-16 font-500 mb-10'>Enter your payment</p>
-				<Form name='flag-no-show' layout='vertical' onFinish={this.onFinish} ref={ref => this.form = ref}>
-					<Form.Item
-						name="payment"
-						rules={[{
-							required: true,
-							validator: (_, value) => {
-								if (value === undefined) return Promise.reject('Please enter your payment');
-								if (value <= 0) return Promise.reject('Must be value greater than 0');
-								return Promise.resolve();
-							}
-						}]}
-					>
-						<Input
-							type='number'
-							min={0}
-							addonBefore="$"
-							className='font-16 penalty'
-							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
-						/>
-					</Form.Item>
-					<Row className="justify-end gap-2 mt-10">
-						<Button key="back" onClick={this.props.onCancel}>
-							{intl.formatMessage(messages.cancel)}
-						</Button>
-						<Button key="submit" type="primary" htmlType='submit'>
-							{intl.formatMessage(messages.submitFlag)}
-						</Button>
-					</Row>
-				</Form>
+				<p className='font-16'>{this.props.description}</p>
+				<div className='flex justify-end items-center gap-2'>
+
+				</div>
 			</Modal>
 		);
 	}

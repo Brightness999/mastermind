@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { AiFillTag, AiOutlineUserSwitch } from 'react-icons/ai';
 
-import { ModalBalance, ModalCancelAppointment, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalProcessAppointment } from '../../components/Modal';
+import { ModalBalance, ModalCancelAppointment, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalPayment, ModalProcessAppointment } from '../../components/Modal';
 import messages from './messages';
 import msgModal from '../Modal/messages';
 import msgDashboard from '../../routes/Dashboard/messages';
@@ -20,7 +20,7 @@ import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
 import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setNotificationTime, switchConsultation, updateAppointmentNotesForParent } from '../../utils/api/apiList';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PENDING, SCREEN, SUBSIDY } from '../../routes/constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PARENT, PENDING, SCREEN, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -53,6 +53,8 @@ class DrawerDetail extends Component {
       visibleCurrentScreen: false,
       visibleCreateNote: false,
       notificationTime: 1440,
+      visiblePayment: false,
+      paymentDescription: '',
     };
   }
 
@@ -124,7 +126,18 @@ class DrawerDetail extends Component {
   }
 
   openModalCurrent = () => {
-    this.props.event?.type == SCREEN ? this.setState({ visibleCurrentScreen: true }) : this.props.event?.type == CONSULTATION ? this.setState({ visibleCurrentReferral: true }) : this.setState({ visibleCurrent: true });
+    const { event } = this.props;
+    const { user } = this.props.auth;
+
+    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && user.role === PARENT && moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid</span>
+      this.setState({ paymentDescription: desc });
+      message.warn(desc).then(() => {
+        this.setState({ visiblePayment: true });
+      });
+    } else {
+      event?.type === SCREEN ? this.setState({ visibleCurrentScreen: true }) : event?.type === CONSULTATION ? this.setState({ visibleCurrentReferral: true }) : this.setState({ visibleCurrent: true });
+    }
   }
 
   showEditNotes = () => {
@@ -467,6 +480,10 @@ class DrawerDetail extends Component {
     this.setState({ visibleCreateNote: false });
   }
 
+  onCloseModalPayment = () => {
+    this.setState({ visiblePayment: false });
+  }
+
   handleRequestClearance = (requestMessage) => {
     this.onCloseModalCreateNote();
     message.success("Your request has been submitted. Please allow up to 24 hours for the provider to review this.");
@@ -543,7 +560,32 @@ class DrawerDetail extends Component {
   }
 
   render() {
-    const { isProviderHover, isDependentHover, visibleCancel, visibleProcess, visibleCurrent, isShowEditNotes, notes, publicFeedback, isModalInvoice, isLeftFeedback, userRole, visibleCurrentReferral, isShowFeedback, visibleNoShow, visibleBalance, isFlag, visibleEvaluationProcess, errorMessage, visibleModalMessage, visibleCurrentScreen, visibleCreateNote, notificationTime } = this.state;
+    const {
+      isProviderHover,
+      isDependentHover,
+      visibleCancel,
+      visibleProcess,
+      visibleCurrent,
+      isShowEditNotes,
+      notes,
+      publicFeedback,
+      isModalInvoice,
+      isLeftFeedback,
+      userRole,
+      visibleCurrentReferral,
+      isShowFeedback,
+      visibleNoShow,
+      visibleBalance,
+      isFlag,
+      visibleEvaluationProcess,
+      errorMessage,
+      visibleModalMessage,
+      visibleCurrentScreen,
+      visibleCreateNote,
+      notificationTime,
+      visiblePayment,
+      paymentDescription
+    } = this.state;
     const { event, listAppointmentsRecent, auth } = this.props;
     const appointmentDate = moment(event?.date);
     const consultants = auth.consultants?.filter(consultant => consultant?._id !== auth.user?._id && !listAppointmentsRecent?.find(a => a?.consultant?._id === consultant?.consultantInfo?._id && a.date === event?.date) && consultant?.consultantInfo?.manualSchedule?.find(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 }))));
@@ -675,6 +717,13 @@ class DrawerDetail extends Component {
       onSubmit: this.handleRequestClearance,
       onCancel: this.onCloseModalCreateNote,
       title: "Request Message"
+    };
+    const modalPaymentProps = {
+      visible: visiblePayment,
+      onSubmit: this.onCloseModalPayment,
+      onCancel: this.onCloseModalPayment,
+      description: paymentDescription,
+      appointment: event,
     };
 
     const contentConfirm = (
@@ -1172,6 +1221,7 @@ class DrawerDetail extends Component {
         {visibleModalMessage && <ModalCreateNote {...modalMessageProps} />}
         {visibleCurrentScreen && <ModalNewScreening {...modalCurrentScreeningProps} />}
         {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
+        {visiblePayment && <ModalPayment {...modalPaymentProps} />}
       </Drawer >
     );
   }

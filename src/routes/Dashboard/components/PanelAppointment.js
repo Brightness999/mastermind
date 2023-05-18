@@ -11,11 +11,11 @@ import moment from 'moment';
 import messages from '../messages';
 import msgModal from '../../../components/Modal/messages';
 import request from '../../../utils/api/request'
-import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../../components/Modal';
+import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalPayment, ModalProcessAppointment } from '../../../components/Modal';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
 import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag } from '../../../utils/api/apiList';
+import { ACTIVE, APPOINTMENT, BALANCE, CLOSED, DECLINED, EVALUATION, NOSHOW, PARENT, PENDING, SUBSIDY } from '../../constant';
 import './index.less';
-import { ACTIVE, APPOINTMENT, BALANCE, CLOSED, DECLINED, EVALUATION, NOSHOW, PENDING, SUBSIDY } from '../../constant';
 
 class PanelAppointment extends React.Component {
   constructor(props) {
@@ -33,6 +33,8 @@ class PanelAppointment extends React.Component {
       visibleBalance: false,
       visibleNoShow: false,
       visibleFeedback: false,
+      visiblePayment: false,
+      paymentDescription: '',
     };
   }
 
@@ -85,8 +87,22 @@ class PanelAppointment extends React.Component {
     this.setState({ visibleCurrent: false });
   }
 
-  openModalCurrent = (data) => {
-    this.setState({ visibleCurrent: true, event: data });
+  openModalCurrent = (event) => {
+    const { user } = this.props;
+
+    if (user.role === PARENT && moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid</span>
+      this.setState({ paymentDescription: desc, event: event });
+      message.warn(desc).then(() => {
+        this.setState({ visiblePayment: true });
+      })
+    } else {
+      this.setState({ visibleCurrent: true, event: event });
+    }
+  }
+
+  closeModalPayment = () => {
+    this.setState({ visiblePayment: false, paymentDescription: '' });
   }
 
   closeModalCancel = () => {
@@ -289,7 +305,19 @@ class PanelAppointment extends React.Component {
   }
 
   render() {
-    const { appointments, visibleCancel, visibleCurrent, event, visibleInvoice, visibleProcess, visibleBalance, visibleFeedback, visibleNoShow } = this.state;
+    const {
+      appointments,
+      visibleCancel,
+      visibleCurrent,
+      event,
+      visibleInvoice,
+      visibleProcess,
+      visibleBalance,
+      visibleFeedback,
+      visibleNoShow,
+      visiblePayment,
+      paymentDescription,
+    } = this.state;
 
     const modalCancelProps = {
       visible: visibleCancel,
@@ -342,6 +370,14 @@ class PanelAppointment extends React.Component {
       event: event,
     };
 
+    const modalPaymentProps = {
+      visible: visiblePayment,
+      onSubmit: this.closeModalPayment,
+      onCancel: this.closeModalPayment,
+      description: paymentDescription,
+      appointment: event,
+    };
+
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
         <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
@@ -363,6 +399,7 @@ class PanelAppointment extends React.Component {
           )}
           {visibleCancel && <ModalCancelAppointment {...modalCancelProps} />}
           {visibleCurrent && <ModalCurrentAppointment {...modalCurrentProps} />}
+          {visiblePayment && <ModalPayment {...modalPaymentProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
           {appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && a.flagStatus != ACTIVE && [0, -2].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (

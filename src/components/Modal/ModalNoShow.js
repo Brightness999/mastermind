@@ -13,7 +13,7 @@ class ModalNoShow extends React.Component {
 	componentDidMount() {
 		const { event } = this.props;
 		if (event?.flagStatus === NOFLAG) {
-			if (event?.type ===EVALUATION) {
+			if (event?.type === EVALUATION) {
 				this.form?.setFieldsValue({ penalty: event?.provider?.separateEvaluationRate, program: 5 });
 			} else if (event?.type === APPOINTMENT) {
 				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(event?.dependent?.currentGrade)) {
@@ -60,7 +60,7 @@ class ModalNoShow extends React.Component {
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
-			footer: []
+			footer: null,
 		};
 
 		return (

@@ -61,7 +61,7 @@ class ModalBalance extends React.Component {
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
-			footer: []
+			footer: null,
 		};
 		const pastDays = `${moment().diff(moment(event?.date), 'hours') / 24 >= 1 ? Math.floor(moment().diff(moment(event?.date), 'hours') / 24) + 'Days' : ''} ${moment().diff(moment(event?.date), 'hours') % 24 > 0 ? Math.floor(moment().diff(moment(event?.date), 'hours') % 24) + 'Hours' : ''}`
 		const currentBalance = event?.type === SCREEN ? event?.provider?.separateEvaluationRate : event?.type === APPOINTMENT ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.rate : event?.type === SUBSIDY ? event?.provider?.academicLevel?.find(a => a.level == event?.dependent?.currentGrade)?.subsidizedRate : '';

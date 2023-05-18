@@ -383,6 +383,8 @@
   "components.Modal.therapistEmail": "Therapist’s Email",
   "components.Modal.profile": "Profile",
   "components.Modal.gradeLevels": "Grade level(s)",
+  "components.Modal.close": "Close",
+  "components.Modal.paynow": "Pay now",
   
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.editUser": "Edit User",

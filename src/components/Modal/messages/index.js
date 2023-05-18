@@ -484,5 +484,13 @@ export default {
   gradeLevels: {
     id: `${scope}.gradeLevels`,
     defaultMessage: 'Grade level(s)',
+  },
+  close: {
+    id: `${scope}.close`,
+    defaultMessage: 'Close',
+  },
+  paynow: {
+    id: `${scope}.paynow`,
+    defaultMessage: 'Pay now',
   }
 };
