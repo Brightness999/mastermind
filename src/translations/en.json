@@ -157,7 +157,6 @@
   "routes.Createaccount.offeringVolunteer": "I’m offering pro bono/volunteer sessions",
   "routes.Createaccount.numberSessionsWeek": "Number of pro bono sessions per week",
   "routes.Createaccount.provideSubsidizedCases": "I’m willing to provide a reduced rate for subsidized cases",
-  "routes.Createaccount.reduced": "Reduced",
   "routes.Createaccount.openPrivateSlots": "I’m willing to open private slots for HMGH referrals",
   "routes.Createaccount.selectDateTime": "Select a Date & Time",
   "routes.Createaccount.timesAvailable": "times you're available",

@@ -6,7 +6,8 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 
 import messages from '../../../../Sign/CreateAccount/messages';
-import messagesLogin from '../../../../Sign/Login/messages';
+import msgLogin from '../../../../Sign/Login/messages';
+import msgModal from '../../../../../components/Modal/messages';
 import { setInforProvider } from '../../../../../redux/features/authSlice';
 import request from '../../../../../utils/api/request';
 import { getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
@@ -176,8 +177,8 @@ class SubsidyProgram extends Component {
 												<Col xs={12} sm={12} md={6} className='item-remove'>
 													<Form.Item
 														name={[field.name, "subsidizedRate"]}
-														label={'Subsidized' + intl.formatMessage(messages.rate)}
-														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced) }]}
+														label={intl.formatMessage(msgModal.subsidizedRate)}
+														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(msgModal.subsidizedRate) }]}
 													>
 														<Input
 															type="number"

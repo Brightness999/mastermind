@@ -554,10 +554,6 @@ export default ({
     id: `${scope}.provideSubsidizedCases`,
     defaultMessage: 'I’m willing to provide a reduced rate for subsidized cases',
   },
-  reduced: {
-    id: `${scope}.reduced`,
-    defaultMessage: 'Reduced',
-  },
   openPrivateSlots: {
     id: `${scope}.openPrivateSlots`,
     defaultMessage: 'I’m willing to open private slots for HMGH referrals',

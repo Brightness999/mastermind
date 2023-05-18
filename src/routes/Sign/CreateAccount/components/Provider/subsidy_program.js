@@ -6,7 +6,8 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 
 import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
+import msgLogin from '../../../Login/messages';
+import msgModal from '../../../../../components/Modal/messages';
 import { setRegisterData } from '../../../../../redux/features/registerSlice';
 
 class SubsidyProgram extends Component {
@@ -159,7 +160,7 @@ class SubsidyProgram extends Component {
 													<Form.Item
 														name={[field.name, "level"]}
 														label={intl.formatMessage(messages.level)}
-														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.level) }]}
+														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.level) }]}
 													>
 														<Select
 															disabled
@@ -175,7 +176,7 @@ class SubsidyProgram extends Component {
 													<Form.Item
 														name={[field.name, "rate"]}
 														label={'Standard ' + intl.formatMessage(messages.rate)}
-														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
+														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.rate) }]}
 													>
 														<Input
 															disabled
@@ -188,8 +189,8 @@ class SubsidyProgram extends Component {
 												<Col xs={12} sm={12} md={6} className={field.key !== 0 && 'item-remove'}>
 													<Form.Item
 														name={[field.name, "subsidizedRate"]}
-														label={'Subsidized ' + intl.formatMessage(messages.rate)}
-														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.reduced) }]}
+														label={intl.formatMessage(msgModal.subsidizedRate)}
+														rules={[{ required: isAcceptReduceRate, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(msgModal.subsidizedRate) }]}
 													>
 														<Input
 															type="number"
