@@ -339,11 +339,15 @@ class SchedulingCenter extends React.Component {
     const event = data.oldEvent.extendedProps;
     const date = data.oldEvent.start;
 
-    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && moment(date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+    if (moment(data.event.start).isBefore(moment())) {
       data.revert();
-      this.setState({ visibleCancelForAdmin: true, selectedEvent: event, dragInfo: data });
     } else {
-      this.handleEventChange(data);
+      if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && moment(date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+        data.revert();
+        this.setState({ visibleCancelForAdmin: true, selectedEvent: event, dragInfo: data });
+      } else {
+        this.handleEventChange(data);
+      }
     }
   }
 

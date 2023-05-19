@@ -559,16 +559,20 @@ class Dashboard extends React.Component {
     const date = data.oldEvent.start;
     const { user } = this.props;
 
-    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && user.role === PARENT && moment(date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+    if (moment(data.event.start).isBefore(moment())) {
       data.revert();
-      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
-      this.setState({ paymentDescription: desc, selectedEvent: event }, () => {
-        message.warn(desc).then(() => {
-          this.setState({ visiblePayment: true });
-        });
-      });
     } else {
-      this.handleEventChange(data);
+      if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && user.role === PARENT && moment(date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+        data.revert();
+        const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
+        this.setState({ paymentDescription: desc, selectedEvent: event }, () => {
+          message.warn(desc).then(() => {
+            this.setState({ visiblePayment: true });
+          });
+        });
+      } else {
+        this.handleEventChange(data);
+      }
     }
   }
 
