@@ -47,9 +47,6 @@ class ModalPayment extends React.Component {
 		return (
 			<Modal {...modalProps}>
 				<p className='font-16'>{this.props.description}</p>
-				<div className='flex justify-end items-center gap-2'>
-
-				</div>
 			</Modal>
 		);
 	}
