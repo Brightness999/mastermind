@@ -384,6 +384,9 @@
   "components.Modal.gradeLevels": "Grade level(s)",
   "components.Modal.close": "Close",
   "components.Modal.paynow": "Pay now",
+  "components.Modal.applyFeeToParent": "Apply cancellation fee to parent",
+  "components.Modal.waiveFee": "Waive cancellation fee",
+  "components.Modal.payment": "Payment",
   
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.editUser": "Edit User",

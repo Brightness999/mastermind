@@ -492,5 +492,17 @@ export default {
   paynow: {
     id: `${scope}.paynow`,
     defaultMessage: 'Pay now',
+  },
+  applyFeeToParent: {
+    id: `${scope}.applyFeeToParent`,
+    defaultMessage: 'Apply cancellation fee to parent',
+  },
+  waiveFee: {
+    id: `${scope}.waiveFee`,
+    defaultMessage: 'Waive cancellation fee',
+  },
+  payment: {
+    id: `${scope}.payment`,
+    defaultMessage: 'Payment',
   }
 };

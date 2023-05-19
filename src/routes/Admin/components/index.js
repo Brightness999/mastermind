@@ -18,7 +18,7 @@ import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import { ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm, ModalCreateNote } from '../../../components/Modal';
+import { ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm, ModalCreateNote, ModalCancelForAdmin } from '../../../components/Modal';
 import DrawerDetail from '../../../components/DrawerDetail';
 import messages from '../../Dashboard/messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
@@ -29,7 +29,7 @@ import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
 import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
 import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, setSchools } from '../../../redux/features/authSlice';
-import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
+import { applyCancellationFeeToParent, clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
 import PageLoading from '../../../components/Loading/PageLoading';
@@ -77,6 +77,8 @@ class SchedulingCenter extends React.Component {
       loading: false,
       visibleCreateNote: false,
       visibleFlagAction: false,
+      visibleCancelForAdmin: false,
+      dragInfo: {},
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -315,20 +317,68 @@ class SchedulingCenter extends React.Component {
     }
   }
 
-  handleEventChange = (changeInfo) => {
+  handleEventChange = async (changeInfo) => {
     const obj = changeInfo.event.toPlainObject();
     const data = {
       role: this.state.userRole,
       data: {
-        appointId: obj.extendedProps._id,
-        date: new Date(obj.start).getTime()
+        _id: obj.extendedProps._id,
+        date: new Date(obj.start),
       }
     }
-    this.props.changeTime(data)
+    await this.props.changeTime(data)
+    this.updateCalendarEvents(this.state.userRole);
+    this.getMyAppointments(this.state.userRole);
   }
 
   handleClickDate = (date) => {
     this.setState({ visibleNewAppoint: true, selectedDate: moment(date.date) });
+  }
+
+  handleEventDragStop = (data) => {
+    const event = data.oldEvent.extendedProps;
+    const date = data.oldEvent.start;
+
+    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && moment(date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+      data.revert();
+      this.setState({ visibleCancelForAdmin: true, selectedEvent: event, dragInfo: data });
+    } else {
+      this.handleEventChange(data);
+    }
+  }
+
+  onCloseModalCancelForAdmin = () => {
+    this.setState({ visibleCancelForAdmin: false });
+  }
+
+  applyFeeToParent = () => {
+    const { selectedEvent, dragInfo } = this.state;
+    this.onCloseModalCancelForAdmin();
+    this.handleEventChange(dragInfo);
+    this.setState({ selectedEvent: {}, dragInfo: {} });
+
+    const postData = {
+      appointmentId: selectedEvent._id,
+      dependentId: selectedEvent.dependent._id,
+      fee: selectedEvent.provider.cancellationFee,
+      action: 'reschedule',
+    }
+    request.post(applyCancellationFeeToParent, postData).then(res => {
+      if (res.success) {
+        message.success('Sent an invoice to parent successfully.');
+      } else {
+        message.error('Something went wrong while sending an invoice.');
+      }
+    }).catch(() => {
+      message.error('Something went wrong while sending an invoice.');
+    })
+  }
+
+  waiveFee = () => {
+    const { dragInfo } = this.state;
+    this.onCloseModalCancelForAdmin();
+    this.handleEventChange(dragInfo);
+    this.setState({ selectedEvent: {}, dragInfo: {} });
   }
 
   getMyAppointments(userRole, dependentId) {
@@ -539,6 +589,7 @@ class SchedulingCenter extends React.Component {
       visibleCreateNote,
       visibleFlagAction,
       locations,
+      visibleCancelForAdmin,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -649,6 +700,13 @@ class SchedulingCenter extends React.Component {
       onSubmit: this.handleRequestClearance,
       onCancel: this.onCloseModalCreateNote,
       title: "Request Message"
+    };
+
+    const modalCancelForAdminProps = {
+      visible: visibleCancelForAdmin,
+      onSubmit: this.waiveFee,
+      applyFeeToParent: this.applyFeeToParent,
+      onCancel: this.onCloseModalCancelForAdmin,
     };
 
     return (
@@ -797,8 +855,9 @@ class SchedulingCenter extends React.Component {
                 events={calendarEvents}
                 eventContent={(info) => renderEventContent(info, listAppointmentsRecent)}
                 eventClick={this.onShowDrawerDetail}
-                eventChange={this.handleEventChange} // called for drag-n-drop/resize
                 dateClick={this.handleClickDate}
+                eventResize={(info) => info.revert()}
+                eventDrop={this.handleEventDragStop}
                 height="calc(100vh - 220px)"
               />
             </div>
@@ -1002,6 +1061,7 @@ class SchedulingCenter extends React.Component {
         {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
         {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
         {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
+        {visibleCancelForAdmin && <ModalCancelForAdmin {...modalCancelForAdminProps} />}
         <Modal title="Flag Action" open={visibleFlagAction} footer={null} onCancel={this.closeFlagAction}>
           <div className='flex items-center gap-2'>
             {(selectedEvent?.flagItems?.isPaid || selectedEvent?.flagItems?.rate == 0) ? (

@@ -12,15 +12,15 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { AiFillTag, AiOutlineUserSwitch } from 'react-icons/ai';
 
-import { ModalBalance, ModalCancelAppointment, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalPayment, ModalProcessAppointment } from '../../components/Modal';
+import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalPayment, ModalProcessAppointment } from '../../components/Modal';
 import messages from './messages';
 import msgModal from '../Modal/messages';
 import msgDashboard from '../../routes/Dashboard/messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setNotificationTime, switchConsultation, updateAppointmentNotesForParent } from '../../utils/api/apiList';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PARENT, PENDING, SCREEN, SUBSIDY } from '../../routes/constant';
+import { acceptDeclinedScreening, appealRequest, applyCancellationFeeToParent, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setNotificationTime, switchConsultation, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PARENT, PENDING, SCREEN, SUBSIDY, SUPERADMIN } from '../../routes/constant';
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -55,6 +55,8 @@ class DrawerDetail extends Component {
       notificationTime: 1440,
       visiblePayment: false,
       paymentDescription: '',
+      visibleCancelForAdmin: false,
+      cancellationType: '',
     };
   }
 
@@ -88,12 +90,16 @@ class DrawerDetail extends Component {
     const { event } = this.props;
     const { user } = this.props.auth;
 
-    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && user.role === PARENT && moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
-      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
-      this.setState({ paymentDescription: desc });
-      message.warn(desc).then(() => {
-        this.setState({ visiblePayment: true });
-      });
+    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && [PARENT, ADMIN, SUPERADMIN].includes(user.role) && moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+      if (user.role === PARENT) {
+        const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
+        this.setState({ paymentDescription: desc });
+        message.warn(desc).then(() => {
+          this.setState({ visiblePayment: true });
+        });
+      } else {
+        this.setState({ visibleCancelForAdmin: true, cancellationType: 'cancel' });
+      }
     } else {
       this.setState({ visibleCancel: true });
     }
@@ -140,14 +146,59 @@ class DrawerDetail extends Component {
     const { event } = this.props;
     const { user } = this.props.auth;
 
-    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && user.role === PARENT && moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
-      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
-      this.setState({ paymentDescription: desc });
-      message.warn(desc).then(() => {
-        this.setState({ visiblePayment: true });
-      });
+    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type), [PARENT, ADMIN, SUPERADMIN].includes(user.role) && moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+      if (user.role === PARENT) {
+        const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
+        this.setState({ paymentDescription: desc });
+        message.warn(desc).then(() => {
+          this.setState({ visiblePayment: true });
+        });
+      } else {
+        this.setState({ visibleCancelForAdmin: true, cancellationType: 'reschedule' });
+      }
     } else {
       event?.type === SCREEN ? this.setState({ visibleCurrentScreen: true }) : event?.type === CONSULTATION ? this.setState({ visibleCurrentReferral: true }) : this.setState({ visibleCurrent: true });
+    }
+  }
+
+  onCloseModalCancelForAdmin = () => {
+    this.setState({ visibleCancelForAdmin: false });
+  }
+
+  applyFeeToParent = () => {
+    const { cancellationType } = this.state;
+    const { event } = this.props;
+    this.setState({ visibleCancelForAdmin: false });
+    if (cancellationType === 'cancel') {
+      this.setState({ visibleCancel: true, cancellationType: '' });
+    } else if (cancellationType === 'reschedule') {
+      this.setState({ visibleCurrent: true, cancellationType: '' });
+    }
+
+    const postData = {
+      appointmentId: event._id,
+      dependentId: event.dependent._id,
+      fee: event.provider.cancellationFee,
+      action: cancellationType,
+    }
+    request.post(applyCancellationFeeToParent, postData).then(res => {
+      if (res.success) {
+        message.success('Sent an invoice to parent successfully.');
+      } else {
+        message.error('Something went wrong while sending an invoice.');
+      }
+    }).catch(() => {
+      message.error('Something went wrong while sending an invoice.');
+    })
+  }
+
+  waiveFee = () => {
+    const { cancellationType } = this.state;
+    this.setState({ visibleCancelForAdmin: false });
+    if (cancellationType === 'cancel') {
+      this.setState({ visibleCancel: true });
+    } else if (cancellationType === 'reschedule') {
+      this.setState({ visibleCurrent: true });
     }
   }
 
@@ -595,7 +646,8 @@ class DrawerDetail extends Component {
       visibleCreateNote,
       notificationTime,
       visiblePayment,
-      paymentDescription
+      paymentDescription,
+      visibleCancelForAdmin,
     } = this.state;
     const { event, listAppointmentsRecent, auth } = this.props;
     const appointmentDate = moment(event?.date);
@@ -735,6 +787,12 @@ class DrawerDetail extends Component {
       onCancel: this.onCloseModalPayment,
       description: paymentDescription,
       appointment: event,
+    };
+    const modalCancelForAdminProps = {
+      visible: visibleCancelForAdmin,
+      onSubmit: this.waiveFee,
+      applyFeeToParent: this.applyFeeToParent,
+      onCancel: this.onCloseModalCancelForAdmin,
     };
 
     const contentConfirm = (
@@ -1231,6 +1289,7 @@ class DrawerDetail extends Component {
         {visibleCurrentScreen && <ModalNewScreening {...modalCurrentScreeningProps} />}
         {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
         {visiblePayment && <ModalPayment {...modalPaymentProps} />}
+        {visibleCancelForAdmin && <ModalCancelForAdmin {...modalCancelForAdminProps} />}
       </Drawer >
     );
   }

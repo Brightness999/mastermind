@@ -13,7 +13,7 @@ class ModalPayment extends React.Component {
 	render() {
 		const modalProps = {
 			className: 'modal-payment',
-			title: (<span className='font-16'>Payment</span>),
+			title: (<span className='font-16'>{intl.formatMessage(messages.payment)}</span>),
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),

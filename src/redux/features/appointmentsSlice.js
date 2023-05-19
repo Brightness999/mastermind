@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import request from '../../utils/api/request'
-import { cancelAppointmentForParent, cancelAppointmentForProvider, changeTimeAppointForParent, changeTimeAppointForProvider, getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getParentSubsidyRequests, getProviderSubsidyRequests, getSchoolSubsidyRequests } from '../../utils/api/apiList';
+import { cancelAppointmentForParent, cancelAppointmentForProvider, changeTimeAppointForAdmin, changeTimeAppointForParent, changeTimeAppointForProvider, getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getParentSubsidyRequests, getProviderSubsidyRequests, getSchoolSubsidyRequests } from '../../utils/api/apiList';
 import { ADMIN, CONSULTANT, CONSULTATION, PARENT, PENDING, PROVIDER, SUPERADMIN } from '../../routes/constant';
+import moment from 'moment';
 
 const initialState = {
 	dataAppointments: [],
@@ -96,7 +97,7 @@ export const getAppointmentsMonthData = createAsyncThunk(
 				appoint.allDay = false;
 				appoint.start = new Date(appoint.date);
 				appoint.end = new Date(appoint.date);
-				appoint.editable = appoint.status === PENDING ? true : false;
+				appoint.editable = appoint.status === PENDING && moment(appoint.date).isAfter(moment()) ? true : false;
 			});
 			return result.data;
 		} catch (error) {
@@ -111,6 +112,12 @@ export const changeTime = createAsyncThunk(
 		let result = {}
 		try {
 			switch (data.role) {
+				case SUPERADMIN:
+					result = await request.post(changeTimeAppointForAdmin, data.data);
+					return result.data;
+				case ADMIN:
+					result = await request.post(changeTimeAppointForAdmin, data.data);
+					return result.data;
 				case PROVIDER:
 					result = await request.post(changeTimeAppointForProvider, data.data);
 					return result.data;

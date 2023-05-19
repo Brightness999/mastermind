@@ -11,9 +11,9 @@ import moment from 'moment';
 import msgDashboard from '../../Dashboard/messages';
 import msgModal from '../../../components/Modal/messages';
 import request from '../../../utils/api/request'
-import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../../components/Modal';
+import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../../components/Modal';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag } from '../../../utils/api/apiList';
+import { applyCancellationFeeToParent, cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag } from '../../../utils/api/apiList';
 import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLOSED, DECLINED, EVALUATION, NOSHOW, PENDING, SUBSIDY } from '../../constant';
 import './index.less';
 
@@ -33,6 +33,8 @@ class PanelAppointment extends React.Component {
       visibleBalance: false,
       visibleNoShow: false,
       visibleFeedback: false,
+      visibleCancelForAdmin: false,
+      cancellationType: '',
     };
   }
 
@@ -72,6 +74,46 @@ class PanelAppointment extends React.Component {
     );
   }
 
+  onCloseModalCancelForAdmin = () => {
+    this.setState({ visibleCancelForAdmin: false });
+  }
+
+  applyFeeToParent = () => {
+    const { cancellationType, event } = this.state;
+    this.setState({ visibleCancelForAdmin: false });
+    if (cancellationType === 'cancel') {
+      this.setState({ visibleCancel: true, cancellationType: '' });
+    } else if (cancellationType === 'reschedule') {
+      this.setState({ visibleCurrent: true, cancellationType: '' });
+    }
+
+    const postData = {
+      appointmentId: event._id,
+      dependentId: event.dependent._id,
+      fee: event.provider.cancellationFee,
+      action: cancellationType,
+    }
+    request.post(applyCancellationFeeToParent, postData).then(res => {
+      if (res.success) {
+        message.success('Sent an invoice to parent successfully.');
+      } else {
+        message.error('Something went wrong while sending an invoice.');
+      }
+    }).catch(() => {
+      message.error('Something went wrong while sending an invoice.');
+    })
+  }
+
+  waiveFee = () => {
+    const { cancellationType } = this.state;
+    this.setState({ visibleCancelForAdmin: false });
+    if (cancellationType === 'cancel') {
+      this.setState({ visibleCancel: true });
+    } else if (cancellationType === 'reschedule') {
+      this.setState({ visibleCurrent: true });
+    }
+  }
+
   submitModalCurrent = () => {
     this.setState({ visibleCurrent: false });
     this.updateAppointments();
@@ -81,16 +123,24 @@ class PanelAppointment extends React.Component {
     this.setState({ visibleCurrent: false });
   }
 
-  openModalCurrent = (data) => {
-    this.setState({ visibleCurrent: true, event: data });
+  openModalCurrent = (event) => {
+    if (moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+      this.setState({ visibleCancelForAdmin: true, cancellationType: 'reschedule', event: event });
+    } else {
+      this.setState({ visibleCurrent: true, event: event });
+    }
   }
 
   closeModalCancel = () => {
     this.setState({ visibleCancel: false });
   }
 
-  openModalCancel = (data) => {
-    this.setState({ visibleCancel: true, event: data });
+  openModalCancel = (event) => {
+    if (moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+      this.setState({ visibleCancelForAdmin: true, cancellationType: 'cancel', event: event });
+    } else {
+      this.setState({ visibleCancel: true, event: event });
+    }
   }
 
   handleConfirmCancel = () => {
@@ -105,7 +155,6 @@ class PanelAppointment extends React.Component {
             message.warning("can't cancel this appointment")
           }
         }).catch(error => {
-          console.log('closed error---', error);
           message.error(error.message);
         })
       }
@@ -148,7 +197,6 @@ class PanelAppointment extends React.Component {
           message.warning("can't close this appointment");
         }
       }).catch(error => {
-        console.log('closed error---', error);
         message.warning(error.message);
       })
     }
@@ -174,7 +222,6 @@ class PanelAppointment extends React.Component {
           message.warning("can't decline this appointment");
         }
       }).catch(error => {
-        console.log('closed error---', error);
         message.error(error.message);
       })
     }
@@ -278,15 +325,24 @@ class PanelAppointment extends React.Component {
           message.warning("can't leave feedback");
         }
       }).catch(error => {
-        console.log('closed error---', error);
         message.error(error.message);
       })
     }
   }
 
   render() {
-    const { appointments, visibleCancel, visibleCurrent, event, visibleInvoice, visibleProcess, visibleBalance, visibleFeedback, visibleNoShow } = this.state;
-
+    const {
+      appointments,
+      visibleCancel,
+      visibleCurrent,
+      event,
+      visibleInvoice,
+      visibleProcess,
+      visibleBalance,
+      visibleFeedback,
+      visibleNoShow,
+      visibleCancelForAdmin,
+    } = this.state;
     const modalCancelProps = {
       visible: visibleCancel,
       onSubmit: this.handleConfirmCancel,
@@ -338,6 +394,13 @@ class PanelAppointment extends React.Component {
       event: event,
     };
 
+    const modalCancelForAdminProps = {
+      visible: visibleCancelForAdmin,
+      onSubmit: this.waiveFee,
+      applyFeeToParent: this.applyFeeToParent,
+      onCancel: this.onCloseModalCancelForAdmin,
+    };
+
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
         <Tabs.TabPane tab={intl.formatMessage(msgDashboard.upcoming)} key="1">
@@ -359,6 +422,7 @@ class PanelAppointment extends React.Component {
           )}
           {visibleCancel && <ModalCancelAppointment {...modalCancelProps} />}
           {visibleCurrent && <ModalCurrentAppointment {...modalCurrentProps} />}
+          {visibleCancelForAdmin && <ModalCancelForAdmin {...modalCancelForAdminProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(msgDashboard.unprocessed)} key="2">
           {appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && a.flagStatus != ACTIVE && [PENDING, CANCELLED].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (

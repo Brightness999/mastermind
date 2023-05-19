@@ -22,6 +22,7 @@ import ModalFeedback from './ModalFeedback';
 import ModalEvaluationProcess from './ModalEvaluationProcess';
 import ModalNewScreening from './ModalNewScreening';
 import ModalSchoolSubsidyApproval from './ModalSchoolSubsidyApproval';
+import ModalCancelForAdmin from './ModalCancelForAdmin';
 
 export {
   ModalCreateDone,
@@ -48,4 +49,5 @@ export {
   ModalEvaluationProcess,
   ModalNewScreening,
   ModalSchoolSubsidyApproval,
+  ModalCancelForAdmin,
 }
