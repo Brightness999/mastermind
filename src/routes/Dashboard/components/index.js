@@ -18,7 +18,7 @@ import { compose } from 'redux';
 import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 
-import { ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote } from '../../../components/Modal';
+import { ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote, ModalPayment } from '../../../components/Modal';
 import DrawerDetail from '../../../components/DrawerDetail';
 import messages from '../messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
@@ -34,7 +34,7 @@ import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRe
 import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import Subsidiaries from './school';
 import PageLoading from '../../../components/Loading/PageLoading';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PENDING, SCREEN, SUBSIDY } from '../../constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PARENT, PENDING, SCREEN, SUBSIDY } from '../../constant';
 import './index.less';
 
 const { Panel } = Collapse;
@@ -82,6 +82,8 @@ class Dashboard extends React.Component {
       visibleCreateNote: false,
       subsidyId: '',
       loading: false,
+      visiblePayment: false,
+      paymentDescription: '',
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -324,7 +326,6 @@ class Dashboard extends React.Component {
       duration: 10,
       description: 'A parent has sent 1 subsidy request, press for view.',
       onClick: () => {
-        console.log('Notification Clicked!');
         this.onShowModalSubsidy(data.data._id);
         notification.destroy();
       },
@@ -337,7 +338,6 @@ class Dashboard extends React.Component {
       duration: 10,
       description: 'Press for check subsidy progress.',
       onClick: () => {
-        console.log('Notification Clicked!');
         this.onShowModalSubsidy(data);
         notification.destroy();
       },
@@ -543,8 +543,8 @@ class Dashboard extends React.Component {
     const data = {
       role: this.state.userRole,
       data: {
-        appointId: obj.extendedProps._id,
-        date: new Date(obj.start).getTime()
+        _id: obj.extendedProps._id,
+        date: new Date(obj.start),
       }
     }
     this.props.changeTime(data)
@@ -552,6 +552,28 @@ class Dashboard extends React.Component {
 
   handleClickDate = (date) => {
     this.setState({ visibleNewAppoint: true, selectedDate: moment(date.date) });
+  }
+
+  handleEventDragStop = (data) => {
+    const event = data.oldEvent.extendedProps;
+    const date = data.oldEvent.start;
+    const { user } = this.props;
+
+    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && user.role === PARENT && moment(date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+      data.revert();
+      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
+      this.setState({ paymentDescription: desc, selectedEvent: event }, () => {
+        message.warn(desc).then(() => {
+          this.setState({ visiblePayment: true });
+        });
+      });
+    } else {
+      this.handleEventChange(data);
+    }
+  }
+
+  onCloseModalPayment = () => {
+    this.setState({ visiblePayment: false, selectedEvent: {} });
   }
 
   async getMyAppointments(userRole, dependentId) {
@@ -787,6 +809,8 @@ class Dashboard extends React.Component {
       subsidyId,
       loading,
       locations,
+      visiblePayment,
+      paymentDescription,
     } = this.state;
 
     const btnMonthToWeek = (
@@ -895,6 +919,14 @@ class Dashboard extends React.Component {
       subsidyId: subsidyId,
       onSubmit: this.onCloseModalSubsidy,
       onCancel: this.onCloseModalSubsidy,
+    }
+
+    const modalPaymentProps = {
+      visible: visiblePayment,
+      onSubmit: this.onCloseModalPayment,
+      onCancel: this.onCloseModalPayment,
+      description: paymentDescription,
+      appointment: selectedEvent,
     }
 
     if (userRole == 60) {
@@ -1052,8 +1084,9 @@ class Dashboard extends React.Component {
                   events={calendarEvents}
                   eventContent={(info) => renderEventContent(info, listAppointmentsRecent)}
                   eventClick={this.onShowDrawerDetail}
-                  eventChange={this.handleEventChange} // called for drag-n-drop/resize
                   dateClick={userRole !== 30 && this.handleClickDate}
+                  eventResize={(info) => info.revert()}
+                  eventDrop={this.handleEventDragStop}
                   height="calc(100vh - 165px)"
                 />
               </div>
@@ -1294,6 +1327,7 @@ class Dashboard extends React.Component {
           {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
           {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
           {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
+          {visiblePayment && <ModalPayment {...modalPaymentProps} />}
           <PageLoading loading={loading} isBackground={true} />
         </div>
       );

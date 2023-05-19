@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import request from '../../utils/api/request'
 import { cancelAppointmentForParent, cancelAppointmentForProvider, changeTimeAppointForParent, changeTimeAppointForProvider, getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getParentSubsidyRequests, getProviderSubsidyRequests, getSchoolSubsidyRequests } from '../../utils/api/apiList';
-import { ADMIN, CONSULTANT, CONSULTATION, PARENT, PROVIDER, SUPERADMIN } from '../../routes/constant';
+import { ADMIN, CONSULTANT, CONSULTATION, PARENT, PENDING, PROVIDER, SUPERADMIN } from '../../routes/constant';
 
 const initialState = {
 	dataAppointments: [],
@@ -96,6 +96,7 @@ export const getAppointmentsMonthData = createAsyncThunk(
 				appoint.allDay = false;
 				appoint.start = new Date(appoint.date);
 				appoint.end = new Date(appoint.date);
+				appoint.editable = appoint.status === PENDING ? true : false;
 			});
 			return result.data;
 		} catch (error) {
