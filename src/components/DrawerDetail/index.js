@@ -19,8 +19,8 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, applyCancellationFeeToParent, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setNotificationTime, switchConsultation, updateAppointmentNotesForParent } from '../../utils/api/apiList';
-import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PARENT, PENDING, SCREEN, SUBSIDY, SUPERADMIN } from '../../routes/constant';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, sendEmailInvoice, setFlag, setNotificationTime, switchConsultation, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from '../../routes/constant';
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -98,7 +98,7 @@ class DrawerDetail extends Component {
           this.setState({ visiblePayment: true });
         });
       } else {
-        this.setState({ visibleCancelForAdmin: true, cancellationType: 'cancel' });
+        this.setState({ visibleCancelForAdmin: true, cancellationType: CANCEL });
       }
     } else {
       this.setState({ visibleCancel: true });
@@ -154,7 +154,7 @@ class DrawerDetail extends Component {
           this.setState({ visiblePayment: true });
         });
       } else {
-        this.setState({ visibleCancelForAdmin: true, cancellationType: 'reschedule' });
+        this.setState({ visibleCancelForAdmin: true, cancellationType: RESCHEDULE });
       }
     } else {
       event?.type === SCREEN ? this.setState({ visibleCurrentScreen: true }) : event?.type === CONSULTATION ? this.setState({ visibleCurrentReferral: true }) : this.setState({ visibleCurrent: true });
@@ -169,19 +169,17 @@ class DrawerDetail extends Component {
     const { cancellationType } = this.state;
     const { event } = this.props;
     this.setState({ visibleCancelForAdmin: false });
-    if (cancellationType === 'cancel') {
+    if (cancellationType === CANCEL) {
       this.setState({ visibleCancel: true, cancellationType: '' });
-    } else if (cancellationType === 'reschedule') {
+    } else if (cancellationType === RESCHEDULE) {
       this.setState({ visibleCurrent: true, cancellationType: '' });
     }
 
     const postData = {
       appointmentId: event._id,
-      dependentId: event.dependent._id,
-      fee: event.provider.cancellationFee,
-      action: cancellationType,
+      items: [{ type: cancellationType, locationDate: `${event.location} ${moment(event.date).format('MM/DD/YYYY hh:mm')}`, rate: event.provider.cancellationFee }],
     }
-    request.post(applyCancellationFeeToParent, postData).then(res => {
+    request.post(sendEmailInvoice, postData).then(res => {
       if (res.success) {
         message.success('Sent an invoice to parent successfully.');
       } else {
@@ -195,9 +193,9 @@ class DrawerDetail extends Component {
   waiveFee = () => {
     const { cancellationType } = this.state;
     this.setState({ visibleCancelForAdmin: false });
-    if (cancellationType === 'cancel') {
+    if (cancellationType === CANCEL) {
       this.setState({ visibleCancel: true });
-    } else if (cancellationType === 'reschedule') {
+    } else if (cancellationType === RESCHEDULE) {
       this.setState({ visibleCurrent: true });
     }
   }

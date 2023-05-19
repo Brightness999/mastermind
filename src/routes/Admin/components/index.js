@@ -29,11 +29,11 @@ import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request from '../../../utils/api/request'
 import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
 import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, setSchools } from '../../../redux/features/authSlice';
-import { applyCancellationFeeToParent, clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
+import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance, sendEmailInvoice } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
 import PageLoading from '../../../components/Loading/PageLoading';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLEAR, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, NOSHOW, PENDING, PROVIDER, SCREEN, SUBSIDY } from '../../../routes/constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLEAR, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, NOSHOW, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from '../../../routes/constant';
 import './index.less';
 
 const { Panel } = Collapse;
@@ -359,11 +359,9 @@ class SchedulingCenter extends React.Component {
 
     const postData = {
       appointmentId: selectedEvent._id,
-      dependentId: selectedEvent.dependent._id,
-      fee: selectedEvent.provider.cancellationFee,
-      action: 'reschedule',
+      items: [{ type: RESCHEDULE, locationDate: `${selectedEvent.location} ${moment(selectedEvent.date).format('MM/DD/YYYY hh:mm')}`, rate: selectedEvent.provider.cancellationFee }],
     }
-    request.post(applyCancellationFeeToParent, postData).then(res => {
+    request.post(sendEmailInvoice, postData).then(res => {
       if (res.success) {
         message.success('Sent an invoice to parent successfully.');
       } else {

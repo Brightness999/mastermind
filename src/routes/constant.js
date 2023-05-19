@@ -71,3 +71,7 @@ export const SCHOOL = 60;
 export const PROVIDER = 30;
 export const PARENT = 3;
 export const BANNED = 1;
+
+// Cancellation Type
+export const RESCHEDULE = 'Reschedule';
+export const CANCEL = 'Cancel';
