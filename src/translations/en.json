@@ -235,6 +235,10 @@
   "routes.dashboard.HMGHExpensePerSession": "HMGH expense per session",
   "routes.dashboard.totalHMGHExpense": "Total HMGH expense",
   "routes.dashboard.status": "Status",
+  "routes.dashboard.reset": "Reset",
+  "routes.dashboard.countOfSessionsPast": "Count of Sessions Past",
+  "routes.dashboard.countOfSessionsFuture": "Count of Sessions Future",
+  "routes.dashboard.countOfReferrals": "Count of Referrals",
 
   "routes.forgotpass.resetYourPassword": "Reset Your Password",
   "routes.forgotpass.enterYourEmail": "Enter your user account's verified email address and we will new password to email.",

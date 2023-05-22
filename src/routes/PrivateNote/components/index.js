@@ -118,17 +118,20 @@ class PrivateNote extends React.Component {
   render() {
     const { csvData, dependents, visibleDependent, selectedDependent, loading, visibleSubsidyProgress, selectedSubsidyId } = this.state;
     const { auth, subsidyRequests } = this.props;
+    const skills = JSON.parse(JSON.stringify(auth.skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
+    const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
+    const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(s => s?.schoolInfo)?.map(school => { school['text'] = school.name, school['value'] = school._id; return school; });
+
     const columns = [
       {
-        title: 'Full Name', key: 'name',
+        title: intl.formatMessage(messages.studentName), key: 'name',
         sorter: (a, b) => a.firstName + a.lastName > b.firstName + b.lastName ? 1 : -1,
-        render: (dependent) => (<a onClick={() => this.handleClickRow(dependent)}>{dependent.firstName ?? ''} {dependent.lastName ?? ''}</a>),
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
               name='SearchName'
               ref={this.searchInput}
-              placeholder={`Search Dependent Name`}
+              placeholder={`${intl.formatMessage(msgMainHeader.search)} ${intl.formatMessage(messages.studentName)}`}
               value={selectedKeys[0]}
               onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
               onPressEnter={() => confirm()}
@@ -142,14 +145,14 @@ class PrivateNote extends React.Component {
                 size="small"
                 style={{ width: 90 }}
               >
-                Search
+                {intl.formatMessage(msgMainHeader.search)}
               </Button>
               <Button
-                onClick={() => clearFilters()}
+                onClick={() => { clearFilters(); confirm(); }}
                 size="small"
                 style={{ width: 90 }}
               >
-                Reset
+                {intl.formatMessage(messages.reset)}
               </Button>
             </Space>
           </div>
@@ -163,18 +166,47 @@ class PrivateNote extends React.Component {
             setTimeout(() => this.searchInput.current?.select(), 100);
           }
         },
+        render: (dependent) => (<a onClick={() => this.handleClickRow(dependent)}>{dependent.firstName ?? ''} {dependent.lastName ?? ''}</a>),
       },
-      { title: 'Age', dataIndex: 'birthday', key: 'age', sorter: (a, b) => a.birthday > b.birthday ? 1 : -1, render: (birthday) => moment().year() - moment(birthday).year() },
-      { title: 'Grade', dataIndex: 'currentGrade', key: 'grade' },
-      { title: 'School', dataIndex: 'school', key: 'school', render: school => school?.name },
-      { title: 'Count of Sessions Past', dataIndex: 'appointments', key: 'countOfSessionsPast', render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length },
-      { title: 'Count of Sessions Future', dataIndex: 'appointments', key: 'countOfSessionsFuture', render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status == PENDING)?.length },
-      { title: 'Count of Referrals', dataIndex: 'appointments', key: 'countOfReferrals', render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length },
-      { title: 'Subsidy', dataIndex: 'subsidy', key: 'subsidy', render: subsidy => subsidy?.length ? subsidy.length : 'No Subsidy' },
+      {
+        title: intl.formatMessage(msgCreateAccount.age), dataIndex: 'birthday', key: 'age',
+        sorter: (a, b) => a.birthday > b.birthday ? 1 : -1,
+        render: (birthday) => moment().year() - moment(birthday).year(),
+      },
+      {
+        title: intl.formatMessage(msgCreateAccount.currentGrade), dataIndex: 'currentGrade', key: 'grade',
+        sorter: (a, b) => a.currentGrade.toLowerCase() > b.currentGrade.toLowerCase() ? 1 : -1,
+        filters: grades,
+        onFilter: (value, record) => record?.currentGrade === value,
+      },
+      {
+        title: intl.formatMessage(msgCreateAccount.school), dataIndex: 'school', key: 'school',
+        sorter: (a, b) => !a.school ? 1 : a?.school?.name > b?.school?.name ? 1 : -1,
+        filters: schools,
+        onFilter: (value, record) => record?.school?._id === value,
+        render: school => school?.name,
+      },
+      {
+        title: intl.formatMessage(messages.countOfSessionsPast), dataIndex: 'appointments', key: 'countOfSessionsPast',
+        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length,
+        render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length,
+      },
+      {
+        title: intl.formatMessage(messages.countOfSessionsFuture), dataIndex: 'appointments', key: 'countOfSessionsFuture',
+        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == PENDING)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == PENDING)?.length,
+        render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status == PENDING)?.length,
+      },
+      {
+        title: intl.formatMessage(messages.countOfReferrals), dataIndex: 'appointments', key: 'countOfReferrals',
+        sorter: (a, b) => a.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length - b.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length,
+        render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length,
+      },
+      {
+        title: intl.formatMessage(msgCreateAccount.subsidy), dataIndex: 'subsidy', key: 'subsidy',
+        sorter: (a, b) => a?.subsidy?.length > b?.subsidy?.length ? 1 : -1,
+        render: subsidy => subsidy?.length ? subsidy.length : 'No Subsidy',
+      },
     ];
-    const skills = JSON.parse(JSON.stringify(auth.skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
-    const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
-    const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(s => s?.schoolInfo)?.map(school => { school['text'] = school.name, school['value'] = school._id; return school; });
 
     const adminApprovedColumns = [
       {

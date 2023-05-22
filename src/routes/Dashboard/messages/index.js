@@ -190,4 +190,20 @@ export default ({
     id: `${scope}.status`,
     defaultMessage: 'Status',
   },
+  reset: {
+    id: `${scope}.reset`,
+    defaultMessage: 'Reset',
+  },
+  countOfSessionsPast: {
+    id: `${scope}.countOfSessionsPast`,
+    defaultMessage: 'Count of Sessions Past',
+  },
+  countOfSessionsFuture: {
+    id: `${scope}.countOfSessionsFuture`,
+    defaultMessage: 'Count of Sessions Future',
+  },
+  countOfReferrals: {
+    id: `${scope}.countOfReferrals`,
+    defaultMessage: 'Count of Referrals',
+  },
 });
