@@ -48,7 +48,7 @@ class ModalNoShow extends React.Component {
 			} else {
 				balance = '';
 			}
-			this.form?.setFieldsValue({ penalty: balance, program: 5 });
+			this.form?.setFieldsValue({ penalty: balance, program: 2 });
 		} else {
 			this.form?.setFieldsValue({ penalty: event?.flagItems?.penalty, program: event?.flagItems?.program, notes: event?.flagItems?.notes });
 		}

@@ -988,17 +988,23 @@ class DrawerDetail extends Component {
                 )}
               </div>
             ) : userRole === 30 ? (
-              <Popconfirm
-                title="Are you sure to clear this flag?"
-                onConfirm={this.handleClearFlag}
-                okText="Yes"
-                cancelText="No"
-                overlayClassName='clear-flag-confirm'
-              >
-                <Button type='primary' block className='h-30 p-0'>
-                  {intl.formatMessage(messages.clearFlag)}
+              event?.flagItems?.isPaid ? (
+                <Button type='primary' block className='flex-1 h-30 p-0' disabled>
+                  {intl.formatMessage(messages.paid)}
                 </Button>
-              </Popconfirm>
+              ) : (
+                <Popconfirm
+                  title="Are you sure to clear this flag?"
+                  onConfirm={this.handleClearFlag}
+                  okText="Yes"
+                  cancelText="No"
+                  overlayClassName='clear-flag-confirm'
+                >
+                  <Button type='primary' block className='h-30 p-0'>
+                    {intl.formatMessage(messages.clearFlag)}
+                  </Button>
+                </Popconfirm>
+              )
             ) : (
               <div className='flex items-center justify-between gap-2 flex-2'>
                 {(event?.flagItems?.isPaid || event?.flagItems?.rate == 0) ? (
@@ -1012,7 +1018,7 @@ class DrawerDetail extends Component {
                   </Button>
                 ) : event?.flagItems?.rate == 0 ? null : (
                   <>
-                    <Button type='primary' className='flex-1 h-30 p-0' onClick={() => this.setState({ isModalInvoice: true })}>
+                    <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagItems?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagItems?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
                     <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
@@ -1032,19 +1038,19 @@ class DrawerDetail extends Component {
                         {intl.formatMessage(messages.payFlag)}
                       </Button>
                     </form>
+                    <Popconfirm
+                      title="Are you sure to clear this flag?"
+                      onConfirm={this.handleClearFlag}
+                      okText="Yes"
+                      cancelText="No"
+                      overlayClassName='clear-flag-confirm'
+                    >
+                      <Button type='primary' block className='flex-1 h-30 p-0'>
+                        {intl.formatMessage(messages.clearFlag)}
+                      </Button>
+                    </Popconfirm>
                   </>
                 )}
-                <Popconfirm
-                  title="Are you sure to clear this flag?"
-                  onConfirm={this.handleClearFlag}
-                  okText="Yes"
-                  cancelText="No"
-                  overlayClassName='clear-flag-confirm'
-                >
-                  <Button type='primary' block className='flex-1 h-30 p-0'>
-                    {intl.formatMessage(messages.clearFlag)}
-                  </Button>
-                </Popconfirm>
               </div>
             ) : null}
           </div>
@@ -1220,17 +1226,13 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(!isFlag && userRole > 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && (event?.status === CLOSED || event?.status === PENDING)) && (
+              {(!isFlag && userRole > 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && (event?.status === CLOSED || event?.status === PENDING) && moment().isAfter(moment(event?.date))) && (
                 <Col span={12}>
                   <Button
                     type='primary'
                     icon={<BsFillFlagFill size={15} />}
                     block
-                    onClick={() => {
-                      event?.status === PENDING && moment().isBefore(moment(event?.date)) && this.onShowModalBalance();
-                      event?.status === PENDING && moment().isAfter(moment(event?.date)) && this.onShowModalNoShow();
-                      event?.status === CLOSED && this.onShowModalBalance();
-                    }}
+                    onClick={this.onShowModalNoShow}
                   >
                     {intl.formatMessage(messages.flagDependent)}
                   </Button>
