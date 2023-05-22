@@ -416,6 +416,7 @@ class DrawerDetail extends Component {
     const { event } = this.props;
     const data = {
       _id: event?._id,
+      status: NOSHOW,
       flagItems: {
         ...values,
         type: event?.type == EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type == APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : event?.type == SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
@@ -1226,7 +1227,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(!isFlag && userRole > 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && (event?.status === CLOSED || event?.status === PENDING) && moment().isAfter(moment(event?.date))) && (
+              {(!isFlag && userRole > 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === PENDING && moment().isAfter(moment(event?.date))) && (
                 <Col span={12}>
                   <Button
                     type='primary'
