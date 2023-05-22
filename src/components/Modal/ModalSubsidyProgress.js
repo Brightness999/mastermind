@@ -29,7 +29,7 @@ class ModalSubsidyProgress extends React.Component {
 		selectedHour: undefined,
 		selectedProviderFromAdmin: undefined,
 		numberOfSessions: undefined,
-		priceForSession: undefined,
+		pricePerSession: undefined,
 		parentWarning: '',
 		consulationWarning: '',
 		referral: {},
@@ -53,8 +53,8 @@ class ModalSubsidyProgress extends React.Component {
 				this.setState({
 					subsidy: data,
 					numberOfSessions: data.numberOfSessions,
-					priceForSession: data.priceForSession,
-					totalPayment: data.priceForSession * data.numberOfSessions,
+					pricePerSession: data.pricePerSession,
+					totalPayment: data.pricePerSession * data.numberOfSessions,
 					otherProvider: data.otherProvider,
 					decisionExplanation: data.decisionExplanation ?? '',
 				});
@@ -174,15 +174,15 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	submitSubsidyFromAdmin = (subsidy) => {
-		const { selectedProviderFromAdmin, numberOfSessions, priceForSession } = this.state;
+		const { selectedProviderFromAdmin, numberOfSessions, pricePerSession } = this.state;
 		const postData = {
 			selectedProviderFromAdmin,
 			numberOfSessions,
-			priceForSession,
+			pricePerSession,
 			approvalDate: moment(),
 			subsidyId: subsidy?._id,
 		}
-		if (!selectedProviderFromAdmin || !numberOfSessions || !priceForSession) {
+		if (!selectedProviderFromAdmin || !numberOfSessions || !pricePerSession) {
 			message.error('please fill all reuired field');
 			return;
 		}
@@ -499,7 +499,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderDecision(subsidy) {
-		const { selectedProviderFromAdmin, numberOfSessions, priceForSession, referral, providers, totalPayment, subsidizedRate } = this.state;
+		const { selectedProviderFromAdmin, numberOfSessions, pricePerSession, referral, providers, totalPayment, subsidizedRate } = this.state;
 		const { user } = this.props.auth;
 		const isNotAdmin = user?.role < 900;
 
@@ -529,11 +529,11 @@ class ModalSubsidyProgress extends React.Component {
 							<p className='font-700'>{intl.formatMessage(messages.numberApprovedSessions)}</p>
 							<p className='font-700'>{numberOfSessions}</p>
 							<p className='font-700'>{intl.formatMessage(messages.hmghExpensePerSession)}</p>
-							<p className='font-700'>${priceForSession}</p>
+							<p className='font-700'>${pricePerSession}</p>
 						</Col>
 						<Col xs={24} sm={24} md={8} className='flex flex-col justify-end'>
 							<p className='font-700'>{intl.formatMessage(messages.totalPayment)}</p>
-							<p className='font-700'>${priceForSession * numberOfSessions}</p>
+							<p className='font-700'>${pricePerSession * numberOfSessions}</p>
 						</Col>
 					</Row>
 				</div >
@@ -576,19 +576,19 @@ class ModalSubsidyProgress extends React.Component {
 							min={0}
 							className='h-40 pb-10'
 							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
-							onChange={e => this.setState({ numberOfSessions: e.target.value, totalPayment: e.target.value * priceForSession })}
+							onChange={e => this.setState({ numberOfSessions: e.target.value, totalPayment: e.target.value * pricePerSession })}
 						/>
 						<p className='font-700'>*{intl.formatMessage(messages.hmghExpensePerSession)}</p>
 						<Input
 							name='PricePerSession'
 							disabled={isNotAdmin || subsidy.status === 5}
-							value={priceForSession}
+							value={pricePerSession}
 							type="number"
 							min={0}
 							className='h-40'
 							addonBefore="$"
 							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
-							onChange={e => this.setState({ priceForSession: e.target.value, totalPayment: e.target.value * numberOfSessions })}
+							onChange={e => this.setState({ pricePerSession: e.target.value, totalPayment: e.target.value * numberOfSessions })}
 						/>
 					</Col>
 					<Col xs={24} sm={24} md={8} className='flex flex-col justify-end'>
@@ -600,7 +600,7 @@ class ModalSubsidyProgress extends React.Component {
 							min={0}
 							addonBefore="$"
 							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
-							onChange={e => this.setState({ totalPayment: e.target.value, priceForSession: numberOfSessions > 0 ? e.target.value / numberOfSessions : 0 })}
+							onChange={e => this.setState({ totalPayment: e.target.value, pricePerSession: numberOfSessions > 0 ? e.target.value / numberOfSessions : 0 })}
 							className='h-40'
 							disabled={isNotAdmin || subsidy.status === 5}
 						/>

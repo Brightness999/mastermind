@@ -98,10 +98,10 @@ class PrivateNote extends React.Component {
       "Service Requested": r?.skillSet?.name,
       "Notes": r?.note,
       "Provider": r?.selectedProvider ? `${r?.selectedProvider?.firstName ?? ''} ${r?.selectedProvider?.lastName ?? ''}` : r?.otherProvider,
-      "HMGH expense per session": r.priceForSession ?? '',
+      "HMGH expense per session": r.pricePerSession ?? '',
       "# of approved sessions": r.numberOfSessions ?? '',
       "# of sessions paid to DATE": r?.appointments?.filter(a => a.status === CLOSED && a.isPaid)?.length ?? '',
-      "Total HMGH expense": r.priceForSession * r.numberOfSessions,
+      "Total HMGH expense": r.pricePerSession * r.numberOfSessions,
     }))
     this.setState({ csvData: data });
     return true;
@@ -478,15 +478,15 @@ class PrivateNote extends React.Component {
         title: <span className="font-16">{intl.formatMessage(messages.HMGHExpensePerSession)}</span>,
         key: 'HMGHExpensePerSession',
         align: 'center',
-        sorter: (a, b) => a?.priceForSession > b?.priceForSession ? 1 : -1,
-        render: (subsidy) => <span>{subsidy?.priceForSession ?? ''}</span>
+        sorter: (a, b) => a?.pricePerSession > b?.pricePerSession ? 1 : -1,
+        render: (subsidy) => <span>{subsidy?.pricePerSession ?? ''}</span>
       },
       {
         title: <span className="font-16">{intl.formatMessage(messages.totalHMGHExpense)}</span>,
         key: 'totalHMGHExpense',
         align: 'center',
-        sorter: (a, b) => a?.priceForSession * a?.numberOfSessions > b?.priceForSession * b?.numberOfSessions ? 1 : -1,
-        render: (subsidy) => <span>{subsidy?.priceForSession * subsidy?.numberOfSessions ? subsidy?.priceForSession * subsidy?.numberOfSessions : ''}</span>
+        sorter: (a, b) => a?.pricePerSession * a?.numberOfSessions > b?.pricePerSession * b?.numberOfSessions ? 1 : -1,
+        render: (subsidy) => <span>{subsidy?.pricePerSession * subsidy?.numberOfSessions ? subsidy?.pricePerSession * subsidy?.numberOfSessions : ''}</span>
       },
       {
         title: <span className="font-16">{intl.formatMessage(messages.status)}</span>,
