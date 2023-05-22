@@ -13,7 +13,7 @@ import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/featu
 import { store } from '../../redux/store';
 import ModalProcessAppointment from './ModalProcessAppointment';
 import ModalInvoice from './ModalInvoice';
-import { APPOINTMENT, BALANCE, EVALUATION, PENDING, SUBSIDY } from '../../routes/constant';
+import { ACTIVE, APPOINTMENT, EVALUATION, PENDING, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -203,14 +203,14 @@ class ModalSessionsNeedToClose extends React.Component {
 				render: (appointment) => `${appointment?.provider.firstName ?? ''} ${appointment?.provider.lastName ?? ''}`,
 			});
 			columns.splice(5, 0, {
-				title: 'Action', key: 'action', render: (appointment) => this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus === BALANCE)
+				title: 'Action', key: 'action', render: (appointment) => this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus === ACTIVE)
 					? (<div>Suspending</div>) : (
 						<a className='btn-blue action' onClick={() => this.handleClose(appointment)}>Close</a>
 					)
 			});
 		} else {
 			columns.splice(4, 0, {
-				title: 'Action', key: 'action', render: (appointment) => this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus === BALANCE)
+				title: 'Action', key: 'action', render: (appointment) => this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus === ACTIVE)
 					? (<div>Suspending</div>) : (
 						<a className='btn-blue action' onClick={() => this.handleClose(appointment)}>Close</a>
 					)

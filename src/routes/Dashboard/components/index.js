@@ -530,14 +530,6 @@ class Dashboard extends React.Component {
     }
   }
 
-  handleEventAdd = (addInfo) => {
-    this.props.createEvent(addInfo.event.toPlainObject())
-      .catch(() => {
-        reportNetworkError()
-        addInfo.revert()
-      })
-  }
-
   handleEventChange = (changeInfo) => {
     const obj = changeInfo.event.toPlainObject();
     const data = {
@@ -1337,10 +1329,6 @@ class Dashboard extends React.Component {
       );
     }
   }
-}
-
-function reportNetworkError() {
-  alert('This action could not be completed')
 }
 
 function renderEventContent(eventInfo, appointments) {

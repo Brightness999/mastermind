@@ -33,7 +33,7 @@ import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance, sendEm
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
 import PageLoading from '../../../components/Loading/PageLoading';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLEAR, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, NOSHOW, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from '../../../routes/constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLEAR, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from '../../../routes/constant';
 import './index.less';
 
 const { Panel } = Collapse;
@@ -1018,7 +1018,7 @@ class SchedulingCenter extends React.Component {
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                    {listAppointmentsRecent?.filter(a => a.flagStatus === NOSHOW)?.map((appointment, index) =>
+                    {listAppointmentsRecent?.filter(a => a.flagStatus === CLEAR)?.map((appointment, index) =>
                       <div key={index} className='list-item padding-item justify-between' onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
@@ -1101,10 +1101,6 @@ class SchedulingCenter extends React.Component {
   }
 }
 
-function reportNetworkError() {
-  alert('This action could not be completed')
-}
-
 function renderEventContent(eventInfo, appointments) {
   const event = eventInfo.event.extendedProps;
   const type = event?.type;
@@ -1122,9 +1118,9 @@ function renderEventContent(eventInfo, appointments) {
       </div>
       {event?.type === SUBSIDY && <FaHandHoldingUsd size={20} className='text-green500 mr-5' />}
       {event?.flagStatus === ACTIVE && event?.flagItems?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
-      {event?.status === PENDING && event?.flagStatus === PENDING && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagItems?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
+      {event?.status === PENDING && event?.flagStatus === NOFLAG && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagItems?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
       {event?.flagStatus === ACTIVE && event?.flagItems?.flagType === NOSHOW && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
-      {event?.status === PENDING && event?.flagStatus === PENDING && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagItems?.flagType === NOSHOW && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
+      {event?.status === PENDING && event?.flagStatus === NOFLAG && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagItems?.flagType === NOSHOW && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
     </div>
   )
 }
