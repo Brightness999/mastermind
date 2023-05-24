@@ -239,6 +239,7 @@
   "routes.dashboard.countOfSessionsPast": "Count of Sessions Past",
   "routes.dashboard.countOfSessionsFuture": "Count of Sessions Future",
   "routes.dashboard.countOfReferrals": "Count of Referrals",
+  "routes.dashboard.countOfSessionsPaid": "Count of Sessions Paid",
 
   "routes.forgotpass.resetYourPassword": "Reset Your Password",
   "routes.forgotpass.enterYourEmail": "Enter your user account's verified email address and we will new password to email.",
@@ -320,6 +321,7 @@
   "components.Modal.hmghExpensePerSession": "HMGH expense per session",
   "components.Modal.totalRemaining": "Total remaining",
   "components.Modal.totalPayment": "Total payment",
+  "components.Modal.minimumPayment": "Minimum payment",
   "components.Modal.appeal": "Appeal",
   "components.Modal.submitFlag": "Submit Flag",
   "components.Modal.noShowPenalty": "No show penalty",
@@ -420,7 +422,6 @@
   "components.drawerdetail.when": "When",
   "components.drawerdetail.where": "Where",
   "components.drawerdetail.reschedule": "Reschedule",
-  "components.drawerdetail.cancel": "Cancel",
   "components.drawerdetail.cancelled": "Cancelled",
   "components.drawerdetail.graduated": "Graduated",
   "components.drawerdetail.accepted": "Accepted",

@@ -1,5 +1,5 @@
 import React, { createRef } from 'react';
-import { Divider, Table, Space, Input, Button } from 'antd';
+import { Divider, Table, Space, Input, Button, message } from 'antd';
 import intl from 'react-intl-universal';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
@@ -8,13 +8,14 @@ import { compose } from 'redux';
 import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
 
-import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, PENDING, routerLinks } from '../../constant';
-import { ModalDependentDetail, ModalSubsidyProgress } from '../../../components/Modal';
+import { ACTIVE, APPOINTMENT, BALANCE, CLOSED, CONSULTANT, CONSULTATION, EVALUATION, PARENT, PENDING, PROVIDER, SCHOOL, SUBSIDY } from '../../constant';
+import { ModalBalance, ModalDependentDetail, ModalSubsidyProgress } from '../../../components/Modal';
 import msgMainHeader from '../../../components/MainHeader/messages';
 import messages from '../../Dashboard/messages';
 import msgCreateAccount from '../../Sign/CreateAccount/messages';
+import msgDraweDetail from '../../../components/DrawerDetail/messages';
 import request from '../../../utils/api/request';
-import { deletePrivateNote, getDependents } from '../../../utils/api/apiList';
+import { getDependents, setFlagBalance } from '../../../utils/api/apiList';
 import { getSubsidyRequests } from '../../../redux/features/appointmentsSlice';
 import PageLoading from '../../../components/Loading/PageLoading';
 import './index.less';
@@ -32,12 +33,17 @@ class PrivateNote extends React.Component {
       csvData: [],
       visibleSubsidyProgress: false,
       selectedSubsidyId: undefined,
+      visibleBalance: false,
     };
     this.searchInput = createRef(null);
   }
 
   componentDidMount() {
     this.setState({ loading: true });
+    this.getDependentList();
+  }
+
+  getDependentList() {
     request.post(getDependents).then(result => {
       this.setState({ loading: false });
       const { success, data } = result;
@@ -48,7 +54,6 @@ class PrivateNote extends React.Component {
           }) ?? []
         });
       } else {
-        console.log(data);
         this.setState({ dependents: [], loading: false });
       }
     }).catch(err => {
@@ -57,33 +62,8 @@ class PrivateNote extends React.Component {
     })
   }
 
-  handleNewUser = () => {
-    this.props.history.push(routerLinks.CreateAccount);
-  }
-
   onCloseModalDependent = () => {
     this.setState({ visibleDependent: false });
-  }
-
-  handleConfirm = () => {
-    const { dependents, selectedDependentId } = this.state;
-    const selectedDependent = dependents?.find(dependent => dependent._id == selectedDependentId);
-    if (selectedDependent.notes?.find(note => note.dependent == selectedDependentId)) {
-      request.post(deletePrivateNote, { id: selectedDependent.notes?.find(note => note.dependent == selectedDependentId)?._id }).then((res) => {
-        if (res.success) {
-          this.setState({
-            dependents: dependents?.map(dependent => {
-              if (dependent._id == selectedDependentId) {
-                dependent.notes = [];
-              }
-              return dependent;
-            })
-          })
-        }
-      }).catch(err => {
-        console.log('activate user error---', err);
-      })
-    }
   }
 
   handleClickRow = (dependent) => {
@@ -115,8 +95,58 @@ class PrivateNote extends React.Component {
     this.setState({ selectedSubsidyId: undefined, visibleSubsidyProgress: false });
   };
 
+  onShowModalBalance = (dependent) => {
+    if (dependent?.appointments?.length) {
+      this.setState({ selectedDependent: dependent }, () => {
+        this.setState({ visibleBalance: true });
+      })
+    }
+  }
+
+  onCloseModalBalance = () => {
+    this.setState({ visibleBalance: false, selectedDependent: {} });
+  }
+
+  handleSubmitFlagBalance = (values) => {
+    const { totalPayment, minimumPayment, notes } = values
+    delete values.totalPayment;
+    delete values.minimumPayment;
+    delete values.notes;
+    let postData = [];
+
+    Object.entries(values)?.forEach(value => {
+      if (value?.length) {
+        postData.push({
+          updateOne: {
+            filter: { _id: value[0] },
+            update: {
+              $set: {
+                flagStatus: ACTIVE,
+                flagItems: {
+                  flagType: BALANCE,
+                  late: value[1] * 1,
+                  totalPayment,
+                  minimumPayment: minimumPayment * 1,
+                  notes
+                }
+              }
+            }
+          }
+        })
+      }
+    })
+
+    request.post(setFlagBalance, postData).then(result => {
+      const { success } = result;
+      if (success) {
+        this.setState({ visibleBalance: false });
+        this.getDependentList();
+      }
+    }).catch(err => message.error(err.message));
+  }
+
   render() {
-    const { csvData, dependents, visibleDependent, selectedDependent, loading, visibleSubsidyProgress, selectedSubsidyId } = this.state;
+    const { csvData, dependents, visibleDependent, selectedDependent, loading, visibleSubsidyProgress, selectedSubsidyId, visibleBalance } = this.state;
     const { auth, subsidyRequests } = this.props;
     const skills = JSON.parse(JSON.stringify(auth.skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
@@ -186,27 +216,84 @@ class PrivateNote extends React.Component {
         onFilter: (value, record) => record?.school?._id === value,
         render: school => school?.name,
       },
-      {
+    ];
+
+    if (auth.user.role === PARENT) {
+      columns.splice(5, 0, {
         title: intl.formatMessage(messages.countOfSessionsPast), dataIndex: 'appointments', key: 'countOfSessionsPast',
         sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length,
         render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length,
-      },
-      {
+      });
+      columns.splice(6, 0, {
+        title: intl.formatMessage(messages.countOfSessionsPaid), dataIndex: 'appointments', key: 'countOfSessionsPaid',
+        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED && data.isPaid)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED && data.isPaid)?.length,
+        render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED && a.isPaid)?.length,
+      })
+      columns.splice(7, 0, {
         title: intl.formatMessage(messages.countOfSessionsFuture), dataIndex: 'appointments', key: 'countOfSessionsFuture',
         sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == PENDING)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == PENDING)?.length,
         render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status == PENDING)?.length,
-      },
-      {
+      })
+      columns.splice(8, 0, {
         title: intl.formatMessage(messages.countOfReferrals), dataIndex: 'appointments', key: 'countOfReferrals',
         sorter: (a, b) => a.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length - b.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length,
         render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length,
-      },
-      {
+      })
+      columns.splice(9, 0, {
         title: intl.formatMessage(msgCreateAccount.subsidy), dataIndex: 'subsidy', key: 'subsidy',
         sorter: (a, b) => a?.subsidy?.length > b?.subsidy?.length ? 1 : -1,
-        render: subsidy => subsidy?.length ? subsidy.length : 'No Subsidy',
-      },
-    ];
+        render: subsidy => subsidy?.length ? subsidy?.length : 'No Subsidy',
+      })
+    }
+
+    if (auth.user.role === PROVIDER) {
+      columns.splice(5, 0, {
+        title: intl.formatMessage(messages.countOfSessionsPast), dataIndex: 'appointments', key: 'countOfSessionsPast',
+        sorter: (a, b) => a.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length - b.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length,
+        render: appointments => appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length,
+      });
+      columns.splice(6, 0, {
+        title: intl.formatMessage(messages.countOfSessionsPaid), dataIndex: 'appointments', key: 'countOfSessionsPaid',
+        sorter: (a, b) => a.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED && data.isPaid)?.length - b.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED && data.isPaid)?.length,
+        render: appointments => appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED && a.isPaid)?.length,
+      })
+      columns.splice(7, 0, {
+        title: intl.formatMessage(messages.countOfSessionsFuture), dataIndex: 'appointments', key: 'countOfSessionsFuture',
+        sorter: (a, b) => a.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == PENDING)?.length - b.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == PENDING)?.length,
+        render: appointments => appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isBefore(moment(a.date)) && a.status == PENDING)?.length,
+      })
+      columns.splice(8, 0, {
+        title: intl.formatMessage(messages.action), key: 'action',
+        render: dependent => {
+          const countOfSessionsPast = dependent?.appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length;
+          const countOfSessionsPaid = dependent?.appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED && a.isPaid)?.length;
+
+          if (countOfSessionsPast > countOfSessionsPaid) {
+            return (
+              <a className='action' onClick={() => this.onShowModalBalance(dependent)}>{intl.formatMessage(msgDraweDetail.flagDependent)}</a>
+            )
+          } else {
+            return null;
+          }
+        },
+      });
+    }
+
+    if (auth.user.role === SCHOOL) {
+      columns.splice(5, 0, {
+        title: intl.formatMessage(msgCreateAccount.subsidy), dataIndex: 'subsidy', key: 'subsidy',
+        sorter: (a, b) => a?.subsidy?.length > b?.subsidy?.length ? 1 : -1,
+        render: subsidy => subsidy?.length ? subsidy?.length : 'No Subsidy',
+      })
+    }
+
+    if (auth.user.role === CONSULTANT) {
+      columns.splice(5, 0, {
+        title: intl.formatMessage(messages.countOfReferrals), dataIndex: 'appointments', key: 'countOfReferrals',
+        sorter: (a, b) => a.appointments?.filter(data => data.consultant?._id === auth.user.consultantInfo?._id && data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length - b.appointments?.filter(data => data.consultant?._id === auth.user.consultantInfo?._id && data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length,
+        render: appointments => appointments?.filter(a => a.consultant?._id === auth.user.consultantInfo?._id && a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length,
+      })
+    }
 
     const adminApprovedColumns = [
       {
@@ -511,6 +598,13 @@ class PrivateNote extends React.Component {
       subsidyId: selectedSubsidyId,
     }
 
+    const modalBalanceProps = {
+      visible: visibleBalance,
+      onSubmit: this.handleSubmitFlagBalance,
+      onCancel: this.onCloseModalBalance,
+      dependent: selectedDependent,
+    }
+
     return (
       <div className="full-layout page usermanager-page">
         <div className='div-title-admin'>
@@ -524,8 +618,8 @@ class PrivateNote extends React.Component {
           columns={columns}
           onRow={(dependent) => {
             return {
-              onClick: (e) => e.target.className != 'btn-blue action' && this.handleClickRow(dependent),
-              onDoubleClick: (e) => e.target.className != 'btn-blue action' && this.handleClickRow(dependent),
+              onClick: (e) => e.target.className != 'action' && this.handleClickRow(dependent),
+              onDoubleClick: (e) => e.target.className != 'action' && this.handleClickRow(dependent),
             }
           }}
         />
@@ -553,6 +647,7 @@ class PrivateNote extends React.Component {
         ) : null}
         {visibleDependent && <ModalDependentDetail {...modalDependentProps} />}
         {visibleSubsidyProgress && <ModalSubsidyProgress {...modalSubsidyProps} />}
+        {visibleBalance && <ModalBalance {...modalBalanceProps} />}
         <PageLoading loading={loading} isBackground={true} />
       </div>
     );

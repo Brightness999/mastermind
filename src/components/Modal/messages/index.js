@@ -261,6 +261,10 @@ export default {
     id: `${scope}.totalPayment`,
     defaultMessage: 'Total payment',
   },
+  minimumPayment: {
+    id: `${scope}.minimumPayment`,
+    defaultMessage: 'Minimum payment',
+  },
   appeal: {
     id: `${scope}.appeal`,
     defaultMessage: 'Appeal',
