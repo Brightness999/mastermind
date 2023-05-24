@@ -449,6 +449,7 @@
   "components.drawerdetail.switchTag": "Switch Tag",
   "components.drawerdetail.removeTag": "Remove Tag",
   "components.drawerdetail.claimed": "Claimed",
+  "components.drawerdetail.editFlag": "Edit Flag",
     
   "components.Notification.prompt": "Prompt",
   "components.Notification.success": "Success",

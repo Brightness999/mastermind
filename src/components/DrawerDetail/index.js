@@ -19,7 +19,7 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, sendEmailInvoice, setFlag, setNotificationTime, switchConsultation, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, sendEmailInvoice, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent } from '../../utils/api/apiList';
 import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from '../../routes/constant';
 import './style/index.less';
 
@@ -121,7 +121,6 @@ class DrawerDetail extends Component {
             this.setState({ errorMessage: result.data });
           }
         }).catch(error => {
-          console.log('cancel error---', error);
           this.setState({ errorMessage: error.message });
         })
       }
@@ -241,7 +240,6 @@ class DrawerDetail extends Component {
           this.updateAppointments();
         }
       }).catch(err => {
-        console.log('update edit notes error---', err);
         this.setState({ errorMessage: err.message });
       })
     }
@@ -274,7 +272,6 @@ class DrawerDetail extends Component {
           this.setState({ errorMessage: result.data });
         }
       }).catch(error => {
-        console.log('closed error---', error);
         this.setState({ errorMessage: error.message });
       })
     }
@@ -297,7 +294,6 @@ class DrawerDetail extends Component {
           this.setState({ errorMessage: result.data });
         }
       }).catch(error => {
-        console.log('closed error---', error);
         this.setState({ errorMessage: error.message });
       })
     }
@@ -321,7 +317,6 @@ class DrawerDetail extends Component {
           this.setState({ errorMessage: result.data });
         }
       }).catch(error => {
-        console.log('decline error---', error);
         this.setState({ errorMessage: error.message });
       })
     }
@@ -362,7 +357,6 @@ class DrawerDetail extends Component {
         this.setState({ errorMessage: result.data });
       }
     }).catch(error => {
-      console.log('closed error---', error);
       this.setState({ errorMessage: error.message });
     })
   }
@@ -376,7 +370,6 @@ class DrawerDetail extends Component {
         this.setState({ errorMessage: result.data });
       }
     }).catch(error => {
-      console.log('closed error---', error);
       this.setState({ errorMessage: error.message });
     })
   }
@@ -443,24 +436,41 @@ class DrawerDetail extends Component {
   };
 
   onSubmitFlagBalance = (values) => {
-    const { event } = this.props;
-    const data = {
-      _id: event?._id,
-      flagItems: {
-        ...values,
-        type: event?.type == EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type == APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : event?.type == SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
-        locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
-        rate: values?.late,
-        flagType: BALANCE,
+    const { totalPayment, minimumPayment, notes } = values
+    delete values.totalPayment;
+    delete values.minimumPayment;
+    delete values.notes;
+    let postData = [];
+
+    Object.entries(values)?.forEach(value => {
+      if (value?.length) {
+        postData.push({
+          updateOne: {
+            filter: { _id: value[0] },
+            update: {
+              $set: {
+                flagStatus: ACTIVE,
+                flagItems: {
+                  flagType: BALANCE,
+                  late: value[1] * 1,
+                  totalPayment,
+                  minimumPayment: minimumPayment * 1,
+                  notes
+                }
+              }
+            }
+          }
+        })
       }
-    }
-    request.post(setFlag, data).then(result => {
+    })
+
+    request.post(setFlagBalance, postData).then(result => {
       const { success } = result;
       if (success) {
         this.setState({ visibleBalance: false, isFlag: true });
         this.updateAppointments();
       }
-    })
+    }).catch(err => message.error(err.message));
   }
 
   onOpenModalInvoice = () => {
@@ -564,7 +574,7 @@ class DrawerDetail extends Component {
           this.updateAppointments();
         }
       })
-      .catch(err => { console.log(err); this.setState({ errorMessage: err.message }); });
+      .catch(err => this.setState({ errorMessage: err.message }));
   }
 
   handleTag = () => {
@@ -589,7 +599,7 @@ class DrawerDetail extends Component {
             }
             this.updateAppointments();
           })
-          .catch(err => { this.setState({ errorMessage: err.message }); console.log(err); });
+          .catch(err => this.setState({ errorMessage: err.message }));
       } else {
         message.warning("You are not available at this event time.");
       }
@@ -605,7 +615,7 @@ class DrawerDetail extends Component {
           message.success("Switched successfully");
         }
       })
-      .catch(err => { this.setState({ errorMessage: err.message }); console.log(err) });
+      .catch(err => this.setState({ errorMessage: err.message }));
   }
 
   handleRemoveTag = () => {
@@ -617,7 +627,7 @@ class DrawerDetail extends Component {
           message.success("Removed successfully");
         }
       })
-      .catch(err => { this.setState({ errorMessage: err.message }); console.log(err) });
+      .catch(err => this.setState({ errorMessage: err.message }));
   }
 
   render() {
@@ -649,6 +659,7 @@ class DrawerDetail extends Component {
       visibleCancelForAdmin,
     } = this.state;
     const { event, listAppointmentsRecent, auth } = this.props;
+    const dependent = { ...event?.dependent, appointments: listAppointmentsRecent?.filter(a => a.dependent?._id === event?.dependent?._id) };
     const appointmentDate = moment(event?.date);
     const consultants = auth.consultants?.filter(consultant => consultant?._id !== auth.user?._id && !listAppointmentsRecent?.find(a => a?.consultant?._id === consultant?.consultantInfo?._id && a.date === event?.date) && consultant?.consultantInfo?.manualSchedule?.find(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 }))));
 
@@ -753,6 +764,7 @@ class DrawerDetail extends Component {
       onSubmit: this.onSubmitFlagBalance,
       onCancel: this.onCloseModalBalance,
       event: listAppointmentsRecent?.find(a => a?._id === event?._id),
+      dependent,
     };
     const modalEvaluationProcessProps = {
       visible: visibleEvaluationProcess,
@@ -793,7 +805,6 @@ class DrawerDetail extends Component {
       applyFeeToParent: this.applyFeeToParent,
       onCancel: this.onCloseModalCancelForAdmin,
     };
-    console.log(event)
 
     const contentConfirm = (
       <div className='confirm-content'>
@@ -995,17 +1006,22 @@ class DrawerDetail extends Component {
                   {intl.formatMessage(messages.paid)}
                 </Button>
               ) : (
-                <Popconfirm
-                  title="Are you sure to clear this flag?"
-                  onConfirm={this.handleClearFlag}
-                  okText="Yes"
-                  cancelText="No"
-                  overlayClassName='clear-flag-confirm'
-                >
-                  <Button type='primary' block className='h-30 p-0'>
-                    {intl.formatMessage(messages.clearFlag)}
+                <div className='flex items-center gap-2'>
+                  <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagItems?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagItems?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
+                    {intl.formatMessage(messages.editFlag)}
                   </Button>
-                </Popconfirm>
+                  <Popconfirm
+                    title="Are you sure to clear this flag?"
+                    onConfirm={this.handleClearFlag}
+                    okText="Yes"
+                    cancelText="No"
+                    overlayClassName='clear-flag-confirm'
+                  >
+                    <Button type='primary' block className='flex-1 h-30 p-0'>
+                      {intl.formatMessage(messages.clearFlag)}
+                    </Button>
+                  </Popconfirm>
+                </div>
               )
             ) : (
               <div className='flex items-center justify-between gap-2 flex-2'>

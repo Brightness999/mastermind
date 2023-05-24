@@ -137,6 +137,10 @@ export default {
     id: `${scope}.flagDetails`,
     defaultMessage: 'Flag Details',
   },
+  editFlag: {
+    id: `${scope}.editFlag`,
+    defaultMessage: 'Edit Flag',
+  },
   viewInvoice: {
     id: `${scope}.viewInvoice`,
     defaultMessage: 'View Invoice',
