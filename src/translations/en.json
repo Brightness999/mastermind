@@ -237,6 +237,8 @@
   "routes.dashboard.status": "Status",
   "routes.dashboard.reset": "Reset",
   "routes.dashboard.countOfSessionsPast": "Count of Sessions Past",
+  "routes.dashboard.countOfClosedSessionsPast": "Count of Closed Sessions Past",
+  "routes.dashboard.countOfPendingSessionsPast": "Count of Pending Sessions Past",
   "routes.dashboard.countOfSessionsFuture": "Count of Sessions Future",
   "routes.dashboard.countOfReferrals": "Count of Referrals",
   "routes.dashboard.countOfSessionsPaid": "Count of Sessions Paid",

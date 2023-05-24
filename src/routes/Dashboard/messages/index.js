@@ -198,6 +198,14 @@ export default ({
     id: `${scope}.countOfSessionsPast`,
     defaultMessage: 'Count of Sessions Past',
   },
+  countOfClosedSessionsPast: {
+    id: `${scope}.countOfClosedSessionsPast`,
+    defaultMessage: 'Count of Closed Sessions Past',
+  },
+  countOfPendingSessionsPast: {
+    id: `${scope}.countOfPendingSessionsPast`,
+    defaultMessage: 'Count of Pending Sessions Past',
+  },
   countOfSessionsPaid: {
     id: `${scope}.countOfSessionsPaid`,
     defaultMessage: 'Count of Sessions Paid',

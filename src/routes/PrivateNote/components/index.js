@@ -8,7 +8,7 @@ import { compose } from 'redux';
 import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
 
-import { ACTIVE, APPOINTMENT, BALANCE, CLOSED, CONSULTANT, CONSULTATION, EVALUATION, PARENT, PENDING, PROVIDER, SCHOOL, SUBSIDY } from '../../constant';
+import { ACTIVE, ADMINAPPROVED, APPOINTMENT, BALANCE, CLOSED, CONSULTANT, CONSULTATION, EVALUATION, PARENT, PENDING, PROVIDER, SCHOOL, SUBSIDY } from '../../constant';
 import { ModalBalance, ModalDependentDetail, ModalSubsidyProgress } from '../../../components/Modal';
 import msgMainHeader from '../../../components/MainHeader/messages';
 import messages from '../../Dashboard/messages';
@@ -57,7 +57,6 @@ class PrivateNote extends React.Component {
         this.setState({ dependents: [], loading: false });
       }
     }).catch(err => {
-      console.log('get dependents error ---', err);
       this.setState({ dependents: [], loading: false });
     })
   }
@@ -221,52 +220,116 @@ class PrivateNote extends React.Component {
     if (auth.user.role === PARENT) {
       columns.splice(5, 0, {
         title: intl.formatMessage(messages.countOfSessionsPast), dataIndex: 'appointments', key: 'countOfSessionsPast',
-        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length,
-        render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length,
-      });
+        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && [CLOSED, PENDING].includes(data.status))?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && [CLOSED, PENDING].includes(data.status))?.length,
+        render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && [CLOSED, PENDING].includes(a.status))?.length,
+      })
       columns.splice(6, 0, {
-        title: intl.formatMessage(messages.countOfSessionsPaid), dataIndex: 'appointments', key: 'countOfSessionsPaid',
-        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED && data.isPaid)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED && data.isPaid)?.length,
-        render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED && a.isPaid)?.length,
+        title: intl.formatMessage(messages.countOfSessionsFuture), dataIndex: 'appointments', key: 'countOfSessionsFuture',
+        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length,
+        render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status === PENDING)?.length,
       })
       columns.splice(7, 0, {
-        title: intl.formatMessage(messages.countOfSessionsFuture), dataIndex: 'appointments', key: 'countOfSessionsFuture',
-        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == PENDING)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == PENDING)?.length,
-        render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status == PENDING)?.length,
+        title: intl.formatMessage(messages.countOfReferrals), dataIndex: 'appointments', key: 'countOfReferrals',
+        sorter: (a, b) => a.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length - b.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length,
+        render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length,
       })
       columns.splice(8, 0, {
-        title: intl.formatMessage(messages.countOfReferrals), dataIndex: 'appointments', key: 'countOfReferrals',
-        sorter: (a, b) => a.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length - b.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length,
-        render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length,
+        title: intl.formatMessage(msgCreateAccount.subsidy), key: 'subsidy',
+        sorter: (a, b) => a?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length > b?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length ? 1 : -1,
+        render: dependent => {
+          const approvedSubsidy = dependent.subsidy?.filter(s => s?.status === ADMINAPPROVED);
+
+          if (approvedSubsidy.length) {
+            const totalAllowedSessions = approvedSubsidy?.reduce((a, b) => a + b.numberOfSessions, 0);
+            const totalUsedSessions = dependent.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length ?? 0;
+
+            return `${totalUsedSessions}/${totalAllowedSessions}`;
+          } else {
+            return 'No Subsidy';
+          }
+        },
       })
       columns.splice(9, 0, {
-        title: intl.formatMessage(msgCreateAccount.subsidy), dataIndex: 'subsidy', key: 'subsidy',
-        sorter: (a, b) => a?.subsidy?.length > b?.subsidy?.length ? 1 : -1,
-        render: subsidy => subsidy?.length ? subsidy?.length : 'No Subsidy',
+        title: intl.formatMessage(messages.recentSessionDate), dataIndex: 'appointments', key: 'recentSession',
+        sorter: (a, b) => {
+          const aLastSession = a.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
+          const bLastSession = b.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
+
+          if (aLastSession.date) {
+            if (bLastSession.date) {
+              return moment(aLastSession.date) > moment(bLastSession.date) ? 1 : -1;
+            } else {
+              return 1;
+            }
+          } else {
+            return 1;
+          }
+        },
+        render: appointments => {
+          const lastSession = appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
+          return lastSession.date ? moment(lastSession.date).format('MM/DD/YYYY hh:mm A') : ''
+        },
       })
     }
 
     if (auth.user.role === PROVIDER) {
       columns.splice(5, 0, {
-        title: intl.formatMessage(messages.countOfSessionsPast), dataIndex: 'appointments', key: 'countOfSessionsPast',
-        sorter: (a, b) => a.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length - b.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length,
-        render: appointments => appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length,
+        title: intl.formatMessage(messages.countOfClosedSessionsPast), dataIndex: 'appointments', key: 'countOfClosedSessionsPast',
+        sorter: (a, b) => a.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length - b.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length,
+        render: appointments => appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length,
       });
       columns.splice(6, 0, {
-        title: intl.formatMessage(messages.countOfSessionsPaid), dataIndex: 'appointments', key: 'countOfSessionsPaid',
-        sorter: (a, b) => a.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED && data.isPaid)?.length - b.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED && data.isPaid)?.length,
-        render: appointments => appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED && a.isPaid)?.length,
-      })
+        title: intl.formatMessage(messages.countOfPendingSessionsPast), dataIndex: 'appointments', key: 'countOfPendingSessionsPast',
+        sorter: (a, b) => a.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === PENDING)?.length - b.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === PENDING)?.length,
+        render: appointments => appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === PENDING)?.length,
+      });
       columns.splice(7, 0, {
         title: intl.formatMessage(messages.countOfSessionsFuture), dataIndex: 'appointments', key: 'countOfSessionsFuture',
-        sorter: (a, b) => a.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == PENDING)?.length - b.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == PENDING)?.length,
-        render: appointments => appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isBefore(moment(a.date)) && a.status == PENDING)?.length,
+        sorter: (a, b) => a.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length - b.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length,
+        render: appointments => appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status === PENDING)?.length,
       })
       columns.splice(8, 0, {
+        title: intl.formatMessage(msgCreateAccount.subsidy), key: 'subsidy',
+        sorter: (a, b) => a?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length > b?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length ? 1 : -1,
+        render: dependent => {
+          const approvedSubsidy = dependent.subsidy?.filter(s => s?.status === ADMINAPPROVED && s?.selectedProvider?._id === auth.user.providerInfo?._id);
+
+          if (approvedSubsidy.length) {
+            const totalAllowedSessions = approvedSubsidy?.reduce((a, b) => a + b.numberOfSessions, 0);
+            const totalUsedSessions = dependent.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status) && a?.provider?._id === auth.user.providerInfo?._id)?.length ?? 0;
+
+            return `${totalUsedSessions}/${totalAllowedSessions}`;
+          } else {
+            return 'No Subsidy';
+          }
+        },
+      })
+      columns.splice(9, 0, {
+        title: intl.formatMessage(messages.recentSessionDate), dataIndex: 'appointments', key: 'recentSession',
+        sorter: (a, b) => {
+          const aLastSession = a.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
+          const bLastSession = b.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
+
+          if (aLastSession.date) {
+            if (bLastSession.date) {
+              return moment(aLastSession.date) > moment(bLastSession.date) ? 1 : -1;
+            } else {
+              return 1;
+            }
+          } else {
+            return 1;
+          }
+        },
+        render: appointments => {
+          const lastSession = appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
+          return lastSession.date ? moment(lastSession.date).format('MM/DD/YYYY hh:mm A') : ''
+        },
+      })
+      columns.splice(10, 0, {
         title: intl.formatMessage(messages.action), key: 'action',
         render: dependent => {
-          const countOfSessionsPast = dependent?.appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length;
-          const countOfSessionsPaid = dependent?.appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED && a.isPaid)?.length;
+          const countOfSessionsPast = dependent?.appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length;
+          const countOfSessionsPaid = dependent?.appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED && a.isPaid)?.length;
 
           if (countOfSessionsPast > countOfSessionsPaid) {
             return (
@@ -281,17 +344,75 @@ class PrivateNote extends React.Component {
 
     if (auth.user.role === SCHOOL) {
       columns.splice(5, 0, {
-        title: intl.formatMessage(msgCreateAccount.subsidy), dataIndex: 'subsidy', key: 'subsidy',
-        sorter: (a, b) => a?.subsidy?.length > b?.subsidy?.length ? 1 : -1,
-        render: subsidy => subsidy?.length ? subsidy?.length : 'No Subsidy',
+        title: intl.formatMessage(msgCreateAccount.subsidy), key: 'subsidy',
+        sorter: (a, b) => a?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length > b?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length ? 1 : -1,
+        render: dependent => {
+          const approvedSubsidy = dependent.subsidy?.filter(s => s?.status === ADMINAPPROVED);
+
+          if (approvedSubsidy.length) {
+            const totalAllowedSessions = approvedSubsidy?.reduce((a, b) => a + b.numberOfSessions, 0);
+            const totalUsedSessions = dependent.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length ?? 0;
+
+            return `${totalUsedSessions}/${totalAllowedSessions}`;
+          } else {
+            return 'No Subsidy';
+          }
+        },
       })
     }
 
     if (auth.user.role === CONSULTANT) {
       columns.splice(5, 0, {
+        title: intl.formatMessage(messages.countOfSessionsPast), dataIndex: 'appointments', key: 'countOfSessionsPast',
+        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && [CLOSED, PENDING].includes(data.status))?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && [CLOSED, PENDING].includes(data.status))?.length,
+        render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && [CLOSED, PENDING].includes(a.status))?.length,
+      })
+      columns.splice(6, 0, {
+        title: intl.formatMessage(messages.countOfSessionsFuture), dataIndex: 'appointments', key: 'countOfSessionsFuture',
+        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length,
+        render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status === PENDING)?.length,
+      })
+      columns.splice(7, 0, {
         title: intl.formatMessage(messages.countOfReferrals), dataIndex: 'appointments', key: 'countOfReferrals',
-        sorter: (a, b) => a.appointments?.filter(data => data.consultant?._id === auth.user.consultantInfo?._id && data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length - b.appointments?.filter(data => data.consultant?._id === auth.user.consultantInfo?._id && data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length,
-        render: appointments => appointments?.filter(a => a.consultant?._id === auth.user.consultantInfo?._id && a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length,
+        sorter: (a, b) => a.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length - b.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length,
+        render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length,
+      })
+      columns.splice(8, 0, {
+        title: intl.formatMessage(msgCreateAccount.subsidy), key: 'subsidy',
+        sorter: (a, b) => a?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length > b?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length ? 1 : -1,
+        render: dependent => {
+          const approvedSubsidy = dependent.subsidy?.filter(s => s?.status === ADMINAPPROVED);
+
+          if (approvedSubsidy.length) {
+            const totalAllowedSessions = approvedSubsidy?.reduce((a, b) => a + b.numberOfSessions, 0);
+            const totalUsedSessions = dependent.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length ?? 0;
+
+            return `${totalUsedSessions}/${totalAllowedSessions}`;
+          } else {
+            return 'No Subsidy';
+          }
+        },
+      })
+      columns.splice(9, 0, {
+        title: intl.formatMessage(messages.recentSessionDate), dataIndex: 'appointments', key: 'recentSession',
+        sorter: (a, b) => {
+          const aLastSession = a.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
+          const bLastSession = b.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
+
+          if (aLastSession.date) {
+            if (bLastSession.date) {
+              return moment(aLastSession.date) > moment(bLastSession.date) ? 1 : -1;
+            } else {
+              return 1;
+            }
+          } else {
+            return 1;
+          }
+        },
+        render: appointments => {
+          const lastSession = appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
+          return lastSession.date ? moment(lastSession.date).format('MM/DD/YYYY hh:mm A') : ''
+        },
       })
     }
 
