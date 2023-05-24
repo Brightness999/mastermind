@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 
 import messages from './messages';
-import { APPOINTMENT, EVALUATION, NOFLAG, SUBSIDY } from '../../routes/constant';
+import { APPOINTMENT, CLEAR, EVALUATION, NOFLAG, PARENT, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -80,6 +80,7 @@ class ModalNoShow extends React.Component {
 								name="penalty"
 								label={intl.formatMessage(messages.penaltyAmount)}
 								rules={[{ required: true }]}
+								className={`${(user?.role === PARENT || event?.flagStatus === CLEAR) && 'events-none'}`}
 							>
 								<Input
 									type='number'
@@ -87,8 +88,13 @@ class ModalNoShow extends React.Component {
 									style={{ width: 100 }}
 									addonBefore="$"
 									className='font-16 penalty'
-									disabled={user?.role == 3 || event?.flagStatus == 2}
-									onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+									onKeyDown={(e) => {
+										(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+										if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+											e.preventDefault();
+											e.target.value = e.key;
+										}
+									}}
 								/>
 							</Form.Item>
 						</div>
@@ -97,6 +103,7 @@ class ModalNoShow extends React.Component {
 								name="program"
 								label={intl.formatMessage(messages.programPenalty)}
 								rules={[{ required: true }]}
+								className={`${(user?.role === PARENT || event?.flagStatus === CLEAR) && 'events-none'}`}
 							>
 								<Input
 									type='number'
@@ -104,20 +111,25 @@ class ModalNoShow extends React.Component {
 									style={{ width: 100 }}
 									addonBefore="$"
 									className='font-16 program'
-									disabled={user?.role == 3 || event?.flagStatus == 2}
-									onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+									onKeyDown={(e) => {
+										(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+										if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+											e.preventDefault();
+											e.target.value = e.key;
+										}
+									}}
 								/>
 							</Form.Item>
 						</div>
 					</div>
-					<Form.Item name="notes" label={intl.formatMessage(messages.notes)} rules={[{ required: true }]}>
-						<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.notes)} disabled={user?.role == 3 || event?.flagStatus == 2} className="notes" />
+					<Form.Item name="notes" label={intl.formatMessage(messages.notes)} rules={[{ required: true }]} className={`${(user?.role === PARENT || event?.flagStatus === CLEAR) && 'events-none'}`}>
+						<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.notes)} />
 					</Form.Item>
 					<Row className="justify-end gap-2 mt-10">
 						<Button key="back" onClick={this.props.onCancel}>
 							{intl.formatMessage(messages.cancel)}
 						</Button>
-						<Button key="submit" type="primary" htmlType='submit' disabled={user?.role == 3 || event?.flagStatus == 2}>
+						<Button key="submit" type="primary" htmlType='submit' disabled={user?.role === PARENT || event?.flagStatus === CLEAR}>
 							{intl.formatMessage(messages.submitFlag)}
 						</Button>
 					</Row>
