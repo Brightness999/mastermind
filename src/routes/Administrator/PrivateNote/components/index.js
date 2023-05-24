@@ -5,14 +5,14 @@ import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, PENDING, routerLinks } from '../../../constant';
+import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, PENDING } from '../../../constant';
 import { ModalDependentDetail } from '../../../../components/Modal';
 import intl from 'react-intl-universal';
 import msgMainHeader from '../../../../components/MainHeader/messages';
 import messages from '../../../Dashboard/messages';
 import msgCreateAccount from '../../../Sign/CreateAccount/messages';
 import request from '../../../../utils/api/request';
-import { deletePrivateNote, getDependents } from '../../../../utils/api/apiList';
+import { getDependents } from '../../../../utils/api/apiList';
 import PageLoading from '../../../../components/Loading/PageLoading';
 import './index.less';
 
@@ -48,33 +48,8 @@ class PrivateNote extends React.Component {
     })
   }
 
-  handleNewUser = () => {
-    this.props.history.push(routerLinks.CreateAccount);
-  }
-
   onCloseModalDependent = () => {
     this.setState({ visibleDependent: false });
-  }
-
-  handleConfirm = () => {
-    const { dependents, selectedDependentId } = this.state;
-    const selectedDependent = dependents?.find(dependent => dependent._id == selectedDependentId);
-    if (selectedDependent.notes?.find(note => note.dependent == selectedDependentId)) {
-      request.post(deletePrivateNote, { id: selectedDependent.notes?.find(note => note.dependent == selectedDependentId)?._id }).then((res) => {
-        if (res.success) {
-          this.setState({
-            dependents: dependents?.map(dependent => {
-              if (dependent._id == selectedDependentId) {
-                dependent.notes = [];
-              }
-              return dependent;
-            })
-          })
-        }
-      }).catch(err => {
-        console.log('activate user error---', err);
-      })
-    }
   }
 
   handleClickRow = (dependent) => {
@@ -84,7 +59,6 @@ class PrivateNote extends React.Component {
   render() {
     const { dependents, visibleDependent, selectedDependent, loading } = this.state;
     const { auth } = this.props;
-    const skills = JSON.parse(JSON.stringify(auth.skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
     const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(s => s?.schoolInfo)?.map(school => { school['text'] = school.name, school['value'] = school._id; return school; });
 
