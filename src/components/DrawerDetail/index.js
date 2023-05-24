@@ -793,6 +793,7 @@ class DrawerDetail extends Component {
       applyFeeToParent: this.applyFeeToParent,
       onCancel: this.onCloseModalCancelForAdmin,
     };
+    console.log(event)
 
     const contentConfirm = (
       <div className='confirm-content'>
@@ -1064,7 +1065,7 @@ class DrawerDetail extends Component {
                   {intl.formatMessage(msgModal.save)}
                 </Button>
                 <Button type='primary' block onClick={this.hideEditNotes} className='h-30 p-0'>
-                  {intl.formatMessage(messages.cancel)}
+                  {intl.formatMessage(msgModal.cancel)}
                 </Button>
               </div>
             )}
@@ -1084,7 +1085,7 @@ class DrawerDetail extends Component {
                   </Col>
                   <Col span={12}>
                     <Button type='primary' block onClick={this.hideFeedback} className='h-30 p-0'>
-                      {intl.formatMessage(messages.cancel)}
+                      {intl.formatMessage(msgModal.cancel)}
                     </Button>
                   </Col>
                 </Row>

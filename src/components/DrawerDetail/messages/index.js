@@ -53,10 +53,6 @@ export default {
     id: `${scope}.reschedule`,
     defaultMessage: 'Reschedule',
   },
-  cancel: {
-    id: `${scope}.cancel`,
-    defaultMessage: 'Cancel',
-  },
   cancelled: {
     id: `${scope}.cancelled`,
     defaultMessage: 'Cancelled',
