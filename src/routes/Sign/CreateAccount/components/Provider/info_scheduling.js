@@ -115,20 +115,18 @@ class InfoScheduling extends Component {
 								</Row>
 							</Col>
 							<Col xs={24} sm={24} md={12}>
-								{isSeparateEvaluationRate && (
-									<Form.Item
-										name="separateEvaluationDuration"
-										label={intl.formatMessage(messages.evaluationDuration)}
-										className='w-100 float-label-item'
-										rules={[{ required: isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.duration) }]}
-									>
-										<Select placeholder={intl.formatMessage(messages.duration)} onChange={separateEvaluationDuration => this.setValueToReduxRegisterData("separateEvaluationDuration", separateEvaluationDuration)}>
-											{durations?.map((duration, index) => (
-												<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
-											))}
-										</Select>
-									</Form.Item>
-								)}
+								<Form.Item
+									name="separateEvaluationDuration"
+									label={intl.formatMessage(messages.evaluationDuration)}
+									className={`w-100 float-label-item ${isSeparateEvaluationRate ? '' : 'display-none events-none'}`}
+									rules={[{ required: isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.duration) }]}
+								>
+									<Select placeholder={intl.formatMessage(messages.duration)} onChange={separateEvaluationDuration => this.setValueToReduxRegisterData("separateEvaluationDuration", separateEvaluationDuration)}>
+										{durations?.map((duration, index) => (
+											<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
+										))}
+									</Select>
+								</Form.Item>
 							</Col>
 						</Row>
 						<Row>

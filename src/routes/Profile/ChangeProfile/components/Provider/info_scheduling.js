@@ -150,7 +150,7 @@ class InfoScheduling extends Component {
 								<Form.Item
 									name="separateEvaluationDuration"
 									label={intl.formatMessage(messages.evaluationDuration)}
-									className={`w-100 float-label-item ${isSeparateEvaluationRate ? '' : 'display-none'}`}
+									className={`w-100 float-label-item ${isSeparateEvaluationRate ? '' : 'display-none events-none'}`}
 									rules={[{ required: isSeparateEvaluationRate }]}
 								>
 									<Select placeholder={intl.formatMessage(messages.duration)}>
