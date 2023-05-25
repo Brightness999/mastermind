@@ -107,9 +107,18 @@ class PrivateNote extends React.Component {
   }
 
   handleSubmitFlagBalance = (values) => {
-    const { totalPayment, minimumPayment, notes } = values
-    delete values.totalPayment;
-    delete values.minimumPayment;
+    const { notes } = values;
+    let totalPayment, minimumPayment;
+    for (let key in values) {
+      if (key.includes('totalPayment')) {
+        totalPayment = values[key];
+        delete values[key];
+      }
+      if (key.includes('minimumPayment')) {
+        minimumPayment = values[key] * 1;
+        delete values[key];
+      }
+    }
     delete values.notes;
     let postData = [];
 
@@ -125,7 +134,7 @@ class PrivateNote extends React.Component {
                   flagType: BALANCE,
                   late: value[1] * 1,
                   totalPayment,
-                  minimumPayment: minimumPayment * 1,
+                  minimumPayment,
                   notes
                 }
               }
@@ -138,8 +147,8 @@ class PrivateNote extends React.Component {
     request.post(setFlagBalance, postData).then(result => {
       const { success } = result;
       if (success) {
-        this.setState({ visibleBalance: false });
         this.getDependentList();
+        this.onCloseModalBalance();
       }
     }).catch(err => message.error(err.message));
   }
