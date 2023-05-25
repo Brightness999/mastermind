@@ -108,39 +108,32 @@ class PrivateNote extends React.Component {
 
   handleSubmitFlagBalance = (values) => {
     const { notes } = values;
-    let totalPayment, minimumPayment;
-    for (let key in values) {
-      if (key.includes('totalPayment')) {
-        totalPayment = values[key];
-        delete values[key];
-      }
-      if (key.includes('minimumPayment')) {
-        minimumPayment = values[key] * 1;
-        delete values[key];
-      }
-    }
-    delete values.notes;
+    const { selectedDependent } = this.state;
     let postData = [];
 
     Object.entries(values)?.forEach(value => {
       if (value?.length) {
-        postData.push({
-          updateOne: {
-            filter: { _id: value[0] },
-            update: {
-              $set: {
-                flagStatus: ACTIVE,
-                flagItems: {
-                  flagType: BALANCE,
-                  late: value[1] * 1,
-                  totalPayment,
-                  minimumPayment,
-                  notes
+        const appointment = selectedDependent.appointments?.find(a => a._id === value[0]);
+        if (appointment) {
+          postData.push({
+            updateOne: {
+              filter: { _id: value[0] },
+              update: {
+                $set: {
+                  flagStatus: ACTIVE,
+                  flagItems: {
+                    flagType: BALANCE,
+                    late: value[1] * 1,
+                    balance: values[`balance-${appointment?._id}`] * 1,
+                    totalPayment: values[`totalPayment-${appointment.provider?._id}`],
+                    minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
+                    notes,
+                  }
                 }
               }
             }
-          }
-        })
+          })
+        }
       }
     })
 

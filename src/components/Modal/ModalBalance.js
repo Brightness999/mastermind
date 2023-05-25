@@ -44,13 +44,13 @@ class ModalBalance extends React.Component {
 				unpaidAppointments?.filter(a => a.provider?._id === provider?._id)?.forEach(event => {
 					const balance = this.getBalance(event);
 					if (event?.flagStatus === NOFLAG) {
-						temp.push({ ...event, currentBalance: balance, pastDays: this.pastDays(event?.date) });
-						this.form?.setFieldsValue({ [event._id]: balance });
+						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
+						this.form?.setFieldsValue({ [event._id]: balance, [`balance-${event._id}`]: balance });
 						total += balance * 2;
 					} else {
-						temp.push({ ...event, currentBalance: balance, pastDays: this.pastDays(event?.date) });
-						this.form?.setFieldsValue({ [event._id]: event?.flagItems?.late, notes: event?.flagItems?.notes });
-						total += balance + event?.flagItems?.late;
+						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
+						this.form?.setFieldsValue({ [event._id]: event?.flagItems?.late, [`balance-${event._id}`]: event?.flagItems.balance, notes: event?.flagItems?.notes });
+						total += event?.flagItems?.balance + event?.flagItems?.late;
 						minimum = event?.flagItems?.minimumPayment;
 					}
 				});
@@ -118,7 +118,7 @@ class ModalBalance extends React.Component {
 		const { providerData } = this.state;
 		const values = this.form.getFieldsValue();
 		const appointments = providerData?.find(p => p.provider?._id == providerId).appointments;
-		let newTotal = appointments?.reduce((a, b) => (a + b?.currentBalance * 1 + values[b._id] * 1), 0);
+		let newTotal = appointments?.reduce((a, b) => (a + values[`balance-${b._id}`] * 1 + values[b._id] * 1), 0);
 		this.form.setFieldsValue({ [`totalPayment-${providerId}`]: newTotal });
 	}
 
@@ -170,8 +170,20 @@ class ModalBalance extends React.Component {
 										</Form.Item>
 									</div>
 									<div className='mr-10 flex-1'>
-										{index === 0 ? <p>{intl.formatMessage(messages.currentBalanceDue)}</p> : null}
-										<p className={`font-16 font-500 mb-0 ${index === 0 && 'mt-1'}`}>{a?.currentBalance ? `$${a?.currentBalance}` : ''}</p>
+										<Form.Item
+											name={`balance-${a._id}`}
+											label={index === 0 ? intl.formatMessage(messages.currentBalanceDue) : ''}
+											className='mb-0 events-none'
+											rules={[{ required: true }]}
+										>
+											<Input
+												type='number'
+												min={0}
+												addonBefore="$"
+												style={{ width: 110 }}
+												className='font-16 late'
+											/>
+										</Form.Item>
 									</div>
 									<div className='flex-1'>
 										{index === 0 ? <p>{intl.formatMessage(messages.daysPastDue)}</p> : null}
