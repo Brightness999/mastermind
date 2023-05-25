@@ -439,7 +439,7 @@ class PanelAppointment extends React.Component {
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {(this.props.user?.role == 3 && !data?.isPaid) ? (
-                <div className={`item-right cursor gap-1 ${data?.status === DECLINED && 'display-none'}`}>
+                <div className={`item-right cursor gap-1 ${data?.status === DECLINED && 'display-none events-none'}`}>
                   <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                     <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                     <input type="hidden" name="business" value="office@helpmegethelp.org" />
@@ -460,7 +460,7 @@ class PanelAppointment extends React.Component {
                 </div>
               ) : null}
               {this.props.user?.role > 3 ? (
-                <div className={`item-right gap-1 ${data?.status === DECLINED && 'display-none'}`}>
+                <div className={`item-right gap-1 ${data?.status === DECLINED && 'display-none events-none'}`}>
                   <BsEnvelope size={15} onClick={() => this.openModalFeedback(data)} />
                   <BsFillFlagFill size={15} onClick={() => this.openModalBalance(data)} />
                 </div>

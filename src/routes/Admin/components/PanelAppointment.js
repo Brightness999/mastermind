@@ -428,7 +428,7 @@ class PanelAppointment extends React.Component {
           {appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && a.flagStatus != ACTIVE && [PENDING, CANCELLED].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
-              <div className={`item-right gap-1 ${data.status === CANCELLED && 'display-none'}`}>
+              <div className={`item-right gap-1 ${data.status === CANCELLED && 'display-none events-none'}`}>
                 <BsFillFlagFill size={15} onClick={() => this.openModalNoShow(data)} />
                 <BsCheckCircleFill className='text-green500' size={15} onClick={() => this.handleClose(data)} />
               </div>
@@ -447,7 +447,7 @@ class PanelAppointment extends React.Component {
           {appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && [CLOSED, DECLINED].includes(a.status) && a.flagStatus != ACTIVE && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
-              <div className={`item-right gap-1 ${data?.status === DECLINED && 'display-none'}`}>
+              <div className={`item-right gap-1 ${data?.status === DECLINED && 'display-none events-none'}`}>
                 <BsEnvelope size={15} onClick={() => this.openModalFeedback(data)} />
                 <BsFillFlagFill size={15} onClick={() => this.openModalBalance(data)} />
               </div>
