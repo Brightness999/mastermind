@@ -222,8 +222,8 @@ class ModalDependentDetail extends React.Component {
 						)}
 					</div>
 					<div className={`flex gap-5 mt-2 ${dependent?.isRemoved ? 'd-none' : ''}`}>
-						<Button type='primary' block className={`${(user?.role == 3 || user?.role > 900) ? '' : 'display-none'}`} onClick={() => this.onOpenModalNewSubsidy()}>Request Subsidy</Button>
-						<Button type='primary' block className={`${user?.role == 3 ? 'display-none' : ''}`} onClick={() => this.onAddComment()}>Add Comment</Button>
+						<Button type='primary' block className={`${(user?.role == 3 || user?.role > 900) ? '' : 'display-none events-none'}`} onClick={() => this.onOpenModalNewSubsidy()}>Request Subsidy</Button>
+						<Button type='primary' block className={`${user?.role == 3 ? 'display-none events-none' : ''}`} onClick={() => this.onAddComment()}>Add Comment</Button>
 					</div>
 				</Card>
 				{visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
