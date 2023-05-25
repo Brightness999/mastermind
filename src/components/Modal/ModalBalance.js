@@ -149,7 +149,7 @@ class ModalBalance extends React.Component {
 										<Form.Item
 											name={a._id}
 											label={index === 0 ? intl.formatMessage(messages.lateFeeAmount) : ''}
-											className={`mb-0 ${(user?.role === PARENT || event?.flagStatus === CLEAR) && 'events-none'}`}
+											className='mb-0'
 											rules={[{ required: true }]}
 										>
 											<Input
@@ -158,6 +158,7 @@ class ModalBalance extends React.Component {
 												addonBefore="$"
 												style={{ width: 110 }}
 												className='font-16 late'
+												disabled={user?.role === PARENT || event?.flagStatus === CLEAR}
 												onKeyDown={(e) => {
 													(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
 													if (e.key > -1 && e.key < 10 && e.target.value === '0') {
@@ -173,7 +174,7 @@ class ModalBalance extends React.Component {
 										<Form.Item
 											name={`balance-${a._id}`}
 											label={index === 0 ? intl.formatMessage(messages.currentBalanceDue) : ''}
-											className='mb-0 events-none'
+											className='mb-0'
 											rules={[{ required: true }]}
 										>
 											<Input
@@ -182,6 +183,7 @@ class ModalBalance extends React.Component {
 												addonBefore="$"
 												style={{ width: 110 }}
 												className='font-16 late'
+												disabled
 											/>
 										</Form.Item>
 									</div>
@@ -200,7 +202,7 @@ class ModalBalance extends React.Component {
 									<Form.Item
 										name={`totalPayment-${p.provider?._id}`}
 										label={intl.formatMessage(messages.totalPayment)}
-										className="mb-0 events-none"
+										className="mb-0"
 										rules={[{ required: true }]}
 									>
 										<Input
@@ -209,13 +211,7 @@ class ModalBalance extends React.Component {
 											addonBefore="$"
 											style={{ width: 120 }}
 											className='font-16 late'
-											onKeyDown={(e) => {
-												(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
-												if (e.key > -1 && e.key < 10 && e.target.value === '0') {
-													e.preventDefault();
-													e.target.value = e.key;
-												}
-											}}
+											disabled
 										/>
 									</Form.Item>
 								</Col>
@@ -223,7 +219,7 @@ class ModalBalance extends React.Component {
 									<Form.Item
 										name={`minimumPayment-${p.provider?._id}`}
 										label={intl.formatMessage(messages.minimumPayment)}
-										className={`mb-0 ${(user?.role === PARENT || event?.flagStatus === CLEAR) && 'events-none'}`}
+										className='mb-0'
 										rules={[{ required: true }]}
 									>
 										<Input
@@ -232,6 +228,7 @@ class ModalBalance extends React.Component {
 											addonBefore="$"
 											style={{ width: 120 }}
 											className='font-16 late'
+											disabled={user?.role === PARENT || event?.flagStatus === CLEAR}
 											onKeyDown={(e) => {
 												(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
 												if (e.key > -1 && e.key < 10 && e.target.value === '0') {
@@ -245,8 +242,8 @@ class ModalBalance extends React.Component {
 							</Row>
 						</Fragment>
 					))}
-					<Form.Item name="notes" label={intl.formatMessage(messages.notes)} rules={[{ required: true }]} className={`${(user?.role === PARENT || event?.flagStatus === CLEAR) && 'events-none'}`}>
-						<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.notes)} className="notes" />
+					<Form.Item name="notes" label={intl.formatMessage(messages.notes)} rules={[{ required: true }]}>
+						<Input.TextArea rows={4} placeholder={intl.formatMessage(messages.notes)} className="notes" disabled={user?.role === PARENT || event?.flagStatus === CLEAR} />
 					</Form.Item>
 					<Row className="justify-end gap-2 mt-10">
 						<Button key="back" onClick={this.props.onCancel}>
