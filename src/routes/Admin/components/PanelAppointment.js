@@ -341,6 +341,7 @@ class PanelAppointment extends React.Component {
       visibleNoShow,
       visibleCancelForAdmin,
     } = this.state;
+    const dependent = { ...event?.dependent, appointments: appointments?.filter(a => a.dependent?._id === event?.dependent?._id) };
     const modalCancelProps = {
       visible: visibleCancel,
       onSubmit: this.handleConfirmCancel,
@@ -383,6 +384,7 @@ class PanelAppointment extends React.Component {
       onSubmit: this.onSubmitFlagBalance,
       onCancel: this.closeModalBalance,
       event: event,
+      dependent,
     };
 
     const modalFeedbackProps = {
