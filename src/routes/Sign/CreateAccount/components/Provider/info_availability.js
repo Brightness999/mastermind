@@ -581,7 +581,7 @@ class InfoAvailability extends Component {
 														<Row>
 															<Col span={12}>
 																{!registerData?.profileInfor?.isPrivateForHmgh ? (
-																	<div className={`flex items-center justify-start gap-2 ${!registerData?.subsidy?.isWillingOpenPrivate ? 'display-none' : ''}`}>
+																	<div className={`flex items-center justify-start gap-2 ${!registerData?.subsidy?.isWillingOpenPrivate ? 'd-none' : ''}`}>
 																		<Form.Item name={[field.name, "isPrivate"]} valuePropName="checked">
 																			<Switch size="small" />
 																		</Form.Item>
