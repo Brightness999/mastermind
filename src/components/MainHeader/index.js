@@ -13,6 +13,7 @@ import { MdOutlineSpaceDashboard } from 'react-icons/md';
 import messages from './messages';
 import { routerLinks } from '../../routes/constant';
 import { logout } from '../../redux/features/authSlice';
+import { helper } from '../../utils/auth/helper';
 import './style/index.less';
 
 class MainHeader extends Component {
@@ -28,6 +29,7 @@ class MainHeader extends Component {
       if (window.location.pathname.includes('/account') || window.location.pathname.includes('/administrator')) {
         const countDown = setTimeout(() => {
           this.logout();
+          helper.history.push(routerLinks.Home);
         }, 10 * 60 * 1000);
         this.setState({ intervalId: countDown });
       }
@@ -81,7 +83,7 @@ class MainHeader extends Component {
         key: '5',
         icon: <BiLogOutCircle size={18} color='#495057' />,
         label: (
-          <Link to='/home' onClick={this.logout}>
+          <Link to={routerLinks.Home} onClick={this.logout}>
             {intl.formatMessage(messages.logOut)}
           </Link>
         ),
