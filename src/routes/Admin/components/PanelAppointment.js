@@ -416,7 +416,7 @@ class PanelAppointment extends React.Component {
             </div>
           ))}
           {(appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && a.flagStatus != ACTIVE && a.status === PENDING && moment().isBefore(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
-            <div key={1} className='list-item'>
+            <div key={1} className='list-item justify-center'>
               <p className='p-10'>No upcoming appoiment</p>
             </div>
           )}
@@ -435,7 +435,7 @@ class PanelAppointment extends React.Component {
             </div>
           ))}
           {(appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && [PENDING, CANCELLED].includes(a.status) && a.flagStatus != ACTIVE && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
-            <div key={1} className='list-item'>
+            <div key={1} className='list-item justify-center'>
               <p className='p-10'>No unprocess appoiment</p>
             </div>
           )}
@@ -454,7 +454,7 @@ class PanelAppointment extends React.Component {
             </div>
           ))}
           {(appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && [CLOSED, DECLINED].includes(a.status) && a.flagStatus != ACTIVE && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
-            <div key={1} className='list-item'>
+            <div key={1} className='list-item justify-center'>
               <p className='p-10'>No past appoiment</p>
             </div>
           )}
