@@ -439,38 +439,40 @@ class DrawerDetail extends Component {
   };
 
   onSubmitFlagBalance = (values) => {
-    const { totalPayment, minimumPayment, notes } = values
-    delete values.totalPayment;
-    delete values.minimumPayment;
-    delete values.notes;
+    const { notes } = values;
+    const { listAppointmentsRecent } = this.props;
     let postData = [];
 
     Object.entries(values)?.forEach(value => {
       if (value?.length) {
-        postData.push({
-          updateOne: {
-            filter: { _id: value[0] },
-            update: {
-              $set: {
-                flagStatus: ACTIVE,
-                flagItems: {
-                  flagType: BALANCE,
-                  late: value[1] * 1,
-                  totalPayment,
-                  minimumPayment: minimumPayment * 1,
-                  notes
+        const appointment = listAppointmentsRecent?.find(a => a._id === value[0]);
+        if (appointment) {
+          postData.push({
+            updateOne: {
+              filter: { _id: value[0] },
+              update: {
+                $set: {
+                  flagStatus: ACTIVE,
+                  flagItems: {
+                    flagType: BALANCE,
+                    late: value[1] * 1,
+                    balance: values[`balance-${appointment._id}`],
+                    totalPayment: values[`totalPayment-${appointment.provider?._id}`],
+                    minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
+                    notes,
+                  }
                 }
               }
             }
-          }
-        })
+          })
+        }
       }
     })
 
     request.post(setFlagBalance, postData).then(result => {
       const { success } = result;
       if (success) {
-        this.setState({ visibleBalance: false, isFlag: true });
+        this.onCloseModalBalance();
         this.updateAppointments();
       }
     }).catch(err => message.error(err.message));
