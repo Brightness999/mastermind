@@ -5,14 +5,15 @@ import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, PENDING } from '../../../constant';
-import { ModalDependentDetail } from '../../../../components/Modal';
+import { ACTIVE, ADMINAPPROVED, APPOINTMENT, BALANCE, CLOSED, CONSULTATION, EVALUATION, PENDING, SUBSIDY } from '../../../constant';
+import { ModalBalance, ModalDependentDetail } from '../../../../components/Modal';
 import intl from 'react-intl-universal';
 import msgMainHeader from '../../../../components/MainHeader/messages';
 import messages from '../../../Dashboard/messages';
 import msgCreateAccount from '../../../Sign/CreateAccount/messages';
+import msgDraweDetail from '../../../../components/DrawerDetail/messages';
 import request from '../../../../utils/api/request';
-import { getDependents } from '../../../../utils/api/apiList';
+import { getDependents, setFlagBalance } from '../../../../utils/api/apiList';
 import PageLoading from '../../../../components/Loading/PageLoading';
 import './index.less';
 
@@ -26,12 +27,17 @@ class PrivateNote extends React.Component {
       visibleDependent: false,
       selectedDependent: {},
       loading: false,
+      visibleBalance: false,
     };
     this.searchInput = createRef(null);
   }
 
   componentDidMount() {
     this.setState({ loading: true });
+    this.getDependentList();
+  }
+
+  getDependentList() {
     request.post(getDependents).then(result => {
       this.setState({ loading: false });
       const { success, data } = result;
@@ -52,12 +58,64 @@ class PrivateNote extends React.Component {
     this.setState({ visibleDependent: false });
   }
 
+  onShowModalBalance = (dependent) => {
+    if (dependent?.appointments?.length) {
+      this.setState({ selectedDependent: dependent }, () => {
+        this.setState({ visibleBalance: true });
+      })
+    }
+  }
+
+  onCloseModalBalance = () => {
+    this.setState({ visibleBalance: false, selectedDependent: {} });
+  }
+
+  handleSubmitFlagBalance = (values) => {
+    const { notes } = values;
+    const { selectedDependent } = this.state;
+    let postData = [];
+
+    Object.entries(values)?.forEach(value => {
+      if (value?.length) {
+        const appointment = selectedDependent.appointments?.find(a => a._id === value[0]);
+        if (appointment) {
+          postData.push({
+            updateOne: {
+              filter: { _id: value[0] },
+              update: {
+                $set: {
+                  flagStatus: ACTIVE,
+                  flagItems: {
+                    flagType: BALANCE,
+                    late: value[1] * 1,
+                    balance: values[`balance-${appointment._id}`],
+                    totalPayment: values[`totalPayment-${appointment.provider?._id}`],
+                    minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
+                    notes,
+                  }
+                }
+              }
+            }
+          })
+        }
+      }
+    })
+
+    request.post(setFlagBalance, postData).then(result => {
+      const { success } = result;
+      if (success) {
+        this.getDependentList();
+        this.onCloseModalBalance();
+      }
+    }).catch(err => message.error(err.message));
+  }
+
   handleClickRow = (dependent) => {
     this.setState({ visibleDependent: true, selectedDependent: dependent });
   }
 
   render() {
-    const { dependents, visibleDependent, selectedDependent, loading } = this.state;
+    const { dependents, visibleDependent, selectedDependent, loading, visibleBalance } = this.state;
     const { auth } = this.props;
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
     const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(s => s?.schoolInfo)?.map(school => { school['text'] = school.name, school['value'] = school._id; return school; });
@@ -128,30 +186,91 @@ class PrivateNote extends React.Component {
         render: school => school?.name,
       },
       {
-        title: intl.formatMessage(messages.countOfSessionsPast), dataIndex: 'appointments', key: 'countOfSessionsPast',
-        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length,
+        title: intl.formatMessage(messages.countOfClosedSessionsPast), dataIndex: 'appointments', key: 'countOfClosedSessionsPast',
+        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length,
         render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length,
       },
       {
+        title: intl.formatMessage(messages.countOfPendingSessionsPast), dataIndex: 'appointments', key: 'countOfPendingSessionsPast',
+        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === PENDING)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === PENDING)?.length,
+        render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === PENDING)?.length,
+      },
+      {
         title: intl.formatMessage(messages.countOfSessionsFuture), dataIndex: 'appointments', key: 'countOfSessionsFuture',
-        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == PENDING)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status == PENDING)?.length,
+        sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length,
         render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status === PENDING)?.length,
       },
       {
         title: intl.formatMessage(messages.countOfReferrals), dataIndex: 'appointments', key: 'countOfReferrals',
-        sorter: (a, b) => a.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length - b.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status == CLOSED)?.length,
+        sorter: (a, b) => a.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length - b.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length,
         render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length
-      }, ,
-      {
-        title: intl.formatMessage(msgCreateAccount.subsidy), dataIndex: 'subsidy', key: 'subsidy',
-        sorter: (a, b) => a?.subsidy?.length > b?.subsidy?.length ? 1 : -1,
-        render: subsidy => subsidy?.length ? subsidy.length : 'No Subsidy',
       },
+      {
+        title: intl.formatMessage(msgCreateAccount.subsidy), key: 'subsidy',
+        sorter: (a, b) => a?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length > b?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length ? 1 : -1,
+        render: dependent => {
+          const approvedSubsidy = dependent.subsidy?.filter(s => s?.status === ADMINAPPROVED);
+
+          if (approvedSubsidy.length) {
+            const totalAllowedSessions = approvedSubsidy?.reduce((a, b) => a + b.numberOfSessions, 0);
+            const totalUsedSessions = dependent.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length ?? 0;
+
+            return `${totalUsedSessions}/${totalAllowedSessions}`;
+          } else {
+            return 'No Subsidy';
+          }
+        },
+      },
+      {
+        title: intl.formatMessage(messages.recentSessionDate), dataIndex: 'appointments', key: 'recentSession',
+        sorter: (a, b) => {
+          const aLastSession = a.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
+          const bLastSession = b.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
+
+          if (aLastSession.date) {
+            if (bLastSession.date) {
+              return moment(aLastSession.date) > moment(bLastSession.date) ? 1 : -1;
+            } else {
+              return 1;
+            }
+          } else {
+            return -1;
+          }
+        },
+        render: appointments => {
+          const lastSession = appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
+          return lastSession.date ? moment(lastSession.date).format('MM/DD/YYYY hh:mm A') : ''
+        },
+      },
+      {
+        title: intl.formatMessage(messages.action), key: 'action',
+        render: dependent => {
+          const countOfSessionsPast = dependent?.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length;
+          const countOfSessionsPaid = dependent?.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED && a.isPaid)?.length;
+
+          if (countOfSessionsPast > countOfSessionsPaid) {
+            return (
+              <div className='action cursor' onClick={() => this.onShowModalBalance(dependent)}>
+                <a className='action cursor'>{intl.formatMessage(msgDraweDetail.flagDependent)}</a>
+              </div>
+            )
+          } else {
+            return null;
+          }
+        },
+      }
     ];
 
     const modalDependentProps = {
       visible: visibleDependent,
       onCancel: this.onCloseModalDependent,
+      dependent: selectedDependent,
+    }
+
+    const modalBalanceProps = {
+      visible: visibleBalance,
+      onSubmit: this.handleSubmitFlagBalance,
+      onCancel: this.onCloseModalBalance,
       dependent: selectedDependent,
     }
 
@@ -168,12 +287,13 @@ class PrivateNote extends React.Component {
           columns={columns}
           onRow={(dependent) => {
             return {
-              onClick: (e) => e.target.className != 'btn-blue action' && this.handleClickRow(dependent),
-              onDoubleClick: (e) => e.target.className != 'btn-blue action' && this.handleClickRow(dependent),
+              onClick: (e) => e.target.className != 'action cursor' && this.handleClickRow(dependent),
+              onDoubleClick: (e) => e.target.className != 'action cursor' && this.handleClickRow(dependent),
             }
           }}
         />
         {visibleDependent && <ModalDependentDetail {...modalDependentProps} />}
+        {visibleBalance && <ModalBalance {...modalBalanceProps} />}
         <PageLoading loading={loading} isBackground={true} />
       </div>
     );
