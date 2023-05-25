@@ -127,7 +127,7 @@ class ModalNoShow extends React.Component {
 					</Form.Item>
 					<Row className="justify-end gap-2 mt-10">
 						<Button key="back" onClick={this.props.onCancel}>
-							{intl.formatMessage(messages.cancel)}
+							{intl.formatMessage(messages.goBack)}
 						</Button>
 						<Button key="submit" type="primary" htmlType='submit' disabled={user?.role === PARENT || event?.flagStatus === CLEAR}>
 							{intl.formatMessage(messages.submitFlag)}
