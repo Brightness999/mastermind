@@ -214,7 +214,7 @@ class ModalInvoice extends React.Component {
 						</tr>
 						<tr>
 							<td>
-								<div className='my-10'><Button type='primary' className={`font-16 add-item px-20 ${user.role > 3 ? '' : 'display-none'}`} onClick={() => this.handleAddItem()}>Add item</Button></div>
+								<div className='my-10'><Button type='primary' className={`font-16 add-item px-20 ${user.role > 3 ? '' : 'display-none events-none'}`} onClick={() => this.handleAddItem()}>Add item</Button></div>
 							</td>
 						</tr>
 						<tr>
