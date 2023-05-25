@@ -152,7 +152,8 @@ class ModalFlagExpand extends React.Component {
 
 	render() {
 		const { activeFlags, clearedFlags, skillSet, visibleBalance, visibleNoShow, event, visibleCreateNote } = this.state;
-		const { user } = this.props.auth;
+		const { auth, appointments } = this.props;
+		const dependent = { ...event?.dependent, appointments: appointments?.filter(a => a.dependent?._id === event?.dependent?._id) };
 		const modalProps = {
 			className: 'modal-referral-service',
 			title: "Flags",
@@ -226,7 +227,7 @@ class ModalFlagExpand extends React.Component {
 			{ title: 'Session Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm A') },
 		];
 
-		if (user.role == 3) {
+		if (auth.user.role == 3) {
 			columns.splice(1, 0, {
 				title: 'Provider',
 				key: 'provider',
@@ -259,7 +260,7 @@ class ModalFlagExpand extends React.Component {
 					</Space>
 				)
 			});
-		} else if (user.role == 30) {
+		} else if (auth.user.role == 30) {
 			columns.splice(4, 0, {
 				title: 'Action', key: 'action', render: (appointment) => (
 					<Popconfirm
@@ -273,7 +274,7 @@ class ModalFlagExpand extends React.Component {
 					</Popconfirm>
 				)
 			});
-		} else if (user.role > 900) {
+		} else if (auth.user.role > 900) {
 			columns.splice(1, 0, {
 				title: 'Provider',
 				key: 'provider',
@@ -329,6 +330,7 @@ class ModalFlagExpand extends React.Component {
 			onSubmit: this.onSubmitFlagBalance,
 			onCancel: this.onCloseModalBalance,
 			event: event,
+			dependent,
 		};
 
 		const modalCreateNoteProps = {
@@ -383,6 +385,7 @@ class ModalFlagExpand extends React.Component {
 const mapStateToProps = state => {
 	return ({
 		auth: state.auth,
+		appointments: state.appointments.dataAppointments,
 	})
 }
 
