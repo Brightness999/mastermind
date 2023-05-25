@@ -85,13 +85,16 @@ class ModalFlagExpand extends React.Component {
 
 	onSubmitFlagNoShow = (values) => {
 		const { event } = this.state;
+		const { penalty, program, notes } = values;
 		const data = {
 			_id: event?._id,
 			flagItems: {
-				...values,
+				notes,
+				penalty: penalty * 1,
+				program: program * 1,
 				type: event?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
 				locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
-				rate: values?.penalty * 1 + values?.program * 1,
+				rate: penalty * 1 + program * 1,
 				flagType: NOSHOW,
 			}
 		}

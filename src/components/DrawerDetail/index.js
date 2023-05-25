@@ -407,14 +407,17 @@ class DrawerDetail extends Component {
 
   onSubmitFlagNoShow = (values) => {
     const { event } = this.props;
+    const { penalty, program, notes } = values;
     const data = {
       _id: event?._id,
       status: NOSHOW,
       flagItems: {
-        ...values,
+        penalty: penalty * 1,
+        program: program * 1,
+        notes,
         type: event?.type == EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type == APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : event?.type == SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
         locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
-        rate: values?.penalty + values?.program,
+        rate: penalty * 1 + program * 1,
         flagType: NOSHOW,
       }
     }
