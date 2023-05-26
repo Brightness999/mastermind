@@ -21,11 +21,15 @@ class ModalBalance extends React.Component {
 		let unpaidAppointments = [], providerData = [];
 
 		if (event?.flagStatus === CLEAR) {
-			const balance = this.getBalance(event);
-			this.form?.setFieldsValue({ [event._id]: event.flagItems?.late, [`totalPayment-${event.provider?._id}`]: event.flagItems?.totalPayment, [`minimumPayment-${event.provider?._id}`]: event.flagItems?.minimumPayment });
+			this.form?.setFieldsValue({
+				[event._id]: event.flagItems?.late || 0,
+				[`balance-${event?._id}`]: event.flagItems?.totalPayment || 0,
+				[`totalPayment-${event.provider?._id}`]: event.flagItems?.totalPayment || 0,
+				[`minimumPayment-${event.provider?._id}`]: event.flagItems?.minimumPayment || 0,
+			});
 			this.setState({
 				providerData: [{
-					appointments: [{ ...event, currentBalance: balance, pastDays: this.pastDays(event.date) }],
+					appointments: [{ ...event, pastDays: this.pastDays(event.date) }],
 					provider: event.provider,
 				}]
 			})
@@ -45,17 +49,26 @@ class ModalBalance extends React.Component {
 					const balance = this.getBalance(event);
 					if (event?.flagStatus === NOFLAG) {
 						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
-						this.form?.setFieldsValue({ [event._id]: balance, [`balance-${event._id}`]: balance });
+						this.form?.setFieldsValue({
+							[event._id]: balance || 0,
+							[`balance-${event._id}`]: balance || 0,
+						});
 						total += balance * 2;
 					} else {
 						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
-						this.form?.setFieldsValue({ [event._id]: event?.flagItems?.late, [`balance-${event._id}`]: event?.flagItems.balance, notes: event?.flagItems?.notes });
+						this.form?.setFieldsValue({
+							[event._id]: event?.flagItems?.late || 0,
+							[`balance-${event._id}`]: event?.flagItems.balance || 0,
+							notes: event?.flagItems?.notes,
+						});
 						total += event?.flagItems?.balance + event?.flagItems?.late;
 						minimum = event?.flagItems?.minimumPayment;
 					}
 				});
-				this.form.setFieldsValue({ [`totalPayment-${provider?._id}`]: total });
-				this.form.setFieldsValue({ [`minimumPayment-${provider?._id}`]: minimum });
+				this.form.setFieldsValue({
+					[`totalPayment-${provider?._id}`]: total || 0,
+					[`minimumPayment-${provider?._id}`]: minimum || 0,
+				});
 				providerData.push({
 					appointments: temp,
 					provider: provider,

@@ -14,6 +14,7 @@ import msgMainHeader from '../../../components/MainHeader/messages';
 import messages from '../../Dashboard/messages';
 import msgCreateAccount from '../../Sign/CreateAccount/messages';
 import msgDraweDetail from '../../../components/DrawerDetail/messages';
+import msgModal from '../../../components/Modal/messages';
 import request from '../../../utils/api/request';
 import { getDependents, setFlagBalance } from '../../../utils/api/apiList';
 import { getSubsidyRequests } from '../../../redux/features/appointmentsSlice';
@@ -127,6 +128,8 @@ class PrivateNote extends React.Component {
                     balance: values[`balance-${appointment?._id}`] * 1,
                     totalPayment: values[`totalPayment-${appointment.provider?._id}`],
                     minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
+                    type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
+                    locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
                     notes,
                   }
                 }
@@ -140,8 +143,8 @@ class PrivateNote extends React.Component {
     request.post(setFlagBalance, postData).then(result => {
       const { success } = result;
       if (success) {
-        this.getDependentList();
         this.onCloseModalBalance();
+        this.getDependentList();
       }
     }).catch(err => message.error(err.message));
   }

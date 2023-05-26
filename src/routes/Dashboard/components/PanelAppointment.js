@@ -13,7 +13,7 @@ import msgModal from '../../../components/Modal/messages';
 import request from '../../../utils/api/request'
 import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalPayment, ModalProcessAppointment } from '../../../components/Modal';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag } from '../../../utils/api/apiList';
+import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag, setFlagBalance } from '../../../utils/api/apiList';
 import { ACTIVE, APPOINTMENT, BALANCE, CLOSED, DECLINED, EVALUATION, NOSHOW, PARENT, PENDING, SUBSIDY } from '../../constant';
 import './index.less';
 
@@ -237,28 +237,49 @@ class PanelAppointment extends React.Component {
   }
 
   closeModalBalance = () => {
-    this.setState({ visibleBalance: false });
+    this.setState({ visibleBalance: false, event: {} });
   }
 
   onSubmitFlagBalance = (values) => {
-    const { event } = this.state;
-    const data = {
-      _id: event?._id,
-      flagItems: {
-        ...values,
-        type: event?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
-        locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
-        rate: values?.late,
-        flagType: BALANCE,
-      }
-    }
-    request.post(setFlag, data).then(result => {
-      const { success } = result;
-      if (success) {
-        this.setState({ visibleBalance: false, isFlag: true });
-        this.updateAppointments();
+    const { notes } = values;
+    const { appointments } = this.props;
+    let postData = [];
+
+    Object.entries(values)?.forEach(value => {
+      if (value?.length) {
+        const appointment = appointments?.find(a => a._id === value[0]);
+        if (appointment) {
+          postData.push({
+            updateOne: {
+              filter: { _id: value[0] },
+              update: {
+                $set: {
+                  flagStatus: ACTIVE,
+                  flagItems: {
+                    flagType: BALANCE,
+                    late: value[1] * 1,
+                    balance: values[`balance-${appointment._id}`],
+                    totalPayment: values[`totalPayment-${appointment.provider?._id}`],
+                    minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
+                    type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
+                    locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
+                    notes,
+                  }
+                }
+              }
+            }
+          })
+        }
       }
     })
+
+    request.post(setFlagBalance, postData).then(result => {
+      const { success } = result;
+      if (success) {
+        this.closeModalBalance();
+        this.updateAppointments();
+      }
+    }).catch(err => message.error(err.message));
   }
 
   onSubmitFlagNoShow = (values) => {
@@ -421,7 +442,7 @@ class PanelAppointment extends React.Component {
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {this.props.user?.role > 3 ? (
-                <div className={`item-right gap-1 ${(data.status == -2 || appointments.find(a => a.dependent?._id == data?.dependent?._id && a.provider?._id == data?.provider?._id && a.flagStatus == 1)) && 'display-none'}`}>
+                <div className={`item-right gap-1 ${(data.status == -2 || appointments.find(a => a.dependent?._id == data?.dependent?._id && a.provider?._id == data?.provider?._id && a.flagStatus == 1)) && 'display-none events-none'}`}>
                   <BsFillFlagFill size={15} onClick={() => this.openModalNoShow(data)} />
                   <BsCheckCircleFill className='text-green500' size={15} onClick={() => this.handleClose(data)} />
                 </div>

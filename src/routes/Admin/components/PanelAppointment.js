@@ -13,7 +13,7 @@ import msgModal from '../../../components/Modal/messages';
 import request from '../../../utils/api/request'
 import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../../components/Modal';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, sendEmailInvoice, setFlag } from '../../../utils/api/apiList';
+import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, sendEmailInvoice, setFlag, setFlagBalance } from '../../../utils/api/apiList';
 import { ACTIVE, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, DECLINED, EVALUATION, NOSHOW, PENDING, RESCHEDULE, SUBSIDY } from '../../constant';
 import './index.less';
 
@@ -252,28 +252,49 @@ class PanelAppointment extends React.Component {
   }
 
   closeModalBalance = () => {
-    this.setState({ visibleBalance: false });
+    this.setState({ visibleBalance: false, event: {} });
   }
 
   onSubmitFlagBalance = (values) => {
-    const { event } = this.state;
-    const data = {
-      _id: event?._id,
-      flagItems: {
-        ...values,
-        type: event?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
-        locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
-        rate: values?.late,
-        flagType: BALANCE,
-      }
-    }
-    request.post(setFlag, data).then(result => {
-      const { success } = result;
-      if (success) {
-        this.setState({ visibleBalance: false, isFlag: true });
-        this.updateAppointments();
+    const { notes } = values;
+    const { appointments } = this.props;
+    let postData = [];
+
+    Object.entries(values)?.forEach(value => {
+      if (value?.length) {
+        const appointment = appointments?.find(a => a._id === value[0]);
+        if (appointment) {
+          postData.push({
+            updateOne: {
+              filter: { _id: value[0] },
+              update: {
+                $set: {
+                  flagStatus: ACTIVE,
+                  flagItems: {
+                    flagType: BALANCE,
+                    late: value[1] * 1,
+                    balance: values[`balance-${appointment._id}`],
+                    totalPayment: values[`totalPayment-${appointment.provider?._id}`],
+                    minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
+                    type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
+                    locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
+                    notes,
+                  }
+                }
+              }
+            }
+          })
+        }
       }
     })
+
+    request.post(setFlagBalance, postData).then(result => {
+      const { success } = result;
+      if (success) {
+        this.closeModalBalance();
+        this.updateAppointments();
+      }
+    }).catch(err => message.error(err.message));
   }
 
   onSubmitFlagNoShow = (values) => {
