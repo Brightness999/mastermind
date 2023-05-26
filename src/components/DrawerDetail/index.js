@@ -90,14 +90,15 @@ class DrawerDetail extends Component {
     const { event } = this.props;
     const { user } = this.props.auth;
 
-    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && [PARENT, ADMIN, SUPERADMIN].includes(user.role) && moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && [PARENT, ADMIN, SUPERADMIN].includes(user.role) && moment(event.date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
+      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
       if (user.role === PARENT) {
-        const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
         this.setState({ paymentDescription: desc });
         message.warn(desc).then(() => {
           this.setState({ visiblePayment: true });
         });
       } else {
+        message.warn(desc);
         this.setState({ visibleCancelForAdmin: true, cancellationType: CANCEL });
       }
     } else {
@@ -145,14 +146,15 @@ class DrawerDetail extends Component {
     const { event } = this.props;
     const { user } = this.props.auth;
 
-    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type), [PARENT, ADMIN, SUPERADMIN].includes(user.role) && moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && [PARENT, ADMIN, SUPERADMIN].includes(user.role) && moment(event.date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
+      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
       if (user.role === PARENT) {
-        const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
         this.setState({ paymentDescription: desc });
         message.warn(desc).then(() => {
           this.setState({ visiblePayment: true });
         });
       } else {
+        message.warn(desc);
         this.setState({ visibleCancelForAdmin: true, cancellationType: RESCHEDULE });
       }
     } else {

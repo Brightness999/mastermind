@@ -122,7 +122,7 @@ class PanelAppointment extends React.Component {
   }
 
   openModalCurrent = (event) => {
-    if (moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+    if (moment(event.date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
       this.setState({ visibleCancelForAdmin: true, cancellationType: RESCHEDULE, event: event });
     } else {
       this.setState({ visibleCurrent: true, event: event });
@@ -134,7 +134,7 @@ class PanelAppointment extends React.Component {
   }
 
   openModalCancel = (event) => {
-    if (moment(event.date).subtract(event.provider.cancellationWindow, 'h').isBefore(moment()) && event.provider.cancellationFee && !event.isCancellationFeePaid) {
+    if (moment(event.date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
       this.setState({ visibleCancelForAdmin: true, cancellationType: CANCEL, event: event });
     } else {
       this.setState({ visibleCancel: true, event: event });
