@@ -88,6 +88,7 @@ class ModalFlagExpand extends React.Component {
 		const { penalty, program, notes } = values;
 		const data = {
 			_id: event?._id,
+      status: NOSHOW,
 			flagItems: {
 				notes,
 				penalty: penalty * 1,

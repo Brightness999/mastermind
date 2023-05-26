@@ -14,7 +14,7 @@ import request from '../../../utils/api/request'
 import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalPayment, ModalProcessAppointment } from '../../../components/Modal';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
 import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag, setFlagBalance } from '../../../utils/api/apiList';
-import { ACTIVE, APPOINTMENT, BALANCE, CLOSED, DECLINED, EVALUATION, NOSHOW, PARENT, PENDING, SUBSIDY } from '../../constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLOSED, DECLINED, EVALUATION, NOSHOW, PARENT, PENDING, SUBSIDY } from '../../constant';
 import './index.less';
 
 class PanelAppointment extends React.Component {
@@ -287,6 +287,7 @@ class PanelAppointment extends React.Component {
     const { penalty, program, notes } = values;
     const data = {
       _id: event?._id,
+      status: NOSHOW,
       flagItems: {
         penalty: penalty * 1,
         program: program * 1,
@@ -438,18 +439,18 @@ class PanelAppointment extends React.Component {
           {visiblePayment && <ModalPayment {...modalPaymentProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
-          {appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && a.flagStatus != ACTIVE && [0, -2].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && a.flagStatus != ACTIVE && [PENDING, CANCELLED].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {this.props.user?.role > 3 ? (
-                <div className={`item-right gap-1 ${(data.status == -2 || appointments.find(a => a.dependent?._id == data?.dependent?._id && a.provider?._id == data?.provider?._id && a.flagStatus == 1)) && 'display-none events-none'}`}>
+                <div className={`item-right gap-1 ${(data.status === CANCELLED || appointments.find(a => a.dependent?._id == data?.dependent?._id && a.provider?._id == data?.provider?._id && a.flagStatus === ACTIVE)) && 'display-none events-none'}`}>
                   <BsFillFlagFill size={15} onClick={() => this.openModalNoShow(data)} />
                   <BsCheckCircleFill className='text-green500' size={15} onClick={() => this.handleClose(data)} />
                 </div>
               ) : null}
             </div>
           ))}
-          {(appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && [0, -2].includes(a.status) && a.flagStatus != ACTIVE && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
+          {(appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && [PENDING, CANCELLED].includes(a.status) && a.flagStatus != ACTIVE && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
             <div key={1} className='list-item p-10 justify-center'>
               <span>No unprocess appoiment</span>
             </div>
@@ -459,10 +460,10 @@ class PanelAppointment extends React.Component {
           {visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="3">
-          {appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && [-1, -3].includes(a.status) && a.flagStatus != ACTIVE && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && [CLOSED, DECLINED].includes(a.status) && a.flagStatus != ACTIVE && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
-              {(this.props.user?.role == 3 && !data?.isPaid) ? (
+              {(this.props.user?.role === PARENT && !data?.isPaid) ? (
                 <div className={`item-right cursor gap-1 ${data?.status === DECLINED && 'display-none events-none'}`}>
                   <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                     <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
