@@ -1,5 +1,5 @@
 import React, { createRef, useCallback, useRef, useState } from 'react';
-import { Table, Space, Input, Button } from 'antd';
+import { Table, Space, Input, Button, Popconfirm } from 'antd';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import update from 'immutability-helper';
@@ -12,6 +12,7 @@ import { FaFileDownload } from 'react-icons/fa';
 import messages from '../../../Dashboard/messages';
 import msgCreateAccount from '../../../Sign/CreateAccount/messages';
 import msgModal from '../../../../components/Modal/messages';
+import { AiFillWarning } from 'react-icons/ai';
 
 const SchoolApproved = (props) => {
   const type = 'DraggableBodyRow';
@@ -251,8 +252,25 @@ const SchoolApproved = (props) => {
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => props.adminPreApproveSubsidy(subsidy?._id)}>{intl.formatMessage(msgModal.preapprove)}</a>
-          <a className='btn-blue' onClick={() => props.onShowModalDeclineExplanation(subsidy?._id)}>{intl.formatMessage(msgModal.decline)}</a>
+          <Popconfirm
+            icon={<AiFillWarning size={24} />}
+            title={<span >Are you sure to approve this request?</span>}
+            onConfirm={() => props.adminPreApproveSubsidy(subsidy?._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <a className='btn-blue'>{intl.formatMessage(msgModal.preapprove)}</a>
+          </Popconfirm>
+          <Popconfirm
+            icon={<AiFillWarning size={24} />}
+            title={<span >Are you sure to decline this request?</span>}
+            placement='left'
+            onConfirm={() => props.onShowModalDeclineExplanation(subsidy?._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <a className='btn-blue'>{intl.formatMessage(msgModal.decline)}</a>
+          </Popconfirm>
         </Space>
       ),
       align: 'center',
