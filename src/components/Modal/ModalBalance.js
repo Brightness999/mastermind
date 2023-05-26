@@ -157,8 +157,8 @@ class ModalBalance extends React.Component {
 						<Fragment key={index}>
 							<Divider className={index === 0 ? 'd-none' : 'my-10'} />
 							{p.appointments?.map((a, index) => (
-								<div key={index} className={`flex flex-row ${index === 0 ? 'items-start' : 'items-center'} mb-5`}>
-									<div className='mr-10 flex-1'>
+								<Row key={index} className={`flex flex-row ${index === 0 ? 'items-start' : 'items-center'} mb-10`}>
+									<Col xs={24} sm={24} md={6}>
 										<Form.Item
 											name={a._id}
 											label={index === 0 ? intl.formatMessage(messages.lateFeeAmount) : ''}
@@ -170,7 +170,7 @@ class ModalBalance extends React.Component {
 												min={0}
 												addonBefore="$"
 												style={{ width: 110 }}
-												className='font-16 late'
+												className='font-16'
 												disabled={user?.role === PARENT || event?.flagStatus === CLEAR}
 												onKeyDown={(e) => {
 													(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
@@ -182,8 +182,8 @@ class ModalBalance extends React.Component {
 												onChange={() => this.handleChangeLateFee(p.provider?._id)}
 											/>
 										</Form.Item>
-									</div>
-									<div className='mr-10 flex-1'>
+									</Col>
+									<Col xs={24} sm={24} md={6}>
 										<Form.Item
 											name={`balance-${a._id}`}
 											label={index === 0 ? intl.formatMessage(messages.currentBalanceDue) : ''}
@@ -195,23 +195,23 @@ class ModalBalance extends React.Component {
 												min={0}
 												addonBefore="$"
 												style={{ width: 110 }}
-												className='font-16 late'
+												className='font-16'
 												disabled
 											/>
 										</Form.Item>
-									</div>
-									<div className='flex-1'>
+									</Col>
+									<Col xs={24} sm={24} md={6}>
 										{index === 0 ? <p>{intl.formatMessage(messages.daysPastDue)}</p> : null}
 										<p className={`font-16 font-500 mb-0 ${index === 0 && 'mt-1'}`}>{a?.pastDays}</p>
-									</div>
-									<div className='flex-1'>
+									</Col>
+									<Col xs={24} sm={24} md={6}>
 										{index === 0 ? <p>{intl.formatMessage(msgCreateAccount.provider)}</p> : null}
 										<p className={`font-16 font-500 mb-0 ${index === 0 && 'mt-1'}`}>{p?.provider?.firstName} {p?.provider?.lastName}</p>
-									</div>
-								</div>
+									</Col>
+								</Row>
 							))}
-							<Row gutter={15}>
-								<Col>
+							<Row>
+								<Col xs={24} sm={24} md={6}>
 									<Form.Item
 										name={`totalPayment-${p.provider?._id}`}
 										label={intl.formatMessage(messages.totalPayment)}
@@ -223,12 +223,12 @@ class ModalBalance extends React.Component {
 											min={0}
 											addonBefore="$"
 											style={{ width: 120 }}
-											className='font-16 late'
+											className='font-16'
 											disabled
 										/>
 									</Form.Item>
 								</Col>
-								<Col>
+								<Col xs={24} sm={24} md={6}>
 									<Form.Item
 										name={`minimumPayment-${p.provider?._id}`}
 										label={intl.formatMessage(messages.minimumPayment)}
@@ -240,7 +240,7 @@ class ModalBalance extends React.Component {
 											min={0}
 											addonBefore="$"
 											style={{ width: 120 }}
-											className='font-16 late'
+											className='font-16'
 											disabled={user?.role === PARENT || event?.flagStatus === CLEAR}
 											onKeyDown={(e) => {
 												(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();

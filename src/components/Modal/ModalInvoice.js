@@ -136,7 +136,6 @@ class ModalInvoice extends React.Component {
 
 	render() {
 		const { event, user } = this.props;
-		console.log(event)
 		const { items, selectedItemIndex, subTotal, loadingDownload, loadingEmail } = this.state;
 
 		const modalProps = {
