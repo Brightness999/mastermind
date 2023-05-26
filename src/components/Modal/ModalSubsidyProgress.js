@@ -575,7 +575,13 @@ class ModalSubsidyProgress extends React.Component {
 							type="number"
 							min={0}
 							className='h-40 pb-10'
-							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+							onKeyDown={(e) => {
+								(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+								if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+									e.preventDefault();
+									e.target.value = e.key;
+								}
+							}}
 							onChange={e => this.setState({ numberOfSessions: e.target.value, totalPayment: e.target.value * pricePerSession })}
 						/>
 						<p className='font-700'>*{intl.formatMessage(messages.hmghExpensePerSession)}</p>
@@ -587,7 +593,13 @@ class ModalSubsidyProgress extends React.Component {
 							min={0}
 							className='h-40'
 							addonBefore="$"
-							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+							onKeyDown={(e) => {
+								(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+								if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+									e.preventDefault();
+									e.target.value = e.key;
+								}
+							}}
 							onChange={e => this.setState({ pricePerSession: e.target.value, totalPayment: e.target.value * numberOfSessions })}
 						/>
 					</Col>
@@ -599,7 +611,13 @@ class ModalSubsidyProgress extends React.Component {
 							type="number"
 							min={0}
 							addonBefore="$"
-							onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+							onKeyDown={(e) => {
+								(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+								if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+									e.preventDefault();
+									e.target.value = e.key;
+								}
+							}}
 							onChange={e => this.setState({ totalPayment: e.target.value, pricePerSession: numberOfSessions > 0 ? e.target.value / numberOfSessions : 0 })}
 							className='h-40'
 							disabled={isNotAdmin || subsidy.status === 5}

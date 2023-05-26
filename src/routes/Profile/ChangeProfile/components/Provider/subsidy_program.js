@@ -185,7 +185,13 @@ class SubsidyProgram extends Component {
 															min={0}
 															addonBefore="$"
 															className='h-40'
-															onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+															onKeyDown={(e) => {
+																(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+																if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+																	e.preventDefault();
+																	e.target.value = e.key;
+																}
+															}}
 															onChange={e => {
 																if (isSameRate) {
 																	let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));

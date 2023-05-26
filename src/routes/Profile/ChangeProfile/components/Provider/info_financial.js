@@ -254,7 +254,13 @@ class InfoFinancial extends Component {
 															type="number"
 															min={0}
 															addonBefore="$"
-															onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+															onKeyDown={(e) => {
+																(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+																if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+																	e.preventDefault();
+																	e.target.value = e.key;
+																}
+															}}
 															onChange={(event => {
 																const value = event.target.value;
 																let arr = JSON.parse(JSON.stringify(this.form?.getFieldValue('academicLevel')));
@@ -316,7 +322,13 @@ class InfoFinancial extends Component {
 										min={0}
 										addonBefore="$"
 										placeholder={intl.formatMessage(messages.rate)}
-										onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+										onKeyDown={(e) => {
+											(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+											if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+												e.preventDefault();
+												e.target.value = e.key;
+											}
+										}}
 									/>
 								</Form.Item>
 							</Col>
@@ -332,7 +344,13 @@ class InfoFinancial extends Component {
 										min={0}
 										addonBefore="$"
 										placeholder={intl.formatMessage(messages.cancellationFee)}
-										onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+										onKeyDown={(e) => {
+											(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+											if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+												e.preventDefault();
+												e.target.value = e.key;
+											}
+										}}
 									/>
 								</Form.Item>
 							</Col>

@@ -90,7 +90,13 @@ class InfoServices extends Component {
 										min={0}
 										placeholder={intl.formatMessage(messages.yearsExperience)}
 										onChange={e => this.setValueToReduxRegisterData("yearExp", e.target.value)}
-										onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+										onKeyDown={(e) => {
+											(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+											if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+												e.preventDefault();
+												e.target.value = e.key;
+											}
+										}}
 									/>
 								</Form.Item>
 							</Col>

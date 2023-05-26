@@ -263,7 +263,13 @@ class ModalInvoice extends React.Component {
 																className="text-center item-input font-16 p-10"
 																placeholder={intl.formatMessage(msgCreateAccount.rate)}
 																onChange={(e) => this.handleChangeItem('rate', e.target.value)}
-																onKeyDown={(e) => (e.key === '-' || e.key === 'Subtract' || e.key === '.' || (e.key > -1 && e.key < 10 && e.target.value === '0') || e.key === 'e') && e.preventDefault()}
+																onKeyDown={(e) => {
+																	(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+																	if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+																		e.preventDefault();
+																		e.target.value = e.key;
+																	}
+																}}
 															/>
 														</td>
 														<td colSpan={2} className='border border-1 border-black -mb-1 -mr-1'>
