@@ -1,5 +1,5 @@
 import React, { createRef, useState } from 'react';
-import { Table, Space, Input, Button } from 'antd';
+import { Table, Space, Input, Button, Popconfirm } from 'antd';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import { SearchOutlined } from '@ant-design/icons';
@@ -8,6 +8,7 @@ import { FaFileDownload } from 'react-icons/fa';
 
 import messages from '../messages';
 import msgCreateAccount from '../../Sign/CreateAccount/messages';
+import { AiFillWarning } from 'react-icons/ai';
 
 const Pending = (props) => {
   const { skills, grades, requests } = props;
@@ -182,9 +183,25 @@ const Pending = (props) => {
       fixed: 'right',
       render: (subsidy) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => props.onShowModalSchoolApproval(subsidy?._id)}>Approve</a>
-          <a className='btn-blue' onClick={() => props.onShowModalDeclineExplanation(subsidy?._id)}>Decline</a>
-        </Space>
+          <Popconfirm
+            icon={<AiFillWarning size={24} />}
+            title="Are you sure to approve this request?"
+            onConfirm={() => props.onShowModalSchoolApproval(subsidy?._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <a className='btn-blue'>Approve</a>
+          </Popconfirm>
+          <Popconfirm
+            icon={<AiFillWarning size={24} />}
+            title="Are you sure to decline this request?"
+            onConfirm={() => props.onShowModalDeclineExplanation(subsidy?._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <a className='btn-blue'>Decline</a>
+          </Popconfirm>
+        </Space >
       ),
     },
   ];

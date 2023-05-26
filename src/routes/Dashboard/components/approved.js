@@ -1,5 +1,5 @@
 import React, { createRef, useCallback, useRef, useState } from 'react';
-import { Table, Space, Input, Button } from 'antd';
+import { Table, Space, Input, Button, Popconfirm } from 'antd';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import update from 'immutability-helper';
@@ -11,6 +11,7 @@ import { FaFileDownload } from 'react-icons/fa';
 
 import messages from '../messages';
 import msgCreateAccount from '../../Sign/CreateAccount/messages';
+import { AiFillWarning } from 'react-icons/ai';
 
 const Approved = (props) => {
   const type = 'DraggableBodyRow';
@@ -241,7 +242,15 @@ const Approved = (props) => {
       key: 'action',
       render: (subsidy) => (
         <Space size="middle">
-          <a className='btn-blue' onClick={() => props.onShowModalDeclineExplanation(subsidy?._id)}>Decline</a>
+          <Popconfirm
+            icon={<AiFillWarning size={24} />}
+            title="Are you sure to decline this request?"
+            onConfirm={() => props.onShowModalDeclineExplanation(subsidy?._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <a className='btn-blue'>Decline</a>
+          </Popconfirm>
         </Space>
       ),
       align: 'center',
