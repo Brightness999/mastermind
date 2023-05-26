@@ -136,6 +136,7 @@ class ModalInvoice extends React.Component {
 
 	render() {
 		const { event, user } = this.props;
+		console.log(event)
 		const { items, selectedItemIndex, subTotal, loadingDownload, loadingEmail } = this.state;
 
 		const modalProps = {
@@ -192,7 +193,7 @@ class ModalInvoice extends React.Component {
 								<div className='w-100'>
 									<div className='border border-1 border-black -mb-1 -mr-1 p-10 font-16'>Bill To:</div>
 									<div className='border border-1 border-black -mb-1 -mr-1 p-10 font-16'>
-										<div>{event?.parent?.parentInfo?.fatherName ? event?.parent?.parentInfo?.fatherName : event?.parent?.parentInfo?.motherName}</div>
+										<div>{event?.parent?.parentInfo?.fatherName ? event?.parent?.parentInfo?.fatherName : event?.parent?.parentInfo?.motherName} {event?.parent?.parentInfo?.familyName}</div>
 										<div>C/O {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
 										<div>{event?.parent?.parentInfo?.address}</div>
 									</div>
