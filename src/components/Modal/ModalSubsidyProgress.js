@@ -1,10 +1,11 @@
 import React from 'react';
-import { Modal, Button, Divider, Steps, Row, Col, Select, Input, message } from 'antd';
+import { Modal, Button, Divider, Steps, Row, Col, Select, Input, message, Popconfirm } from 'antd';
 import { FaRegCalendarAlt } from 'react-icons/fa';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import moment from 'moment';
+import { AiFillWarning } from 'react-icons/ai';
 
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
@@ -574,7 +575,7 @@ class ModalSubsidyProgress extends React.Component {
 							value={numberOfSessions}
 							type="number"
 							min={0}
-							className='h-40 pb-10'
+							className='h-40 mb-10'
 							onKeyDown={(e) => {
 								(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
 								if (e.key > -1 && e.key < 10 && e.target.value === '0') {
@@ -667,12 +668,28 @@ class ModalSubsidyProgress extends React.Component {
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
-				<Button key="decline" onClick={() => this.onShowModalDeclineExplanation()} className='mr-10'>
-					{intl.formatMessage(messages.decline).toUpperCase()}
-				</Button>,
-				<Button key="approve" onClick={() => subsidy.school ? this.schoolAcceptSubsidy(subsidy) : this.adminPreApproveSubsidy(subsidy)} type='primary'>
-					{subsidy?.school ? intl.formatMessage(messages.approve).toUpperCase() : intl.formatMessage(messages.preapprove).toUpperCase()}
-				</Button>
+				<Popconfirm
+					icon={<AiFillWarning size={24} />}
+					title="Are you sure to decline this request?"
+					onConfirm={this.onShowModalDeclineExplanation}
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button key="decline" className='mr-10'>
+						{intl.formatMessage(messages.decline).toUpperCase()}
+					</Button>
+				</Popconfirm>,
+				<Popconfirm
+					icon={<AiFillWarning size={24} />}
+					title="Are you sure to approve this request?"
+					onConfirm={() => subsidy.school ? this.schoolAcceptSubsidy(subsidy) : this.adminPreApproveSubsidy(subsidy)}
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button key="approve" type='primary'>
+						{subsidy?.school ? intl.formatMessage(messages.approve).toUpperCase() : intl.formatMessage(messages.preapprove).toUpperCase()}
+					</Button>
+				</Popconfirm>,
 			]
 		}
 
@@ -684,15 +701,39 @@ class ModalSubsidyProgress extends React.Component {
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
-				<Button key="decline" onClick={() => this.onShowModalDeclineExplanation()} className='mr-10'>
-					{intl.formatMessage(messages.decline).toUpperCase()}
-				</Button>,
-				<Button key="edit" onClick={() => this.schoolAcceptAppeal(subsidy)} type='primary' className='mr-10'>
-					{intl.formatMessage(messages.edit).toUpperCase()}
-				</Button>,
-				<Button key="preapprove" onClick={() => this.adminPreApproveSubsidy(subsidy)} type='primary' className='mr-10'>
-					{intl.formatMessage(messages.preapprove).toUpperCase()}
-				</Button>
+				<Popconfirm
+					icon={<AiFillWarning size={24} />}
+					title="Are you sure to decline this request?"
+					onConfirm={this.onShowModalDeclineExplanation()}
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button key="decline" className='mr-10'>
+						{intl.formatMessage(messages.decline).toUpperCase()}
+					</Button>
+				</Popconfirm>,
+				<Popconfirm
+					icon={<AiFillWarning size={24} />}
+					title="Are you sure to accept this appeal?"
+					onConfirm={() => this.schoolAcceptAppeal(subsidy)}
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button key="edit" type='primary' className='mr-10'>
+						{intl.formatMessage(messages.edit).toUpperCase()}
+					</Button>
+				</Popconfirm>,
+				<Popconfirm
+					icon={<AiFillWarning size={24} />}
+					title="Are you sure to approve this request?"
+					onConfirm={() => this.adminPreApproveSubsidy(subsidy)}
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button key="preapprove" type='primary' className='mr-10'>
+						{intl.formatMessage(messages.preapprove).toUpperCase()}
+					</Button>
+				</Popconfirm>,
 			]
 		}
 
@@ -704,12 +745,28 @@ class ModalSubsidyProgress extends React.Component {
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
-				<Button key="decline" onClick={() => this.onShowModalDeclineExplanation()} className='mr-10'>
-					{intl.formatMessage(messages.decline).toUpperCase()}
-				</Button>,
-				<Button key="edit" onClick={() => this.schoolAcceptAppeal(subsidy)} type='primary' className='mr-10'>
-					{intl.formatMessage(messages.edit).toUpperCase()}
-				</Button>
+				<Popconfirm
+					icon={<AiFillWarning size={24} />}
+					title="Are you sure to decline this request?"
+					onConfirm={this.onShowModalDeclineExplanation}
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button key="decline" className='mr-10'>
+						{intl.formatMessage(messages.decline).toUpperCase()}
+					</Button>
+				</Popconfirm>,
+				<Popconfirm
+					icon={<AiFillWarning size={24} />}
+					title="Are you sure to accept this appeal?"
+					onConfirm={() => this.schoolAcceptAppeal(subsidy)}
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button key="edit" type='primary' className='mr-10'>
+						{intl.formatMessage(messages.edit).toUpperCase()}
+					</Button>
+				</Popconfirm>,
 			]
 		}
 
@@ -718,9 +775,17 @@ class ModalSubsidyProgress extends React.Component {
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
-				<Button key="submit" type="primary" onClick={() => this.appealSubsidy(subsidy)} style={{ padding: '7.5px 30px' }}>
-					{intl.formatMessage(messages.appeal).toUpperCase()}
-				</Button>
+				<Popconfirm
+					icon={<AiFillWarning size={24} />}
+					title="Are you sure to appeal?"
+					onConfirm={() => this.appealSubsidy(subsidy)}
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button key="submit" type="primary" style={{ padding: '7.5px 30px' }}>
+						{intl.formatMessage(messages.appeal).toUpperCase()}
+					</Button>
+				</Popconfirm>
 			]
 		}
 
@@ -730,12 +795,28 @@ class ModalSubsidyProgress extends React.Component {
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
-				<Button key="decline" onClick={() => this.denyAppeal(subsidy)} className='mr-10'>
-					{intl.formatMessage(messages.decline).toUpperCase()}
-				</Button>,
-				<Button key="approve" onClick={() => this.schoolAcceptAppeal(subsidy)} type='primary'>
-					{intl.formatMessage(messages.approve).toUpperCase()}
-				</Button>
+				<Popconfirm
+					icon={<AiFillWarning size={24} />}
+					title="Are you sure to decline this appeal?"
+					onConfirm={() => this.denyAppeal(subsidy)}
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button key="decline" className='mr-10'>
+						{intl.formatMessage(messages.decline).toUpperCase()}
+					</Button>
+				</Popconfirm>,
+				<Popconfirm
+					icon={<AiFillWarning size={24} />}
+					title="Are you sure to approve this appeal?"
+					onConfirm={() => this.schoolAcceptAppeal(subsidy)}
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button key="approve" type='primary'>
+						{intl.formatMessage(messages.approve).toUpperCase()}
+					</Button>
+				</Popconfirm>,
 			]
 		}
 
@@ -744,12 +825,28 @@ class ModalSubsidyProgress extends React.Component {
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
-				<Button key="decline" onClick={() => this.onShowModalDeclineExplanation()} className='mr-10'>
-					{intl.formatMessage(messages.decline).toUpperCase()}
-				</Button>,
-				<Button key="approve" onClick={() => this.submitSubsidyFromAdmin(subsidy)} type='primary'>
-					{intl.formatMessage(messages.approve).toUpperCase()}
-				</Button>
+				<Popconfirm
+					icon={<AiFillWarning size={24} />}
+					title="Are you sure to decline this request?"
+					onConfirm={this.onShowModalDeclineExplanation}
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button key="decline" className='mr-10'>
+						{intl.formatMessage(messages.decline).toUpperCase()}
+					</Button>
+				</Popconfirm>,
+				<Popconfirm
+					icon={<AiFillWarning size={24} />}
+					title="Are you sure to approve this request?"
+					onConfirm={() => this.submitSubsidyFromAdmin(subsidy)}
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button key="approve" type='primary'>
+						{intl.formatMessage(messages.approve).toUpperCase()}
+					</Button>
+				</Popconfirm>,
 			]
 		}
 
