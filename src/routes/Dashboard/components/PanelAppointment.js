@@ -14,7 +14,7 @@ import request from '../../../utils/api/request'
 import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalPayment, ModalProcessAppointment } from '../../../components/Modal';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
 import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag, setFlagBalance } from '../../../utils/api/apiList';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLOSED, DECLINED, EVALUATION, NOSHOW, PARENT, PENDING, SUBSIDY } from '../../constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLEAR, CLOSED, DECLINED, EVALUATION, NOSHOW, PARENT, PENDING, SUBSIDY } from '../../constant';
 import './index.less';
 
 class PanelAppointment extends React.Component {
@@ -443,8 +443,8 @@ class PanelAppointment extends React.Component {
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {this.props.user?.role > 3 ? (
-                <div className={`item-right gap-1 ${(data.status === CANCELLED || appointments.find(a => a.dependent?._id == data?.dependent?._id && a.provider?._id == data?.provider?._id && a.flagStatus === ACTIVE)) && 'display-none events-none'}`}>
-                  <BsFillFlagFill size={15} onClick={() => this.openModalNoShow(data)} />
+                <div className={`item-right gap-1 ${(data.status === CANCELLED) && 'd-none'}`}>
+                  {data.flagStatus === PENDING && <BsFillFlagFill size={15} onClick={() => this.openModalNoShow(data)} />}
                   <BsCheckCircleFill className='text-green500' size={15} onClick={() => this.handleClose(data)} />
                 </div>
               ) : null}
