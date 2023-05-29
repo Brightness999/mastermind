@@ -671,6 +671,7 @@ class DrawerDetail extends Component {
     const dependent = { ...event?.dependent, appointments: listAppointmentsRecent?.filter(a => a.dependent?._id === event?.dependent?._id) };
     const appointmentDate = moment(event?.date);
     const consultants = auth.consultants?.filter(consultant => consultant?._id !== auth.user?._id && !listAppointmentsRecent?.find(a => a?.consultant?._id === consultant?.consultantInfo?._id && a.date === event?.date) && consultant?.consultantInfo?.manualSchedule?.find(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 }))));
+    const flagEvent = listAppointmentsRecent?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE);
 
     const providerProfile = (
       <div className='provider-profile'>
@@ -883,18 +884,15 @@ class DrawerDetail extends Component {
           {event?.flagStatus !== ACTIVE && event?.status === CLOSED && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.accepted)}]</div>
           )}
-          {event?.flagStatus !== ACTIVE && event?.status === NOSHOW && (
-            <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.noShow)}]</div>
-          )}
           {event?.flagStatus !== ACTIVE && event?.status === CANCELLED ? event?.dependent?.isRemoved ? (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.graduated)}]</div>
           ) : (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.cancelled)}]</div>
           ) : null}
-          {event?.flagStatus !== BALANCE && event?.status === DECLINED && (
+          {event?.flagStatus !== ACTIVE && event?.status === DECLINED && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(msgDashboard.declined)}]</div>
           )}
-          {event?.flagStatus !== BALANCE && event?.status === PENDING && event?.previousAppointment && (
+          {event?.flagStatus !== ACTIVE && event?.status === PENDING && event?.previousAppointment && (
             <Popover content={contentConfirm} trigger="click">
               <div className='event-status text-consultation font-20 text-center text-underline cursor'>
                 {intl.formatMessage(msgDashboard.rescheduled)}
@@ -966,9 +964,9 @@ class DrawerDetail extends Component {
             </div>
           )}
         </div>
-        {listAppointmentsRecent?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE) ? (
+        {(flagEvent && (event?.flagStatus === ACTIVE || moment().isBefore(moment(event.date)))) ? (
           <div className='text-center font-18 mt-2'>
-            {listAppointmentsRecent?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE).flagItems?.flagType === BALANCE ? (
+            {flagEvent.flagItems?.flagType === BALANCE ? (
               <MdOutlineRequestQuote color="#ff0000" size={32} />
             ) : (
               <MdOutlineEventBusy color="#ff0000" size={32} />
