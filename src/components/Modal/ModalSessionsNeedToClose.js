@@ -13,7 +13,7 @@ import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/featu
 import { store } from '../../redux/store';
 import ModalProcessAppointment from './ModalProcessAppointment';
 import ModalInvoice from './ModalInvoice';
-import { ACTIVE, APPOINTMENT, EVALUATION, PENDING, SUBSIDY } from '../../routes/constant';
+import { ACTIVE, ADMIN, APPOINTMENT, EVALUATION, PENDING, SUBSIDY, SUPERADMIN } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -107,11 +107,12 @@ class ModalSessionsNeedToClose extends React.Component {
 	}
 
 	updateAppointments() {
-		store.dispatch(getAppointmentsData({ role: this.props.user?.role }));
-		const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
-		const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
+		const { user, calendar } = this.props;
+		store.dispatch(getAppointmentsData({ role: user?.role }));
+		const month = calendar.current?._calendarApi.getDate().getMonth() + 1;
+		const year = calendar.current?._calendarApi.getDate().getFullYear();
 		const dataFetchAppointMonth = {
-			role: this.props.user?.role,
+			role: user?.role,
 			data: {
 				month: month,
 				year: year
@@ -121,7 +122,9 @@ class ModalSessionsNeedToClose extends React.Component {
 	}
 
 	render() {
-		const { appointments, skillSet, visibleProcess, visibleInvoice, event, errorMessage } = this.state;
+		const { appointments, visibleProcess, visibleInvoice, event, errorMessage } = this.state;
+		const { skillSet, user } = this.props;
+		const skills = JSON.parse(JSON.stringify(skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
 		const modalProps = {
 			className: 'modal-referral-service',
 			title: (<span className='font-18 text-bold'>Sessions need to close</span>),
@@ -178,7 +181,7 @@ class ModalSessionsNeedToClose extends React.Component {
 				},
 			},
 			{
-				title: 'Service', key: 'skillSet', filters: skillSet,
+				title: 'Service', key: 'skillSet', filters: skills,
 				onFilter: (value, record) => record.skillSet?._id == value,
 				render: (record) => record.skillSet?.name,
 			},
@@ -195,7 +198,7 @@ class ModalSessionsNeedToClose extends React.Component {
 			{ title: 'Session Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm a') },
 		];
 
-		if (this.props.user?.role > 900 || this.props.user?.role == 100) {
+		if ([ADMIN, SUPERADMIN].includes(user?.role)) {
 			columns.splice(1, 0, {
 				title: 'Provider',
 				key: 'provider',
@@ -253,6 +256,7 @@ const mapStateToProps = state => {
 	return ({
 		appointments: state.appointments.dataAppointments,
 		user: state.auth.user,
+		skillSet: state.auth.skillSet,
 	})
 }
 
