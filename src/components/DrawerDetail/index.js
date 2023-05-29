@@ -1277,7 +1277,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {((userRole === 3 || userRole > 900) && event?.status === PENDING) && (
+              {((userRole === 3 || userRole > 900) && event?.status === PENDING && moment().isBefore(moment(event?.date))) && (
                 <Col span={12}>
                   <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.showEditNotes}>
                     {intl.formatMessage(messages.editNotes)}
