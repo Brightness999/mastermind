@@ -302,7 +302,7 @@ class PanelAppointment extends React.Component {
     const { penalty, program, notes } = values;
     const data = {
       _id: event?._id,
-      status: NOSHOW,
+      flagStatus: ACTIVE,
       flagItems: {
         penalty: penalty * 1,
         program: program * 1,

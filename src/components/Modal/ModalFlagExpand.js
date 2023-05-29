@@ -13,7 +13,7 @@ import { clearFlag, requestClearance, setFlag, setFlagBalance } from '../../util
 import ModalBalance from './ModalBalance';
 import ModalNoShow from './ModalNoShow';
 import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/features/appointmentsSlice';
-import { APPOINTMENT, BALANCE, EVALUATION, NOSHOW, SUBSIDY } from '../../routes/constant';
+import { ACTIVE, APPOINTMENT, BALANCE, EVALUATION, NOSHOW, SUBSIDY } from '../../routes/constant';
 import { store } from '../../redux/store';
 import ModalCreateNote from './ModalCreateNote';
 import './style/index.less';
@@ -88,7 +88,7 @@ class ModalFlagExpand extends React.Component {
 		const { penalty, program, notes } = values;
 		const data = {
 			_id: event?._id,
-      status: NOSHOW,
+			flagStatus: ACTIVE,
 			flagItems: {
 				notes,
 				penalty: penalty * 1,
