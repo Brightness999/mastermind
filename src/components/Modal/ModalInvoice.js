@@ -1,17 +1,18 @@
 import React from 'react';
 import { Modal, Button, Popover, Input, message } from 'antd';
 import intl from 'react-intl-universal';
-import messages from './messages';
-import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import './style/index.less';
-import '../../assets/styles/login.less';
-import { CheckCircleTwoTone, CloseCircleTwoTone, DeleteTwoTone, DownloadOutlined, EditTwoTone, PrinterTwoTone, SendOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import moment from 'moment';
+import { CheckCircleTwoTone, CloseCircleTwoTone, DeleteTwoTone, DownloadOutlined, EditTwoTone, PrinterTwoTone, SendOutlined } from '@ant-design/icons';
+
+import messages from './messages';
+import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import { downloadInvoice, sendEmailInvoice } from '../../utils/api/apiList';
 import request from '../../utils/api/request';
 import { APPOINTMENT, EVALUATION, SUBSIDY } from '../../routes/constant';
-import moment from 'moment';
+import './style/index.less';
+import '../../assets/styles/login.less';
 
 class ModalInvoice extends React.Component {
 	constructor(props) {
@@ -31,8 +32,9 @@ class ModalInvoice extends React.Component {
 
 	componentDidMount() {
 		const { event } = this.props;
-		if (event?.items?.length) {
-			this.setState({ items: event.items, subTotal: event.items?.reduce((a, b) => a += b.rate * 1, 0) });
+		if (event?.sessionInvoice) {
+			const items = event.sessionInvoice.data?.[0]?.items || [];
+			this.setState({ items: items, subTotal: items?.reduce((a, b) => a += b.rate * 1, 0), invoiceNumber: event.sessionInvoice.invoiceNumber });
 		} else {
 			const initItems = [{
 				type: event?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
@@ -328,7 +330,7 @@ class ModalInvoice extends React.Component {
 							) : null}
 						</>
 					) : null}
-					<Button key="submit" type="primary" onClick={() => user.role > 3 ? this.props.onSubmit({items, invoiceNumber}) : this.props.onCancel()} style={{ padding: '0px 30px', height: 38 }}>
+					<Button key="submit" type="primary" onClick={() => user.role > 3 ? this.props.onSubmit({ items, invoiceNumber }) : this.props.onCancel()} style={{ padding: '0px 30px', height: 38 }}>
 						{(event?.status === 0 && user.role > 3) ? intl.formatMessage(messages.createInvoice) : (event?.status === -1 && !event?.isPaid && user.role > 3) ? intl.formatMessage(messages.editInvoice) : intl.formatMessage(messages.ok)}
 					</Button>
 				</div>
