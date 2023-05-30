@@ -138,6 +138,7 @@ class ModalFlagExpand extends React.Component {
 										late: value[1] * 1,
 										balance: values[`balance-${appointment._id}`],
 										totalPayment: values[`totalPayment-${appointment.provider?._id}`],
+										rate: values[`totalPayment-${appointment.provider?._id}`],
 										minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
 										type: appointment?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
 										locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
