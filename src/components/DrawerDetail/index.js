@@ -45,7 +45,6 @@ class DrawerDetail extends Component {
       visibleCurrentReferral: false,
       visibleNoShow: false,
       visibleBalance: false,
-      isFlag: this.props.event?.flagStatus,
       note: '',
       visibleEvaluationProcess: false,
       items: [],
@@ -449,7 +448,7 @@ class DrawerDetail extends Component {
     request.post(invoiceNumber ? updateNoshowFlag : setFlag, data).then(result => {
       const { success } = result;
       if (success) {
-        this.setState({ visibleNoShow: false, isFlag: true });
+        this.setState({ visibleNoShow: false });
         this.updateAppointments();
       }
     })
@@ -680,7 +679,6 @@ class DrawerDetail extends Component {
       isShowFeedback,
       visibleNoShow,
       visibleBalance,
-      isFlag,
       visibleEvaluationProcess,
       errorMessage,
       visibleModalMessage,
@@ -1275,7 +1273,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(!isFlag && userRole > 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === PENDING && moment().isAfter(moment(event?.date))) && (
+              {(event.flagStatus === NOFLAG && userRole > 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === PENDING && moment().isAfter(moment(event?.date))) && (
                 <Col span={12}>
                   <Button
                     type='primary'
