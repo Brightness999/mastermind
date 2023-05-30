@@ -19,7 +19,7 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, sendEmailInvoice, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent } from '../../utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, sendEmailInvoice, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateNoshowFlag } from '../../utils/api/apiList';
 import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from '../../routes/constant';
 import './style/index.less';
 
@@ -427,7 +427,7 @@ class DrawerDetail extends Component {
 
   onSubmitFlagNoShow = (values) => {
     const { event } = this.props;
-    const { penalty, program, notes } = values;
+    const { penalty, program, notes, invoiceNumber } = values;
     const data = {
       _id: event?._id,
       dependent: event?.dependent?._id,
@@ -442,9 +442,11 @@ class DrawerDetail extends Component {
         locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
         rate: penalty * 1 + program * 1,
         flagType: NOSHOW,
-      }
+      },
+      invoiceNumber,
     }
-    request.post(setFlag, data).then(result => {
+
+    request.post(invoiceNumber ? updateNoshowFlag : setFlag, data).then(result => {
       const { success } = result;
       if (success) {
         this.setState({ visibleNoShow: false, isFlag: true });

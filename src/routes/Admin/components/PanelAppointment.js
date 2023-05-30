@@ -13,7 +13,7 @@ import msgModal from '../../../components/Modal/messages';
 import request from '../../../utils/api/request'
 import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../../components/Modal';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, sendEmailInvoice, setFlag, setFlagBalance } from '../../../utils/api/apiList';
+import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, sendEmailInvoice, setFlag, setFlagBalance, updateNoshowFlag } from '../../../utils/api/apiList';
 import { ACTIVE, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, DECLINED, EVALUATION, NOSHOW, PENDING, RESCHEDULE, SUBSIDY } from '../../constant';
 import './index.less';
 
@@ -307,7 +307,7 @@ class PanelAppointment extends React.Component {
 
   onSubmitFlagNoShow = (values) => {
     const { event } = this.state;
-    const { penalty, program, notes } = values;
+    const { penalty, program, notes, invoiceNumber } = values;
     const data = {
       _id: event?._id,
       dependent: event?.dependent?._id,
@@ -322,9 +322,11 @@ class PanelAppointment extends React.Component {
         locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
         rate: penalty * 1 + program * 1,
         flagType: NOSHOW,
-      }
+      },
+      invoiceNumber,
     }
-    request.post(setFlag, data).then(result => {
+
+    request.post(invoiceNumber ? updateNoshowFlag : setFlag, data).then(result => {
       const { success } = result;
       if (success) {
         this.setState({ visibleNoShow: false, isFlag: true });

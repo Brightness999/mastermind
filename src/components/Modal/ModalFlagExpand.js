@@ -9,7 +9,7 @@ import moment from 'moment';
 import messages from './messages';
 import msgDrawer from '../DrawerDetail/messages';
 import request from '../../utils/api/request'
-import { clearFlag, requestClearance, setFlag, setFlagBalance } from '../../utils/api/apiList';
+import { clearFlag, requestClearance, setFlag, setFlagBalance, updateNoshowFlag } from '../../utils/api/apiList';
 import ModalBalance from './ModalBalance';
 import ModalNoShow from './ModalNoShow';
 import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/features/appointmentsSlice';
@@ -85,7 +85,7 @@ class ModalFlagExpand extends React.Component {
 
 	onSubmitFlagNoShow = (values) => {
 		const { event } = this.state;
-		const { penalty, program, notes } = values;
+		const { penalty, program, notes, invoiceNumber } = values;
 		const data = {
 			_id: event?._id,
 			dependent: event?.dependent?._id,
@@ -100,9 +100,11 @@ class ModalFlagExpand extends React.Component {
 				locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
 				rate: penalty * 1 + program * 1,
 				flagType: NOSHOW,
-			}
+			},
+			invoiceNumber,
 		}
-		request.post(setFlag, data).then(result => {
+
+		request.post(invoiceNumber ? updateNoshowFlag : setFlag, data).then(result => {
 			const { success } = result;
 			if (success) {
 				this.setState({ visibleNoShow: false, isFlag: true });
@@ -130,7 +132,7 @@ class ModalFlagExpand extends React.Component {
 							update: {
 								$set: {
 									flagStatus: ACTIVE,
-                  flagType: BALANCE,
+									flagType: BALANCE,
 									flagItems: {
 										flagType: BALANCE,
 										late: value[1] * 1,
