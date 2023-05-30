@@ -365,7 +365,12 @@ class SchedulingCenter extends React.Component {
 
     const postData = {
       appointmentId: selectedEvent._id,
-      items: [{ type: RESCHEDULE, locationDate: `${selectedEvent.location} ${moment(selectedEvent.date).format('MM/DD/YYYY hh:mm')}`, rate: selectedEvent.provider.cancellationFee }],
+      type: RESCHEDULE,
+      items: [{
+        type: selectedEvent?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : selectedEvent?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : selectedEvent?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
+        locationDate: `${selectedEvent.location} ${moment(selectedEvent.date).format('MM/DD/YYYY hh:mm')}`,
+        rate: selectedEvent.provider.cancellationFee,
+      }],
     }
     request.post(sendEmailInvoice, postData).then(res => {
       if (res.success) {
@@ -1119,10 +1124,10 @@ function renderEventContent(eventInfo, appointments) {
         {provider()}
       </div>
       {event?.type === SUBSIDY && <FaHandHoldingUsd size={20} className='text-green500 mr-5' />}
-      {event?.flagStatus === ACTIVE && event?.flagItems?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
-      {event?.status === PENDING && event?.flagStatus === NOFLAG && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagItems?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
-      {event?.flagStatus === ACTIVE && event?.flagItems?.flagType === NOSHOW && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
-      {event?.status === PENDING && event?.flagStatus === NOFLAG && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagItems?.flagType === NOSHOW && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
+      {event?.flagStatus === ACTIVE && event?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
+      {event?.status === PENDING && event?.flagStatus === NOFLAG && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
+      {event?.flagStatus === ACTIVE && event?.flagType === NOSHOW && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
+      {event?.status === PENDING && event?.flagStatus === NOFLAG && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagType === NOSHOW && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
     </div>
   )
 }

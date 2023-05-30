@@ -86,6 +86,7 @@ class PrivateNote extends React.Component {
               update: {
                 $set: {
                   flagStatus: ACTIVE,
+                  flagType: BALANCE,
                   flagItems: {
                     flagType: BALANCE,
                     late: value[1] * 1,
@@ -104,7 +105,7 @@ class PrivateNote extends React.Component {
       }
     })
 
-    request.post(setFlagBalance, postData).then(result => {
+    request.post(setFlagBalance, { bulkData: postData, dependent: selectedDependent?._id }).then(result => {
       const { success } = result;
       if (success) {
         this.onCloseModalBalance();

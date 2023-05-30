@@ -18,6 +18,7 @@ class ModalBalance extends React.Component {
 
 	componentDidMount() {
 		const { dependent, auth, event } = this.props;
+		console.log(event, dependent)
 		let unpaidAppointments = [], providerData = [];
 
 		if (event?.flagStatus === CLEAR) {
@@ -58,7 +59,7 @@ class ModalBalance extends React.Component {
 						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
 						this.form?.setFieldsValue({
 							[event._id]: event?.flagItems?.late || 0,
-							[`balance-${event._id}`]: event?.flagItems.balance || 0,
+							[`balance-${event._id}`]: event?.flagItems?.balance || 0,
 							notes: event?.flagItems?.notes,
 						});
 						total += event?.flagItems?.balance + event?.flagItems?.late;

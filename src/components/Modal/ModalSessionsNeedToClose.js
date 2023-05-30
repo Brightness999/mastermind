@@ -45,7 +45,8 @@ class ModalSessionsNeedToClose extends React.Component {
 				appointmentId: event._id,
 				publicFeedback: publicFeedback,
 				note: note,
-				items: items,
+				items: items?.items,
+				invoiceNumber: items?.invoiceNumber,
 			}
 
 			request.post(closeAppointmentForProvider, data).then(result => {
@@ -206,14 +207,14 @@ class ModalSessionsNeedToClose extends React.Component {
 				render: (appointment) => `${appointment?.provider.firstName ?? ''} ${appointment?.provider.lastName ?? ''}`,
 			});
 			columns.splice(5, 0, {
-				title: 'Action', key: 'action', render: (appointment) => this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus === ACTIVE)
+				title: 'Action', key: 'action', render: (appointment) => (this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus === ACTIVE) && moment().isBefore(moment(appointment.date)))
 					? (<div>Suspending</div>) : (
 						<a className='btn-blue action' onClick={() => this.handleClose(appointment)}>Close</a>
 					)
 			});
 		} else {
 			columns.splice(4, 0, {
-				title: 'Action', key: 'action', render: (appointment) => this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus === ACTIVE)
+				title: 'Action', key: 'action', render: (appointment) => (this.props.appointments.find(a => a.dependent?._id == appointment?.dependent?._id && a.provider?._id == appointment?.provider?._id && a.flagStatus === ACTIVE) && moment().isBefore(moment(appointment.date)))
 					? (<div>Suspending</div>) : (
 						<a className='btn-blue action' onClick={() => this.handleClose(appointment)}>Close</a>
 					)

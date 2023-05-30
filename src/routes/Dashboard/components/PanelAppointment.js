@@ -167,7 +167,8 @@ class PanelAppointment extends React.Component {
         appointmentId: event._id,
         publicFeedback: publicFeedback,
         note: note,
-        items: items,
+        items: items?.items,
+        invoiceNumber: items?.invoiceNumber,
       }
 
       request.post(closeAppointmentForProvider, data).then(result => {
@@ -243,6 +244,7 @@ class PanelAppointment extends React.Component {
   onSubmitFlagBalance = (values) => {
     const { notes } = values;
     const { appointments } = this.props;
+    const { event } = this.state;
     let postData = [];
 
     Object.entries(values)?.forEach(value => {
@@ -255,6 +257,7 @@ class PanelAppointment extends React.Component {
               update: {
                 $set: {
                   flagStatus: ACTIVE,
+                  flagType: BALANCE,
                   flagItems: {
                     flagType: BALANCE,
                     late: value[1] * 1,
@@ -273,7 +276,7 @@ class PanelAppointment extends React.Component {
       }
     })
 
-    request.post(setFlagBalance, postData).then(result => {
+    request.post(setFlagBalance, { bulkData: postData, dependent: event?.dependent?._id }).then(result => {
       const { success } = result;
       if (success) {
         this.closeModalBalance();
@@ -287,7 +290,10 @@ class PanelAppointment extends React.Component {
     const { penalty, program, notes } = values;
     const data = {
       _id: event?._id,
+      dependent: event?.dependent?._id,
+      status: NOSHOW,
       flagStatus: ACTIVE,
+      flagType: NOSHOW,
       flagItems: {
         penalty: penalty * 1,
         program: program * 1,

@@ -82,10 +82,6 @@ export default ({
     id: `${scope}.session`,
     defaultMessage: 'Session',
   },
-  evaluation: {
-    id: `${scope}.evaluation`,
-    defaultMessage: 'Evaluation',
-  },
   referral: {
     id: `${scope}.referral`,
     defaultMessage: 'Referral',

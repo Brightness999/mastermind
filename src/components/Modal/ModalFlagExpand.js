@@ -71,10 +71,10 @@ class ModalFlagExpand extends React.Component {
 	}
 
 	openModalFlag = (appointment) => {
-		if (appointment?.flagItems?.flagType === BALANCE) {
+		if (appointment?.flagType === BALANCE) {
 			this.setState({ visibleBalance: true, event: appointment });
 		}
-		if (appointment?.flagItems?.flagType === NOSHOW) {
+		if (appointment?.flagType === NOSHOW) {
 			this.setState({ visibleNoShow: true, event: appointment });
 		}
 	}
@@ -88,7 +88,10 @@ class ModalFlagExpand extends React.Component {
 		const { penalty, program, notes } = values;
 		const data = {
 			_id: event?._id,
+			dependent: event?.dependent?._id,
+			status: NOSHOW,
 			flagStatus: ACTIVE,
+			flagType: NOSHOW,
 			flagItems: {
 				notes,
 				penalty: penalty * 1,
@@ -114,6 +117,7 @@ class ModalFlagExpand extends React.Component {
 	onSubmitFlagBalance = (values) => {
 		const { notes } = values;
 		const { appointments } = this.props;
+		const { event } = this.state;
 		let postData = [];
 
 		Object.entries(values)?.forEach(value => {
@@ -126,6 +130,7 @@ class ModalFlagExpand extends React.Component {
 							update: {
 								$set: {
 									flagStatus: ACTIVE,
+                  flagType: BALANCE,
 									flagItems: {
 										flagType: BALANCE,
 										late: value[1] * 1,
@@ -133,7 +138,7 @@ class ModalFlagExpand extends React.Component {
 										totalPayment: values[`totalPayment-${appointment.provider?._id}`],
 										minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
 										type: appointment?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
-                    locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
+										locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
 										notes,
 									}
 								}
@@ -144,7 +149,7 @@ class ModalFlagExpand extends React.Component {
 			}
 		})
 
-		request.post(setFlagBalance, postData).then(result => {
+		request.post(setFlagBalance, { bulkData: postData, dependent: event?.dependent?._id }).then(result => {
 			const { success } = result;
 			if (success) {
 				this.onCloseModalBalance();
@@ -294,7 +299,6 @@ class ModalFlagExpand extends React.Component {
 						onConfirm={() => this.handleClearFlag(appointment)}
 						okText="Yes"
 						cancelText="No"
-						overlayClassName='clear-flag-confirm'
 					>
 						<a className='btn-blue action'>{intl.formatMessage(msgDrawer.clearFlag)}</a>
 					</Popconfirm>
@@ -335,7 +339,6 @@ class ModalFlagExpand extends React.Component {
 							onConfirm={() => this.handleClearFlag(appointment)}
 							okText="Yes"
 							cancelText="No"
-							overlayClassName='clear-flag-confirm'
 						>
 							<a className='btn-blue action'>{intl.formatMessage(msgDrawer.clearFlag)}</a>
 						</Popconfirm>

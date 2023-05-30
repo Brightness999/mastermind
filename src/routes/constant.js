@@ -36,7 +36,7 @@ export const JEWISH_CALENDAR_REGION = "en.jewish";
 export const DECLINED = -3;
 export const CANCELLED = -2;
 export const CLOSED = -1;
-// export const PENDING = 0;
+export const PENDING = 0;
 
 // APPOINTMENT TYPE
 export const SCREEN = 1;
@@ -56,7 +56,7 @@ export const CLEAR = 2;
 
 // SUBSIDY STATUS
 // export const CANCELLED = -2;
-export const PENDING = 0;
+// export const PENDING = 0;
 export const SCHOOLAPPROVED = 1;
 export const SCHOOLDECLINED = 2;
 export const ADMINPREAPPROVED = 3;

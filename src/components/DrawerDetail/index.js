@@ -36,7 +36,7 @@ class DrawerDetail extends Component {
       errorMessage: '',
       isShowEditNotes: false,
       notes: this.props.event?.notes,
-      isModalInvoice: false,
+      visibleInvoice: false,
       publicFeedback: this.props.event?.publicFeedback ?? '',
       isLeftFeedback: !!this.props.event?.publicFeedback,
       isShowFeedback: false,
@@ -61,16 +61,19 @@ class DrawerDetail extends Component {
   }
 
   componentDidMount() {
-    if (this.state.userRole === 3) {
-      this.setState({ notificationTime: this.props.event?.parentNotificationTime });
+    const { userRole } = this.state;
+    const { event } = this.props;
+
+    if (userRole === 3) {
+      this.setState({ notificationTime: event?.parentNotificationTime });
     }
 
-    if (this.state.userRole === 30) {
-      this.setState({ notificationTime: this.props.event?.providerNotificationTime });
+    if (userRole === 30) {
+      this.setState({ notificationTime: event?.providerNotificationTime });
     }
 
-    if (this.state.userRole === 100) {
-      this.setState({ notificationTime: this.props.event?.consultantNotificationTime });
+    if (userRole === 100) {
+      this.setState({ notificationTime: event?.consultantNotificationTime });
     }
   }
 
@@ -87,12 +90,11 @@ class DrawerDetail extends Component {
   }
 
   openModalCancel = () => {
-    const { event } = this.props;
-    const { user } = this.props.auth;
+    const { event, auth } = this.props;
 
-    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && [PARENT, ADMIN, SUPERADMIN].includes(user.role) && moment(event.date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
+    if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && [PARENT, ADMIN, SUPERADMIN].includes(auth.user.role) && moment(event.date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
       const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
-      if (user.role === PARENT) {
+      if (auth.user.role === PARENT) {
         this.setState({ paymentDescription: desc });
         message.warn(desc).then(() => {
           this.setState({ visiblePayment: true });
@@ -111,9 +113,10 @@ class DrawerDetail extends Component {
   }
 
   handleConfirmCancel = () => {
+    const { event } = this.props;
     this.setState({ visibleCancel: false }, () => {
-      if (this.props.event?._id) {
-        const data = { appointId: this.props.event._id };
+      if (event?._id) {
+        const data = { appointId: event._id };
         request.post(cancelAppointmentForParent, data).then(result => {
           if (result.success) {
             this.setState({ errorMessage: '' });
@@ -139,7 +142,8 @@ class DrawerDetail extends Component {
   }
 
   closeModalCurrent = () => {
-    this.props.event?.type == SCREEN ? this.setState({ visibleCurrentScreen: false }) : this.props.event?.type == CONSULTATION ? this.setState({ visibleCurrentReferral: false }) : this.setState({ visibleCurrent: false });
+    const { event } = this.props;
+    event?.type === SCREEN ? this.setState({ visibleCurrentScreen: false }) : event?.type === CONSULTATION ? this.setState({ visibleCurrentReferral: false }) : this.setState({ visibleCurrent: false });
   }
 
   openModalCurrent = () => {
@@ -178,7 +182,12 @@ class DrawerDetail extends Component {
 
     const postData = {
       appointmentId: event._id,
-      items: [{ type: cancellationType, locationDate: `${event.location} ${moment(event.date).format('MM/DD/YYYY hh:mm')}`, rate: event.provider.cancellationFee }],
+      type: cancellationType,
+      items: [{
+        type: event?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
+        locationDate: `${event.location} ${moment(event.date).format('MM/DD/YYYY hh:mm a')}`,
+        rate: event.provider.cancellationFee,
+      }],
     }
     request.post(sendEmailInvoice, postData).then(res => {
       if (res.success) {
@@ -230,8 +239,9 @@ class DrawerDetail extends Component {
   }
 
   handleUpdateNotes = () => {
-    if (this.props.event?._id) {
-      const data = { appointmentId: this.props.event._id, notes: this.state.notes };
+    const { event } = this.props;
+    if (event?._id) {
+      const data = { appointmentId: event._id, notes: this.state.notes };
       request.post(updateAppointmentNotesForParent, data).then(res => {
         if (res.success) {
           this.setState({
@@ -256,14 +266,16 @@ class DrawerDetail extends Component {
   }
 
   handleMarkAsClosed = (items, skipEvaluation, note, publicFeedback) => {
-    this.setState({ visibleProcess: false, isModalInvoice: false });
+    this.setState({ visibleProcess: false, visibleInvoice: false });
+    const { event } = this.props;
 
-    if (this.props.event?._id) {
+    if (event?._id) {
       const data = {
-        appointmentId: this.props.event._id,
+        appointmentId: event._id,
         publicFeedback: publicFeedback ? publicFeedback : this.state.publicFeedback,
         skipEvaluation: skipEvaluation,
-        items: items,
+        items: items?.items,
+        invoiceNumber: items?.invoiceNumber,
         note: note,
       }
       request.post(closeAppointmentForProvider, data).then(result => {
@@ -280,11 +292,12 @@ class DrawerDetail extends Component {
   }
 
   handleMarkAsNoShow = (note, publicFeedback) => {
-    this.setState({ visibleProcess: false, isModalInvoice: false });
+    this.setState({ visibleProcess: false, visibleInvoice: false });
+    const { event } = this.props;
 
-    if (this.props.event?._id) {
+    if (event?._id) {
       const data = {
-        appointmentId: this.props.event._id,
+        appointmentId: event._id,
         publicFeedback: publicFeedback ? publicFeedback : this.state.publicFeedback,
         note: note,
       }
@@ -302,11 +315,12 @@ class DrawerDetail extends Component {
   }
 
   handleDecline = (note, publicFeedback) => {
-    this.setState({ visibleProcess: false, isModalInvoice: false });
+    this.setState({ visibleProcess: false, visibleInvoice: false });
+    const { event } = this.props;
 
-    if (this.props.event?._id) {
+    if (event?._id) {
       const data = {
-        appointmentId: this.props.event._id,
+        appointmentId: event._id,
         publicFeedback: publicFeedback ? publicFeedback : this.state.publicFeedback,
         note: note,
         items: this.state.items,
@@ -325,9 +339,11 @@ class DrawerDetail extends Component {
   }
 
   confirmModalProcess = (note, publicFeedback) => {
-    if (this.props.event?.type == EVALUATION) {
-      this.setState({ visibleProcess: false, isModalInvoice: true, note: note, publicFeedback: publicFeedback });
-    } else if (this.props.event?.type == CONSULTATION) {
+    const { event } = this.props;
+
+    if (event?.type == EVALUATION) {
+      this.setState({ visibleProcess: false, visibleInvoice: true, note: note, publicFeedback: publicFeedback });
+    } else if (event?.type == CONSULTATION) {
       this.handleMarkAsClosed(undefined, false, note, publicFeedback);
     } else {
       this.handleMarkAsClosed(this.state.items, false, note, publicFeedback);
@@ -336,14 +352,14 @@ class DrawerDetail extends Component {
 
   confirmModalInvoice = (items) => {
     if (this.props.event?.type == EVALUATION) {
-      this.setState({ isModalInvoice: false, visibleEvaluationProcess: true, items: items });
+      this.setState({ visibleInvoice: false, visibleEvaluationProcess: true, items: items });
     } else {
-      this.setState({ isModalInvoice: false, visibleProcess: true, items: items });
+      this.setState({ visibleInvoice: false, visibleProcess: true, items: items });
     }
   }
 
   cancelModalInvoice = () => {
-    this.setState({ isModalInvoice: false });
+    this.setState({ visibleInvoice: false });
   }
 
   handleLeaveFeedback = () => {
@@ -377,10 +393,12 @@ class DrawerDetail extends Component {
   }
 
   updateAppointments() {
+    const { calendar, getAppointmentsData, getAppointmentsMonthData } = this.props;
     const { userRole } = this.state;
-    this.props.getAppointmentsData({ role: userRole });
-    const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
-    const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
+
+    getAppointmentsData({ role: userRole });
+    const month = calendar.current?._calendarApi.getDate().getMonth() + 1;
+    const year = calendar.current?._calendarApi.getDate().getFullYear();
     const dataFetchAppointMonth = {
       role: userRole,
       data: {
@@ -388,7 +406,7 @@ class DrawerDetail extends Component {
         year: year
       }
     };
-    this.props.getAppointmentsMonthData(dataFetchAppointMonth);
+    getAppointmentsMonthData(dataFetchAppointMonth);
   }
 
   openModalProcess() {
@@ -412,7 +430,10 @@ class DrawerDetail extends Component {
     const { penalty, program, notes } = values;
     const data = {
       _id: event?._id,
+      dependent: event?.dependent?._id,
+      status: NOSHOW,
       flagStatus: ACTIVE,
+      flagType: NOSHOW,
       flagItems: {
         penalty: penalty * 1,
         program: program * 1,
@@ -442,7 +463,7 @@ class DrawerDetail extends Component {
 
   onSubmitFlagBalance = (values) => {
     const { notes } = values;
-    const { listAppointmentsRecent } = this.props;
+    const { listAppointmentsRecent, event } = this.props;
     let postData = [];
 
     Object.entries(values)?.forEach(value => {
@@ -455,6 +476,7 @@ class DrawerDetail extends Component {
               update: {
                 $set: {
                   flagStatus: ACTIVE,
+                  flagType: BALANCE,
                   flagItems: {
                     flagType: BALANCE,
                     late: value[1] * 1,
@@ -473,7 +495,7 @@ class DrawerDetail extends Component {
       }
     })
 
-    request.post(setFlagBalance, postData).then(result => {
+    request.post(setFlagBalance, { bulkData: postData, dependent: event?.dependent?._id }).then(result => {
       const { success } = result;
       if (success) {
         this.onCloseModalBalance();
@@ -483,7 +505,7 @@ class DrawerDetail extends Component {
   }
 
   onOpenModalInvoice = () => {
-    this.setState({ isModalInvoice: true });
+    this.setState({ visibleInvoice: true });
   }
 
   declineEvaluation = () => {
@@ -596,7 +618,7 @@ class DrawerDetail extends Component {
       const ranges = auth.user?.consultantInfo?.manualSchedule?.filter(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
 
       if (ranges?.length) {
-        request.post(claimConsultation, { appointmentId: this.props.event?._id })
+        request.post(claimConsultation, { appointmentId: event?._id })
           .then(res => {
             if (res.success) {
               this.setState({ errorMessage: '' });
@@ -649,7 +671,7 @@ class DrawerDetail extends Component {
       isShowEditNotes,
       notes,
       publicFeedback,
-      isModalInvoice,
+      visibleInvoice,
       isLeftFeedback,
       userRole,
       visibleCurrentReferral,
@@ -752,7 +774,7 @@ class DrawerDetail extends Component {
       listAppointmentsRecent,
     };
     const modalInvoiceProps = {
-      visible: isModalInvoice,
+      visible: visibleInvoice,
       onSubmit: this.confirmModalInvoice,
       onCancel: this.cancelModalInvoice,
       event: listAppointmentsRecent?.find(a => a?._id === event?._id),
@@ -872,10 +894,10 @@ class DrawerDetail extends Component {
         }
       >
         <div>
-          {event?.flagStatus === ACTIVE && event?.flagItems?.flagType === BALANCE && (
+          {event?.flagStatus === ACTIVE && event?.flagType === BALANCE && (
             <div className='text-center'><MdOutlineRequestQuote color="#ff0000" size={32} /></div>
           )}
-          {event?.flagStatus === ACTIVE && event?.flagItems?.flagType === NOSHOW && (
+          {event?.flagStatus === ACTIVE && event?.flagType === NOSHOW && (
             <div className='text-center'><MdOutlineEventBusy color="#ff0000" size={32} /></div>
           )}
           {event?.flagStatus !== ACTIVE && event?.type === CONSULTATION && event?.status === PENDING && event?.consultant?._id && event.consultant?._id !== auth.user?.consultantInfo?._id && (
@@ -954,7 +976,7 @@ class DrawerDetail extends Component {
           {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(msgCreateAccount.rate)}</p>
-              <p className={`font-18 ${event?.status === CLOSED ? 'text-underline cursor' : ''} ${!event?.isPaid && 'text-red'}`} onClick={() => event?.status === CLOSED && this.setState({ isModalInvoice: true })}>${event?.items?.length ? event.items?.reduce((a, b) => a += b.rate * 1, 0) : event?.rate}</p>
+              <p className={`font-18 ${event?.status === CLOSED ? 'text-underline cursor' : ''} ${!event?.isPaid && 'text-red'}`} onClick={() => event?.status === CLOSED && this.setState({ visibleInvoice: true })}>${event?.items?.length ? event.items?.reduce((a, b) => a += b.rate * 1, 0) : event?.rate}</p>
             </div>
           )}
           {[SCREEN, CONSULTATION].includes(event?.type) && (
@@ -966,7 +988,7 @@ class DrawerDetail extends Component {
         </div>
         {(flagEvent && (event?.flagStatus === ACTIVE || moment().isBefore(moment(event.date)))) ? (
           <div className='text-center font-18 mt-2'>
-            {flagEvent.flagItems?.flagType === BALANCE ? (
+            {flagEvent.flagType === BALANCE ? (
               <MdOutlineRequestQuote color="#ff0000" size={32} />
             ) : (
               <MdOutlineEventBusy color="#ff0000" size={32} />
@@ -984,7 +1006,7 @@ class DrawerDetail extends Component {
                   </Button>
                 ) : event?.flagItems?.rate == 0 ? null : (
                   <>
-                    <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagItems?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagItems?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
+                    <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
                     <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
@@ -1014,7 +1036,7 @@ class DrawerDetail extends Component {
                 </Button>
               ) : (
                 <div className='flex items-center gap-2'>
-                  <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagItems?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagItems?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
+                  <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
                     {intl.formatMessage(messages.editFlag)}
                   </Button>
                   <Popconfirm
@@ -1022,7 +1044,7 @@ class DrawerDetail extends Component {
                     onConfirm={this.handleClearFlag}
                     okText="Yes"
                     cancelText="No"
-                    overlayClassName='clear-flag-confirm'
+                    placement='left'
                   >
                     <Button type='primary' block className='flex-1 h-30 p-0'>
                       {intl.formatMessage(messages.clearFlag)}
@@ -1043,7 +1065,7 @@ class DrawerDetail extends Component {
                   </Button>
                 ) : event?.flagItems?.rate == 0 ? null : (
                   <>
-                    <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagItems?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagItems?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
+                    <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
                     <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
@@ -1068,7 +1090,7 @@ class DrawerDetail extends Component {
                       onConfirm={this.handleClearFlag}
                       okText="Yes"
                       cancelText="No"
-                      overlayClassName='clear-flag-confirm'
+                      placement='left'
                     >
                       <Button type='primary' block className='flex-1 h-30 p-0'>
                         {intl.formatMessage(messages.clearFlag)}
@@ -1220,7 +1242,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && (userRole === 3 || userRole > 900 || (userRole === 100) && event?.consultant?._id && event?.consultant?._id === auth.user?.consultantInfo?._id)) && (
+              {(event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && (userRole === 3 || userRole > 900 || (userRole === 100 && event?.consultant?._id && event?.consultant?._id === auth.user?.consultantInfo?._id))) && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsClockHistory size={15} />} block onClick={this.openModalCurrent}>
                     {intl.formatMessage(messages.reschedule)}
@@ -1291,7 +1313,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && (userRole === 3 || userRole > 900 || (userRole === 100 && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id))) && (
+              {(event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && (userRole === 3 || userRole > 900 || (userRole === 100 && event?.consultant?._id && event?.consultant?._id === auth.user?.consultantInfo?._id))) && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsXCircle size={15} />} block onClick={this.openModalCancel}>
                     {intl.formatMessage(msgModal.cancel)}
@@ -1306,7 +1328,7 @@ class DrawerDetail extends Component {
         {visibleProcess && <ModalProcessAppointment {...modalProcessProps} />}
         {visibleCurrent && <ModalCurrentAppointment {...modalCurrentProps} />}
         {visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
-        {isModalInvoice && <ModalInvoice {...modalInvoiceProps} />}
+        {visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
         {visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
         {visibleBalance && <ModalBalance {...modalBalanceProps} />}
         {visibleEvaluationProcess && <ModalEvaluationProcess {...modalEvaluationProcessProps} />}

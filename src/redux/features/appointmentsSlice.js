@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import request from '../../utils/api/request'
-import { cancelAppointmentForParent, cancelAppointmentForProvider, changeTimeAppointForAdmin, changeTimeAppointForParent, changeTimeAppointForProvider, getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getParentSubsidyRequests, getProviderSubsidyRequests, getSchoolSubsidyRequests } from '../../utils/api/apiList';
+import { changeTimeAppointForAdmin, changeTimeAppointForParent, changeTimeAppointForProvider, getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getParentSubsidyRequests, getProviderSubsidyRequests, getSchoolSubsidyRequests } from '../../utils/api/apiList';
 import { ADMIN, CONSULTANT, CONSULTATION, PARENT, PENDING, PROVIDER, SUPERADMIN } from '../../routes/constant';
 import moment from 'moment';
 
@@ -125,26 +125,6 @@ export const changeTime = createAsyncThunk(
 					result = await request.post(changeTimeAppointForParent, data.data);
 					return result.data;
 			}
-		} catch (error) {
-			console.log(error, 'error')
-		}
-	}
-)
-
-export const removeAppoint = createAsyncThunk(
-	'auth/removeAppoint',
-	async (data) => {
-		let result = {}
-		try {
-			switch (data.role) {
-				case PROVIDER:
-					result = await request.post(cancelAppointmentForProvider, data.data);
-					break;
-				case PARENT:
-					result = await request.post(cancelAppointmentForParent, data.data);
-					break;
-			}
-			return result;
 		} catch (error) {
 			console.log(error, 'error')
 		}

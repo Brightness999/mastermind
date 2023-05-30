@@ -10,7 +10,8 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { downloadInvoice, sendEmailInvoice } from '../../utils/api/apiList';
 import request from '../../utils/api/request';
-import { APPOINTMENT, CONSULTATION, EVALUATION } from '../../routes/constant';
+import { APPOINTMENT, EVALUATION, SUBSIDY } from '../../routes/constant';
+import moment from 'moment';
 
 class ModalInvoice extends React.Component {
 	constructor(props) {
@@ -24,6 +25,7 @@ class ModalInvoice extends React.Component {
 			subTotal: '',
 			loadingDownload: false,
 			loadingEmail: false,
+			invoiceNumber: '',
 		};
 	}
 
@@ -33,11 +35,11 @@ class ModalInvoice extends React.Component {
 			this.setState({ items: event.items, subTotal: event.items?.reduce((a, b) => a += b.rate * 1, 0) });
 		} else {
 			const initItems = [{
-				type: event?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : event?.type === CONSULTATION ? intl.formatMessage(messages.subsidizedSession) : '',
-				locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
+				type: event?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
+				locationDate: `(${event?.location}) Session on ${moment(event?.date).format('MM/DD/YYYY hh:mm a')}`,
 				rate: event?.rate,
 			}]
-			this.setState({ items: initItems, subTotal: event?.rate });
+			this.setState({ items: initItems, subTotal: event?.rate, invoiceNumber: new Date().getTime().toString() });
 		}
 	}
 
@@ -136,7 +138,7 @@ class ModalInvoice extends React.Component {
 
 	render() {
 		const { event, user } = this.props;
-		const { items, selectedItemIndex, subTotal, loadingDownload, loadingEmail } = this.state;
+		const { items, selectedItemIndex, subTotal, loadingDownload, loadingEmail, invoiceNumber } = this.state;
 
 		const modalProps = {
 			className: 'modal-invoice',
@@ -165,7 +167,7 @@ class ModalInvoice extends React.Component {
 									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>Date</div>
 									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>Invoice #</div>
 									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>{new Date().toLocaleDateString()}</div>
-									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>{new Date().getTime().toString()}</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>{invoiceNumber}</div>
 								</div>
 							</td>
 						</tr>
@@ -326,7 +328,7 @@ class ModalInvoice extends React.Component {
 							) : null}
 						</>
 					) : null}
-					<Button key="submit" type="primary" onClick={() => user.role > 3 ? this.props.onSubmit(items) : this.props.onCancel()} style={{ padding: '0px 30px', height: 38 }}>
+					<Button key="submit" type="primary" onClick={() => user.role > 3 ? this.props.onSubmit({items, invoiceNumber}) : this.props.onCancel()} style={{ padding: '0px 30px', height: 38 }}>
 						{(event?.status === 0 && user.role > 3) ? intl.formatMessage(messages.createInvoice) : (event?.status === -1 && !event?.isPaid && user.role > 3) ? intl.formatMessage(messages.editInvoice) : intl.formatMessage(messages.ok)}
 					</Button>
 				</div>

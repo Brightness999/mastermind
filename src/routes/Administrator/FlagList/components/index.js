@@ -179,7 +179,6 @@ class FlagList extends React.Component {
             onConfirm={() => this.handleClearFlag(appointment)}
             okText="Yes"
             cancelText="No"
-            overlayClassName='clear-flag-confirm'
           >
             <a className='btn-blue action'>{intl.formatMessage(msgDrawer.clearFlag)}</a>
           </Popconfirm>
