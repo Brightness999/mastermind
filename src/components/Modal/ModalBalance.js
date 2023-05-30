@@ -58,13 +58,13 @@ class ModalBalance extends React.Component {
 					} else {
 						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
 						const invoice = event.flagInvoice;
-						const data = invoice?.data?.find(a => a?.appointment?._id === event?._id);
+						const data = invoice?.data?.find(a => a?.appointment === event?._id);
 
 						this.form?.setFieldsValue({
 							[event._id]: data?.items?.late || 0,
 							[`balance-${event._id}`]: data?.items?.balance || 0,
 							notes: data?.items?.notes,
-							invoiceNumber: invoice?.invoiceNumber,
+							[`invoiceNumber-${provider?._id}`]: invoice?._id,
 						});
 						total += data?.items?.balance + data?.items?.late;
 						minimum = data?.items?.minimumPayment;
@@ -158,11 +158,11 @@ class ModalBalance extends React.Component {
 			<Modal {...modalProps}>
 				<p className='font-20 font-500 mb-10'>{intl.formatMessage(messages.unpaidBalance)} - <span className='text-uppercase'>{`${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`}</span></p>
 				<Form name='flag-balance' layout='vertical' onFinish={this.onFinish} ref={ref => this.form = ref}>
-					<Form.Item name="invoiceNumber" hidden>
-						<Input />
-					</Form.Item>
 					{providerData?.map((p, index) => (
 						<Fragment key={index}>
+							<Form.Item name={`invoiceNumber-${p.provider?._id}`} hidden>
+								<Input />
+							</Form.Item>
 							<Divider className={index === 0 ? 'd-none' : 'my-10'} />
 							{p.appointments?.map((a, index) => (
 								<Row key={index} className={`flex flex-row ${index === 0 ? 'items-start' : 'items-center'} mb-10`}>

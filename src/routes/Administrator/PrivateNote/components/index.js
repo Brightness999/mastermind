@@ -5,7 +5,7 @@ import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import { ACTIVE, ADMINAPPROVED, APPOINTMENT, BALANCE, CLOSED, CONSULTATION, EVALUATION, PENDING, SUBSIDY } from '../../../constant';
+import { ADMINAPPROVED, APPOINTMENT, BALANCE, CLOSED, CONSULTATION, EVALUATION, PENDING, SUBSIDY } from '../../../constant';
 import { ModalBalance, ModalDependentDetail } from '../../../../components/Modal';
 import intl from 'react-intl-universal';
 import msgMainHeader from '../../../../components/MainHeader/messages';
@@ -14,7 +14,7 @@ import msgCreateAccount from '../../../Sign/CreateAccount/messages';
 import msgDraweDetail from '../../../../components/DrawerDetail/messages';
 import msgModal from '../../../../components/Modal/messages';
 import request from '../../../../utils/api/request';
-import { getDependents, setFlagBalance, updateBalanceFlag } from '../../../../utils/api/apiList';
+import { getDependents, setFlagBalance } from '../../../../utils/api/apiList';
 import PageLoading from '../../../../components/Loading/PageLoading';
 import './index.less';
 
@@ -72,41 +72,41 @@ class PrivateNote extends React.Component {
   }
 
   handleSubmitFlagBalance = (values) => {
-    const { notes, invoiceNumber } = values;
+    const { notes } = values;
     const { selectedDependent } = this.state;
+    const providerIds = Object.keys(values).filter(a => a.includes('invoiceNumber')).map(a => a.split("-")[1]);
     let bulkData = [];
-
-    Object.entries(values)?.forEach(value => {
-      if (value?.length) {
-        const appointment = selectedDependent.appointments?.find(a => a._id === value[0]);
-        if (appointment) {
-          bulkData.push({
-            updateOne: {
-              filter: { _id: value[0] },
-              update: {
-                $set: {
-                  flagStatus: ACTIVE,
-                  flagType: BALANCE,
-                  flagItems: {
-                    flagType: BALANCE,
-                    late: value[1] * 1,
-                    balance: values[`balance-${appointment._id}`],
-                    totalPayment: values[`totalPayment-${appointment.provider?._id}`],
-                    rate: values[`totalPayment-${appointment.provider?._id}`],
-                    minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
-                    type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
-                    locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
-                    notes,
-                  }
-                }
+    providerIds.forEach(providerId => {
+      let temp = [];
+      Object.entries(values)?.forEach(value => {
+        if (value?.length) {
+          const appointment = selectedDependent.appointments?.find(a => a._id === value[0]);
+          if (appointment && appointment?.provider?._id === providerId) {
+            temp.push({
+              appointment: appointment._id,
+              items: {
+                flagType: BALANCE,
+                late: value[1] * 1,
+                balance: values[`balance-${appointment._id}`],
+                totalPayment: values[`totalPayment-${appointment.provider?._id}`],
+                rate: values[`totalPayment-${appointment.provider?._id}`],
+                minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
+                type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
+                locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
+                notes,
               }
-            }
-          })
+            })
+          }
         }
-      }
+      })
+      bulkData.push({
+        providerId,
+        invoiceNumber: values[`invoiceNumber-${providerId}`],
+        data: temp
+      })
     })
 
-    request.post(invoiceNumber ? updateBalanceFlag : setFlagBalance, { bulkData, invoiceNumber, dependent: selectedDependent?._id }).then(result => {
+    request.post(setFlagBalance, { bulkData, dependent: selectedDependent?._id }).then(result => {
       const { success } = result;
       if (success) {
         this.onCloseModalBalance();

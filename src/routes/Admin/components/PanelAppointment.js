@@ -13,7 +13,7 @@ import msgModal from '../../../components/Modal/messages';
 import request from '../../../utils/api/request'
 import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../../components/Modal';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, sendEmailInvoice, setFlag, setFlagBalance, updateBalanceFlag, updateNoshowFlag } from '../../../utils/api/apiList';
+import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, sendEmailInvoice, setFlag, setFlagBalance, updateNoshowFlag } from '../../../utils/api/apiList';
 import { ACTIVE, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, DECLINED, EVALUATION, NOSHOW, PENDING, RESCHEDULE, SUBSIDY } from '../../constant';
 import './index.less';
 
@@ -262,48 +262,51 @@ class PanelAppointment extends React.Component {
   }
 
   onSubmitFlagBalance = (values) => {
-    const { notes, invoiceNumber } = values;
+    const { notes } = values;
     const { appointments } = this.props;
     const { event } = this.state;
+    const providerIds = Object.keys(values).filter(a => a.includes('invoiceNumber')).map(a => a.split("-")[1]);
     let bulkData = [];
 
-    Object.entries(values)?.forEach(value => {
-      if (value?.length) {
-        const appointment = appointments?.find(a => a._id === value[0]);
-        if (appointment) {
-          bulkData.push({
-            updateOne: {
-              filter: { _id: value[0] },
-              update: {
-                $set: {
-                  flagStatus: ACTIVE,
-                  flagType: BALANCE,
-                  flagItems: {
-                    flagType: BALANCE,
-                    late: value[1] * 1,
-                    balance: values[`balance-${appointment._id}`],
-                    totalPayment: values[`totalPayment-${appointment.provider?._id}`],
-                    rate: values[`totalPayment-${appointment.provider?._id}`],
-                    minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
-                    type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
-                    locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
-                    notes,
-                  }
-                }
+    providerIds.forEach(providerId => {
+      let temp = [];
+      Object.entries(values)?.forEach(value => {
+        if (value?.length) {
+          const appointment = appointments?.find(a => a._id === value[0]);
+          if (appointment && appointment?.provider?._id === providerId) {
+            temp.push({
+              appointment: appointment._id,
+              items: {
+                flagType: BALANCE,
+                late: value[1] * 1,
+                balance: values[`balance-${appointment._id}`],
+                totalPayment: values[`totalPayment-${appointment.provider?._id}`],
+                rate: values[`totalPayment-${appointment.provider?._id}`],
+                minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
+                type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
+                locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
+                notes,
               }
-            }
-          })
+            })
+          }
         }
-      }
+      })
+      bulkData.push({
+        providerId,
+        invoiceNumber: values[`invoiceNumber-${providerId}`],
+        data: temp
+      })
     })
 
-    request.post(invoiceNumber ? updateBalanceFlag : setFlagBalance, { bulkData, invoiceNumber, dependent: event?.dependent?._id }).then(result => {
-      const { success } = result;
-      if (success) {
-        this.closeModalBalance();
-        this.updateAppointments();
-      }
-    }).catch(err => message.error(err.message));
+    if (bulkData.length) {
+      request.post(setFlagBalance, { bulkData, dependent: event?.dependent?._id }).then(result => {
+        const { success } = result;
+        if (success) {
+          this.closeModalBalance();
+          this.updateAppointments();
+        }
+      }).catch(err => message.error(err.message));
+    }
   }
 
   onSubmitFlagNoShow = (values) => {
