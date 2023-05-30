@@ -480,7 +480,7 @@ class PanelAppointment extends React.Component {
                     <input type="hidden" name="cmd" value="_donations" />
                     <input type="hidden" name="item_name" value="Help Me Get Help" />
                     <input type="hidden" name="item_number" />
-                    <input type="hidden" name="amount" value={data?.items?.reduce((a, b) => a += b.rate * 1, 0)} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                    <input type="hidden" name="amount" value={data?.sessionInvoice?.data?.[0]?.items?.reduce((a, b) => a += b.rate * 1, 0)} data-aid="PAYMENT_HIDDEN_AMOUNT" />
                     <input type="hidden" name="shipping" value="0.00" />
                     <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                     <input type="hidden" name="rm" value="0" />
