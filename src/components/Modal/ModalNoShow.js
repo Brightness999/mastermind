@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 
 import messages from './messages';
-import { APPOINTMENT, CLEAR, EVALUATION, InvoiceType, NOFLAG, PARENT, SUBSIDY } from '../../routes/constant';
+import { APPOINTMENT, CLEAR, EVALUATION, NOFLAG, PARENT, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -50,7 +50,7 @@ class ModalNoShow extends React.Component {
 			}
 			this.form?.setFieldsValue({ penalty: balance, program: 2 });
 		} else {
-			const invoice = event.invoice?.find(a => a.type === InvoiceType.NOSHOW);
+			const invoice = event.flagInvoice;
 			const data = invoice?.data?.[0];
 			this.form?.setFieldsValue({ penalty: data?.items?.penalty, program: data?.items?.program, notes: data?.items?.notes, invoiceNumber: invoice?._id });
 		}
@@ -144,10 +144,6 @@ class ModalNoShow extends React.Component {
 	}
 };
 
-const mapStateToProps = state => {
-	return ({
-		auth: state.auth,
-	})
-}
+const mapStateToProps = state => ({ auth: state.auth })
 
 export default compose(connect(mapStateToProps))(ModalNoShow);
