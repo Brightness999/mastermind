@@ -7,7 +7,7 @@ import { compose } from 'redux';
 
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import { ACTIVE, ADMIN, APPOINTMENT, CLEAR, CLOSED, EVALUATION, NOFLAG, PARENT, PROVIDER, SUBSIDY, SUPERADMIN } from '../../routes/constant';
+import { ACTIVE, ADMIN, APPOINTMENT, CLEAR, CLOSED, EVALUATION, InvoiceType, NOFLAG, PARENT, PROVIDER, SUBSIDY, SUPERADMIN } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -57,13 +57,15 @@ class ModalBalance extends React.Component {
 						total += balance * 2;
 					} else {
 						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
+						const data = event.invoice?.find(a => a.type === InvoiceType.BALANCE)?.data?.find(a => a?.appointment?._id === event?._id);
+
 						this.form?.setFieldsValue({
-							[event._id]: event?.flagItems?.late || 0,
-							[`balance-${event._id}`]: event?.flagItems?.balance || 0,
-							notes: event?.flagItems?.notes,
+							[event._id]: data?.items?.late || 0,
+							[`balance-${event._id}`]: data?.items?.balance || 0,
+							notes: data?.items?.notes,
 						});
-						total += event?.flagItems?.balance + event?.flagItems?.late;
-						minimum = event?.flagItems?.minimumPayment;
+						total += data?.items?.balance + data?.items?.late;
+						minimum = data?.items?.minimumPayment;
 					}
 				});
 				this.form.setFieldsValue({

@@ -75,3 +75,11 @@ export const BANNED = 1;
 // Cancellation Type
 export const RESCHEDULE = 'Reschedule';
 export const CANCEL = 'Cancel';
+
+export const InvoiceType = {
+  SESSION: 1,
+  RESCHEDULE: 2,
+  CANCEL: 3,
+  NOSHOW: 4,
+  BALANCE: 5,
+}
