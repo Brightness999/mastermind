@@ -9,7 +9,7 @@ import moment from 'moment';
 import messages from './messages';
 import msgDrawer from '../DrawerDetail/messages';
 import request from '../../utils/api/request'
-import { clearFlag, requestClearance, setFlag, setFlagBalance, updateNoshowFlag } from '../../utils/api/apiList';
+import { clearFlag, requestClearance, setFlag, setFlagBalance, updateBalanceFlag, updateNoshowFlag } from '../../utils/api/apiList';
 import ModalBalance from './ModalBalance';
 import ModalNoShow from './ModalNoShow';
 import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/features/appointmentsSlice';
@@ -117,16 +117,16 @@ class ModalFlagExpand extends React.Component {
 	};
 
 	onSubmitFlagBalance = (values) => {
-		const { notes } = values;
+		const { notes, invoiceNumber } = values;
 		const { appointments } = this.props;
 		const { event } = this.state;
-		let postData = [];
+		let bulkData = [];
 
 		Object.entries(values)?.forEach(value => {
 			if (value?.length) {
 				const appointment = appointments?.find(a => a._id === value[0]);
 				if (appointment) {
-					postData.push({
+					bulkData.push({
 						updateOne: {
 							filter: { _id: value[0] },
 							update: {
@@ -151,7 +151,7 @@ class ModalFlagExpand extends React.Component {
 			}
 		})
 
-		request.post(setFlagBalance, { bulkData: postData, dependent: event?.dependent?._id }).then(result => {
+		request.post(invoiceNumber ? updateBalanceFlag : setFlagBalance, { bulkData, invoiceNumber, dependent: event?.dependent?._id }).then(result => {
 			const { success } = result;
 			if (success) {
 				this.onCloseModalBalance();

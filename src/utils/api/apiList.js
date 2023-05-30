@@ -83,6 +83,7 @@ export const updateMyProviderAvailability = 'providers/update_my_provider_availa
 export const setFlag = 'providers/set_flag'
 export const updateNoshowFlag = 'providers/update_noshow_flag'
 export const setFlagBalance = 'providers/set_flag_balance'
+export const updateBalanceFlag = 'providers/update_balance_flag'
 export const acceptDeclinedScreening = 'providers/accept_declined_screening'
 export const sendEmailInvoice = 'providers/send_email_invoice'
 export const getProviderSubsidyRequests = 'providers/get_my_subsidy_requests'

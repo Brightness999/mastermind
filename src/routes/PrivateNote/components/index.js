@@ -16,7 +16,7 @@ import msgCreateAccount from '../../Sign/CreateAccount/messages';
 import msgDraweDetail from '../../../components/DrawerDetail/messages';
 import msgModal from '../../../components/Modal/messages';
 import request from '../../../utils/api/request';
-import { getDependents, setFlagBalance } from '../../../utils/api/apiList';
+import { getDependents, setFlagBalance, updateBalanceFlag } from '../../../utils/api/apiList';
 import { getSubsidyRequests } from '../../../redux/features/appointmentsSlice';
 import PageLoading from '../../../components/Loading/PageLoading';
 import './index.less';
@@ -108,15 +108,15 @@ class PrivateNote extends React.Component {
   }
 
   handleSubmitFlagBalance = (values) => {
-    const { notes } = values;
+    const { notes, invoiceNumber } = values;
     const { selectedDependent } = this.state;
-    let postData = [];
+    let bulkData = [];
 
     Object.entries(values)?.forEach(value => {
       if (value?.length) {
         const appointment = selectedDependent.appointments?.find(a => a._id === value[0]);
         if (appointment) {
-          postData.push({
+          bulkData.push({
             updateOne: {
               filter: { _id: value[0] },
               update: {
@@ -141,7 +141,7 @@ class PrivateNote extends React.Component {
       }
     })
 
-    request.post(setFlagBalance, { bulkData: postData, dependent: selectedDependent?._id }).then(result => {
+    request.post(invoiceNumber ? updateBalanceFlag : setFlagBalance, { bulkData, invoiceNumber, dependent: selectedDependent?._id }).then(result => {
       const { success } = result;
       if (success) {
         this.onCloseModalBalance();

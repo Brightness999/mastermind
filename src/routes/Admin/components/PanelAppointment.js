@@ -13,7 +13,7 @@ import msgModal from '../../../components/Modal/messages';
 import request from '../../../utils/api/request'
 import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../../components/Modal';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, sendEmailInvoice, setFlag, setFlagBalance, updateNoshowFlag } from '../../../utils/api/apiList';
+import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, sendEmailInvoice, setFlag, setFlagBalance, updateBalanceFlag, updateNoshowFlag } from '../../../utils/api/apiList';
 import { ACTIVE, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, DECLINED, EVALUATION, NOSHOW, PENDING, RESCHEDULE, SUBSIDY } from '../../constant';
 import './index.less';
 
@@ -262,16 +262,16 @@ class PanelAppointment extends React.Component {
   }
 
   onSubmitFlagBalance = (values) => {
-    const { notes } = values;
+    const { notes, invoiceNumber } = values;
     const { appointments } = this.props;
     const { event } = this.state;
-    let postData = [];
+    let bulkData = [];
 
     Object.entries(values)?.forEach(value => {
       if (value?.length) {
         const appointment = appointments?.find(a => a._id === value[0]);
         if (appointment) {
-          postData.push({
+          bulkData.push({
             updateOne: {
               filter: { _id: value[0] },
               update: {
@@ -296,7 +296,7 @@ class PanelAppointment extends React.Component {
       }
     })
 
-    request.post(setFlagBalance, { bulkData: postData, dependent: event?.dependent?._id }).then(result => {
+    request.post(invoiceNumber ? updateBalanceFlag : setFlagBalance, { bulkData, invoiceNumber, dependent: event?.dependent?._id }).then(result => {
       const { success } = result;
       if (success) {
         this.closeModalBalance();

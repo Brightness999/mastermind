@@ -19,7 +19,7 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, sendEmailInvoice, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateNoshowFlag } from '../../utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, sendEmailInvoice, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateBalanceFlag, updateNoshowFlag } from '../../utils/api/apiList';
 import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from '../../routes/constant';
 import './style/index.less';
 
@@ -464,15 +464,15 @@ class DrawerDetail extends Component {
   };
 
   onSubmitFlagBalance = (values) => {
-    const { notes } = values;
+    const { notes, invoiceNumber } = values;
     const { listAppointmentsRecent, event } = this.props;
-    let postData = [];
+    let bulkData = [];
 
     Object.entries(values)?.forEach(value => {
       if (value?.length) {
         const appointment = listAppointmentsRecent?.find(a => a._id === value[0]);
         if (appointment) {
-          postData.push({
+          bulkData.push({
             updateOne: {
               filter: { _id: value[0] },
               update: {
@@ -497,7 +497,7 @@ class DrawerDetail extends Component {
       }
     })
 
-    request.post(setFlagBalance, { bulkData: postData, dependent: event?.dependent?._id }).then(result => {
+    request.post(invoiceNumber ? updateBalanceFlag : setFlagBalance, { bulkData, invoiceNumber, dependent: event?.dependent?._id }).then(result => {
       const { success } = result;
       if (success) {
         this.onCloseModalBalance();

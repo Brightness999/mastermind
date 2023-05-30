@@ -18,7 +18,6 @@ class ModalBalance extends React.Component {
 
 	componentDidMount() {
 		const { dependent, auth, event } = this.props;
-		console.log(event, dependent)
 		let unpaidAppointments = [], providerData = [];
 
 		if (event?.flagStatus === CLEAR) {
@@ -57,7 +56,8 @@ class ModalBalance extends React.Component {
 						total += balance * 2;
 					} else {
 						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
-						const data = event.invoice?.find(a => a.type === InvoiceType.BALANCE)?.data?.find(a => a?.appointment?._id === event?._id);
+						const invoice = event.invoice?.find(a => a.type === InvoiceType.BALANCE);
+						const data = invoice?.data?.find(a => a?.appointment?._id === event?._id);
 
 						this.form?.setFieldsValue({
 							[event._id]: data?.items?.late || 0,
@@ -156,6 +156,9 @@ class ModalBalance extends React.Component {
 			<Modal {...modalProps}>
 				<p className='font-20 font-500 mb-10'>{intl.formatMessage(messages.unpaidBalance)} - <span className='text-uppercase'>{`${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`}</span></p>
 				<Form name='flag-balance' layout='vertical' onFinish={this.onFinish} ref={ref => this.form = ref}>
+					<Form.Item name="invoiceNumber" hidden>
+						<Input />
+					</Form.Item>
 					{providerData?.map((p, index) => (
 						<Fragment key={index}>
 							<Divider className={index === 0 ? 'd-none' : 'my-10'} />
