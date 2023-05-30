@@ -977,7 +977,7 @@ class DrawerDetail extends Component {
           {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(msgCreateAccount.rate)}</p>
-              <p className={`font-18 ${event?.status === CLOSED ? 'text-underline cursor' : ''} ${!event?.isPaid && 'text-red'}`} onClick={() => event?.status === CLOSED && this.setState({ visibleInvoice: true })}>${event?.items?.length ? event.items?.reduce((a, b) => a += b.rate * 1, 0) : event?.rate}</p>
+              <p className={`font-18 ${event?.status === CLOSED ? 'text-underline cursor' : ''} ${!event?.isPaid && 'text-red'}`} onClick={() => event?.status === CLOSED && this.setState({ visibleInvoice: true })}>${event?.rate}</p>
             </div>
           )}
           {[SCREEN, CONSULTATION].includes(event?.type) && (
@@ -1181,7 +1181,7 @@ class DrawerDetail extends Component {
                     <input type="hidden" name="cmd" value="_donations" />
                     <input type="hidden" name="item_name" value="Help Me Get Help" />
                     <input type="hidden" name="item_number" />
-                    <input type="hidden" name="amount" value={event?.items?.reduce((a, b) => a += b.rate * 1, 0)} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                    <input type="hidden" name="amount" value={event?.sessionInvoice?.data?.[0]?.items?.reduce((a, b) => a += b.rate * 1, 0)} data-aid="PAYMENT_HIDDEN_AMOUNT" />
                     <input type="hidden" name="shipping" value="0.00" />
                     <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                     <input type="hidden" name="rm" value="0" />
