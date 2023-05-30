@@ -19,7 +19,6 @@ import request from '../../../utils/api/request';
 import { getDependents, setFlagBalance } from '../../../utils/api/apiList';
 import { getSubsidyRequests } from '../../../redux/features/appointmentsSlice';
 import PageLoading from '../../../components/Loading/PageLoading';
-import './index.less';
 
 class PrivateNote extends React.Component {
   constructor(props) {
