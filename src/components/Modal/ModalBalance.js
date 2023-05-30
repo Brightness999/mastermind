@@ -7,7 +7,7 @@ import { compose } from 'redux';
 
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import { ACTIVE, ADMIN, APPOINTMENT, CLEAR, CLOSED, EVALUATION, InvoiceType, NOFLAG, PARENT, PROVIDER, SUBSIDY, SUPERADMIN } from '../../routes/constant';
+import { ACTIVE, ADMIN, APPOINTMENT, CLEAR, CLOSED, EVALUATION, NOFLAG, PARENT, PROVIDER, SUBSIDY, SUPERADMIN } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -21,11 +21,12 @@ class ModalBalance extends React.Component {
 		let unpaidAppointments = [], providerData = [];
 
 		if (event?.flagStatus === CLEAR) {
+			const items = event?.flagInvoice?.data?.find(a => a?.appointment === event?._id)?.items;
 			this.form?.setFieldsValue({
-				[event._id]: event.flagItems?.late || 0,
-				[`balance-${event?._id}`]: event.flagItems?.totalPayment || 0,
-				[`totalPayment-${event.provider?._id}`]: event.flagItems?.totalPayment || 0,
-				[`minimumPayment-${event.provider?._id}`]: event.flagItems?.minimumPayment || 0,
+				[event._id]: items?.late || 0,
+				[`balance-${event?._id}`]: items?.totalPayment || 0,
+				[`totalPayment-${event.provider?._id}`]: items?.totalPayment || 0,
+				[`minimumPayment-${event.provider?._id}`]: items?.minimumPayment || 0,
 			});
 			this.setState({
 				providerData: [{
@@ -56,13 +57,14 @@ class ModalBalance extends React.Component {
 						total += balance * 2;
 					} else {
 						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
-						const invoice = event.invoice?.find(a => a.type === InvoiceType.BALANCE);
+						const invoice = event.flagInvoice;
 						const data = invoice?.data?.find(a => a?.appointment?._id === event?._id);
 
 						this.form?.setFieldsValue({
 							[event._id]: data?.items?.late || 0,
 							[`balance-${event._id}`]: data?.items?.balance || 0,
 							notes: data?.items?.notes,
+							invoiceNumber: invoice?.invoiceNumber,
 						});
 						total += data?.items?.balance + data?.items?.late;
 						minimum = data?.items?.minimumPayment;
