@@ -271,15 +271,15 @@ class ModalFlagExpand extends React.Component {
 			columns.splice(5, 0, {
 				title: 'Action', key: 'action', render: (appointment) => (
 					<Space size="small">
-						{(appointment?.flagItems?.isPaid || appointment?.flagItems?.rate == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
-						{appointment?.flagItems?.isPaid ? 'Paid' : appointment?.flagItems?.rate == 0 ? null : (
+						{(appointment?.flagInvoice?.isPaid || appointment?.flagInvoice?.data?.[0]?.items?.rate == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
+						{appointment?.flagInvoice?.isPaid ? 'Paid' : appointment?.flagInvoice?.data?.[0]?.items?.rate == 0 ? null : (
 							<form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
 								<input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
 								<input type="hidden" name="business" value="office@helpmegethelp.org" />
 								<input type="hidden" name="cmd" value="_donations" />
 								<input type="hidden" name="item_name" value="Help Me Get Help" />
 								<input type="hidden" name="item_number" />
-								<input type="hidden" name="amount" value={appointment?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+								<input type="hidden" name="amount" value={appointment?.flagInvoice?.data?.[0]?.items?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
 								<input type="hidden" name="shipping" value="0.00" />
 								<input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
 								<input type="hidden" name="rm" value="0" />
@@ -317,15 +317,15 @@ class ModalFlagExpand extends React.Component {
 			columns.splice(5, 0, {
 				title: 'Action', key: 'action', render: (appointment) => (
 					<Space size="small">
-						{(appointment?.flagItems?.isPaid || appointment?.flagItems?.rate == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
-						{appointment?.flagItems?.isPaid ? 'Paid' : appointment?.flagItems?.rate == 0 ? null : (
+						{(appointment?.flagInvoice?.isPaid || appointment?.flagInvoice?.data?.[0]?.items?.rate == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
+						{appointment?.flagInvoice?.isPaid ? 'Paid' : appointment?.flagInvoice?.data?.[0]?.items?.rate == 0 ? null : (
 							<form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
 								<input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
 								<input type="hidden" name="business" value="office@helpmegethelp.org" />
 								<input type="hidden" name="cmd" value="_donations" />
 								<input type="hidden" name="item_name" value="Help Me Get Help" />
 								<input type="hidden" name="item_number" />
-								<input type="hidden" name="amount" value={appointment?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+								<input type="hidden" name="amount" value={appointment?.flagInvoice?.data?.[0]?.items?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
 								<input type="hidden" name="shipping" value="0.00" />
 								<input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
 								<input type="hidden" name="rm" value="0" />

@@ -1073,21 +1073,21 @@ class SchedulingCenter extends React.Component {
         {visibleCancelForAdmin && <ModalCancelForAdmin {...modalCancelForAdminProps} />}
         <Modal title="Flag Action" open={visibleFlagAction} footer={null} onCancel={this.closeFlagAction}>
           <div className='flex items-center gap-2'>
-            {(selectedEvent?.flagItems?.isPaid || selectedEvent?.flagItems?.rate == 0) ? (
+            {(selectedEvent?.flagInvoice?.isPaid || selectedEvent?.flagInvoice?.data?.[0]?.items?.rate == 0) ? (
               <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' onClick={() => this.onOpenModalCreateNote()}>{intl.formatMessage(msgDrawer.requestClearance)}</Button>
             ) : null}
-            {selectedEvent?.flagItems?.isPaid ? (
+            {selectedEvent?.flagInvoice?.isPaid ? (
               <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' disabled>
                 {intl.formatMessage(msgDrawer.paid)}
               </Button>
-            ) : selectedEvent?.flagItems?.rate == 0 ? null : (
+            ) : selectedEvent?.flagInvoice?.data?.[0]?.items?.rate == 0 ? null : (
               <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post" className='flex-1'>
                 <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                 <input type="hidden" name="business" value="office@helpmegethelp.org" />
                 <input type="hidden" name="cmd" value="_donations" />
                 <input type="hidden" name="item_name" value="Help Me Get Help" />
                 <input type="hidden" name="item_number" />
-                <input type="hidden" name="amount" value={selectedEvent?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                <input type="hidden" name="amount" value={selectedEvent?.flagInvoice?.data?.[0]?.items?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
                 <input type="hidden" name="shipping" value="0.00" />
                 <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                 <input type="hidden" name="rm" value="0" />

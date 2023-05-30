@@ -996,16 +996,16 @@ class DrawerDetail extends Component {
             )}
             {event?.flagStatus === ACTIVE ? userRole === 3 ? (
               <div className='flex items-center justify-between gap-2'>
-                {(event?.flagItems?.isPaid || event?.flagItems?.rate == 0) ? (
+                {(event?.flagInvoice?.isPaid || event?.flagInvoice?.data?.[0]?.items?.rate == 0) ? (
                   <Button type='primary' block className='flex-1 h-30 p-0' onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
                   </Button>
                 ) : null}
-                {event?.flagItems?.isPaid ? (
+                {event?.flagInvoice?.isPaid ? (
                   <Button type='primary' block className='flex-1 h-30 p-0' disabled>
                     {intl.formatMessage(messages.paid)}
                   </Button>
-                ) : event?.flagItems?.rate == 0 ? null : (
+                ) : event?.flagInvoice?.data?.[0]?.items?.rate == 0 ? null : (
                   <>
                     <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
                       {intl.formatMessage(messages.flagDetails)}
@@ -1016,7 +1016,7 @@ class DrawerDetail extends Component {
                       <input type="hidden" name="cmd" value="_donations" />
                       <input type="hidden" name="item_name" value="Help Me Get Help" />
                       <input type="hidden" name="item_number" />
-                      <input type="hidden" name="amount" value={event?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                      <input type="hidden" name="amount" value={event?.flagInvoice?.data?.[0]?.items?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
                       <input type="hidden" name="shipping" value="0.00" />
                       <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                       <input type="hidden" name="rm" value="0" />
@@ -1031,7 +1031,7 @@ class DrawerDetail extends Component {
                 )}
               </div>
             ) : userRole === 30 ? (
-              event?.flagItems?.isPaid ? (
+              event?.flagInvoice?.isPaid ? (
                 <Button type='primary' block className='flex-1 h-30 p-0' disabled>
                   {intl.formatMessage(messages.paid)}
                 </Button>
@@ -1055,16 +1055,16 @@ class DrawerDetail extends Component {
               )
             ) : (
               <div className='flex items-center justify-between gap-2 flex-2'>
-                {(event?.flagItems?.isPaid || event?.flagItems?.rate == 0) ? (
+                {(event?.flagInvoice?.isPaid || event?.flagInvoice?.data?.[0]?.items?.rate == 0) ? (
                   <Button type='primary' block className='flex-1 h-30 p-0 px-5' onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
                   </Button>
                 ) : null}
-                {event?.flagItems?.isPaid ? (
+                {event?.flagInvoice?.isPaid ? (
                   <Button type='primary' block className='flex-1 h-30 p-0' disabled>
                     {intl.formatMessage(messages.paid)}
                   </Button>
-                ) : event?.flagItems?.rate == 0 ? null : (
+                ) : event?.flagInvoice?.data?.[0]?.items?.rate == 0 ? null : (
                   <>
                     <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
                       {intl.formatMessage(messages.flagDetails)}
@@ -1075,7 +1075,7 @@ class DrawerDetail extends Component {
                       <input type="hidden" name="cmd" value="_donations" />
                       <input type="hidden" name="item_name" value="Help Me Get Help" />
                       <input type="hidden" name="item_number" />
-                      <input type="hidden" name="amount" value={event?.flagItems?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                      <input type="hidden" name="amount" value={event?.flagInvoice?.data?.[0]?.items?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
                       <input type="hidden" name="shipping" value="0.00" />
                       <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                       <input type="hidden" name="rm" value="0" />
@@ -1293,7 +1293,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(userRole === 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.flagStatus === ACTIVE && (event?.isPaid || event?.flagItems?.rate == 0)) && (
+              {(userRole === 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.flagStatus === ACTIVE && (event?.isPaid || event?.flagInvoice?.data?.[0]?.items?.rate == 0)) && (
                 <Col span={12}>
                   <Button type='primary' icon={<FaFileContract size={12} />} block onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
