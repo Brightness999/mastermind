@@ -203,7 +203,7 @@ class PrivateNote extends React.Component {
             setTimeout(() => this.searchInput.current?.select(), 100);
           }
         },
-        render: (dependent) => (<a onClick={() => this.handleClickRow(dependent)}>{dependent.firstName ?? ''} {dependent.lastName ?? ''}</a>),
+        render: (dependent) => (<span className='text-primary cursor' onClick={() => this.handleClickRow(dependent)}>{dependent.firstName ?? ''} {dependent.lastName ?? ''}</span>),
       },
       {
         title: intl.formatMessage(msgCreateAccount.age), dataIndex: 'birthday', key: 'age',
@@ -341,7 +341,7 @@ class PrivateNote extends React.Component {
 
           if (countOfSessionsPast > countOfSessionsPaid) {
             return (
-              <a className='action' onClick={() => this.onShowModalBalance(dependent)}>{intl.formatMessage(msgDraweDetail.flagDependent)}</a>
+              <span className='action text-primary cursor' onClick={() => this.onShowModalBalance(dependent)}>{intl.formatMessage(msgDraweDetail.flagDependent)}</span>
             )
           } else {
             return null;
@@ -747,8 +747,8 @@ class PrivateNote extends React.Component {
           columns={columns}
           onRow={(dependent) => {
             return {
-              onClick: (e) => e.target.className != 'action' && this.handleClickRow(dependent),
-              onDoubleClick: (e) => e.target.className != 'action' && this.handleClickRow(dependent),
+              onClick: (e) => !e.target.className.includes('action') && this.handleClickRow(dependent),
+              onDoubleClick: (e) => !e.target.className.includes('action') && this.handleClickRow(dependent),
             }
           }}
         />

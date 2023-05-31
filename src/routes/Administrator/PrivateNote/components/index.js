@@ -129,7 +129,6 @@ class PrivateNote extends React.Component {
       {
         title: intl.formatMessage(messages.studentName), key: 'name',
         sorter: (a, b) => (a.firstName || '' + a.lastName || '').toLowerCase() > (b.firstName || '' + b.lastName || '').toLowerCase() ? 1 : -1,
-        render: (dependent) => (<a onClick={() => this.handleClickRow(dependent)}>{dependent.firstName ?? ''} {dependent.lastName ?? ''}</a>),
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
@@ -171,6 +170,7 @@ class PrivateNote extends React.Component {
             setTimeout(() => this.searchInput.current?.select(), 100);
           }
         },
+        render: (dependent) => (<span className='text-primary cursor' onClick={() => this.handleClickRow(dependent)}>{dependent.firstName ?? ''} {dependent.lastName ?? ''}</span>),
       },
       {
         title: intl.formatMessage(msgCreateAccount.age), dataIndex: 'birthday', key: 'age',
@@ -256,7 +256,7 @@ class PrivateNote extends React.Component {
           if (countOfSessionsPast > countOfSessionsPaid) {
             return (
               <div className='action cursor' onClick={() => this.onShowModalBalance(dependent)}>
-                <a className='action cursor'>{intl.formatMessage(msgDraweDetail.flagDependent)}</a>
+                <span className='action text-primary cursor'>{intl.formatMessage(msgDraweDetail.flagDependent)}</span>
               </div>
             )
           } else {
@@ -292,8 +292,8 @@ class PrivateNote extends React.Component {
           columns={columns}
           onRow={(dependent) => {
             return {
-              onClick: (e) => e.target.className != 'action cursor' && this.handleClickRow(dependent),
-              onDoubleClick: (e) => e.target.className != 'action cursor' && this.handleClickRow(dependent),
+              onClick: (e) => !e.target.className.includes('action') && this.handleClickRow(dependent),
+              onDoubleClick: (e) => !e.target.className.includes('action') && this.handleClickRow(dependent),
             }
           }}
         />
