@@ -164,12 +164,10 @@ class ModalInvoice extends React.Component {
 	}
 
 	downloadInvoice = () => {
-		const { event } = this.props;
-		const { items } = this.state;
-
+		const { items, providerBillingAddress, providerEmail, providerName, providerPhonenumber, dependentName, parentAddress, parentName, service, invoiceDate, invoiceNumber } = this.state;
 		this.setState({ loadingDownload: true });
 
-		request.post(downloadInvoice, { appointmentId: event?._id, items: items }).then(res => {
+		request.post(downloadInvoice, { items, providerBillingAddress, providerEmail, providerName, providerPhonenumber, dependentName, parentAddress, parentName, service, invoiceDate, invoiceNumber }).then(res => {
 			this.setState({ loadingDownload: false });
 			const url = window.URL.createObjectURL(new Blob([new Uint8Array(res.data.data)]));
 			const link = document.createElement("a");
