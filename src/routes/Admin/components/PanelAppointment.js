@@ -191,6 +191,7 @@ class PanelAppointment extends React.Component {
         note: note,
         items: items?.items,
         invoiceNumber: items?.invoiceNumber,
+        invoiceId: items?.invoiceId,
       }
 
       request.post(closeAppointmentForProvider, data).then(result => {

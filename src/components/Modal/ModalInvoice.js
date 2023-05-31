@@ -11,8 +11,6 @@ import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import { downloadInvoice, sendEmailInvoice } from '../../utils/api/apiList';
 import request from '../../utils/api/request';
 import { APPOINTMENT, EVALUATION, SUBSIDY } from '../../routes/constant';
-import './style/index.less';
-import '../../assets/styles/login.less';
 
 class ModalInvoice extends React.Component {
 	constructor(props) {
@@ -27,21 +25,84 @@ class ModalInvoice extends React.Component {
 			loadingDownload: false,
 			loadingEmail: false,
 			invoiceNumber: '',
+			event: this.props.event,
+			invoiceDate: '',
+			providerBillingAddress: '',
+			providerPhonenumber: '',
+			providerEmail: '',
+			service: '',
+			providerName: '',
+			parentName: '',
+			parentAddress: '',
+			dependentName: '',
+			isPaid: false,
+			invoiceId: '',
 		};
 	}
 
 	componentDidMount() {
-		const { event } = this.props;
+		const { event, invoice, user } = this.props;
 		if (event?.sessionInvoice) {
 			const items = event.sessionInvoice.data?.[0]?.items || [];
-			this.setState({ items: items, subTotal: items?.reduce((a, b) => a += b.rate * 1, 0), invoiceNumber: event.sessionInvoice.invoiceNumber });
+			this.setState({
+				items: items,
+				subTotal: items?.reduce((a, b) => a += b.rate * 1, 0),
+				invoiceNumber: event.sessionInvoice.invoiceNumber,
+				invoiceDate: moment(event.sessionInvoice.updatedAt).format("MM/DD/YYYY"),
+				providerBillingAddress: event?.provider?.billingAddress,
+				providerPhonenumber: event?.provider?.contactNumber?.[0]?.phoneNumber,
+				providerName: `${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`,
+				providerEmail: event?.provider?.contactEmail?.[0]?.email,
+				parentName: `${event?.parent?.parentInfo?.fatherName ? event?.parent?.parentInfo?.fatherName : event?.parent?.parentInfo?.motherName} ${event?.parent?.parentInfo?.familyName}`,
+				parentAddress: event?.parent?.parentInfo?.address,
+				dependentName: `${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`,
+				service: event?.skillSet?.name,
+				isPaid: event.sessionInvoice?.isPaid,
+			});
+		} else if (invoice) {
+			let items = [];
+			switch (invoice.type) {
+				case 1: case 2: case 3: items = invoice.data?.[0]?.items || []; break;
+				case 4: items = invoice.data?.[0]?.items ? [invoice.data?.[0]?.items] : []; break;
+				case 5: items = invoice.data?.map(a => ([{ type: a.items.type, locationDate: a.items.locationDate, rate: a.items.balance }, { type: a.items.type, locationDate: a.items.locationDate, rate: a.items.late }]))?.flat();
+				default:
+					break;
+			}
+			this.setState({
+				items: items,
+				subTotal: items?.reduce((a, b) => a += b.rate * 1, 0),
+				invoiceNumber: invoice.invoiceNumber,
+				invoiceDate: moment(invoice.updatedAt).format("MM/DD/YYYY"),
+				providerBillingAddress: invoice.data?.[0]?.appointment?.provider?.billingAddress,
+				providerPhonenumber: invoice.data?.[0]?.appointment?.provider?.contactNumber?.[0]?.phoneNumber,
+				providerName: `${invoice.data?.[0]?.appointment?.provider?.firstName ?? ''} ${invoice.data?.[0]?.appointment?.provider?.lastName ?? ''}`,
+				providerEmail: invoice.data?.[0]?.appointment?.provider?.contactEmail?.[0]?.email,
+				parentName: `${user?.parentInfo?.fatherName ? user?.parentInfo?.fatherName : user?.parentInfo?.motherName} ${user?.parentInfo?.familyName}`,
+				parentAddress: user?.parentInfo?.address,
+				dependentName: `${invoice?.dependent?.firstName ?? ''} ${invoice?.dependent?.lastName ?? ''}`,
+				service: invoice.data?.[0]?.appointment?.skillSet?.name,
+				isPaid: invoice.isPaid,
+			});
 		} else {
 			const initItems = [{
 				type: event?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
 				locationDate: `(${event?.location}) Session on ${moment(event?.date).format('MM/DD/YYYY hh:mm a')}`,
 				rate: event?.rate,
 			}]
-			this.setState({ items: initItems, subTotal: event?.rate, invoiceNumber: new Date().getTime().toString() });
+			this.setState({
+				items: initItems,
+				subTotal: event?.rate,
+				invoiceNumber: new Date().getTime().toString(),
+				invoiceDate: new Date().toLocaleDateString(),
+				providerBillingAddress: event.provider?.billingAddress,
+				providerPhonenumber: event?.provider?.contactNumber?.[0]?.phoneNumber,
+				providerName: `${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`,
+				providerEmail: event?.provider?.contactEmail?.[0]?.email,
+				parentName: `${event?.parent?.parentInfo?.fatherName ? event?.parent?.parentInfo?.fatherName : event?.parent?.parentInfo?.motherName} ${event?.parent?.parentInfo?.familyName}`,
+				parentAddress: event?.parent?.parentInfo?.address,
+				dependentName: `${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`,
+				service: event?.skillSet?.name,
+			});
 		}
 	}
 
@@ -139,12 +200,12 @@ class ModalInvoice extends React.Component {
 	}
 
 	render() {
-		const { event, user } = this.props;
-		const { items, selectedItemIndex, subTotal, loadingDownload, loadingEmail, invoiceNumber } = this.state;
+		const { event, user, invoice } = this.props;
+		const { invoiceId, isPaid, items, selectedItemIndex, subTotal, loadingDownload, loadingEmail, invoiceNumber, invoiceDate, providerBillingAddress, providerEmail, providerName, providerPhonenumber, parentAddress, parentName, dependentName, service } = this.state;
 
 		const modalProps = {
 			className: 'modal-invoice',
-			title: (<div className='font-20'>Invoice</div>),
+			title: (<div className='font-20'>{invoice?.type === 1 ? 'Session Invoice' : invoice?.type === 2 ? 'Reschedule Invoice' : invoice?.type === 3 ? 'Cancel Invoice' : invoice?.type === 4 ? 'No show Invoice' : invoice?.type === 5 ? 'Past due Invoice' : 'Invoice'}</div>),
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: this.props.onCancel,
@@ -168,7 +229,7 @@ class ModalInvoice extends React.Component {
 								<div className='grid grid-columns-2'>
 									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>Date</div>
 									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>Invoice #</div>
-									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>{new Date().toLocaleDateString()}</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>{invoiceDate}</div>
 									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>{invoiceNumber}</div>
 								</div>
 							</td>
@@ -176,7 +237,7 @@ class ModalInvoice extends React.Component {
 						<tr>
 							<td colSpan={3}>
 								<div className='w-100 text-black'>
-									<div className='font-16'>{event?.provider?.billingAddress}</div>
+									<div className='font-16'>{providerBillingAddress}</div>
 								</div>
 							</td>
 							<td colSpan={9}></td>
@@ -184,8 +245,8 @@ class ModalInvoice extends React.Component {
 						<tr>
 							<td colSpan={12}>
 								<div className='w-100 text-black06 font-16'>
-									<div>{event?.provider?.contactNumber?.[0]?.phoneNumber}</div>
-									<div>{event?.provider?.contactEmail?.[0]?.email}</div>
+									<div>{providerPhonenumber}</div>
+									<div>{providerEmail}</div>
 									<div>helpmegethelp.org</div>
 								</div>
 							</td>
@@ -196,9 +257,9 @@ class ModalInvoice extends React.Component {
 								<div className='w-100'>
 									<div className='border border-1 border-black -mb-1 -mr-1 p-10 font-16'>Bill To:</div>
 									<div className='border border-1 border-black -mb-1 -mr-1 p-10 font-16'>
-										<div>{event?.parent?.parentInfo?.fatherName ? event?.parent?.parentInfo?.fatherName : event?.parent?.parentInfo?.motherName} {event?.parent?.parentInfo?.familyName}</div>
-										<div>C/O {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
-										<div>{event?.parent?.parentInfo?.address}</div>
+										<div>{parentName}</div>
+										<div>C/O {dependentName}</div>
+										<div>{parentAddress}</div>
 									</div>
 								</div>
 							</td>
@@ -211,8 +272,8 @@ class ModalInvoice extends React.Component {
 								<div className='grid grid-columns-2'>
 									<div className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>Service</div>
 									<div className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>Provider</div>
-									<div className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>{event?.skillSet?.name}</div>
-									<div className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>{`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`}</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>{service}</div>
+									<div className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>{providerName}</div>
 								</div>
 							</td>
 						</tr>
@@ -235,7 +296,7 @@ class ModalInvoice extends React.Component {
 										</thead>
 										<tbody>
 											{items.map((item, index) => (
-												<Popover key={index} placement='right' content={user?.role == 3 ? (<></>) : (
+												<Popover key={index} placement='right' content={(user?.role === 3 || isPaid) ? (<></>) : (
 													<div className='flex flex-col gap-2'>
 														{selectedItemIndex == index ? (
 															<>
@@ -330,8 +391,8 @@ class ModalInvoice extends React.Component {
 							) : null}
 						</>
 					) : null}
-					<Button key="submit" type="primary" onClick={() => user.role > 3 ? this.props.onSubmit({ items, invoiceNumber }) : this.props.onCancel()} style={{ padding: '0px 30px', height: 38 }}>
-						{(event?.status === 0 && user.role > 3) ? intl.formatMessage(messages.createInvoice) : (event?.status === -1 && !event?.isPaid && user.role > 3) ? intl.formatMessage(messages.editInvoice) : intl.formatMessage(messages.ok)}
+					<Button key="submit" type="primary" onClick={() => (user.role > 3 && !isPaid) ? this.props.onSubmit({ items, invoiceNumber, invoiceId }) : this.props.onCancel()} style={{ padding: '0px 30px', height: 38 }}>
+						{(event?.status === 0 && user.role > 3) ? intl.formatMessage(messages.createInvoice) : (event?.status === -1 && !isPaid && user.role > 3) ? intl.formatMessage(messages.editInvoice) : intl.formatMessage(messages.ok)}
 					</Button>
 				</div>
 			</Modal>

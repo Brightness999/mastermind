@@ -275,6 +275,7 @@ class DrawerDetail extends Component {
         skipEvaluation: skipEvaluation,
         items: items?.items,
         invoiceNumber: items?.invoiceNumber,
+        invoiceId: items?.invoiceId,
         note: note,
       }
       request.post(closeAppointmentForProvider, data).then(result => {
