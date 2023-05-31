@@ -128,7 +128,7 @@ class PrivateNote extends React.Component {
     const columns = [
       {
         title: intl.formatMessage(messages.studentName), key: 'name',
-        sorter: (a, b) => a.firstName + a.lastName > b.firstName + b.lastName ? 1 : -1,
+        sorter: (a, b) => (a.firstName || '' + a.lastName || '').toLowerCase() > (b.firstName || '' + b.lastName || '').toLowerCase() ? 1 : -1,
         render: (dependent) => (<a onClick={() => this.handleClickRow(dependent)}>{dependent.firstName ?? ''} {dependent.lastName ?? ''}</a>),
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
@@ -179,7 +179,7 @@ class PrivateNote extends React.Component {
       },
       {
         title: intl.formatMessage(msgCreateAccount.currentGrade), dataIndex: 'currentGrade', key: 'grade',
-        sorter: (a, b) => a.currentGrade.toLowerCase() > b.currentGrade.toLowerCase() ? 1 : -1,
+        sorter: (a, b) => (a.currentGrade || '').toLowerCase() > (b.currentGrade || '').toLowerCase() ? 1 : -1,
         filters: grades,
         onFilter: (value, record) => record?.currentGrade === value,
       },
