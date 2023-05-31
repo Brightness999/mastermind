@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'dva/router';
-import { FaChild, FaUserAlt, FaUserEdit } from 'react-icons/fa';
+import { FaChild, FaFileInvoiceDollar, FaUserAlt, FaUserEdit } from 'react-icons/fa';
 import { BiLogOutCircle, BiBell } from 'react-icons/bi';
 import { BsSearch } from 'react-icons/bs';
 import { Badge, Avatar, Input, Dropdown } from 'antd';
@@ -95,6 +95,15 @@ class MainHeader extends Component {
       label: (
         <Link to={routerLinks.PrivateNote}>
           {intl.formatMessage(messages.dependentList)}
+        </Link>
+      ),
+    });
+    user?.role === 3 && items.splice(4, 0, {
+      key: '6',
+      icon: <FaFileInvoiceDollar size={18} color='#495057' />,
+      label: (
+        <Link to={routerLinks.InvoiceList}>
+          {intl.formatMessage(messages.invoiceList)}
         </Link>
       ),
     });

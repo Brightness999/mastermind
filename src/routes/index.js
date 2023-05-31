@@ -29,6 +29,7 @@ import Private from './Administrator/PrivateNote';
 import PrivateNote from './PrivateNote';
 import Notification from './Notifications';
 import CreateUser from './Administrator/CreateAccount';
+import InvoiceList from './Invoice';
 
 const routesConfig = app => [
   {
@@ -41,6 +42,7 @@ const routesConfig = app => [
       Changeprofile(app),
       PrivateNote(app),
       Notification(app),
+      InvoiceList(app),
     ]
   },
   {

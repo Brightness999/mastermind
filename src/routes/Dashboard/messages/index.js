@@ -214,4 +214,16 @@ export default ({
     id: `${scope}.countOfReferrals`,
     defaultMessage: 'Count of Referrals',
   },
+  invoiceType: {
+    id: `${scope}.invoiceType`,
+    defaultMessage: 'Invoice Type',
+  },
+  createdDate: {
+    id: `${scope}.createdDate`,
+    defaultMessage: 'Created Date',
+  },
+  updatedDate: {
+    id: `${scope}.updatedDate`,
+    defaultMessage: 'Updated Date',
+  },
 });

@@ -19,6 +19,7 @@ export const routerLinks = {
   Changeprofile: '/account/changeprofile',
   Notification: '/account/notifications',
   PrivateNote: '/account/privatenote',
+  InvoiceList: '/account/invoicelist',
   Blank: '/widget/blank',
   Home: '/home',
   Donate: '/donate',

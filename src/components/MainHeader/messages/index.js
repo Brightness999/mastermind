@@ -25,6 +25,10 @@ export default {
     id: `${scope}.dependentList`,
     defaultMessage: 'Dependent List',
   },
+  invoiceList: {
+    id: `${scope}.invoiceList`,
+    defaultMessage: 'Invoice List',
+  },
   notification: {
     id: `${scope}.notification`,
     defaultMessage: 'Notification',
