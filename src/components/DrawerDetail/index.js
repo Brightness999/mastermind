@@ -465,7 +465,7 @@ class DrawerDetail extends Component {
   onSubmitFlagBalance = (values) => {
     const { notes } = values;
     const { listAppointmentsRecent, event } = this.props;
-    const providerIds = Object.keys(values).filter(a => a.includes('invoiceNumber')).map(a => a.split("-")[1]);
+    const providerIds = Object.keys(values).filter(a => a.includes('invoiceId')).map(a => a.split("-")[1]);
     let bulkData = [];
 
     providerIds.forEach(providerId => {
@@ -493,7 +493,7 @@ class DrawerDetail extends Component {
       })
       bulkData.push({
         providerId,
-        invoiceNumber: values[`invoiceNumber-${providerId}`],
+        invoiceId: values[`invoiceId-${providerId}`],
         data: temp
       })
     })

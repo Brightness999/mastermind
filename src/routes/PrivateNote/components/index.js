@@ -109,7 +109,7 @@ class PrivateNote extends React.Component {
   handleSubmitFlagBalance = (values) => {
     const { notes } = values;
     const { selectedDependent } = this.state;
-    const providerIds = Object.keys(values).filter(a => a.includes('invoiceNumber')).map(a => a.split("-")[1]);
+    const providerIds = Object.keys(values).filter(a => a.includes('invoiceId')).map(a => a.split("-")[1]);
     let bulkData = [];
 
     providerIds.forEach(providerId => {
@@ -137,7 +137,7 @@ class PrivateNote extends React.Component {
       })
       bulkData.push({
         providerId,
-        invoiceNumber: values[`invoiceNumber-${providerId}`],
+        invoiceId: values[`invoiceId-${providerId}`],
         data: temp
       })
     })

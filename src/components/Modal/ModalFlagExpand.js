@@ -120,7 +120,7 @@ class ModalFlagExpand extends React.Component {
 		const { notes } = values;
 		const { appointments } = this.props;
 		const { event } = this.state;
-		const providerIds = Object.keys(values).filter(a => a.includes('invoiceNumber')).map(a => a.split("-")[1]);
+		const providerIds = Object.keys(values).filter(a => a.includes('invoiceId')).map(a => a.split("-")[1]);
 		let bulkData = [];
 		providerIds.forEach(providerId => {
 			let temp = [];
@@ -147,7 +147,7 @@ class ModalFlagExpand extends React.Component {
 			})
 			bulkData.push({
 				providerId,
-				invoiceNumber: values[`invoiceNumber-${providerId}`],
+				invoiceId: values[`invoiceId-${providerId}`],
 				data: temp
 			})
 		})

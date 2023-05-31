@@ -8,8 +8,6 @@ import { compose } from 'redux';
 import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import { ACTIVE, ADMIN, APPOINTMENT, CLEAR, CLOSED, EVALUATION, NOFLAG, PARENT, PROVIDER, SUBSIDY, SUPERADMIN } from '../../routes/constant';
-import './style/index.less';
-import '../../assets/styles/login.less';
 
 class ModalBalance extends React.Component {
 	state = {
@@ -36,11 +34,11 @@ class ModalBalance extends React.Component {
 			})
 		} else {
 			if (auth.user.role === ADMIN || auth.user.role === SUPERADMIN) {
-				unpaidAppointments = dependent?.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED && !a.isPaid && [ACTIVE, NOFLAG].includes(a.flagStatus));
+				unpaidAppointments = dependent?.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED && !a.sessionInvoice?.isPaid && [ACTIVE, NOFLAG].includes(a.flagStatus));
 			} else if (auth.user.role === PROVIDER) {
-				unpaidAppointments = dependent?.appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED && !a.isPaid && [ACTIVE, NOFLAG].includes(a.flagStatus));
+				unpaidAppointments = dependent?.appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED && !a.sessionInvoice?.isPaid && [ACTIVE, NOFLAG].includes(a.flagStatus));
 			} else {
-				unpaidAppointments = dependent?.appointments?.filter(a => a.provider?._id === event?.provider?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED && !a.isPaid && [ACTIVE, NOFLAG].includes(a.flagStatus));
+				unpaidAppointments = dependent?.appointments?.filter(a => a.provider?._id === event?.provider?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED && !a.sessionInvoice?.isPaid && [ACTIVE, NOFLAG].includes(a.flagStatus));
 			}
 
 			const providers = unpaidAppointments?.map(a => a.provider)?.reduce((a, b) => a?.find(p => p._id === b._id) ? a : [...a, b], []);
@@ -64,7 +62,7 @@ class ModalBalance extends React.Component {
 							[event._id]: data?.items?.late || 0,
 							[`balance-${event._id}`]: data?.items?.balance || 0,
 							notes: data?.items?.notes,
-							[`invoiceNumber-${provider?._id}`]: invoice?._id,
+							[`invoiceId-${provider?._id}`]: invoice?._id,
 						});
 						total += data?.items?.balance + data?.items?.late;
 						minimum = data?.items?.minimumPayment;
@@ -160,7 +158,7 @@ class ModalBalance extends React.Component {
 				<Form name='flag-balance' layout='vertical' onFinish={this.onFinish} ref={ref => this.form = ref}>
 					{providerData?.map((p, index) => (
 						<Fragment key={index}>
-							<Form.Item name={`invoiceNumber-${p.provider?._id}`} hidden>
+							<Form.Item name={`invoiceId-${p.provider?._id}`} hidden>
 								<Input />
 							</Form.Item>
 							<Divider className={index === 0 ? 'd-none' : 'my-10'} />
