@@ -85,7 +85,7 @@ class ModalFlagExpand extends React.Component {
 
 	onSubmitFlagNoShow = (values) => {
 		const { event } = this.state;
-		const { penalty, program, notes, invoiceNumber } = values;
+		const { penalty, program, notes, invoiceId } = values;
 		const data = {
 			_id: event?._id,
 			dependent: event?.dependent?._id,
@@ -101,10 +101,10 @@ class ModalFlagExpand extends React.Component {
 				rate: penalty * 1 + program * 1,
 				flagType: NOSHOW,
 			},
-			invoiceNumber,
+			invoiceId,
 		}
 
-		request.post(invoiceNumber ? updateNoshowFlag : setFlag, data).then(result => {
+		request.post(invoiceId ? updateNoshowFlag : setFlag, data).then(result => {
 			const { success } = result;
 			if (success) {
 				this.setState({ visibleNoShow: false, isFlag: true });

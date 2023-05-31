@@ -52,7 +52,7 @@ class ModalNoShow extends React.Component {
 		} else {
 			const invoice = event.flagInvoice;
 			const data = invoice?.data?.[0];
-			this.form?.setFieldsValue({ penalty: data?.items?.penalty, program: data?.items?.program, notes: data?.items?.notes, invoiceNumber: invoice?._id });
+			this.form?.setFieldsValue({ penalty: data?.items?.penalty, program: data?.items?.program, notes: data?.items?.notes, invoiceId: invoice?._id });
 		}
 	}
 
@@ -78,7 +78,7 @@ class ModalNoShow extends React.Component {
 				<Form name='flag-no-show' layout='vertical' onFinish={this.onFinish} ref={ref => this.form = ref}>
 					<div className='flex flex-row items-start mb-5'>
 						<div className='mr-10 flex-1'>
-							<Form.Item name="invoiceNumber" hidden>
+							<Form.Item name="invoiceId" hidden>
 								<Input />
 							</Form.Item>
 							<Form.Item
