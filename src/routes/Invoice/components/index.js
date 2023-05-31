@@ -200,7 +200,7 @@ class InvoiceList extends React.Component {
       },
       {
         title: intl.formatMessage(messages.action), key: 'action',
-        render: invoice => invoice.isPaid ? null : <Button type='link'>Pay</Button>,
+        render: invoice => invoice.isPaid ? null : <span className='underline text-primary'>Pay</span>,
       },
     ];
 

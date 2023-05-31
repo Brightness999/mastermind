@@ -45,7 +45,7 @@ class ModalInvoice extends React.Component {
 		if (event?.sessionInvoice) {
 			const items = event.sessionInvoice.data?.[0]?.items || [];
 			this.setState({
-				items: items,
+				items,
 				subTotal: items?.reduce((a, b) => a += b.rate * 1, 0),
 				invoiceNumber: event.sessionInvoice.invoiceNumber,
 				invoiceDate: moment(event.sessionInvoice.updatedAt).format("MM/DD/YYYY"),
@@ -63,13 +63,16 @@ class ModalInvoice extends React.Component {
 			let items = [];
 			switch (invoice.type) {
 				case 1: case 2: case 3: items = invoice.data?.[0]?.items || []; break;
-				case 4: items = invoice.data?.[0]?.items ? [invoice.data?.[0]?.items] : []; break;
-				case 5: items = invoice.data?.map(a => ([{ type: a.items.type, locationDate: a.items.locationDate, rate: a.items.balance }, { type: a.items.type, locationDate: a.items.locationDate, rate: a.items.late }]))?.flat();
+				case 4:
+					const data = invoice.data?.[0]?.items;
+					items = data ? [{ type: 'Penalty', locationDate: data.locationDate, rate: data.penalty }, { type: 'Program Fee', locationDate: data.locationDate, rate: data.program }] : [];
+					break;
+				case 5: items = invoice.data?.map(a => ([{ type: a.items.type, locationDate: a.items.locationDate, rate: a.items.balance }, { type: 'Late Fee', locationDate: a.items.locationDate, rate: a.items.late }]))?.flat();
 				default:
 					break;
 			}
 			this.setState({
-				items: items,
+				items,
 				subTotal: items?.reduce((a, b) => a += b.rate * 1, 0),
 				invoiceNumber: invoice.invoiceNumber,
 				invoiceDate: moment(invoice.updatedAt).format("MM/DD/YYYY"),

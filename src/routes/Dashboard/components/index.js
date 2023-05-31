@@ -1232,7 +1232,7 @@ class Dashboard extends React.Component {
                     <Tabs defaultActiveKey="1" type="card" size='small'>
                       <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                         {listAppointmentsRecent?.filter(a => a.flagStatus === ACTIVE)?.map((appointment, index) =>
-                          <div key={index} className='list-item padding-item gap-2' onClick={(e) => !e.target.className.includes('font-12 flag-action') && this.onShowDrawerDetail(appointment._id)}>
+                          <div key={index} className='list-item padding-item justify-between' onClick={(e) => !e.target.className.includes('font-12 flag-action') && this.onShowDrawerDetail(appointment._id)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
                               <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
@@ -1240,6 +1240,7 @@ class Dashboard extends React.Component {
                             </div>
                             {userRole === 3 ? (
                               <>
+                                <div className='font-12'>{appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
                                 {(appointment?.flagInvoice?.isPaid || appointment?.flagInvoice?.data?.[0]?.items?.rate == 0) ? (
                                   <a className='font-12 flag-action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
                                 ) : null}
