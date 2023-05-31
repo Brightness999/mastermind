@@ -184,10 +184,10 @@ class ModalInvoice extends React.Component {
 
 	sendEmailInvoice = () => {
 		const { event } = this.props;
-		const { items } = this.state;
+		const { items, providerBillingAddress, providerEmail, providerName, providerPhonenumber, dependentName, parentAddress, parentName, service, invoiceDate, invoiceNumber } = this.state;
 
 		this.setState({ loadingEmail: true });
-		request.post(sendEmailInvoice, { appointmentId: event?._id, items: items }).then(res => {
+		request.post(sendEmailInvoice, { appointmentId: event?._id, items, providerBillingAddress, providerEmail, providerName, providerPhonenumber, dependentName, parentAddress, parentName, service, invoiceDate, invoiceNumber }).then(res => {
 			this.setState({ loadingEmail: false });
 			if (res.success) {
 				message.success('This invoice has been sent successfully.');
