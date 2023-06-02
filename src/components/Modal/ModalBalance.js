@@ -50,11 +50,11 @@ class ModalBalance extends React.Component {
 						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
 						const discount = event?.type === SUBSIDY ? (event.subsidy?.pricePerSession || 0) * -1 : 0;
 						this.form?.setFieldsValue({
-							[event._id]: balance || 0,
-							[`balance-${event._id}`]: balance || 0,
+							[event._id]: event?.sessionInvoice ? event.sessionInvoice?.data?.[0]?.items?.[0]?.rate : balance || 0,
+							[`balance-${event._id}`]: event?.sessionInvoice ? event.sessionInvoice?.data?.[0]?.items?.[0]?.rate : balance || 0,
 							[`discount-${event._id}`]: discount,
 						});
-						total += balance * 2 + discount;
+						total += (event?.sessionInvoice ? event.sessionInvoice?.data?.[0]?.items?.[0]?.rate : balance || 0) * 2 + discount;
 					} else {
 						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
 						const invoice = event.flagInvoice;
@@ -67,7 +67,7 @@ class ModalBalance extends React.Component {
 							notes: data?.items?.notes,
 							[`invoiceId-${provider?._id}`]: invoice?._id,
 						});
-						total = invoice.totalPayment;
+						total += (data?.items?.balance * 1 || 0) + (data?.items?.late * 1 || 0) + (data?.items?.discount * 1 || 0);
 						minimum = invoice.minimumPayment;
 					}
 				});
