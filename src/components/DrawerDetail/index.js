@@ -430,7 +430,7 @@ class DrawerDetail extends Component {
 
   onSubmitFlagNoShow = (values) => {
     const { event } = this.props;
-    const { penalty, program, notes, invoiceId } = values;
+    const { penalty, program, notes, invoiceId, balance, feeOption } = values;
     const data = {
       _id: event?._id,
       dependent: event?.dependent?._id,
@@ -444,10 +444,12 @@ class DrawerDetail extends Component {
         type: 'Fee',
         date: moment(event?.date).format("MM/DD/YYYY hh:mm a"),
         details: 'Missed Appointment',
-        rate: penalty * 1 + program * 1,
+        rate: feeOption === 1 ? balance : feeOption === 2 ? penalty * 1 + program * 1 : 0,
         flagType: NOSHOW,
+        feeOption,
+        balance,
       },
-      totalPayment: (penalty * 1 + program * 1) || 0,
+      totalPayment: feeOption === 1 ? balance : feeOption === 2 ? penalty * 1 + program * 1 : 0,
       invoiceId,
     }
 
