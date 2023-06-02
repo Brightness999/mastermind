@@ -62,7 +62,8 @@ class ModalInvoice extends React.Component {
 		} else if (invoice) {
 			let items = [];
 			switch (invoice.type) {
-				case 1: case 2: case 3: case 4: items = invoice.data?.[0]?.items || []; break;
+				case 1: case 2: case 3: items = invoice.data?.[0]?.items || []; break;
+				case 4: items = invoice.data?.[0]?.items ? [invoice.data?.[0]?.items] : []; break;
 				case 5: items = invoice.data?.map(a => ([
 					{ type: a.items.type, date: a.items.date, details: a.items.details, discount: a.items.discount ? a.items.discount : undefined, rate: a.items.balance, count: a.items.count },
 					{ type: 'Fee', date: a.items.date, details: 'Past Due Balance Fee', rate: a.items.late }
