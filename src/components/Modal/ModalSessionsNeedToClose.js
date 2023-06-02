@@ -48,6 +48,7 @@ class ModalSessionsNeedToClose extends React.Component {
 				items: items?.items,
 				invoiceNumber: items?.invoiceNumber,
 				invoiceId: items?.invoiceId,
+				totalPayment: items?.totalPayment,
 			}
 
 			request.post(closeAppointmentForProvider, data).then(result => {

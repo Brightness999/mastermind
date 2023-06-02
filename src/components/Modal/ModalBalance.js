@@ -22,7 +22,7 @@ class ModalBalance extends React.Component {
 			const items = event?.flagInvoice?.data?.find(a => a?.appointment === event?._id)?.items;
 			this.form?.setFieldsValue({
 				[event._id]: items?.late || 0,
-				[`balance-${event?._id}`]: items?.totalPayment || 0,
+				[`balance-${event?._id}`]: items?.balance || 0,
 				[`totalPayment-${event.provider?._id}`]: items?.totalPayment || 0,
 				[`minimumPayment-${event.provider?._id}`]: items?.minimumPayment || 0,
 			});
@@ -48,11 +48,13 @@ class ModalBalance extends React.Component {
 					const balance = this.getBalance(event);
 					if (event?.flagStatus === NOFLAG) {
 						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
+						const discount = event?.type === SUBSIDY ? (event.subsidy?.pricePerSession || 0) * -1 : 0;
 						this.form?.setFieldsValue({
 							[event._id]: balance || 0,
 							[`balance-${event._id}`]: balance || 0,
+							[`discount-${event._id}`]: discount,
 						});
-						total += balance * 2;
+						total += balance * 2 + discount;
 					} else {
 						temp.push({ ...event, pastDays: this.pastDays(event?.date) });
 						const invoice = event.flagInvoice;
@@ -61,11 +63,12 @@ class ModalBalance extends React.Component {
 						this.form?.setFieldsValue({
 							[event._id]: data?.items?.late || 0,
 							[`balance-${event._id}`]: data?.items?.balance || 0,
+							[`discount-${event._id}`]: data?.items?.discount || 0,
 							notes: data?.items?.notes,
 							[`invoiceId-${provider?._id}`]: invoice?._id,
 						});
-						total += data?.items?.balance + data?.items?.late;
-						minimum = data?.items?.minimumPayment;
+						total = invoice.totalPayment;
+						minimum = invoice.minimumPayment;
 					}
 				});
 				this.form.setFieldsValue({
@@ -134,7 +137,7 @@ class ModalBalance extends React.Component {
 		const { providerData } = this.state;
 		const values = this.form.getFieldsValue();
 		const appointments = providerData?.find(p => p.provider?._id == providerId).appointments;
-		let newTotal = appointments?.reduce((a, b) => (a + values[`balance-${b._id}`] * 1 + values[b._id] * 1), 0);
+		let newTotal = appointments?.reduce((a, b) => a += (values[`balance-${b._id}`] || 0) * 1 + (values[`discount-${b._id}`] || 0) * 1 + (values[b._id] || 0) * 1, 0);
 		this.form.setFieldsValue({ [`totalPayment-${providerId}`]: newTotal });
 	}
 
@@ -213,6 +216,33 @@ class ModalBalance extends React.Component {
 									<Col xs={24} sm={24} md={6}>
 										{index === 0 ? <p>{intl.formatMessage(msgCreateAccount.provider)}</p> : null}
 										<p className={`font-16 font-500 mb-0 ${index === 0 && 'mt-1'}`}>{p?.provider?.firstName} {p?.provider?.lastName}</p>
+									</Col>
+									<Col xs={24} sm={24} md={6}>
+										<Form.Item
+											name={`discount-${a._id}`}
+											label="Discount amount"
+											className='mb-0'
+										>
+											<Input
+												type='number'
+												max={0}
+												addonBefore="$"
+												style={{ width: 110 }}
+												className='font-16'
+												disabled={user?.role === PARENT || event?.flagStatus === CLEAR}
+												onKeyDown={(e) => {
+													(e.key === '.' || e.key === 'e' || (e.key === '-' && e.target.value != '')) && e.preventDefault();
+													if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+														e.preventDefault();
+														e.target.value = e.key;
+													}
+													if (e.key === '-' && e.target.value === '') {
+														e.target.value = '-';
+													}
+												}}
+												onChange={() => this.handleChangeLateFee(p.provider?._id)}
+											/>
+										</Form.Item>
 									</Col>
 								</Row>
 							))}

@@ -183,10 +183,12 @@ class DrawerDetail extends Component {
       appointmentId: event._id,
       type: cancellationType,
       items: [{
-        type: event?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
-        locationDate: `${event.location} ${moment(event.date).format('MM/DD/YYYY hh:mm a')}`,
+        type: 'Fee',
+        date: moment(event.date).format('MM/DD/YYYY hh:mm a'),
+        details: `${cancellationType} Appointment`,
         rate: event.provider.cancellationFee,
       }],
+      totalPayment: event.provider.cancellationFee || 0,
     }
     request.post(sendEmailInvoice, postData).then(res => {
       if (res.success) {
@@ -276,6 +278,7 @@ class DrawerDetail extends Component {
         items: items?.items,
         invoiceNumber: items?.invoiceNumber,
         invoiceId: items?.invoiceId,
+        totalPayment: items?.totalPayment,
         note: note,
       }
       request.post(closeAppointmentForProvider, data).then(result => {
@@ -438,11 +441,13 @@ class DrawerDetail extends Component {
         penalty: penalty * 1,
         program: program * 1,
         notes,
-        type: event?.type == EVALUATION ? intl.formatMessage(msgModal.evaluation) : event?.type == APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : event?.type == SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
-        locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
+        type: 'Fee',
+        date: moment(event?.date).format("MM/DD/YYYY hh:mm a"),
+        details: 'Missed Appointment',
         rate: penalty * 1 + program * 1,
         flagType: NOSHOW,
       },
+      totalPayment: (penalty * 1 + program * 1) || 0,
       invoiceId,
     }
 
@@ -480,12 +485,15 @@ class DrawerDetail extends Component {
               items: {
                 flagType: BALANCE,
                 late: value[1] * 1,
+                count: appointment.type === SUBSIDY ? `[${listAppointmentsRecent?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status) && a?.dependent?._id === appointment?.dependent?._id && a?.provider?._id === appointment?.provider?._id)?.length}/${appointment?.subsidy?.numberOfSessions}]` : '',
+                discount: values[`discount-${appointment._id}`],
                 balance: values[`balance-${appointment._id}`],
                 totalPayment: values[`totalPayment-${appointment.provider?._id}`],
                 rate: values[`totalPayment-${appointment.provider?._id}`],
                 minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
                 type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
-                locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
+                date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
+                details: `Location: ${appointment?.location}`,
                 notes,
               }
             })
@@ -495,7 +503,9 @@ class DrawerDetail extends Component {
       bulkData.push({
         providerId,
         invoiceId: values[`invoiceId-${providerId}`],
-        data: temp
+        totalPayment: values[`totalPayment-${providerId}`],
+        minimumPayment: values[`minimumPayment-${providerId}`],
+        data: temp,
       })
     })
 
@@ -998,7 +1008,7 @@ class DrawerDetail extends Component {
             )}
             {event?.flagStatus === ACTIVE ? userRole === 3 ? (
               <div className='flex items-center justify-between gap-2'>
-                {(event?.flagInvoice?.isPaid || event?.flagInvoice?.data?.[0]?.items?.rate == 0) ? (
+                {(event?.flagInvoice?.isPaid || event?.flagInvoice?.totalPayment == 0) ? (
                   <Button type='primary' block className='flex-1 h-30 p-0' onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
                   </Button>
@@ -1007,7 +1017,7 @@ class DrawerDetail extends Component {
                   <Button type='primary' block className='flex-1 h-30 p-0' disabled>
                     {intl.formatMessage(messages.paid)}
                   </Button>
-                ) : event?.flagInvoice?.data?.[0]?.items?.rate == 0 ? null : (
+                ) : event?.flagInvoice?.totalPayment == 0 ? null : (
                   <>
                     <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
                       {intl.formatMessage(messages.flagDetails)}
@@ -1018,7 +1028,7 @@ class DrawerDetail extends Component {
                       <input type="hidden" name="cmd" value="_donations" />
                       <input type="hidden" name="item_name" value="Help Me Get Help" />
                       <input type="hidden" name="item_number" />
-                      <input type="hidden" name="amount" value={event?.flagInvoice?.data?.[0]?.items?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                      <input type="hidden" name="amount" value={event?.flagInvoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
                       <input type="hidden" name="shipping" value="0.00" />
                       <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                       <input type="hidden" name="rm" value="0" />
@@ -1057,7 +1067,7 @@ class DrawerDetail extends Component {
               )
             ) : (
               <div className='flex items-center justify-between gap-2 flex-2'>
-                {(event?.flagInvoice?.isPaid || event?.flagInvoice?.data?.[0]?.items?.rate == 0) ? (
+                {(event?.flagInvoice?.isPaid || event?.flagInvoice?.totalPayment == 0) ? (
                   <Button type='primary' block className='flex-1 h-30 p-0 px-5' onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
                   </Button>
@@ -1066,7 +1076,7 @@ class DrawerDetail extends Component {
                   <Button type='primary' block className='flex-1 h-30 p-0' disabled>
                     {intl.formatMessage(messages.paid)}
                   </Button>
-                ) : event?.flagInvoice?.data?.[0]?.items?.rate == 0 ? null : (
+                ) : event?.flagInvoice?.totalPayment == 0 ? null : (
                   <>
                     <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
                       {intl.formatMessage(messages.flagDetails)}
@@ -1077,7 +1087,7 @@ class DrawerDetail extends Component {
                       <input type="hidden" name="cmd" value="_donations" />
                       <input type="hidden" name="item_name" value="Help Me Get Help" />
                       <input type="hidden" name="item_number" />
-                      <input type="hidden" name="amount" value={event?.flagInvoice?.data?.[0]?.items?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                      <input type="hidden" name="amount" value={event?.flagInvoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
                       <input type="hidden" name="shipping" value="0.00" />
                       <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                       <input type="hidden" name="rm" value="0" />
@@ -1183,7 +1193,7 @@ class DrawerDetail extends Component {
                     <input type="hidden" name="cmd" value="_donations" />
                     <input type="hidden" name="item_name" value="Help Me Get Help" />
                     <input type="hidden" name="item_number" />
-                    <input type="hidden" name="amount" value={event?.sessionInvoice?.data?.[0]?.items?.reduce((a, b) => a += b.rate * 1, 0)} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                    <input type="hidden" name="amount" value={event?.sessionInvoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
                     <input type="hidden" name="shipping" value="0.00" />
                     <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                     <input type="hidden" name="rm" value="0" />
@@ -1295,7 +1305,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(userRole === 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.flagStatus === ACTIVE && (event?.sessionInvoice?.isPaid || event?.flagInvoice?.data?.[0]?.items?.rate == 0)) && (
+              {(userRole === 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.flagStatus === ACTIVE && (event?.sessionInvoice?.isPaid || event?.flagInvoice?.totalPayment == 0)) && (
                 <Col span={12}>
                   <Button type='primary' icon={<FaFileContract size={12} />} block onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
@@ -1346,6 +1356,7 @@ class DrawerDetail extends Component {
 }
 
 const mapStateToProps = state => ({
+  appointments: state.appointments.dataAppointments,
   auth: state.auth,
 });
 

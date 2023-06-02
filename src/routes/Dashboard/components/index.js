@@ -1241,17 +1241,17 @@ class Dashboard extends React.Component {
                             {userRole === 3 ? (
                               <>
                                 <div className='font-12'>{appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
-                                {(appointment?.flagInvoice?.isPaid || appointment?.flagInvoice?.data?.[0]?.items?.rate == 0) ? (
+                                {(appointment?.flagInvoice?.isPaid || appointment?.flagInvoice?.totalPayment == 0) ? (
                                   <a className='font-12 flag-action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
                                 ) : null}
-                                {appointment?.flagInvoice?.isPaid ? 'Paid' : appointment?.flagInvoice?.data?.[0]?.items?.rate == 0 ? null : (
+                                {appointment?.flagInvoice?.isPaid ? 'Paid' : appointment?.flagInvoice?.totalPayment == 0 ? null : (
                                   <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                                     <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                                     <input type="hidden" name="business" value="office@helpmegethelp.org" />
                                     <input type="hidden" name="cmd" value="_donations" />
                                     <input type="hidden" name="item_name" value="Help Me Get Help" />
                                     <input type="hidden" name="item_number" />
-                                    <input type="hidden" name="amount" value={appointment?.flagInvoice?.data?.[0]?.items?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                                    <input type="hidden" name="amount" value={appointment?.flagInvoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
                                     <input type="hidden" name="shipping" value="0.00" />
                                     <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                                     <input type="hidden" name="rm" value="0" />

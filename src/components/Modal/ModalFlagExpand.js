@@ -96,11 +96,13 @@ class ModalFlagExpand extends React.Component {
 				notes,
 				penalty: penalty * 1,
 				program: program * 1,
-				type: event?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
-				locationDate: `(${event?.location}) Session on ${new Date(event?.date).toLocaleDateString()}`,
+				type: 'Fee',
+				date: moment(event?.date).format("MM/DD/YYYY hh:mm a"),
+				details: "Missed Appointment",
 				rate: penalty * 1 + program * 1,
 				flagType: NOSHOW,
 			},
+			totalPayment: (penalty * 1 + program * 1) || 0,
 			invoiceId,
 		}
 
@@ -133,12 +135,15 @@ class ModalFlagExpand extends React.Component {
 							items: {
 								flagType: BALANCE,
 								late: value[1] * 1,
+								count: appointment.type === SUBSIDY ? `[${appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status) && a?.dependent?._id === appointment?.dependent?._id && a?.provider?._id === appointment?.provider?._id)?.length}/${appointment?.subsidy?.numberOfSessions}]` : '',
+								discount: values[`discount-${appointment._id}`],
 								balance: values[`balance-${appointment._id}`],
 								totalPayment: values[`totalPayment-${appointment.provider?._id}`],
 								rate: values[`totalPayment-${appointment.provider?._id}`],
 								minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
 								type: appointment?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
-								locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
+								date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
+								details: `Location: ${appointment?.location}`,
 								notes,
 							}
 						})
@@ -148,7 +153,9 @@ class ModalFlagExpand extends React.Component {
 			bulkData.push({
 				providerId,
 				invoiceId: values[`invoiceId-${providerId}`],
-				data: temp
+				totalPayment: values[`totalPayment-${providerId}`],
+				minimumPayment: values[`minimumPayment-${providerId}`],
+				data: temp,
 			})
 		})
 
@@ -271,15 +278,15 @@ class ModalFlagExpand extends React.Component {
 			columns.splice(5, 0, {
 				title: 'Action', key: 'action', render: (appointment) => (
 					<Space size="small">
-						{(appointment?.flagInvoice?.isPaid || appointment?.flagInvoice?.data?.[0]?.items?.rate == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
-						{appointment?.flagInvoice?.isPaid ? 'Paid' : appointment?.flagInvoice?.data?.[0]?.items?.rate == 0 ? null : (
+						{(appointment?.flagInvoice?.isPaid || appointment?.flagInvoice?.totalPayment == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
+						{appointment?.flagInvoice?.isPaid ? 'Paid' : appointment?.flagInvoice?.totalPayment == 0 ? null : (
 							<form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
 								<input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
 								<input type="hidden" name="business" value="office@helpmegethelp.org" />
 								<input type="hidden" name="cmd" value="_donations" />
 								<input type="hidden" name="item_name" value="Help Me Get Help" />
 								<input type="hidden" name="item_number" />
-								<input type="hidden" name="amount" value={appointment?.flagInvoice?.data?.[0]?.items?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+								<input type="hidden" name="amount" value={appointment?.flagInvoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
 								<input type="hidden" name="shipping" value="0.00" />
 								<input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
 								<input type="hidden" name="rm" value="0" />
@@ -317,15 +324,15 @@ class ModalFlagExpand extends React.Component {
 			columns.splice(5, 0, {
 				title: 'Action', key: 'action', render: (appointment) => (
 					<Space size="small">
-						{(appointment?.flagInvoice?.isPaid || appointment?.flagInvoice?.data?.[0]?.items?.rate == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
-						{appointment?.flagInvoice?.isPaid ? 'Paid' : appointment?.flagInvoice?.data?.[0]?.items?.rate == 0 ? null : (
+						{(appointment?.flagInvoice?.isPaid || appointment?.flagInvoice?.totalPayment == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
+						{appointment?.flagInvoice?.isPaid ? 'Paid' : appointment?.flagInvoice?.totalPayment == 0 ? null : (
 							<form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
 								<input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
 								<input type="hidden" name="business" value="office@helpmegethelp.org" />
 								<input type="hidden" name="cmd" value="_donations" />
 								<input type="hidden" name="item_name" value="Help Me Get Help" />
 								<input type="hidden" name="item_number" />
-								<input type="hidden" name="amount" value={appointment?.flagInvoice?.data?.[0]?.items?.rate} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+								<input type="hidden" name="amount" value={appointment?.flagInvoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
 								<input type="hidden" name="shipping" value="0.00" />
 								<input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
 								<input type="hidden" name="rm" value="0" />

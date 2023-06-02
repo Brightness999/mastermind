@@ -123,12 +123,15 @@ class PrivateNote extends React.Component {
               items: {
                 flagType: BALANCE,
                 late: value[1] * 1,
+                count: appointment.type === SUBSIDY ? `[${selectedDependent.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status) && a?.dependent?._id === appointment?.dependent?._id && a?.provider?._id === appointment?.provider?._id)?.length}/${appointment?.subsidy?.numberOfSessions}]` : '',
+                discount: values[`discount-${appointment?._id}`] * 1,
                 balance: values[`balance-${appointment?._id}`] * 1,
                 totalPayment: values[`totalPayment-${appointment.provider?._id}`],
                 rate: values[`totalPayment-${appointment.provider?._id}`],
                 minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
                 type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
-                locationDate: `(${appointment?.location}) Session on ${new Date(appointment?.date).toLocaleDateString()}`,
+                date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
+                details: `Location: ${appointment?.location}`,
                 notes,
               }
             })
@@ -138,7 +141,9 @@ class PrivateNote extends React.Component {
       bulkData.push({
         providerId,
         invoiceId: values[`invoiceId-${providerId}`],
-        data: temp
+        totalPayment: values[`totalPayment-${providerId}`],
+        minimumPayment: values[`minimumPayment-${providerId}`],
+        data: temp,
       })
     })
 

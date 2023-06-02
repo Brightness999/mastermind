@@ -492,10 +492,21 @@
   color: @gray300;
 }
 
-.item-input.ant-input[type=number]::-webkit-inner-spin-button,
-.item-input.ant-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+.item-input {
+  background-color: transparent;
+  border: 0;
+  color: black;
+
+  .ant-input[type=number] {
+    color: black;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+
 }
 
 .clear-flag-confirm {
