@@ -1021,7 +1021,7 @@ class SchedulingCenter extends React.Component {
                           <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
                           <p className='font-09 mb-0'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                         </div>
-                        <div className='font-12'>{appointment?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
+                        <div className='font-12'>{appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
                         <a className='font-12 flag-action' onClick={() => this.openFlagAction(appointment)}>{intl.formatMessage(messages.action)}</a>
                       </div>
                     )}
@@ -1034,7 +1034,7 @@ class SchedulingCenter extends React.Component {
                           <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
                           <p className='font-09 mb-0'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
                         </div>
-                        <div className='font-12'>{appointment?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
+                        <div className='font-12'>{appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
                         <div>
                           <div className='font-12'>{moment(appointment.date).format("hh:mm a")}</div>
                           <div className='font-12 font-700 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
