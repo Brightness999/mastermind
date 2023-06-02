@@ -10,6 +10,7 @@ import { ModalInvoice } from '../../../components/Modal';
 import msgMainHeader from '../../../components/MainHeader/messages';
 import messages from '../../Dashboard/messages';
 import msgCreateAccount from '../../Sign/CreateAccount/messages';
+import msgModal from 'components/Modal/messages';
 import request from '../../../utils/api/request';
 import { getInvoices } from '../../../utils/api/apiList';
 import { getSubsidyRequests } from '../../../redux/features/appointmentsSlice';
@@ -200,7 +201,23 @@ class InvoiceList extends React.Component {
       },
       {
         title: intl.formatMessage(messages.action), key: 'action',
-        render: invoice => invoice.isPaid ? null : <span className='underline text-primary cursor'>Pay</span>,
+        render: invoice => invoice.isPaid ? null : <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+          <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+          <input type="hidden" name="business" value="office@helpmegethelp.org" />
+          <input type="hidden" name="cmd" value="_donations" />
+          <input type="hidden" name="item_name" value="Help Me Get Help" />
+          <input type="hidden" name="item_number" />
+          <input type="hidden" name="amount" value={invoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+          <input type="hidden" name="shipping" value="0.00" />
+          <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+          <input type="hidden" name="rm" value="0" />
+          <input type="hidden" name="return" value={`${window.location.href}?success=true&type=flag&invoiceId=${invoice?._id}`} />
+          <input type="hidden" name="cancel_return" value={window.location.href} />
+          <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+          <Button type='link' block className='h-30 p-0 text-primary' htmlType='submit'>
+            {intl.formatMessage(msgModal.paynow)}
+          </Button>
+        </form>,
       },
     ];
 
