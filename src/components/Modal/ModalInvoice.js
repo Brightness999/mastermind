@@ -58,6 +58,7 @@ class ModalInvoice extends React.Component {
 				dependentName: `${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`,
 				service: event?.skillSet?.name,
 				isPaid: event.sessionInvoice?.isPaid,
+				invoiceId: event.sessionInvoice?._id,
 			});
 		} else if (invoice) {
 			let items = [];
@@ -85,6 +86,7 @@ class ModalInvoice extends React.Component {
 				service: [...new Set(invoice.data?.map(a => a?.appointment?.skillSet?.name))].join(', '),
 				isPaid: invoice.isPaid,
 				minimumPayment: invoice.minimumPayment || 0,
+				invoiceId: invoice._id,
 			});
 		} else {
 			const initItems = [{
@@ -438,21 +440,36 @@ class ModalInvoice extends React.Component {
 								<PrinterTwoTone />
 								{intl.formatMessage(messages.print)}
 							</Button>
-							<Button key="download" icon={<DownloadOutlined />} loading={loadingDownload} onClick={() => this.downloadInvoice()}>
+							<Button key="download" icon={<DownloadOutlined />} loading={loadingDownload} onClick={this.downloadInvoice}>
 								{intl.formatMessage(messages.download)}
 							</Button>
 							{user.role > 3 ? (
-								<Button key="email" icon={<SendOutlined />} loading={loadingEmail} onClick={() => this.sendEmailInvoice()}>
+								<Button key="email" icon={<SendOutlined />} loading={loadingEmail} onClick={this.sendEmailInvoice}>
 									{intl.formatMessage(msgCreateAccount.email)}
 								</Button>
 							) : null}
 						</>
 					) : null}
-					<Button key="submit" type="primary" onClick={() => (user.role > 3 && !isPaid) ? totalPayment < 0 ? message.warn("Total amount is not valid.") : this.props.onSubmit({ items, invoiceNumber, invoiceId, totalPayment, minimumPayment }) : this.props.onCancel()} style={{ padding: '0px 30px', height: 38 }}>
-						{(event?.status === 0 && user.role > 3) ? intl.formatMessage(messages.createInvoice) : (event?.status === -1 && !isPaid && user.role > 3) ? intl.formatMessage(messages.editInvoice) : intl.formatMessage(messages.ok)}
+					<Button key="submit" type="primary" onClick={() => {
+						if (user.role > 3 && !isPaid) {
+							if (totalPayment < 0) {
+								message.warn("Total amount is not valid.");
+							} else {
+								if (event.status === PENDING) {
+									this.props.onSubmit({ items, invoiceNumber, invoiceId, totalPayment, minimumPayment });
+								}
+								if (event.status === CLOSED) {
+									this.props.onSubmit({ items, invoiceNumber, invoiceId, totalPayment, minimumPayment, isEdit: true });
+								}
+							}
+						} else {
+							this.props.onCancel();
+						}
+					}} style={{ padding: '0px 30px', height: 38 }}>
+						{(event?.status === PENDING && user.role > 3) ? intl.formatMessage(messages.createInvoice) : (event?.status === CLOSED && !isPaid && user.role > 3) ? intl.formatMessage(messages.editInvoice) : intl.formatMessage(messages.ok)}
 					</Button>
 				</div>
-			</Modal>
+			</Modal >
 		);
 	}
 };

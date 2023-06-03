@@ -19,7 +19,7 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, sendEmailInvoice, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateNoshowFlag } from '../../utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, sendEmailInvoice, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from '../../utils/api/apiList';
 import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from '../../routes/constant';
 import './style/index.less';
 
@@ -354,15 +354,44 @@ class DrawerDetail extends Component {
   }
 
   confirmModalInvoice = (items) => {
-    if (this.props.event?.type == EVALUATION) {
-      this.setState({ visibleInvoice: false, visibleEvaluationProcess: true, items: items });
+    if (items.isEdit) {
+      this.handleUpdateInvoice(items);
     } else {
-      this.setState({ visibleInvoice: false, visibleProcess: true, items: items });
+      if (this.props.event?.type == EVALUATION) {
+        this.setState({ visibleInvoice: false, visibleEvaluationProcess: true, items: items });
+      } else {
+        this.setState({ visibleInvoice: false, visibleProcess: true, items: items });
+      }
     }
   }
 
-  cancelModalInvoice = () => {
+  closeModalInvoice = () => {
     this.setState({ visibleInvoice: false });
+  }
+
+
+  handleUpdateInvoice = (items) => {
+    this.closeModalInvoice();
+    const { event } = this.props;
+
+    if (event?._id) {
+      const data = {
+        appointmentId: event._id,
+        items: items?.items,
+        invoiceId: items?.invoiceId,
+        totalPayment: items?.totalPayment,
+      }
+      request.post(updateInvoice, data).then(result => {
+        if (result.success) {
+          this.setState({ errorMessage: '' });
+          this.updateAppointments();
+        } else {
+          this.setState({ errorMessage: result.data });
+        }
+      }).catch(error => {
+        this.setState({ errorMessage: error.message });
+      })
+    }
   }
 
   handleLeaveFeedback = () => {
@@ -791,7 +820,7 @@ class DrawerDetail extends Component {
     const modalInvoiceProps = {
       visible: visibleInvoice,
       onSubmit: this.confirmModalInvoice,
-      onCancel: this.cancelModalInvoice,
+      onCancel: this.closeModalInvoice,
       event: listAppointmentsRecent?.find(a => a?._id === event?._id),
     }
     const modalCurrentReferralProps = {
@@ -991,7 +1020,7 @@ class DrawerDetail extends Component {
           {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(msgCreateAccount.rate)}</p>
-              <p className={`font-18 ${event?.status === CLOSED ? 'text-underline cursor' : ''} ${!event?.sessionInvoice?.isPaid && 'text-red'}`} onClick={() => event?.status === CLOSED && this.setState({ visibleInvoice: true })}>${event?.rate}</p>
+              <p className={`font-18 ${event?.status === CLOSED ? 'text-underline cursor' : ''} ${!event?.sessionInvoice?.isPaid && 'text-red'}`} onClick={() => event?.status === CLOSED && this.onOpenModalInvoice()}>${event?.rate}</p>
             </div>
           )}
           {[SCREEN, CONSULTATION].includes(event?.type) && (
@@ -1182,7 +1211,7 @@ class DrawerDetail extends Component {
               )}
               {[APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === PENDING && userRole > 3 && (
                 <Col span={12}>
-                  <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={() => this.onOpenModalInvoice()} className='flex items-center gap-2 h-30'>
+                  <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={this.onOpenModalInvoice} className='flex items-center gap-2 h-30'>
                     {intl.formatMessage(messages.markClosed)}
                   </Button>
                 </Col>
