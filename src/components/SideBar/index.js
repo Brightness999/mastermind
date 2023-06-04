@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 import { Menu } from 'antd';
-import { FaUsers, FaFileInvoice, FaRegChartBar, FaFlag, FaSchool, FaChild } from 'react-icons/fa';
+import { FaUsers, FaFileInvoice, FaRegChartBar, FaFlag, FaSchool, FaChild, FaFileInvoiceDollar } from 'react-icons/fa';
 import { AiOutlineSchedule } from 'react-icons/ai';
 import { IoSettingsSharp } from 'react-icons/io5';
 import { Link } from 'dva/router';
 import intl from "react-intl-universal";
-
 import { MdContactPhone } from 'react-icons/md';
+
 import messages from './messages';
 import msgMainHeader from '../MainHeader/messages';
 import { routerLinks } from '../../routes/constant';
@@ -49,6 +49,11 @@ class SideBar extends Component {
         label: <Link to={routerLinks.Private}>{intl.formatMessage(msgMainHeader.dependentList)}</Link>,
         key: routerLinks.Private,
         icon: <FaChild size={20} />
+      },
+      {
+        label: <Link to={routerLinks.Invoices}>{intl.formatMessage(msgMainHeader.invoiceList)}</Link>,
+        key: routerLinks.Invoices,
+        icon: <FaFileInvoiceDollar size={20} />
       },
       {
         label: <Link to={routerLinks.SystemSetting}>{intl.formatMessage(messages.systemSetting)}</Link>,

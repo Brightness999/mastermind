@@ -30,6 +30,7 @@ import PrivateNote from './PrivateNote';
 import Notification from './Notifications';
 import CreateUser from './Administrator/CreateAccount';
 import InvoiceList from './Invoice';
+import Invoices from './Administrator/Invoice';
 
 const routesConfig = app => [
   {
@@ -62,6 +63,7 @@ const routesConfig = app => [
       ChangeUserProfile(app),
       CreateUser(app),
       Statistics(app),
+      Invoices(app),
     ]
   },
   {

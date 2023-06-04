@@ -38,6 +38,7 @@ export const preApproveSubsidy = 'admin/pre_approve_subsidy'
 export const selectFinalProviderForSubsidy = 'admin/select_final_provider_for_subsidy'
 export const applyCancellationFeeToParent = 'admin/apply_cancellation_fee_to_parent'
 export const changeTimeAppointForAdmin = 'admin/change_time_appoint'
+export const getInvoicesForAdmin = 'admin/get_invoices'
 
 export const getDefaultValuesForConsultant = 'consultants/get_default_values_for_consultant'
 export const getAppointmentsForConsultant = 'consultants/get_my_appointments'

@@ -16,6 +16,7 @@ export const routerLinks = {
   SubsidyManager: '/administrator/subsidymanager',
   Statistics: '/administrator/statistics',
   Private: '/administrator/privatenote',
+  Invoices: '/administrator/invoicelist',
   Changeprofile: '/account/changeprofile',
   Notification: '/account/notifications',
   PrivateNote: '/account/privatenote',
