@@ -19,8 +19,8 @@ import msgDashboard from '../../routes/Dashboard/messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import request from '../../utils/api/request';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, sendEmailInvoice, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from '../../utils/api/apiList';
-import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from '../../routes/constant';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from '../../utils/api/apiList';
+import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from '../../routes/constant';
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -56,6 +56,7 @@ class DrawerDetail extends Component {
       paymentDescription: '',
       visibleCancelForAdmin: false,
       cancellationType: '',
+      isFeeToParent: false,
     };
   }
 
@@ -113,18 +114,33 @@ class DrawerDetail extends Component {
 
   handleConfirmCancel = () => {
     const { event } = this.props;
+    const { isFeeToParent } = this.state;
     this.setState({ visibleCancel: false }, () => {
       if (event?._id) {
-        const data = { appointId: event._id };
+        let data = { appointId: event._id };
+        if (isFeeToParent) {
+          data = {
+            ...data,
+            type: InvoiceType.CANCEL,
+            items: [{
+              type: 'Fee',
+              date: moment(event.date).format('MM/DD/YYYY hh:mm a'),
+              details: 'Canceled Appointment',
+              rate: event.provider.cancellationFee || 0,
+            }],
+            totalPayment: event.provider.cancellationFee || 0,
+          }
+        }
+
         request.post(cancelAppointmentForParent, data).then(result => {
           if (result.success) {
-            this.setState({ errorMessage: '' });
+            this.setState({ errorMessage: '', isFeeToParent: false });
             this.updateAppointments();
           } else {
-            this.setState({ errorMessage: result.data });
+            this.setState({ errorMessage: result.data, isFeeToParent: false });
           }
         }).catch(error => {
-          this.setState({ errorMessage: error.message });
+          this.setState({ errorMessage: error.message, isFeeToParent: false });
         })
       }
     });
@@ -166,44 +182,22 @@ class DrawerDetail extends Component {
   }
 
   onCloseModalCancelForAdmin = () => {
-    this.setState({ visibleCancelForAdmin: false });
+    this.setState({ visibleCancelForAdmin: false, isFeeToParent: false });
   }
 
   applyFeeToParent = () => {
     const { cancellationType } = this.state;
-    const { event } = this.props;
-    this.setState({ visibleCancelForAdmin: false });
+    this.setState({ visibleCancelForAdmin: false, isFeeToParent: true });
     if (cancellationType === CANCEL) {
       this.setState({ visibleCancel: true, cancellationType: '' });
     } else if (cancellationType === RESCHEDULE) {
       this.setState({ visibleCurrent: true, cancellationType: '' });
     }
-
-    const postData = {
-      appointmentId: event._id,
-      type: cancellationType,
-      items: [{
-        type: 'Fee',
-        date: moment(event.date).format('MM/DD/YYYY hh:mm a'),
-        details: `${cancellationType} Appointment`,
-        rate: event.provider.cancellationFee,
-      }],
-      totalPayment: event.provider.cancellationFee || 0,
-    }
-    request.post(sendEmailInvoice, postData).then(res => {
-      if (res.success) {
-        message.success('Sent an invoice to parent successfully.');
-      } else {
-        message.error('Something went wrong while sending an invoice.');
-      }
-    }).catch(() => {
-      message.error('Something went wrong while sending an invoice.');
-    })
   }
 
   waiveFee = () => {
     const { cancellationType } = this.state;
-    this.setState({ visibleCancelForAdmin: false });
+    this.setState({ visibleCancelForAdmin: false, isFeeToParent: false });
     if (cancellationType === CANCEL) {
       this.setState({ visibleCancel: true });
     } else if (cancellationType === RESCHEDULE) {
@@ -732,6 +726,7 @@ class DrawerDetail extends Component {
       visiblePayment,
       paymentDescription,
       visibleCancelForAdmin,
+      isFeeToParent,
     } = this.state;
     const { event, listAppointmentsRecent, auth } = this.props;
     const dependent = { ...event?.dependent, appointments: listAppointmentsRecent?.filter(a => a.dependent?._id === event?.dependent?._id) };
@@ -816,6 +811,7 @@ class DrawerDetail extends Component {
       onCancel: this.closeModalCurrent,
       event: listAppointmentsRecent?.find(a => a?._id === event?._id),
       listAppointmentsRecent,
+      isFeeToParent,
     };
     const modalInvoiceProps = {
       visible: visibleInvoice,

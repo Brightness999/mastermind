@@ -13,8 +13,8 @@ import msgModal from '../../../components/Modal/messages';
 import request from '../../../utils/api/request'
 import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../../components/Modal';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, sendEmailInvoice, setFlag, setFlagBalance, updateNoshowFlag } from '../../../utils/api/apiList';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, DECLINED, EVALUATION, NOSHOW, PENDING, RESCHEDULE, SUBSIDY } from '../../constant';
+import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag, setFlagBalance, updateNoshowFlag } from '../../../utils/api/apiList';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, DECLINED, EVALUATION, InvoiceType, NOSHOW, PENDING, RESCHEDULE, SUBSIDY } from '../../constant';
 import './index.less';
 
 class PanelAppointment extends React.Component {
@@ -35,6 +35,7 @@ class PanelAppointment extends React.Component {
       visibleFeedback: false,
       visibleCancelForAdmin: false,
       cancellationType: '',
+      isFeeToParent: false,
     };
   }
 
@@ -75,43 +76,22 @@ class PanelAppointment extends React.Component {
   }
 
   onCloseModalCancelForAdmin = () => {
-    this.setState({ visibleCancelForAdmin: false });
+    this.setState({ visibleCancelForAdmin: false, isFeeToParent: false });
   }
 
   applyFeeToParent = () => {
-    const { cancellationType, event } = this.state;
-    this.setState({ visibleCancelForAdmin: false });
+    const { cancellationType } = this.state;
+    this.setState({ visibleCancelForAdmin: false, isFeeToParent: true });
     if (cancellationType === CANCEL) {
       this.setState({ visibleCancel: true, cancellationType: '' });
     } else if (cancellationType === RESCHEDULE) {
       this.setState({ visibleCurrent: true, cancellationType: '' });
     }
-
-    const postData = {
-      appointmentId: event._id,
-      type: cancellationType,
-      items: [{
-        type: 'Fee',
-        date: moment(event.date).format('MM/DD/YYYY hh:mm a'),
-        details: `${cancellationType} Appointment`,
-        rate: event.provider.cancellationFee,
-      }],
-      totalPayment: event.provider.cancellationFee || 0,
-    }
-    request.post(sendEmailInvoice, postData).then(res => {
-      if (res.success) {
-        message.success('Sent an invoice to parent successfully.');
-      } else {
-        message.error('Something went wrong while sending an invoice.');
-      }
-    }).catch(() => {
-      message.error('Something went wrong while sending an invoice.');
-    })
   }
 
   waiveFee = () => {
     const { cancellationType } = this.state;
-    this.setState({ visibleCancelForAdmin: false });
+    this.setState({ visibleCancelForAdmin: false, isFeeToParent: false });
     if (cancellationType === CANCEL) {
       this.setState({ visibleCancel: true });
     } else if (cancellationType === RESCHEDULE) {
@@ -149,18 +129,36 @@ class PanelAppointment extends React.Component {
   }
 
   handleConfirmCancel = () => {
+    const { isFeeToParent } = this.state;
     this.setState({ visibleCancel: false }, () => {
       const { event } = this.state;
       if (event?._id) {
-        const data = { appointId: event._id };
+        let data = { appointId: event._id };
+        if (isFeeToParent) {
+          data = {
+            ...data,
+            type: InvoiceType.CANCEL,
+            items: [{
+              type: 'Fee',
+              date: moment(event.date).format('MM/DD/YYYY hh:mm a'),
+              details: 'Canceled Appointment',
+              rate: event.provider.cancellationFee || 0,
+            }],
+            totalPayment: event.provider.cancellationFee || 0,
+          }
+        }
+
         request.post(cancelAppointmentForParent, data).then(result => {
           if (result.success) {
             this.updateAppointments();
+            this.setState({ isFeeToParent: false });
           } else {
             message.warning("can't cancel this appointment")
+            this.setState({ isFeeToParent: false });
           }
         }).catch(error => {
           message.error(error.message);
+          this.setState({ isFeeToParent: false });
         })
       }
     });
@@ -395,6 +393,7 @@ class PanelAppointment extends React.Component {
       visibleFeedback,
       visibleNoShow,
       visibleCancelForAdmin,
+      isFeeToParent,
     } = this.state;
     const dependent = { ...event?.dependent, appointments: appointments?.filter(a => a.dependent?._id === event?.dependent?._id) };
     const modalCancelProps = {
@@ -410,6 +409,7 @@ class PanelAppointment extends React.Component {
       onCancel: this.closeModalCurrent,
       event: appointments?.find(a => a?._id == event?._id),
       listAppointmentsRecent: appointments,
+      isFeeToParent,
     };
 
     const modalProcessProps = {

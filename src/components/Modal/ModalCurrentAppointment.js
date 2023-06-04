@@ -15,7 +15,7 @@ import msgDrawer from '../../components/DrawerDetail/messages';
 import request from '../../utils/api/request';
 import { store } from '../../redux/store';
 import { rescheduleAppointmentForParent } from '../../utils/api/apiList';
-import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, PENDING, SCREEN, SUBSIDY } from '../../routes/constant';
+import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, InvoiceType, PENDING, SCREEN, SUBSIDY } from '../../routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -85,11 +85,11 @@ class ModalCurrentAppointment extends React.Component {
 					}, []);
 
 					timeArr?.sort((a, b) => a?.[0] - b?.[0]).forEach(a => {
-						let startTime = moment().set({ hours: a?.[0], minutes: 0, seconds: 0, milliseconds: 0 });
+						let startTime = moment(date).set({ hours: a?.[0], minutes: 0, seconds: 0, milliseconds: 0 });
 						for (let i = 0; i < (a?.[1] - a?.[0]) * 60 / duration; i++) {
 							arrTime.push({
 								value: startTime.clone().add(duration * i, 'minutes'),
-								active: date.isBefore(moment()) ? false : true,
+								active: startTime.clone().add(duration * i, 'minutes').isAfter(moment()),
 							});
 						}
 					})
@@ -102,7 +102,6 @@ class ModalCurrentAppointment extends React.Component {
 	}
 
 	componentDidMount() {
-		this.setState({ arrTime: this.getArrTime(0) });
 		const { event } = this.props;
 		const currentGrade = event.dependent.currentGrade;
 		let standardRate = 0;
@@ -164,9 +163,7 @@ class ModalCurrentAppointment extends React.Component {
 					}
 				})
 
-				if (flag) {
-					time.active = true;
-				} else {
+				if (!flag) {
 					time.active = false;
 				}
 				return time;
@@ -209,9 +206,11 @@ class ModalCurrentAppointment extends React.Component {
 	handleReschedule = () => {
 		const { selectedDate, address, notes, selectedTimeIndex, arrTime } = this.state;
 		const { durations } = store.getState().auth;
-		const { event } = this.props;
+		const { event, isFeeToParent } = this.props;
+		const { years, months, date } = selectedDate.toObject();
+		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
 
-		if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
+		if (!hour?.isAfter(moment()) || selectedTimeIndex < 0) {
 			this.setState({ errorMessage: 'Please select a date and time' })
 			return;
 		}
@@ -224,21 +223,35 @@ class ModalCurrentAppointment extends React.Component {
 			}
 		}
 
-		const { years, months, date } = selectedDate.toObject();
-		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
-		const postData = {
-			_id: this.props.event?._id,
+		let postData = {
+			appointmentId: this.props.event?._id,
 			date: hour?.valueOf(),
 			location: address,
 			notes: notes,
 			status: PENDING,
 		};
 
+		if (isFeeToParent) {
+			postData = {
+				...postData,
+				type: InvoiceType.RESCHEDULE,
+				items: [{
+					type: 'Fee',
+					date: moment(event.date).format('MM/DD/YYYY hh:mm a'),
+					details: 'Rescheduled Appointment',
+					rate: event.provider.cancellationFee || 0,
+				}],
+				totalPayment: event.provider.cancellationFee || 0,
+			}
+		}
+
 		request.post(rescheduleAppointmentForParent, postData).then(result => {
 			if (result.success) {
 				this.setState({ errorMessage: '' });
-				if (postData?.type == EVALUATION) {
+				if (event?.type == EVALUATION) {
 					message.success(`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''} requires a ${durations?.find(a => a.value == this.state.duration)?.label} evaluation. Please proceed to schedule.`);
+				} else {
+					message.success('Successfully Rescheduled');
 				}
 				this.props.onSubmit();
 			} else {
@@ -502,7 +515,7 @@ class ModalCurrentAppointment extends React.Component {
 															if (availableTime) {
 																const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
 																const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 });
-																if (date.isBetween(availableFromDate, availableToDate) && !event?.provider?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() === date.year() && moment(blackoutDate).month() === date.month() && moment(blackoutDate).date() === date.date())) {
+																if (date.isBetween(availableFromDate, availableToDate) && !event?.provider?.blackoutDates?.find(blackoutDate => moment(new Date(blackoutDate)).year() === date.year() && moment(new Date(blackoutDate)).month() === date.month() && moment(new Date(blackoutDate)).date() === date.date())) {
 																	return (<div className='absolute top-0 left-0 h-100 w-100 border border-1 border-warning rounded-2'></div>)
 																}
 															}
@@ -527,7 +540,7 @@ class ModalCurrentAppointment extends React.Component {
 															return true;
 														}
 
-														if (event?.provider?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() === date.year() && moment(blackoutDate).month() === date.month() && moment(blackoutDate).date() === date.date())) {
+														if (event?.provider?.blackoutDates?.find(blackoutDate => moment(new Date(blackoutDate)).year() === date.year() && moment(new Date(blackoutDate)).month() === date.month() && moment(new Date(blackoutDate)).date() === date.date())) {
 															return true;
 														}
 
