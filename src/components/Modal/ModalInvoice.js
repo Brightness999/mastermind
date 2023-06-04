@@ -42,7 +42,8 @@ class ModalInvoice extends React.Component {
 	}
 
 	componentDidMount() {
-		const { appointments, event, invoice, user } = this.props;
+		const { appointments, event, invoice } = this.props;
+		console.log(invoice);
 		if (event?.sessionInvoice) {
 			const items = event.sessionInvoice.data?.[0]?.items || [];
 			this.setState({
@@ -80,8 +81,8 @@ class ModalInvoice extends React.Component {
 				providerPhonenumber: invoice.data?.[0]?.appointment?.provider?.contactNumber?.[0]?.phoneNumber,
 				providerName: `${invoice.data?.[0]?.appointment?.provider?.firstName ?? ''} ${invoice.data?.[0]?.appointment?.provider?.lastName ?? ''}`,
 				providerEmail: invoice.data?.[0]?.appointment?.provider?.contactEmail?.[0]?.email,
-				parentName: `${user?.parentInfo?.fatherName ? user?.parentInfo?.fatherName : user?.parentInfo?.motherName} ${user?.parentInfo?.familyName}`,
-				parentAddress: user?.parentInfo?.address,
+				parentName: `${invoice.parent?.parentInfo?.fatherName ? invoice.parent?.parentInfo?.fatherName : invoice.parent?.parentInfo?.motherName} ${invoice.parent?.parentInfo?.familyName}`,
+				parentAddress: invoice.parent?.parentInfo?.address,
 				dependentName: `${invoice?.dependent?.firstName ?? ''} ${invoice?.dependent?.lastName ?? ''}`,
 				service: [...new Set(invoice.data?.map(a => a?.appointment?.skillSet?.name))].join(', '),
 				isPaid: invoice.isPaid,
