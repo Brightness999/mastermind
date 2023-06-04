@@ -92,11 +92,11 @@ class ModalNewAppointment extends React.Component {
 					}, []);
 
 					timeArr?.sort((a, b) => a?.[0] - b?.[0]).forEach(a => {
-						let startTime = moment().set({ hours: a?.[0], minutes: 0, seconds: 0, milliseconds: 0 });
+						let startTime = moment(date).set({ hours: a?.[0], minutes: 0, seconds: 0, milliseconds: 0 });
 						for (let i = 0; i < (a?.[1] - a?.[0]) * 60 / duration; i++) {
 							arrTime.push({
 								value: startTime.clone().add(duration * i, 'minutes'),
-								active: date.isBefore(moment()) ? false : true,
+								active: startTime.clone().add(duration * i, 'minutes').isAfter(moment()),
 							});
 						}
 					})
@@ -255,9 +255,7 @@ class ModalNewAppointment extends React.Component {
 						}
 					})
 
-					if (flag) {
-						time.active = true;
-					} else {
+					if (!flag) {
 						time.active = false;
 					}
 					return time;
@@ -362,9 +360,7 @@ class ModalNewAppointment extends React.Component {
 				}
 			})
 
-			if (flag) {
-				time.active = true;
-			} else {
+			if (!flag) {
 				time.active = false;
 			}
 			return time;
