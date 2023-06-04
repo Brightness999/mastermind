@@ -121,6 +121,10 @@ export default {
     id: `${scope}.paid`,
     defaultMessage: 'Paid',
   },
+  unpaid: {
+    id: `${scope}.unpaid`,
+    defaultMessage: 'Unpaid',
+  },
   payFlag: {
     id: `${scope}.payFlag`,
     defaultMessage: 'Pay Flag',

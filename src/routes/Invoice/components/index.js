@@ -1,5 +1,5 @@
 import React, { createRef } from 'react';
-import { Divider, Table, Space, Input, Button } from 'antd';
+import { Divider, Table, Space, Input, Button, Tabs } from 'antd';
 import intl from 'react-intl-universal';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
@@ -11,6 +11,7 @@ import msgMainHeader from '../../../components/MainHeader/messages';
 import messages from '../../Dashboard/messages';
 import msgCreateAccount from '../../Sign/CreateAccount/messages';
 import msgModal from 'components/Modal/messages';
+import msgDrawer from 'components/DrawerDetail/messages';
 import request from '../../../utils/api/request';
 import { getInvoices } from '../../../utils/api/apiList';
 import { getSubsidyRequests } from '../../../redux/features/appointmentsSlice';
@@ -24,6 +25,8 @@ class InvoiceList extends React.Component {
       invoices: [],
       visibleInvoice: false,
       selectedInvoice: {},
+      tabInvoices: [],
+      selectedTab: 0,
     };
     this.searchInput = createRef(null);
   }
@@ -41,7 +44,10 @@ class InvoiceList extends React.Component {
         this.setState({
           invoices: data?.map((invoice, i) => {
             invoice['key'] = i; return invoice;
-          }) ?? []
+          }) ?? [],
+          tabInvoices: data?.filter(i => !i.isPaid)?.map((invoice, i) => {
+            invoice['key'] = i; return invoice;
+          }) ?? [],
         });
       } else {
         this.setState({ invoices: [], loading: false });
@@ -60,11 +66,18 @@ class InvoiceList extends React.Component {
     this.setState({ visibleInvoice: false, selectedInvoice: {} });
   }
 
+  handleChangeTab = (value) => {
+    const { invoices } = this.state;
+    this.setState({
+      tabInvoices: invoices.filter(i => i.isPaid == value),
+      selectedTab: value,
+    })
+  }
+
   render() {
-    const { invoices, loading, selectedInvoice, visibleInvoice } = this.state;
+    const { loading, selectedInvoice, selectedTab, tabInvoices, visibleInvoice } = this.state;
     const { auth } = this.props;
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
-
     const columns = [
       {
         title: intl.formatMessage(messages.invoiceType), dataIndex: 'type', key: 'invoicetype',
@@ -221,6 +234,45 @@ class InvoiceList extends React.Component {
       },
     ];
 
+    if (selectedTab == 1) {
+      columns.splice(8);
+    }
+
+    const items = [
+      {
+        key: '0',
+        label: <span className="font-16">{intl.formatMessage(msgDrawer.unpaid)}</span>,
+        children: (
+          <Table
+            bordered
+            size='middle'
+            dataSource={tabInvoices}
+            columns={columns}
+            onRow={invoice => ({
+              onClick: () => this.openModalInvoice(invoice._id),
+              onDoubleClick: () => this.openModalInvoice(invoice._id),
+            })}
+          />
+        ),
+      },
+      {
+        key: '1',
+        label: <span className="font-16">{intl.formatMessage(msgDrawer.paid)}</span>,
+        children: (
+          <Table
+            bordered
+            size='middle'
+            dataSource={tabInvoices}
+            columns={columns}
+            onRow={invoice => ({
+              onClick: () => this.openModalInvoice(invoice._id),
+              onDoubleClick: () => this.openModalInvoice(invoice._id),
+            })}
+          />
+        ),
+      },
+    ]
+
     const modalInvoiceProps = {
       visible: visibleInvoice,
       onSubmit: this.closeModalInvoice,
@@ -234,15 +286,13 @@ class InvoiceList extends React.Component {
           <div className='font-16 font-500'>{intl.formatMessage(msgMainHeader.invoiceList)}</div>
           <Divider />
         </div>
-        <Table
-          bordered
-          size='middle'
-          dataSource={invoices}
-          columns={columns}
-          onRow={invoice => ({
-            onClick: () => this.openModalInvoice(invoice._id),
-            onDoubleClick: () => this.openModalInvoice(invoice._id),
-          })}
+        <Tabs
+          defaultActiveKey="0"
+          type="card"
+          size='small'
+          items={items}
+          className="bg-white p-10 h-100 overflow-y-scroll overflow-x-hidden"
+          onChange={this.handleChangeTab}
         />
         {visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
         <PageLoading loading={loading} isBackground={true} />
