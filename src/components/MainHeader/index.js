@@ -11,7 +11,7 @@ import { compose } from 'redux';
 import { MdOutlineSpaceDashboard } from 'react-icons/md';
 
 import messages from './messages';
-import { routerLinks } from '../../routes/constant';
+import { PARENT, PROVIDER, routerLinks } from '../../routes/constant';
 import { logout } from '../../redux/features/authSlice';
 import { helper } from '../../utils/auth/helper';
 import './style/index.less';
@@ -98,7 +98,7 @@ class MainHeader extends Component {
         </Link>
       ),
     });
-    user?.role === 3 && items.splice(4, 0, {
+    [PARENT, PROVIDER].includes(user?.role) && items.splice(4, 0, {
       key: '6',
       icon: <FaFileInvoiceDollar size={18} color='#495057' />,
       label: (
