@@ -1111,9 +1111,12 @@ class DrawerDetail extends Component {
                 </Button>
               ) : (
                 <div className='flex items-center gap-2'>
-                  <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
+                  <Button type='primary' className='flex-1 h-30 p-0' onClick={this.onOpenModalInvoice}>
                     {intl.formatMessage(messages.editFlag)}
                   </Button>
+                  {/* <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
+                    {intl.formatMessage(messages.editFlag)}
+                  </Button> */}
                   <Popconfirm
                     title="Are you sure to clear this flag?"
                     onConfirm={this.handleClearFlag}
