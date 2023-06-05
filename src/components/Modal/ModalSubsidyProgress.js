@@ -669,6 +669,7 @@ class ModalSubsidyProgress extends React.Component {
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
 				<Popconfirm
+					key="decline"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to decline this request?"
 					onConfirm={this.onShowModalDeclineExplanation}
@@ -680,6 +681,7 @@ class ModalSubsidyProgress extends React.Component {
 					</Button>
 				</Popconfirm>,
 				<Popconfirm
+					key="approve"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to approve this request?"
 					onConfirm={() => subsidy.school ? this.schoolAcceptSubsidy(subsidy) : this.adminPreApproveSubsidy(subsidy)}
@@ -702,9 +704,10 @@ class ModalSubsidyProgress extends React.Component {
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
 				<Popconfirm
+					key="decline"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to decline this request?"
-					onConfirm={this.onShowModalDeclineExplanation()}
+					onConfirm={this.onShowModalDeclineExplanation}
 					okText="Yes"
 					cancelText="No"
 				>
@@ -713,6 +716,7 @@ class ModalSubsidyProgress extends React.Component {
 					</Button>
 				</Popconfirm>,
 				<Popconfirm
+					key="edit"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to accept this appeal?"
 					onConfirm={() => this.schoolAcceptAppeal(subsidy)}
@@ -724,6 +728,7 @@ class ModalSubsidyProgress extends React.Component {
 					</Button>
 				</Popconfirm>,
 				<Popconfirm
+					key="pareapprove"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to approve this request?"
 					onConfirm={() => this.adminPreApproveSubsidy(subsidy)}
@@ -746,6 +751,7 @@ class ModalSubsidyProgress extends React.Component {
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
 				<Popconfirm
+					key="decline"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to decline this request?"
 					onConfirm={this.onShowModalDeclineExplanation}
@@ -757,6 +763,7 @@ class ModalSubsidyProgress extends React.Component {
 					</Button>
 				</Popconfirm>,
 				<Popconfirm
+					key="edit"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to accept this appeal?"
 					onConfirm={() => this.schoolAcceptAppeal(subsidy)}
@@ -776,6 +783,7 @@ class ModalSubsidyProgress extends React.Component {
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
 				<Popconfirm
+					key="submit"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to appeal?"
 					onConfirm={() => this.appealSubsidy(subsidy)}
@@ -796,6 +804,7 @@ class ModalSubsidyProgress extends React.Component {
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
 				<Popconfirm
+					key="decline"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to decline this appeal?"
 					onConfirm={() => this.denyAppeal(subsidy)}
@@ -807,6 +816,7 @@ class ModalSubsidyProgress extends React.Component {
 					</Button>
 				</Popconfirm>,
 				<Popconfirm
+					key="approve"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to approve this appeal?"
 					onConfirm={() => this.schoolAcceptAppeal(subsidy)}
@@ -826,6 +836,7 @@ class ModalSubsidyProgress extends React.Component {
 					{intl.formatMessage(messages.cancel).toUpperCase()}
 				</Button>,
 				<Popconfirm
+					key="decline"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to decline this request?"
 					onConfirm={this.onShowModalDeclineExplanation}
@@ -837,6 +848,7 @@ class ModalSubsidyProgress extends React.Component {
 					</Button>
 				</Popconfirm>,
 				<Popconfirm
+					key="approve"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to approve this request?"
 					onConfirm={() => this.submitSubsidyFromAdmin(subsidy)}
