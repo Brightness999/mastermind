@@ -261,15 +261,25 @@ class PanelAppointment extends React.Component {
               items: {
                 flagType: BALANCE,
                 late: value[1] * 1,
-                count: appointment.type === SUBSIDY ? `[${appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status) && a?.dependent?._id === appointment?.dependent?._id && a?.provider?._id === appointment?.provider?._id)?.length}/${appointment?.subsidy?.numberOfSessions}]` : '',
-                discount: values[`discount-${appointment._id}`],
                 balance: values[`balance-${appointment._id}`],
                 totalPayment: values[`totalPayment-${appointment.provider?._id}`],
-                rate: values[`totalPayment-${appointment.provider?._id}`],
                 minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
-                type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
-                date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
-                details: `Location: ${appointment?.location}`,
+                data: [
+                  {
+                    type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
+                    date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
+                    details: `Location: ${appointment?.location}`,
+                    count: appointment.type === SUBSIDY ? `[${appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status) && a?.dependent?._id === appointment?.dependent?._id && a?.provider?._id === appointment?.provider?._id)?.length}/${appointment?.subsidy?.numberOfSessions}]` : '',
+                    discount: values[`discount-${appointment._id}`],
+                    rate: values[`balance-${appointment._id}`],
+                  },
+                  {
+                    type: 'Fee',
+                    date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
+                    details: 'Past Due Balance Fee',
+                    rate: value[1] * 1,
+                  },
+                ],
                 notes,
               }
             })
@@ -307,10 +317,12 @@ class PanelAppointment extends React.Component {
         penalty: penalty * 1,
         program: program * 1,
         notes,
-        type: 'Fee',
-        date: moment(event?.date).format("MM/DD/YYYY hh:mm a"),
-        details: "Missed Appointment",
-        rate: feeOption === 1 ? balance : feeOption === 2 ? penalty * 1 + program * 1 : 0,
+        data: [{
+          type: 'Fee',
+          date: moment(event?.date).format("MM/DD/YYYY hh:mm a"),
+          details: "Missed Appointment",
+          rate: feeOption === 1 ? balance : feeOption === 2 ? penalty * 1 + program * 1 : 0,
+        }],
         flagType: NOSHOW,
         feeOption,
         balance,

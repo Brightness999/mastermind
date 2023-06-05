@@ -363,19 +363,38 @@ class DrawerDetail extends Component {
     this.setState({ visibleInvoice: false });
   }
 
-
   handleUpdateInvoice = (items) => {
     this.closeModalInvoice();
     const { event } = this.props;
 
     if (event?._id) {
-      const data = {
-        appointmentId: event._id,
-        items: items?.items,
+      let postData = {
         invoiceId: items?.invoiceId,
         totalPayment: items?.totalPayment,
+        minimumPayment: items?.minimumPayment,
       }
-      request.post(updateInvoice, data).then(result => {
+
+      if (event.sessionInvoice) {
+        postData = {
+          ...postData,
+          updateData: [{
+            appointment: event._id,
+            items: items?.items,
+          }],
+        }
+      } else if (event.flagInvoice) {
+        postData = {
+          ...postData,
+          updateData: [{
+            appointment: event._id,
+            items: {
+              ...event.flagInvoice.data?.[0]?.items,
+              data: items.items,
+            },
+          }],
+        }
+      }
+      request.post(updateInvoice, postData).then(result => {
         if (result.success) {
           this.setState({ errorMessage: '' });
           this.updateAppointments();
@@ -464,10 +483,12 @@ class DrawerDetail extends Component {
         penalty: penalty * 1,
         program: program * 1,
         notes,
-        type: 'Fee',
-        date: moment(event?.date).format("MM/DD/YYYY hh:mm a"),
-        details: 'Missed Appointment',
-        rate: feeOption === 1 ? balance : feeOption === 2 ? penalty * 1 + program * 1 : 0,
+        data: [{
+          type: 'Fee',
+          date: moment(event?.date).format("MM/DD/YYYY hh:mm a"),
+          details: 'Missed Appointment',
+          rate: feeOption === 1 ? balance : feeOption === 2 ? penalty * 1 + program * 1 : 0,
+        }],
         flagType: NOSHOW,
         feeOption,
         balance,
@@ -510,15 +531,25 @@ class DrawerDetail extends Component {
               items: {
                 flagType: BALANCE,
                 late: value[1] * 1,
-                count: appointment.type === SUBSIDY ? `[${listAppointmentsRecent?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status) && a?.dependent?._id === appointment?.dependent?._id && a?.provider?._id === appointment?.provider?._id)?.length}/${appointment?.subsidy?.numberOfSessions}]` : '',
-                discount: values[`discount-${appointment._id}`],
                 balance: values[`balance-${appointment._id}`],
                 totalPayment: values[`totalPayment-${appointment.provider?._id}`],
-                rate: values[`totalPayment-${appointment.provider?._id}`],
                 minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
-                type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
-                date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
-                details: `Location: ${appointment?.location}`,
+                data: [
+                  {
+                    type: appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : '',
+                    date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
+                    details: `Location: ${appointment?.location}`,
+                    count: appointment.type === SUBSIDY ? `[${listAppointmentsRecent?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status) && a?.dependent?._id === appointment?.dependent?._id && a?.provider?._id === appointment?.provider?._id)?.length}/${appointment?.subsidy?.numberOfSessions}]` : '',
+                    discount: values[`discount-${appointment._id}`],
+                    rate: values[`balance-${appointment._id}`] * 1,
+                  },
+                  {
+                    type: 'Fee',
+                    date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
+                    details: 'Past Due Balance Fee',
+                    rate: value[1] * 1,
+                  },
+                ],
                 notes,
               }
             })
@@ -1046,9 +1077,12 @@ class DrawerDetail extends Component {
                   </Button>
                 ) : event?.flagInvoice?.totalPayment == 0 ? null : (
                   <>
-                    <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
+                    <Button type='primary' className='flex-1 h-30 p-0' onClick={this.onOpenModalInvoice}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
+                    {/* <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
+                      {intl.formatMessage(messages.flagDetails)}
+                    </Button> */}
                     <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                       <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                       <input type="hidden" name="business" value="office@helpmegethelp.org" />
@@ -1105,9 +1139,12 @@ class DrawerDetail extends Component {
                   </Button>
                 ) : event?.flagInvoice?.totalPayment == 0 ? null : (
                   <>
-                    <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
+                    <Button type='primary' className='flex-1 h-30 p-0' onClick={this.onOpenModalInvoice}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
+                    {/* <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
+                      {intl.formatMessage(messages.flagDetails)}
+                    </Button> */}
                     <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                       <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                       <input type="hidden" name="business" value="office@helpmegethelp.org" />

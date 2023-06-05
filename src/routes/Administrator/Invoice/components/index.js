@@ -1,5 +1,5 @@
 import React, { createRef } from 'react';
-import { Divider, Table, Space, Input, Button, Tabs } from 'antd';
+import { Divider, Table, Space, Input, Button, Tabs, message } from 'antd';
 import intl from 'react-intl-universal';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
@@ -13,9 +13,10 @@ import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import msgModal from 'components/Modal/messages';
 import msgDrawer from 'components/DrawerDetail/messages';
 import request from 'src/utils/api/request';
-import { getInvoicesForAdmin } from 'src/utils/api/apiList';
+import { getInvoicesForAdmin, updateInvoice } from 'src/utils/api/apiList';
 import { getSubsidyRequests } from 'src/redux/features/appointmentsSlice';
 import PageLoading from 'components/Loading/PageLoading';
+import { InvoiceType } from 'src/routes/constant';
 
 class InvoiceList extends React.Component {
   constructor(props) {
@@ -72,6 +73,74 @@ class InvoiceList extends React.Component {
       tabInvoices: invoices.filter(i => i.isPaid == value),
       selectedTab: value,
     })
+  }
+
+  handleUpdateInvoice = (items) => {
+    const { selectedInvoice, invoices } = this.state;
+    const { totalPayment } = items;
+    this.closeModalInvoice();
+    if (selectedInvoice) {
+      let postData = {
+        invoiceId: selectedInvoice._id,
+        totalPayment: totalPayment,
+      }
+
+      if ([InvoiceType.BALANCE, InvoiceType.CANCEL, InvoiceType.RESCHEDULE].includes(selectedInvoice.type)) {
+        postData = {
+          ...postData,
+          updateData: [{
+            appointment: selectedInvoice.data?.[0]?.appointment?._id,
+            items: items?.items,
+          }]
+        }
+      }
+
+      if (selectedInvoice.type === InvoiceType.NOSHOW) {
+        postData = {
+          ...postData,
+          updateData: [{
+            appointment: selectedInvoice.data?.[0]?.appointment?._id,
+            items: {
+              ...selectedInvoice.data?.[0]?.items,
+              data: items.items,
+            }
+          }]
+        }
+      }
+
+      request.post(updateInvoice, postData).then(result => {
+        if (result.success) {
+          message.success('Successfully updated');
+          this.setState({
+            invoices: invoices?.map(invoice => {
+              if (invoice?._id === selectedInvoice._id) {
+                if ([InvoiceType.BALANCE, InvoiceType.CANCEL, InvoiceType.RESCHEDULE].includes(selectedInvoice.type)) {
+                  invoice.totalPayment = totalPayment;
+                  invoice.data = [{
+                    appointment: selectedInvoice.data?.[0]?.appointment,
+                    items: items?.items,
+                  }];
+                } else if (selectedInvoice.type === InvoiceType.NOSHOW) {
+                  invoice.totalPayment = totalPayment;
+                  invoice.data = [{
+                    appointment: selectedInvoice.data?.[0]?.appointment,
+                    items: {
+                      ...selectedInvoice.data?.[0]?.items,
+                      data: items?.items,
+                    },
+                  }];
+                }
+              }
+              return invoice;
+            })
+          })
+        } else {
+          message.success('Something went wrong. Please try again or contact admin.');
+        }
+      }).catch(error => {
+        message.success('Something went wrong. Please try again or contact admin.');
+      })
+    }
   }
 
   render() {
@@ -275,7 +344,7 @@ class InvoiceList extends React.Component {
 
     const modalInvoiceProps = {
       visible: visibleInvoice,
-      onSubmit: this.closeModalInvoice,
+      onSubmit: this.handleUpdateInvoice,
       onCancel: this.closeModalInvoice,
       invoice: selectedInvoice,
     }

@@ -9,9 +9,10 @@ import moment from 'moment';
 import messages from './messages';
 import msgDrawer from '../DrawerDetail/messages';
 import request from '../../utils/api/request'
-import { clearFlag, requestClearance, setFlag, setFlagBalance, updateNoshowFlag } from '../../utils/api/apiList';
+import { clearFlag, requestClearance, setFlag, setFlagBalance, updateInvoice, updateNoshowFlag } from '../../utils/api/apiList';
 import ModalBalance from './ModalBalance';
 import ModalNoShow from './ModalNoShow';
+import ModalInvoice from './ModalInvoice';
 import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/features/appointmentsSlice';
 import { ACTIVE, APPOINTMENT, BALANCE, EVALUATION, NOSHOW, SUBSIDY } from '../../routes/constant';
 import { store } from '../../redux/store';
@@ -30,6 +31,7 @@ class ModalFlagExpand extends React.Component {
 			visibleBalance: false,
 			visibleNoShow: false,
 			visibleCreateNote: false,
+			visibleInvoice: false,
 		}
 		this.searchInput = React.createRef(null);
 	}
@@ -96,10 +98,12 @@ class ModalFlagExpand extends React.Component {
 				notes,
 				penalty: penalty * 1,
 				program: program * 1,
-				type: 'Fee',
-				date: moment(event?.date).format("MM/DD/YYYY hh:mm a"),
-				details: "Missed Appointment",
-				rate: feeOption === 1 ? balance : feeOption === 2 ? penalty * 1 + program * 1 : 0,
+				data: [{
+					type: 'Fee',
+					date: moment(event?.date).format("MM/DD/YYYY hh:mm a"),
+					details: "Missed Appointment",
+					rate: feeOption === 1 ? balance : feeOption === 2 ? penalty * 1 + program * 1 : 0,
+				}],
 				flagType: NOSHOW,
 				feeOption,
 				balance,
@@ -137,15 +141,25 @@ class ModalFlagExpand extends React.Component {
 							items: {
 								flagType: BALANCE,
 								late: value[1] * 1,
-								count: appointment.type === SUBSIDY ? `[${appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status) && a?.dependent?._id === appointment?.dependent?._id && a?.provider?._id === appointment?.provider?._id)?.length}/${appointment?.subsidy?.numberOfSessions}]` : '',
-								discount: values[`discount-${appointment._id}`],
 								balance: values[`balance-${appointment._id}`],
 								totalPayment: values[`totalPayment-${appointment.provider?._id}`],
-								rate: values[`totalPayment-${appointment.provider?._id}`],
 								minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
-								type: appointment?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
-								date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
-								details: `Location: ${appointment?.location}`,
+								data: [
+									{
+										type: appointment?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
+										date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
+										details: `Location: ${appointment?.location}`,
+										count: appointment.type === SUBSIDY ? `[${appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status) && a?.dependent?._id === appointment?.dependent?._id && a?.provider?._id === appointment?.provider?._id)?.length}/${appointment?.subsidy?.numberOfSessions}]` : '',
+										discount: values[`discount-${appointment._id}`],
+										rate: values[`balance-${appointment._id}`],
+									},
+									{
+										type: 'Fee',
+										date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
+										details: 'Past Due Balance Fee',
+										rate: value[1] * 1,
+									},
+								],
 								notes,
 							}
 						})
@@ -193,8 +207,47 @@ class ModalFlagExpand extends React.Component {
 		this.setState({ visibleCreateNote: false, event: {} });
 	}
 
+	openModalInvoice = (appointment) => {
+		this.setState({ visibleInvoice: true, event: appointment });
+	}
+
+	closeModalInvoice = () => {
+		this.setState({ visibleInvoice: false, event: {} })
+	}
+
+	handleUpdateInvoice = (items) => {
+		const { event } = this.state;
+
+		if (event?._id) {
+			let postData = {
+				invoiceId: items?.invoiceId,
+				totalPayment: items?.totalPayment,
+				minimumPayment: items?.minimumPayment,
+				updateData: [{
+					appointment: event._id,
+					items: {
+						...event.flagInvoice.data?.[0]?.items,
+						data: items.items,
+					},
+				}],
+			}
+
+			request.post(updateInvoice, postData).then(result => {
+				if (result.success) {
+					this.closeModalInvoice();
+					this.updateAppointments();
+					message.success("Successfully updated.");
+				} else {
+					message.success("Something went wrong. Please try again or contact admin");
+				}
+			}).catch(error => {
+				message.success("Something went wrong. Please try again or contact admin");
+			})
+		}
+	}
+
 	render() {
-		const { activeFlags, clearedFlags, skillSet, visibleBalance, visibleNoShow, event, visibleCreateNote } = this.state;
+		const { activeFlags, clearedFlags, skillSet, visibleBalance, visibleNoShow, event, visibleCreateNote, visibleInvoice } = this.state;
 		const { auth, appointments } = this.props;
 		const dependent = { ...event?.dependent, appointments: appointments?.filter(a => a.dependent?._id === event?.dependent?._id) };
 		const modalProps = {
@@ -363,14 +416,14 @@ class ModalFlagExpand extends React.Component {
 			visible: visibleNoShow,
 			onSubmit: this.onSubmitFlagNoShow,
 			onCancel: this.onCloseModalNoShow,
-			event: event,
+			event,
 		};
 
 		const modalBalanceProps = {
 			visible: visibleBalance,
 			onSubmit: this.onSubmitFlagBalance,
 			onCancel: this.onCloseModalBalance,
-			event: event,
+			event,
 			dependent,
 		};
 
@@ -380,6 +433,13 @@ class ModalFlagExpand extends React.Component {
 			onCancel: this.onCloseModalCreateNote,
 			title: "Request Message"
 		};
+
+		const modalInvoiceProps = {
+			visible: visibleInvoice,
+			onSubmit: this.handleUpdateInvoice,
+			onCancel: this.closeModalInvoice,
+			event,
+		}
 
 		return (
 			<Modal {...modalProps}>
@@ -393,8 +453,10 @@ class ModalFlagExpand extends React.Component {
 							className="p-10"
 							onRow={(appointment) => {
 								return {
-									onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalFlag(appointment),
-									onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalFlag(appointment),
+									onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(appointment),
+									onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(appointment),
+									// onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalFlag(appointment),
+									// onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalFlag(appointment),
 								}
 							}}
 						/>
@@ -408,8 +470,8 @@ class ModalFlagExpand extends React.Component {
 							className="p-10"
 							onRow={(appointment) => {
 								return {
-									onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalFlag(appointment),
-									onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalFlag(appointment),
+									onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(appointment),
+									onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(appointment),
 								}
 							}}
 						/>
@@ -418,6 +480,7 @@ class ModalFlagExpand extends React.Component {
 				{visibleBalance && <ModalBalance {...modalBalanceProps} />}
 				{visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
 				{visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
+				{visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
 			</Modal>
 		);
 	}

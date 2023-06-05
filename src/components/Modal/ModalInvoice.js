@@ -10,7 +10,7 @@ import messages from './messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
 import { downloadInvoice, sendEmailInvoice } from '../../utils/api/apiList';
 import request from '../../utils/api/request';
-import { APPOINTMENT, CLOSED, EVALUATION, PENDING, SUBSIDY } from '../../routes/constant';
+import { APPOINTMENT, CLOSED, EVALUATION, NOSHOW, PENDING, SUBSIDY } from '../../routes/constant';
 
 class ModalInvoice extends React.Component {
 	constructor(props) {
@@ -43,7 +43,6 @@ class ModalInvoice extends React.Component {
 
 	componentDidMount() {
 		const { appointments, event, invoice } = this.props;
-		console.log(invoice);
 		if (event?.sessionInvoice) {
 			const items = event.sessionInvoice.data?.[0]?.items || [];
 			this.setState({
@@ -65,11 +64,8 @@ class ModalInvoice extends React.Component {
 			let items = [];
 			switch (invoice.type) {
 				case 1: case 2: case 3: items = invoice.data?.[0]?.items || []; break;
-				case 4: items = invoice.data?.[0]?.items ? [invoice.data?.[0]?.items] : []; break;
-				case 5: items = invoice.data?.map(a => ([
-					{ type: a.items.type, date: a.items.date, details: a.items.details, discount: a.items.discount ? a.items.discount : undefined, rate: a.items.balance, count: a.items.count },
-					{ type: 'Fee', date: a.items.date, details: 'Past Due Balance Fee', rate: a.items.late }
-				]))?.flat();
+				case 4: items = invoice.data?.[0]?.items?.data || []; break;
+				case 5: items = invoice.data?.map(a => a.items.data)?.flat();
 				default:
 					break;
 			}
@@ -88,6 +84,31 @@ class ModalInvoice extends React.Component {
 				isPaid: invoice.isPaid,
 				minimumPayment: invoice.minimumPayment || 0,
 				invoiceId: invoice._id,
+			});
+		} else if (event?.flagInvoice) {
+			let items = [];
+			if (event.flagInvoice.type === 4) {
+				items = event.flagInvoice.data?.[0]?.items?.data || [];
+			}
+			if (event.flagInvoice.type === 5) {
+				items = event.flagInvoice.data?.map(a => a.items.data)?.flat() || [];
+			}
+
+			this.setState({
+				items,
+				invoiceNumber: event.flagInvoice.invoiceNumber,
+				invoiceDate: moment(event.flagInvoice.updatedAt).format("MM/DD/YYYY"),
+				providerBillingAddress: event?.provider?.billingAddress,
+				providerPhonenumber: event?.provider?.contactNumber?.[0]?.phoneNumber,
+				providerName: `${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''}`,
+				providerEmail: event?.provider?.contactEmail?.[0]?.email,
+				parentName: `${event?.parent?.parentInfo?.fatherName ? event?.parent?.parentInfo?.fatherName : event?.parent?.parentInfo?.motherName} ${event?.parent?.parentInfo?.familyName}`,
+				parentAddress: event?.parent?.parentInfo?.address,
+				dependentName: `${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`,
+				service: event?.skillSet?.name,
+				isPaid: event.flagInvoice?.isPaid,
+				invoiceId: event.flagInvoice?._id,
+				minimumPayment: event.flagInvoice?.minimumPayment || 0,
 			});
 		} else {
 			const initItems = [{
@@ -325,15 +346,15 @@ class ModalInvoice extends React.Component {
 												)}>
 													<tr key={index} className='border border-1 border-x-0 border-black -mb-1 -mr-1'>
 														<td colSpan={2}>
-															<Input name='Type' disabled={selectedItemIndex != index} value={item.type} className="text-left item-input font-16 p-10" placeholder="Session type" onChange={(e) => this.handleChangeItem('type', e.target.value)} />
+															<Input name='Type' disabled={selectedItemIndex != index} value={item?.type} className="text-left item-input font-16 p-10" placeholder="Session type" onChange={(e) => this.handleChangeItem('type', e.target.value)} />
 														</td>
 														<td colSpan={3}>
-															<Input name='Date' disabled={selectedItemIndex != index} value={item.date} className="text-left item-input font-16 p-10" placeholder="Date" onChange={(e) => this.handleChangeItem('date', e.target.value)} />
+															<Input name='Date' disabled={selectedItemIndex != index} value={item?.date} className="text-left item-input font-16 p-10" placeholder="Date" onChange={(e) => this.handleChangeItem('date', e.target.value)} />
 														</td>
 														<td colSpan={4}>
 															<div className='flex justify-between items-center'>
-																<Input name='Details' disabled={selectedItemIndex != index} value={item.details} className="text-left item-input font-16 p-10" placeholder="Description" onChange={(e) => this.handleChangeItem('details', e.target.value)} />
-																<div className='px-20 font-16'>{item.count || ''}</div>
+																<Input name='Details' disabled={selectedItemIndex != index} value={item?.details} className="text-left item-input font-16 p-10" placeholder="Description" onChange={(e) => this.handleChangeItem('details', e.target.value)} />
+																<div className='px-20 font-16'>{item?.count || ''}</div>
 															</div>
 														</td>
 														<td colSpan={1}>
@@ -343,7 +364,7 @@ class ModalInvoice extends React.Component {
 																prefix="$"
 																min={0}
 																disabled={selectedItemIndex != index}
-																value={item.rate}
+																value={item?.rate}
 																className="text-center item-input font-16 p-10"
 																placeholder={intl.formatMessage(msgCreateAccount.rate)}
 																onChange={(e) => this.handleChangeItem('rate', e.target.value)}
@@ -362,7 +383,7 @@ class ModalInvoice extends React.Component {
 																type='number'
 																prefix="$"
 																disabled={selectedItemIndex != index}
-																value={item.discount}
+																value={item?.discount}
 																className="text-center item-input font-16 p-10"
 																onChange={(e) => this.handleChangeItem('discount', e.target.value)}
 																onKeyDown={(e) => {
@@ -378,7 +399,7 @@ class ModalInvoice extends React.Component {
 															/>
 														</td>
 														<td colSpan={1}>
-															<div className='text-center font-16'>${item.rate * 1 + (item.discount * 1 || 0)}</div>
+															<div className='text-center font-16'>${(item?.rate * 1 || 0) + (item?.discount * 1 || 0)}</div>
 														</td>
 													</tr>
 												</Popover>
@@ -410,7 +431,7 @@ class ModalInvoice extends React.Component {
 						min={0}
 						disabled={user?.role === 3 || isPaid}
 						addonBefore="Minimum due to unlock account:"
-						className={`mt-10 ${invoice?.type === 5 ? '' : 'd-none'}`}
+						className={`mt-10 ${(invoice?.type === 5 || event?.flagInvoice?.type === 5) ? '' : 'd-none'}`}
 						value={minimumPayment}
 						onKeyDown={(e) => {
 							(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
@@ -456,18 +477,21 @@ class ModalInvoice extends React.Component {
 							if (totalPayment < 0) {
 								message.warn("Total amount is not valid.");
 							} else {
-								if (event.status === PENDING) {
+								if (event?.status === PENDING) {
 									this.props.onSubmit({ items, invoiceNumber, invoiceId, totalPayment, minimumPayment });
-								}
-								if (event.status === CLOSED) {
+								} else if ([CLOSED, NOSHOW].includes(event?.status)) {
 									this.props.onSubmit({ items, invoiceNumber, invoiceId, totalPayment, minimumPayment, isEdit: true });
+								} else if (invoice) {
+									this.props.onSubmit({ items, invoiceNumber, invoiceId, totalPayment, minimumPayment, isEdit: true });
+								} else {
+									this.props.onCancel();
 								}
 							}
 						} else {
 							this.props.onCancel();
 						}
 					}} style={{ padding: '0px 30px', height: 38 }}>
-						{(event?.status === PENDING && user.role > 3) ? intl.formatMessage(messages.createInvoice) : (event?.status === CLOSED && !isPaid && user.role > 3) ? intl.formatMessage(messages.editInvoice) : intl.formatMessage(messages.ok)}
+						{(event?.status === PENDING && user.role > 3) ? intl.formatMessage(messages.createInvoice) : (([CLOSED, NOSHOW].includes(event?.status) || invoice) && !isPaid && user.role > 3) ? intl.formatMessage(messages.editInvoice) : intl.formatMessage(messages.ok)}
 					</Button>
 				</div>
 			</Modal >
