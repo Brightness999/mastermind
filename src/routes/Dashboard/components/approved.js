@@ -237,25 +237,25 @@ const Approved = (props) => {
       },
       render: (subsidy) => <span>{moment(subsidy?.schoolApprovalDate).format('MM/DD/YYYY hh:mm A')}</span>
     },
-    {
-      title: <span className="font-16">{intl.formatMessage(messages.action)}</span>,
-      key: 'action',
-      render: (subsidy) => (
-        <Space size="middle">
-          <Popconfirm
-            icon={<AiFillWarning size={24} />}
-            title="Are you sure to decline this request?"
-            onConfirm={() => props.onShowModalDeclineExplanation(subsidy?._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <a className='btn-blue'>Decline</a>
-          </Popconfirm>
-        </Space>
-      ),
-      align: 'center',
-      fixed: 'right',
-    },
+    // {
+    //   title: <span className="font-16">{intl.formatMessage(messages.action)}</span>,
+    //   key: 'action',
+    //   render: (subsidy) => (
+    //     <Space size="middle">
+    //       <Popconfirm
+    //         icon={<AiFillWarning size={24} />}
+    //         title="Are you sure to decline this request?"
+    //         onConfirm={() => props.onShowModalDeclineExplanation(subsidy?._id)}
+    //         okText="Yes"
+    //         cancelText="No"
+    //       >
+    //         <a className='btn-blue'>Decline</a>
+    //       </Popconfirm>
+    //     </Space>
+    //   ),
+    //   align: 'center',
+    //   fixed: 'right',
+    // },
   ];
 
   const DraggableBodyRow = ({ index, moveRow, className, style, onClick, ...restProps }) => {

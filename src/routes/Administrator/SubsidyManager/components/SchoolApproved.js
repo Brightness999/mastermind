@@ -247,35 +247,35 @@ const SchoolApproved = (props) => {
       },
       render: (subsidy) => <span>{moment(subsidy?.schoolApprovalDate).format('MM/DD/YYYY hh:mm A')}</span>
     },
-    {
-      title: <span className="font-16">{intl.formatMessage(messages.action)}</span>,
-      key: 'action',
-      render: (subsidy) => (
-        <Space size="middle">
-          <Popconfirm
-            icon={<AiFillWarning size={24} />}
-            title={<span >Are you sure to approve this request?</span>}
-            onConfirm={() => props.adminPreApproveSubsidy(subsidy?._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <a className='btn-blue'>{intl.formatMessage(msgModal.preapprove)}</a>
-          </Popconfirm>
-          <Popconfirm
-            icon={<AiFillWarning size={24} />}
-            title={<span >Are you sure to decline this request?</span>}
-            placement='left'
-            onConfirm={() => props.onShowModalDeclineExplanation(subsidy?._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <a className='btn-blue'>{intl.formatMessage(msgModal.decline)}</a>
-          </Popconfirm>
-        </Space>
-      ),
-      align: 'center',
-      fixed: 'right',
-    },
+    // {
+    //   title: <span className="font-16">{intl.formatMessage(messages.action)}</span>,
+    //   key: 'action',
+    //   render: (subsidy) => (
+    //     <Space size="middle">
+    //       <Popconfirm
+    //         icon={<AiFillWarning size={24} />}
+    //         title={<span >Are you sure to approve this request?</span>}
+    //         onConfirm={() => props.adminPreApproveSubsidy(subsidy?._id)}
+    //         okText="Yes"
+    //         cancelText="No"
+    //       >
+    //         <a className='btn-blue'>{intl.formatMessage(msgModal.preapprove)}</a>
+    //       </Popconfirm>
+    //       <Popconfirm
+    //         icon={<AiFillWarning size={24} />}
+    //         title={<span >Are you sure to decline this request?</span>}
+    //         placement='left'
+    //         onConfirm={() => props.onShowModalDeclineExplanation(subsidy?._id)}
+    //         okText="Yes"
+    //         cancelText="No"
+    //       >
+    //         <a className='btn-blue'>{intl.formatMessage(msgModal.decline)}</a>
+    //       </Popconfirm>
+    //     </Space>
+    //   ),
+    //   align: 'center',
+    //   fixed: 'right',
+    // },
   ];
 
   const DraggableBodyRow = ({ index, moveRow, className, style, onClick, ...restProps }) => {

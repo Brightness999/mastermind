@@ -176,34 +176,34 @@ const Pending = (props) => {
       },
       render: (subsidy) => <span>{moment(subsidy?.createdAt).format('MM/DD/YYYY hh:mm A')}</span>,
     },
-    {
-      title: <span className="font-16">{intl.formatMessage(messages.action)}</span>,
-      key: 'action',
-      align: 'center',
-      fixed: 'right',
-      render: (subsidy) => (
-        <Space size="middle">
-          <Popconfirm
-            icon={<AiFillWarning size={24} />}
-            title="Are you sure to approve this request?"
-            onConfirm={() => props.onShowModalSchoolApproval(subsidy?._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <a className='btn-blue'>Approve</a>
-          </Popconfirm>
-          <Popconfirm
-            icon={<AiFillWarning size={24} />}
-            title="Are you sure to decline this request?"
-            onConfirm={() => props.onShowModalDeclineExplanation(subsidy?._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <a className='btn-blue'>Decline</a>
-          </Popconfirm>
-        </Space >
-      ),
-    },
+    // {
+    //   title: <span className="font-16">{intl.formatMessage(messages.action)}</span>,
+    //   key: 'action',
+    //   align: 'center',
+    //   fixed: 'right',
+    //   render: (subsidy) => (
+    //     <Space size="middle">
+    //       <Popconfirm
+    //         icon={<AiFillWarning size={24} />}
+    //         title="Are you sure to approve this request?"
+    //         onConfirm={() => props.onShowModalSchoolApproval(subsidy?._id)}
+    //         okText="Yes"
+    //         cancelText="No"
+    //       >
+    //         <a className='btn-blue'>Approve</a>
+    //       </Popconfirm>
+    //       <Popconfirm
+    //         icon={<AiFillWarning size={24} />}
+    //         title="Are you sure to decline this request?"
+    //         onConfirm={() => props.onShowModalDeclineExplanation(subsidy?._id)}
+    //         okText="Yes"
+    //         cancelText="No"
+    //       >
+    //         <a className='btn-blue'>Decline</a>
+    //       </Popconfirm>
+    //     </Space >
+    //   ),
+    // },
   ];
 
   const exportToExcel = () => {
