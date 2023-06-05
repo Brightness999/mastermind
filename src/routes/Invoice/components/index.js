@@ -149,8 +149,8 @@ class InvoiceList extends React.Component {
         render: dependent => dependent?.currentGrade,
       },
       {
-        title: intl.formatMessage(msgCreateAccount.provider), dataIndex: 'data', key: 'provider',
-        sorter: (a, b) => (a.data?.[0]?.appointment?.provider?.firstName || '' + a.data?.[0]?.appointment?.provider?.lastName || '').toLowerCase() > (b.data?.[0]?.appointment?.provider?.firstName || '' + b.data?.[0]?.appointment?.provider?.lastName || '').toLowerCase() ? 1 : -1,
+        title: intl.formatMessage(msgCreateAccount.provider), dataIndex: 'provider', key: 'provider',
+        sorter: (a, b) => (a?.provider?.firstName || '' + a?.provider?.lastName || '').toLowerCase() > (b?.provider?.firstName || '' + b?.provider?.lastName || '').toLowerCase() ? 1 : -1,
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
@@ -185,13 +185,13 @@ class InvoiceList extends React.Component {
         filterIcon: (filtered) => (
           <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
         ),
-        onFilter: (value, record) => (record.data?.[0]?.appointment?.provider?.firstName || '')?.toLowerCase()?.includes((value).toLowerCase()) || (record.data?.[0]?.appointment?.provider?.lastName || '')?.toLowerCase()?.includes((value).toLowerCase()),
+        onFilter: (value, record) => (record.provider?.firstName || '')?.toLowerCase()?.includes((value).toLowerCase()) || (record.provider?.lastName || '')?.toLowerCase()?.includes((value).toLowerCase()),
         onFilterDropdownOpenChange: visible => {
           if (visible) {
             setTimeout(() => this.searchInput.current?.select(), 100);
           }
         },
-        render: data => `${data?.[0]?.appointment?.provider?.firstName || ''} ${data?.[0]?.appointment?.provider?.lastName || ''}`,
+        render: provider => `${provider?.firstName || ''} ${provider?.lastName || ''}`,
       },
       {
         title: intl.formatMessage(messages.status), dataIndex: 'isPaid', key: 'status',
