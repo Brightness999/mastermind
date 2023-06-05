@@ -476,6 +476,7 @@ class DrawerDetail extends Component {
     const data = {
       _id: event?._id,
       dependent: event?.dependent?._id,
+      provider: event?.provider?._id,
       status: NOSHOW,
       flagStatus: ACTIVE,
       flagType: NOSHOW,
