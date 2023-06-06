@@ -451,8 +451,6 @@ class Dashboard extends React.Component {
       content: intl.formatMessage(messages.appointmentScheduled),
       className: 'popup-scheduled',
     });
-    this.updateCalendarEvents(this.state.userRole);
-    this.getMyAppointments(this.state.userRole);
   };
 
   onShowModalSubsidy = (subsidyId) => {
@@ -483,8 +481,6 @@ class Dashboard extends React.Component {
       content: intl.formatMessage(messages.appointmentScheduled),
       className: 'popup-scheduled',
     });
-    this.updateCalendarEvents(this.state.userRole);
-    this.getMyAppointments(this.state.userRole);
   };
 
   onShowModalNewSubsidy = () => {

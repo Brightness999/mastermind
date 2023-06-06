@@ -8,15 +8,17 @@ import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import 'moment/locale/en-au';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 import messages from './messages';
-import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import request from '../../utils/api/request'
-import { createAppointmentForParent, searchProvidersForAdmin } from '../../utils/api/apiList';
+import msgCreateAccount from 'src/routes/Sign/CreateAccount/messages';
+import request from 'src/utils/api/request'
+import { createAppointmentForParent, searchProvidersForAdmin } from 'src/utils/api/apiList';
 import ModalNewScreening from './ModalNewScreening';
-import { store } from '../../redux/store';
 import ModalConfirm from './ModalConfirm';
-import { ADMINAPPROVED, APPOINTMENT, CLOSED, EVALUATION, PENDING, SCREEN, SUBSIDY } from '../../routes/constant';
+import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
+import { ADMINAPPROVED, APPOINTMENT, CLOSED, EVALUATION, PENDING, SCREEN, SUBSIDY } from 'src/routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -109,10 +111,9 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	componentDidMount() {
-		this.setState({
-			skillSet: this.props.SkillSet,
-			selectedDate: moment(this.props.selectedDate),
-		});
+		console.log(this.props);
+		const { SkillSet, selectedDate } = this.props;
+		this.setState({ skillSet: SkillSet, selectedDate: moment(selectedDate) });
 	}
 
 	searchProvider(searchKey, address, selectedSkill, dependentId) {
@@ -158,7 +159,7 @@ class ModalNewAppointment extends React.Component {
 
 	createAppointment = (data) => {
 		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration, standardRate, subsidizedRate, subsidyAvailable, isSubsidyOnly } = this.state;
-		const { durations } = store.getState().auth;
+		const { durations, listDependents } = this.props;
 
 		if (selectedProvider == undefined) {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
@@ -173,7 +174,7 @@ class ModalNewAppointment extends React.Component {
 
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
-		const dependent = this.props.listDependents?.find(d => d._id === selectedDependent);
+		const dependent = listDependents?.find(d => d._id === selectedDependent);
 		const subsidy = dependent?.subsidy?.find(s => s.skillSet === selectedSkill && s.status === 5);
 
 		const postData = {
@@ -235,10 +236,8 @@ class ModalNewAppointment extends React.Component {
 	};
 
 	onSelectDate = (newValue) => {
-		this.setState({
-			selectedDate: newValue,
-			selectedTimeIndex: -1,
-		});
+		const { listAppointmentsRecent } = this.props;
+		this.setState({ selectedDate: newValue, selectedTimeIndex: -1 });
 		if (newValue.isSameOrAfter(new Date())) {
 			const { selectedProviderIndex, selectedDependent, listProvider, appointmentType } = this.state;
 			if (selectedProviderIndex > -1) {
@@ -249,7 +248,7 @@ class ModalNewAppointment extends React.Component {
 					time.value = moment(time.value).set({ years, months, date });
 
 					let flag = true;
-					this.props.listAppointmentsRecent?.filter(appointment => (appointment.status === 0) && (appointment.provider?._id === listProvider[selectedProviderIndex]?._id || appointment.dependent?._id === selectedDependent))?.forEach(appointment => {
+					listAppointmentsRecent?.filter(appointment => (appointment.status === 0) && (appointment.provider?._id === listProvider[selectedProviderIndex]?._id || appointment.dependent?._id === selectedDependent))?.forEach(appointment => {
 						if (time.value.toLocaleString() === moment(appointment.date).toLocaleString()) {
 							flag = false;
 						}
@@ -279,6 +278,7 @@ class ModalNewAppointment extends React.Component {
 
 	onChooseProvider = (providerIndex) => {
 		const { listProvider, selectedDate, selectedDependent, selectedProviderIndex, selectedSkill } = this.state;
+		const { listAppointmentsRecent, listDependents } = this.props;
 		const appointments = listProvider[providerIndex]?.appointments ?? [];
 
 		const flagAppointments = appointments?.filter(a => a?.dependent === selectedDependent && a?.flagStatus === 1);
@@ -354,7 +354,7 @@ class ModalNewAppointment extends React.Component {
 			time.value = moment(time.value).set({ years, months, date });
 
 			let flag = true;
-			this.props.listAppointmentsRecent?.filter(appointment => (appointment.status === 0) && (appointment.provider?._id === listProvider[selectedProviderIndex]?._id || appointment.dependent?._id === selectedDependent))?.forEach(appointment => {
+			listAppointmentsRecent?.filter(appointment => (appointment.status === 0) && (appointment.provider?._id === listProvider[selectedProviderIndex]?._id || appointment.dependent?._id === selectedDependent))?.forEach(appointment => {
 				if (time.value.isSame(moment(appointment.date))) {
 					flag = false;
 				}
@@ -370,7 +370,7 @@ class ModalNewAppointment extends React.Component {
 		let subsidizedRate = 0;
 
 		if (selectedDependent) {
-			const currentGrade = this.props.listDependents?.find(dependent => dependent?._id == selectedDependent)?.currentGrade;
+			const currentGrade = listDependents?.find(dependent => dependent?._id == selectedDependent)?.currentGrade;
 
 			if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(currentGrade)) {
 				standardRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'Early Education'].includes(level.level))?.rate;
@@ -390,7 +390,7 @@ class ModalNewAppointment extends React.Component {
 			}
 
 			if (selectedSkill) {
-				const dependent = this.props.listDependents?.find(d => d._id === selectedDependent);
+				const dependent = listDependents?.find(d => d._id === selectedDependent);
 				const subsidy = dependent?.subsidy?.find(s => s.skillSet === selectedSkill && s.status === ADMINAPPROVED);
 				if (subsidy) {
 					const subsidyAppointments = dependent?.appointments?.filter(a => a.skillSet === selectedSkill && a.type === SUBSIDY && [PENDING, CLOSED].includes(a.status))?.length ?? 0;
@@ -416,12 +416,16 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	requestCreateAppointment(postData) {
+		const { appointments, appointmentsInMonth, onSubmit, setAppointments, setAppointmentsInMonth } = this.props;
 		request.post(createAppointmentForParent, postData).then(result => {
-			if (result.success) {
+			const { success, data } = result;
+			if (success) {
 				this.setState({ errorMessage: '' });
-				this.props.onSubmit();
+				setAppointments([...appointments, data]);
+				setAppointmentsInMonth([...appointmentsInMonth, data]);
+				onSubmit();
 			} else {
-				this.setState({ errorMessage: result.data });
+				this.setState({ errorMessage: data });
 			}
 		}).catch(err => {
 			this.setState({ errorMessage: err.message });
@@ -436,11 +440,11 @@ class ModalNewAppointment extends React.Component {
 
 	handleSelectDependent = (dependentId) => {
 		const { searchKey, address, selectedSkill } = this.state;
-		const dependents = this.props.listDependents;
+		const { listDependents } = this.props;
 		this.setState({
 			selectedDependent: dependentId,
-			skillSet: dependents?.find(dependent => dependent._id === dependentId)?.services,
-			addressOptions: dependents?.find(dependent => dependent._id === dependentId)?.school?.name ? ['Dependent Home', 'Provider Office', dependents?.find(dependent => dependent._id === dependentId)?.school?.name] : ['Dependent Home', 'Provider Office'],
+			skillSet: listDependents?.find(dependent => dependent._id === dependentId)?.services,
+			addressOptions: listDependents?.find(dependent => dependent._id === dependentId)?.school?.name ? ['Dependent Home', 'Provider Office', listDependents?.find(dependent => dependent._id === dependentId)?.school?.name] : ['Dependent Home', 'Provider Office'],
 			subsidyAvailable: false,
 			isSubsidyOnly: false,
 		});
@@ -503,6 +507,7 @@ class ModalNewAppointment extends React.Component {
 			isSubsidyOnly,
 			cancellationFee,
 		} = this.state;
+		const { durations, listDependents } = this.props;
 		const modalProps = {
 			className: 'modal-new',
 			title: "",
@@ -517,7 +522,7 @@ class ModalNewAppointment extends React.Component {
 			onSubmit: this.createAppointment,
 			onCancel: this.onCloseModalScreening,
 			provider: listProvider[selectedProviderIndex],
-			dependent: this.props.listDependents?.find(dependent => dependent._id == selectedDependent),
+			dependent: listDependents?.find(dependent => dependent._id == selectedDependent),
 			notes: notes,
 		}
 		const modalConfirmProps = {
@@ -535,7 +540,7 @@ class ModalNewAppointment extends React.Component {
 							<p className='font-30 mb-10'>{appointmentType === APPOINTMENT && intl.formatMessage(messages.newAppointment)}{appointmentType === EVALUATION && intl.formatMessage(messages.newEvaluation)}{appointmentType === SCREEN && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType === EVALUATION && selectedProviderIndex > -1 && (
 								<div className='font-20'>
-									<div>{store.getState().auth.durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
+									<div>{durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
 									<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
 								</div>
 							)}
@@ -567,7 +572,7 @@ class ModalNewAppointment extends React.Component {
 										onChange={value => this.handleSelectDependent(value)}
 										placeholder={intl.formatMessage(msgCreateAccount.dependent)}
 									>
-										{this.props.listDependents?.map((dependent, index) => (
+										{listDependents?.map((dependent, index) => (
 											<Select.Option key={index} value={dependent._id}>{dependent.firstName} {dependent.lastName}</Select.Option>
 										))}
 									</Select>
@@ -801,4 +806,11 @@ class ModalNewAppointment extends React.Component {
 		);
 	}
 };
-export default ModalNewAppointment;
+
+const mapStateToProps = state => ({
+	durations: state.auth.durations,
+	appointments: state.appointments.dataAppointments,
+	appointmentsInMonth: state.appointments.dataAppointmentsMonth,
+});
+
+export default compose(connect(mapStateToProps, { setAppointments, setAppointmentsInMonth }))(ModalNewAppointment);

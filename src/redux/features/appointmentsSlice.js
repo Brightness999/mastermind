@@ -135,8 +135,11 @@ export const appointmentsSlice = createSlice({
 	name: 'appointments',
 	initialState,
 	reducers: {
-		setAppointMonth(state, action) {
+		setAppointments(state, action) {
 			state.dataAppointments = action.payload;
+		},
+		setAppointmentsInMonth(state, action) {
+			state.dataAppointmentsMonth = action.payload;
 		},
 		setSubsidyRequests(state, action) {
 			state.dataSubsidyRequests = action.payload;
@@ -159,6 +162,6 @@ export const appointmentsSlice = createSlice({
 	}
 });
 
-export const { getDatadAppointments, setAppointMonth, setSubsidyRequests } = appointmentsSlice.actions;
+export const { getDatadAppointments, setAppointments, setAppointmentsInMonth, setSubsidyRequests } = appointmentsSlice.actions;
 
 export default appointmentsSlice.reducer;

@@ -27,7 +27,7 @@ import msgDrawer from '../../../components/DrawerDetail/messages';
 import msgModal from '../../../components/Modal/messages';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request, { decryptParam, encryptParam } from '../../../utils/api/request'
-import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
+import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, setAppointments, setAppointmentsInMonth } from '../../../redux/features/appointmentsSlice'
 import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, setSchools } from '../../../redux/features/authSlice';
 import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance, sendEmailInvoice } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
@@ -259,8 +259,6 @@ class SchedulingCenter extends React.Component {
       content: intl.formatMessage(messages.appointmentScheduled),
       className: 'popup-scheduled',
     });
-    this.updateCalendarEvents(this.state.userRole);
-    this.getMyAppointments(this.state.userRole);
   };
 
   onShowModalSubsidy = (subsidyId) => {
@@ -291,8 +289,6 @@ class SchedulingCenter extends React.Component {
       content: intl.formatMessage(messages.appointmentScheduled),
       className: 'popup-scheduled',
     });
-    this.updateCalendarEvents(this.state.userRole);
-    this.getMyAppointments(this.state.userRole);
   };
 
   onShowModalNewSubsidy = () => {
@@ -1143,4 +1139,4 @@ const mapStateToProps = state => ({
   auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps, { changeTime, getAppointmentsData, getAppointmentsMonthData, setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, getSubsidyRequests, setSchools }))(SchedulingCenter);
+export default compose(connect(mapStateToProps, { changeTime, getAppointmentsData, getAppointmentsMonthData, setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, getSubsidyRequests, setSchools, setAppointments, setAppointmentsInMonth }))(SchedulingCenter);
