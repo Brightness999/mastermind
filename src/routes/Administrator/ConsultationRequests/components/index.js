@@ -126,7 +126,7 @@ class ConsultationRequest extends React.Component {
     return (
       <div className="full-layout page usermanager-page">
         <div className='div-title-admin'>
-          <p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.flagList)}</p>
+          <p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.consultationRequests)}</p>
           <Divider />
         </div>
         <CSVLink onClick={this.exportToExcel} data={csvData} headers={csvHeaders} filename="Approved Requests">
