@@ -14,6 +14,7 @@ import { AiFillWarning } from 'react-icons/ai';
 const SchoolPending = (props) => {
   const { skills, grades, requests, schools } = props;
   const [csvData, setCsvData] = useState([]);
+  const [sortedRequests, setSortedRequests] = useState(requests);
   const csvHeaders = ["Student Name", "School", "Student Grade", "Service Requested", "Notes", "Request Date"];
   const searchInput = createRef(null);
   const pendingColumns = [
@@ -218,7 +219,7 @@ const SchoolPending = (props) => {
   ];
 
   const exportToExcel = () => {
-    const data = requests?.map(r => ({
+    const data = sortedRequests?.map(r => ({
       "Student Name": `${r?.student?.firstName ?? ''} ${r?.student?.lastName ?? ''}`,
       "School": r?.school?.name ?? '',
       "Student Grade": r?.student?.currentGrade,
@@ -244,6 +245,7 @@ const SchoolPending = (props) => {
         columns={pendingColumns}
         scroll={{ x: 1300 }}
         className='mt-1 pb-10'
+        onChange={(_, __, ___, extra) => setSortedRequests(extra.currentDataSource)}
         onRow={(subsidy) => ({
           onClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
           onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),

@@ -11,6 +11,7 @@ import msgCreateAccount from '../../Sign/CreateAccount/messages';
 const Declined = (props) => {
   const { skills, grades, requests } = props;
   const [csvData, setCsvData] = useState([]);
+  const [sortedRequests, setSortedRequests] = useState(requests);
   const csvHeaders = ["Student Name", "School", "Student Grade", "Service Requested", "Notes"];
   const searchInput = createRef(null);
   const declinedColumns = [
@@ -130,7 +131,7 @@ const Declined = (props) => {
   ];
 
   const exportToExcel = () => {
-    const data = requests?.map(r => ({
+    const data = sortedRequests?.map(r => ({
       "Student Name": `${r?.student?.firstName ?? ''} ${r?.student?.lastName ?? ''}`,
       "School": r?.school?.name ?? '',
       "Student Grade": r?.student?.currentGrade,
@@ -155,6 +156,7 @@ const Declined = (props) => {
         columns={declinedColumns}
         scroll={{ x: 1300 }}
         className='mt-1 pb-10'
+        onChange={(_, __, ___, extra) => setSortedRequests(extra.currentDataSource)}
         onRow={(subsidy) => ({
           onClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
           onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),

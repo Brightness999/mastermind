@@ -17,6 +17,7 @@ const Approved = (props) => {
   const type = 'DraggableBodyRow';
   const { skills, grades, requests } = props;
   const [csvData, setCsvData] = useState([]);
+  const [sortedRequests, setSortedRequests] = useState(requests);
   const csvHeaders = ["Student Name", "School", "Student Grade", "Service Requested", "Notes", "Provider", "Approval Date"];
   const searchInput = createRef(null);
   const approvedColumns = [
@@ -325,7 +326,7 @@ const Approved = (props) => {
   );
 
   const exportToExcel = () => {
-    const data = requests?.map(r => ({
+    const data = sortedRequests?.map(r => ({
       "Student Name": `${r?.student?.firstName ?? ''} ${r?.student?.lastName ?? ''}`,
       "School": r?.school?.name ?? '',
       "Student Grade": r?.student?.currentGrade,
@@ -352,6 +353,7 @@ const Approved = (props) => {
           dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
           columns={approvedColumns}
           components={components}
+          onChange={(_, __, ___, extra) => setSortedRequests(extra.currentDataSource)}
           onRow={(_, index) => {
             const attr = {
               index,
