@@ -155,7 +155,7 @@ class InvoiceList extends React.Component {
         render: (dependent) => `${dependent.firstName ?? ''} ${dependent.lastName ?? ''}`,
       },
       {
-        title: intl.formatMessage(msgCreateAccount.age), dataIndex: 'dependent', key: 'age',
+        title: intl.formatMessage(msgCreateAccount.age), dataIndex: 'dependent', key: 'age', type: 'datetime',
         sorter: (a, b) => a.dependent.birthday > b.dependent.birthday ? 1 : -1,
         render: (dependent) => moment().year() - moment(dependent.birthday).year(),
       },
@@ -212,6 +212,10 @@ class InvoiceList extends React.Component {
         render: provider => `${provider?.firstName || ''} ${provider?.lastName || ''}`,
       },
       {
+        title: 'Amount', dataIndex: 'totalPayment', type: 'number', key: 'amount',
+        sorter: (a, b) => a.totalPayment > b.totalPayment ? 1 : -1,
+      },
+      {
         title: intl.formatMessage(messages.createdDate), dataIndex: 'createdAt', type: 'date', key: 'createdat',
         sorter: (a, b) => a.createdAt > b.createdAt ? 1 : -1,
         render: createdAt => moment(createdAt).format("MM/DD/YYYY hh:mm a"),
@@ -244,7 +248,7 @@ class InvoiceList extends React.Component {
     ];
 
     if (selectedTab == 1) {
-      columns.splice(7);
+      columns.splice(8);
     }
 
     const items = [
