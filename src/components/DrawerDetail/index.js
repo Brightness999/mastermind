@@ -1048,7 +1048,7 @@ class DrawerDetail extends Component {
           {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(msgCreateAccount.rate)}</p>
-              <p className={`font-18 ${event?.status === CLOSED ? 'text-underline cursor' : ''} ${!event?.sessionInvoice?.isPaid && 'text-red'}`} onClick={() => event?.status === CLOSED && this.onOpenModalInvoice()}>${event?.rate}</p>
+              <p className={`font-18 ${(event?.status === CLOSED || event?.status === NOSHOW) ? 'text-underline cursor' : ''} ${(!event?.sessionInvoice?.isPaid && !event?.flagInvoice?.isPaid) && 'text-red'}`} onClick={() => (event?.status === CLOSED || event?.status === NOSHOW) && this.onOpenModalInvoice()}>${event?.rate}</p>
             </div>
           )}
           {[SCREEN, CONSULTATION].includes(event?.type) && (
