@@ -2,6 +2,7 @@ import { url } from './baseUrl';
 import axios from 'axios'
 import Cookies from 'js-cookie';
 import { message } from 'antd';
+import CryptoJS from 'crypto-js';
 
 // config aioxs
 const instance = axios.create({
@@ -67,6 +68,16 @@ export function generateSearchStructureWithPopulateSearch(search = "", filter = 
 			"isNestedQuery": isNestedQuery
 		}
 	}
+}
+
+export function encryptParam(param) {
+	const key = 'hmghpayment';
+	return CryptoJS.AES.encrypt(param, key).toString();
+}
+
+export function decryptParam(encryptedParam) {
+	const key = 'hmghpayment';
+	return CryptoJS.AES.decrypt(encryptedParam, key).toString(CryptoJS.enc.Utf8);
 }
 
 export default instance;

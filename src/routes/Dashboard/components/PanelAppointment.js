@@ -10,7 +10,7 @@ import moment from 'moment';
 
 import messages from '../messages';
 import msgModal from '../../../components/Modal/messages';
-import request from '../../../utils/api/request'
+import request, { encryptParam } from '../../../utils/api/request'
 import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalPayment, ModalProcessAppointment } from '../../../components/Modal';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
 import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag, setFlagBalance, updateNoshowFlag } from '../../../utils/api/apiList';
@@ -497,7 +497,7 @@ class PanelAppointment extends React.Component {
           {appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && [CLOSED, DECLINED].includes(a.status) && a.flagStatus != ACTIVE && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
-              {(this.props.user?.role === PARENT && !data?.isPaid) ? (
+              {(this.props.user?.role === PARENT && !data?.sessionInvoice?.isPaid) ? (
                 <div className={`item-right cursor gap-1 ${data?.status === DECLINED && 'display-none events-none'}`}>
                   <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                     <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
@@ -509,7 +509,7 @@ class PanelAppointment extends React.Component {
                     <input type="hidden" name="shipping" value="0.00" />
                     <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                     <input type="hidden" name="rm" value="0" />
-                    <input type="hidden" name="return" value={`${window.location.href}?success=true&id=${data?._id}`} />
+                    <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(data?.sessionInvoice?._id)}`} />
                     <input type="hidden" name="cancel_return" value={window.location.href} />
                     <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
                     <button className='flag-action pay-flag-button'>

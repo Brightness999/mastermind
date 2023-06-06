@@ -26,7 +26,7 @@ import msgSidebar from '../../../components/SideBar/messages';
 import msgDrawer from '../../../components/DrawerDetail/messages';
 import msgModal from '../../../components/Modal/messages';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
-import request from '../../../utils/api/request'
+import request, { decryptParam, encryptParam } from '../../../utils/api/request'
 import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
 import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, setSchools } from '../../../redux/features/authSlice';
 import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance, sendEmailInvoice } from '../../../utils/api/apiList';
@@ -88,15 +88,18 @@ class SchedulingCenter extends React.Component {
     const { auth } = this.props;
     this.setState({ loading: true });
     const params = new URLSearchParams(window.location.search);
-    if (params.get('success') === 'true' && params.get('id')) {
-      const appointmentId = params.get('id');
-      const type = params.get('type');
-      request.post(payInvoice, { id: appointmentId, type }).then(res => {
+    const success = decryptParam(params.get('s')?.replaceAll(' ', '+') || '');
+    const invoiceId = decryptParam(params.get('i')?.replaceAll(' ', '+') || '');
+    const appointmentId = decryptParam(params.get('a')?.replaceAll(' ', '+') || '');
+    if (success === 'true' && (invoiceId || appointmentId)) {
+      request.post(payInvoice, { invoiceId, appointmentId }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
-          window.location.search = '';
+          const url = window.location.href;
+          const cleanUrl = url.split('?')[0];
+          window.history.replaceState({}, document.title, cleanUrl);
         } else {
-          message.warning('Something went wrong. Please try again.');
+          message.warning('Something went wrong. Please try again');
         }
       }).catch(err => {
         console.log('pay flag error---', err);
@@ -1093,7 +1096,7 @@ class SchedulingCenter extends React.Component {
                 <input type="hidden" name="shipping" value="0.00" />
                 <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                 <input type="hidden" name="rm" value="0" />
-                <input type="hidden" name="return" value={`${window.location.href}?success=true&type=flag&id=${selectedEvent?._id}`} />
+                <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(selectedEvent?.flagInvoice?._id)}`} />
                 <input type="hidden" name="cancel_return" value={window.location.href} />
                 <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
                 <Button type='primary' htmlType='submit' block className='font-16 flag-action whitespace-nowrap'>

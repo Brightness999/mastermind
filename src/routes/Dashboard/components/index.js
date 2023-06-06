@@ -25,7 +25,7 @@ import messagesCreateAccount from '../../Sign/CreateAccount/messages';
 import msgModal from '../../../components/Modal/messages';
 import msgDrawer from '../../../components/DrawerDetail/messages';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
-import request from '../../../utils/api/request'
+import request, { decryptParam, encryptParam } from '../../../utils/api/request'
 import { store } from '../../../redux/store';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
@@ -93,13 +93,16 @@ class Dashboard extends React.Component {
     const { user } = this.props;
     this.setState({ loading: true });
     const params = new URLSearchParams(window.location.search);
-    if (params.get('success') === 'true' && params.get('id')) {
-      const appointmentId = params.get('id');
-      const type = params.get('type');
-      request.post(payInvoice, { id: appointmentId, type }).then(res => {
+    const success = decryptParam(params.get('s')?.replaceAll(' ', '+') || '');
+    const invoiceId = decryptParam(params.get('i')?.replaceAll(' ', '+') || '');
+    const appointmentId = decryptParam(params.get('a')?.replaceAll(' ', '+') || '');
+    if (success === 'true' && (invoiceId || appointmentId)) {
+      request.post(payInvoice, { invoiceId, appointmentId }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
-          window.location.search = '';
+          const url = window.location.href;
+          const cleanUrl = url.split('?')[0];
+          window.history.replaceState({}, document.title, cleanUrl);
         } else {
           message.warning('Something went wrong. Please try again');
         }
@@ -1255,7 +1258,7 @@ class Dashboard extends React.Component {
                                     <input type="hidden" name="shipping" value="0.00" />
                                     <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                                     <input type="hidden" name="rm" value="0" />
-                                    <input type="hidden" name="return" value={`${window.location.href}?success=true&type=flag&id=${appointment?._id}`} />
+                                    <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(appointment?.flagInvoice?._id)}`} />
                                     <input type="hidden" name="cancel_return" value={window.location.href} />
                                     <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
                                     <button className='font-12 flag-action pay-flag-button'>

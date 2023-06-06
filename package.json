@@ -34,6 +34,7 @@
     "base-64": "^1.0.0",
     "classnames": "^2.2.6",
     "cmn-utils": "^1.0.9",
+    "crypto-js": "^4.1.1",
     "css-animation": "^2.0.4",
     "css-element-queries": "^1.2.1",
     "dva": "^2.4.1",

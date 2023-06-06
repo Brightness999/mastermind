@@ -1,5 +1,5 @@
 import React, { createRef } from 'react';
-import { Divider, Table, Space, Input, Button, Tabs } from 'antd';
+import { Divider, Table, Space, Input, Button, Tabs, message } from 'antd';
 import intl from 'react-intl-universal';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
@@ -12,8 +12,8 @@ import messages from '../../Dashboard/messages';
 import msgCreateAccount from '../../Sign/CreateAccount/messages';
 import msgModal from 'components/Modal/messages';
 import msgDrawer from 'components/DrawerDetail/messages';
-import request from '../../../utils/api/request';
-import { getInvoices } from '../../../utils/api/apiList';
+import request, { decryptParam, encryptParam } from '../../../utils/api/request';
+import { getInvoices, payInvoice } from '../../../utils/api/apiList';
 import { getSubsidyRequests } from '../../../redux/features/appointmentsSlice';
 import PageLoading from '../../../components/Loading/PageLoading';
 
@@ -33,6 +33,24 @@ class InvoiceList extends React.Component {
 
   componentDidMount() {
     this.setState({ loading: true });
+    const params = new URLSearchParams(window.location.search);
+    const success = decryptParam(params.get('s')?.replace(' ', '+') || '');
+    const invoiceId = decryptParam(params.get('i')?.replace(' ', '+') || '');
+    if (success === 'true' && (invoiceId)) {
+      request.post(payInvoice, { invoiceId }).then(res => {
+        if (res.success) {
+          message.success('Paid successfully');
+          const url = window.location.href;
+          const cleanUrl = url.split('?')[0];
+          window.history.replaceState({}, document.title, cleanUrl);
+        } else {
+          message.warning('Something went wrong. Please try again');
+        }
+      }).catch(err => {
+        console.log('pay flag error---', err);
+        message.error(err.message);
+      });
+    }
     this.getInvoiceList();
   }
 
@@ -224,7 +242,7 @@ class InvoiceList extends React.Component {
           <input type="hidden" name="shipping" value="0.00" />
           <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
           <input type="hidden" name="rm" value="0" />
-          <input type="hidden" name="return" value={`${window.location.href}?success=true&type=flag&invoiceId=${invoice?._id}`} />
+          <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
           <input type="hidden" name="cancel_return" value={window.location.href} />
           <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
           <Button type='link' block className='h-30 p-0 text-primary' htmlType='submit'>

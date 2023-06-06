@@ -8,7 +8,7 @@ import moment from 'moment';
 
 import messages from './messages';
 import msgDrawer from '../DrawerDetail/messages';
-import request from '../../utils/api/request'
+import request, { encryptParam } from '../../utils/api/request'
 import { clearFlag, requestClearance, setFlag, setFlagBalance, updateInvoice, updateNoshowFlag } from '../../utils/api/apiList';
 import ModalBalance from './ModalBalance';
 import ModalNoShow from './ModalNoShow';
@@ -346,7 +346,7 @@ class ModalFlagExpand extends React.Component {
 								<input type="hidden" name="shipping" value="0.00" />
 								<input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
 								<input type="hidden" name="rm" value="0" />
-								<input type="hidden" name="return" value={`${window.location.href}?success=true&type=flag&id=${appointment?._id}`} />
+								<input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(appointment?.flagInvoice?._id)}`} />
 								<input type="hidden" name="cancel_return" value={window.location.href} />
 								<input type="hidden" name="cbt" value="Return to Help Me Get Help" />
 								<button className='flag-action pay-flag-button'>
@@ -392,7 +392,7 @@ class ModalFlagExpand extends React.Component {
 								<input type="hidden" name="shipping" value="0.00" />
 								<input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
 								<input type="hidden" name="rm" value="0" />
-								<input type="hidden" name="return" value={`${window.location.href}?success=true&type=flag&id=${appointment?._id}`} />
+								<input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(appointment?.flagInvoice?._id)}`} />
 								<input type="hidden" name="cancel_return" value={window.location.href} />
 								<input type="hidden" name="cbt" value="Return to Help Me Get Help" />
 								<button className='flag-action pay-flag-button'>

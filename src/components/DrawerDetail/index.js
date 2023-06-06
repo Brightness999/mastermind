@@ -17,7 +17,7 @@ import messages from './messages';
 import msgModal from '../Modal/messages';
 import msgDashboard from '../../routes/Dashboard/messages';
 import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import request from '../../utils/api/request';
+import request, { encryptParam } from '../../utils/api/request';
 import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
 import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from '../../utils/api/apiList';
 import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from '../../routes/constant';
@@ -1094,7 +1094,7 @@ class DrawerDetail extends Component {
                       <input type="hidden" name="shipping" value="0.00" />
                       <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                       <input type="hidden" name="rm" value="0" />
-                      <input type="hidden" name="return" value={`${window.location.href}?success=true&type=flag&id=${event?._id}`} />
+                      <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.flagInvoice?._id)}`} />
                       <input type="hidden" name="cancel_return" value={window.location.href} />
                       <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
                       <Button type='primary' block className='h-30 p-0' htmlType='submit'>
@@ -1159,7 +1159,7 @@ class DrawerDetail extends Component {
                       <input type="hidden" name="shipping" value="0.00" />
                       <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                       <input type="hidden" name="rm" value="0" />
-                      <input type="hidden" name="return" value={`${window.location.href}?success=true&type=flag&id=${event?._id}`} />
+                      <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.flagInvoice?._id)}`} />
                       <input type="hidden" name="cancel_return" value={window.location.href} />
                       <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
                       <Button type='primary' block className='h-30 p-0' htmlType='submit'>
@@ -1265,7 +1265,7 @@ class DrawerDetail extends Component {
                     <input type="hidden" name="shipping" value="0.00" />
                     <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                     <input type="hidden" name="rm" value="0" />
-                    <input type="hidden" name="return" value={`${window.location.href}?success=true&type=session&id=${event?._id}`} />
+                    <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.sessionInvoice?._id)}`} />
                     <input type="hidden" name="cancel_return" value={window.location.href} />
                     <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
                     <Button type='primary' icon={<BsPaypal size={15} color="#fff" />} block htmlType='submit'>
