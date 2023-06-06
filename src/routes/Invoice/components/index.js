@@ -227,7 +227,7 @@ class InvoiceList extends React.Component {
       },
       {
         title: intl.formatMessage(messages.action), key: 'action',
-        render: invoice => invoice.isPaid ? null : <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+        render: invoice => (invoice.isPaid || invoice.totalPayment == 0) ? null : <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
           <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
           <input type="hidden" name="business" value="office@helpmegethelp.org" />
           <input type="hidden" name="cmd" value="_donations" />
@@ -240,9 +240,9 @@ class InvoiceList extends React.Component {
           <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
           <input type="hidden" name="cancel_return" value={window.location.href} />
           <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-          <Button type='link' block className='h-30 p-0 text-primary' htmlType='submit'>
+          <button type='submit' className='paynow bg-transparent border-none text-primary cursor'>
             {intl.formatMessage(msgModal.paynow)}
-          </Button>
+          </button>
         </form>,
       },
     ];
@@ -262,8 +262,8 @@ class InvoiceList extends React.Component {
             dataSource={tabInvoices}
             columns={columns}
             onRow={invoice => ({
-              onClick: () => this.openModalInvoice(invoice._id),
-              onDoubleClick: () => this.openModalInvoice(invoice._id),
+              onClick: (e) => !e.target.className.includes('paynow') && this.openModalInvoice(invoice._id),
+              onDoubleClick: (e) => !e.target.className.includes('paynow') && this.openModalInvoice(invoice._id),
             })}
           />
         ),
