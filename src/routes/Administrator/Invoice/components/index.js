@@ -281,15 +281,6 @@ class InvoiceList extends React.Component {
         render: provider => `${provider?.firstName || ''} ${provider?.lastName || ''}`,
       },
       {
-        title: intl.formatMessage(messages.status), dataIndex: 'isPaid', key: 'status',
-        filters: [
-          { text: 'Paid', value: 1 },
-          { text: 'Unpaid', value: 0 },
-        ],
-        onFilter: (value, record) => record?.isPaid === value,
-        render: isPaid => isPaid ? 'Paid' : 'Unpaid',
-      },
-      {
         title: intl.formatMessage(messages.createdDate), dataIndex: 'createdAt', type: 'date', key: 'createdat',
         sorter: (a, b) => a.createdAt > b.createdAt ? 1 : -1,
         render: createdAt => moment(createdAt).format("MM/DD/YYYY hh:mm a"),
@@ -322,7 +313,7 @@ class InvoiceList extends React.Component {
     ];
 
     if (selectedTab == 1) {
-      columns.splice(8);
+      columns.splice(7);
     }
 
     const items = [
