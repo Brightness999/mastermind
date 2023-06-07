@@ -18,7 +18,7 @@ import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import { ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm, ModalCreateNote, ModalCancelForAdmin } from '../../../components/Modal';
+import { ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm, ModalCreateNote, ModalCancelForAdmin, ModalInvoice } from '../../../components/Modal';
 import DrawerDetail from '../../../components/DrawerDetail';
 import messages from '../../Dashboard/messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
@@ -26,13 +26,13 @@ import msgSidebar from '../../../components/SideBar/messages';
 import msgDrawer from '../../../components/DrawerDetail/messages';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request, { decryptParam, encryptParam } from '../../../utils/api/request'
-import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, setAppointments, setAppointmentsInMonth, getInvoiceList } from '../../../redux/features/appointmentsSlice'
+import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, setAppointments, setAppointmentsInMonth, getInvoiceList, setInvoiceList } from '../../../redux/features/appointmentsSlice'
 import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, setSchools } from '../../../redux/features/authSlice';
-import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance, sendEmailInvoice } from '../../../utils/api/apiList';
+import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance, sendEmailInvoice, updateInvoice } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
 import PageLoading from '../../../components/Loading/PageLoading';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLEAR, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from '../../../routes/constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from '../../../routes/constant';
 import './index.less';
 
 const { Panel } = Collapse;
@@ -78,6 +78,7 @@ class SchedulingCenter extends React.Component {
       visibleFlagAction: false,
       visibleCancelForAdmin: false,
       dragInfo: {},
+      visibleInvoice: false,
       selectedFlag: {},
     };
     this.calendarRef = React.createRef();
@@ -567,6 +568,84 @@ class SchedulingCenter extends React.Component {
     this.setState({ visibleFlagAction: false, selectedFlag: {} });
   }
 
+  openModalInvoice = (invoice) => {
+    this.setState({ visibleInvoice: true, selectedFlag: invoice });
+  }
+
+  closeModalInvoice = () => {
+    this.setState({ visibleInvoice: false, selectedFlag: {} });
+  }
+
+  handleUpdateInvoice = (items) => {
+    const { invoices } = this.props;
+    const { selectedFlag } = this.state;
+    const { totalPayment, minimumPayment } = items;
+    this.closeModalInvoice();
+    if (selectedFlag?._id) {
+      let postData = {
+        invoiceId: selectedFlag._id,
+        totalPayment: totalPayment,
+        minimumPayment: minimumPayment,
+      }
+
+      if ([InvoiceType.BALANCE, InvoiceType.CANCEL, InvoiceType.RESCHEDULE].includes(selectedFlag.type)) {
+        postData = {
+          ...postData,
+          updateData: [{
+            appointment: selectedFlag.data?.[0]?.appointment?._id,
+            items: items?.items,
+          }]
+        }
+      }
+
+      if (selectedFlag.type === InvoiceType.NOSHOW || selectedFlag.type === InvoiceType.BALANCE) {
+        postData = {
+          ...postData,
+          updateData: [{
+            appointment: selectedFlag.data?.[0]?.appointment?._id,
+            items: {
+              ...selectedFlag.data?.[0]?.items,
+              data: items.items,
+            }
+          }]
+        }
+      }
+
+      request.post(updateInvoice, postData).then(result => {
+        if (result.success) {
+          message.success('Successfully updated!');
+          const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(invoice => {
+            if (invoice?._id === selectedFlag._id) {
+              if ([InvoiceType.BALANCE, InvoiceType.CANCEL, InvoiceType.RESCHEDULE].includes(selectedFlag.type)) {
+                invoice.totalPayment = totalPayment;
+                invoice.data = [{
+                  appointment: selectedFlag.data?.[0]?.appointment,
+                  items: items?.items,
+                }];
+              } else if (selectedFlag.type === InvoiceType.NOSHOW || selectedFlag.type === InvoiceType.BALANCE) {
+                invoice.totalPayment = totalPayment;
+                invoice.minimumPayment = minimumPayment;
+                invoice.data = [{
+                  appointment: selectedFlag.data?.[0]?.appointment,
+                  items: {
+                    ...selectedFlag.data?.[0]?.items,
+                    data: items?.items,
+                  },
+                }];
+              }
+            }
+            return invoice;
+          });
+          this.props.setInvoiceList(newInvoices);
+        } else {
+          message.warning('Something went wrong. Please try again or contact admin.');
+        }
+      }).catch(error => {
+        message.warning('Something went wrong. Please try again or contact admin.');
+      })
+    }
+  }
+
   render() {
     const {
       isFilter,
@@ -602,6 +681,7 @@ class SchedulingCenter extends React.Component {
       locations,
       visibleCancelForAdmin,
       selectedFlag,
+      visibleInvoice,
     } = this.state;
     const { invoices } = this.props;
 
@@ -721,6 +801,13 @@ class SchedulingCenter extends React.Component {
       applyFeeToParent: this.applyFeeToParent,
       onCancel: this.onCloseModalCancelForAdmin,
     };
+
+    const modalInvoiceProps = {
+      visible: visibleInvoice,
+      onSubmit: this.handleUpdateInvoice,
+      onCancel: this.closeModalInvoice,
+      invoice: selectedFlag,
+    }
 
     return (
       <div className="full-layout page admin-page">
@@ -1017,20 +1104,20 @@ class SchedulingCenter extends React.Component {
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid)?.map((invoice, index) =>
-                      <div key={index} className='list-item padding-item justify-between' onClick={() => { }}>
+                      <div key={index} className='list-item padding-item justify-between' onClick={(e) => e.target.id != 'action' && this.openModalInvoice(invoice)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
                           <p className='font-12 mb-0'>{invoice.dependent?.firstName ?? ''} {invoice.dependent?.lastName ?? ''}</p>
                           <p className='font-12 mb-0'>{invoice.provider?.firstName ?? ''} {invoice.provider?.lastName ?? ''}</p>
                         </div>
                         <div className='font-12'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
-                        <a className='font-12 flag-action' onClick={() => this.openFlagAction(invoice)}>{intl.formatMessage(messages.action)}</a>
+                        <span className='font-12 text-primary cursor' id='action' onClick={() => this.openFlagAction(invoice)}>{intl.formatMessage(messages.action)}</span>
                       </div>
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
                     {invoices?.filter(a => [4, 5].includes(a.type) && a.isPaid)?.map((invoice, index) =>
-                      <div key={index} className='list-item padding-item justify-between' onClick={() => { }}>
+                      <div key={index} className='list-item padding-item justify-between' onClick={() => this.openModalInvoice(invoice)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
                           <p className='font-12 mb-0'>{invoice.dependent?.firstName ?? ''} {invoice.dependent?.lastName ?? ''}</p>
@@ -1075,6 +1162,7 @@ class SchedulingCenter extends React.Component {
         {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
         {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
         {visibleCancelForAdmin && <ModalCancelForAdmin {...modalCancelForAdminProps} />}
+        {visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
         <Modal title="Flag Action" open={visibleFlagAction} footer={null} onCancel={this.closeFlagAction}>
           <div className='flex items-center gap-2'>
             {(selectedFlag?.totalPayment == 0) ? (
@@ -1143,4 +1231,4 @@ const mapStateToProps = state => ({
   auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps, { changeTime, getAppointmentsData, getAppointmentsMonthData, setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, getSubsidyRequests, setSchools, setAppointments, setAppointmentsInMonth, getInvoiceList }))(SchedulingCenter);
+export default compose(connect(mapStateToProps, { changeTime, getAppointmentsData, getAppointmentsMonthData, setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, getSubsidyRequests, setSchools, setAppointments, setAppointmentsInMonth, getInvoiceList, setInvoiceList }))(SchedulingCenter);

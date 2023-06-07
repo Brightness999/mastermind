@@ -18,7 +18,7 @@ import { compose } from 'redux';
 import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 
-import { ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote, ModalPayment } from '../../../components/Modal';
+import { ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote, ModalPayment, ModalInvoice } from '../../../components/Modal';
 import DrawerDetail from '../../../components/DrawerDetail';
 import messages from '../messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
@@ -30,8 +30,8 @@ import { store } from '../../../redux/store';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
 import { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
-import { changeTime, getAppointmentsData, getAppointmentsMonthData, getInvoiceList, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
-import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
+import { changeTime, getAppointmentsData, getAppointmentsMonthData, getInvoiceList, getSubsidyRequests, setInvoiceList } from '../../../redux/features/appointmentsSlice'
+import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance, updateInvoice } from '../../../utils/api/apiList';
 import Subsidiaries from './school';
 import PageLoading from '../../../components/Loading/PageLoading';
 import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, PROVIDER, SCREEN, SUBSIDY } from '../../constant';
@@ -84,6 +84,7 @@ class Dashboard extends React.Component {
       visiblePayment: false,
       paymentDescription: '',
       selectedFlag: {},
+      visibleInvoice: false,
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -735,7 +736,7 @@ class Dashboard extends React.Component {
   onOpenModalConfirm = (invoice) => {
     this.setState({
       visibleConfirm: true,
-      confirmMessage: type == 'request-clearance' ? 'Did you pay for this flag?' : 'Are you sure to clear this flag?',
+      confirmMessage: 'Are you sure to clear this flag?',
       selectedFlag: invoice,
     });
   }
@@ -762,6 +763,84 @@ class Dashboard extends React.Component {
 
   onCloseModalCreateNote = () => {
     this.setState({ visibleCreateNote: false, selectedFlag: {} });
+  }
+
+  openModalInvoice = (invoice) => {
+    this.setState({ visibleInvoice: true, selectedFlag: invoice });
+  }
+
+  closeModalInvoice = () => {
+    this.setState({ visibleInvoice: false, selectedFlag: {} });
+  }
+
+  handleUpdateInvoice = (items) => {
+    const { invoices } = this.props;
+    const { selectedFlag } = this.state;
+    const { totalPayment, minimumPayment } = items;
+    this.closeModalInvoice();
+    if (selectedFlag?._id) {
+      let postData = {
+        invoiceId: selectedFlag._id,
+        totalPayment: totalPayment,
+        minimumPayment: minimumPayment,
+      }
+
+      if ([InvoiceType.BALANCE, InvoiceType.CANCEL, InvoiceType.RESCHEDULE].includes(selectedFlag.type)) {
+        postData = {
+          ...postData,
+          updateData: [{
+            appointment: selectedFlag.data?.[0]?.appointment?._id,
+            items: items?.items,
+          }]
+        }
+      }
+
+      if (selectedFlag.type === InvoiceType.NOSHOW || selectedFlag.type === InvoiceType.BALANCE) {
+        postData = {
+          ...postData,
+          updateData: [{
+            appointment: selectedFlag.data?.[0]?.appointment?._id,
+            items: {
+              ...selectedFlag.data?.[0]?.items,
+              data: items.items,
+            }
+          }]
+        }
+      }
+
+      request.post(updateInvoice, postData).then(result => {
+        if (result.success) {
+          message.success('Successfully updated!');
+          const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(invoice => {
+            if (invoice?._id === selectedFlag._id) {
+              if ([InvoiceType.BALANCE, InvoiceType.CANCEL, InvoiceType.RESCHEDULE].includes(selectedFlag.type)) {
+                invoice.totalPayment = totalPayment;
+                invoice.data = [{
+                  appointment: selectedFlag.data?.[0]?.appointment,
+                  items: items?.items,
+                }];
+              } else if (selectedFlag.type === InvoiceType.NOSHOW || selectedFlag.type === InvoiceType.BALANCE) {
+                invoice.totalPayment = totalPayment;
+                invoice.minimumPayment = minimumPayment;
+                invoice.data = [{
+                  appointment: selectedFlag.data?.[0]?.appointment,
+                  items: {
+                    ...selectedFlag.data?.[0]?.items,
+                    data: items?.items,
+                  },
+                }];
+              }
+            }
+            return invoice;
+          });
+          this.props.setInvoiceList(newInvoices);
+        } else {
+          message.warning('Something went wrong. Please try again or contact admin.');
+        }
+      }).catch(error => {
+        message.warning('Something went wrong. Please try again or contact admin.');
+      })
+    }
   }
 
   render() {
@@ -798,6 +877,8 @@ class Dashboard extends React.Component {
       locations,
       visiblePayment,
       paymentDescription,
+      visibleInvoice,
+      selectedFlag,
     } = this.state;
     const { invoices } = this.props;
 
@@ -915,6 +996,13 @@ class Dashboard extends React.Component {
       onCancel: this.onCloseModalPayment,
       description: paymentDescription,
       appointment: selectedEvent,
+    }
+
+    const modalInvoiceProps = {
+      visible: visibleInvoice,
+      onSubmit: this.handleUpdateInvoice,
+      onCancel: this.closeModalInvoice,
+      invoice: selectedFlag,
     }
 
     if (userRole == 60) {
@@ -1224,7 +1312,7 @@ class Dashboard extends React.Component {
                     <Tabs defaultActiveKey="1" type="card" size='small'>
                       <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                         {invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid)?.map((invoice, index) =>
-                          <div key={index} className='list-item padding-item justify-between' onClick={() => { }}>
+                          <div key={index} className='list-item padding-item justify-between' onClick={(e) => e.target.id != 'action' && this.openModalInvoice(invoice)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
                               <p className='font-12 mb-0'>{userRole === PROVIDER ? `${invoice.dependent?.firstName ?? ''} ${invoice.dependent?.lastName ?? ''}` : `${invoice.provider?.firstName ?? ''} ${invoice.provider?.lastName ?? ''}`}</p>
@@ -1233,7 +1321,7 @@ class Dashboard extends React.Component {
                               <>
                                 <div className='font-12'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
                                 {(invoice?.totalPayment == 0) ? (
-                                  <a className='font-12 flag-action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
+                                  <span className='font-12 text-primary cursor' id='action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</span>
                                 ) : null}
                                 {invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
                                   <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
@@ -1258,7 +1346,7 @@ class Dashboard extends React.Component {
                             ) : (
                               <>
                                 <div className='font-12'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
-                                <a className='font-12 flag-action' onClick={() => this.onOpenModalConfirm(invoice)}>{intl.formatMessage(msgDrawer.clearFlag)}</a>
+                                <span className='font-12 text-primary cursor' id='action' onClick={() => this.onOpenModalConfirm(invoice)}>{intl.formatMessage(msgDrawer.clearFlag)}</span>
                               </>
                             )}
                           </div>
@@ -1266,7 +1354,7 @@ class Dashboard extends React.Component {
                       </Tabs.TabPane>
                       <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
                         {invoices?.filter(a => [4, 5].includes(a.type) && a.isPaid)?.map((invoice, index) =>
-                          <div key={index} className='list-item padding-item gap-2' onClick={() => { }}>
+                          <div key={index} className='list-item padding-item gap-2' onClick={() => this.openModalInvoice(invoice)}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
                               <p className='font-12 mb-0'>{userRole === 30 ? `${invoice.dependent?.firstName ?? ''} ${invoice.dependent?.lastName ?? ''}` : `${invoice.provider?.firstName ?? ''} ${invoice.provider?.lastName ?? ''}`}</p>
@@ -1315,6 +1403,7 @@ class Dashboard extends React.Component {
           {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
           {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
           {visiblePayment && <ModalPayment {...modalPaymentProps} />}
+          {visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
           <PageLoading loading={loading} isBackground={true} />
         </div>
       );
@@ -1353,4 +1442,4 @@ const mapStateToProps = state => ({
   user: state.auth.user,
 })
 
-export default compose(connect(mapStateToProps, { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, getInvoiceList }))(Dashboard);
+export default compose(connect(mapStateToProps, { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, getInvoiceList, setInvoiceList }))(Dashboard);
