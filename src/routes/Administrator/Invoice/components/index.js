@@ -51,14 +51,15 @@ class InvoiceList extends React.Component {
         message.error(err.message);
       });
     }
-    this.setState({ tabInvoices: invoices?.filter(i => i.isPaid == selectedTab) });
+    this.setState({ tabInvoices: JSON.parse(JSON.stringify(invoices))?.filter(i => i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) });
     this.props.getInvoiceList({ role: auth.user.role });
   }
 
   componentDidUpdate(prevProps) {
     const { selectedTab } = this.state;
-    if (JSON.stringify(prevProps.invoices) != JSON.stringify(this.props.invoices)) {
-      this.setState({ tabInvoices: this.props.invoices?.filter(i => i.isPaid == selectedTab) });
+    const { invoices } = this.props;
+    if (JSON.stringify(prevProps.invoices) != JSON.stringify(invoices)) {
+      this.setState({ tabInvoices: JSON.parse(JSON.stringify(invoices))?.filter(i => i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) });
     }
   }
 
@@ -74,7 +75,7 @@ class InvoiceList extends React.Component {
   handleChangeTab = (value) => {
     const { invoices } = this.props;
     this.setState({
-      tabInvoices: invoices.filter(i => i.isPaid == value),
+      tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid == value)?.map(f => ({ ...f, key: f._id })),
       selectedTab: value,
     })
   }
