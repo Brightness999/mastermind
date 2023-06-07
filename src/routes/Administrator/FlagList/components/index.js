@@ -331,8 +331,8 @@ class FlagList extends React.Component {
             dataSource={tabFlags}
             columns={columns}
             onRow={invoice => ({
-              onClick: () => this.openModalInvoice(invoice),
-              onDoubleClick: () => this.openModalInvoice(invoice),
+              onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice),
+              onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice),
             })}
           />
         ),
