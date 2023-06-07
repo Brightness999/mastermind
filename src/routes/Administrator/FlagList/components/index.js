@@ -49,14 +49,15 @@ class FlagList extends React.Component {
         message.error(err.message);
       });
     }
-    this.setState({ tabFlags: invoices?.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == selectedTab) });
+    this.setState({ tabFlags: JSON.parse(JSON.stringify(invoices))?.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) });
     this.props.getInvoiceList({ role: auth.user.role });
   }
 
   componentDidUpdate(prevProps) {
     const { selectedTab } = this.state;
-    if (JSON.stringify(prevProps.invoices) != JSON.stringify(this.props.invoices)) {
-      this.setState({ tabFlags: this.props.invoices?.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == selectedTab) });
+    const { invoices } = this.props;
+    if (JSON.stringify(prevProps.invoices) != JSON.stringify(invoices)) {
+      this.setState({ tabFlags: JSON.parse(JSON.stringify(invoices))?.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) });
     }
   }
 
@@ -80,7 +81,7 @@ class FlagList extends React.Component {
   handleChangeTab = (value) => {
     const { invoices } = this.props;
     this.setState({
-      tabFlags: invoices.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == value),
+      tabFlags: JSON.parse(JSON.stringify(invoices)).filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == value)?.map(f => ({ ...f, key: f._id })),
       selectedTab: value,
     })
   }
