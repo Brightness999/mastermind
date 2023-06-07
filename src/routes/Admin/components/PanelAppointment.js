@@ -373,7 +373,12 @@ class PanelAppointment extends React.Component {
 
   handleLeaveFeedback = (note, publicFeedback) => {
     const { event } = this.state;
-    this.setState({ visibleFeedback: false });
+
+    if (!note?.trim() && !publicFeedback?.trim()) {
+      message.warn('Please input the internal note or public feedback for parent');
+      return;
+    }
+
     if (event?._id) {
       const data = {
         appointmentId: event._id,
@@ -384,6 +389,7 @@ class PanelAppointment extends React.Component {
       request.post(leaveFeedbackForProvider, data).then(result => {
         const { success } = result;
         if (success) {
+          this.closeModalFeedback();
           this.updateAppointments();
         } else {
           message.warning("can't leave feedback");

@@ -28,7 +28,7 @@ class ModalFeedback extends React.Component {
     };
 
     return (
-      <Modal {...modalProps} style={{ top: '40vh' }}>
+      <Modal {...modalProps}>
         <div className='flex flex-col gap-5'>
           <div>
             <p className='mb-0 font-12'>Internal notes</p>
