@@ -97,25 +97,20 @@ class ModalFlagExpand extends React.Component {
 	handleUpdateInvoice = (items) => {
 		const { invoices } = this.props;
 		const { selectedFlag } = this.state;
-		const { totalPayment } = items;
+		const { totalPayment, minimumPayment } = items;
 
 		if (selectedFlag?._id) {
 			let postData = {
 				invoiceId: selectedFlag._id,
 				totalPayment: totalPayment,
-			}
-
-			if (selectedFlag.type === InvoiceType.NOSHOW) {
-				postData = {
-					...postData,
-					updateData: [{
-						appointment: selectedFlag.data?.[0]?.appointment?._id,
-						items: {
-							...selectedFlag.data?.[0]?.items,
-							data: items.items,
-						}
-					}]
-				}
+				minimumPayment: minimumPayment,
+				updateData: [{
+					appointment: selectedFlag.data?.[0]?.appointment?._id,
+					items: {
+						...selectedFlag.data?.[0]?.items,
+						data: items.items,
+					}
+				}],
 			}
 
 			request.post(updateInvoice, postData).then(result => {
@@ -124,22 +119,15 @@ class ModalFlagExpand extends React.Component {
 					message.success('Successfully updated!');
 					const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(invoice => {
 						if (invoice?._id === selectedFlag._id) {
-							if ([InvoiceType.BALANCE, InvoiceType.CANCEL, InvoiceType.RESCHEDULE].includes(selectedFlag.type)) {
-								invoice.totalPayment = totalPayment;
-								invoice.data = [{
-									appointment: selectedFlag.data?.[0]?.appointment,
-									items: items?.items,
-								}];
-							} else if (selectedFlag.type === InvoiceType.NOSHOW) {
-								invoice.totalPayment = totalPayment;
-								invoice.data = [{
-									appointment: selectedFlag.data?.[0]?.appointment,
-									items: {
-										...selectedFlag.data?.[0]?.items,
-										data: items?.items,
-									},
-								}];
-							}
+							invoice.totalPayment = totalPayment;
+							invoice.minimumPayment = minimumPayment;
+							invoice.data = [{
+								appointment: selectedFlag.data?.[0]?.appointment,
+								items: {
+									...selectedFlag.data?.[0]?.items,
+									data: items?.items,
+								},
+							}];
 						}
 						return invoice;
 					});

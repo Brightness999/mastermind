@@ -83,12 +83,13 @@ class InvoiceList extends React.Component {
   handleUpdateInvoice = (items) => {
     const { invoices } = this.props;
     const { selectedInvoice } = this.state;
-    const { totalPayment } = items;
+    const { totalPayment, minimumPayment } = items;
     this.closeModalInvoice();
     if (selectedInvoice?._id) {
       let postData = {
         invoiceId: selectedInvoice._id,
         totalPayment: totalPayment,
+        minimumPayment: minimumPayment,
       }
 
       if ([InvoiceType.BALANCE, InvoiceType.CANCEL, InvoiceType.RESCHEDULE].includes(selectedInvoice.type)) {
@@ -101,7 +102,7 @@ class InvoiceList extends React.Component {
         }
       }
 
-      if (selectedInvoice.type === InvoiceType.NOSHOW) {
+      if (selectedInvoice.type === InvoiceType.NOSHOW || selectedInvoice.type === InvoiceType.BALANCE) {
         postData = {
           ...postData,
           updateData: [{
@@ -125,8 +126,9 @@ class InvoiceList extends React.Component {
                   appointment: selectedInvoice.data?.[0]?.appointment,
                   items: items?.items,
                 }];
-              } else if (selectedInvoice.type === InvoiceType.NOSHOW) {
+              } else if (selectedInvoice.type === InvoiceType.NOSHOW || selectedInvoice.type === InvoiceType.BALANCE) {
                 invoice.totalPayment = totalPayment;
+                invoice.minimumPayment = minimumPayment;
                 invoice.data = [{
                   appointment: selectedInvoice.data?.[0]?.appointment,
                   items: {
