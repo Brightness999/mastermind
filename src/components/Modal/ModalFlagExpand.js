@@ -11,7 +11,7 @@ import msgDrawer from '../DrawerDetail/messages';
 import request, { encryptParam } from '../../utils/api/request'
 import { clearFlag, requestClearance, updateInvoice } from '../../utils/api/apiList';
 import ModalInvoice from './ModalInvoice';
-import { getInvoiceList } from '../../redux/features/appointmentsSlice';
+import { getInvoiceList, setInvoiceList } from '../../redux/features/appointmentsSlice';
 import { InvoiceType } from '../../routes/constant';
 import ModalCreateNote from './ModalCreateNote';
 import './style/index.less';
@@ -21,24 +21,35 @@ class ModalFlagExpand extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			activeFlags: [],
-			clearedFlags: [],
-			skillSet: [],
-			event: {},
 			visibleCreateNote: false,
 			visibleInvoice: false,
 			selectedFlag: {},
+			tabFlags: [],
+			selectedTab: 0,
 		}
 		this.searchInput = React.createRef(null);
 	}
 
 	componentDidMount() {
-		const flags = JSON.parse(JSON.stringify(this.props.flags));
-		const skillSet = JSON.parse(JSON.stringify(this.props.auth.skillSet));
+		const { auth, invoices } = this.props;
+		const { selectedTab } = this.state;
+		this.setState({ tabFlags: JSON.parse(JSON.stringify(invoices))?.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) });
+		this.props.getInvoiceList({ role: auth.user.role });
+	}
+
+	componentDidUpdate(prevProps) {
+		const { selectedTab } = this.state;
+		const { invoices } = this.props;
+		if (JSON.stringify(prevProps.invoices) != JSON.stringify(invoices)) {
+			this.setState({ tabFlags: JSON.parse(JSON.stringify(invoices))?.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) });
+		}
+	}
+
+	handleChangeTab = (value) => {
+		const { invoices } = this.props;
 		this.setState({
-			activeFlags: flags?.filter(f => !f.isPaid)?.map(f => ({ ...f, key: f._id })),
-			clearedFlags: flags?.filter(f => f.isPaid)?.map(f => ({ ...f, key: f._id })),
-			skillSet: skillSet?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; })
+			tabFlags: JSON.parse(JSON.stringify(invoices)).filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == value)?.map(f => ({ ...f, key: f._id })),
+			selectedTab: value,
 		})
 	}
 
@@ -53,18 +64,16 @@ class ModalFlagExpand extends React.Component {
 	}
 
 	handleClearFlag = (invoice) => {
+		const { invoices } = this.props;
 		request.post(clearFlag, { invoiceId: invoice?._id }).then(result => {
-			const { success } = result;
-			if (success) {
-				const { activeFlags, clearedFlags } = this.state;
-				message.success('Cleared successfully');
-				clearedFlags.push(invoice);
-				const newActiveFlags = activeFlags.filter(a => a._id != invoice?._id);
-				this.setState({
-					clearedFlags: clearedFlags,
-					activeFlags: newActiveFlags,
+			if (result.success) {
+				const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(a => {
+					if (a._id === invoice?._id) {
+						a.isPaid = true;
+					}
+					return a;
 				})
-				this.props.getInvoiceList();
+				this.props.setInvoiceList(newInvoices);
 			}
 		})
 	}
@@ -86,11 +95,13 @@ class ModalFlagExpand extends React.Component {
 	}
 
 	handleUpdateInvoice = (items) => {
+		const { invoices } = this.props;
 		const { selectedFlag } = this.state;
+		const { totalPayment } = items;
 
 		if (selectedFlag?._id) {
 			let postData = {
-				invoiceId: selectedInvoice._id,
+				invoiceId: selectedFlag._id,
 				totalPayment: totalPayment,
 			}
 
@@ -110,8 +121,29 @@ class ModalFlagExpand extends React.Component {
 			request.post(updateInvoice, postData).then(result => {
 				if (result.success) {
 					this.closeModalInvoice();
-					this.props.getInvoiceList();
-					message.success("Successfully updated.");
+					message.success('Successfully updated!');
+					const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(invoice => {
+						if (invoice?._id === selectedFlag._id) {
+							if ([InvoiceType.BALANCE, InvoiceType.CANCEL, InvoiceType.RESCHEDULE].includes(selectedFlag.type)) {
+								invoice.totalPayment = totalPayment;
+								invoice.data = [{
+									appointment: selectedFlag.data?.[0]?.appointment,
+									items: items?.items,
+								}];
+							} else if (selectedFlag.type === InvoiceType.NOSHOW) {
+								invoice.totalPayment = totalPayment;
+								invoice.data = [{
+									appointment: selectedFlag.data?.[0]?.appointment,
+									items: {
+										...selectedFlag.data?.[0]?.items,
+										data: items?.items,
+									},
+								}];
+							}
+						}
+						return invoice;
+					});
+					this.props.setInvoiceList(newInvoices);
 				} else {
 					message.success("Something went wrong. Please try again or contact admin");
 				}
@@ -122,7 +154,7 @@ class ModalFlagExpand extends React.Component {
 	}
 
 	render() {
-		const { activeFlags, clearedFlags, selectedFlag, visibleCreateNote, visibleInvoice } = this.state;
+		const { selectedFlag, tabFlags, visibleCreateNote, visibleInvoice } = this.state;
 		const { auth } = this.props;
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -387,12 +419,12 @@ class ModalFlagExpand extends React.Component {
 
 		return (
 			<Modal {...modalProps}>
-				<Tabs defaultActiveKey="1" type="card" size='small'>
-					<Tabs.TabPane tab={intl.formatMessage(messages.active)} key="1">
+				<Tabs defaultActiveKey="0" type="card" size='small' onChange={this.handleChangeTab}>
+					<Tabs.TabPane tab={intl.formatMessage(messages.active)} key="0">
 						<Table
 							bordered
 							size='middle'
-							dataSource={activeFlags}
+							dataSource={tabFlags}
 							columns={columns}
 							className="p-10"
 							onRow={(invoice) => {
@@ -403,17 +435,17 @@ class ModalFlagExpand extends React.Component {
 							}}
 						/>
 					</Tabs.TabPane>
-					<Tabs.TabPane tab={intl.formatMessage(messages.cleared)} key="2">
+					<Tabs.TabPane tab={intl.formatMessage(messages.cleared)} key="1">
 						<Table
 							bordered
 							size='middle'
-							dataSource={clearedFlags}
+							dataSource={tabFlags}
 							columns={columns.slice(0, -1)}
 							className="p-10"
 							onRow={(invoice) => {
 								return {
-									onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice),
-									onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice),
+									onClick: () => this.openModalInvoice(invoice),
+									onDoubleClick: () => this.openModalInvoice(invoice),
 								}
 							}}
 						/>
@@ -428,6 +460,7 @@ class ModalFlagExpand extends React.Component {
 
 const mapStateToProps = state => ({
 	auth: state.auth,
+	invoices: state.appointments.dataInvoices,
 })
 
-export default compose(connect(mapStateToProps, { getInvoiceList }))(ModalFlagExpand);
+export default compose(connect(mapStateToProps, { getInvoiceList, setInvoiceList }))(ModalFlagExpand);
