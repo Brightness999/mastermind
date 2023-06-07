@@ -1077,7 +1077,7 @@ class SchedulingCenter extends React.Component {
         {visibleCancelForAdmin && <ModalCancelForAdmin {...modalCancelForAdminProps} />}
         <Modal title="Flag Action" open={visibleFlagAction} footer={null} onCancel={this.closeFlagAction}>
           <div className='flex items-center gap-2'>
-            {(selectedFlag?.isPaid || selectedFlag?.totalPayment == 0) ? (
+            {(selectedFlag?.totalPayment == 0) ? (
               <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' onClick={() => this.onOpenModalCreateNote()}>{intl.formatMessage(msgDrawer.requestClearance)}</Button>
             ) : null}
             {selectedFlag?.isPaid ? (

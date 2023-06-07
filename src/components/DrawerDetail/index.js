@@ -1068,7 +1068,7 @@ class DrawerDetail extends Component {
             )}
             {event?.flagStatus === ACTIVE ? userRole === 3 ? (
               <div className='flex items-center justify-between gap-2'>
-                {(event?.flagInvoice?.isPaid || event?.flagInvoice?.totalPayment == 0) ? (
+                {(event?.flagInvoice?.totalPayment == 0) ? (
                   <Button type='primary' block className='flex-1 h-30 p-0' onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
                   </Button>
@@ -1133,7 +1133,7 @@ class DrawerDetail extends Component {
               )
             ) : (
               <div className='flex items-center justify-between gap-2 flex-2'>
-                {(event?.flagInvoice?.isPaid || event?.flagInvoice?.totalPayment == 0) ? (
+                {(event?.flagInvoice?.totalPayment == 0) ? (
                   <Button type='primary' block className='flex-1 h-30 p-0 px-5' onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}
                   </Button>
@@ -1374,7 +1374,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(userRole === 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.flagStatus === ACTIVE && (event?.sessionInvoice?.isPaid || event?.flagInvoice?.totalPayment == 0)) && (
+              {(userRole === 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.flagStatus === ACTIVE && event?.flagInvoice?.totalPayment == 0) && (
                 <Col span={12}>
                   <Button type='primary' icon={<FaFileContract size={12} />} block onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}

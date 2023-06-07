@@ -285,7 +285,7 @@ class ModalFlagExpand extends React.Component {
 			columns.splice(6, 0, {
 				title: 'Action', key: 'action', render: (invoice) => (
 					<Space size="small">
-						{(invoice?.isPaid || invoice?.totalPayment == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
+						{(invoice?.totalPayment == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
 						{invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
 							<form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
 								<input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
@@ -370,7 +370,7 @@ class ModalFlagExpand extends React.Component {
 			columns.splice(6, 0, {
 				title: 'Action', key: 'action', render: (invoice) => (
 					<Space size="small">
-						{(invoice?.isPaid || invoice?.totalPayment == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
+						{(invoice?.totalPayment == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
 						{invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
 							<form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
 								<input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
