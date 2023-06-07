@@ -1,5 +1,5 @@
 import React, { createRef } from 'react';
-import { Divider, Table, Space, Input, Button, Tabs, message } from 'antd';
+import { Divider, Table, Space, Input, Button, Tabs, message, Popconfirm } from 'antd';
 import intl from 'react-intl-universal';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
@@ -13,8 +13,8 @@ import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import msgModal from 'components/Modal/messages';
 import msgDrawer from 'components/DrawerDetail/messages';
 import request, { decryptParam, encryptParam } from 'src/utils/api/request';
-import { getInvoicesForAdmin, payInvoice, updateInvoice } from 'src/utils/api/apiList';
-import { getSubsidyRequests } from 'src/redux/features/appointmentsSlice';
+import { clearFlag, payInvoice, updateInvoice } from 'src/utils/api/apiList';
+import { getInvoiceList, setInvoiceList } from 'src/redux/features/appointmentsSlice';
 import PageLoading from 'components/Loading/PageLoading';
 import { InvoiceType } from 'src/routes/constant';
 
@@ -23,7 +23,6 @@ class InvoiceList extends React.Component {
     super(props);
     this.state = {
       loading: false,
-      invoices: [],
       visibleInvoice: false,
       selectedInvoice: {},
       tabInvoices: [],
@@ -33,7 +32,8 @@ class InvoiceList extends React.Component {
   }
 
   componentDidMount() {
-    this.setState({ loading: true });
+    const { auth, invoices } = this.props;
+    const { selectedTab } = this.state;
     const params = new URLSearchParams(window.location.search);
     const success = decryptParam(params.get('s')?.replace(' ', '+') || '');
     const invoiceId = decryptParam(params.get('i')?.replace(' ', '+') || '');
@@ -48,36 +48,22 @@ class InvoiceList extends React.Component {
           message.warning('Something went wrong. Please try again');
         }
       }).catch(err => {
-        console.log('pay flag error---', err);
         message.error(err.message);
       });
     }
-    this.getInvoiceList();
+    this.setState({ tabInvoices: invoices?.filter(i => i.isPaid == selectedTab) });
+    this.props.getInvoiceList({ role: auth.user.role });
   }
 
-  getInvoiceList() {
-    request.post(getInvoicesForAdmin).then(result => {
-      this.setState({ loading: false });
-      const { success, data } = result;
-      if (success) {
-        this.setState({
-          invoices: data?.map((invoice, i) => {
-            invoice['key'] = i; return invoice;
-          }) ?? [],
-          tabInvoices: data?.filter(i => !i.isPaid)?.map((invoice, i) => {
-            invoice['key'] = i; return invoice;
-          }) ?? [],
-        });
-      } else {
-        this.setState({ invoices: [], loading: false });
-      }
-    }).catch(err => {
-      this.setState({ invoices: [], loading: false });
-    })
+  componentDidUpdate(prevProps) {
+    const { selectedTab } = this.state;
+    if (JSON.stringify(prevProps.invoices) != JSON.stringify(this.props.invoices)) {
+      this.setState({ tabInvoices: this.props.invoices?.filter(i => i.isPaid == selectedTab) });
+    }
   }
 
   openModalInvoice = (invoiceId) => {
-    const { invoices } = this.state;
+    const { invoices } = this.props;
     this.setState({ visibleInvoice: true, selectedInvoice: invoices?.find(a => a._id === invoiceId) });
   }
 
@@ -86,7 +72,7 @@ class InvoiceList extends React.Component {
   }
 
   handleChangeTab = (value) => {
-    const { invoices } = this.state;
+    const { invoices } = this.props;
     this.setState({
       tabInvoices: invoices.filter(i => i.isPaid == value),
       selectedTab: value,
@@ -94,10 +80,11 @@ class InvoiceList extends React.Component {
   }
 
   handleUpdateInvoice = (items) => {
-    const { selectedInvoice, invoices } = this.state;
+    const { invoices } = this.props;
+    const { selectedInvoice } = this.state;
     const { totalPayment } = items;
     this.closeModalInvoice();
-    if (selectedInvoice) {
+    if (selectedInvoice?._id) {
       let postData = {
         invoiceId: selectedInvoice._id,
         totalPayment: totalPayment,
@@ -128,37 +115,53 @@ class InvoiceList extends React.Component {
 
       request.post(updateInvoice, postData).then(result => {
         if (result.success) {
-          message.success('Successfully updated');
-          this.setState({
-            invoices: invoices?.map(invoice => {
-              if (invoice?._id === selectedInvoice._id) {
-                if ([InvoiceType.BALANCE, InvoiceType.CANCEL, InvoiceType.RESCHEDULE].includes(selectedInvoice.type)) {
-                  invoice.totalPayment = totalPayment;
-                  invoice.data = [{
-                    appointment: selectedInvoice.data?.[0]?.appointment,
-                    items: items?.items,
-                  }];
-                } else if (selectedInvoice.type === InvoiceType.NOSHOW) {
-                  invoice.totalPayment = totalPayment;
-                  invoice.data = [{
-                    appointment: selectedInvoice.data?.[0]?.appointment,
-                    items: {
-                      ...selectedInvoice.data?.[0]?.items,
-                      data: items?.items,
-                    },
-                  }];
-                }
+          message.success('Successfully updated!');
+          const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(invoice => {
+            if (invoice?._id === selectedInvoice._id) {
+              if ([InvoiceType.BALANCE, InvoiceType.CANCEL, InvoiceType.RESCHEDULE].includes(selectedInvoice.type)) {
+                invoice.totalPayment = totalPayment;
+                invoice.data = [{
+                  appointment: selectedInvoice.data?.[0]?.appointment,
+                  items: items?.items,
+                }];
+              } else if (selectedInvoice.type === InvoiceType.NOSHOW) {
+                invoice.totalPayment = totalPayment;
+                invoice.data = [{
+                  appointment: selectedInvoice.data?.[0]?.appointment,
+                  items: {
+                    ...selectedInvoice.data?.[0]?.items,
+                    data: items?.items,
+                  },
+                }];
               }
-              return invoice;
-            })
-          })
+            }
+            return invoice;
+          });
+          this.props.setInvoiceList(newInvoices);
         } else {
-          message.success('Something went wrong. Please try again or contact admin.');
+          message.warning('Something went wrong. Please try again or contact admin.');
         }
       }).catch(error => {
-        message.success('Something went wrong. Please try again or contact admin.');
+        message.warning('Something went wrong. Please try again or contact admin.');
       })
     }
+  }
+
+  handleClearFlag = (invoice) => {
+    const { invoices } = this.props;
+    request.post(clearFlag, { invoiceId: invoice?._id }).then(result => {
+      const { success } = result;
+      if (success) {
+        const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(a => {
+          if (a._id === invoice?._id) {
+            a.isPaid = true;
+          }
+          return a;
+        })
+        this.props.setInvoiceList(newInvoices);
+        message.success('Successfully cleared!');
+      }
+    })
   }
 
   render() {
@@ -295,24 +298,38 @@ class InvoiceList extends React.Component {
         render: updatedAt => moment(updatedAt).format("MM/DD/YYYY hh:mm a"),
       },
       {
-        title: intl.formatMessage(messages.action), key: 'action',
-        render: invoice => (invoice.isPaid || invoice.totalPayment == 0) ? null : <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-          <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-          <input type="hidden" name="business" value="office@helpmegethelp.org" />
-          <input type="hidden" name="cmd" value="_donations" />
-          <input type="hidden" name="item_name" value="Help Me Get Help" />
-          <input type="hidden" name="item_number" />
-          <input type="hidden" name="amount" value={invoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-          <input type="hidden" name="shipping" value="0.00" />
-          <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-          <input type="hidden" name="rm" value="0" />
-          <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
-          <input type="hidden" name="cancel_return" value={window.location.href} />
-          <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-          <button type='submit' className='paynow bg-transparent border-none text-primary cursor'>
-            {intl.formatMessage(msgModal.paynow)}
-          </button>
-        </form>,
+        title: intl.formatMessage(messages.action), key: 'action', align: 'center',
+        render: invoice => (invoice.isPaid || invoice.totalPayment == 0) ? null : (
+          <div className='flex'>
+            <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+              <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+              <input type="hidden" name="business" value="office@helpmegethelp.org" />
+              <input type="hidden" name="cmd" value="_donations" />
+              <input type="hidden" name="item_name" value="Help Me Get Help" />
+              <input type="hidden" name="item_number" />
+              <input type="hidden" name="amount" value={invoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+              <input type="hidden" name="shipping" value="0.00" />
+              <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+              <input type="hidden" name="rm" value="0" />
+              <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
+              <input type="hidden" name="cancel_return" value={window.location.href} />
+              <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+              <Button type='link' htmlType='submit'>
+                <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
+              </Button>
+            </form>
+            {[4, 5].includes(invoice.type) ? (
+              <Popconfirm
+                title="Are you sure to clear this flag?"
+                onConfirm={() => this.handleClearFlag(invoice)}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button type='link'><span className='text-primary'>Clear flag</span></Button>
+              </Popconfirm>
+            ) : null}
+          </div>
+        ),
       },
     ];
 
@@ -331,8 +348,8 @@ class InvoiceList extends React.Component {
             dataSource={tabInvoices}
             columns={columns}
             onRow={invoice => ({
-              onClick: (e) => !e.target.className.includes('paynow') && this.openModalInvoice(invoice._id),
-              onDoubleClick: (e) => !e.target.className.includes('paynow') && this.openModalInvoice(invoice._id),
+              onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice._id),
+              onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice._id),
             })}
           />
         ),
@@ -385,6 +402,7 @@ class InvoiceList extends React.Component {
 
 const mapStateToProps = state => ({
   auth: state.auth,
+  invoices: state.appointments.dataInvoices,
 })
 
-export default compose(connect(mapStateToProps, { getSubsidyRequests }))(InvoiceList);
+export default compose(connect(mapStateToProps, { getInvoiceList, setInvoiceList }))(InvoiceList);

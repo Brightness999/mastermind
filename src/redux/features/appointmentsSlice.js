@@ -171,6 +171,9 @@ export const appointmentsSlice = createSlice({
 		setSubsidyRequests(state, action) {
 			state.dataSubsidyRequests = action.payload;
 		},
+		setInvoiceList(state, action) {
+			state.dataInvoices = action.payload;
+		},
 	},
 	extraReducers: {
 		[getAppointmentsData.fulfilled]: (state, action) => {
@@ -193,6 +196,6 @@ export const appointmentsSlice = createSlice({
 	}
 });
 
-export const { getDatadAppointments, setAppointments, setAppointmentsInMonth, setSubsidyRequests } = appointmentsSlice.actions;
+export const { getDatadAppointments, setAppointments, setAppointmentsInMonth, setSubsidyRequests, setInvoiceList } = appointmentsSlice.actions;
 
 export default appointmentsSlice.reducer;
