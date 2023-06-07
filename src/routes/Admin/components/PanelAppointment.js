@@ -523,7 +523,7 @@ class PanelAppointment extends React.Component {
               {this.renderItemLeft(data)}
               <div className={`item-right gap-1 ${data?.status === DECLINED && 'display-none events-none'}`}>
                 <BsEnvelope size={15} onClick={() => this.openModalFeedback(data)} />
-                <BsFillFlagFill size={15} onClick={() => this.openModalBalance(data)} />
+                {(data?.flagStatus === PENDING && !data?.sessionInvoice?.isPaid) && <BsFillFlagFill size={15} onClick={() => this.openModalBalance(data)} />}
               </div>
             </div>
           ))}
