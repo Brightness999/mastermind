@@ -634,7 +634,8 @@ class DrawerDetail extends Component {
   }
 
   handleClearFlag = () => {
-    request.post(clearFlag, { _id: this.props.event?._id }).then(result => {
+    const { event } = this.props;
+    request.post(clearFlag, { invoiceId: event?.flagInvoice?._id }).then(result => {
       const { success } = result;
       if (success) {
         message.success('Cleared successfully');
