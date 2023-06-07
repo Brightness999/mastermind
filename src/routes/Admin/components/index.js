@@ -684,7 +684,7 @@ class SchedulingCenter extends React.Component {
       visible: visibleFlagExpand,
       onSubmit: this.onCloseModalFlagExpand,
       onCancel: this.onCloseModalFlagExpand,
-      flags: listAppointmentsRecent?.filter(appointment => appointment.flagStatus === ACTIVE || appointment.flagStatus === CLEAR),
+      flags: invoices?.filter(invoice => [InvoiceType.BALANCE, InvoiceType.NOSHOW].includes(invoice.type)),
       calendar: this.calendarRef,
     };
 
@@ -1006,7 +1006,7 @@ class SchedulingCenter extends React.Component {
                 key="5"
                 extra={(
                   <div className='flex gap-2'>
-                    <BiExpand size={18} className="cursor" onClick={() => this.onOpenModalFlagExpand()} />
+                    <BiExpand size={18} className="cursor" onClick={this.onOpenModalFlagExpand} />
                     <Badge size="small" count={invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid)?.length}>
                       <BsFillFlagFill size={18} />
                     </Badge>
