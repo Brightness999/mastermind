@@ -30,11 +30,11 @@ import { store } from '../../../redux/store';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
 import { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
-import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
+import { changeTime, getAppointmentsData, getAppointmentsMonthData, getInvoiceList, getSubsidyRequests } from '../../../redux/features/appointmentsSlice'
 import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance } from '../../../utils/api/apiList';
 import Subsidiaries from './school';
 import PageLoading from '../../../components/Loading/PageLoading';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PARENT, PENDING, SCREEN, SUBSIDY } from '../../constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, PROVIDER, SCREEN, SUBSIDY } from '../../constant';
 import './index.less';
 
 const { Panel } = Collapse;
@@ -74,7 +74,6 @@ class Dashboard extends React.Component {
       intervalId: 0,
       selectedDate: undefined,
       visibleFlagExpand: false,
-      modalType: '',
       visibleConfirm: false,
       confirmMessage: '',
       visibleSessionsNeedToClose: false,
@@ -84,6 +83,7 @@ class Dashboard extends React.Component {
       loading: false,
       visiblePayment: false,
       paymentDescription: '',
+      selectedFlag: {},
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -115,6 +115,7 @@ class Dashboard extends React.Component {
     this.updateCalendarEvents(user.role);
     this.getMyAppointments(user.role);
     this.props.getSubsidyRequests({ role: user.role });
+    this.props.getInvoiceList({ role: user.role });
     const notifications = setInterval(() => {
       if (user.role === 3) {
         request.post(checkNotificationForClient).then(res => {
@@ -706,45 +707,36 @@ class Dashboard extends React.Component {
   }
 
   handleRequestClearance = (requestMessage) => {
+    const { selectedFlag } = this.state;
     this.onCloseModalCreateNote();
     message.success("Your request has been submitted. Please allow up to 24 hours for the provider to review this.");
 
-    request.post(requestClearance, { appointmentId: this.state.selectedEvent?._id, message: requestMessage }).catch(err => {
+    request.post(requestClearance, { invoiceId: selectedFlag?._id, message: requestMessage }).catch(err => {
       message.error(err.message);
     })
   }
 
   handleClearFlag = () => {
+    const { selectedFlag, userRole } = this.state;
     this.onCloseModalConfirm();
-    request.post(clearFlag, { _id: this.state.selectedEvent?._id }).then(result => {
+    request.post(clearFlag, { invoiceId: selectedFlag?._id }).then(result => {
       const { success } = result;
       if (success) {
         message.success('Cleared successfully');
-        this.updateCalendarEvents(this.state.userRole);
-        this.getMyAppointments(this.state.userRole);
+        this.props.getInvoiceList({ role: userRole });
       }
     })
   }
 
-  onSubmitModalConfirm = () => {
-    if (this.state.modalType == 'request-clearance') {
-      this.handleRequestClearance();
-    }
-    if (this.state.modalType == 'clear-flag') {
-      this.handleClearFlag();
-    }
-  }
-
   onCloseModalConfirm = () => {
-    this.setState({ visibleConfirm: false });
+    this.setState({ visibleConfirm: false, selectedFlag: {} });
   }
 
-  onOpenModalConfirm = (type, appointment) => {
+  onOpenModalConfirm = (invoice) => {
     this.setState({
       visibleConfirm: true,
       confirmMessage: type == 'request-clearance' ? 'Did you pay for this flag?' : 'Are you sure to clear this flag?',
-      modalType: type,
-      selectedEvent: appointment,
+      selectedFlag: invoice,
     });
   }
 
@@ -764,12 +756,12 @@ class Dashboard extends React.Component {
     this.getMyAppointments(this.state.userRole, 0);
   }
 
-  onOpenModalCreateNote = (appointment) => {
-    this.setState({ visibleCreateNote: true, selectedEvent: appointment });
+  onOpenModalCreateNote = (invoice) => {
+    this.setState({ visibleCreateNote: true, selectedFlag: invoice });
   }
 
   onCloseModalCreateNote = () => {
-    this.setState({ visibleCreateNote: false, selectedEvent: {} });
+    this.setState({ visibleCreateNote: false, selectedFlag: {} });
   }
 
   render() {
@@ -807,6 +799,7 @@ class Dashboard extends React.Component {
       visiblePayment,
       paymentDescription,
     } = this.state;
+    const { invoices } = this.props;
 
     const btnMonthToWeek = (
       <div role='button' className='btn-type' onClick={this.handleMonthToWeek}>
@@ -891,7 +884,7 @@ class Dashboard extends React.Component {
 
     const modalConfirmProps = {
       visible: visibleConfirm,
-      onSubmit: this.onSubmitModalConfirm,
+      onSubmit: this.handleClearFlag,
       onCancel: this.onCloseModalConfirm,
       message: confirmMessage,
     };
@@ -1221,7 +1214,7 @@ class Dashboard extends React.Component {
                     extra={
                       <div className='flex gap-2'>
                         <BiExpand size={18} className="cursor" onClick={() => this.onOpenModalFlagExpand()} />
-                        <Badge size="small" count={listAppointmentsRecent?.filter(a => a.flagStatus === ACTIVE)?.length}>
+                        <Badge size="small" count={invoices?.filter(a => [4, 5].includes(a.type) && !a?.isPaid)?.length}>
                           <BsFillFlagFill size={18} />
                         </Badge>
                       </div>
@@ -1230,31 +1223,30 @@ class Dashboard extends React.Component {
                   >
                     <Tabs defaultActiveKey="1" type="card" size='small'>
                       <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                        {listAppointmentsRecent?.filter(a => a.flagStatus === ACTIVE)?.map((appointment, index) =>
-                          <div key={index} className='list-item padding-item justify-between' onClick={(e) => !e.target.className.includes('font-12 flag-action') && this.onShowDrawerDetail(appointment._id)}>
+                        {invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid)?.map((invoice, index) =>
+                          <div key={index} className='list-item padding-item justify-between' onClick={() => { }}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
-                              <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                              <p className='font-09 mb-0'>{userRole === 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                              <p className='font-12 mb-0'>{userRole === PROVIDER ? `${invoice.dependent?.firstName ?? ''} ${invoice.dependent?.lastName ?? ''}` : `${invoice.provider?.firstName ?? ''} ${invoice.provider?.lastName ?? ''}`}</p>
                             </div>
-                            {userRole === 3 ? (
+                            {userRole === PARENT ? (
                               <>
-                                <div className='font-12'>{appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
-                                {(appointment?.flagInvoice?.isPaid || appointment?.flagInvoice?.totalPayment == 0) ? (
-                                  <a className='font-12 flag-action' onClick={() => this.onOpenModalCreateNote(appointment)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
+                                <div className='font-12'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
+                                {(invoice?.isPaid || invoice?.totalPayment == 0) ? (
+                                  <a className='font-12 flag-action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</a>
                                 ) : null}
-                                {appointment?.flagInvoice?.isPaid ? 'Paid' : appointment?.flagInvoice?.totalPayment == 0 ? null : (
+                                {invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
                                   <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                                     <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                                     <input type="hidden" name="business" value="office@helpmegethelp.org" />
                                     <input type="hidden" name="cmd" value="_donations" />
                                     <input type="hidden" name="item_name" value="Help Me Get Help" />
                                     <input type="hidden" name="item_number" />
-                                    <input type="hidden" name="amount" value={appointment?.flagInvoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                                    <input type="hidden" name="amount" value={invoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
                                     <input type="hidden" name="shipping" value="0.00" />
                                     <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                                     <input type="hidden" name="rm" value="0" />
-                                    <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(appointment?.flagInvoice?._id)}`} />
+                                    <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
                                     <input type="hidden" name="cancel_return" value={window.location.href} />
                                     <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
                                     <button className='font-12 flag-action pay-flag-button'>
@@ -1265,25 +1257,24 @@ class Dashboard extends React.Component {
                               </>
                             ) : (
                               <>
-                                <div className='font-12'>{appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
-                                <a className='font-12 flag-action' onClick={() => this.onOpenModalConfirm('clear-flag', appointment)}>{intl.formatMessage(msgDrawer.clearFlag)}</a>
+                                <div className='font-12'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
+                                <a className='font-12 flag-action' onClick={() => this.onOpenModalConfirm(invoice)}>{intl.formatMessage(msgDrawer.clearFlag)}</a>
                               </>
                             )}
                           </div>
                         )}
                       </Tabs.TabPane>
                       <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                        {listAppointmentsRecent?.filter(a => a.flagStatus === 2)?.map((appointment, index) =>
-                          <div key={index} className='list-item padding-item gap-2' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                        {invoices?.filter(a => [4, 5].includes(a.type) && a.isPaid)?.map((invoice, index) =>
+                          <div key={index} className='list-item padding-item gap-2' onClick={() => { }}>
                             <Avatar size={24} icon={<FaUser size={12} />} />
                             <div className='div-service'>
-                              <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                              <p className='font-09 mb-0'>{userRole === 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                              <p className='font-12 mb-0'>{userRole === 30 ? `${invoice.dependent?.firstName ?? ''} ${invoice.dependent?.lastName ?? ''}` : `${invoice.provider?.firstName ?? ''} ${invoice.provider?.lastName ?? ''}`}</p>
                             </div>
-                            <div className='font-12'>{appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
+                            <div className='font-12'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
                             <div className='ml-auto'>
-                              <div className='font-12'>{moment(appointment.date).format("hh:mm a")}</div>
-                              <div className='font-12 font-700'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
+                              <div className='font-12 text-center'>{moment(invoice.updatedAt).format("hh:mm a")}</div>
+                              <div className='font-12 font-700 text-center'>{moment(invoice.updatedAt).format('MM/DD/YYYY')}</div>
                             </div>
                           </div>
                         )}
@@ -1358,7 +1349,8 @@ function renderEventContent(eventInfo, appointments) {
 const mapStateToProps = state => ({
   appointments: state.appointments.dataAppointments,
   appointmentsInMonth: state.appointments.dataAppointmentsMonth,
+  invoices: state.appointments.dataInvoices,
   user: state.auth.user,
 })
 
-export default compose(connect(mapStateToProps, { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests }))(Dashboard);
+export default compose(connect(mapStateToProps, { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, getInvoiceList }))(Dashboard);

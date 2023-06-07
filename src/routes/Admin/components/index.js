@@ -24,16 +24,15 @@ import messages from '../../Dashboard/messages';
 import messagesCreateAccount from '../../Sign/CreateAccount/messages';
 import msgSidebar from '../../../components/SideBar/messages';
 import msgDrawer from '../../../components/DrawerDetail/messages';
-import msgModal from '../../../components/Modal/messages';
 import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
 import request, { decryptParam, encryptParam } from '../../../utils/api/request'
-import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, setAppointments, setAppointmentsInMonth } from '../../../redux/features/appointmentsSlice'
+import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, setAppointments, setAppointmentsInMonth, getInvoiceList } from '../../../redux/features/appointmentsSlice'
 import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, setSchools } from '../../../redux/features/authSlice';
 import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance, sendEmailInvoice } from '../../../utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
 import PageLoading from '../../../components/Loading/PageLoading';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLEAR, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, NOFLAG, NOSHOW, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from '../../../routes/constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLEAR, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from '../../../routes/constant';
 import './index.less';
 
 const { Panel } = Collapse;
@@ -79,6 +78,7 @@ class SchedulingCenter extends React.Component {
       visibleFlagAction: false,
       visibleCancelForAdmin: false,
       dragInfo: {},
+      selectedFlag: {},
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -109,6 +109,7 @@ class SchedulingCenter extends React.Component {
     this.updateCalendarEvents(auth?.user?.role);
     this.getMyAppointments(auth?.user?.role);
     this.props.getSubsidyRequests({ role: auth?.user?.role });
+    this.props.getInvoiceList({ role: auth?.user?.role });
     this.loadDefaultData();
 
     const script = document.createElement("script");
@@ -473,9 +474,10 @@ class SchedulingCenter extends React.Component {
   }
 
   handleRequestClearance = () => {
+    const { selectedFlag } = this.state;
     this.closeFlagAction();
     this.onCloseModalCreateNote();
-    request.post(requestClearance, { appointmentId: this.state.selectedEvent?._id }).then(result => {
+    request.post(requestClearance, { invoiceId: selectedFlag?._id }).then(result => {
       const { success } = result;
       if (success) {
         message.success('Sent successfully');
@@ -486,13 +488,12 @@ class SchedulingCenter extends React.Component {
   handleClearFlag = () => {
     this.onCloseModalConfirm();
     this.closeFlagAction();
-    const { selectedEvent, userRole } = this.state;
-    request.post(clearFlag, { _id: selectedEvent?._id }).then(result => {
+    const { selectedFlag, userRole } = this.state;
+    request.post(clearFlag, { invoiceId: selectedFlag?._id }).then(result => {
       const { success } = result;
       if (success) {
         message.success('Cleared successfully');
-        this.updateCalendarEvents(userRole);
-        this.getMyAppointments(userRole);
+        this.props.getInvoiceList({ role: userRole });
       } else {
         message.error("Cannot find this flag");
       }
@@ -558,12 +559,12 @@ class SchedulingCenter extends React.Component {
     this.setState({ visibleCreateNote: false });
   }
 
-  openFlagAction = (appointment) => {
-    this.setState({ selectedEvent: appointment, visibleFlagAction: true });
+  openFlagAction = (invoice) => {
+    this.setState({ selectedFlag: invoice, visibleFlagAction: true });
   }
 
   closeFlagAction = () => {
-    this.setState({ visibleFlagAction: false, selectedEvent: {} });
+    this.setState({ visibleFlagAction: false, selectedFlag: {} });
   }
 
   render() {
@@ -600,7 +601,9 @@ class SchedulingCenter extends React.Component {
       visibleFlagAction,
       locations,
       visibleCancelForAdmin,
+      selectedFlag,
     } = this.state;
+    const { invoices } = this.props;
 
     const btnMonthToWeek = (
       <div role='button' className='btn-type' onClick={this.handleMonthToWeek}>
@@ -1004,7 +1007,7 @@ class SchedulingCenter extends React.Component {
                 extra={(
                   <div className='flex gap-2'>
                     <BiExpand size={18} className="cursor" onClick={() => this.onOpenModalFlagExpand()} />
-                    <Badge size="small" count={listAppointmentsRecent?.filter(a => a.flagStatus === ACTIVE)?.length}>
+                    <Badge size="small" count={invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid)?.length}>
                       <BsFillFlagFill size={18} />
                     </Badge>
                   </div>
@@ -1013,30 +1016,30 @@ class SchedulingCenter extends React.Component {
               >
                 <Tabs defaultActiveKey="1" type="card" size='small'>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
-                    {listAppointmentsRecent?.filter(a => a.flagStatus === ACTIVE)?.map((appointment, index) =>
-                      <div key={index} className='list-item padding-item justify-between' onClick={(e) => e.target.className !== 'font-12 flag-action' && this.onShowDrawerDetail(appointment._id)}>
+                    {invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid)?.map((invoice, index) =>
+                      <div key={index} className='list-item padding-item justify-between' onClick={() => { }}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
-                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                          <p className='font-09 mb-0'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                          <p className='font-12 mb-0'>{invoice.dependent?.firstName ?? ''} {invoice.dependent?.lastName ?? ''}</p>
+                          <p className='font-12 mb-0'>{invoice.provider?.firstName ?? ''} {invoice.provider?.lastName ?? ''}</p>
                         </div>
-                        <div className='font-12'>{appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
-                        <a className='font-12 flag-action' onClick={() => this.openFlagAction(appointment)}>{intl.formatMessage(messages.action)}</a>
+                        <div className='font-12'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
+                        <a className='font-12 flag-action' onClick={() => this.openFlagAction(invoice)}>{intl.formatMessage(messages.action)}</a>
                       </div>
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
-                    {listAppointmentsRecent?.filter(a => a.flagStatus === CLEAR)?.map((appointment, index) =>
-                      <div key={index} className='list-item padding-item justify-between' onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                    {invoices?.filter(a => [4, 5].includes(a.type) && a.isPaid)?.map((invoice, index) =>
+                      <div key={index} className='list-item padding-item justify-between' onClick={() => { }}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='div-service'>
-                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                          <p className='font-09 mb-0'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
+                          <p className='font-12 mb-0'>{invoice.dependent?.firstName ?? ''} {invoice.dependent?.lastName ?? ''}</p>
+                          <p className='font-12 mb-0'>{invoice.provider?.firstName ?? ''} {invoice.provider?.lastName ?? ''}</p>
                         </div>
-                        <div className='font-12'>{appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</div>
+                        <div className='font-12'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
                         <div>
-                          <div className='font-12'>{moment(appointment.date).format("hh:mm a")}</div>
-                          <div className='font-12 font-700 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
+                          <div className='font-12'>{moment(invoice.updatedAt).format("hh:mm a")}</div>
+                          <div className='font-12 font-700 whitespace-nowrap'>{moment(invoice.updatedAt).format('MM/DD/YYYY')}</div>
                         </div>
                       </div>
                     )}
@@ -1074,25 +1077,25 @@ class SchedulingCenter extends React.Component {
         {visibleCancelForAdmin && <ModalCancelForAdmin {...modalCancelForAdminProps} />}
         <Modal title="Flag Action" open={visibleFlagAction} footer={null} onCancel={this.closeFlagAction}>
           <div className='flex items-center gap-2'>
-            {(selectedEvent?.flagInvoice?.isPaid || selectedEvent?.flagInvoice?.totalPayment == 0) ? (
+            {(selectedFlag?.isPaid || selectedFlag?.totalPayment == 0) ? (
               <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' onClick={() => this.onOpenModalCreateNote()}>{intl.formatMessage(msgDrawer.requestClearance)}</Button>
             ) : null}
-            {selectedEvent?.flagInvoice?.isPaid ? (
+            {selectedFlag?.isPaid ? (
               <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' disabled>
                 {intl.formatMessage(msgDrawer.paid)}
               </Button>
-            ) : selectedEvent?.flagInvoice?.totalPayment == 0 ? null : (
+            ) : selectedFlag?.totalPayment == 0 ? null : (
               <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post" className='flex-1'>
                 <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                 <input type="hidden" name="business" value="office@helpmegethelp.org" />
                 <input type="hidden" name="cmd" value="_donations" />
                 <input type="hidden" name="item_name" value="Help Me Get Help" />
                 <input type="hidden" name="item_number" />
-                <input type="hidden" name="amount" value={selectedEvent?.flagInvoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                <input type="hidden" name="amount" value={selectedFlag?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
                 <input type="hidden" name="shipping" value="0.00" />
                 <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
                 <input type="hidden" name="rm" value="0" />
-                <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(selectedEvent?.flagInvoice?._id)}`} />
+                <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(selectedFlag?._id)}`} />
                 <input type="hidden" name="cancel_return" value={window.location.href} />
                 <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
                 <Button type='primary' htmlType='submit' block className='font-16 flag-action whitespace-nowrap'>
@@ -1136,7 +1139,8 @@ function renderEventContent(eventInfo, appointments) {
 const mapStateToProps = state => ({
   appointments: state.appointments.dataAppointments,
   appointmentsInMonth: state.appointments.dataAppointmentsMonth,
+  invoices: state.appointments.dataInvoices,
   auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps, { changeTime, getAppointmentsData, getAppointmentsMonthData, setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, getSubsidyRequests, setSchools, setAppointments, setAppointmentsInMonth }))(SchedulingCenter);
+export default compose(connect(mapStateToProps, { changeTime, getAppointmentsData, getAppointmentsMonthData, setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, getSubsidyRequests, setSchools, setAppointments, setAppointmentsInMonth, getInvoiceList }))(SchedulingCenter);

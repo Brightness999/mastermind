@@ -1,13 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import request from '../../utils/api/request'
-import { changeTimeAppointForAdmin, changeTimeAppointForParent, changeTimeAppointForProvider, getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getParentSubsidyRequests, getProviderSubsidyRequests, getSchoolSubsidyRequests } from '../../utils/api/apiList';
-import { ADMIN, CONSULTANT, CONSULTATION, PARENT, PENDING, PROVIDER, SUPERADMIN } from '../../routes/constant';
 import moment from 'moment';
+
+import request from 'src/utils/api/request'
+import { changeTimeAppointForAdmin, changeTimeAppointForParent, changeTimeAppointForProvider, getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getInvoices, getParentSubsidyRequests, getProviderSubsidyRequests, getSchoolSubsidyRequests } from 'src/utils/api/apiList';
+import { ADMIN, CONSULTANT, CONSULTATION, PARENT, PENDING, PROVIDER, SCHOOL, SUPERADMIN } from 'src/routes/constant';
 
 const initialState = {
 	dataAppointments: [],
 	dataSubsidyRequests: [],
-	dataAppointmentsMonth: []
+	dataAppointmentsMonth: [],
+	dataInvoices: [],
 };
 
 export const getAppointmentsData = createAsyncThunk(
@@ -44,13 +46,13 @@ export const getSubsidyRequests = createAsyncThunk(
 		let result = {}
 		try {
 			switch (data.role) {
-				case 1000:
+				case SUPERADMIN:
 					result = await request.post(getAdminSubsidyRequests, data);
 					return result.data.docs;
 				case ADMIN:
 					result = await request.post(getAdminSubsidyRequests, data);
 					return result.data.docs;
-				case 60:
+				case SCHOOL:
 					result = await request.post(getSchoolSubsidyRequests, data);
 					return result.data.docs;
 				case PROVIDER:
@@ -72,7 +74,7 @@ export const getAppointmentsMonthData = createAsyncThunk(
 		let result = {}
 		try {
 			switch (data.role) {
-				case 1000:
+				case SUPERADMIN:
 					result = await request.post(getAppointmentsInMonthForAdmin, data.data);
 					break;
 				case ADMIN:
@@ -131,6 +133,31 @@ export const changeTime = createAsyncThunk(
 	}
 )
 
+export const getInvoiceList = createAsyncThunk(
+	'auth/getInvoiceList',
+	async (data) => {
+		let result = {}
+		try {
+			switch (data.role) {
+				case SUPERADMIN:
+					result = await request.post(getInvoices, data.data);
+					return result.data;
+				case ADMIN:
+					result = await request.post(getInvoices, data.data);
+					return result.data;
+				case PROVIDER:
+					result = await request.post(getInvoices, data.data);
+					return result.data;
+				case PARENT:
+					result = await request.post(getInvoices, data.data);
+					return result.data;
+			}
+		} catch (error) {
+			console.log(error, 'error')
+		}
+	}
+)
+
 export const appointmentsSlice = createSlice({
 	name: 'appointments',
 	initialState,
@@ -156,6 +183,10 @@ export const appointmentsSlice = createSlice({
 
 		[getSubsidyRequests.fulfilled]: (state, action) => {
 			state.dataSubsidyRequests = action.payload
+		},
+
+		[getInvoiceList.fulfilled]: (state, action) => {
+			state.dataInvoices = action.payload
 		},
 
 		[changeTime.fulfilled]: (state, action) => { },
