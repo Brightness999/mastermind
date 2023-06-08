@@ -5,12 +5,12 @@ import intl from 'react-intl-universal';
 import Cookies from 'js-cookie';
 import { decode as base64_decode } from 'base-64';
 
-import { routerLinks } from "../../../constant";
 import messages from '../messages';
-import { getInfoAuth, setUser } from '../../../../redux/features/authSlice';
-import { store } from '../../../../redux/store';
-import request from '../../../../utils/api/request';
-import { userActivate, userLogin } from '../../../../utils/api/apiList';
+import { routerLinks } from "routes/constant";
+import { setUser } from 'src/redux/features/authSlice';
+import { store } from 'src/redux/store';
+import request from 'utils/api/request';
+import { userActivate, userLogin } from 'utils/api/apiList';
 import './index.less';
 
 export default class extends React.Component {
@@ -59,7 +59,6 @@ export default class extends React.Component {
 			if (success) {
 				Cookies.set('tk', data.token, { expires: new Date(Date.now() + 10 * 60 * 1000) });
 				store.dispatch(setUser(data.user));
-				store.dispatch(getInfoAuth({ role: data.user.role }));
 				data.user.role > 900 ? this.props.history.push(routerLinks.Admin) : this.props.history.push(routerLinks.Dashboard);
 			}
 		} catch (error) {

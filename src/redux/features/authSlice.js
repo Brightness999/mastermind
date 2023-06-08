@@ -1,9 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { message } from 'antd';
 
-import { helper } from '../../utils/auth/helper';
-import request from '../../utils/api/request'
-import { getChildProfile, getMyProviderInfo, getMySchoolInfo, getParentProfile, getSettings, updateChildAvailability, updateChildProfile, updateMyProviderProfile, updateParentProfile, updateSchoolInfo } from '../../utils/api/apiList';
+import request from 'utils/api/request'
+import { updateChildAvailability, updateChildProfile, updateMyProviderProfile, updateParentProfile, updateSchoolInfo } from 'utils/api/apiList';
 
 const initialState = {
 	user: {},
@@ -34,38 +33,6 @@ const initialState = {
 		schools: [],
 	},
 };
-
-export const getInfoAuth = createAsyncThunk(
-	'auth/getInfoAuth',
-	async (data) => {
-		try {
-			let result = '';
-			let resultParent = {};
-			let resultChild = {};
-			switch (data?.role) {
-				case 1000:
-					result = await request.post(getSettings, data);
-					return result.data;
-				case 999:
-					result = await request.post(getSettings, data);
-					return result.data;
-				case 60:
-					result = await request.post(getMySchoolInfo, data);
-					return result.data;
-				case 30:
-					result = await request.post(getMyProviderInfo, data);
-					return result.data;
-				case 3:
-					resultParent = await request.post(getParentProfile, data);
-					resultChild = await request.post(getChildProfile, data);
-					return { parent: resultParent.data, child: resultChild.data };
-			}
-		} catch (error) {
-			console.log('error', error)
-		}
-		return false;
-	}
-)
 
 export const setInforClientChild = createAsyncThunk(
 	'auth/setInforClientChild',
@@ -200,19 +167,6 @@ export const authSlice = createSlice({
 		},
 	},
 	extraReducers: {
-		[getInfoAuth.fulfilled]: (state, action) => {
-			const user = state.user;
-			if (user) {
-				if (user.role == 3) {
-					state.authDataClientChild = action.payload.child;
-					state.authDataClientParent = action.payload.parent;
-				} else if (user.role > 900) {
-					state.currentCommunity = action.payload;
-				} else {
-					state.authData = action.payload;
-				}
-			}
-		},
 		[setInforProvider.fulfilled]: (state, action) => {
 			state.user = { ...state.user, providerInfo: action.payload };
 		},

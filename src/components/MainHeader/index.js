@@ -11,9 +11,11 @@ import { compose } from 'redux';
 import { MdOutlineSpaceDashboard } from 'react-icons/md';
 
 import messages from './messages';
-import { PARENT, PROVIDER, routerLinks } from '../../routes/constant';
-import { logout } from '../../redux/features/authSlice';
-import { helper } from '../../utils/auth/helper';
+import { PARENT, PROVIDER, routerLinks } from 'routes/constant';
+import { logout, setCommunity } from 'src/redux/features/authSlice';
+import { helper } from 'utils/auth/helper';
+import request from 'utils/api/request';
+import { getSettings } from 'utils/api/apiList';
 import './style/index.less';
 
 class MainHeader extends Component {
@@ -25,6 +27,15 @@ class MainHeader extends Component {
   }
 
   componentDidMount() {
+    const { user } = this.props;
+    if (user.role > 900) {
+      request.post(getSettings).then(result => {
+        const { success, data } = result;
+        if (success) {
+          this.props.setCommunity(data);
+        }
+      })
+    }
     window.onblur = () => {
       if (window.location.pathname.includes('/account') || window.location.pathname.includes('/administrator')) {
         const countDown = setTimeout(() => {
@@ -136,4 +147,4 @@ const mapStateToProps = state => ({
   community: state.auth.currentCommunity,
 });
 
-export default compose(connect(mapStateToProps, { logout }))(MainHeader);
+export default compose(connect(mapStateToProps, { logout, setCommunity }))(MainHeader);
