@@ -9,12 +9,12 @@ import { compose } from 'redux';
 import moment from 'moment';
 
 import messages from '../messages';
-import msgModal from '../../../components/Modal/messages';
-import request, { encryptParam } from '../../../utils/api/request'
-import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalPayment, ModalProcessAppointment } from '../../../components/Modal';
-import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag, setFlagBalance, updateNoshowFlag } from '../../../utils/api/apiList';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CLOSED, DECLINED, EVALUATION, NOSHOW, PARENT, PENDING, SUBSIDY } from '../../constant';
+import msgModal from 'components/Modal/messages';
+import request, { encryptParam } from 'utils/api/request'
+import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalPayment, ModalProcessAppointment } from 'components/Modal';
+import { getAppointmentsData, getAppointmentsMonthData } from 'src/redux/features/appointmentsSlice';
+import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag, setFlagBalance, updateNoshowFlag } from 'utils/api/apiList';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, DECLINED, EVALUATION, NOSHOW, PARENT, PENDING, RESCHEDULE, SUBSIDY } from 'routes/constant';
 import './index.less';
 
 class PanelAppointment extends React.Component {
@@ -35,6 +35,7 @@ class PanelAppointment extends React.Component {
       visibleFeedback: false,
       visiblePayment: false,
       paymentDescription: '',
+      cancellationType: '',
     };
   }
 
@@ -94,7 +95,7 @@ class PanelAppointment extends React.Component {
       const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
       this.setState({ paymentDescription: desc, event: event });
       message.warn(desc).then(() => {
-        this.setState({ visiblePayment: true });
+        this.setState({ visiblePayment: true, cancellationType: RESCHEDULE });
       })
     } else {
       this.setState({ visibleCurrent: true, event: event });
@@ -116,7 +117,7 @@ class PanelAppointment extends React.Component {
       const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
       this.setState({ paymentDescription: desc, event: event });
       message.warn(desc).then(() => {
-        this.setState({ visiblePayment: true });
+        this.setState({ visiblePayment: true, cancellationType: CANCEL });
       })
     } else {
       this.setState({ visibleCancel: true, event: event });
@@ -392,6 +393,7 @@ class PanelAppointment extends React.Component {
       visibleNoShow,
       visiblePayment,
       paymentDescription,
+      cancellationType,
     } = this.state;
     const dependent = { ...event?.dependent, appointments: appointments?.filter(a => a.dependent?._id === event?.dependent?._id) };
 
@@ -453,6 +455,7 @@ class PanelAppointment extends React.Component {
       onCancel: this.closeModalPayment,
       description: paymentDescription,
       appointment: event,
+      cancellationType,
     };
 
     return (

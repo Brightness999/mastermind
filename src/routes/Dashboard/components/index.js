@@ -18,23 +18,23 @@ import { compose } from 'redux';
 import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 
-import { ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote, ModalPayment, ModalInvoice } from '../../../components/Modal';
-import DrawerDetail from '../../../components/DrawerDetail';
+import { ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote, ModalPayment, ModalInvoice } from 'components/Modal';
+import DrawerDetail from 'components/DrawerDetail';
 import messages from '../messages';
-import messagesCreateAccount from '../../Sign/CreateAccount/messages';
-import msgModal from '../../../components/Modal/messages';
-import msgDrawer from '../../../components/DrawerDetail/messages';
-import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
-import request, { decryptParam, encryptParam } from '../../../utils/api/request'
-import { store } from '../../../redux/store';
+import messagesCreateAccount from 'routes/Sign/CreateAccount/messages';
+import msgModal from 'components/Modal/messages';
+import msgDrawer from 'components/DrawerDetail/messages';
+import { socketUrl, socketUrlJSFile } from 'utils/api/baseUrl';
+import request, { decryptParam, encryptParam } from 'utils/api/request'
+import { store } from 'src/redux/store';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
-import { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from '../../../redux/features/authSlice';
-import { changeTime, getAppointmentsData, getAppointmentsMonthData, getInvoiceList, getSubsidyRequests, setInvoiceList } from '../../../redux/features/appointmentsSlice'
-import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance, updateInvoice } from '../../../utils/api/apiList';
+import { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from 'src/redux/features/authSlice';
+import { changeTime, getAppointmentsData, getAppointmentsMonthData, getInvoiceList, getSubsidyRequests, setInvoiceList } from 'src/redux/features/appointmentsSlice'
+import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance, updateInvoice } from 'utils/api/apiList';
 import Subsidiaries from './school';
-import PageLoading from '../../../components/Loading/PageLoading';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, PROVIDER, SCREEN, SUBSIDY } from '../../constant';
+import PageLoading from 'components/Loading/PageLoading';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from 'routes/constant';
 import './index.less';
 
 const { Panel } = Collapse;
@@ -97,8 +97,9 @@ class Dashboard extends React.Component {
     const success = decryptParam(params.get('s')?.replaceAll(' ', '+') || '');
     const invoiceId = decryptParam(params.get('i')?.replaceAll(' ', '+') || '');
     const appointmentId = decryptParam(params.get('a')?.replaceAll(' ', '+') || '');
+    const cancellationType = decryptParam(params.get('t')?.replaceAll(' ', '+') || '');
     if (success === 'true' && (invoiceId || appointmentId)) {
-      request.post(payInvoice, { invoiceId, appointmentId }).then(res => {
+      request.post(payInvoice, { invoiceId, appointmentId, cancellationType }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
           const url = window.location.href;
@@ -996,6 +997,7 @@ class Dashboard extends React.Component {
       onCancel: this.onCloseModalPayment,
       description: paymentDescription,
       appointment: selectedEvent,
+      cancellationType: RESCHEDULE,
     }
 
     const modalInvoiceProps = {

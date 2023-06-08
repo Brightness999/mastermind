@@ -12,15 +12,15 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { AiFillTag, AiOutlineUserSwitch } from 'react-icons/ai';
 
-import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalPayment, ModalProcessAppointment } from '../../components/Modal';
+import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalPayment, ModalProcessAppointment } from 'components/Modal';
 import messages from './messages';
-import msgModal from '../Modal/messages';
-import msgDashboard from '../../routes/Dashboard/messages';
-import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import request, { encryptParam } from '../../utils/api/request';
-import { getAppointmentsData, getAppointmentsMonthData } from '../../redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from '../../utils/api/apiList';
-import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from '../../routes/constant';
+import msgModal from 'components/Modal/messages';
+import msgDashboard from 'routes/Dashboard/messages';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
+import request, { encryptParam } from 'utils/api/request';
+import { getAppointmentsData, getAppointmentsMonthData } from 'src/redux/features/appointmentsSlice';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from 'utils/api/apiList';
+import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from 'routes/constant';
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -97,7 +97,7 @@ class DrawerDetail extends Component {
       if (auth.user.role === PARENT) {
         this.setState({ paymentDescription: desc });
         message.warn(desc).then(() => {
-          this.setState({ visiblePayment: true });
+          this.setState({ visiblePayment: true, cancellationType: CANCEL });
         });
       } else {
         message.warn(desc);
@@ -170,7 +170,7 @@ class DrawerDetail extends Component {
       if (user.role === PARENT) {
         this.setState({ paymentDescription: desc });
         message.warn(desc).then(() => {
-          this.setState({ visiblePayment: true });
+          this.setState({ visiblePayment: true, cancellationType: RESCHEDULE });
         });
       } else {
         message.warn(desc);
@@ -655,7 +655,7 @@ class DrawerDetail extends Component {
   }
 
   onCloseModalPayment = () => {
-    this.setState({ visiblePayment: false });
+    this.setState({ visiblePayment: false, cancellationType: '' });
   }
 
   handleRequestClearance = (requestMessage) => {
@@ -760,6 +760,7 @@ class DrawerDetail extends Component {
       paymentDescription,
       visibleCancelForAdmin,
       isFeeToParent,
+      cancellationType,
     } = this.state;
     const { event, listAppointmentsRecent, auth } = this.props;
     const dependent = { ...event?.dependent, appointments: listAppointmentsRecent?.filter(a => a.dependent?._id === event?.dependent?._id) };
@@ -903,6 +904,7 @@ class DrawerDetail extends Component {
       onCancel: this.onCloseModalPayment,
       description: paymentDescription,
       appointment: event,
+      cancellationType,
     };
     const modalCancelForAdminProps = {
       visible: visibleCancelForAdmin,

@@ -32,7 +32,7 @@ class ModalPayment extends React.Component {
 					<input type="hidden" name="shipping" value="0.00" />
 					<input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
 					<input type="hidden" name="rm" value="0" />
-					<input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&a=${encryptParam(this.props.appointment?._id)}`} />
+					<input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&t=${encryptParam(this.props.cancellationType)}&a=${encryptParam(this.props.appointment?._id)}`} />
 					<input type="hidden" name="cancel_return" value={window.location.href} />
 					<input type="hidden" name="cbt" value="Return to Help Me Get Help" />
 					<Button key="submit" type="primary" htmlType='submit'>
