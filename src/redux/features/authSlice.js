@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { message } from 'antd';
 
 import request from 'utils/api/request'
-import { updateChildAvailability, updateChildProfile, updateMyProviderProfile, updateParentProfile, updateSchoolInfo } from 'utils/api/apiList';
+import { updateChildProfile, updateMyProviderProfile, updateParentProfile, updateSchoolInfo } from 'utils/api/apiList';
 
 const initialState = {
 	user: {},
@@ -43,22 +43,6 @@ export const setInforClientChild = createAsyncThunk(
 				message.success('Updated successfully');
 			}
 			return result;
-		} catch (error) {
-			console.log(error, 'error')
-			message.error(error.message);
-		}
-		return false
-	}
-)
-
-export const setAvailabilityClientChild = createAsyncThunk(
-	'auth/setAvailabilityClientChild',
-	async (data) => {
-		try {
-			const result = await request.post(updateChildAvailability, data.data);
-			if (result.success) {
-				message.success('Updated successfully');
-			}
 		} catch (error) {
 			console.log(error, 'error')
 			message.error(error.message);
