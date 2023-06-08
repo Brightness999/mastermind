@@ -10,7 +10,6 @@ import InfoScheduling from '../../../Profile/ChangeProfile/components/Provider/i
 import InfoFinancial from '../../../Profile/ChangeProfile/components/Provider/info_financial';
 import InfoChild from '../../../Profile/ChangeProfile/components/Parents/info_child';
 import InfoParent from '../../../Profile/ChangeProfile/components/Parents/info_parent';
-import DependentAvailability from '../../../Profile/ChangeProfile/components/Parents/info_availability';
 import InfoSchool from '../../../Profile/ChangeProfile/components/School/info_school';
 import InfoAvaiSchool from '../../../Profile/ChangeProfile/components/School/info_availability'
 import InfoConsultant from '../../../Profile/ChangeProfile/components/Consultant/info_consultant';
@@ -31,7 +30,6 @@ export default class extends React.Component {
       parent: {
         info_child: true,
         info_parent: false,
-        info_availability: false,
       },
       provider: {
         info_general: true,
@@ -144,7 +142,6 @@ export default class extends React.Component {
         switch (val) {
           case 'Info_child': this.setState({ parent: { newStateParent, info_child: true } }); break;
           case 'Info_parent': this.setState({ parent: { newStateParent, info_parent: true } }); break;
-          case 'Info_availability': this.setState({ parent: { newStateParent, info_availability: true } }); break;
           default: break;
         }
         break;
@@ -203,8 +200,6 @@ export default class extends React.Component {
           return <InfoChild />
         } else if (parent.info_parent) {
           return <InfoParent />
-        } else if (parent.info_availability) {
-          return <DependentAvailability />
         } else {
           return null;
         }

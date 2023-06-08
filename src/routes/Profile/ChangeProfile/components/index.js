@@ -9,7 +9,6 @@ import InfoScheduling from './Provider/info_scheduling';
 import InfoFinancial from './Provider/info_financial';
 import InfoChild from './Parents/info_child';
 import InfoParent from './Parents/info_parent';
-import DependentAvailability from './Parents/info_availability';
 import InfoSchool from './School/info_school';
 import InfoAvaiSchool from './School/info_availability'
 import InfoConsultant from './Consultant/info_consultant';
@@ -30,7 +29,6 @@ export default class extends React.Component {
       parent: {
         info_child: true,
         info_parent: false,
-        info_availability: false,
         info_notification: false,
         change_password: false
       },
@@ -199,9 +197,6 @@ export default class extends React.Component {
           case 'Info_parent':
             this.setState({ parent: { newStateParent, info_parent: true } })
             break;
-          case 'Info_availability':
-            this.setState({ parent: { newStateParent, info_availability: true } })
-            break;
           case 'Info_notification':
             this.setState({ parent: { newStateParent, info_notification: true } })
             break;
@@ -271,8 +266,6 @@ export default class extends React.Component {
           return <InfoChild />
         } else if (parent.info_parent) {
           return <InfoParent />
-        } else if (parent.info_availability) {
-          return <DependentAvailability />
         } else if (parent.info_notification) {
           return <InfoNotification />
         } else {

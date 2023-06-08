@@ -14,7 +14,6 @@ import { setInforClientChild } from '../../../../../redux/features/authSlice';
 import request from '../../../../../utils/api/request';
 import { getChildProfile, getDefaultValueForClient, getUserProfile } from '../../../../../utils/api/apiList';
 import PageLoading from '../../../../../components/Loading/PageLoading';
-import { CloseCircleFilled } from '@ant-design/icons';
 
 class InfoChild extends Component {
 	constructor(props) {

@@ -17,11 +17,9 @@ class InfoProfile extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			dataForm: [],
 			service_address: '',
 			EmailType: [],
 			ContactNumberType: [],
-			contactPhoneNumber: [],
 			contactEmail: [],
 			cityConnections: [],
 			loading: false,
