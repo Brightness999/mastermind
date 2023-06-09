@@ -5,6 +5,8 @@ import { compose } from 'redux';
 import moment from 'moment';
 import { Divider, Table, Space, Button, Input, message, Popconfirm, Tabs } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
+import { CSVLink } from "react-csv";
+import { FaFileDownload } from 'react-icons/fa';
 
 import { InvoiceType } from 'routes/constant';
 import mgsSidebar from 'components/SideBar/messages';
@@ -25,6 +27,8 @@ class FlagList extends React.Component {
       selectedTab: 0,
       visibleInvoice: false,
       selectedFlag: {},
+      csvData: [],
+      sortedFlags: [],
     };
     this.searchInput = createRef(null);
   }
@@ -49,7 +53,10 @@ class FlagList extends React.Component {
         message.error(err.message);
       });
     }
-    this.setState({ tabFlags: JSON.parse(JSON.stringify(invoices))?.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) });
+    this.setState({
+      tabFlags: JSON.parse(JSON.stringify(invoices))?.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })),
+      sortedFlags: JSON.parse(JSON.stringify(invoices))?.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })),
+    });
     this.props.getInvoiceList({ role: auth.user.role });
   }
 
@@ -82,6 +89,7 @@ class FlagList extends React.Component {
     const { invoices } = this.props;
     this.setState({
       tabFlags: JSON.parse(JSON.stringify(invoices)).filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == value)?.map(f => ({ ...f, key: f._id })),
+      sortedFlags: JSON.parse(JSON.stringify(invoices)).filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == value)?.map(f => ({ ...f, key: f._id })),
       selectedTab: value,
     })
   }
@@ -140,9 +148,26 @@ class FlagList extends React.Component {
     }
   }
 
+  exportToExcel = () => {
+    const { sortedFlags } = this.state;
+    const data = sortedFlags?.map(f => ({
+      "Flag Type": f?.type === InvoiceType.NOSHOW ? 'No Show' : f?.type === InvoiceType.BALANCE ? 'Past Due Balance' : '',
+      "Student Name": `${f?.dependent?.firstName ?? ''} ${f?.dependent?.lastName ?? ''}`,
+      "Age": moment().year() - moment(f?.dependent?.birthday).year(),
+      "Student Grade": f?.dependent?.currentGrade,
+      "Provider": `${f?.provider?.firstName ?? ''} ${f?.provider?.lastName ?? ''}`,
+      "Amount": f?.totalPayment,
+      "Created Date": moment(f?.createdAt).format('MM/DD/YYYY hh:mm A'),
+      "Updated Date": moment(f?.updatedAt).format('MM/DD/YYYY hh:mm A'),
+    }))
+    this.setState({ csvData: data });
+    return true;
+  }
+
   render() {
-    const { tabFlags, loading, selectedTab, visibleInvoice, selectedFlag } = this.state;
+    const { csvData, tabFlags, loading, selectedTab, visibleInvoice, selectedFlag } = this.state;
     const { auth } = this.props;
+    const csvHeaders = ["Flag Type", "Student Name", "Age", "Student Grade", "Provider", "Amount", "Created Date", "Updated Date"];
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
     const columns = [
       {
@@ -313,32 +338,49 @@ class FlagList extends React.Component {
         key: '0',
         label: <span className="font-16">{intl.formatMessage(msgModal.active)}</span>,
         children: (
-          <Table
-            bordered
-            size='middle'
-            dataSource={tabFlags}
-            columns={columns}
-            onRow={invoice => ({
-              onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice),
-              onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice),
-            })}
-          />
+          <div>
+            <CSVLink onClick={this.exportToExcel} data={csvData} headers={csvHeaders} filename="Pending Requests">
+              <Button type='primary' className='inline-flex items-center gap-2' icon={<FaFileDownload size={24} />}>
+                Download CSV
+              </Button>
+            </CSVLink>
+            <Table
+              bordered
+              size='middle'
+              dataSource={tabFlags}
+              columns={columns}
+              className='mt-1'
+              onChange={(_, __, ___, extra) => this.setState({ sortedFlags: extra.currentDataSource })}
+              onRow={invoice => ({
+                onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice),
+                onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice),
+              })}
+            />
+          </div>
         ),
       },
       {
         key: '1',
         label: <span className="font-16">{intl.formatMessage(msgModal.cleared)}</span>,
         children: (
-          <Table
-            bordered
-            size='middle'
-            dataSource={tabFlags}
-            columns={columns}
-            onRow={invoice => ({
-              onClick: () => this.openModalInvoice(invoice),
-              onDoubleClick: () => this.openModalInvoice(invoice),
-            })}
-          />
+          <div>
+            <CSVLink onClick={this.exportToExcel} data={csvData} headers={csvHeaders} filename="Pending Requests">
+              <Button type='primary' className='inline-flex items-center gap-2' icon={<FaFileDownload size={24} />}>
+                Download CSV
+              </Button>
+            </CSVLink>
+            <Table
+              bordered
+              size='middle'
+              dataSource={tabFlags}
+              columns={columns}
+              className='mt-1'
+              onRow={invoice => ({
+                onClick: () => this.openModalInvoice(invoice),
+                onDoubleClick: () => this.openModalInvoice(invoice),
+              })}
+            />
+          </div>
         ),
       },
     ]
