@@ -450,8 +450,8 @@ class ModalNewAppointmentForParents extends React.Component {
 			const { success, data } = result;
 			if (success) {
 				this.setState({ errorMessage: '' });
-				setAppointments([...appointments, data]);
-				setAppointmentsInMonth([...appointmentsInMonth, data]);
+				setAppointments([...appointments || [], data]);
+				setAppointmentsInMonth([...appointmentsInMonth || [], data]);
 				onSubmit();
 			} else {
 				this.setState({ errorMessage: data });
@@ -856,6 +856,8 @@ class ModalNewAppointmentForParents extends React.Component {
 const mapStateToProps = state => ({
 	user: state.auth.user,
 	durations: state.auth.durations,
+	appointments: state.appointments.dataAppointments,
+	appointmentsInMonth: state.appointments.dataAppointmentsMonth,
 });
 
 export default compose(connect(mapStateToProps, { setAppointments, setAppointmentsInMonth }))(ModalNewAppointmentForParents);
