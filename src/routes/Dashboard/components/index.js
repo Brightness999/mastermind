@@ -24,7 +24,7 @@ import messages from '../messages';
 import messagesCreateAccount from 'routes/Sign/CreateAccount/messages';
 import msgModal from 'components/Modal/messages';
 import msgDrawer from 'components/DrawerDetail/messages';
-import { socketUrl, socketUrlJSFile } from 'utils/api/baseUrl';
+import { socketUrl } from 'utils/api/baseUrl';
 import request, { decryptParam, encryptParam } from 'utils/api/request'
 import { store } from 'src/redux/store';
 import PanelAppointment from './PanelAppointment';
@@ -236,12 +236,7 @@ class Dashboard extends React.Component {
       }
     }, 60000);
     this.setState({ intervalId: notifications });
-
-    const script = document.createElement("script");
-    script.src = socketUrlJSFile;
-    script.async = true;
-    script.onload = () => this.scriptLoaded();
-    document.body.appendChild(script);
+    this.scriptLoaded();
   }
 
   componentDidUpdate(prevProps) {
@@ -307,23 +302,10 @@ class Dashboard extends React.Component {
       autoConnect: true,
     };
     this.socket = io(socketUrl, opts);
-    this.socket.on('connect_error', e => {
-      console.log('connect error ', e);
-    });
-
-    this.socket.on('connect', () => {
-      console.log('socket connect success');
-      this.socket.emit('join_room', this.props.user?._id);
-    });
-
     this.socket.on('socket_result', data => {
       console.log('socket result');
       this.handleSocketResult(data);
     })
-
-    this.socket.on('disconnect', e => {
-      console.log('socket disconnect', e);
-    });
   }
 
   showNotificationForSubsidy(data) {
