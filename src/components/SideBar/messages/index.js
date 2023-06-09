@@ -31,7 +31,7 @@ export default {
   },
   subsidyManager: {
     id: `${scope}.subsidyManager`,
-    defaultMessage: 'Subsidized List',
+    defaultMessage: 'Subsidy Request',
   },
   schedulingCenter: {
     id: `${scope}.schedulingCenter`,
