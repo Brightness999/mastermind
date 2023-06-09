@@ -577,6 +577,11 @@ class DrawerDetail extends Component {
 
   onOpenModalInvoice = () => {
     this.setState({ visibleInvoice: true });
+    this.props.socket.emit("action_tracking", {
+      user: this.props.auth.user?._id,
+      action: "Invoice",
+      description: "Viewed invoice",
+    })
   }
 
   declineEvaluation = () => {

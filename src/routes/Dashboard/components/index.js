@@ -929,6 +929,7 @@ class Dashboard extends React.Component {
       event: listAppointmentsRecent?.find(a => a._id == selectedEvent?._id),
       listAppointmentsRecent: listAppointmentsRecent,
       calendar: this.calendarRef,
+      socket: this.socket,
     };
 
     const modalFlagExpandProps = {
