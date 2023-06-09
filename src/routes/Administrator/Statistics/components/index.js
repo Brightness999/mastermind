@@ -121,7 +121,7 @@ export default class extends React.Component {
             case PARENT: return `${user.parentInfo?.fatherName || user.parentInfo?.motherName} ${user.parentInfo?.familyName}`;
             case PROVIDER: return `${user.providerInfo?.firstName} ${user.providerInfo?.lastName}`;
             case SCHOOL: return user.schoolInfo?.name || '';
-            case CONSULTANT: return user.consultantInfo?.name || '';
+            case CONSULTANT: return user.username || '';
             case ADMIN: return user.fullName || '';
             case SUPERADMIN: return user.fullName || '';
             default: return;
