@@ -22,7 +22,6 @@ class PanelAppointment extends React.Component {
     super(props);
     this.state = {
       appointments: this.props.appointments,
-      currentTab: 1,
       visibleCancel: false,
       visibleCurrent: false,
       event: {},
@@ -39,23 +38,26 @@ class PanelAppointment extends React.Component {
     };
   }
 
-  componentDidMount() {
-    this.handleTabChange(1)
-    this.props.setReload(this.setReloadData);
-  }
-
   componentDidUpdate(prevProps) {
     if (prevProps.appointments != this.props.appointments) {
       this.setState({ appointments: this.props.appointments });
     }
   }
 
-  setReloadData = () => {
-    this.handleTabChange(this.state.currentTab);
-  }
-
   handleTabChange = (v) => {
-    this.setState({ currentTab: v });
+    const { user } = this.props;
+    let data = {
+      user: user?._id,
+      action: "View",
+    }
+    switch (v) {
+      case "1": data.description = "Viewed upcoming appointments"; break;
+      case "2": data.description = "Viewed unprocessed appointments"; break;
+      case "3": data.description = "Viewed unprocessed appointments"; break;
+      default: break;
+    }
+
+    this.props.socket.emit("action_tracking", data);
   }
 
   renderItemLeft = (event) => {

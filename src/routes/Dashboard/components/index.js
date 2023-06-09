@@ -411,11 +411,25 @@ class Dashboard extends React.Component {
   }
 
   onShowDrawerDetail = (val) => {
+    const { user } = this.props;
     const { userRole, listAppointmentsRecent } = this.state;
     const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : val;
     const selectedEvent = listAppointmentsRecent?.find(a => a._id == id);
     this.setState({ selectedEvent: selectedEvent });
     [3, 30, 100].includes(userRole) && this.setState({ userDrawerVisible: true });
+    let data = {
+      user: user?._id,
+      action: "View",
+    }
+    switch (selectedEvent.type) {
+      case SCREEN: data.description = "Viewed screening details"; break;
+      case EVALUATION: data.description = "Viewed evaluation details"; break;
+      case APPOINTMENT: data.description = "Viewed standard session details"; break;
+      case CONSULTATION: data.description = "Viewed consultation details"; break;
+      case SUBSIDY: data.description = "Viewed subsidized session details"; break;
+      default: break;
+    }
+    this.socket.emit("action_tracking", data);
   };
 
   onCloseDrawerDetail = () => {
@@ -498,22 +512,6 @@ class Dashboard extends React.Component {
     }
   }
 
-  handleDateSelect = (selectInfo) => {
-    let calendarApi = selectInfo.view.calendar
-    let title = prompt('Please enter a new title for your event')
-
-    calendarApi.unselect() // clear date selection
-
-    if (title) {
-      calendarApi.addEvent({ // will render immediately. will call handleEventAdd
-        title,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
-        allDay: selectInfo.allDay
-      }, true) // temporary=true, will get overwritten when reducer gives new events
-    }
-  }
-
   handleEventChange = (changeInfo) => {
     const obj = changeInfo.event.toPlainObject();
     const data = {
@@ -589,24 +587,21 @@ class Dashboard extends React.Component {
     this.setState({ visibleSessionsNeedToClose: true });
   }
 
-  renderPanelAppointmentForProvider = () => {
-    if (this.state.userRole == 30 || this.state.userRole == 3)
-      return (
-        <Panel
-          key="1"
-          header={intl.formatMessage(messages.appointments)}
-          extra={this.state.userRole > 3 && (<BsClockHistory size={18} className="cursor" onClick={() => this.onOpenModalSessionsNeedToClose()} />)}
-          className='appointment-panel'
-          collapsible='header'
-        >
-          <PanelAppointment
-            setReload={reload => this.panelAppoimentsReload = reload}
-            onShowDrawerDetail={this.onShowDrawerDetail}
-            calendar={this.calendarRef}
-          />
-        </Panel>
-      );
-  }
+  renderPanelAppointmentForProvider = () => (
+    <Panel
+      key="1"
+      header={intl.formatMessage(messages.appointments)}
+      extra={this.state.userRole > 3 && (<BsClockHistory size={18} className="cursor" onClick={() => this.onOpenModalSessionsNeedToClose()} />)}
+      className='appointment-panel'
+      collapsible='header'
+    >
+      <PanelAppointment
+        onShowDrawerDetail={this.onShowDrawerDetail}
+        calendar={this.calendarRef}
+        socket={this.socket}
+      />
+    </Panel>
+  )
 
   handleClickPrevMonth = () => {
     const calendar = this.calendarRef.current;
@@ -683,7 +678,13 @@ class Dashboard extends React.Component {
   }
 
   onOpenModalFlagExpand = () => {
+    const { user } = this.props;
     this.setState({ visibleFlagExpand: true });
+    this.socket.emit("action_tracking", {
+      user: user?._id,
+      action: "Flag",
+      description: "Viewed flags",
+    })
   }
 
   onCloseModalFlagExpand = () => {
@@ -749,7 +750,13 @@ class Dashboard extends React.Component {
   }
 
   openModalInvoice = (invoice) => {
+    const { user } = this.props;
     this.setState({ visibleInvoice: true, selectedFlag: invoice });
+    this.socket.emit("action_tracking", {
+      user: user?._id,
+      action: "Invoice",
+      description: "Viewed invoice"
+    })
   }
 
   closeModalInvoice = () => {
@@ -824,6 +831,62 @@ class Dashboard extends React.Component {
         message.warning('Something went wrong. Please try again or contact admin.');
       })
     }
+  }
+
+  handleChangeReferralTab = (v) => {
+    const { user } = this.props;
+    let data = {
+      user: user?._id,
+      action: "View",
+    }
+    switch (v) {
+      case '1': data.description = "Viewed upcoming consultations"; break;
+      case '2': data.description = "Viewed past consultations"; break;
+      default: break;
+    }
+    this.socket.emit("action_tracking", data);
+  }
+
+  handleChangeScreeningTab = (v) => {
+    const { user } = this.props;
+    let data = {
+      user: user?._id,
+      action: "View",
+    }
+    switch (v) {
+      case '1': data.description = "Viewed upcoming screenings"; break;
+      case '2': data.description = "Viewed past screenings"; break;
+      default: break;
+    }
+    this.socket.emit("action_tracking", data);
+  }
+
+  handleChangeEvaluationTab = (v) => {
+    const { user } = this.props;
+    let data = {
+      user: user?._id,
+      action: "View",
+    }
+    switch (v) {
+      case '1': data.description = "Viewed upcoming evaluations"; break;
+      case '2': data.description = "Viewed past evaluations"; break;
+      default: break;
+    }
+    this.socket.emit("action_tracking", data);
+  }
+
+  handleChangeFlagTab = (v) => {
+    const { user } = this.props;
+    let data = {
+      user: user?._id,
+      action: "View",
+    }
+    switch (v) {
+      case '1': data.description = "Viewed active flags"; break;
+      case '2': data.description = "Viewed cleared flags"; break;
+      default: break;
+    }
+    this.socket.emit("action_tracking", data);
   }
 
   render() {
@@ -1163,7 +1226,7 @@ class Dashboard extends React.Component {
                   {this.renderPanelAppointmentForProvider()}
                   {userRole == 3 && (
                     <Panel header={intl.formatMessage(messages.referrals)} key="2">
-                      <Tabs defaultActiveKey="1" type="card" size='small'>
+                      <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleChangeReferralTab}>
                         <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                           {listAppointmentsRecent?.filter(a => a.type === CONSULTATION && a.status === PENDING && a.flagStatus != ACTIVE)?.map((appointment, index) =>
                             <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
@@ -1206,7 +1269,7 @@ class Dashboard extends React.Component {
                     </Panel>
                   )}
                   <Panel header={intl.formatMessage(messages.screenings)} key="3">
-                    <Tabs defaultActiveKey="1" type="card" size='small'>
+                    <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleChangeScreeningTab}>
                       <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                         {listAppointmentsRecent?.filter(a => a.type === SCREEN && a.status === PENDING && a.flagStatus !== ACTIVE)?.map((appointment, index) =>
                           <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
@@ -1245,8 +1308,8 @@ class Dashboard extends React.Component {
                       </Tabs.TabPane>
                     </Tabs>
                   </Panel>
-                  <Panel header={intl.formatMessage(messages.evaluations)} key="4">
-                    <Tabs defaultActiveKey="1" type="card" size='small'>
+                  <Panel header={intl.formatMessage(messages.evaluations)} key="4" >
+                    <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleChangeEvaluationTab}>
                       <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                         {listAppointmentsRecent?.filter(a => a.type === EVALUATION && a.status === PENDING && a.flagStatus !== ACTIVE)?.map((appointment, index) =>
                           <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
@@ -1294,7 +1357,7 @@ class Dashboard extends React.Component {
                     }
                     collapsible='header'
                   >
-                    <Tabs defaultActiveKey="1" type="card" size='small'>
+                    <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleChangeFlagTab}>
                       <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                         {invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid)?.map((invoice, index) =>
                           <div key={index} className='list-item padding-item justify-between' onClick={(e) => e.target.id != 'action' && this.openModalInvoice(invoice)}>
@@ -1370,7 +1433,7 @@ class Dashboard extends React.Component {
                       className='subsidiaries-panel'
                       collapsible='header'
                     >
-                      <PanelSubsidiaries onShowModalSubsidyDetail={this.onShowModalSubsidy} />
+                      <PanelSubsidiaries onShowModalSubsidyDetail={this.onShowModalSubsidy} socket={this.socket} />
                     </Panel>
                   ) : null}
                 </Collapse>

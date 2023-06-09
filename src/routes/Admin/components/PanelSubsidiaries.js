@@ -37,16 +37,24 @@ class PanelSubsidiaries extends React.Component {
   }
 
   handleTabChange = (v) => {
-    const { listSubsidiaries } = this.props;
+    const { listSubsidiaries, user } = this.props;
+    let data = {
+      user: user?._id,
+      action: "Subsidy Request",
+    }
     switch (v) {
       case "1":
+        data.description = "Viewed pending subsidy requests";
         this.setState({ listSubsidiaries: listSubsidiaries?.filter(s => [PENDING, SCHOOLAPPROVED, ADMINPREAPPROVED].includes(s.status)) ?? [], status: v }); break;
       case "2":
+        data.description = "Viewed declined subsidy requests";
         this.setState({ listSubsidiaries: listSubsidiaries?.filter(s => [SCHOOLDECLINED, ADMINDECLINED].includes(s.status)) ?? [], status: v }); break;
       case "3":
+        data.description = "Viewed approved subsidy requests";
         this.setState({ listSubsidiaries: listSubsidiaries?.filter(s => s.status === ADMINAPPROVED) ?? [], status: v }); break;
       default: break;
     }
+    this.props.socket.emit("action_tracking", data);
   }
 
   renderStatus(status) {

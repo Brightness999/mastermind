@@ -220,10 +220,23 @@ class SchedulingCenter extends React.Component {
   }
 
   onShowDrawerDetail = (val) => {
+    const { user } = this.props.auth;
     const { listAppointmentsRecent } = this.state;
     const id = val?.event?.toPlainObject() ? val.event?.toPlainObject()?.extendedProps?._id : val;
     const selectedEvent = listAppointmentsRecent?.find(a => a._id == id);
     this.setState({ selectedEvent: selectedEvent, userDrawerVisible: true });
+    let data = {
+      user: user?._id,
+      action: "View",
+    }
+    switch (selectedEvent.type) {
+      case SCREEN: data.description = "Viewed screening details"; break;
+      case EVALUATION: data.description = "Viewed evaluation details"; break;
+      case APPOINTMENT: data.description = "Viewed standard session details"; break;
+      case CONSULTATION: data.description = "Viewed consultation details"; break;
+      case SUBSIDY: data.description = "Viewed subsidized session details"; break;
+      default: break;
+    }
   };
 
   onCloseDrawerDetail = () => {
@@ -450,7 +463,13 @@ class SchedulingCenter extends React.Component {
   }
 
   onOpenModalFlagExpand = () => {
+    const { user } = this.props.auth;
     this.setState({ visibleFlagExpand: true });
+    this.socket.emit("action_tracking", {
+      user: user?._id,
+      action: "Flag",
+      description: "Viewed flags",
+    })
   }
 
   onCloseModalFlagExpand = () => {
@@ -505,23 +524,21 @@ class SchedulingCenter extends React.Component {
     this.setState({ visibleSessionsNeedToClose: false });
   }
 
-  renderPanelAppointmentForProvider = () => {
-    return (
-      <Panel
-        key="1"
-        header={intl.formatMessage(messages.appointments)}
-        extra={(<BsClockHistory size={18} className="cursor" onClick={() => this.onOpenModalSessionsNeedToClose()} />)}
-        className='appointment-panel'
-        collapsible='header'
-      >
-        <PanelAppointment
-          setReload={reload => this.panelAppoimentsReload = reload}
-          onShowDrawerDetail={this.onShowDrawerDetail}
-          calendar={this.calendarRef}
-        />
-      </Panel>
-    );
-  }
+  renderPanelAppointmentForProvider = () => (
+    <Panel
+      key="1"
+      header={intl.formatMessage(messages.appointments)}
+      extra={(<BsClockHistory size={18} className="cursor" onClick={() => this.onOpenModalSessionsNeedToClose()} />)}
+      className='appointment-panel'
+      collapsible='header'
+    >
+      <PanelAppointment
+        onShowDrawerDetail={this.onShowDrawerDetail}
+        calendar={this.calendarRef}
+        socket={this.socket}
+      />
+    </Panel>
+  );
 
   handleClickDependent = (id) => {
     this.setState({ selectedDependentId: id });
@@ -552,7 +569,13 @@ class SchedulingCenter extends React.Component {
   }
 
   openModalInvoice = (invoice) => {
+    const { user } = this.props.auth;
     this.setState({ visibleInvoice: true, selectedFlag: invoice });
+    this.socket.emit("action_tracking", {
+      user: user?._id,
+      action: "Invoice",
+      description: "Viewed invoice"
+    })
   }
 
   closeModalInvoice = () => {
@@ -627,6 +650,62 @@ class SchedulingCenter extends React.Component {
         message.warning('Something went wrong. Please try again or contact admin.');
       })
     }
+  }
+
+  handleChangeReferralTab = (v) => {
+    const { user } = this.props.auth;
+    let data = {
+      user: user?._id,
+      action: "View",
+    }
+    switch (v) {
+      case '1': data.description = "Viewed upcoming consultations"; break;
+      case '2': data.description = "Viewed past consultations"; break;
+      default: break;
+    }
+    this.socket.emit("action_tracking", data);
+  }
+
+  handleChangeScreeningTab = (v) => {
+    const { user } = this.props.auth;
+    let data = {
+      user: user?._id,
+      action: "View",
+    }
+    switch (v) {
+      case '1': data.description = "Viewed upcoming screenings"; break;
+      case '2': data.description = "Viewed past screenings"; break;
+      default: break;
+    }
+    this.socket.emit("action_tracking", data);
+  }
+
+  handleChangeEvaluationTab = (v) => {
+    const { user } = this.props.auth;
+    let data = {
+      user: user?._id,
+      action: "View",
+    }
+    switch (v) {
+      case '1': data.description = "Viewed upcoming evaluations"; break;
+      case '2': data.description = "Viewed past evaluations"; break;
+      default: break;
+    }
+    this.socket.emit("action_tracking", data);
+  }
+
+  handleChangeFlagTab = (v) => {
+    const { user } = this.props.auth;
+    let data = {
+      user: user?._id,
+      action: "View",
+    }
+    switch (v) {
+      case '1': data.description = "Viewed active flags"; break;
+      case '2': data.description = "Viewed cleared flags"; break;
+      default: break;
+    }
+    this.socket.emit("action_tracking", data);
   }
 
   render() {
@@ -954,7 +1033,7 @@ class SchedulingCenter extends React.Component {
             >
               {this.renderPanelAppointmentForProvider()}
               <Panel header={intl.formatMessage(messages.referrals)} key="2">
-                <Tabs defaultActiveKey="1" type="card" size='small'>
+                <Tabs defaultActiveKey="1" type="card" size='small'onChange={this.handleChangeReferralTab}>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {listAppointmentsRecent?.filter(a => a.type === CONSULTATION && a.status === PENDING)?.map((appointment, index) =>
                       <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
@@ -996,7 +1075,7 @@ class SchedulingCenter extends React.Component {
                 </Tabs>
               </Panel>
               <Panel header={intl.formatMessage(messages.screenings)} key="3">
-                <Tabs defaultActiveKey="1" type="card" size='small'>
+                <Tabs defaultActiveKey="1" type="card" size='small'onChange={this.handleChangeScreeningTab}>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {listAppointmentsRecent?.filter(a => a.type === SCREEN && a.status === PENDING)?.map((appointment, index) =>
                       <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
@@ -1036,7 +1115,7 @@ class SchedulingCenter extends React.Component {
                 </Tabs>
               </Panel>
               <Panel header={intl.formatMessage(messages.evaluations)} key="4">
-                <Tabs defaultActiveKey="1" type="card" size='small'>
+                <Tabs defaultActiveKey="1" type="card" size='small'onChange={this.handleChangeEvaluationTab}>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {listAppointmentsRecent?.filter(a => a.type === EVALUATION && a.status === PENDING && a.flagStatus !== ACTIVE)?.map((appointment, index) =>
                       <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
@@ -1084,7 +1163,7 @@ class SchedulingCenter extends React.Component {
                 )}
                 collapsible="header"
               >
-                <Tabs defaultActiveKey="1" type="card" size='small'>
+                <Tabs defaultActiveKey="1" type="card" size='small'onChange={this.handleChangeFlagTab}>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid)?.map((invoice, index) =>
                       <div key={index} className='list-item padding-item justify-between' onClick={(e) => e.target.id != 'action' && this.openModalInvoice(invoice)}>
@@ -1129,7 +1208,7 @@ class SchedulingCenter extends React.Component {
                 className='subsidiaries-panel'
                 collapsible='header'
               >
-                <PanelSubsidiaries onShowModalSubsidyDetail={this.onShowModalSubsidy} />
+                <PanelSubsidiaries onShowModalSubsidyDetail={this.onShowModalSubsidy} socket={this.socket} />
               </Panel>
             </Collapse>
           </section>
