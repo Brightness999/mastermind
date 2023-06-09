@@ -191,9 +191,9 @@ export default class extends React.Component {
       {
         title: 'Date', dataIndex: 'createdAt', key: 'createdAt', type: 'datetime',
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-          <div style={{ padding: 8 }}>
-            <div>
-              <RangePicker value={dateRange} onChange={(range) => {
+          <div className='p-3'>
+            <div className='mb-5'>
+              <RangePicker showTime size='small' value={dateRange} onChange={(range) => {
                 setSelectedKeys(range);
                 this.setState({ dateRange: range });
               }} />
