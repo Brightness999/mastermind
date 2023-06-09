@@ -37,6 +37,12 @@ const Subsidiaries = (props) => {
   const handleChangeTab = v => {
     setRequests(props.listSubsidiaries?.filter(s => s.status == v));
     setStatus(v);
+    switch (v) {
+      case '0': props.socket.emit('action_tracking', {user: user._id, action: 'Subsidy Request', description: 'Viewed pending subsidy requests'}); break;
+      case '1': props.socket.emit('action_tracking', {user: user._id, action: 'Subsidy Request', description: 'Viewed approved subsidy requests'}); break;
+      case '2': props.socket.emit('action_tracking', {user: user._id, action: 'Subsidy Request', description: 'Viewed declined subsidy requests'}); break;
+      default: break;
+    }
   }
 
   const onCloseModalSubsidy = () => {

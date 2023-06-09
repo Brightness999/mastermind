@@ -1008,7 +1008,7 @@ class Dashboard extends React.Component {
     }
 
     if (userRole == 60) {
-      return <Subsidiaries subsidyId={subsidyId} />
+      return <Subsidiaries socket={this.socket} subsidyId={subsidyId} />
     } else {
       return (
         <div className="full-layout page dashboard-page">
