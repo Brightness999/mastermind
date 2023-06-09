@@ -64,7 +64,7 @@ const SchoolPending = (props) => {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
-      render: (subsidy) => <span>{subsidy?.student?.firstName ?? ''} {subsidy?.student?.lastName ?? ''}</span>,
+      render: (subsidy) => `${subsidy?.student?.firstName ?? ''} ${subsidy?.student?.lastName ?? ''}`,
     },
     {
       title: <span className="font-16">{intl.formatMessage(msgCreateAccount.school)}</span>,
@@ -73,7 +73,7 @@ const SchoolPending = (props) => {
       filters: schools,
       onFilter: (value, record) => record.school?._id === value,
       sorter: (a, b) => (a?.school?.name ?? '').toLowerCase() > (b?.school?.name ?? '').toLowerCase() ? 1 : -1,
-      render: (subsidy) => <span>{subsidy?.school?.name ?? ''}</span>,
+      render: (subsidy) => subsidy?.school?.name ?? '',
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.studentGrade)}</span>,
@@ -82,7 +82,7 @@ const SchoolPending = (props) => {
       filters: grades,
       onFilter: (value, record) => record.student?.currentGrade === value,
       sorter: (a, b) => (a?.student?.currentGrade ?? '').toLowerCase() > (b?.student?.currentGrade ?? '').toLowerCase() ? 1 : -1,
-      render: (subsidy) => <span>{subsidy?.student?.currentGrade}</span>
+      render: (subsidy) => subsidy?.student?.currentGrade
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.serviceRequested)}</span>,
@@ -91,7 +91,7 @@ const SchoolPending = (props) => {
       filters: skills,
       onFilter: (value, record) => record.skillSet?._id === value,
       sorter: (a, b) => (a?.skillSet?.name ?? '').toLowerCase() > (b?.skillSet?.name ?? '').toLowerCase() ? 1 : -1,
-      render: (subsidy) => <span>{subsidy?.skillSet?.name}</span>,
+      render: (subsidy) => subsidy?.skillSet?.name,
     },
     {
       title: <span className="font-16">{intl.formatMessage(msgCreateAccount.notes)}</span>,
@@ -138,7 +138,7 @@ const SchoolPending = (props) => {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
-      render: (subsidy) => <span>{subsidy?.note}</span>,
+      render: (subsidy) => subsidy?.note,
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.requestDate)}</span>,
@@ -185,37 +185,37 @@ const SchoolPending = (props) => {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
-      render: (subsidy) => <span>{moment(subsidy?.createdAt).format('MM/DD/YYYY hh:mm A')}</span>,
+      render: (subsidy) => moment(subsidy?.createdAt).format('MM/DD/YYYY hh:mm A'),
     },
-    // {
-    //   title: <span className="font-16">{intl.formatMessage(messages.action)}</span>,
-    //   key: 'action',
-    //   align: 'center',
-    //   fixed: 'right',
-    //   render: (subsidy) => (
-    //     <Space size="middle">
-    //       <Popconfirm
-    //         icon={<AiFillWarning size={24} />}
-    //         title="Are you sure to approve this request?"
-    //         onConfirm={() => subsidy?.school ? props.onShowModalSchoolApproval(subsidy?._id) : props.adminPreApproveSubsidy(subsidy?._id)}
-    //         okText="Yes"
-    //         cancelText="No"
-    //       >
-    //         <a className='btn-blue'>{intl.formatMessage(msgModal.approve)}</a>
-    //       </Popconfirm>
-    //       <Popconfirm
-    //         icon={<AiFillWarning size={24} />}
-    //         title={<span >Are you sure to decline this request?</span>}
-    //         placement='left'
-    //         onConfirm={() => props.onShowModalDeclineExplanation(subsidy?._id)}
-    //         okText="Yes"
-    //         cancelText="No"
-    //       >
-    //         <a className='btn-blue'>{intl.formatMessage(msgModal.decline)}</a>
-    //       </Popconfirm>
-    //     </Space>
-    //   ),
-    // },
+    {
+      title: <span className="font-16">{intl.formatMessage(messages.action)}</span>,
+      key: 'action',
+      align: 'center',
+      fixed: 'right',
+      render: (subsidy) => (
+        <Space size="middle">
+          <Popconfirm
+            icon={<AiFillWarning size={24} />}
+            title="Are you sure to approve this request?"
+            onConfirm={() => subsidy?.school ? props.onShowModalSchoolApproval(subsidy?._id) : props.adminPreApproveSubsidy(subsidy?._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <a className='btn-blue'>{intl.formatMessage(msgModal.approve)}</a>
+          </Popconfirm>
+          <Popconfirm
+            icon={<AiFillWarning size={24} />}
+            title={<span >Are you sure to decline this request?</span>}
+            placement='left'
+            onConfirm={() => props.onShowModalDeclineExplanation(subsidy?._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <a className='btn-blue'>{intl.formatMessage(msgModal.decline)}</a>
+          </Popconfirm>
+        </Space>
+      ),
+    },
   ];
 
   const exportToExcel = () => {
@@ -247,8 +247,8 @@ const SchoolPending = (props) => {
         className='mt-1 pb-10'
         onChange={(_, __, ___, extra) => setSortedRequests(extra.currentDataSource)}
         onRow={(subsidy) => ({
-          onClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
-          onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
+          onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && props.onShowModalSubsidy(subsidy?._id),
+          onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && props.onShowModalSubsidy(subsidy?._id),
         })}
         pagination={false}
       />
