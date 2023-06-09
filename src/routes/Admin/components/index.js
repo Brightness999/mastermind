@@ -18,21 +18,21 @@ import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import { ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm, ModalCreateNote, ModalCancelForAdmin, ModalInvoice } from '../../../components/Modal';
-import DrawerDetail from '../../../components/DrawerDetail';
-import messages from '../../Dashboard/messages';
-import messagesCreateAccount from '../../Sign/CreateAccount/messages';
-import msgSidebar from '../../../components/SideBar/messages';
-import msgDrawer from '../../../components/DrawerDetail/messages';
-import { socketUrl, socketUrlJSFile } from '../../../utils/api/baseUrl';
-import request, { decryptParam, encryptParam } from '../../../utils/api/request'
-import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, setAppointments, setAppointmentsInMonth, getInvoiceList, setInvoiceList } from '../../../redux/features/appointmentsSlice'
-import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, setSchools } from '../../../redux/features/authSlice';
-import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance, sendEmailInvoice, updateInvoice } from '../../../utils/api/apiList';
+import { ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm, ModalCreateNote, ModalCancelForAdmin, ModalInvoice } from 'components/Modal';
+import DrawerDetail from 'components/DrawerDetail';
+import messages from 'src/routes/Dashboard/messages';
+import msgCreateAccount from 'src/routes/Sign/CreateAccount/messages';
+import msgSidebar from 'components/SideBar/messages';
+import msgDrawer from 'components/DrawerDetail/messages';
+import { socketUrl } from 'utils/api/baseUrl';
+import request, { decryptParam, encryptParam } from 'utils/api/request'
+import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, setAppointments, setAppointmentsInMonth, getInvoiceList, setInvoiceList } from 'src/redux/features/appointmentsSlice'
+import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, setSchools } from 'src/redux/features/authSlice';
+import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance, sendEmailInvoice, updateInvoice } from 'utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
-import PageLoading from '../../../components/Loading/PageLoading';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from '../../../routes/constant';
+import PageLoading from 'components/Loading/PageLoading';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from 'routes/constant';
 import './index.less';
 
 const { Panel } = Collapse;
@@ -112,12 +112,7 @@ class SchedulingCenter extends React.Component {
     this.props.getSubsidyRequests({ role: auth?.user?.role });
     this.props.getInvoiceList({ role: auth?.user?.role });
     this.loadDefaultData();
-
-    const script = document.createElement("script");
-    script.src = socketUrlJSFile;
-    script.async = true;
-    script.onload = () => this.scriptLoaded();
-    document.body.appendChild(script);
+    this.scriptLoaded();
   }
 
   componentDidUpdate(prevProps) {
@@ -167,23 +162,11 @@ class SchedulingCenter extends React.Component {
       autoConnect: true,
     };
     this.socket = io(socketUrl, opts);
-    this.socket.on('connect_error', e => {
-      console.log('connect error ', e);
-    });
-
-    this.socket.on('connect', () => {
-      console.log('socket connect success');
-      this.socket.emit('join_room', this.props.auth?.user?._id);
-    });
 
     this.socket.on('socket_result', data => {
       console.log('socket result', data);
       this.handleSocketResult(data);
     })
-
-    this.socket.on('disconnect', e => {
-      console.log('socket disconnect', e);
-    });
   }
 
   showNotificationForSubsidy(data) {
@@ -862,11 +845,11 @@ class SchedulingCenter extends React.Component {
                     <Checkbox.Group options={optionsEvent} value={selectedEventTypes} onChange={(v) => this.handleSelectEventType(v)} className="flex flex-col" />
                   </Col>
                   <Col xs={12} sm={12} md={8} className='skillset-checkbox'>
-                    <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.services)}</p>
+                    <p className='font-16 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.services)}</p>
                     <Checkbox.Group options={SkillSet.map(skill => skill.name)} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
                   </Col>
                   <Col xs={12} sm={12} md={6} className='select-small'>
-                    <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
+                    <p className='font-16 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.provider)}</p>
                     <Select
                       showSearch
                       mode='multiple'
@@ -889,7 +872,7 @@ class SchedulingCenter extends React.Component {
                     </div> */}
                   </Col>
                   <Col xs={12} sm={12} md={6} className='select-small'>
-                    <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.location)}</p>
+                    <p className='font-16 font-700 mb-5'>{intl.formatMessage(msgCreateAccount.location)}</p>
                     <Select
                       showSearch
                       mode='multiple'
