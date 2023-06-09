@@ -401,7 +401,7 @@
   
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.editUser": "Edit User",
-  "components.sidebar.subsidyManager": "Subsidy Request",
+  "components.sidebar.subsidyManager": "Subsidy Requests",
   "components.sidebar.systemSetting": "System Setting",
   "components.sidebar.statistics": "Statistics",
   "components.sidebar.appointments": "Appointments",

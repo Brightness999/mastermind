@@ -11,16 +11,19 @@ import { compose } from 'redux';
 import { MdOutlineSpaceDashboard } from 'react-icons/md';
 
 import messages from './messages';
-import { PARENT, PROVIDER, routerLinks } from 'routes/constant';
+import msgSidebar from 'src/components/SideBar/messages';
+import { ADMIN, CONSULTANT, PARENT, PROVIDER, SCHOOL, SUPERADMIN, routerLinks } from 'routes/constant';
 import { logout, setCommunity } from 'src/redux/features/authSlice';
 import { helper } from 'utils/auth/helper';
 import request from 'utils/api/request';
 import { getSettings } from 'utils/api/apiList';
+import { socketUrl, socketUrlJSFile } from 'utils/api/baseUrl';
 import './style/index.less';
 
 class MainHeader extends Component {
   constructor(props) {
     super(props);
+    this.socket = undefined;
     this.state = {
       intervalId: 0,
     };
@@ -28,6 +31,16 @@ class MainHeader extends Component {
 
   componentDidMount() {
     const { user } = this.props;
+    const token = Cookies.get('tk');
+
+    if (token?.length > 0) {
+      const script = document.createElement("script");
+      script.src = socketUrlJSFile;
+      script.async = true;
+      script.onload = () => this.handleSocketEvents();
+      document.body.appendChild(script);
+    }
+
     if (user.role > 900) {
       request.post(getSettings).then(result => {
         const { success, data } = result;
@@ -55,9 +68,66 @@ class MainHeader extends Component {
     }
   }
 
+  handleSocketEvents = () => {
+    let opts = {
+      query: {
+        token: Cookies.get('tk'),
+      },
+      withCredentials: true,
+      autoConnect: true,
+    };
+    this.socket = io(socketUrl, opts);
+  }
+
   logout = () => {
+    const { user } = this.props;
+    const data = {
+      user: user?._id,
+      action: 'Logout',
+      description: 'User logged out',
+    }
+    this.socket.emit("action_tracking", data);
     Cookies.remove('tk');
     this.props.logout();
+  }
+
+  handleClickLink = (link) => {
+    const { user } = this.props;
+    let data = { user: user?._id };
+
+    switch (link) {
+      case intl.formatMessage(messages.dashboard):
+        if ([PARENT, PROVIDER, CONSULTANT].includes(user?.role)) {
+          data.action = 'User Manage';
+          data.description = `Viewed ${intl.formatMessage(messages.dashboard)}`;
+        } else if (user.role === SCHOOL) {
+          data.action = 'User Manage';
+          data.description = `Viewed pending subsidy requests`;
+        } else if ([ADMIN, SUPERADMIN].includes(user?.role)) {
+          data.action = 'Admin Manage';
+          data.description = `Viewed ${intl.formatMessage(msgSidebar.schedulingCenter)}`;
+        }
+        break;
+      case intl.formatMessage(messages.editProfile):
+        data.action = 'Profile';
+        data.description = 'Viewed Profile';
+        break;
+      case intl.formatMessage(messages.notification):
+        data.action = 'User Manage';
+        data.description = `Viewed ${intl.formatMessage(messages.notification)}`;
+        break;
+      case intl.formatMessage(messages.dependentList):
+        data.action = 'User Manage';
+        data.description = `Viewed ${intl.formatMessage(messages.dependentList)}`;
+        break;
+      case intl.formatMessage(messages.invoiceList):
+        data.action = 'User Manage';
+        data.description = `Viewed ${intl.formatMessage(messages.invoiceList)}`;
+        break;
+      default:
+        break;
+    }
+    this.socket.emit("action_tracking", data);
   }
 
   render() {
@@ -67,7 +137,7 @@ class MainHeader extends Component {
         key: '1',
         icon: <MdOutlineSpaceDashboard size={18} color='#495057' />,
         label: (
-          <Link to={user?.role > 900 ? routerLinks.Admin : routerLinks.Dashboard}>
+          <Link to={user?.role > 900 ? routerLinks.Admin : routerLinks.Dashboard} onClick={() => this.handleClickLink(intl.formatMessage(messages.dashboard))}>
             {intl.formatMessage(messages.dashboard)}
           </Link>
         ),
@@ -76,7 +146,7 @@ class MainHeader extends Component {
         key: '2',
         icon: <FaUserEdit size={18} color='#495057' />,
         label: (
-          <Link to={routerLinks.Changeprofile}>
+          <Link to={routerLinks.Changeprofile} onClick={() => this.handleClickLink(intl.formatMessage(messages.editProfile))}>
             {intl.formatMessage(messages.editProfile)}
           </Link>
         ),
@@ -85,7 +155,7 @@ class MainHeader extends Component {
         key: '3',
         icon: <Badge size="small" count={6}><BiBell size={18} color='#495057' /></Badge>,
         label: (
-          <Link to={routerLinks.Notification}>
+          <Link to={routerLinks.Notification} onClick={() => this.handleClickLink(intl.formatMessage(messages.notification))}>
             {intl.formatMessage(messages.notification)}
           </Link>
         ),
@@ -94,7 +164,7 @@ class MainHeader extends Component {
         key: '5',
         icon: <BiLogOutCircle size={18} color='#495057' />,
         label: (
-          <Link to={routerLinks.Home} onClick={this.logout}>
+          <Link to={routerLinks.Home} onClick={() => this.logout()}>
             {intl.formatMessage(messages.logOut)}
           </Link>
         ),
@@ -104,7 +174,7 @@ class MainHeader extends Component {
       key: '4',
       icon: <FaChild size={18} color='#495057' />,
       label: (
-        <Link to={routerLinks.PrivateNote}>
+        <Link to={routerLinks.PrivateNote} onClick={() => this.handleClickLink(intl.formatMessage(messages.dependentList))}>
           {intl.formatMessage(messages.dependentList)}
         </Link>
       ),
@@ -113,7 +183,7 @@ class MainHeader extends Component {
       key: '6',
       icon: <FaFileInvoiceDollar size={18} color='#495057' />,
       label: (
-        <Link to={routerLinks.InvoiceList}>
+        <Link to={routerLinks.InvoiceList} onClick={() => this.handleClickLink(intl.formatMessage(messages.invoiceList))}>
           {intl.formatMessage(messages.invoiceList)}
         </Link>
       ),
