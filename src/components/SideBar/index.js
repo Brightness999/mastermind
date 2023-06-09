@@ -61,7 +61,7 @@ class SideBar extends Component {
         icon: <IoSettingsSharp size={20} />
       },
       {
-        label: <Link to={routerLinks.Statistics}>{intl.formatMessage(messages.statistics)}</Link>,
+        label: <Link to={routerLinks.Statistics}>{intl.formatMessage(messages.actionTracker)}</Link>,
         key: routerLinks.Statistics,
         icon: <FaRegChartBar size={20} />
       },

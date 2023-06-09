@@ -45,4 +45,8 @@ export default {
     id: `${scope}.statistics`,
     defaultMessage: 'Statistics',
   },
+  actionTracker: {
+    id: `${scope}.actionTracker`,
+    defaultMessage: 'Action Tracker',
+  },
 };

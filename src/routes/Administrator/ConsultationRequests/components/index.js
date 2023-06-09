@@ -5,6 +5,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import moment from 'moment';
+import 'moment/locale/en-au';
 import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
 
