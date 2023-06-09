@@ -336,6 +336,11 @@ const Approved = (props) => {
       "Approval Date": moment(r?.schoolApprovalDate).format('MM/DD/YYYY hh:mm A'),
     }))
     setCsvData(data);
+    props.socket.emit("action_tracking", {
+      user: props.user?._id,
+      action: "Subsidy Request",
+      description: "Downloaded approved subsidy requests",
+    })
     return true;
   }
 

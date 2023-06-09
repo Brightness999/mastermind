@@ -7,18 +7,20 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
+import Cookies from 'js-cookie';
 
-import { ADMINAPPROVED, APPOINTMENT, BALANCE, CLOSED, CONSULTANT, CONSULTATION, EVALUATION, PARENT, PENDING, PROVIDER, SCHOOL, SUBSIDY } from '../../constant';
-import { ModalBalance, ModalDependentDetail, ModalSubsidyProgress } from '../../../components/Modal';
-import msgMainHeader from '../../../components/MainHeader/messages';
-import messages from '../../Dashboard/messages';
-import msgCreateAccount from '../../Sign/CreateAccount/messages';
-import msgDraweDetail from '../../../components/DrawerDetail/messages';
-import msgModal from '../../../components/Modal/messages';
-import request from '../../../utils/api/request';
-import { getDependents, setFlagBalance } from '../../../utils/api/apiList';
-import { getSubsidyRequests } from '../../../redux/features/appointmentsSlice';
-import PageLoading from '../../../components/Loading/PageLoading';
+import { ADMINAPPROVED, APPOINTMENT, BALANCE, CLOSED, CONSULTANT, CONSULTATION, EVALUATION, PARENT, PENDING, PROVIDER, SCHOOL, SUBSIDY } from 'routes/constant';
+import { ModalBalance, ModalDependentDetail, ModalSubsidyProgress } from 'components/Modal';
+import msgMainHeader from 'components/MainHeader/messages';
+import messages from 'routes/Dashboard/messages';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
+import msgDraweDetail from 'components/DrawerDetail/messages';
+import msgModal from 'components/Modal/messages';
+import request from 'utils/api/request';
+import { getDependents, setFlagBalance } from 'utils/api/apiList';
+import { getSubsidyRequests } from 'src/redux/features/appointmentsSlice';
+import PageLoading from 'components/Loading/PageLoading';
+import { socketUrl } from 'utils/api/baseUrl';
 
 class PrivateNote extends React.Component {
   constructor(props) {
@@ -36,11 +38,20 @@ class PrivateNote extends React.Component {
       visibleBalance: false,
     };
     this.searchInput = createRef(null);
+    this.socket = undefined;
   }
 
   componentDidMount() {
     this.setState({ loading: true });
     this.getDependentList();
+    const opts = {
+      query: {
+        token: Cookies.get('tk'),
+      },
+      withCredentials: true,
+      autoConnect: true,
+    };
+    this.socket = io(socketUrl, opts);
   }
 
   getDependentList() {
@@ -70,6 +81,7 @@ class PrivateNote extends React.Component {
   }
 
   exportToExcel = () => {
+    const { user } = this.props.auth;
     const data = this.props.subsidyRequests?.map(r => ({
       "Student Name": `${r?.student?.firstName ?? ''} ${r?.student?.lastName ?? ''}`,
       "School": r?.school?.name ?? '',
@@ -83,6 +95,11 @@ class PrivateNote extends React.Component {
       "Total HMGH expense": r.pricePerSession * r.numberOfSessions,
     }))
     this.setState({ csvData: data });
+    this.socket.emit("action_tracking", {
+      user: user?._id,
+      action: "Subsidy Request",
+      description: "Downloaded subsidy requests",
+    })
     return true;
   }
 

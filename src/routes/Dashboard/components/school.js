@@ -138,6 +138,8 @@ const Subsidiaries = (props) => {
           onShowModalSubsidy={onShowModalSubsidy}
           onShowModalSchoolApproval={onShowModalSchoolApproval}
           onShowModalDeclineExplanation={onShowModalDeclineExplanation}
+          socket={props.socket}
+          user={user}
         />
       ),
     },
@@ -153,6 +155,8 @@ const Subsidiaries = (props) => {
           onShowModalSubsidy={onShowModalSubsidy}
           onShowModalDeclineExplanation={onShowModalDeclineExplanation}
           handleReorder={handleReorder}
+          socket={props.socket}
+          user={user}
         />
       ),
     },
@@ -165,6 +169,8 @@ const Subsidiaries = (props) => {
           skills={skills}
           grades={grades}
           onShowModalSubsidy={onShowModalSubsidy}
+          socket={props.socket}
+          user={user}
         />
       ),
     }
