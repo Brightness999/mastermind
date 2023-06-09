@@ -7,6 +7,7 @@ import { Divider, Table, Space, Button, Input, message, Popconfirm, Tabs } from 
 import { SearchOutlined } from '@ant-design/icons';
 import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
+import Cookies from 'js-cookie';
 
 import { InvoiceType } from 'routes/constant';
 import mgsSidebar from 'components/SideBar/messages';
@@ -17,6 +18,7 @@ import { clearFlag, payInvoice, updateInvoice } from 'utils/api/apiList';
 import PageLoading from 'components/Loading/PageLoading';
 import { getInvoiceList, setInvoiceList } from 'src/redux/features/appointmentsSlice';
 import { ModalInvoice } from 'components/Modal';
+import { socketUrl } from 'utils/api/baseUrl';
 
 class FlagList extends React.Component {
   constructor(props) {
@@ -31,6 +33,7 @@ class FlagList extends React.Component {
       sortedFlags: [],
     };
     this.searchInput = createRef(null);
+    this.socket = undefined;
   }
 
   componentDidMount() {
@@ -58,6 +61,14 @@ class FlagList extends React.Component {
       sortedFlags: JSON.parse(JSON.stringify(invoices))?.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })),
     });
     this.props.getInvoiceList({ role: auth.user.role });
+    const opts = {
+      query: {
+        token: Cookies.get('tk'),
+      },
+      withCredentials: true,
+      autoConnect: true,
+    };
+    this.socket = io(socketUrl, opts);
   }
 
   componentDidUpdate(prevProps) {
@@ -149,6 +160,7 @@ class FlagList extends React.Component {
   }
 
   exportToExcel = () => {
+    const { user } = this.props.auth;
     const { sortedFlags } = this.state;
     const data = sortedFlags?.map(f => ({
       "Flag Type": f?.type === InvoiceType.NOSHOW ? 'No Show' : f?.type === InvoiceType.BALANCE ? 'Past Due Balance' : '',
@@ -161,6 +173,11 @@ class FlagList extends React.Component {
       "Updated Date": moment(f?.updatedAt).format('MM/DD/YYYY hh:mm A'),
     }))
     this.setState({ csvData: data });
+    this.socket.emit("action_tracking", {
+      user: user?._id,
+      action: "Flag List",
+      description: "Downloaded flags",
+    })
     return true;
   }
 

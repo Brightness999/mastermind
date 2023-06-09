@@ -148,6 +148,11 @@ const SchoolDeclined = (props) => {
       "Notes": r?.note,
     }))
     setCsvData(data);
+    props.socket.emit("action_tracking", {
+      user: props.user?._id,
+      action: "Subsidy Request",
+      description: "Downloaded school declined subsidy requests",
+    })
     return true;
   }
 

@@ -228,6 +228,11 @@ const SchoolPending = (props) => {
       "Request Date": moment(r?.createdAt).format('MM/DD/YYYY hh:mm A'),
     }))
     setCsvData(data);
+    props.socket.emit("action_tracking", {
+      user: props.user?._id,
+      action: "Subsidy Request",
+      description: "Downloaded pending subsidy requests",
+    })
     return true;
   }
 

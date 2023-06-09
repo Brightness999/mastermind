@@ -327,6 +327,11 @@ const AdminApproved = (props) => {
       "Total HMGH expense": r.pricePerSession * r.numberOfSessions,
     }))
     setCsvData(data);
+    props.socket.emit("action_tracking", {
+      user: props.user?._id,
+      action: "Subsidy Request",
+      description: "Downloaded admin approved subsidy requests",
+    })
     return true;
   }
 

@@ -3,22 +3,24 @@ import { Divider, message, Tabs } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import Cookies from 'js-cookie';
 
-import mgsSidebar from '../../../../components/SideBar/messages';
-import messages from '../../../Dashboard/messages';
-import msgCreateAccount from '../../../Sign/CreateAccount/messages';
-import msgModal from '../../../../components/Modal/messages';
-import request from '../../../../utils/api/request'
-import { ModalCreateNote, ModalSchoolSubsidyApproval, ModalSubsidyProgress } from '../../../../components/Modal';
-import { acceptSubsidyRequest, denySubsidyRequest, preApproveSubsidy, reorderRequests } from '../../../../utils/api/apiList';
-import PageLoading from '../../../../components/Loading/PageLoading';
-import { getSubsidyRequests, setSubsidyRequests } from "../../../../redux/features/appointmentsSlice";
+import mgsSidebar from 'components/SideBar/messages';
+import messages from 'routes/Dashboard/messages';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
+import msgModal from 'components/Modal/messages';
+import request from 'utils/api/request'
+import { ModalCreateNote, ModalSchoolSubsidyApproval, ModalSubsidyProgress } from 'components/Modal';
+import { acceptSubsidyRequest, denySubsidyRequest, preApproveSubsidy, reorderRequests } from 'utils/api/apiList';
+import PageLoading from 'components/Loading/PageLoading';
+import { getSubsidyRequests, setSubsidyRequests } from "src/redux/features/appointmentsSlice";
 import SchoolPending from './SchoolPending';
 import SchoolApproved from './SchoolApproved';
 import SchoolDeclined from './SchoolDeclined';
 import AdminPreApproved from './AdminPreApproved';
 import AdminDeclined from './AdminDeclined';
 import AdminApproved from './AdminApproved';
+import { socketUrl } from 'utils/api/baseUrl';
 import './index.less';
 
 const SubsidyManager = (props) => {
@@ -33,6 +35,7 @@ const SubsidyManager = (props) => {
   const [selectedSubsidyId, setSelectedSubsidyId] = useState(undefined);
   const [visibleSchoolApproval, setVisibleSchoolApproval] = useState(false);
   const [visibleDeclineExplanation, setVisibleDeclineExplanation] = useState(false);
+  const [socket, setSocket] = useState(undefined);
 
   const onShowModalSubsidy = (subsidyId) => {
     setSelectedSubsidyId(subsidyId);
@@ -147,6 +150,8 @@ const SubsidyManager = (props) => {
           onShowModalSchoolApproval={onShowModalSchoolApproval}
           onShowModalDeclineExplanation={onShowModalDeclineExplanation}
           adminPreApproveSubsidy={adminPreApproveSubsidy}
+          socket={socket}
+          user={user}
         />
       ),
     },
@@ -164,6 +169,8 @@ const SubsidyManager = (props) => {
           handleReorder={handleReorder}
           onShowModalDeclineExplanation={onShowModalDeclineExplanation}
           adminPreApproveSubsidy={adminPreApproveSubsidy}
+          socket={socket}
+          user={user}
         />
       ),
     },
@@ -177,6 +184,8 @@ const SubsidyManager = (props) => {
           grades={grades}
           schools={schoolInfos}
           onShowModalSubsidy={onShowModalSubsidy}
+          socket={socket}
+          user={user}
         />
       ),
     },
@@ -190,6 +199,8 @@ const SubsidyManager = (props) => {
           grades={grades}
           schools={schoolInfos}
           onShowModalSubsidy={onShowModalSubsidy}
+          socket={socket}
+          user={user}
         />
       ),
     },
@@ -203,6 +214,8 @@ const SubsidyManager = (props) => {
           grades={grades}
           schools={schoolInfos}
           onShowModalSubsidy={onShowModalSubsidy}
+          socket={socket}
+          user={user}
         />
       ),
     },
@@ -216,6 +229,8 @@ const SubsidyManager = (props) => {
           grades={grades}
           schools={schoolInfos}
           onShowModalSubsidy={onShowModalSubsidy}
+          socket={socket}
+          user={user}
         />
       ),
     }
@@ -227,6 +242,14 @@ const SubsidyManager = (props) => {
 
   useEffect(() => {
     props.getSubsidyRequests({ role: user.role });
+    const opts = {
+      query: {
+        token: Cookies.get('tk'),
+      },
+      withCredentials: true,
+      autoConnect: true,
+    };
+    setSocket(io(socketUrl, opts))
   }, []);
 
   const modalSubsidyProps = {

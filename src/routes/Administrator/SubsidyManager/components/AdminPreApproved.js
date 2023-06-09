@@ -255,6 +255,11 @@ const AdminPreApproved = (props) => {
       "Consultation Date": r?.consultation?.date ? moment(r?.consultation?.date).format('MM/DD/YYYY hh:mm A') : ''
     }))
     setCsvData(data);
+    props.socket.emit("action_tracking", {
+      user: props.user?._id,
+      action: "Subsidy Request",
+      description: "Downloaded pre-approved subsidy requests",
+    })
     return true;
   }
 

@@ -198,6 +198,11 @@ const AdminDeclined = (props) => {
       "Provider": r?.selectedProvider ? `${r?.selectedProvider?.firstName ?? ''} ${r?.selectedProvider?.lastName ?? ''}` : r?.otherProvider,
     }))
     setCsvData(data);
+    props.socket.emit("action_tracking", {
+      user: props.user?._id,
+      action: "Subsidy Request",
+      description: "Downloaded admin declined subsidy requests",
+    })
     return true;
   }
 

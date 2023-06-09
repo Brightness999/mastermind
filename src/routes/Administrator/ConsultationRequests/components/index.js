@@ -8,11 +8,13 @@ import moment from 'moment';
 import 'moment/locale/en-au';
 import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
+import Cookies from 'js-cookie';
 
-import mgsSidebar from '../../../../components/SideBar/messages';
-import request from '../../../../utils/api/request';
-import { getConsultationList } from '../../../../utils/api/apiList';
-import PageLoading from '../../../../components/Loading/PageLoading';
+import mgsSidebar from 'components/SideBar/messages';
+import request from 'utils/api/request';
+import { getConsultationList } from 'utils/api/apiList';
+import PageLoading from 'components/Loading/PageLoading';
+import { socketUrl } from 'utils/api/baseUrl';
 
 class ConsultationRequest extends React.Component {
   constructor(props) {
@@ -24,6 +26,7 @@ class ConsultationRequest extends React.Component {
       csvData: [],
     };
     this.searchInput = createRef(null);
+    this.socket = undefined;
   }
 
   componentDidMount() {
@@ -44,9 +47,18 @@ class ConsultationRequest extends React.Component {
       message.error(err.message);
       this.setState({ loading: false });
     })
+    const opts = {
+      query: {
+        token: Cookies.get('tk'),
+      },
+      withCredentials: true,
+      autoConnect: true,
+    };
+    this.socket = io(socketUrl, opts);
   }
 
   exportToExcel = () => {
+    const { user } = this.props.auth;
     const { consultationList } = this.state;
     const data = consultationList?.map(c => ({
       "Student Name": `${c?.dependent?.firstName ?? ''} ${c?.dependent?.lastName ?? ''}`,
@@ -57,6 +69,11 @@ class ConsultationRequest extends React.Component {
       "Date": c?.date ? moment(c?.date).format('MM/DD/YYYY hh:mm A') : '',
     }))
     this.setState({ csvData: data });
+    this.socket.emit("action_tracking", {
+      user: user?._id,
+      action: "Consultation Request",
+      description: "Downloaded consultation requests",
+    })
     return true;
   }
 
