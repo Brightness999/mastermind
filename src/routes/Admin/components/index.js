@@ -162,11 +162,6 @@ class SchedulingCenter extends React.Component {
       autoConnect: true,
     };
     this.socket = io(socketUrl, opts);
-
-    this.socket.on('socket_result', data => {
-      console.log('socket result', data);
-      this.handleSocketResult(data);
-    })
   }
 
   showNotificationForSubsidy(data) {
@@ -820,6 +815,7 @@ class SchedulingCenter extends React.Component {
       event: listAppointmentsRecent?.find(a => a._id == selectedEvent?._id),
       calendar: this.calendarRef,
       listAppointmentsRecent: listAppointmentsRecent,
+      socket: this.socket,
     };
 
     const modalFlagExpandProps = {
@@ -1033,7 +1029,7 @@ class SchedulingCenter extends React.Component {
             >
               {this.renderPanelAppointmentForProvider()}
               <Panel header={intl.formatMessage(messages.referrals)} key="2">
-                <Tabs defaultActiveKey="1" type="card" size='small'onChange={this.handleChangeReferralTab}>
+                <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleChangeReferralTab}>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {listAppointmentsRecent?.filter(a => a.type === CONSULTATION && a.status === PENDING)?.map((appointment, index) =>
                       <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
@@ -1075,7 +1071,7 @@ class SchedulingCenter extends React.Component {
                 </Tabs>
               </Panel>
               <Panel header={intl.formatMessage(messages.screenings)} key="3">
-                <Tabs defaultActiveKey="1" type="card" size='small'onChange={this.handleChangeScreeningTab}>
+                <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleChangeScreeningTab}>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {listAppointmentsRecent?.filter(a => a.type === SCREEN && a.status === PENDING)?.map((appointment, index) =>
                       <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
@@ -1115,7 +1111,7 @@ class SchedulingCenter extends React.Component {
                 </Tabs>
               </Panel>
               <Panel header={intl.formatMessage(messages.evaluations)} key="4">
-                <Tabs defaultActiveKey="1" type="card" size='small'onChange={this.handleChangeEvaluationTab}>
+                <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleChangeEvaluationTab}>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {listAppointmentsRecent?.filter(a => a.type === EVALUATION && a.status === PENDING && a.flagStatus !== ACTIVE)?.map((appointment, index) =>
                       <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
@@ -1163,7 +1159,7 @@ class SchedulingCenter extends React.Component {
                 )}
                 collapsible="header"
               >
-                <Tabs defaultActiveKey="1" type="card" size='small'onChange={this.handleChangeFlagTab}>
+                <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleChangeFlagTab}>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid)?.map((invoice, index) =>
                       <div key={index} className='list-item padding-item justify-between' onClick={(e) => e.target.id != 'action' && this.openModalInvoice(invoice)}>
