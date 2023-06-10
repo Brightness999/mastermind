@@ -37,9 +37,12 @@ class InfoNotification extends React.Component {
 			isFlagCreatedEmail: false,
 			isFlagCreatedPush: false,
 			isFlagCreatedText: false,
-			isPaidEmail: false,
-			isPaidPush: false,
-			isPaidText: false,
+			isInvoiceUpdatedEmail: false,
+			isInvoiceUpdatedPush: false,
+			isInvoiceUpdatedText: false,
+			isInvoicePaidEmail: false,
+			isInvoicePaidPush: false,
+			isInvoicePaidText: false,
 		};
 	}
 
@@ -69,9 +72,12 @@ class InfoNotification extends React.Component {
 			isFlagCreatedEmail: this.props.user.notificationSetting?.isFlagCreatedEmail,
 			isFlagCreatedPush: this.props.user.notificationSetting?.isFlagCreatedPush,
 			isFlagCreatedText: this.props.user.notificationSetting?.isFlagCreatedText,
-			isPaidEmail: this.props.user.notificationSetting?.isPaidEmail,
-			isPaidPush: this.props.user.notificationSetting?.isPaidPush,
-			isPaidText: this.props.user.notificationSetting?.isPaidText,
+			isInvoiceUpdatedEmail: this.props.user.notificationSetting?.isInvoiceUpdatedEmail,
+			isInvoiceUpdatedPush: this.props.user.notificationSetting?.isInvoiceUpdatedPush,
+			isInvoiceUpdatedText: this.props.user.notificationSetting?.isInvoiceUpdatedText,
+			isInvoicePaidEmail: this.props.user.notificationSetting?.isInvoicePaidEmail,
+			isInvoicePaidPush: this.props.user.notificationSetting?.isInvoicePaidPush,
+			isInvoicePaidText: this.props.user.notificationSetting?.isInvoicePaidText,
 		});
 	}
 	handleSaveSetting = () => {
@@ -100,9 +106,12 @@ class InfoNotification extends React.Component {
 			isFlagCreatedEmail: this.state.isFlagCreatedEmail,
 			isFlagCreatedPush: this.state.isFlagCreatedPush,
 			isFlagCreatedText: this.state.isFlagCreatedText,
-			isPaidEmail: this.state.isPaidEmail,
-			isPaidPush: this.state.isPaidPush,
-			isPaidText: this.state.isPaidText,
+			isInvoiceUpdatedEmail: this.state.isInvoiceUpdatedEmail,
+			isInvoiceUpdatedPush: this.state.isInvoiceUpdatedPush,
+			isInvoiceUpdatedText: this.state.isInvoiceUpdatedText,
+			isInvoicePaidEmail: this.state.isInvoicePaidEmail,
+			isInvoicePaidPush: this.state.isInvoicePaidPush,
+			isInvoicePaidText: this.state.isInvoicePaidText,
 		}
 
 		request.post(updateNotificationSetting, data).then(res => {
@@ -134,9 +143,12 @@ class InfoNotification extends React.Component {
 				isFlagCreatedEmail: this.state.isFlagCreatedEmail,
 				isFlagCreatedPush: this.state.isFlagCreatedPush,
 				isFlagCreatedText: this.state.isFlagCreatedText,
-				isPaidEmail: this.state.isPaidEmail,
-				isPaidPush: this.state.isPaidPush,
-				isPaidText: this.state.isPaidText,
+				isInvoiceUpdatedEmail: this.state.isInvoiceUpdatedEmail,
+				isInvoiceUpdatedPush: this.state.isInvoiceUpdatedPush,
+				isInvoiceUpdatedText: this.state.isInvoiceUpdatedText,
+				isInvoicePaidEmail: this.state.isInvoicePaidEmail,
+				isInvoicePaidPush: this.state.isInvoicePaidPush,
+				isInvoicePaidText: this.state.isInvoicePaidText,
 			};
 			if (success) {
 				store.dispatch(setUser(user));
@@ -174,9 +186,12 @@ class InfoNotification extends React.Component {
 			isFlagCreatedEmail,
 			isFlagCreatedPush,
 			isFlagCreatedText,
-			isPaidEmail,
-			isPaidPush,
-			isPaidText,
+			isInvoiceUpdatedEmail,
+			isInvoiceUpdatedPush,
+			isInvoiceUpdatedText,
+			isInvoicePaidEmail,
+			isInvoicePaidPush,
+			isInvoicePaidText,
 		} = this.state;
 
 		return (
@@ -262,14 +277,20 @@ class InfoNotification extends React.Component {
 									</tr>
 									<tr>
 										<td colSpan={4} className="bg-pastel">
-											<div className='header'>Pay</div>
+											<div className='header'>Invoice</div>
 										</td>
 									</tr>
 									<tr>
-										<td>Paid</td>
-										<td><div className='text-center'><Switch checked={isPaidEmail} onChange={v => this.setState({ isPaidEmail: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isPaidText} onChange={v => this.setState({ isPaidText: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isPaidPush} onChange={v => this.setState({ isPaidPush: v })} /></div></td>
+										<td>Invoice Updated</td>
+										<td><div className='text-center'><Switch checked={isInvoiceUpdatedEmail} onChange={v => this.setState({ isInvoiceUpdatedEmail: v })} /></div></td>
+										<td><div className='text-center'><Switch checked={isInvoiceUpdatedText} onChange={v => this.setState({ isInvoiceUpdatedText: v })} /></div></td>
+										<td><div className='text-center'><Switch checked={isInvoiceUpdatedPush} onChange={v => this.setState({ isInvoiceUpdatedPush: v })} /></div></td>
+									</tr>
+									<tr>
+										<td>Invoice Paid</td>
+										<td><div className='text-center'><Switch checked={isInvoicePaidEmail} onChange={v => this.setState({ isInvoicePaidEmail: v })} /></div></td>
+										<td><div className='text-center'><Switch checked={isInvoicePaidText} onChange={v => this.setState({ isInvoicePaidText: v })} /></div></td>
+										<td><div className='text-center'><Switch checked={isInvoicePaidPush} onChange={v => this.setState({ isInvoicePaidPush: v })} /></div></td>
 									</tr>
 								</tbody>
 							</table>
