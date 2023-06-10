@@ -1,10 +1,6 @@
 export const scope = 'components.sidebar';
 
 export default {
-  test: {
-    id: `${scope}.test`,
-    defaultMessage: 'SideBar',
-  },
   appointments: {
     id: `${scope}.appointments`,
     defaultMessage: 'Appointments',

@@ -409,11 +409,7 @@
   "components.sidebar.flagList": "Flag List",
   "components.sidebar.consultationRequests": "Consultation Requests",
   "components.sidebar.schedulingCenter": "Scheduling Center",
-  "components.sideBar.optionOnline": "Online",
-  "components.sideBar.optionBusy": "Busy",
-  "components.sideBar.optionInvisible": "Invisible",
-  "components.sideBar.optionOffline": "Offline",
-  "components.sideBar.actionTracker": "Action Tracker",
+  "components.sidebar.actionTracker": "Action Tracker",
   
   "components.drawerdetail.appointmentDetails": "Appointment Details",
   "components.drawerdetail.consultationDetails": "Consultation Details",
