@@ -72,7 +72,7 @@ class ModalCurrentReferralService extends React.Component {
 		});
 	}
 
-	createConsulation = () => {
+	createConsultation = () => {
 		const { selectedDependent, selectedSkillSet, phoneNumber, fileList, note, selectedTimeIndex, selectedDate, arrTime, isGoogleMeet } = this.state;
 		const meetingLink = this.form.getFieldValue("meetingLink");
 
@@ -148,7 +148,7 @@ class ModalCurrentReferralService extends React.Component {
 				window.open(res.data);
 			})
 		} else {
-			this.createConsulation();
+			this.createConsultation();
 		}
 	}
 

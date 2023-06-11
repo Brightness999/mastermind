@@ -90,7 +90,7 @@ class ModalReferralService extends React.Component {
 		});
 	}
 
-	createConsulation = () => {
+	createConsultation = () => {
 		const { selectedDependent, selectedSkillSet, phoneNumber, fileList, note, selectedTimeIndex, selectedDate, arrTime, isGoogleMeet, selectedSubsidy } = this.state;
 		const { subsidy } = this.props;
 		const meetingLink = this.form.getFieldValue("meetingLink");
@@ -180,7 +180,7 @@ class ModalReferralService extends React.Component {
 				window.open(res.data);
 			})
 		} else {
-			this.createConsulation();
+			this.createConsultation();
 		}
 	}
 
