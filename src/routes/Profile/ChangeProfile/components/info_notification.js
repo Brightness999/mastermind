@@ -31,6 +31,9 @@ class InfoNotification extends React.Component {
 			isSubsidyUpdateEmail: false,
 			isSubsidyUpdatePush: false,
 			isSubsidyUpdateText: false,
+			isSubsidyCreateEmail: false,
+			isSubsidyCreatePush: false,
+			isSubsidyCreateText: false,
 			isFlagClearedEmail: false,
 			isFlagClearedPush: false,
 			isFlagClearedText: false,
@@ -66,6 +69,9 @@ class InfoNotification extends React.Component {
 			isSubsidyUpdateEmail: this.props.user.notificationSetting?.isSubsidyUpdateEmail,
 			isSubsidyUpdatePush: this.props.user.notificationSetting?.isSubsidyUpdatePush,
 			isSubsidyUpdateText: this.props.user.notificationSetting?.isSubsidyUpdateText,
+			isSubsidyCreateEmail: this.props.user.notificationSetting?.isSubsidyCreateEmail,
+			isSubsidyCreatePush: this.props.user.notificationSetting?.isSubsidyCreatePush,
+			isSubsidyCreateText: this.props.user.notificationSetting?.isSubsidyCreateText,
 			isFlagClearedEmail: this.props.user.notificationSetting?.isFlagClearedEmail,
 			isFlagClearedPush: this.props.user.notificationSetting?.isFlagClearedPush,
 			isFlagClearedText: this.props.user.notificationSetting?.isFlagClearedText,
@@ -100,6 +106,9 @@ class InfoNotification extends React.Component {
 			isSubsidyUpdateEmail: this.state.isSubsidyUpdateEmail,
 			isSubsidyUpdatePush: this.state.isSubsidyUpdatePush,
 			isSubsidyUpdateText: this.state.isSubsidyUpdateText,
+			isSubsidyCreateEmail: this.state.isSubsidyCreateEmail,
+			isSubsidyCreatePush: this.state.isSubsidyCreatePush,
+			isSubsidyCreateText: this.state.isSubsidyCreateText,
 			isFlagClearedEmail: this.state.isFlagClearedEmail,
 			isFlagClearedPush: this.state.isFlagClearedPush,
 			isFlagClearedText: this.state.isFlagClearedText,
@@ -137,6 +146,9 @@ class InfoNotification extends React.Component {
 				isSubsidyUpdateEmail: this.state.isSubsidyUpdateEmail,
 				isSubsidyUpdatePush: this.state.isSubsidyUpdatePush,
 				isSubsidyUpdateText: this.state.isSubsidyUpdateText,
+				isSubsidyCreateEmail: this.state.isSubsidyCreateEmail,
+				isSubsidyCreatePush: this.state.isSubsidyCreatePush,
+				isSubsidyCreateText: this.state.isSubsidyCreateText,
 				isFlagClearedEmail: this.state.isFlagClearedEmail,
 				isFlagClearedPush: this.state.isFlagClearedPush,
 				isFlagClearedText: this.state.isFlagClearedText,
@@ -180,6 +192,9 @@ class InfoNotification extends React.Component {
 			isSubsidyUpdateEmail,
 			isSubsidyUpdatePush,
 			isSubsidyUpdateText,
+			isSubsidyCreateEmail,
+			isSubsidyCreatePush,
+			isSubsidyCreateText,
 			isFlagClearedEmail,
 			isFlagClearedPush,
 			isFlagClearedText,
@@ -251,6 +266,12 @@ class InfoNotification extends React.Component {
 										<td colSpan={4} className="bg-pastel">
 											<div className='header'>Subsidy</div>
 										</td>
+									</tr>
+									<tr>
+										<td>Subsidy Create</td>
+										<td><div className='text-center'><Switch checked={isSubsidyCreateEmail} onChange={v => this.setState({ isSubsidyCreateEmail: v })} /></div></td>
+										<td><div className='text-center'><Switch checked={isSubsidyCreateText} onChange={v => this.setState({ isSubsidyCreateText: v })} /></div></td>
+										<td><div className='text-center'><Switch checked={isSubsidyCreatePush} onChange={v => this.setState({ isSubsidyCreatePush: v })} /></div></td>
 									</tr>
 									<tr>
 										<td>Subsidy Update</td>
