@@ -425,8 +425,8 @@ class DrawerDetail extends Component {
   }
 
   handleRequestFeedback = () => {
-    const { provider, type } = this.props.event;
-    const data = { providerId: provider?._id, type };
+    const { provider, type, dependent } = this.props.event;
+    const data = { providerId: provider?._id, dependentId: dependent?._id, type };
     request.post(requestFeedbackForClient, data).then(result => {
       if (result.success) {
         message.success('The request has been sent successfully.');
@@ -1372,13 +1372,6 @@ class DrawerDetail extends Component {
                     onClick={this.onShowModalNoShow}
                   >
                     {intl.formatMessage(messages.flagDependent)}
-                  </Button>
-                </Col>
-              )}
-              {(userRole === 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === CLOSED && event?.flagStatus === NOFLAG) && (
-                <Col span={12}>
-                  <Button type='primary' icon={<FaFileContract size={12} />} block >
-                    {intl.formatMessage(messages.requestInvoice)}
                   </Button>
                 </Col>
               )}
