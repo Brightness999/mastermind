@@ -425,7 +425,8 @@ class DrawerDetail extends Component {
   }
 
   handleRequestFeedback = () => {
-    const data = { appointmentId: this.props.event?._id };
+    const { provider, type } = this.props.event;
+    const data = { providerId: provider?._id, type };
     request.post(requestFeedbackForClient, data).then(result => {
       if (result.success) {
         message.success('The request has been sent successfully.');
