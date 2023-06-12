@@ -11,6 +11,7 @@ import messages from 'routes/Dashboard/messages';
 import request from 'utils/api/request';
 import { getTrackedActions } from 'utils/api/apiList';
 import { ADMIN, CONSULTANT, PARENT, PROVIDER, SCHOOL, SUPERADMIN } from 'routes/constant';
+import PageLoading from 'components/Loading/PageLoading';
 import './index.less';
 
 const { RangePicker } = DatePicker;
@@ -26,6 +27,7 @@ export default class extends React.Component {
       userSearch: '',
       actionSearch: '',
       dateRange: undefined,
+      loading: false,
     };
     this.searchInput = createRef(null);
   }
@@ -45,7 +47,9 @@ export default class extends React.Component {
     if (!dateRange?.length) {
       dateRange = [0, moment().valueOf()];
     }
+    this.setState({ loading: true });
     request.post(getTrackedActions, { userSearch, actionSearch, pageNumber, pageSize, dateRange }).then(result => {
+      this.setState({ loading: false });
       const { success, data } = result;
       if (success) {
         this.setState({
@@ -54,12 +58,13 @@ export default class extends React.Component {
         });
       }
     }).catch(err => {
+      this.setState({ loading: false });
       message.error(err.message);
     });
   }
 
   render() {
-    const { pageNumber, pageSize, totalSize, trackedLogs, userSearch, actionSearch, dateRange } = this.state;
+    const { loading, pageNumber, pageSize, totalSize, trackedLogs, userSearch, actionSearch, dateRange } = this.state;
     const columns = [
       {
         title: 'User', dataIndex: 'user', key: 'user',
@@ -271,6 +276,7 @@ export default class extends React.Component {
           <Table bordered size='middle' pagination={false} dataSource={trackedLogs} columns={columns} />
           <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} onChange={this.handleChangePagination} />
         </Space>
+				<PageLoading loading={loading} isBackground={true} />
       </div>
     );
   }
