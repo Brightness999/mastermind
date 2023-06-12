@@ -1,19 +1,20 @@
-import { Divider, Table, Space, Button, Input, message } from 'antd';
-import { routerLinks } from '../../../constant';
-import { ModalConfirm, ModalInputCode } from '../../../../components/Modal';
 import React, { createRef } from 'react';
+import { Divider, Table, Space, Button, Input, message, Pagination } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import mgsSidebar from '../../../../components/SideBar/messages';
-import './index.less';
-import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
-import { activateUser, getUsers } from '../../../../utils/api/apiList';
-import { removeRegisterData } from '../../../../redux/features/registerSlice';
-import { setSelectedUser } from '../../../../redux/features/authSlice';
-import { store } from '../../../../redux/store';
-import PageLoading from '../../../../components/Loading/PageLoading';
+import moment from 'moment';
+
+import mgsSidebar from 'components/SideBar/messages';
+import { routerLinks } from 'routes/constant';
+import { ModalConfirm, ModalInputCode } from 'components/Modal';
+import request from 'utils/api/request';
+import { activateUser, getUsers } from 'utils/api/apiList';
+import { removeRegisterData } from 'src/redux/features/registerSlice';
+import { setSelectedUser } from 'src/redux/features/authSlice';
+import PageLoading from 'components/Loading/PageLoading';
+import './index.less';
 
 class UserManager extends React.Component {
 	constructor(props) {
@@ -27,20 +28,33 @@ class UserManager extends React.Component {
 			userState: 1,
 			selectedUser: {},
 			loading: false,
+			pageSize: 10,
+			pageNumber: 1,
+			totalSize: 0,
 		};
 		this.searchInput = createRef(null);
 	}
 
 	componentDidMount() {
+		this.getUserList();
+	}
+
+	handleChangePagination = (newPageNumber, newPageSize) => {
+		this.setState({ pageNumber: newPageNumber, pageSize: newPageSize });
+		this.getUserList(newPageNumber, newPageSize);
+	}
+
+	getUserList = (pageNumber = 1, pageSize = 10) => {
 		this.setState({ loading: true });
-		request.post(getUsers).then(result => {
+		request.post(getUsers, { pageNumber, pageSize }).then(result => {
 			const { success, data } = result;
 			this.setState({ loading: false });
 			if (success) {
 				this.setState({
-					users: data?.map((user, i) => {
+					users: data?.users?.map((user, i) => {
 						user['key'] = i; return user;
-					}) ?? []
+					}) ?? [],
+					totalSize: data?.total,
 				});
 			}
 		}).catch(err => {
@@ -65,7 +79,7 @@ class UserManager extends React.Component {
 	verifyCode = (code) => {
 		if (code == 613) {
 			this.onCloseModalInputCode();
-			store.dispatch(setSelectedUser(this.state.selectedUser));
+			this.props.setSelectedUser(this.state.selectedUser);
 			this.props.history.push(routerLinks.ChangeUserProfile);
 		} else {
 			message.warning('Invalid code. Try again.');
@@ -109,7 +123,7 @@ class UserManager extends React.Component {
 	}
 
 	render() {
-		const { visibleInputCode, users, isConfirmModal, confirmMessage, loading } = this.state;
+		const { pageNumber, pageSize, totalSize, visibleInputCode, users, isConfirmModal, confirmMessage, loading } = this.state;
 		const columns = [
 			{
 				title: 'UserName', dataIndex: 'username', key: 'name',
@@ -191,9 +205,9 @@ class UserManager extends React.Component {
 				onFilter: (value, record) => record.isActive == value,
 			},
 			{
-				title: 'Last Activity', dataIndex: 'activity', key: 'lastActivity',
-				render: (activity) => new Date(activity?.slice(-1)?.[0]?.timeLogin)?.toLocaleString(),
-				sorter: (a, b) => new Date(a?.activity?.slice(-1)?.[0]?.timeLogin) > new Date(b?.activity?.slice(-1)?.[0]?.timeLogin) ? 1 : -1,
+				title: 'Last Activity', dataIndex: 'activity', key: 'lastActivity', type: 'datetime',
+				sorter: (a, b) => a?.activity?.createdAt > b?.activity?.createdAt ? 1 : -1,
+				render: (activity) => activity?.createdAt ? moment(activity?.createdAt)?.format('MM/DD/YYYY hh:mm A') : '',
 			},
 			{
 				title: 'Action', key: 'action', render: (user) => (
@@ -227,7 +241,10 @@ class UserManager extends React.Component {
 				<div className='text-right mb-20'>
 					<Button type='primary' onClick={() => this.handleNewUser()}>Create New User</Button>
 				</div>
-				<Table bordered size='middle' dataSource={users} columns={columns} />
+				<Space direction='vertical' className='flex'>
+					<Table bordered size='middle' pagination={false} dataSource={users} columns={columns} />
+					<Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
+				</Space>
 				{visibleInputCode && <ModalInputCode {...modalInputCodeProps} />}
 				{isConfirmModal && <ModalConfirm {...confirmModalProps} />}
 				<PageLoading loading={loading} isBackground={true} />
@@ -240,4 +257,4 @@ const mapStateToProps = state => ({
 	user: state.auth.user,
 })
 
-export default compose(connect(mapStateToProps, { removeRegisterData }))(UserManager);
+export default compose(connect(mapStateToProps, { removeRegisterData, setSelectedUser }))(UserManager);
