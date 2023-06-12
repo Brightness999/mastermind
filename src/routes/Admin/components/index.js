@@ -164,52 +164,6 @@ class SchedulingCenter extends React.Component {
     this.socket = io(socketUrl, opts);
   }
 
-  showNotificationForSubsidy(data) {
-    notification.open({
-      message: 'You have new Subsidy',
-      duration: 10,
-      description:
-        'A parent has sent 1 subsidy request, press for view.',
-      onClick: () => {
-        console.log('Notification Clicked!');
-        this.onShowModalSubsidy(data.data._id);
-      },
-    });
-  }
-
-  showNotificationForSubsidyChange(data) {
-    notification.open({
-      message: 'Subsidy Status changed',
-      duration: 10,
-      description:
-        'Press for check subsidy progress.',
-      onClick: () => {
-        console.log('Notification Clicked!');
-        this.onShowModalSubsidy(data);
-      },
-    });
-  }
-
-  handleSocketResult(data) {
-    switch (data.key) {
-      case 'new_appoint_from_client':
-        this.setState({ providerDrawervisible: true, });
-        return;
-      case 'new_subsidy_request_from_client':
-        this.panelSubsidiariesReload && typeof this.panelSubsidiariesReload == 'function' && this.panelSubsidiariesReload(true)
-        this.showNotificationForSubsidy(data);
-        return;
-      case 'subsidy_change_status':
-        this.panelSubsidiariesReload && typeof this.panelSubsidiariesReload == 'function' && this.panelSubsidiariesReload(true)
-        this.showNotificationForSubsidyChange(data.data);
-        return;
-      case 'meeting_link':
-        this.props.setMeetingLink(data.data);
-      case 'appeal_subsidy':
-        return;
-    }
-  }
-
   onShowFilter = () => {
     this.setState({ isFilter: !this.state.isFilter });
   }
