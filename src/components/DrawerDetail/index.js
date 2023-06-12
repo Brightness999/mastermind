@@ -981,7 +981,7 @@ class DrawerDetail extends Component {
           {event?.flagStatus === ACTIVE && event?.flagType === NOSHOW && (
             <div className='text-center'><MdOutlineEventBusy color="#ff0000" size={32} /></div>
           )}
-          {event?.flagStatus !== ACTIVE && event?.type === CONSULTATION && event?.status === PENDING && event?.consultant?._id && event.consultant?._id !== auth.user?.consultantInfo?._id && (
+          {event?.flagStatus !== ACTIVE && event?.type === CONSULTATION && event?.status === PENDING && event?.consultant?._id && event?.consultant?._id !== auth.user?.consultantInfo?._id && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.claimed)}]</div>
           )}
           {event?.flagStatus !== ACTIVE && event?.status === CLOSED && (
@@ -1067,7 +1067,7 @@ class DrawerDetail extends Component {
             </div>
           )}
         </div>
-        {(flagEvent && (event?.flagStatus === ACTIVE || moment().isBefore(moment(event.date)))) ? (
+        {(flagEvent && (event?.flagStatus === ACTIVE || moment().isBefore(moment(event?.date)))) ? (
           <div className='text-center font-18 mt-2'>
             {flagEvent.flagType === BALANCE ? (
               <MdOutlineRequestQuote color="#ff0000" size={32} />
@@ -1363,7 +1363,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(event.flagStatus === NOFLAG && userRole > 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === PENDING && moment().isAfter(moment(event?.date))) && (
+              {(event?.flagStatus === NOFLAG && userRole > 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === PENDING && moment().isAfter(moment(event?.date))) && (
                 <Col span={12}>
                   <Button
                     type='primary'
