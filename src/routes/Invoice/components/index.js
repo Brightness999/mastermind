@@ -16,7 +16,7 @@ import request, { decryptParam, encryptParam } from 'utils/api/request';
 import { clearFlag, payInvoice, updateInvoice } from 'utils/api/apiList';
 import { getInvoiceList, setInvoiceList } from 'src/redux/features/appointmentsSlice';
 import PageLoading from 'components/Loading/PageLoading';
-import { InvoiceType, PROVIDER } from 'src/routes/constant';
+import { InvoiceType, PARENT, PROVIDER } from 'src/routes/constant';
 
 class InvoiceList extends React.Component {
   constructor(props) {
@@ -304,23 +304,25 @@ class InvoiceList extends React.Component {
         title: intl.formatMessage(messages.action), key: 'action', align: 'center',
         render: invoice => (invoice.isPaid || invoice.totalPayment == 0) ? null : (
           <div className='flex'>
-            <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-              <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-              <input type="hidden" name="business" value="office@helpmegethelp.org" />
-              <input type="hidden" name="cmd" value="_donations" />
-              <input type="hidden" name="item_name" value="Help Me Get Help" />
-              <input type="hidden" name="item_number" />
-              <input type="hidden" name="amount" value={invoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-              <input type="hidden" name="shipping" value="0.00" />
-              <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-              <input type="hidden" name="rm" value="0" />
-              <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
-              <input type="hidden" name="cancel_return" value={window.location.href} />
-              <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-              <Button type='link' htmlType='submit'>
-                <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
-              </Button>
-            </form>
+            {user?.role === PARENT ? (
+              <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
+                <input type="hidden" name="business" value="office@helpmegethelp.org" />
+                <input type="hidden" name="cmd" value="_donations" />
+                <input type="hidden" name="item_name" value="Help Me Get Help" />
+                <input type="hidden" name="item_number" />
+                <input type="hidden" name="amount" value={invoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
+                <input type="hidden" name="shipping" value="0.00" />
+                <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
+                <input type="hidden" name="rm" value="0" />
+                <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
+                <input type="hidden" name="cancel_return" value={window.location.href} />
+                <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
+                <Button type='link' htmlType='submit'>
+                  <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
+                </Button>
+              </form>
+            ) : null}
             {([4, 5].includes(invoice.type) && user?.role === PROVIDER) ? (
               <Popconfirm
                 title="Are you sure to clear this flag?"
