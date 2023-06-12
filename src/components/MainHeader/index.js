@@ -13,7 +13,7 @@ import { MdOutlineSpaceDashboard } from 'react-icons/md';
 import messages from './messages';
 import msgSidebar from 'src/components/SideBar/messages';
 import { ADMIN, CONSULTANT, PARENT, PROVIDER, SCHOOL, SUPERADMIN, routerLinks } from 'routes/constant';
-import { logout, setCommunity } from 'src/redux/features/authSlice';
+import { logout, setCommunity, setCountOfUnreadNotifications } from 'src/redux/features/authSlice';
 import { helper } from 'utils/auth/helper';
 import request from 'utils/api/request';
 import { getSettings } from 'utils/api/apiList';
@@ -69,6 +69,7 @@ class MainHeader extends Component {
   }
 
   handleSocketEvents = () => {
+    const { user } = this.props;
     let opts = {
       query: {
         token: Cookies.get('tk'),
@@ -77,6 +78,32 @@ class MainHeader extends Component {
       autoConnect: true,
     };
     this.socket = io(socketUrl, opts);
+
+    if (user.role < 900) {
+      this.socket.on('connect', () => {
+        this.socket.emit('unread_notifications', this.props.user?._id);
+      });
+    }
+
+    this.socket.on('socket_result', data => {
+      switch (data.key) {
+        case "countOfUnreadNotifications": this.props.setCountOfUnreadNotifications(data.count); break;
+        case "subsidy_change_status":
+        case "invoice_updated":
+        case "missed_consultation":
+        case "noshow_created":
+        case "update_noshow":
+        case "balance_created":
+        case "flag_cleared":
+        case "new_appoint_from_client":
+        case "new_subsidy_request_from_client":
+        case "appeal_subsidy":
+        case "cancel_subsidy":
+        case "paid":
+        case "update_appointment": this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1); break;
+        default: break;
+      }
+    })
   }
 
   logout = () => {
@@ -131,7 +158,7 @@ class MainHeader extends Component {
   }
 
   render() {
-    const { user, community } = this.props;
+    const { user, community, countOfUnreadNotifications } = this.props;
     const items = [
       {
         key: '1',
@@ -152,15 +179,6 @@ class MainHeader extends Component {
         ),
       },
       {
-        key: '3',
-        icon: <Badge size="small" count={6}><BiBell size={18} color='#495057' /></Badge>,
-        label: (
-          <Link to={routerLinks.Notification} onClick={() => this.handleClickLink(intl.formatMessage(messages.notification))}>
-            {intl.formatMessage(messages.notification)}
-          </Link>
-        ),
-      },
-      {
         key: '5',
         icon: <BiLogOutCircle size={18} color='#495057' />,
         label: (
@@ -170,6 +188,15 @@ class MainHeader extends Component {
         ),
       },
     ]
+    user?.role < 900 && items.splice(2, 0, {
+      key: '3',
+      icon: <Badge size="small" count={countOfUnreadNotifications}><BiBell size={18} color='#495057' /></Badge>,
+      label: (
+        <Link to={routerLinks.Notification} onClick={() => this.handleClickLink(intl.formatMessage(messages.notification))}>
+          {intl.formatMessage(messages.notification)}
+        </Link>
+      ),
+    });
     user?.role < 900 && items.splice(3, 0, {
       key: '4',
       icon: <FaChild size={18} color='#495057' />,
@@ -194,7 +221,7 @@ class MainHeader extends Component {
         <div className='div-account'>
           <div className='account-icon'>
             <Dropdown menu={{ items }} placement="bottomLeft" trigger="click">
-              <Badge size="small" count={6}>
+              <Badge size="small" count={countOfUnreadNotifications}>
                 <Avatar icon={<FaUserAlt size={17} className='text-white' />} />
               </Badge>
             </Dropdown>
@@ -214,7 +241,8 @@ class MainHeader extends Component {
 }
 const mapStateToProps = state => ({
   user: state.auth.user,
+  countOfUnreadNotifications: state.auth.countOfUnreadNotifications,
   community: state.auth.currentCommunity,
 });
 
-export default compose(connect(mapStateToProps, { logout, setCommunity }))(MainHeader);
+export default compose(connect(mapStateToProps, { logout, setCommunity, setCountOfUnreadNotifications }))(MainHeader);

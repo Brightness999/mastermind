@@ -32,6 +32,7 @@ const initialState = {
 		cityConnections: [],
 		schools: [],
 	},
+	countOfUnreadNotifications: 0,
 };
 
 export const setInforClientChild = createAsyncThunk(
@@ -146,6 +147,9 @@ export const authSlice = createSlice({
 		setSchools(state, action) {
 			state.schools = action.payload
 		},
+		setCountOfUnreadNotifications(state, action) {
+			state.countOfUnreadNotifications = action.payload
+		},
 		logout(state) {
 			state.user = {};
 		},
@@ -173,6 +177,7 @@ export const {
 	setGeneralData,
 	setConsultants,
 	setSchools,
+	setCountOfUnreadNotifications,
 } = authSlice.actions;
 
 export default authSlice.reducer;
