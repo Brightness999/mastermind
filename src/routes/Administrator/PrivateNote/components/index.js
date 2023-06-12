@@ -265,10 +265,9 @@ class PrivateNote extends React.Component {
       {
         title: intl.formatMessage(messages.action), key: 'action',
         render: dependent => {
-          const countOfSessionsPast = dependent?.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED)?.length;
-          const countOfSessionsPaid = dependent?.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status == CLOSED && a.isPaid)?.length;
+          const countOfUnpaidInvoices = dependent?.invoices?.filter(a => a.provider === auth.user.providerInfo?._id && !a.isPaid && a.type === 1)?.length || 0;
 
-          if (countOfSessionsPast > countOfSessionsPaid) {
+          if (countOfUnpaidInvoices) {
             return (
               <div className='action cursor' onClick={() => this.onShowModalBalance(dependent)}>
                 <span className='action text-primary cursor'>{intl.formatMessage(msgDraweDetail.flagDependent)}</span>

@@ -112,11 +112,9 @@ class PrivateNote extends React.Component {
   };
 
   onShowModalBalance = (dependent) => {
-    if (dependent?.appointments?.length) {
-      this.setState({ selectedDependent: dependent }, () => {
-        this.setState({ visibleBalance: true });
-      })
-    }
+    this.setState({ selectedDependent: dependent }, () => {
+      this.setState({ visibleBalance: true });
+    })
   }
 
   onCloseModalBalance = () => {
@@ -368,10 +366,8 @@ class PrivateNote extends React.Component {
       columns.splice(10, 0, {
         title: intl.formatMessage(messages.action), key: 'action',
         render: dependent => {
-          const countOfSessionsPast = dependent?.appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length;
-          const countOfSessionsPaid = dependent?.appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED && a.isPaid)?.length;
-
-          if (countOfSessionsPast > countOfSessionsPaid) {
+          const countOfUnpaidInvoices = dependent?.invoices?.filter(a => a.provider === auth.user.providerInfo?._id && !a.isPaid && a.type === 1)?.length || 0;
+          if (countOfUnpaidInvoices) {
             return (
               <span className='action text-primary cursor' onClick={() => this.onShowModalBalance(dependent)}>{intl.formatMessage(msgDraweDetail.flagDependent)}</span>
             )
@@ -779,8 +775,8 @@ class PrivateNote extends React.Component {
           columns={columns}
           onRow={(dependent) => {
             return {
-              onClick: (e) => !e.target.className.includes('action') && this.handleClickRow(dependent),
-              onDoubleClick: (e) => !e.target.className.includes('action') && this.handleClickRow(dependent),
+              onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.handleClickRow(dependent),
+              onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.handleClickRow(dependent),
             }
           }}
         />
