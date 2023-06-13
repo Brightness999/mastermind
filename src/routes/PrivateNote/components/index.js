@@ -1,5 +1,5 @@
 import React, { createRef } from 'react';
-import { Divider, Table, Space, Input, Button, message } from 'antd';
+import { Divider, Table, Space, Input, Button, message, Pagination } from 'antd';
 import intl from 'react-intl-universal';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
@@ -36,6 +36,9 @@ class PrivateNote extends React.Component {
       visibleSubsidyProgress: false,
       selectedSubsidyId: undefined,
       visibleBalance: false,
+      pageSize: 10,
+      pageNumber: 1,
+      totalSize: 0,
     };
     this.searchInput = createRef(null);
     this.socket = undefined;
@@ -54,21 +57,27 @@ class PrivateNote extends React.Component {
     this.socket = io(socketUrl, opts);
   }
 
-  getDependentList() {
-    request.post(getDependents).then(result => {
+  handleChangePagination = (newPageNumber, newPageSize) => {
+    this.setState({ pageNumber: newPageNumber, pageSize: newPageSize });
+    this.getDependentList(newPageNumber, newPageSize);
+  }
+
+  getDependentList(pageNumber = 1, pageSize = 10) {
+    request.post(getDependents, { pageNumber, pageSize }).then(result => {
       this.setState({ loading: false });
       const { success, data } = result;
       if (success) {
         this.setState({
-          dependents: data?.map((user, i) => {
+          dependents: data?.dependents?.map((user, i) => {
             user['key'] = i; return user;
-          }) ?? []
+          }) ?? [],
+          totalSize: data?.total,
         });
       } else {
-        this.setState({ dependents: [], loading: false });
+        this.setState({ dependents: [], totalSize: 0, loading: false });
       }
     }).catch(err => {
-      this.setState({ dependents: [], loading: false });
+      this.setState({ dependents: [], totalSize: 0, loading: false });
     })
   }
 
@@ -183,7 +192,7 @@ class PrivateNote extends React.Component {
   }
 
   render() {
-    const { csvData, dependents, visibleDependent, selectedDependent, loading, visibleSubsidyProgress, selectedSubsidyId, visibleBalance } = this.state;
+    const { csvData, dependents, pageNumber, pageSize, totalSize, visibleDependent, selectedDependent, loading, visibleSubsidyProgress, selectedSubsidyId, visibleBalance } = this.state;
     const { auth, subsidyRequests } = this.props;
     const skills = JSON.parse(JSON.stringify(auth.skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
@@ -768,20 +777,24 @@ class PrivateNote extends React.Component {
           <div className='font-16 font-500'>{intl.formatMessage(msgMainHeader.dependentList)}</div>
           <Divider />
         </div>
-        <Table
-          bordered
-          size='middle'
-          dataSource={dependents}
-          columns={columns}
-          onRow={(dependent) => {
-            return {
-              onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.handleClickRow(dependent),
-              onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.handleClickRow(dependent),
-            }
-          }}
-        />
+        <Space direction='vertical' className='flex'>
+          <Table
+            bordered
+            size='middle'
+            dataSource={dependents}
+            columns={columns}
+            onRow={(dependent) => {
+              return {
+                onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.handleClickRow(dependent),
+                onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.handleClickRow(dependent),
+              }
+            }}
+            pagination={false}
+          />
+          <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} onChange={this.handleChangePagination} />
+        </Space>
         {auth.user?.role === 30 ? (
-          <div>
+          <div className='mt-10'>
             <div className='div-title-admin'>
               <div className='font-16 font-500'>{intl.formatMessage(msgCreateAccount.subsidyRequest)}</div>
               <Divider />

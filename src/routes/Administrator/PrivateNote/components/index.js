@@ -1,21 +1,21 @@
 import React, { createRef } from 'react';
-import { Divider, Table, Space, Input, Button, message } from 'antd';
+import { Divider, Table, Space, Input, Button, message, Pagination } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-
-import { ADMINAPPROVED, APPOINTMENT, BALANCE, CLOSED, CONSULTATION, EVALUATION, PENDING, SUBSIDY } from '../../../constant';
-import { ModalBalance, ModalDependentDetail } from '../../../../components/Modal';
 import intl from 'react-intl-universal';
-import msgMainHeader from '../../../../components/MainHeader/messages';
-import messages from '../../../Dashboard/messages';
-import msgCreateAccount from '../../../Sign/CreateAccount/messages';
-import msgDraweDetail from '../../../../components/DrawerDetail/messages';
-import msgModal from '../../../../components/Modal/messages';
-import request from '../../../../utils/api/request';
-import { getDependents, setFlagBalance } from '../../../../utils/api/apiList';
-import PageLoading from '../../../../components/Loading/PageLoading';
+
+import { ADMINAPPROVED, APPOINTMENT, BALANCE, CLOSED, CONSULTATION, EVALUATION, PENDING, SUBSIDY } from 'routes/constant';
+import { ModalBalance, ModalDependentDetail } from 'components/Modal';
+import msgMainHeader from 'components/MainHeader/messages';
+import messages from 'routes/Dashboard/messages';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
+import msgDraweDetail from 'components/DrawerDetail/messages';
+import msgModal from 'components/Modal/messages';
+import request from 'utils/api/request';
+import { getDependents, setFlagBalance } from 'utils/api/apiList';
+import PageLoading from 'components/Loading/PageLoading';
 import './index.less';
 
 class PrivateNote extends React.Component {
@@ -29,29 +29,38 @@ class PrivateNote extends React.Component {
       selectedDependent: {},
       loading: false,
       visibleBalance: false,
+      pageSize: 10,
+      pageNumber: 1,
+      totalSize: 0,
     };
     this.searchInput = createRef(null);
   }
 
   componentDidMount() {
-    this.setState({ loading: true });
     this.getDependentList();
   }
 
-  getDependentList() {
-    request.post(getDependents).then(result => {
+  handleChangePagination = (newPageNumber, newPageSize) => {
+    this.setState({ pageNumber: newPageNumber, pageSize: newPageSize });
+    this.getDependentList(newPageNumber, newPageSize);
+  }
+
+  getDependentList(pageNumber = 1, pageSize = 10) {
+    this.setState({ loading: true });
+    request.post(getDependents, { pageNumber, pageSize }).then(result => {
       this.setState({ loading: false });
       const { success, data } = result;
       if (success) {
         this.setState({
-          dependents: data?.map((user, i) => {
+          dependents: data?.dependents?.map((user, i) => {
             user['key'] = i; return user;
-          }) ?? []
+          }) ?? [],
+          totalSize: data?.total,
         });
       }
     }).catch(err => {
       message.error(err.message);
-      this.setState({ dependents: [], loading: false });
+      this.setState({ dependents: [], totalSize: 0, loading: false });
     })
   }
 
@@ -73,7 +82,7 @@ class PrivateNote extends React.Component {
 
   handleSubmitFlagBalance = (values) => {
     const { notes } = values;
-    const { selectedDependent } = this.state;
+    const { selectedDependent, pageNumber, pageSize } = this.state;
     const providerIds = Object.keys(values).filter(a => a.includes('invoiceId')).map(a => a.split("-")[1]);
     let bulkData = [];
     providerIds.forEach(providerId => {
@@ -125,7 +134,7 @@ class PrivateNote extends React.Component {
       const { success } = result;
       if (success) {
         this.onCloseModalBalance();
-        this.getDependentList();
+        this.getDependentList(pageNumber, pageSize);
       }
     }).catch(err => message.error(err.message));
   }
@@ -135,7 +144,7 @@ class PrivateNote extends React.Component {
   }
 
   render() {
-    const { dependents, visibleDependent, selectedDependent, loading, visibleBalance } = this.state;
+    const { dependents, pageNumber, pageSize, totalSize, visibleDependent, selectedDependent, loading, visibleBalance } = this.state;
     const { auth } = this.props;
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
     const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(s => s?.schoolInfo)?.map(school => { school['text'] = school.name, school['value'] = school._id; return school; });
@@ -299,18 +308,22 @@ class PrivateNote extends React.Component {
           <p className='font-16 font-500'>{intl.formatMessage(msgMainHeader.dependentList)}</p>
           <Divider />
         </div>
-        <Table
-          bordered
-          size='middle'
-          dataSource={dependents}
-          columns={columns}
-          onRow={(dependent) => {
-            return {
-              onClick: (e) => !e.target.className.includes('action') && this.handleClickRow(dependent),
-              onDoubleClick: (e) => !e.target.className.includes('action') && this.handleClickRow(dependent),
-            }
-          }}
-        />
+        <Space direction='vertical' className='flex'>
+          <Table
+            bordered
+            size='middle'
+            dataSource={dependents}
+            columns={columns}
+            onRow={(dependent) => {
+              return {
+                onClick: (e) => !e.target.className.includes('action') && this.handleClickRow(dependent),
+                onDoubleClick: (e) => !e.target.className.includes('action') && this.handleClickRow(dependent),
+              }
+            }}
+            pagination={false}
+          />
+          <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} onChange={this.handleChangePagination} />
+        </Space>
         {visibleDependent && <ModalDependentDetail {...modalDependentProps} />}
         {visibleBalance && <ModalBalance {...modalBalanceProps} />}
         <PageLoading loading={loading} isBackground={true} />
