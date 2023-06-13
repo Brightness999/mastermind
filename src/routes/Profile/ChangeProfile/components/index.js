@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'dva/router';
 import { Menu } from 'antd';
+import Cookies from 'js-cookie';
+import intl from "react-intl-universal";
 
 import InfoProfile from './Provider/info_profile';
 import InfoServices from './Provider/info_services';
@@ -16,15 +18,18 @@ import ConsultantAvailability from './Consultant/info_availability';
 import ChangePassword from './ChangePassword';
 import InfoAdmin from './Admin/info_admin';
 import InfoNotification from './info_notification';
+import SubsidyProgram from './Provider/subsidy_program';
 import { MENU_ADMIN, MENU_CONSULTANT, MENU_PARENT, MENU_PROVIDER, MENU_SCHOOL } from '../constant';
 import { setKeyDefault } from '../service';
 import { store } from '../../../../redux/store';
-import SubsidyProgram from './Provider/subsidy_program';
+import { socketUrl } from 'utils/api/baseUrl';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import './index.less';
 
 export default class extends React.Component {
   constructor(props) {
     super(props);
+    this.socket = undefined;
     this.state = {
       parent: {
         info_child: true,
@@ -85,6 +90,18 @@ export default class extends React.Component {
         this.setState({ listMenu: this.getMenuList(MENU_PARENT) });
         break;
     }
+    this.handleSocketEvents();
+  }
+
+  handleSocketEvents = () => {
+    let opts = {
+      query: {
+        token: Cookies.get('tk'),
+      },
+      withCredentials: true,
+      autoConnect: true,
+    };
+    this.socket = io(socketUrl, opts);
   }
 
   getMenuList = (data) => {
@@ -101,16 +118,24 @@ export default class extends React.Component {
   }
 
   changeMenu = (val) => {
+    const { user } = this.state;
     this.setState({ keyActive: val });
-    switch (this.state.user.role) {
+    let data = {
+      user: user?._id,
+      action: 'Profile',
+    }
+
+    switch (user.role) {
       case 1000:
         let newStateSuperAdmin = { ...this.state.admin };
         switch (val) {
           case 'Info_admin':
-            this.setState({ admin: { newStateSuperAdmin, info_admin: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.adminDetails)}.`;
+            this.setState({ admin: { newStateSuperAdmin, info_admin: true } });
             break;
           default:
-            this.setState({ admin: { newStateSuperAdmin, change_password: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.titleChangePassword)}.`;
+            this.setState({ admin: { newStateSuperAdmin, change_password: true } });
             break;
         }
         break;
@@ -118,10 +143,12 @@ export default class extends React.Component {
         let newStateAdmin = { ...this.state.admin };
         switch (val) {
           case 'Info_admin':
-            this.setState({ admin: { newStateAdmin, info_admin: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.adminDetails)}.`;
+            this.setState({ admin: { newStateAdmin, info_admin: true } });
             break;
           default:
-            this.setState({ admin: { newStateAdmin, change_password: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.titleChangePassword)}.`;
+            this.setState({ admin: { newStateAdmin, change_password: true } });
             break;
         }
         break;
@@ -129,16 +156,20 @@ export default class extends React.Component {
         let newStateConsultant = { ...this.state.consultant }
         switch (val) {
           case 'Info_consultant':
-            this.setState({ consultant: { newStateConsultant, info_consultant: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.generalInformation)}.`;
+            this.setState({ consultant: { newStateConsultant, info_consultant: true } });
             break;
           case 'Info_availability':
-            this.setState({ consultant: { newStateConsultant, info_availability: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.availability)}.`;
+            this.setState({ consultant: { newStateConsultant, info_availability: true } });
             break;
           case 'Info_notification':
-            this.setState({ consultant: { newStateConsultant, info_notification: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.notificationSetting)}.`;
+            this.setState({ consultant: { newStateConsultant, info_notification: true } });
             break;
           default:
-            this.setState({ consultant: { newStateConsultant, change_password: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.titleChangePassword)}.`;
+            this.setState({ consultant: { newStateConsultant, change_password: true } });
             break;
         }
         break;
@@ -146,16 +177,20 @@ export default class extends React.Component {
         let newStateSchool = { ...this.state.school }
         switch (val) {
           case 'Info_school':
-            this.setState({ school: { newStateSchool, info_school: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.schoolDetails)}.`;
+            this.setState({ school: { newStateSchool, info_school: true } });
             break;
           case 'Info_availability':
-            this.setState({ school: { newStateSchool, info_availability: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.availability)}.`;
+            this.setState({ school: { newStateSchool, info_availability: true } });
             break;
           case 'Info_notification':
-            this.setState({ school: { newStateSchool, info_notification: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.notificationSetting)}.`;
+            this.setState({ school: { newStateSchool, info_notification: true } });
             break;
           default:
-            this.setState({ school: { newStateSchool, change_password: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.titleChangePassword)}.`;
+            this.setState({ school: { newStateSchool, change_password: true } });
             break;
         }
         break;
@@ -163,28 +198,36 @@ export default class extends React.Component {
         let newStateProvider = { ...this.state.provider };
         switch (val) {
           case 'Info_general':
-            this.setState({ provider: { newStateProvider, info_general: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.generalInformation)}.`;
+            this.setState({ provider: { newStateProvider, info_general: true } });
             break;
           case 'Info_professional':
-            this.setState({ provider: { newStateProvider, info_professional: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.professionalInformation)}.`;
+            this.setState({ provider: { newStateProvider, info_professional: true } });
             break;
           case 'Info_scheduling':
-            this.setState({ provider: { newStateProvider, info_scheduling: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.scheduling)}.`;
+            this.setState({ provider: { newStateProvider, info_scheduling: true } });
             break;
           case 'Info_availability':
-            this.setState({ provider: { newStateProvider, info_availability: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.availability)}.`;
+            this.setState({ provider: { newStateProvider, info_availability: true } });
             break;
           case 'Info_subsidy':
-            this.setState({ provider: { newStateProvider, info_subsidy: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.subsidyProgram)}.`;
+            this.setState({ provider: { newStateProvider, info_subsidy: true } });
             break;
           case 'Info_billing':
-            this.setState({ provider: { newStateProvider, info_billing: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.billingDetails)}.`;
+            this.setState({ provider: { newStateProvider, info_billing: true } });
             break;
           case 'Info_notification':
-            this.setState({ provider: { newStateProvider, info_notification: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.notificationSetting)}.`;
+            this.setState({ provider: { newStateProvider, info_notification: true } });
             break;
           default:
-            this.setState({ provider: { newStateProvider, change_password: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.titleChangePassword)}.`;
+            this.setState({ provider: { newStateProvider, change_password: true } });
             break;
         }
         break;
@@ -192,19 +235,26 @@ export default class extends React.Component {
         let newStateParent = { ...this.state.parent }
         switch (val) {
           case 'Info_child':
-            this.setState({ parent: { newStateParent, info_child: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.dependentsInfo)}.`;
+            this.setState({ parent: { newStateParent, info_child: true } });
             break;
           case 'Info_parent':
-            this.setState({ parent: { newStateParent, info_parent: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.parentInformation)}.`;
+            this.setState({ parent: { newStateParent, info_parent: true } });
             break;
           case 'Info_notification':
-            this.setState({ parent: { newStateParent, info_notification: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.notificationSetting)}.`;
+            this.setState({ parent: { newStateParent, info_notification: true } });
             break;
           default:
-            this.setState({ parent: { newStateParent, change_password: true } })
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.titleChangePassword)}.`;
+            this.setState({ parent: { newStateParent, change_password: true } });
             break;
         }
         break;
+    }
+    if (data.description) {
+      this.socket.emit('action_tracking', data);
     }
   }
 

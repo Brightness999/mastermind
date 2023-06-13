@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'dva/router';
 import { Divider, Menu } from 'antd';
 import intl from 'react-intl-universal';
+import Cookies from 'js-cookie';
 
 import InfoProfile from '../../../Profile/ChangeProfile/components/Provider/info_profile';
 import InfoServices from '../../../Profile/ChangeProfile/components/Provider/info_services';
@@ -18,13 +19,16 @@ import InfoAdmin from '../../../Profile/ChangeProfile/components/Admin/info_admi
 import SubsidyProgram from '../../../Profile/ChangeProfile/components/Provider/subsidy_program';
 import { MENU_ADMIN, MENU_CONSULTANT, MENU_PARENT, MENU_PROVIDER, MENU_SCHOOL } from '../constant';
 import { setKeyDefault } from '../service';
-import { store } from '../../../../redux/store';
-import mgsSidebar from '../../../../components/SideBar/messages';
+import { store } from 'src/redux/store';
+import { socketUrl } from 'utils/api/baseUrl';
+import mgsSidebar from 'components/SideBar/messages';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import './index.less';
 
 export default class extends React.Component {
   constructor(props) {
     super(props);
+    this.socket = undefined;
     this.state = {
       user: store.getState().auth.selectedUser,
       parent: {
@@ -76,6 +80,18 @@ export default class extends React.Component {
         this.setState({ listMenu: this.getMenuList(MENU_PARENT) });
         break;
     }
+    this.handleSocketEvents();
+  }
+
+  handleSocketEvents = () => {
+    let opts = {
+      query: {
+        token: Cookies.get('tk'),
+      },
+      withCredentials: true,
+      autoConnect: true,
+    };
+    this.socket = io(socketUrl, opts);
   }
 
   getMenuList = (data) => {
@@ -94,57 +110,94 @@ export default class extends React.Component {
   changeMenu = (val) => {
     this.setState({ keyActive: val });
     const { user } = this.state;
+    let data = {
+      user: user?._id,
+      action: 'User Manage',
+    }
+
     switch (user?.role) {
       case 1000:
         let newStateSuperAdmin = { ...this.state.admin };
         switch (val) {
-          case 'Info_admin': this.setState({ admin: { newStateSuperAdmin, info_admin: true } }); break;
+          case 'Info_admin':
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.adminDetails)}.`;
+            this.setState({ admin: { newStateSuperAdmin, info_admin: true } }); break;
           default: break;
         }
         break;
       case 999:
         let newStateAdmin = { ...this.state.admin };
         switch (val) {
-          case 'Info_admin': this.setState({ admin: { newStateAdmin, info_admin: true } }); break;
+          case 'Info_admin':
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.adminDetails)}.`;
+            this.setState({ admin: { newStateAdmin, info_admin: true } }); break;
           default: break;
         }
         break;
       case 100:
         let newStateConsultant = { ...this.state.consultant };
         switch (val) {
-          case 'Info_consultant': this.setState({ consultant: { newStateConsultant, info_consultant: true } }); break;
-          case 'Info_availability': this.setState({ consultant: { newStateConsultant, info_availability: true } }); break;
+          case 'Info_consultant':
+            data['description'] = `Viewed consultant's ${intl.formatMessage(msgCreateAccount.generalInformation)}.`;
+            this.setState({ consultant: { newStateConsultant, info_consultant: true } }); break;
+          case 'Info_availability':
+            data['description'] = `Viewed consultant's ${intl.formatMessage(msgCreateAccount.availability)}.`;
+            this.setState({ consultant: { newStateConsultant, info_availability: true } }); break;
           default: break;
         }
         break;
       case 60:
         let newStateSchool = { ...this.state.school };
         switch (val) {
-          case 'Info_school': this.setState({ school: { newStateSchool, info_school: true } }); break;
-          case 'Info_availability': this.setState({ school: { newStateSchool, info_availability: true } }); break;
+          case 'Info_school':
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.schoolDetails)}.`;
+            this.setState({ school: { newStateSchool, info_school: true } }); break;
+          case 'Info_availability':
+            data['description'] = `Viewed school's ${intl.formatMessage(msgCreateAccount.availability)}.`;
+            this.setState({ school: { newStateSchool, info_availability: true } }); break;
           default: break;
         }
         break;
       case 30:
         let newStateProvider = { ...this.state.provider };
         switch (val) {
-          case 'Info_general': this.setState({ provider: { newStateProvider, info_general: true } }); break;
-          case 'Info_professional': this.setState({ provider: { newStateProvider, info_professional: true } }); break;
-          case 'Info_scheduling': this.setState({ provider: { newStateProvider, info_scheduling: true } }); break;
-          case 'Info_availability': this.setState({ provider: { newStateProvider, info_availability: true } }); break;
-          case 'Info_subsidy': this.setState({ provider: { newStateProvider, info_subsidy: true } }); break;
-          case 'Info_billing': this.setState({ provider: { newStateProvider, info_billing: true } }); break;
+          case 'Info_general':
+            data['description'] = `Viewed provider's ${intl.formatMessage(msgCreateAccount.generalInformation)}.`;
+            this.setState({ provider: { newStateProvider, info_general: true } }); break;
+          case 'Info_professional':
+            data['description'] = `Viewed provider's ${intl.formatMessage(msgCreateAccount.professionalInformation)}.`;
+            this.setState({ provider: { newStateProvider, info_professional: true } }); break;
+          case 'Info_scheduling':
+            data['description'] = `Viewed provider's ${intl.formatMessage(msgCreateAccount.scheduling)}.`;
+            this.setState({ provider: { newStateProvider, info_scheduling: true } }); break;
+          case 'Info_availability':
+            data['description'] = `Viewed provider's ${intl.formatMessage(msgCreateAccount.availability)}.`;
+            this.setState({ provider: { newStateProvider, info_availability: true } }); break;
+          case 'Info_subsidy':
+            data['description'] = `Viewed provider's ${intl.formatMessage(msgCreateAccount.subsidyProgram)}.`;
+            this.setState({ provider: { newStateProvider, info_subsidy: true } }); break;
+          case 'Info_billing':
+            data['description'] = `Viewed provider's ${intl.formatMessage(msgCreateAccount.billingDetails)}.`;
+            this.setState({ provider: { newStateProvider, info_billing: true } }); break;
           default: break;
         }
         break;
       case 3:
         let newStateParent = { ...this.state.parent }
         switch (val) {
-          case 'Info_child': this.setState({ parent: { newStateParent, info_child: true } }); break;
-          case 'Info_parent': this.setState({ parent: { newStateParent, info_parent: true } }); break;
+          case 'Info_child':
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.dependentsInfo)}.`;
+            this.setState({ parent: { newStateParent, info_child: true } }); break;
+          case 'Info_parent':
+            data['description'] = `Viewed ${intl.formatMessage(msgCreateAccount.parentInformation)}.`;
+            this.setState({ parent: { newStateParent, info_parent: true } }); break;
           default: break;
         }
         break;
+    }
+
+    if (data.description) {
+      this.socket.emit('action_tracking', data);
     }
   }
 
