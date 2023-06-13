@@ -85,7 +85,7 @@ class ModalCurrentReferralService extends React.Component {
 		const { years, months, date } = selectedDate.toObject();
 		const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
 		const postData = {
-			_id: this.props.event?._id,
+			appointmentId: this.props.event?._id,
 			dependent: selectedDependent,
 			skillSet: selectedSkillSet,
 			date: selectedTime,
