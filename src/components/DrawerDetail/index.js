@@ -1262,7 +1262,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === CLOSED && !event?.sessionInvoice?.isPaid && (userRole === 3 || userRole > 900) && (
+              {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === CLOSED && !event?.sessionInvoice?.isPaid && !event?.flagInvoice?.isPaid && (userRole === 3 || userRole > 900) && (
                 <Col span={12}>
                   <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                     <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />

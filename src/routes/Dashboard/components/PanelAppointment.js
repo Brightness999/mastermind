@@ -508,7 +508,7 @@ class PanelAppointment extends React.Component {
           {appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && [CLOSED, DECLINED].includes(a.status) && a.flagStatus != ACTIVE && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
-              {(this.props.user?.role === PARENT && !data?.sessionInvoice?.isPaid) ? (
+              {(this.props.user?.role === PARENT && data?.sessionInvoice && !data?.sessionInvoice?.isPaid) ? (
                 <div className={`item-right cursor gap-1 ${data?.status === DECLINED && 'display-none events-none'}`}>
                   <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                     <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
