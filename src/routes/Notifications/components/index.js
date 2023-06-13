@@ -57,7 +57,9 @@ class NotificationSetting extends React.Component {
       const { success, data } = result;
       if (success) {
         this.setState({
-          notifications: data?.docs || [],
+          notifications: data?.docs?.map((notification, i) => {
+            notification['key'] = i; return notification;
+          }) ?? [],
           totalSize: data?.total || 0,
         });
         const readData = data?.docs?.filter(a => !a.isRead).map(a => ({
