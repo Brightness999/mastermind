@@ -1,77 +1,33 @@
 @import '../../../assets/styles/variables.less';
 
-.dashboard-page {
- 
-  .mr-5 {
-    margin-right: 10px;
-  }
-  .m-5 {
-    margin: 0 5px;
-  }
-  .div-panel-col {
-    .div-content-new {
-      overflow-y: auto;
-      max-height: 45vh;
-    }
-    .div-content-notifi {
-      overflow-y: auto;
-      max-height: 25vh;
+.message {
+  position: relative;
+  display: flex;
+}
 
-      @media (max-width: 991px) {
-        max-height: 40vh;
-      }
-    }
+.message-content {
+  display: inline-block;
+  width: 100%;
+  background-color: #2196f3;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  animation: new-message 1s ease-in-out;
+}
 
-    &.col-small {
-      text-align: center;
-      padding: 2rem .5rem;
-    }
-    &.col-big {
-      padding: 1.75rem;
-    }
-    .anticon {
-      color: @red350;
-      margin-bottom: 10px;
-      svg {
-        width: 25px;
-        height: 25px;
-      }
-    }
-    .panel-title-small {
-      color: @gray300;
-      font-weight: 500;
-      height: 35px;
-      line-height: 18px;
-    }
-    .panel-title-big {
-      color: @gray800;
-      font-size: 18px;
-      font-weight: normal;
-      margin-bottom: 2rem;
-    }
-    .panel-number {
-      color: @red350;
-      font-size: 1.6rem;
-    }
-
-    .div-notifi {
-      .notifi-title {
-        font-size: .85rem;
-        line-height: 1.3rem;
-        color: @gray800;
-        font-weight: normal;
-        margin-bottom: 10px;
-        &:hover {
-          color: @red350;
-        }
-      }
-      .notifi-content {
-        color: @gray300;
-        margin-bottom: 0.25rem;
-        font-size: .76rem;
-      }
-     
-    }
+@keyframes new-message {
+  0% {
+    transform: scale(0);
+    opacity: 0;
   }
-  
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }

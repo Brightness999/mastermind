@@ -1,5 +1,5 @@
 import React from 'react';
-import { Divider, Pagination, Table, message } from 'antd';
+import { Divider, Pagination, Space, Table, message } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -82,7 +82,10 @@ class NotificationSetting extends React.Component {
   render() {
     const { notifications, pageNumber, pageSize, totalSize } = this.state;
     const columns = [
-      { title: 'Message', dataIndex: 'text', key: 'message' },
+      {
+        title: 'Message', key: 'message',
+        render: (notification) => (<div className={`${notification?.isRead ? '' : 'message'}`}><div className={`${notification?.isRead ? '' : 'message-content'}`}>{notification.text}</div></div>)
+      },
       {
         title: 'Author', dataIndex: 'fromUser', key: 'author',
         render: user => {
@@ -132,8 +135,10 @@ class NotificationSetting extends React.Component {
           <p className='font-16 font-500 p-0'>{intl.formatMessage(msgMainHeader.notification)}</p>
           <Divider />
         </div>
-        <Table bordered size='middle' pagination={false} dataSource={notifications} columns={columns} />
-        <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} onChange={this.handleChangePagination} />
+        <Space direction='vertical' className='flex'>
+          <Table bordered size='middle' pagination={false} dataSource={notifications} columns={columns} />
+          <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} onChange={this.handleChangePagination} />
+        </Space>
       </div>
     );
   }
