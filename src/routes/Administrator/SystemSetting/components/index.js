@@ -46,18 +46,20 @@ class SystemSetting extends React.Component {
 	}
 
 	onFinish = (values) => {
-		request.post(updateSettings, values).then(res => {
-			const { success } = res;
-			if (success) {
-				message.success('Successfully updated');
-				this.props.dispatch(setCommunity({
-					...this.props.community,
-					community: this.state.cityConnections?.find(city => city?._id == values?.community),
-				}));
-			}
-		}).catch(error => {
-			console.log('get settings error---', error);
-		})
+		if (values.community) {
+			request.post(updateSettings, values).then(res => {
+				const { success } = res;
+				if (success) {
+					message.success('Successfully updated');
+					this.props.dispatch(setCommunity({
+						...this.props.community,
+						community: this.state.cityConnections?.find(city => city?._id == values?.community),
+					}));
+				}
+			}).catch(error => {
+				console.log('get settings error---', error);
+			})
+		}
 	};
 
 	handleAddCity = () => {
