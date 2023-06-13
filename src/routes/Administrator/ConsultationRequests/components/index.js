@@ -1,5 +1,5 @@
 import React, { createRef } from 'react';
-import { Divider, Table, Space, Button, Input, message } from 'antd';
+import { Divider, Table, Space, Button, Input, message, Pagination } from 'antd';
 import intl from 'react-intl-universal';
 import { SearchOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
@@ -24,29 +24,18 @@ class ConsultationRequest extends React.Component {
       skillSet: [],
       loading: false,
       csvData: [],
+      pageSize: 10,
+      pageNumber: 1,
+      totalSize: 0,
     };
     this.searchInput = createRef(null);
     this.socket = undefined;
   }
 
   componentDidMount() {
-    this.setState({ loading: true });
     const skillSet = JSON.parse(JSON.stringify(this.props.auth.skillSet));
     this.setState({ skillSet: skillSet?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; }) });
-    request.post(getConsultationList).then(result => {
-      this.setState({ loading: false });
-      const { success, data } = result;
-      if (success) {
-        this.setState({
-          consultationList: data?.map((consultation, i) => {
-            consultation['key'] = i; return consultation;
-          }) ?? []
-        });
-      }
-    }).catch(err => {
-      message.error(err.message);
-      this.setState({ loading: false });
-    })
+    this.getConsultations();
     const opts = {
       query: {
         token: Cookies.get('tk'),
@@ -55,6 +44,30 @@ class ConsultationRequest extends React.Component {
       autoConnect: true,
     };
     this.socket = io(socketUrl, opts);
+  }
+
+  handleChangePagination = (newPageNumber, newPageSize) => {
+    this.setState({ pageNumber: newPageNumber, pageSize: newPageSize });
+    this.getConsultations(newPageNumber, newPageSize);
+  }
+
+  getConsultations = (pageNumber = 1, pageSize = 10) => {
+    this.setState({ loading: true });
+    request.post(getConsultationList, { pageNumber, pageSize }).then(result => {
+      this.setState({ loading: false });
+      const { success, data } = result;
+      if (success) {
+        this.setState({
+          consultationList: data?.consultations?.map((consultation, i) => {
+            consultation['key'] = i; return consultation;
+          }) ?? [],
+          totalSize: data?.total || 0,
+        });
+      }
+    }).catch(err => {
+      message.error(err.message);
+      this.setState({ loading: false });
+    })
   }
 
   exportToExcel = () => {
@@ -78,7 +91,7 @@ class ConsultationRequest extends React.Component {
   }
 
   render() {
-    const { consultationList, skillSet, loading, csvData } = this.state;
+    const { pageNumber, pageSize, totalSize, consultationList, skillSet, loading, csvData } = this.state;
     const csvHeaders = ["Student Name", "Referrer", "Student Grade", "Service Requested", "PhoneNumber/Google Meet", "Date"];
     const columns = [
       {
@@ -152,7 +165,10 @@ class ConsultationRequest extends React.Component {
             Download CSV
           </Button>
         </CSVLink>
-        <Table bordered size='middle' dataSource={consultationList} columns={columns} />
+        <Space direction='vertical' className='flex'>
+          <Table bordered size='middle' pagination={false} dataSource={consultationList} columns={columns} />
+          <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
+        </Space>
         <PageLoading loading={loading} isBackground={true} />
       </div>
     );
