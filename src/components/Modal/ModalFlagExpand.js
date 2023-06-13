@@ -33,7 +33,7 @@ class ModalFlagExpand extends React.Component {
 	componentDidMount() {
 		const { auth, invoices } = this.props;
 		const { selectedTab } = this.state;
-		this.setState({ tabFlags: JSON.parse(JSON.stringify(invoices))?.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) });
+		this.setState({ tabFlags: invoices?.length ? JSON.parse(JSON.stringify(invoices))?.filter(i => [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(i.type) && i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) : [] });
 		this.props.getInvoiceList({ role: auth.user.role });
 	}
 

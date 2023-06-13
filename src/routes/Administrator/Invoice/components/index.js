@@ -51,7 +51,7 @@ class InvoiceList extends React.Component {
         message.error(err.message);
       });
     }
-    this.setState({ tabInvoices: JSON.parse(JSON.stringify(invoices))?.filter(i => i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) });
+    this.setState({ tabInvoices: invoices?.length ? JSON.parse(JSON.stringify(invoices))?.filter(i => i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) : [] });
     this.props.getInvoiceList({ role: auth.user.role });
   }
 
