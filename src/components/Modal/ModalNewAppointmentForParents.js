@@ -186,7 +186,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		this.setState({ errorMessage: '' });
 
 		const { years, months, date } = selectedDate.toObject();
-		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
+		const hour = arrTime?.[selectedTimeIndex]?.value.clone().set({ years, months, date });
 		const dependent = listDependents?.find(d => d._id === selectedDependent);
 		const subsidy = dependent?.subsidy?.find(s => s.skillSet === selectedSkillSet && s.status === 5);
 
@@ -194,7 +194,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			skillSet: selectedSkillSet,
 			dependent: selectedDependent,
 			provider: selectedProvider,
-			date: appointmentType === SCREEN ? undefined : hour,
+			date: hour,
 			location: appointmentType > SCREEN ? address : '',
 			phoneNumber: appointmentType === SCREEN ? data.phoneNumber : '',
 			notes: appointmentType === SCREEN ? data.notes : notes,
@@ -501,7 +501,13 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	onOpenModalScreening = () => {
-		const { selectedDependent, listProvider, selectedProviderIndex } = this.state;
+		const { selectedProvider, selectedDependent, listProvider, selectedProviderIndex } = this.state;
+
+		if (selectedProvider == undefined) {
+			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
+			return;
+		}
+
 		const appointment = listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent === selectedDependent && a.type === SCREEN && a.status === PENDING);
 		if (appointment) {
 			message.warning("Your screening request is still being processed", 5);
