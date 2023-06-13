@@ -30,7 +30,7 @@ import { store } from 'src/redux/store';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
 import { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from 'src/redux/features/authSlice';
-import { changeTime, getAppointmentsData, getAppointmentsMonthData, getInvoiceList, getSubsidyRequests, setInvoiceList } from 'src/redux/features/appointmentsSlice'
+import { changeTime, getAppointmentsData, getAppointmentsMonthData, getInvoiceList, getSubsidyRequests, setInvoiceList, setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice'
 import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance, updateInvoice } from 'utils/api/apiList';
 import Subsidiaries from './school';
 import PageLoading from 'components/Loading/PageLoading';
@@ -91,7 +91,7 @@ class Dashboard extends React.Component {
   }
 
   componentDidMount() {
-    const { user } = this.props;
+    const { user, appointments, appointmentsInMonth, invoices } = this.props;
     this.setState({ loading: true });
     const params = new URLSearchParams(window.location.search);
     const success = decryptParam(params.get('s')?.replaceAll(' ', '+') || '');
@@ -105,6 +105,53 @@ class Dashboard extends React.Component {
           const url = window.location.href;
           const cleanUrl = url.split('?')[0];
           window.history.replaceState({}, document.title, cleanUrl);
+          if (invoiceId) {
+            const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => {
+              if (a.sessionInvoice?._id === invoiceId) {
+                a.sessionInvoice = { ...a.sessionInvoice, isPaid: 1 }
+              }
+              if (a.flagInvoice?._id === invoiceId) {
+                a.flagInvoice = { ...a.flagInvoice, isPaid: 1 }
+              }
+              return a;
+            })
+            const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsInMonth))?.map(a => {
+              if (a.sessionInvoice?._id === invoiceId) {
+                a.sessionInvoice = { ...a.sessionInvoice, isPaid: 1 }
+              }
+              if (a.flagInvoice?._id === invoiceId) {
+                a.flagInvoice = { ...a.flagInvoice, isPaid: 1 }
+              }
+              return a;
+            })
+            const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(a => {
+              if (a._id === invoiceId) {
+                a.isPaid = 1;
+              }
+              return a;
+            })
+
+            this.props.setAppointments(newAppointments);
+            this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+            this.props.setInvoiceList(newInvoices);
+          }
+          if (appointmentId) {
+            const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => {
+              if (a._id === appointmentId) {
+                a.isCancellationFeePaid = 1;
+              }
+              return a;
+            })
+            const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsInMonth))?.map(a => {
+              if (a._id === appointmentId) {
+                a.isCancellationFeePaid = 1;
+              }
+              return a;
+            })
+
+            this.props.setAppointments(newAppointments);
+            this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+          }
         } else {
           message.warning('Something went wrong. Please try again');
         }
@@ -540,7 +587,7 @@ class Dashboard extends React.Component {
         data.revert();
         const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
         this.setState({ paymentDescription: desc, selectedEvent: event }, () => {
-          message.warn(desc).then(() => {
+          message.warn(desc, 2).then(() => {
             this.setState({ visiblePayment: true });
           });
         });
@@ -1385,7 +1432,7 @@ class Dashboard extends React.Component {
                                     <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
                                     <input type="hidden" name="cancel_return" value={window.location.href} />
                                     <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                                    <button className='font-12 flag-action pay-flag-button'>
+                                    <button id='action' className='font-12 flag-action pay-flag-button'>
                                       {intl.formatMessage(msgDrawer.payFlag)}
                                     </button>
                                   </form>
@@ -1490,4 +1537,4 @@ const mapStateToProps = state => ({
   user: state.auth.user,
 })
 
-export default compose(connect(mapStateToProps, { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, getInvoiceList, setInvoiceList }))(Dashboard);
+export default compose(connect(mapStateToProps, { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, getInvoiceList, setInvoiceList, setAppointments, setAppointmentsInMonth }))(Dashboard);

@@ -96,11 +96,11 @@ class DrawerDetail extends Component {
       const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
       if (auth.user.role === PARENT) {
         this.setState({ paymentDescription: desc });
-        message.warn(desc).then(() => {
+        message.warn(desc, 2).then(() => {
           this.setState({ visiblePayment: true, cancellationType: CANCEL });
         });
       } else {
-        message.warn(desc);
+        message.warn(desc, 2);
         this.setState({ visibleCancelForAdmin: true, cancellationType: CANCEL });
       }
     } else {
@@ -169,11 +169,11 @@ class DrawerDetail extends Component {
       const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
       if (user.role === PARENT) {
         this.setState({ paymentDescription: desc });
-        message.warn(desc).then(() => {
+        message.warn(desc, 2).then(() => {
           this.setState({ visiblePayment: true, cancellationType: RESCHEDULE });
         });
       } else {
-        message.warn(desc);
+        message.warn(desc, 2);
         this.setState({ visibleCancelForAdmin: true, cancellationType: RESCHEDULE });
       }
     } else {
