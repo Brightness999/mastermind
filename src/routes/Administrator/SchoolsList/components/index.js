@@ -1,15 +1,16 @@
-import { Divider, Table, Space, Button, Input, message } from 'antd';
-import { routerLinks } from '../../../constant';
-import { ModalConfirm, ModalInputCode } from '../../../../components/Modal';
 import React, { createRef } from 'react';
+import { Divider, Table, Space, Button, Input, message, Pagination } from 'antd';
 import intl from 'react-intl-universal';
-import mgsSidebar from '../../../../components/SideBar/messages';
-import request from '../../../../utils/api/request';
 import { SearchOutlined } from '@ant-design/icons';
-import { activateUser, getSchools } from '../../../../utils/api/apiList';
-import PageLoading from '../../../../components/Loading/PageLoading';
-import { setSelectedUser } from '../../../../redux/features/authSlice';
-import { store } from '../../../../redux/store';
+
+import { routerLinks } from 'routes/constant';
+import { ModalConfirm, ModalInputCode } from 'components/Modal';
+import mgsSidebar from 'components/SideBar/messages';
+import request from 'utils/api/request';
+import { activateUser, getSchools } from 'utils/api/apiList';
+import PageLoading from 'components/Loading/PageLoading';
+import { setSelectedUser } from 'src/redux/features/authSlice';
+import { store } from 'src/redux/store';
 
 export default class extends React.Component {
 	constructor(props) {
@@ -22,20 +23,33 @@ export default class extends React.Component {
 			userId: '',
 			userState: 1,
 			loading: false,
+			pageSize: 10,
+			pageNumber: 1,
+			totalSize: 0,
 		};
 		this.searchInput = createRef(null);
 	}
 
 	componentDidMount() {
+		this.getSchoolList();
+	}
+
+	handleChangePagination = (newPageNumber, newPageSize) => {
+		this.setState({ pageNumber: newPageNumber, pageSize: newPageSize });
+		this.getUserList(newPageNumber, newPageSize);
+	}
+
+	getSchoolList = (pageNumber = 1, pageSize = 10) => {
 		this.setState({ loading: true });
-		request.post(getSchools).then(result => {
+		request.post(getSchools, { pageNumber, pageSize }).then(result => {
 			this.setState({ loading: false });
 			const { success, data } = result;
 			if (success) {
 				this.setState({
-					schools: data?.map((user, i) => {
+					schools: data?.schools?.map((user, i) => {
 						user['key'] = i; return user;
-					}) ?? []
+					}) ?? [],
+					totalSize: data?.total,
 				});
 			}
 		}).catch(err => {
@@ -102,7 +116,7 @@ export default class extends React.Component {
 	}
 
 	render() {
-		const { visibleInputCode, schools, isConfirmModal, confirmMessage, loading } = this.state;
+		const { pageNumber, pageSize, totalSize, visibleInputCode, schools, isConfirmModal, confirmMessage, loading } = this.state;
 		const columns = [
 			{ title: 'User Name', dataIndex: 'username', key: 'username', sorter: (a, b) => a.username > b.username ? 1 : -1 },
 			{ title: 'Email', dataIndex: 'email', key: 'email', sorter: (a, b) => a.email > b.email ? 1 : -1 },
@@ -113,7 +127,7 @@ export default class extends React.Component {
 				filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
 					<div style={{ padding: 8 }}>
 						<Input
-              name='SearchName'
+							name='SearchName'
 							ref={this.searchInput}
 							placeholder={`Search Address`}
 							value={selectedKeys[0]}
@@ -189,7 +203,10 @@ export default class extends React.Component {
 					<p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.schoolsList)}</p>
 					<Divider />
 				</div>
-				<Table bordered size='middle' dataSource={schools} columns={columns} />
+				<Space direction='vertical' className='flex'>
+					<Table bordered size='middle' pagination={false} dataSource={schools} columns={columns} />
+					<Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
+				</Space>
 				{visibleInputCode && <ModalInputCode {...modalInputCodeProps} />}
 				<ModalConfirm {...confirmModalProps} />
 				<PageLoading loading={loading} isBackground={true} />
