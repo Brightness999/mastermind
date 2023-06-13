@@ -520,7 +520,7 @@ class PanelAppointment extends React.Component {
           {visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(msgDashboard.past)} key="3">
-          {appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && [CLOSED, DECLINED].includes(a.status) && a.flagStatus != ACTIVE && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && [CLOSED, DECLINED].includes(a.status) && a.flagStatus != ACTIVE)?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className={`item-right gap-1 ${data?.status === DECLINED && 'display-none events-none'}`}>
@@ -529,7 +529,7 @@ class PanelAppointment extends React.Component {
               </div>
             </div>
           ))}
-          {(appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && [CLOSED, DECLINED].includes(a.status) && a.flagStatus != ACTIVE && moment().isAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
+          {(appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && [CLOSED, DECLINED].includes(a.status) && a.flagStatus != ACTIVE)?.length == 0) && (
             <div key={1} className='list-item justify-center'>
               <p className='p-10'>No past appoiment</p>
             </div>
