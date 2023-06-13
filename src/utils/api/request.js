@@ -26,9 +26,10 @@ instance.interceptors.request.use(
 				message.warning({
 					content: 'Your session has expired.',
 					className: 'popup-session-expired',
-					duration: 2,
+					duration: 1,
+				}).then(() => {
+					window.location.href = '/';
 				})
-				window.location.href = '/';
 			} else {
 				delete instance.defaults.headers.common.Authorization;
 			}
