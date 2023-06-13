@@ -35,8 +35,8 @@ class InvoiceList extends React.Component {
     const { auth, invoices } = this.props;
     const { selectedTab } = this.state;
     const params = new URLSearchParams(window.location.search);
-    const success = decryptParam(params.get('s')?.replace(' ', '+') || '');
-    const invoiceId = decryptParam(params.get('i')?.replace(' ', '+') || '');
+    const success = decryptParam(params.get('s')?.replaceAll(' ', '+') || '');
+    const invoiceId = decryptParam(params.get('i')?.replaceAll(' ', '+') || '');
     if (success === 'true' && (invoiceId)) {
       request.post(payInvoice, { invoiceId }).then(res => {
         if (res.success) {
@@ -44,6 +44,16 @@ class InvoiceList extends React.Component {
           const url = window.location.href;
           const cleanUrl = url.split('?')[0];
           window.history.replaceState({}, document.title, cleanUrl);
+          if (invoiceId) {
+            const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(a => {
+              if (a._id === invoiceId) {
+                a.isPaid = 1;
+              }
+              return a;
+            })
+
+            this.props.setInvoiceList(newInvoices);
+          }
         } else {
           message.warning('Something went wrong. Please try again');
         }

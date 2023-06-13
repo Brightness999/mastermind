@@ -86,7 +86,7 @@ class SchedulingCenter extends React.Component {
   }
 
   componentDidMount() {
-    const { auth } = this.props;
+    const { auth, appointments, appointmentsInMonth, invoices } = this.props;
     this.setState({ loading: true });
     const params = new URLSearchParams(window.location.search);
     const success = decryptParam(params.get('s')?.replaceAll(' ', '+') || '');
@@ -99,6 +99,53 @@ class SchedulingCenter extends React.Component {
           const url = window.location.href;
           const cleanUrl = url.split('?')[0];
           window.history.replaceState({}, document.title, cleanUrl);
+          if (invoiceId) {
+            const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => {
+              if (a.sessionInvoice?._id === invoiceId) {
+                a.sessionInvoice = { ...a.sessionInvoice, isPaid: 1 }
+              }
+              if (a.flagInvoice?._id === invoiceId) {
+                a.flagInvoice = { ...a.flagInvoice, isPaid: 1 }
+              }
+              return a;
+            })
+            const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsInMonth))?.map(a => {
+              if (a.sessionInvoice?._id === invoiceId) {
+                a.sessionInvoice = { ...a.sessionInvoice, isPaid: 1 }
+              }
+              if (a.flagInvoice?._id === invoiceId) {
+                a.flagInvoice = { ...a.flagInvoice, isPaid: 1 }
+              }
+              return a;
+            })
+            const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(a => {
+              if (a._id === invoiceId) {
+                a.isPaid = 1;
+              }
+              return a;
+            })
+
+            this.props.setAppointments(newAppointments);
+            this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+            this.props.setInvoiceList(newInvoices);
+          }
+          if (appointmentId) {
+            const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => {
+              if (a._id === appointmentId) {
+                a.isCancellationFeePaid = 1;
+              }
+              return a;
+            })
+            const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsInMonth))?.map(a => {
+              if (a._id === appointmentId) {
+                a.isCancellationFeePaid = 1;
+              }
+              return a;
+            })
+
+            this.props.setAppointments(newAppointments);
+            this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+          }
         } else {
           message.warning('Something went wrong. Please try again');
         }
