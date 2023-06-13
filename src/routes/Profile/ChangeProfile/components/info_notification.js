@@ -1,13 +1,15 @@
 import React from 'react';
 import { Row, Col, Button, message, Card, Switch } from 'antd';
 import intl from 'react-intl-universal';
-import messages from '../../../Sign/CreateAccount/messages';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import request from '../../../../utils/api/request';
-import { updateNotificationSetting } from '../../../../utils/api/apiList';
-import { store } from '../../../../redux/store';
-import { setUser } from '../../../../redux/features/authSlice';
+import Cookies from 'js-cookie';
+
+import messages from 'routes/Sign/CreateAccount/messages';
+import request from 'utils/api/request';
+import { updateNotificationSetting } from 'utils/api/apiList';
+import { socketUrl } from 'utils/api/baseUrl';
+import { setUser, setCountOfUnreadNotifications } from 'src/redux/features/authSlice';
 
 class InfoNotification extends React.Component {
 	constructor(props) {
@@ -85,7 +87,25 @@ class InfoNotification extends React.Component {
 			isInvoicePaidPush: this.props.user.notificationSetting?.isInvoicePaidPush,
 			isInvoicePaidText: this.props.user.notificationSetting?.isInvoicePaidText,
 		});
+		this.scriptLoaded();
 	}
+
+	scriptLoaded = () => {
+		let opts = {
+			query: {
+				token: Cookies.get('tk'),
+			},
+			withCredentials: true,
+			autoConnect: true,
+		};
+		this.socket = io(socketUrl, opts);
+		this.socket.on('socket_result', data => {
+			if (data.key === "countOfUnreadNotifications") {
+				this.props.setCountOfUnreadNotifications(data.data);
+			}
+		})
+	}
+
 	handleSaveSetting = () => {
 		const data = {
 			isNewSessionEmail: this.state.isNewSessionEmail,
@@ -163,7 +183,7 @@ class InfoNotification extends React.Component {
 				isInvoicePaidText: this.state.isInvoicePaidText,
 			};
 			if (success) {
-				store.dispatch(setUser(user));
+				this.props.setUser(user);
 				message.success("Successfully updated");
 			}
 		}).catch(err => {
@@ -326,8 +346,6 @@ class InfoNotification extends React.Component {
 	}
 }
 
-const mapStateToProps = state => {
-	return { user: state.auth.user };
-}
+const mapStateToProps = state => ({ user: state.auth.user });
 
-export default compose(connect(mapStateToProps))(InfoNotification);
+export default compose(connect(mapStateToProps, { setUser, setCountOfUnreadNotifications }))(InfoNotification);
