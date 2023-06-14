@@ -628,7 +628,13 @@ class DrawerDetail extends Component {
   }
 
   handleRescheduleScreening = (data) => {
-    request.post(rescheduleAppointmentForParent, { screeningTime: data?.time, phoneNumber: data?.phoneNumber, notes: data?.notes, _id: this.props.event?._id }).then(result => {
+    const rescheduleData = {
+      appointmentId: this.props.event?._id,
+      screeningTime: data?.time,
+      phoneNumber: data?.phoneNumber,
+      notes: data?.notes,
+    }
+    request.post(rescheduleAppointmentForParent, rescheduleData).then(result => {
       if (result.success) {
         this.closeModalCurrent();
         this.updateAppointments();
