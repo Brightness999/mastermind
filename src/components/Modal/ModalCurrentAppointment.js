@@ -40,6 +40,7 @@ class ModalCurrentAppointment extends React.Component {
 		duration: 30,
 		address: this.props.event?.location,
 		cancellationFee: '',
+		loadingSchedule: false,
 	}
 
 	getArrTime = (date) => {
@@ -245,7 +246,9 @@ class ModalCurrentAppointment extends React.Component {
 			}
 		}
 
+		this.setState({ loadingSchedule: true });
 		request.post(rescheduleAppointmentForParent, postData).then(result => {
+			this.setState({ loadingSchedule: false });
 			if (result.success) {
 				this.setState({ errorMessage: '' });
 				if (event?.type == EVALUATION) {
@@ -258,7 +261,7 @@ class ModalCurrentAppointment extends React.Component {
 				this.setState({ errorMessage: result.data });
 			}
 		}).catch(err => {
-			this.setState({ errorMessage: err.message });
+			this.setState({ errorMessage: err.message, loadingSchedule: false });
 		});
 	}
 
@@ -284,6 +287,7 @@ class ModalCurrentAppointment extends React.Component {
 			subsidyAvailable,
 			restSessions,
 			cancellationFee,
+			loadingSchedule,
 		} = this.state;
 		const { event } = this.props;
 		const modalProps = {
@@ -604,7 +608,7 @@ class ModalCurrentAppointment extends React.Component {
 									</Button>
 								</Popover>
 							) : (
-								<Button key="submit" type="primary" htmlType='submit'>
+								<Button key="submit" type="primary" htmlType='submit' loading={loadingSchedule}>
 									{intl.formatMessage(msgDrawer.reschedule)?.toUpperCase()}
 								</Button>
 							)}

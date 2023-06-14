@@ -38,6 +38,7 @@ class ModalReferralService extends React.Component {
 		consultants: [],
 		skillSet: this.props.auth.skillSet,
 		selectedSubsidy: undefined,
+		loadingSchedule: false,
 	}
 
 	componentDidMount = () => {
@@ -123,7 +124,9 @@ class ModalReferralService extends React.Component {
 			consultant: auth.user.role === CONSULTANT ? auth.user.consultantInfo?._id : undefined,
 		};
 
+		this.setState({ loadingSchedule: true });
 		request.post(createAppointmentForParent, postData).then(result => {
+			this.setState({ loadingSchedule: false });
 			const { success, data } = result;
 			if (success) {
 				this.setState({
@@ -144,6 +147,7 @@ class ModalReferralService extends React.Component {
 			}
 		}).catch(err => {
 			message.error(err.message);
+			this.setState({ loadingSchedule: false });
 		})
 	}
 
@@ -342,7 +346,7 @@ class ModalReferralService extends React.Component {
 	}
 
 	render() {
-		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, skillSet, consultants, selectedSubsidy } = this.state;
+		const { loadingSchedule, selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, skillSet, consultants, selectedSubsidy } = this.state;
 		const { auth, listSubsidy, subsidy } = this.props;
 		const subsidiaries = listSubsidy?.filter(s => s.status === ADMINPREAPPROVED && !s.consultation?.date) ?? [];
 
@@ -558,7 +562,7 @@ class ModalReferralService extends React.Component {
 							<Button key="back" onClick={this.props.onCancel}>
 								{intl.formatMessage(messages.goBack).toUpperCase()}
 							</Button>
-							<Button key="submit" type="primary" htmlType='submit'>
+							<Button key="submit" type="primary" htmlType='submit' loading={loadingSchedule}>
 								{intl.formatMessage(messages.scheduleConsultation).toUpperCase()}
 							</Button>
 						</Row>

@@ -21,6 +21,7 @@ class ModalNewSubsidyRequest extends React.Component {
 			listSchools: [],
 			dependents: [],
 			isRequestRav: false,
+			loadingCreate: false,
 		}
 	}
 
@@ -76,7 +77,9 @@ class ModalNewSubsidyRequest extends React.Component {
 		if (subsidyRequests?.find(s => [0, 1, 3, 5].includes(s.status) && s.student?._id === values?.student && s.skillSet?._id === values.skillSet)) {
 			message.warning("Your subsidy request is still being processed");
 		} else {
+			this.setState({ loadingCreate: true });
 			request.post(createSubsidyRequest, values).then(result => {
+				this.setState({ loadingCreate: false });
 				if (result.success) {
 					message.success('Requested successfully.');
 					this.form.resetFields();
@@ -85,7 +88,7 @@ class ModalNewSubsidyRequest extends React.Component {
 					this.form.setFields([{ name: 'documents', errors: ['error from server'] }]);
 				}
 			}).catch(err => {
-				console.log('create subsidy request error---', err);
+				this.setState({ loadingCreate: false });
 				this.form.setFields([{ name: 'documents', errors: ['error from server'] }]);
 			})
 		}
@@ -105,7 +108,7 @@ class ModalNewSubsidyRequest extends React.Component {
 	}
 
 	render = () => {
-		const { skillSet, listSchools, dependents, isRequestRav } = this.state;
+		const { loadingCreate, skillSet, listSchools, dependents, isRequestRav } = this.state;
 		const modalProps = {
 			className: 'modal-new-subsidy',
 			title: (<span className='font-20'>{intl.formatMessage(msgCreateAccount.subsidyRequest)}</span>),
@@ -262,7 +265,7 @@ class ModalNewSubsidyRequest extends React.Component {
 								<Button key="back" onClick={this.props.onCancel}>
 									{intl.formatMessage(messages.cancel)}
 								</Button>
-								<Button key="submit" type="primary" htmlType="submit" style={{ padding: '7.5px 30px' }}>
+								<Button key="submit" type="primary" htmlType="submit" loading={loadingCreate} style={{ padding: '7.5px 30px' }}>
 									{intl.formatMessage(messages.create)}
 								</Button>
 							</Row>

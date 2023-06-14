@@ -37,6 +37,7 @@ class ModalCurrentReferralService extends React.Component {
 		consultants: [],
 		dependents: this.props.auth.dependents,
 		skillSet: this.props.auth.skillSet,
+		loadingSchedule: false,
 	}
 
 	componentDidMount = () => {
@@ -97,7 +98,9 @@ class ModalCurrentReferralService extends React.Component {
 			status: PENDING,
 		};
 
+		this.setState({ loadingSchedule: true });
 		request.post(rescheduleAppointmentForParent, postData).then(result => {
+			this.setState({ loadingSchedule: false });
 			if (result.success) {
 				this.setState({
 					selectedDate: undefined,
@@ -114,6 +117,7 @@ class ModalCurrentReferralService extends React.Component {
 			}
 		}).catch(err => {
 			message.error('cannot create referral');
+			this.setState({ loadingSchedule: false });
 		})
 	}
 
@@ -263,7 +267,7 @@ class ModalCurrentReferralService extends React.Component {
 	}
 
 	render() {
-		const { selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, dependents, skillSet, consultants } = this.state;
+		const { loadingSchedule, selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, dependents, skillSet, consultants } = this.state;
 		const { event } = this.props;
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -478,7 +482,7 @@ class ModalCurrentReferralService extends React.Component {
 							<Button key="back" onClick={this.props.onCancel}>
 								{intl.formatMessage(messages.goBack).toUpperCase()}
 							</Button>
-							<Button key="submit" type="primary" htmlType='submit'>
+							<Button key="submit" type="primary" htmlType='submit' loading={loadingSchedule}>
 								{intl.formatMessage(messages.scheduleConsultation).toUpperCase()}
 							</Button>
 						</Row>
