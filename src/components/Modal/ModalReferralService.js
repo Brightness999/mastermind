@@ -16,7 +16,7 @@ import request from 'src/utils/api/request'
 import { createAppointmentForParent, getAllConsultantForParent, getAuthorizationUrl } from 'src/utils/api/apiList';
 import { setMeetingLink, setSelectedTime, setSelectedUser } from 'src/redux/features/authSlice';
 import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
-import { ADMINPREAPPROVED, CONSULTATION, PENDING } from 'src/routes/constant';
+import { ADMINPREAPPROVED, CONSULTANT, CONSULTATION, PENDING } from 'src/routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -92,7 +92,7 @@ class ModalReferralService extends React.Component {
 
 	createConsultation = () => {
 		const { selectedDependent, selectedSkillSet, phoneNumber, fileList, note, selectedTimeIndex, selectedDate, arrTime, isGoogleMeet, selectedSubsidy } = this.state;
-		const { subsidy } = this.props;
+		const { subsidy, auth } = this.props;
 		const meetingLink = this.form.getFieldValue("meetingLink");
 
 		if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
@@ -120,6 +120,7 @@ class ModalReferralService extends React.Component {
 			type: CONSULTATION,
 			status: PENDING,
 			subsidy: subsidy ? subsidy?._id : selectedSubsidy,
+			consultant: auth.user.role === CONSULTANT ? auth.user.consultantInfo?._id : undefined,
 		};
 
 		request.post(createAppointmentForParent, postData).then(result => {
