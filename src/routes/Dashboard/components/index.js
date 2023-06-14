@@ -407,7 +407,7 @@ class Dashboard extends React.Component {
     notification.open({
       message: data.type.toUpperCase(),
       duration: 10,
-      description: `${data?.appoinment?.dependent?.firstName} ${data?.appoinment?.dependent?.lastName}'s consultation has been canceled. Please reschedule again.`,
+      description: `${data?.appointment?.dependent?.firstName} ${data?.appointment?.dependent?.lastName}'s consultation ${data.type === 'noshow' ? 'has been closed as no-show' : 'has been canceled.'} Please reschedule again.`,
       onClick: () => {
         this.setState({ userDrawerVisible: true, selectedEvent: this.state.listAppointmentsRecent?.find(a => a._id == data?.appointment?._id) });
         notification.destroy();
