@@ -236,7 +236,7 @@ class ModalInvoice extends React.Component {
 
 		const modalProps = {
 			className: 'modal-invoice',
-			title: (<div className='font-20'>{invoice?.type === 1 ? 'Session Invoice' : invoice?.type === 2 ? 'Reschedule Invoice' : invoice?.type === 3 ? 'Cancel Invoice' : invoice?.type === 4 ? 'No show Invoice' : invoice?.type === 5 ? 'Past due Invoice' : 'Invoice'}</div>),
+			title: (<div className='font-20'>{(invoice?.type === 1 || event?.sessionInvoice?.type === 1) ? 'Session Invoice' : (invoice?.type === 2 || event?.cancelInvoice?.type === 2) ? 'Reschedule Invoice' : (invoice?.type === 3 || event?.cancelInvoice?.type === 3) ? 'Cancel Invoice' : (invoice?.type === 4 || event?.flagInovice?.type === 4) ? 'No show Invoice' : (invoice?.type === 5 || event?.flagInvoice?.type === 5) ? 'Past due Invoice' : 'Invoice'}</div>),
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: this.props.onCancel,
@@ -250,13 +250,13 @@ class ModalInvoice extends React.Component {
 				<table className='w-100 table-fixed text-black' id="invoice">
 					<tbody>
 						<tr>
-							<td colSpan={2}>
+							<td colSpan={4}>
 								<div className='w-100'>
 									<img src="../images/logo.svg" alt="logo" width={120} height={120} />
 								</div>
 							</td>
-							<td colSpan={5}></td>
-							<td colSpan={5}>
+							<td colSpan={10}></td>
+							<td colSpan={10}>
 								<div className='grid grid-columns-2'>
 									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>Date</div>
 									<div className='border border-1 border-black -mb-1 -mr-1 text-center p-10 font-16'>Invoice #</div>
@@ -266,15 +266,15 @@ class ModalInvoice extends React.Component {
 							</td>
 						</tr>
 						<tr>
-							<td colSpan={3}>
+							<td colSpan={6}>
 								<div className='w-100 text-black'>
 									<div className='font-16'>{providerBillingAddress}</div>
 								</div>
 							</td>
-							<td colSpan={9}></td>
+							<td colSpan={18}></td>
 						</tr>
 						<tr>
-							<td colSpan={12}>
+							<td colSpan={24}>
 								<div className='w-100 text-black06 font-16'>
 									<div>{providerPhonenumber}</div>
 									<div>{providerEmail}</div>
@@ -284,7 +284,7 @@ class ModalInvoice extends React.Component {
 						</tr>
 						<tr><td><br /><br /><br /></td></tr>
 						<tr>
-							<td colSpan={6}>
+							<td colSpan={12}>
 								<div className='w-100'>
 									<div className='border border-1 border-black -mb-1 -mr-1 p-10 font-16'>Bill To:</div>
 									<div className='border border-1 border-black -mb-1 -mr-1 p-10 font-16'>
@@ -294,12 +294,12 @@ class ModalInvoice extends React.Component {
 									</div>
 								</div>
 							</td>
-							<td colSpan={6}></td>
+							<td colSpan={12}></td>
 						</tr>
 						<tr><td><br /><br /><br /></td></tr>
 						<tr>
-							<td colSpan={5}></td>
-							<td colSpan={7}>
+							<td colSpan={10}></td>
+							<td colSpan={14}>
 								<div className='grid grid-columns-2'>
 									<div className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>Service</div>
 									<div className='border border-1 border-black -mb-1 -mr-1 text-center font-16 p-10'>Provider</div>
@@ -310,21 +310,25 @@ class ModalInvoice extends React.Component {
 						</tr>
 						<tr>
 							<td>
-								<div className='my-10'><Button type='primary' className={`font-16 add-item px-20 ${user.role > 3 ? '' : 'display-none events-none'}`} onClick={() => this.handleAddItem()}>Add item</Button></div>
+								<div className='my-10'>
+									{(user?.role > 3 && !isPaid) ? (
+										<Button type='primary' className='font-16 add-item px-20' onClick={() => this.handleAddItem()}>Add item</Button>
+									) : null}
+								</div>
 							</td>
 						</tr>
 						<tr>
-							<td colSpan={12}>
+							<td colSpan={24}>
 								<div className='w-100'>
 									<table className='w-100 table-fixed'>
 										<thead>
 											<tr className='border border-1 border-x-0 border-top-0 border-black -mb-1 -mr-1'>
-												<th colSpan={2} className='text-left font-16 p-10'>Type</th>
-												<th colSpan={3} className='text-left font-16 p-10'>Date</th>
-												<th colSpan={4} className='text-left font-16 p-10'>Details</th>
-												<th colSpan={1} className='text-left font-16 p-10'>Rate</th>
-												<th colSpan={1} className='text-left font-16 p-10'>Discount</th>
-												<th colSpan={1} className='font-16 p-10'>Amount</th>
+												<th colSpan={4} className='text-left font-16 p-10'>Type</th>
+												<th colSpan={5} className='text-left font-16 p-10'>Date</th>
+												<th colSpan={7} className='text-left font-16 p-10'>Details</th>
+												<th colSpan={2} className='text-left font-16 p-10'>Rate</th>
+												<th colSpan={3} className='text-left font-16 p-10'>Discount</th>
+												<th colSpan={3} className='font-16 p-10'>Amount</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -345,19 +349,19 @@ class ModalInvoice extends React.Component {
 													</div>
 												)}>
 													<tr key={index} className='border border-1 border-x-0 border-black -mb-1 -mr-1'>
-														<td colSpan={2}>
+														<td colSpan={4}>
 															<Input name='Type' disabled={selectedItemIndex != index} value={item?.type} className="text-left item-input font-16 p-10" placeholder="Session type" onChange={(e) => this.handleChangeItem('type', e.target.value)} />
 														</td>
-														<td colSpan={3}>
+														<td colSpan={5}>
 															<Input name='Date' disabled={selectedItemIndex != index} value={item?.date} className="text-left item-input font-16 p-10" placeholder="Date" onChange={(e) => this.handleChangeItem('date', e.target.value)} />
 														</td>
-														<td colSpan={4}>
+														<td colSpan={7}>
 															<div className='flex justify-between items-center'>
 																<Input name='Details' disabled={selectedItemIndex != index} value={item?.details} className="text-left item-input font-16 p-10" placeholder="Description" onChange={(e) => this.handleChangeItem('details', e.target.value)} />
 																<div className='px-20 font-16'>{item?.count || ''}</div>
 															</div>
 														</td>
-														<td colSpan={1}>
+														<td colSpan={2}>
 															<Input
 																name='Rate'
 																type='number'
@@ -377,7 +381,7 @@ class ModalInvoice extends React.Component {
 																}}
 															/>
 														</td>
-														<td colSpan={1}>
+														<td colSpan={3}>
 															<Input
 																name='Discount'
 																type='number'
@@ -398,23 +402,23 @@ class ModalInvoice extends React.Component {
 																}}
 															/>
 														</td>
-														<td colSpan={1}>
+														<td colSpan={3}>
 															<div className='text-center font-16'>${(item?.rate * 1 || 0) + (item?.discount * 1 || 0)}</div>
 														</td>
 													</tr>
 												</Popover>
 											))}
 											<tr className='border border-1 border-x-0 border-bottom-0 border-black -mb-1 -mr-1'>
-												<td colSpan={11} className=' text-left font-16 p-10'>Sub-Total</td>
-												<td colSpan={1} className=' text-center font-16 p-10'>${subTotal}</td>
+												<td colSpan={21} className=' text-left font-16 p-10'>Sub-Total</td>
+												<td colSpan={3} className=' text-center font-16 p-10'>${subTotal}</td>
 											</tr>
 											<tr className='border border-1 border-x-0 border-top-0 border-black -mb-1 -mr-1'>
-												<td colSpan={11} className=' text-left font-16 p-10'>Total Discount</td>
-												<td colSpan={1} className=' text-center font-16 p-10'>${discount}</td>
+												<td colSpan={21} className=' text-left font-16 p-10'>Total Discount</td>
+												<td colSpan={3} className=' text-center font-16 p-10'>${discount}</td>
 											</tr>
 											<tr className='border border-1 border-x-0 border-bottom-0 border-black -mb-1 -mr-1'>
-												<td colSpan={11} className=' text-left font-16 p-10 text-bold'>Total</td>
-												<td colSpan={1} className=' text-center font-16 p-10 text-bold'>${totalPayment}</td>
+												<td colSpan={21} className=' text-left font-16 p-10 text-bold'>Total</td>
+												<td colSpan={3} className=' text-center font-16 p-10 text-bold'>${totalPayment}</td>
 											</tr>
 										</tbody>
 									</table>
@@ -423,42 +427,40 @@ class ModalInvoice extends React.Component {
 						</tr>
 					</tbody>
 				</table>
-				<Col xs={24} sm={24} md={8}>
-					<Input
-						type='number'
-						size='large'
-						prefix="$"
-						min={0}
-						disabled={user?.role === 3 || isPaid}
-						addonBefore="Minimum due to unlock account:"
-						className={`mt-10 ${(invoice?.type === 5 || event?.flagInvoice?.type === 5) ? '' : 'd-none'}`}
-						value={minimumPayment}
-						onKeyDown={(e) => {
-							(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
-							if (e.key > -1 && e.key < 10 && e.target.value === '0') {
-								e.preventDefault();
-								e.target.value = e.key;
-							}
-						}}
-						onChange={e => this.setState({ minimumPayment: e.target.value * 1 || 0 })}
-					/>
-				</Col>
+				<table>
+					<tbody>
+						<tr>
+							<td colSpan={4}>
+								<Input
+									type='number'
+									size='large'
+									prefix="$"
+									min={0}
+									disabled={user?.role === 3 || isPaid}
+									addonBefore="Minimum due to unlock account:"
+									className={`mt-10 ${(invoice?.type === 5 || event?.flagInvoice?.type === 5) ? '' : 'd-none'}`}
+									value={minimumPayment}
+									onKeyDown={(e) => {
+										(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+										if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+											e.preventDefault();
+											e.target.value = e.key;
+										}
+									}}
+									onChange={e => this.setState({ minimumPayment: e.target.value * 1 || 0 })}
+								/>
+							</td>
+							<td colSpan={8}></td>
+						</tr>
+					</tbody>
+				</table>
 				<div className='flex justify-end gap-2 mt-10 actions'>
 					<Button key="back" onClick={this.props.onCancel}>
 						{intl.formatMessage(messages.cancel)}
 					</Button>
 					{event?.status != 0 ? (
 						<>
-							<Button key="print" onClick={() => {
-								document.querySelector(".add-item").style.display = 'none';
-								document.querySelector(".actions").style.display = 'none';
-								document.querySelector(".ant-modal-mask").style.backgroundColor = 'white';
-								document.querySelector(".ant-modal-content").style.boxShadow = 'none';
-								window.print();
-								document.querySelector(".actions").style.display = '';
-								document.querySelector(".add-item").style.display = '';
-								document.querySelector(".ant-modal-mask").style.backgroundColor = '';
-							}}>
+							<Button key="print" onClick={() => window.print()}>
 								<PrinterTwoTone />
 								{intl.formatMessage(messages.print)}
 							</Button>

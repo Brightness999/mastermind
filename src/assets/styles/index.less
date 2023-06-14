@@ -125,10 +125,6 @@ h6 {
   font-weight: 500 !important;
 }
 
-.ant-input-affix-wrapper .ant-input:not(:first-child) {
-  // padding-left: 40px;
-}
-
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -601,17 +597,6 @@ select:-webkit-autofill:focus {
 
 .ant-list .anticon {
   margin-right: 5px;
-}
-
-@media print {
-  .ant-checkbox-checked .ant-checkbox-inner {
-    background: transparent !important;
-    border-color: #333 !important;
-  }
-
-  .ant-checkbox-checked .ant-checkbox-inner::after {
-    border-color: #333 !important;
-  }
 }
 
 @media (min-width: 376px) {
@@ -2235,11 +2220,34 @@ table.notification-settings {
 }
 
 @media print {
+  .actions {
+    display: none;
+  }
+
+  .add-item {
+    display: none;
+  }
+
+  .ant-modal-wrap {
+    background-color: white;
+  }
+
+  .ant-modal-content {
+    box-shadow: none;
+  }
+
+  .ant-modal {
+    top: 0px;
+    max-width: 100%;
+    margin: 0px;
+    padding: 0px;
+  }
+
   @page {
     size: A4 portrait;
-    margin: 0 !important;
-    padding: 0 !important;
-    -webkit-print-color-adjust: exact !important;
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
   }
 }
 
