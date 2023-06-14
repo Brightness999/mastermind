@@ -49,12 +49,14 @@ class ModalNewAppointment extends React.Component {
 		visibleModalScreening: false,
 		subsidyAvailable: false,
 		restSessions: 0,
-		loading: false,
+		loadingSearchProvider: false,
 		visibleModalConfirm: false,
 		confirmMessage: '',
 		isSubsidyOnly: true,
 		cancellationFee: '',
+		loadingSchedule: false,
 	}
+	scrollElement = React.createRef();
 
 	getArrTime = (type, providerIndex, date) => {
 		let arrTime = [];
@@ -123,9 +125,9 @@ class ModalNewAppointment extends React.Component {
 			skill: selectedSkill,
 			dependentId: dependentId,
 		};
-		this.setState({ loading: true });
+		this.setState({ loadingSearchProvider: true });
 		request.post(searchProvidersForAdmin, params).then(result => {
-			this.setState({ loading: false });
+			this.setState({ loadingSearchProvider: false });
 			const { data, success } = result;
 			if (success) {
 				this.setState({ listProvider: data?.providers });
@@ -144,7 +146,7 @@ class ModalNewAppointment extends React.Component {
 		}).catch(err => {
 			message.error(err.message);
 			this.setState({
-				loading: false,
+				loadingSearchProvider: false,
 				listProvider: [],
 				selectedProviderIndex: -1,
 				selectedProvider: undefined,
@@ -417,7 +419,9 @@ class ModalNewAppointment extends React.Component {
 
 	requestCreateAppointment(postData) {
 		const { appointments, appointmentsInMonth, onSubmit, setAppointments, setAppointmentsInMonth } = this.props;
+		this.setState({ loadingSchedule: true });
 		request.post(createAppointmentForParent, postData).then(result => {
+			this.setState({ loadingSchedule: false });
 			const { success, data } = result;
 			if (success) {
 				this.setState({ errorMessage: '' });
@@ -428,7 +432,7 @@ class ModalNewAppointment extends React.Component {
 				this.setState({ errorMessage: data });
 			}
 		}).catch(err => {
-			this.setState({ errorMessage: err.message });
+			this.setState({ errorMessage: err.message, loadingSchedule: false });
 		});
 	}
 
@@ -505,13 +509,14 @@ class ModalNewAppointment extends React.Component {
 			selectedDependent,
 			subsidyAvailable,
 			restSessions,
-			loading,
+			loadingSearchProvider,
 			notes,
 			address,
 			visibleModalConfirm,
 			confirmMessage,
 			isSubsidyOnly,
 			cancellationFee,
+			loadingSchedule,
 		} = this.state;
 		const { durations, listDependents } = this.props;
 		const modalProps = {
@@ -643,8 +648,8 @@ class ModalNewAppointment extends React.Component {
 										/>
 									</Col>
 								</Row>
-								<div className='doctor-list'>
-									{loading ? <Spin spinning={loading} /> : listProvider?.length > 0 ? listProvider?.map((provider, index) => (
+								<div className='doctor-list' onWheel={(e) => { e.preventDefault(); this.scrollElement.current.scrollLeft += e.deltaY / 2 }} ref={this.scrollElement}>
+									{loadingSearchProvider ? <Spin spinning={loadingSearchProvider} /> : listProvider?.length > 0 ? listProvider?.map((provider, index) => (
 										<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
 											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
 											<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
@@ -802,7 +807,7 @@ class ModalNewAppointment extends React.Component {
 							<Button key="back" onClick={this.props.onCancel}>
 								{intl.formatMessage(messages.goBack).toUpperCase()}
 							</Button>
-							<Button key="submit" type="primary" htmlType='submit'>
+							<Button key="submit" type="primary" htmlType='submit' loading={loadingSchedule}>
 								{intl.formatMessage(messages.schedule)?.toUpperCase()}
 							</Button>
 						</Row>
