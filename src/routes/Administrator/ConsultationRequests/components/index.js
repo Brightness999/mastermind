@@ -95,7 +95,7 @@ class ConsultationRequest extends React.Component {
     const csvHeaders = ["Student Name", "Referrer", "Student Grade", "Service Requested", "PhoneNumber/Google Meet", "Date"];
     const columns = [
       {
-        title: 'Dependent', key: 'dependent',
+        title: 'Dependent', key: 'dependent', fixed: 'left',
         sorter: (a, b) => a.dependent?.firstName + a.dependent?.lastName > b.dependent?.firstName + b.dependent?.lastName ? 1 : -1,
         render: (appointment) => `${appointment?.dependent.firstName ?? ''} ${appointment?.dependent.lastName ?? ''}`,
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -139,7 +139,7 @@ class ConsultationRequest extends React.Component {
           }
         },
       },
-      { title: 'Age', key: 'age', sorter: (a, b) => a.dependent?.birthday > b.dependent?.birthday ? 1 : -1, render: (appointment) => moment().year() - moment(appointment.dependent?.birthday).year() },
+      { title: 'Age', key: 'age', width: 100, sorter: (a, b) => a.dependent?.birthday > b.dependent?.birthday ? 1 : -1, render: (appointment) => moment().year() - moment(appointment.dependent?.birthday).year() },
       { title: 'Grade', key: 'grade', render: (appointment) => appointment.dependent?.currentGrade },
       { title: 'School', key: 'school', render: appointment => appointment?.dependent?.school?.name },
       {
@@ -148,7 +148,7 @@ class ConsultationRequest extends React.Component {
         render: skill => skill?.name,
       },
       {
-        title: 'PhoneNumber / Google Meet',
+        title: <span className='whitespace-nowrap'>PhoneNumber / Google Meet</span>,
         render: (appointment) => appointment?.phoneNumber ? appointment?.phoneNumber : appointment?.meetingLink,
       },
       { title: 'Referral Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm a') },
@@ -166,7 +166,7 @@ class ConsultationRequest extends React.Component {
           </Button>
         </CSVLink>
         <Space direction='vertical' className='flex'>
-          <Table bordered size='middle' pagination={false} dataSource={consultationList} columns={columns} />
+          <Table bordered size='middle' pagination={false} dataSource={consultationList} columns={columns} scroll={{x: 1200}} />
           <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
         </Space>
         <PageLoading loading={loading} isBackground={true} />

@@ -260,7 +260,7 @@ const SchoolApproved = (props) => {
             okText="Yes"
             cancelText="No"
           >
-            <a className='btn-blue'>{intl.formatMessage(msgModal.preapprove)}</a>
+            <span className='text-primary cursor'>{intl.formatMessage(msgModal.preapprove)}</span>
           </Popconfirm>
           <Popconfirm
             icon={<AiFillWarning size={24} />}
@@ -270,7 +270,7 @@ const SchoolApproved = (props) => {
             okText="Yes"
             cancelText="No"
           >
-            <a className='btn-blue'>{intl.formatMessage(msgModal.decline)}</a>
+            <span className='text-primary cursor'>{intl.formatMessage(msgModal.decline)}</span>
           </Popconfirm>
         </Space>
       ),

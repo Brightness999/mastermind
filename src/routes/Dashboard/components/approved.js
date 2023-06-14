@@ -240,7 +240,7 @@ const Approved = (props) => {
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.action)}</span>,
-      key: 'action',
+      key: 'action', align: 'center', fixed: 'right',
       render: (subsidy) => (
         <Space size="middle">
           <Popconfirm
@@ -250,12 +250,10 @@ const Approved = (props) => {
             okText="Yes"
             cancelText="No"
           >
-            <a className='btn-blue'>Decline</a>
+            <span className='text-primary cursor'>Decline</span>
           </Popconfirm>
         </Space>
       ),
-      align: 'center',
-      fixed: 'right',
     },
   ];
 

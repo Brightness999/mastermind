@@ -151,7 +151,7 @@ class PrivateNote extends React.Component {
 
     const columns = [
       {
-        title: intl.formatMessage(messages.studentName), key: 'name',
+        title: intl.formatMessage(messages.studentName), key: 'name', fixed: 'left',
         sorter: (a, b) => (a.firstName || '' + a.lastName || '').toLowerCase() > (b.firstName || '' + b.lastName || '').toLowerCase() ? 1 : -1,
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
@@ -215,22 +215,22 @@ class PrivateNote extends React.Component {
         render: school => school?.name,
       },
       {
-        title: intl.formatMessage(messages.countOfClosedSessionsPast), dataIndex: 'appointments', key: 'countOfClosedSessionsPast',
+        title: 'Closed Sessions', dataIndex: 'appointments', key: 'countOfClosedSessionsPast',
         sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length,
         render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length,
       },
       {
-        title: intl.formatMessage(messages.countOfPendingSessionsPast), dataIndex: 'appointments', key: 'countOfPendingSessionsPast',
+        title: 'Pending Sessions', dataIndex: 'appointments', key: 'countOfPendingSessionsPast',
         sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === PENDING)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === PENDING)?.length,
         render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === PENDING)?.length,
       },
       {
-        title: intl.formatMessage(messages.countOfSessionsFuture), dataIndex: 'appointments', key: 'countOfSessionsFuture',
+        title: 'Future Sessions', dataIndex: 'appointments', key: 'countOfSessionsFuture',
         sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length,
         render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status === PENDING)?.length,
       },
       {
-        title: intl.formatMessage(messages.countOfReferrals), dataIndex: 'appointments', key: 'countOfReferrals',
+        title: 'Referrals', dataIndex: 'appointments', key: 'countOfReferrals',
         sorter: (a, b) => a.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length - b.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length,
         render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length
       },
@@ -272,7 +272,7 @@ class PrivateNote extends React.Component {
         },
       },
       {
-        title: intl.formatMessage(messages.action), key: 'action',
+        title: intl.formatMessage(messages.action), key: 'action', fixed: 'right',
         render: dependent => {
           const countOfUnpaidInvoices = dependent?.invoices?.filter(a => a.provider === auth.user.providerInfo?._id && !a.isPaid && a.type === 1)?.length || 0;
 
@@ -321,6 +321,7 @@ class PrivateNote extends React.Component {
               }
             }}
             pagination={false}
+            scroll={{ x: true }}
           />
           <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} onChange={this.handleChangePagination} />
         </Space>

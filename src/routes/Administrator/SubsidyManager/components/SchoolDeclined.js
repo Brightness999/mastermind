@@ -175,7 +175,6 @@ const SchoolDeclined = (props) => {
           onClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
           onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
         })}
-        pagination={false}
       />
     </div>
   )

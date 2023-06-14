@@ -191,7 +191,7 @@ const Pending = (props) => {
             okText="Yes"
             cancelText="No"
           >
-            <a className='btn-blue'>Approve</a>
+            <span className='text-primary cursor'>Approve</span>
           </Popconfirm>
           <Popconfirm
             icon={<AiFillWarning size={24} />}
@@ -200,7 +200,7 @@ const Pending = (props) => {
             okText="Yes"
             cancelText="No"
           >
-            <a className='btn-blue'>Decline</a>
+            <span className='text-primary cursor'>Decline</span>
           </Popconfirm>
         </Space >
       ),
@@ -244,7 +244,6 @@ const Pending = (props) => {
           onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && props.onShowModalSubsidy(subsidy?._id),
           onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && props.onShowModalSubsidy(subsidy?._id),
         })}
-        pagination={false}
       />
     </div >
   )

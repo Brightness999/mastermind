@@ -183,19 +183,7 @@ class InvoiceList extends React.Component {
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
     const columns = [
       {
-        title: intl.formatMessage(messages.invoiceType), dataIndex: 'type', key: 'invoicetype',
-        filters: [
-          { text: 'Session', value: 1 },
-          { text: 'Reschedule', value: 2 },
-          { text: 'Cancel', value: 3 },
-          { text: 'No show', value: 4 },
-          { text: 'Past due balance', value: 5 },
-        ],
-        onFilter: (value, record) => record.type === value,
-        render: type => type === 1 ? 'Session' : type === 2 ? 'Reschedule' : type === 3 ? 'Cancel' : type === 4 ? 'No show' : type === 5 ? 'Past due balance' : '',
-      },
-      {
-        title: intl.formatMessage(messages.studentName), dataIndex: 'dependent', key: 'name',
+        title: intl.formatMessage(messages.studentName), dataIndex: 'dependent', key: 'name', fixed: 'left',
         sorter: (a, b) => (a.dependent.firstName || '' + a.dependent.lastName || '').toLowerCase() > (b.dependent.firstName || '' + b.dependent.lastName || '').toLowerCase() ? 1 : -1,
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
@@ -238,6 +226,18 @@ class InvoiceList extends React.Component {
           }
         },
         render: (dependent) => `${dependent.firstName ?? ''} ${dependent.lastName ?? ''}`,
+      },
+      {
+        title: intl.formatMessage(messages.invoiceType), dataIndex: 'type', key: 'invoicetype',
+        filters: [
+          { text: 'Session', value: 1 },
+          { text: 'Reschedule', value: 2 },
+          { text: 'Cancel', value: 3 },
+          { text: 'No show', value: 4 },
+          { text: 'Past due balance', value: 5 },
+        ],
+        onFilter: (value, record) => record.type === value,
+        render: type => type === 1 ? 'Session' : type === 2 ? 'Reschedule' : type === 3 ? 'Cancel' : type === 4 ? 'No show' : type === 5 ? 'Past due balance' : '',
       },
       {
         title: intl.formatMessage(msgCreateAccount.age), dataIndex: 'dependent', key: 'age', type: 'datetime',
@@ -303,15 +303,15 @@ class InvoiceList extends React.Component {
       {
         title: intl.formatMessage(messages.createdDate), dataIndex: 'createdAt', type: 'date', key: 'createdat',
         sorter: (a, b) => a.createdAt > b.createdAt ? 1 : -1,
-        render: createdAt => moment(createdAt).format("MM/DD/YYYY hh:mm a"),
+        render: createdAt => moment(createdAt).format("MM/DD/YYYY hh:mm A"),
       },
       {
         title: intl.formatMessage(messages.updatedDate), dataIndex: 'updatedAt', type: 'date', key: 'updatedat',
         sorter: (a, b) => a.updatedAt > b.updatedAt ? 1 : -1,
-        render: updatedAt => moment(updatedAt).format("MM/DD/YYYY hh:mm a"),
+        render: updatedAt => moment(updatedAt).format("MM/DD/YYYY hh:mm A"),
       },
       {
-        title: intl.formatMessage(messages.action), key: 'action', align: 'center',
+        title: intl.formatMessage(messages.action), key: 'action', align: 'center', fixed: 'right',
         render: invoice => (invoice.isPaid || invoice.totalPayment == 0) ? null : (
           <div className='flex'>
             <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
@@ -327,7 +327,7 @@ class InvoiceList extends React.Component {
               <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
               <input type="hidden" name="cancel_return" value={window.location.href} />
               <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-              <Button type='link' htmlType='submit'>
+              <Button type='link' htmlType='submit' className='px-5'>
                 <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
               </Button>
             </form>
@@ -338,7 +338,7 @@ class InvoiceList extends React.Component {
                 okText="Yes"
                 cancelText="No"
               >
-                <Button type='link'><span className='text-primary'>Clear flag</span></Button>
+                <Button type='link' className='px-5'><span className='text-primary'>Clear flag</span></Button>
               </Popconfirm>
             ) : null}
           </div>
@@ -364,6 +364,7 @@ class InvoiceList extends React.Component {
               onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice._id),
               onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice._id),
             })}
+            scroll={{ x: true }}
           />
         ),
       },
@@ -380,6 +381,7 @@ class InvoiceList extends React.Component {
               onClick: () => this.openModalInvoice(invoice._id),
               onDoubleClick: () => this.openModalInvoice(invoice._id),
             })}
+            scroll={{ x: true }}
           />
         ),
       },

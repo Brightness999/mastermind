@@ -366,6 +366,7 @@ class InvoiceList extends React.Component {
               onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice._id),
               onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice._id),
             })}
+            scroll={{ x: true }}
           />
         ),
       },
@@ -382,6 +383,7 @@ class InvoiceList extends React.Component {
               onClick: () => this.openModalInvoice(invoice._id),
               onDoubleClick: () => this.openModalInvoice(invoice._id),
             })}
+            scroll={{ x: true }}
           />
         ),
       },

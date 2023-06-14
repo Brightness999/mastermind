@@ -118,7 +118,7 @@ export default class extends React.Component {
 	render() {
 		const { pageNumber, pageSize, totalSize, visibleInputCode, schools, isConfirmModal, confirmMessage, loading } = this.state;
 		const columns = [
-			{ title: 'User Name', dataIndex: 'username', key: 'username', sorter: (a, b) => a.username > b.username ? 1 : -1 },
+			{ title: 'User Name', dataIndex: 'username', key: 'username', fixed: 'left', sorter: (a, b) => a.username > b.username ? 1 : -1 },
 			{ title: 'Email', dataIndex: 'email', key: 'email', sorter: (a, b) => a.email > b.email ? 1 : -1 },
 			{ title: 'School Name', dataIndex: 'schoolInfo', key: 'schoolname', sorter: (a, b) => a?.schoolInfo?.name > b?.schoolInfo?.name ? 1 : -1, render: (schoolInfo) => schoolInfo?.name },
 			{
@@ -175,10 +175,10 @@ export default class extends React.Component {
 				onFilter: (value, record) => record.isActive == value,
 			},
 			{
-				title: 'Action', key: 'action', render: (user) => (
+				title: 'Action', key: 'action', fixed: 'right', render: (user) => (
 					<Space size="middle">
-						<a className='btn-blue' onClick={() => this.onShowModalInputCode(user)}>Edit</a>
-						<a className='btn-red' onClick={() => this.handleActivate(user._id, user.isActive ? 0 : 1)}>{user.isActive ? 'Deactivate' : 'Activate'}</a>
+						<span className='text-primary cursor' onClick={() => this.onShowModalInputCode(user)}>Edit</span>
+						<span className='text-red cursor' onClick={() => this.handleActivate(user._id, user.isActive ? 0 : 1)}>{user.isActive ? 'Deactivate' : 'Activate'}</span>
 					</Space>
 				),
 			},
@@ -204,7 +204,7 @@ export default class extends React.Component {
 					<Divider />
 				</div>
 				<Space direction='vertical' className='flex'>
-					<Table bordered size='middle' pagination={false} dataSource={schools} columns={columns} />
+					<Table bordered size='middle' pagination={false} dataSource={schools} columns={columns} scroll={{ x: 1000 }} />
 					<Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
 				</Space>
 				{visibleInputCode && <ModalInputCode {...modalInputCodeProps} />}

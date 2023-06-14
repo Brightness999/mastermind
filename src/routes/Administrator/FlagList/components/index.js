@@ -188,16 +188,7 @@ class FlagList extends React.Component {
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
     const columns = [
       {
-        title: 'Flag Type', dataIndex: 'type', key: 'flagtype',
-        filters: [
-          { text: 'No Show', value: InvoiceType.NOSHOW },
-          { text: 'Past Due Balance', value: InvoiceType.BALANCE },
-        ],
-        onFilter: (value, record) => record.type == value,
-        render: (type) => type === InvoiceType.NOSHOW ? 'No Show' : type === InvoiceType.BALANCE ? 'Past Due Balance' : '',
-      },
-      {
-        title: 'Student Name', dataIndex: 'dependent', key: 'dependent',
+        title: 'Student Name', dataIndex: 'dependent', key: 'dependent', fixed: 'left',
         sorter: (a, b) => ((a.dependent?.firstName || '') + (a.dependent?.lastName || '')).toLowerCase() > ((b.dependent?.firstName || '') + (b.dependent?.lastName || '')).toLowerCase() ? 1 : -1,
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
@@ -240,6 +231,15 @@ class FlagList extends React.Component {
           }
         },
         render: (dependent) => `${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`,
+      },
+      {
+        title: 'Flag Type', dataIndex: 'type', key: 'flagtype',
+        filters: [
+          { text: 'No Show', value: InvoiceType.NOSHOW },
+          { text: 'Past Due Balance', value: InvoiceType.BALANCE },
+        ],
+        onFilter: (value, record) => record.type == value,
+        render: (type) => type === InvoiceType.NOSHOW ? 'No Show' : type === InvoiceType.BALANCE ? 'Past Due Balance' : '',
       },
       {
         title: 'Age', dataIndex: 'dependent', key: 'age', type: 'datetime',
@@ -303,17 +303,17 @@ class FlagList extends React.Component {
         sorter: (a, b) => a.totalPayment > b.totalPayment ? 1 : -1,
       },
       {
-        title: 'Created Date', dataIndex: 'createdAt', key: 'createdAt', type: 'datetime',
+        title: <span className='whitespace-nowrap'>Created Date</span>, dataIndex: 'createdAt', key: 'createdAt', type: 'datetime',
         sorter: (a, b) => a.createdAt > b.createdAt ? 1 : -1,
         render: (createdAt) => moment(createdAt).format('MM/DD/YYYY hh:mm A'),
       },
       {
-        title: 'Updated Date', dataIndex: 'updatedAt', key: 'updatedAt', type: 'datetime',
+        title: <span className='whitespace-nowrap'>Updated Date</span>, dataIndex: 'updatedAt', key: 'updatedAt', type: 'datetime',
         sorter: (a, b) => a.updatedAt > b.updatedAt ? 1 : -1,
         render: (updatedAt) => moment(updatedAt).format('MM/DD/YYYY hh:mm A'),
       },
       {
-        title: 'Action', key: 'action', align: 'center',
+        title: 'Action', key: 'action', align: 'center', fixed: 'right', width: 160,
         render: (invoice) => (invoice.isPaid || invoice.totalPayment == 0) ? null : (
           <div className='flex'>
             <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
@@ -329,8 +329,8 @@ class FlagList extends React.Component {
               <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
               <input type="hidden" name="cancel_return" value={window.location.href} />
               <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-              <Button type='link' htmlType='submit'>
-                {intl.formatMessage(msgModal.paynow)}
+              <Button type='link' htmlType='submit' className='px-5'>
+                <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
               </Button>
             </form>
             <Popconfirm
@@ -339,7 +339,7 @@ class FlagList extends React.Component {
               okText="Yes"
               cancelText="No"
             >
-              <Button type='link'>{intl.formatMessage(msgDrawer.clearFlag)}</Button>
+              <Button type='link' className='px-5'><span className='text-primary'>{intl.formatMessage(msgDrawer.clearFlag)}</span></Button>
             </Popconfirm>
           </div>
         )
@@ -372,6 +372,7 @@ class FlagList extends React.Component {
                 onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice),
                 onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.openModalInvoice(invoice),
               })}
+              scroll={{ x: 1300 }}
             />
           </div>
         ),
@@ -396,6 +397,7 @@ class FlagList extends React.Component {
                 onClick: () => this.openModalInvoice(invoice),
                 onDoubleClick: () => this.openModalInvoice(invoice),
               })}
+              scroll={{ x: 1300 }}
             />
           </div>
         ),

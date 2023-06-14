@@ -884,7 +884,7 @@ class SchedulingCenter extends React.Component {
                   className='trans-left' icon={<BiChevronLeft size={35} />}
                   onClick={() => this.scrollTrans(-42)}
                 />
-                <div className='trans-scroll' ref={this.scrollElement}>
+                <div className='trans-scroll' onWheel={(e) => { this.scrollElement.current.scrollLeft += e.deltaY / 2 }} ref={this.scrollElement}>
                   {listDependents?.map((dependent, index) => (
                     <Avatar
                       key={index}

@@ -201,7 +201,7 @@ const SchoolPending = (props) => {
             okText="Yes"
             cancelText="No"
           >
-            <a className='btn-blue'>{intl.formatMessage(msgModal.approve)}</a>
+            <span className='text-primary cursor'>{intl.formatMessage(msgModal.approve)}</span>
           </Popconfirm>
           <Popconfirm
             icon={<AiFillWarning size={24} />}
@@ -211,7 +211,7 @@ const SchoolPending = (props) => {
             okText="Yes"
             cancelText="No"
           >
-            <a className='btn-blue'>{intl.formatMessage(msgModal.decline)}</a>
+            <span className='text-primary cursor'>{intl.formatMessage(msgModal.decline)}</span>
           </Popconfirm>
         </Space>
       ),
@@ -255,7 +255,6 @@ const SchoolPending = (props) => {
           onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && props.onShowModalSubsidy(subsidy?._id),
           onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && props.onShowModalSubsidy(subsidy?._id),
         })}
-        pagination={false}
       />
     </div>
   )

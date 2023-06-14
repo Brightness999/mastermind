@@ -282,7 +282,6 @@ const AdminPreApproved = (props) => {
           onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
         })}
         className='mt-1 pb-10'
-        pagination={false}
       />
     </div>
   )

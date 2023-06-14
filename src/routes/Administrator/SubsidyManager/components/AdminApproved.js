@@ -18,9 +18,7 @@ const AdminApproved = (props) => {
   const adminApprovedColumns = [
     {
       title: <span className="font-16">{intl.formatMessage(messages.studentName)}</span>,
-      key: 'name',
-      align: 'center',
-      fixed: 'left',
+      key: 'name', align: 'center', fixed: 'left',
       sorter: (a, b) => (a?.student?.firstName ?? '' + a?.student?.lastName ?? '').toLowerCase() > (b?.student?.firstName ?? '' + b?.student?.lastName ?? '').toLowerCase() ? 1 : -1,
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
@@ -347,14 +345,13 @@ const AdminApproved = (props) => {
         size='middle'
         dataSource={requests?.map((s, index) => ({ ...s, key: index }))}
         columns={adminApprovedColumns}
-        scroll={{ x: 1300 }}
+        scroll={{ x: true }}
         onChange={(_, __, ___, extra) => setSortedRequests(extra.currentDataSource)}
         onRow={(subsidy) => ({
           onClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
           onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
         })}
         className='mt-1 pb-10'
-        pagination={false}
       />
     </div>
   )

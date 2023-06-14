@@ -126,7 +126,7 @@ class UserManager extends React.Component {
 		const { pageNumber, pageSize, totalSize, visibleInputCode, users, isConfirmModal, confirmMessage, loading } = this.state;
 		const columns = [
 			{
-				title: 'UserName', dataIndex: 'username', key: 'name',
+				title: 'UserName', dataIndex: 'username', key: 'name', fixed: 'left',
 				sorter: (a, b) => a.username > b.username ? 1 : -1,
 				filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
 					<div style={{ padding: 8 }}>
@@ -210,10 +210,11 @@ class UserManager extends React.Component {
 				render: (activity) => activity?.createdAt ? moment(activity?.createdAt)?.format('MM/DD/YYYY hh:mm A') : '',
 			},
 			{
-				title: 'Action', key: 'action', render: (user) => (
+				title: 'Action', key: 'action', fixed: 'right',
+				render: (user) => (
 					<Space size="middle">
-						<a className='btn-blue' onClick={() => this.onShowModalInputCode(user)}>Edit</a>
-						<a className='btn-red' onClick={() => this.handleActivate(user._id, user.isActive ? 0 : 1)}>{user.isActive ? 'Deactivate' : 'Activate'}</a>
+						<span className='text-primary cursor' onClick={() => this.onShowModalInputCode(user)}>Edit</span>
+						<span className='text-red cursor' onClick={() => this.handleActivate(user._id, user.isActive ? 0 : 1)}>{user.isActive ? 'Deactivate' : 'Activate'}</span>
 					</Space>
 				),
 			},
@@ -242,7 +243,7 @@ class UserManager extends React.Component {
 					<Button type='primary' onClick={() => this.handleNewUser()}>Create New User</Button>
 				</div>
 				<Space direction='vertical' className='flex'>
-					<Table bordered size='middle' pagination={false} dataSource={users} columns={columns} />
+					<Table bordered size='middle' pagination={false} dataSource={users} columns={columns} scroll={{ x: 1000 }} />
 					<Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
 				</Space>
 				{visibleInputCode && <ModalInputCode {...modalInputCodeProps} />}

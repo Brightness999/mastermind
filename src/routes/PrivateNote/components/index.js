@@ -200,7 +200,7 @@ class PrivateNote extends React.Component {
 
     const columns = [
       {
-        title: intl.formatMessage(messages.studentName), key: 'name',
+        title: intl.formatMessage(messages.studentName), key: 'name', fixed: 'left',
         sorter: (a, b) => (a.firstName || '' + a.lastName || '').toLowerCase() > (b.firstName || '' + b.lastName || '').toLowerCase() ? 1 : -1,
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
@@ -266,17 +266,17 @@ class PrivateNote extends React.Component {
 
     if (auth.user.role === PARENT) {
       columns.splice(5, 0, {
-        title: intl.formatMessage(messages.countOfSessionsPast), dataIndex: 'appointments', key: 'countOfSessionsPast',
+        title: 'Past Sessions', dataIndex: 'appointments', key: 'countOfSessionsPast',
         sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && [CLOSED, PENDING].includes(data.status))?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && [CLOSED, PENDING].includes(data.status))?.length,
         render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && [CLOSED, PENDING].includes(a.status))?.length,
       })
       columns.splice(6, 0, {
-        title: intl.formatMessage(messages.countOfSessionsFuture), dataIndex: 'appointments', key: 'countOfSessionsFuture',
+        title: 'Future Sessions', dataIndex: 'appointments', key: 'countOfSessionsFuture',
         sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length,
         render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status === PENDING)?.length,
       })
       columns.splice(7, 0, {
-        title: intl.formatMessage(messages.countOfReferrals), dataIndex: 'appointments', key: 'countOfReferrals',
+        title: 'Referrals', dataIndex: 'appointments', key: 'countOfReferrals',
         sorter: (a, b) => a.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length - b.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length,
         render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length,
       })
@@ -321,17 +321,17 @@ class PrivateNote extends React.Component {
 
     if (auth.user.role === PROVIDER) {
       columns.splice(5, 0, {
-        title: intl.formatMessage(messages.countOfClosedSessionsPast), dataIndex: 'appointments', key: 'countOfClosedSessionsPast',
+        title: 'Closed Sessions', dataIndex: 'appointments', key: 'countOfClosedSessionsPast',
         sorter: (a, b) => a.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length - b.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length,
         render: appointments => appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length,
       });
       columns.splice(6, 0, {
-        title: intl.formatMessage(messages.countOfPendingSessionsPast), dataIndex: 'appointments', key: 'countOfPendingSessionsPast',
+        title: 'Pending Sessions', dataIndex: 'appointments', key: 'countOfPendingSessionsPast',
         sorter: (a, b) => a.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === PENDING)?.length - b.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && data.status === PENDING)?.length,
         render: appointments => appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && a.status === PENDING)?.length,
       });
       columns.splice(7, 0, {
-        title: intl.formatMessage(messages.countOfSessionsFuture), dataIndex: 'appointments', key: 'countOfSessionsFuture',
+        title: 'Future Sessions', dataIndex: 'appointments', key: 'countOfSessionsFuture',
         sorter: (a, b) => a.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length - b.appointments?.filter(data => data.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length,
         render: appointments => appointments?.filter(a => a.provider?._id === auth.user.providerInfo?._id && [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status === PENDING)?.length,
       })
@@ -408,17 +408,17 @@ class PrivateNote extends React.Component {
 
     if (auth.user.role === CONSULTANT) {
       columns.splice(5, 0, {
-        title: intl.formatMessage(messages.countOfSessionsPast), dataIndex: 'appointments', key: 'countOfSessionsPast',
+        title: 'Closed Sessions', dataIndex: 'appointments', key: 'countOfSessionsPast',
         sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && [CLOSED, PENDING].includes(data.status))?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isAfter(moment(data.date)) && [CLOSED, PENDING].includes(data.status))?.length,
         render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isAfter(moment(a.date)) && [CLOSED, PENDING].includes(a.status))?.length,
       })
       columns.splice(6, 0, {
-        title: intl.formatMessage(messages.countOfSessionsFuture), dataIndex: 'appointments', key: 'countOfSessionsFuture',
+        title: 'Future Sessions', dataIndex: 'appointments', key: 'countOfSessionsFuture',
         sorter: (a, b) => a.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length - b.appointments?.filter(data => [EVALUATION, APPOINTMENT].includes(data.type) && moment().isBefore(moment(data.date)) && data.status === PENDING)?.length,
         render: appointments => appointments?.filter(a => [EVALUATION, APPOINTMENT].includes(a.type) && moment().isBefore(moment(a.date)) && a.status === PENDING)?.length,
       })
       columns.splice(7, 0, {
-        title: intl.formatMessage(messages.countOfReferrals), dataIndex: 'appointments', key: 'countOfReferrals',
+        title: 'Referrals', dataIndex: 'appointments', key: 'countOfReferrals',
         sorter: (a, b) => a.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length - b.appointments?.filter(data => data.type === CONSULTATION && moment().isAfter(moment(data.date)) && data.status === CLOSED)?.length,
         render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length,
       })
@@ -790,6 +790,7 @@ class PrivateNote extends React.Component {
               }
             }}
             pagination={false}
+            scroll={{ x: true }}
           />
           <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} onChange={this.handleChangePagination} />
         </Space>
@@ -805,7 +806,7 @@ class PrivateNote extends React.Component {
               size='middle'
               dataSource={subsidyRequests?.map((s, index) => ({ ...s, key: index }))}
               columns={adminApprovedColumns}
-              scroll={{ x: 1300 }}
+              scroll={{ x: true }}
               onRow={(subsidy) => ({
                 onClick: (e) => e.target.className !== 'btn-blue' && this.onShowModalSubsidy(subsidy?._id),
                 onDoubleClick: (e) => e.target.className !== 'btn-blue' && this.onShowModalSubsidy(subsidy?._id),
