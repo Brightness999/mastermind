@@ -54,12 +54,17 @@ export default class extends React.Component {
 	onSubmit = async () => {
 		try {
 			const values = await this.form.validateFields();
-			const response = await request.post(userLogin, values);
-			const { success, data } = response;
-			if (success) {
-				Cookies.set('tk', data.token, { expires: new Date(Date.now() + 10 * 60 * 1000) });
-				store.dispatch(setUser(data.user));
-				data.user.role > 900 ? this.props.history.push(routerLinks.Admin) : this.props.history.push(routerLinks.Dashboard);
+			const token = Cookies.get('tk');
+			if (token) {
+				store.getState().auth.user.role > 900 ? this.props.history.push(routerLinks.Admin) : this.props.history.push(routerLinks.Dashboard);
+			} else {
+				const response = await request.post(userLogin, values);
+				const { success, data } = response;
+				if (success) {
+					Cookies.set('tk', data.token, { expires: new Date(Date.now() + 10 * 60 * 1000) });
+					store.dispatch(setUser(data.user));
+					data.user.role > 900 ? this.props.history.push(routerLinks.Admin) : this.props.history.push(routerLinks.Dashboard);
+				}
 			}
 		} catch (error) {
 			console.log(error);
