@@ -779,6 +779,9 @@ class DrawerDetail extends Component {
     const appointmentDate = moment(event?.date);
     const consultants = auth.consultants?.filter(consultant => consultant?._id !== auth.user?._id && !listAppointmentsRecent?.find(a => a?.consultant?._id === consultant?.consultantInfo?._id && a.date === event?.date) && consultant?.consultantInfo?.manualSchedule?.find(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 }))));
     const flagEvent = listAppointmentsRecent?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE);
+    const isReschedule = event?.status === PENDING && (event?.type === SCREEN || (moment().isBefore(moment(event?.date)) && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type)) || (moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && (userRole === 3 || userRole > 900 || (userRole === 100 && event?.consultant?._id && event?.consultant?._id === auth.user?.consultantInfo?._id))));
+    const isLeaveFeedback = userRole !== 3 && !isShowFeedback && [CLOSED, DECLINED].includes(event?.status) && ((event?.type !== CONSULTATION) || (event?.type === CONSULTATION && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)));
+    const isCancel = event?.status === PENDING && (event?.type === SCREEN || (moment().isBefore(moment(event?.date)) && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type)) || (moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && (userRole === 3 || userRole > 900 || (userRole === 100 && event?.consultant?._id && event?.consultant?._id === auth.user?.consultantInfo?._id))));
 
     const providerProfile = (
       <div className='provider-profile'>
@@ -1096,9 +1099,6 @@ class DrawerDetail extends Component {
                     <Button type='primary' className='flex-1 h-30 p-0' onClick={this.onOpenModalInvoice}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
-                    {/* <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
-                      {intl.formatMessage(messages.flagDetails)}
-                    </Button> */}
                     <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                       <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                       <input type="hidden" name="business" value="office@helpmegethelp.org" />
@@ -1129,9 +1129,6 @@ class DrawerDetail extends Component {
                   <Button type='primary' className='flex-1 h-30 p-0' onClick={this.onOpenModalInvoice}>
                     {intl.formatMessage(messages.editFlag)}
                   </Button>
-                  {/* <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
-                    {intl.formatMessage(messages.editFlag)}
-                  </Button> */}
                   <Popconfirm
                     title="Are you sure to clear this flag?"
                     onConfirm={this.handleClearFlag}
@@ -1161,9 +1158,6 @@ class DrawerDetail extends Component {
                     <Button type='primary' className='flex-1 h-30 p-0' onClick={this.onOpenModalInvoice}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
-                    {/* <Button type='primary' className='flex-1 h-30 p-0' onClick={() => event?.flagType === BALANCE ? this.onShowModalBalance() : event?.flagType === NOSHOW ? this.onShowModalNoShow() : {}}>
-                      {intl.formatMessage(messages.flagDetails)}
-                    </Button> */}
                     <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                       <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                       <input type="hidden" name="business" value="office@helpmegethelp.org" />
@@ -1240,23 +1234,9 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {event?.type === SCREEN && event?.status === PENDING && userRole > 3 && (
+              {(event?.status === PENDING && userRole > 3 && ([SCREEN, EVALUATION].includes(event?.type) || (event?.type === CONSULTATION && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)))) && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={() => this.openModalProcess()} className='flex items-center gap-2 h-30'>
-                    {intl.formatMessage(messages.markClosed)}
-                  </Button>
-                </Col>
-              )}
-              {event?.type === EVALUATION && event?.status === PENDING && userRole > 3 && (
-                <Col span={12}>
-                  <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={() => this.openModalProcess()} className='flex items-center gap-2 h-30'>
-                    {intl.formatMessage(messages.markClosed)}
-                  </Button>
-                </Col>
-              )}
-              {event?.type === CONSULTATION && event?.status === PENDING && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900) && (
-                <Col span={12}>
-                  <Button type='primary' icon={<BsCheckCircle size={15} />} block className='flex items-center gap-2 h-30' onClick={() => this.openModalProcess()}>
                     {intl.formatMessage(messages.markClosed)}
                   </Button>
                 </Col>
@@ -1310,14 +1290,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(userRole !== 3 && !isShowFeedback && [CLOSED, DECLINED].includes(event?.status) && event?.type !== CONSULTATION) && (
-                <Col span={12}>
-                  <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.showFeedback}>
-                    {intl.formatMessage(messages.leaveFeedback)}
-                  </Button>
-                </Col>
-              )}
-              {(!isShowFeedback && [CLOSED, DECLINED].includes(event?.status) && event?.type === CONSULTATION && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
+              {isLeaveFeedback && (
                 <Col span={12}>
                   <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.showFeedback}>
                     {intl.formatMessage(messages.leaveFeedback)}
@@ -1331,14 +1304,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type !== CONSULTATION) && (
-                <Col span={12}>
-                  <Button type='primary' icon={<BsClockHistory size={15} />} block onClick={this.openModalCurrent}>
-                    {intl.formatMessage(messages.reschedule)}
-                  </Button>
-                </Col>
-              )}
-              {(event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && (userRole === 3 || userRole > 900 || (userRole === 100 && event?.consultant?._id && event?.consultant?._id === auth.user?.consultantInfo?._id))) && (
+              {isReschedule && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsClockHistory size={15} />} block onClick={this.openModalCurrent}>
                     {intl.formatMessage(messages.reschedule)}
@@ -1395,14 +1361,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type !== CONSULTATION && (
-                <Col span={12}>
-                  <Button type='primary' icon={<BsXCircle size={15} />} block onClick={this.openModalCancel}>
-                    {intl.formatMessage(msgModal.cancel)}
-                  </Button>
-                </Col>
-              )}
-              {(event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && (userRole === 3 || userRole > 900 || (userRole === 100 && event?.consultant?._id && event?.consultant?._id === auth.user?.consultantInfo?._id))) && (
+              {isCancel && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsXCircle size={15} />} block onClick={this.openModalCancel}>
                     {intl.formatMessage(msgModal.cancel)}
