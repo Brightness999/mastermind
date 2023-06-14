@@ -34,7 +34,7 @@ import { changeTime, getAppointmentsData, getAppointmentsMonthData, getInvoiceLi
 import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance, updateInvoice } from 'utils/api/apiList';
 import Subsidiaries from './school';
 import PageLoading from 'components/Loading/PageLoading';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from 'routes/constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from 'routes/constant';
 import './index.less';
 
 const { Panel } = Collapse;
@@ -1487,7 +1487,7 @@ class Dashboard extends React.Component {
               </section>
             )}
           </div>
-          <img src='../images/call.png' alt='hand-up-call' className='btn-call' width="6%" onClick={this.onShowModalReferral} />
+          {[PARENT, CONSULTANT].includes(userRole) ? <img src='../images/call.png' alt='hand-up-call' className='btn-call' width="6%" onClick={this.onShowModalReferral} /> : null}
           {userDrawerVisible && <DrawerDetail {...drawerDetailProps} />}
           {visibleNewAppoint && <ModalNewAppointmentForParents {...modalNewAppointProps} />}
           {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
