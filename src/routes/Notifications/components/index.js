@@ -85,10 +85,6 @@ class NotificationSetting extends React.Component {
     const { notifications, pageNumber, pageSize, totalSize } = this.state;
     const columns = [
       {
-        title: 'Message', key: 'message',
-        render: (notification) => (<div className={`${notification?.isRead ? '' : 'message'}`}><div className={`${notification?.isRead ? '' : 'message-content'}`}>{notification.text}</div></div>)
-      },
-      {
         title: 'Author', dataIndex: 'fromUser', key: 'author',
         render: user => {
           switch (user?.role) {
@@ -103,7 +99,7 @@ class NotificationSetting extends React.Component {
         },
       },
       {
-        title: 'Authro Role', dataIndex: 'fromUser', key: 'role',
+        title: 'Role', dataIndex: 'fromUser', key: 'role',
         filters: [
           { text: 'Super Admin', value: 1000 },
           { text: 'Admin', value: 999 },
@@ -124,6 +120,10 @@ class NotificationSetting extends React.Component {
             default: return 'Banner User';
           }
         },
+      },
+      {
+        title: 'Message', key: 'message',
+        render: (notification) => (<div className={`${notification?.isRead ? '' : 'message'}`}><div className={`${notification?.isRead ? '' : 'message-content'}`}>{notification.text}</div></div>)
       },
       {
         title: 'Created Date', dataIndex: 'createdAt', key: 'createdAt', type: 'datetime',
