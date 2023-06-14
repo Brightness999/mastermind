@@ -120,6 +120,9 @@ export const changeTime = createAsyncThunk(
 				case ADMIN:
 					result = await request.post(changeTimeAppointForAdmin, data.data);
 					return result.data;
+				case CONSULTANT:
+					result = await request.post(changeTimeAppointForParent, data.data);
+					return result.data;
 				case PROVIDER:
 					result = await request.post(changeTimeAppointForProvider, data.data);
 					return result.data;

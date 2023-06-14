@@ -561,11 +561,16 @@ class Dashboard extends React.Component {
 
   handleEventChange = (changeInfo) => {
     const obj = changeInfo.event.toPlainObject();
+    const event = obj.extendedProps;
+    const { userRole } = this.state;
+    const { user } = this.props;
+
     const data = {
-      role: this.state.userRole,
+      role: userRole,
       data: {
-        _id: obj.extendedProps._id,
+        _id: event._id,
         date: new Date(obj.start),
+        consultant: (event.type === CONSULTATION && userRole === CONSULTANT) ? user?.consultantInfo?._id : undefined,
       }
     }
     this.props.changeTime(data)
