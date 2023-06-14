@@ -8,13 +8,13 @@ import moment from 'moment';
 import { AiFillWarning } from 'react-icons/ai';
 
 import messages from './messages';
-import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import msgDashboard from '../../routes/Dashboard/messages';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
+import msgDashboard from 'routes/Dashboard/messages';
 import msgDrawer from '../DrawerDetail/messages';
-import request from '../../utils/api/request'
-import { url, switchPathWithRole } from '../../utils/api/baseUrl'
-import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation, preApproveSubsidy, schoolAcceptAppealSubsidy, searchProvidersForAdmin, selectFinalProviderForSubsidy } from '../../utils/api/apiList';
-import { setSubsidyRequests } from '../../redux/features/appointmentsSlice';
+import request from 'utils/api/request'
+import { url, switchPathWithRole } from 'utils/api/baseUrl'
+import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation, preApproveSubsidy, schoolAcceptAppealSubsidy, searchProvidersForAdmin, selectFinalProviderForSubsidy, updateApprovedRequest } from 'utils/api/apiList';
+import { setSubsidyRequests } from 'src/redux/features/appointmentsSlice';
 import ModalReferralService from './ModalReferralService';
 import ModalCurrentReferralService from './ModalCurrentReferralService';
 import ModalCreateNote from './ModalCreateNote';
@@ -246,9 +246,41 @@ class ModalSubsidyProgress extends React.Component {
 		})
 	}
 
+	schoolEditApprovedRequest(subsidy) {
+		const { selectedProvider, decisionExplanation, otherProvider } = this.state;
+
+		if ((!selectedProvider && !otherProvider) || decisionExplanation.length === 0) {
+			this.setState({ parentWarning: 'Please suggest a provider and fill in decision explaintion' });
+			return;
+		}
+
+		if (selectedProvider && otherProvider) {
+			this.setState({ parentWarning: 'Please select only one provider' });
+			return;
+		}
+
+		this.setState({ parentWarning: '' });
+		request.post(updateApprovedRequest, {
+			subsidyId: subsidy._id,
+			student: subsidy?.student?._id,
+			selectedProvider,
+			decisionExplanation,
+			otherProvider,
+		}).then(result => {
+			message.success('Updated successfully');
+			const { success, data } = result;
+			if (success) {
+				this.updateSubsidiaries(subsidy, data);
+				this.props.onSubmit();
+			}
+		}).catch(err => {
+			message.error(err.message);
+		})
+	}
+
 	updateSubsidiaries(subsidy, data) {
 		const newSubsidyRequests = JSON.parse(JSON.stringify(this.props.listSubsidiaries));
-		this.props.dispatch(setSubsidyRequests(newSubsidyRequests?.map(s => {
+		this.props.setSubsidyRequests(newSubsidyRequests?.map(s => {
 			if (s._id === subsidy._id) {
 				s.status = data.status;
 				s.isAppeal = data.isAppeal;
@@ -256,7 +288,7 @@ class ModalSubsidyProgress extends React.Component {
 				s.otherProvider = data.otherProvider;
 			}
 			return s;
-		})));
+		}));
 	}
 
 	onShowModalReferral = () => {
@@ -385,6 +417,8 @@ class ModalSubsidyProgress extends React.Component {
 									disabled={user.role === 3}
 									onChange={v => this.setState({ selectedProvider: v, otherProvider: undefined })}
 									value={selectedProvider}
+									allowClear
+									onClear={() => this.setState({ selectedProvider: undefined })}
 									className='mb-10'
 									placeholder={intl.formatMessage(msgCreateAccount.provider)}
 								>
@@ -718,8 +752,8 @@ class ModalSubsidyProgress extends React.Component {
 				<Popconfirm
 					key="edit"
 					icon={<AiFillWarning size={24} />}
-					title="Are you sure to accept this appeal?"
-					onConfirm={() => this.schoolAcceptAppeal(subsidy)}
+					title="Are you sure to update this request?"
+					onConfirm={() => this.schoolEditApprovedRequest(subsidy)}
 					okText="Yes"
 					cancelText="No"
 				>
@@ -765,8 +799,8 @@ class ModalSubsidyProgress extends React.Component {
 				<Popconfirm
 					key="edit"
 					icon={<AiFillWarning size={24} />}
-					title="Are you sure to accept this appeal?"
-					onConfirm={() => this.schoolAcceptAppeal(subsidy)}
+					title="Are you sure to update this request?"
+					onConfirm={() => this.schoolEditApprovedRequest(subsidy)}
 					okText="Yes"
 					cancelText="No"
 				>
@@ -824,7 +858,7 @@ class ModalSubsidyProgress extends React.Component {
 					cancelText="No"
 				>
 					<Button key="approve" type='primary'>
-						{intl.formatMessage(messages.approve).toUpperCase()}
+						{intl.formatMessage(messages.accept).toUpperCase()}
 					</Button>
 				</Popconfirm>,
 			]
@@ -932,4 +966,4 @@ const mapStateToProps = state => ({
 	auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps))(ModalSubsidyProgress);
+export default compose(connect(mapStateToProps, { setSubsidyRequests }))(ModalSubsidyProgress);
