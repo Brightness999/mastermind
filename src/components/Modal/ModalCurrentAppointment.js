@@ -254,8 +254,8 @@ class ModalCurrentAppointment extends React.Component {
 			const { success, data } = result;
 			if (success) {
 				this.setState({ errorMessage: '' });
-				const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? data : a);
-				const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? data : a);
+				const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+				const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
 
 				this.props.setAppointments(newAppointments);
 				this.props.setAppointmentsInMonth(newAppointmentsInMonth);
