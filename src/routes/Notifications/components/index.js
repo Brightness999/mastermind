@@ -13,6 +13,7 @@ import { getUserNotifications } from 'utils/api/apiList';
 import { ADMIN, CONSULTANT, PARENT, PROVIDER, SCHOOL, SUPERADMIN } from 'routes/constant';
 import { socketUrl } from 'utils/api/baseUrl';
 import { setCountOfUnreadNotifications } from 'src/redux/features/authSlice';
+import PageLoading from 'components/Loading/PageLoading';
 import './index.less';
 
 class NotificationSetting extends React.Component {
@@ -24,6 +25,7 @@ class NotificationSetting extends React.Component {
       pageSize: 10,
       pageNumber: 1,
       totalSize: 0,
+      loading: false,
     }
   }
 
@@ -52,8 +54,9 @@ class NotificationSetting extends React.Component {
 
   getNotificationList = (pageNumber = 1, pageSize = 10) => {
     const { user } = this.props;
-
+    this.setState({ loading: true });
     request.post(getUserNotifications, { pageNumber, pageSize }).then(result => {
+      this.setState({ loading: false });
       const { success, data } = result;
       if (success) {
         this.setState({
@@ -77,12 +80,12 @@ class NotificationSetting extends React.Component {
       }
     }).catch(err => {
       message.error(err.message);
-      this.setState({ notifications: [] });
+      this.setState({ notifications: [], loading: false });
     })
   }
 
   render() {
-    const { notifications, pageNumber, pageSize, totalSize } = this.state;
+    const { loading, notifications, pageNumber, pageSize, totalSize } = this.state;
     const columns = [
       {
         title: 'Author', dataIndex: 'fromUser', key: 'author',
@@ -141,11 +144,11 @@ class NotificationSetting extends React.Component {
           <Table bordered size='middle' pagination={false} dataSource={notifications} columns={columns} />
           <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} onChange={this.handleChangePagination} />
         </Space>
+        <PageLoading loading={loading} isBackground={true} />
       </div>
     );
   }
 }
-
 
 const mapStateToProps = state => ({ user: state.auth.user });
 
