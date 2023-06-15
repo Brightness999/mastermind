@@ -996,6 +996,9 @@ class DrawerDetail extends Component {
           {event?.flagStatus !== ACTIVE && event?.status === CLOSED && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.accepted)}]</div>
           )}
+          {event?.flagStatus !== ACTIVE && event?.status === NOSHOW && (
+            <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.noShow)}]</div>
+          )}
           {event?.flagStatus !== ACTIVE && event?.status === CANCELLED ? event?.dependent?.isRemoved ? (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.graduated)}]</div>
           ) : (
