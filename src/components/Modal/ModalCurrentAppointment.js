@@ -8,14 +8,16 @@ import { FaCalendarAlt, FaHandHoldingUsd } from 'react-icons/fa';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import 'moment/locale/en-au';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 import messages from './messages';
-import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import msgDrawer from '../../components/DrawerDetail/messages';
-import request from '../../utils/api/request';
-import { store } from '../../redux/store';
-import { rescheduleAppointmentForParent } from '../../utils/api/apiList';
-import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, InvoiceType, PENDING, SCREEN, SUBSIDY } from '../../routes/constant';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
+import msgDrawer from 'components/DrawerDetail/messages';
+import request from 'utils/api/request';
+import { rescheduleAppointmentForParent } from 'utils/api/apiList';
+import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, InvoiceType, PENDING, SCREEN, SUBSIDY } from 'routes/constant';
+import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -26,15 +28,15 @@ class ModalCurrentAppointment extends React.Component {
 	state = {
 		selectedDate: moment(this.props.event?.date),
 		selectedTimeIndex: -1,
-		addressOptions: store.getState().auth.locations,
+		addressOptions: this.props.auth.locations,
 		arrTime: [],
 		errorMessage: '',
-		skillSet: store.getState().auth.skillSet,
+		skillSet: this.props.auth.skillSet,
 		notes: this.props.event?.notes,
-		dependents: store.getState().auth.dependents,
+		dependents: this.props.auth.dependents,
 		standardRate: '',
 		subsidizedRate: '',
-		userRole: store.getState().auth.user.role,
+		userRole: this.props.auth.user.role,
 		subsidyAvailable: false,
 		restSessions: 0,
 		duration: 30,
@@ -103,7 +105,7 @@ class ModalCurrentAppointment extends React.Component {
 	}
 
 	componentDidMount() {
-		const { event } = this.props;
+		const { event, auth } = this.props;
 		const currentGrade = event.dependent.currentGrade;
 		let standardRate = 0;
 		let subsidizedRate = 0;
@@ -126,9 +128,9 @@ class ModalCurrentAppointment extends React.Component {
 		}
 
 		this.setState({
-			skillSet: store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.services ?? [],
+			skillSet: auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.services ?? [],
 			selectedDate: moment(event?.date),
-			addressOptions: ['Dependent Home', 'Provider Office', store.getState().auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.school?.name],
+			addressOptions: ['Dependent Home', 'Provider Office', auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.school?.name],
 			standardRate: standardRate ? standardRate : '',
 			subsidizedRate: subsidizedRate ? subsidizedRate : '',
 			duration: event?.type === EVALUATION ? event?.provider?.separateEvaluationDuration : event?.provider?.duration,
@@ -206,8 +208,8 @@ class ModalCurrentAppointment extends React.Component {
 
 	handleReschedule = () => {
 		const { selectedDate, address, notes, selectedTimeIndex, arrTime } = this.state;
-		const { durations } = store.getState().auth;
-		const { event, isFeeToParent } = this.props;
+		const { durations } = this.props.auth;
+		const { appointments, appointmentsMonth, event, isFeeToParent } = this.props;
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
 
@@ -249,8 +251,15 @@ class ModalCurrentAppointment extends React.Component {
 		this.setState({ loadingSchedule: true });
 		request.post(rescheduleAppointmentForParent, postData).then(result => {
 			this.setState({ loadingSchedule: false });
-			if (result.success) {
+			const { success, data } = result;
+			if (success) {
 				this.setState({ errorMessage: '' });
+				const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? data : a);
+				const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? data : a);
+
+				this.props.setAppointments(newAppointments);
+				this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+
 				if (event?.type == EVALUATION) {
 					message.success(`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''} requires a ${durations?.find(a => a.value == this.state.duration)?.label} evaluation. Please proceed to schedule.`);
 				} else {
@@ -289,7 +298,7 @@ class ModalCurrentAppointment extends React.Component {
 			cancellationFee,
 			loadingSchedule,
 		} = this.state;
-		const { event } = this.props;
+		const { event, auth } = this.props;
 		const modalProps = {
 			className: 'modal-current',
 			title: "",
@@ -359,7 +368,7 @@ class ModalCurrentAppointment extends React.Component {
 							<p className='font-30 mb-10'>{event?.type == APPOINTMENT && intl.formatMessage(messages.newAppointment)}{event?.type === EVALUATION && intl.formatMessage(messages.newEvaluation)}{event?.type === SCREEN && intl.formatMessage(messages.newScreening)}</p>
 							{event?.type === EVALUATION && (
 								<div className='font-20'>
-									<div>{store.getState().auth.durations?.find(a => a.value == event?.provider?.separateEvaluationDuration)?.label} evaluation</div>
+									<div>{auth.durations?.find(a => a.value == event?.provider?.separateEvaluationDuration)?.label} evaluation</div>
 									<div>Rate: ${event?.provider?.separateEvaluationRate}</div>
 								</div>
 							)}
@@ -620,4 +629,10 @@ class ModalCurrentAppointment extends React.Component {
 	}
 };
 
-export default ModalCurrentAppointment;
+const mapStateToProps = state => ({
+	appointments: state.appointments.dataAppointments,
+	appointmentsMonth: state.appointments.dataAppointmentsMonth,
+	auth: state.auth,
+})
+
+export default compose(connect(mapStateToProps, { setAppointments, setAppointmentsInMonth }))(ModalCurrentAppointment);
