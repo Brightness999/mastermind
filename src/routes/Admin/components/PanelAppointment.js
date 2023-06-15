@@ -8,13 +8,13 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import moment from 'moment';
 
-import msgDashboard from '../../Dashboard/messages';
-import msgModal from '../../../components/Modal/messages';
-import request from '../../../utils/api/request'
-import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalProcessAppointment } from '../../../components/Modal';
-import { getAppointmentsData, getAppointmentsMonthData } from '../../../redux/features/appointmentsSlice';
-import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag, setFlagBalance, updateNoshowFlag } from '../../../utils/api/apiList';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, DECLINED, EVALUATION, InvoiceType, NOSHOW, PENDING, RESCHEDULE, SUBSIDY } from '../../constant';
+import msgDashboard from 'routes/Dashboard/messages';
+import msgModal from 'components/Modal/messages';
+import request from 'utils/api/request'
+import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalProcessAppointment } from 'components/Modal';
+import { getInvoiceList, setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
+import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag, setFlagBalance, updateNoshowFlag } from 'utils/api/apiList';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, DECLINED, EVALUATION, InvoiceType, NOSHOW, PENDING, RESCHEDULE, SUBSIDY } from 'routes/constant';
 import './index.less';
 
 class PanelAppointment extends React.Component {
@@ -93,7 +93,7 @@ class PanelAppointment extends React.Component {
 
   waiveFee = () => {
     const { cancellationType } = this.state;
-    this.setState({ visibleCancelForAdmin: false, isFeeToParent: false });
+    this.onCloseModalCancelForAdmin();
     if (cancellationType === CANCEL) {
       this.setState({ visibleCancel: true });
     } else if (cancellationType === RESCHEDULE) {
@@ -102,8 +102,7 @@ class PanelAppointment extends React.Component {
   }
 
   submitModalCurrent = () => {
-    this.setState({ visibleCurrent: false });
-    this.updateAppointments();
+    this.closeModalCurrent();
   }
 
   closeModalCurrent = () => {
@@ -131,14 +130,15 @@ class PanelAppointment extends React.Component {
   }
 
   handleConfirmCancel = () => {
+    const { appointments, appointmentsMonth } = this.props;
     const { isFeeToParent } = this.state;
     this.setState({ visibleCancel: false }, () => {
       const { event } = this.state;
       if (event?._id) {
-        let data = { appointId: event._id };
+        let postData = { appointId: event._id };
         if (isFeeToParent) {
-          data = {
-            ...data,
+          postData = {
+            ...postData,
             type: InvoiceType.CANCEL,
             items: [{
               type: 'Fee',
@@ -150,9 +150,14 @@ class PanelAppointment extends React.Component {
           }
         }
 
-        request.post(cancelAppointmentForParent, data).then(result => {
-          if (result.success) {
-            this.updateAppointments();
+        request.post(cancelAppointmentForParent, postData).then(result => {
+          const { success, data } = result;
+          if (success) {
+            const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+            const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+
+            this.props.setAppointments(newAppointments);
+            this.props.setAppointmentsInMonth(newAppointmentsInMonth);
             this.setState({ isFeeToParent: false });
           } else {
             message.warning("can't cancel this appointment")
@@ -183,11 +188,12 @@ class PanelAppointment extends React.Component {
   }
 
   handleMarkAsClosed = (note, publicFeedback) => {
+    const { appointments, appointmentsMonth } = this.props;
     const { event, items } = this.state;
-    this.setState({ visibleProcess: false });
+    this.closeModalProcess();
 
     if (event?._id) {
-      const data = {
+      const updateData = {
         appointmentId: event._id,
         publicFeedback: publicFeedback,
         note: note,
@@ -197,10 +203,14 @@ class PanelAppointment extends React.Component {
         totalPayment: items?.totalPayment,
       }
 
-      request.post(closeAppointmentForProvider, data).then(result => {
-        const { success } = result;
+      request.post(closeAppointmentForProvider, updateData).then(result => {
+        const { success, data } = result;
         if (success) {
-          this.updateAppointments();
+          const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+          const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+
+          this.props.setAppointments(newAppointments);
+          this.props.setAppointmentsInMonth(newAppointmentsInMonth);
         } else {
           message.warning("can't close this appointment");
         }
@@ -211,21 +221,26 @@ class PanelAppointment extends React.Component {
   }
 
   handleDecline = (note, publicFeedback) => {
+    const { appointments, appointmentsMonth } = this.props;
     const { event, items } = this.state;
-    this.setState({ visibleProcess: false });
+    this.closeModalProcess();
 
     if (event?._id) {
-      const data = {
+      const postData = {
         appointmentId: event._id,
         publicFeedback: publicFeedback,
         note: note,
         items: items,
       }
 
-      request.post(declineAppointmentForProvider, data).then(result => {
-        const { success } = result;
+      request.post(declineAppointmentForProvider, postData).then(result => {
+        const { success, data } = result;
         if (success) {
-          this.updateAppointments();
+          const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+          const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+
+          this.props.setAppointments(newAppointments);
+          this.props.setAppointmentsInMonth(newAppointmentsInMonth);
         } else {
           message.warning("can't decline this appointment");
         }
@@ -233,20 +248,6 @@ class PanelAppointment extends React.Component {
         message.error(error.message);
       })
     }
-  }
-
-  updateAppointments() {
-    this.props.dispatch(getAppointmentsData({ role: this.props.user?.role }));
-    const month = this.props.calendar.current?._calendarApi.getDate().getMonth() + 1;
-    const year = this.props.calendar.current?._calendarApi.getDate().getFullYear();
-    const dataFetchAppointMonth = {
-      role: this.props.user?.role,
-      data: {
-        month: month,
-        year: year
-      }
-    };
-    this.props.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
   }
 
   openModalNoShow = (appointment) => {
@@ -267,7 +268,7 @@ class PanelAppointment extends React.Component {
 
   onSubmitFlagBalance = (values) => {
     const { notes } = values;
-    const { appointments } = this.props;
+    const { appointments, appointmentsMonth } = this.props;
     const { event } = this.state;
     const providerIds = Object.keys(values).filter(a => a.includes('invoiceId')).map(a => a.split("-")[1]);
     let bulkData = [];
@@ -319,19 +320,24 @@ class PanelAppointment extends React.Component {
 
     if (bulkData.length) {
       request.post(setFlagBalance, { bulkData, dependent: event?.dependent?._id }).then(result => {
-        const { success } = result;
+        const { success, data } = result;
         if (success) {
+          const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+          const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+
+          this.props.setAppointments(newAppointments);
+          this.props.setAppointmentsInMonth(newAppointmentsInMonth);
           this.closeModalBalance();
-          this.updateAppointments();
         }
       }).catch(err => message.error(err.message));
     }
   }
 
   onSubmitFlagNoShow = (values) => {
+    const { appointments, appointmentsMonth, user } = this.props;
     const { event } = this.state;
     const { penalty, program, notes, invoiceId, balance, feeOption } = values;
-    const data = {
+    const postData = {
       _id: event?._id,
       dependent: event?.dependent?._id,
       provider: event?.provider?._id,
@@ -356,11 +362,16 @@ class PanelAppointment extends React.Component {
       invoiceId,
     }
 
-    request.post(invoiceId ? updateNoshowFlag : setFlag, data).then(result => {
-      const { success } = result;
+    request.post(invoiceId ? updateNoshowFlag : setFlag, postData).then(result => {
+      const { success, data } = result;
       if (success) {
-        this.setState({ visibleNoShow: false, isFlag: true });
-        this.updateAppointments();
+        const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+        const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+
+        this.props.setAppointments(newAppointments);
+        this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+        this.props.getInvoiceList({ role: user.role });
+        this.closeModalNoShow();
       }
     })
   }
@@ -374,6 +385,7 @@ class PanelAppointment extends React.Component {
   }
 
   handleLeaveFeedback = (note, publicFeedback) => {
+    const { appointments, appointmentsMonth } = this.props;
     const { event } = this.state;
 
     if (!note?.trim() && !publicFeedback?.trim()) {
@@ -382,17 +394,21 @@ class PanelAppointment extends React.Component {
     }
 
     if (event?._id) {
-      const data = {
+      const postData = {
         appointmentId: event._id,
         publicFeedback: publicFeedback,
         note: note,
       }
 
-      request.post(leaveFeedbackForProvider, data).then(result => {
-        const { success } = result;
+      request.post(leaveFeedbackForProvider, postData).then(result => {
+        const { success, data } = result;
         if (success) {
+          const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+          const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+
+          this.props.setAppointments(newAppointments);
+          this.props.setAppointmentsInMonth(newAppointmentsInMonth);
           this.closeModalFeedback();
-          this.updateAppointments();
         } else {
           message.warning("can't leave feedback");
         }
@@ -544,7 +560,8 @@ class PanelAppointment extends React.Component {
 
 const mapStateToProps = state => ({
   appointments: state.appointments.dataAppointments,
+  appointmentsMonth: state.appointments.dataAppointmentsMonth,
   user: state.auth.user,
 })
 
-export default compose(connect(mapStateToProps))(PanelAppointment);
+export default compose(connect(mapStateToProps, { getInvoiceList, setAppointments, setAppointmentsInMonth }))(PanelAppointment);
