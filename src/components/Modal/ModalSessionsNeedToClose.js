@@ -7,13 +7,12 @@ import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
 import messages from './messages';
-import request from '../../utils/api/request'
-import { closeAppointmentForProvider, declineAppointmentForProvider } from '../../utils/api/apiList';
-import { getAppointmentsMonthData, getAppointmentsData } from '../../redux/features/appointmentsSlice';
-import { store } from '../../redux/store';
+import request from 'utils/api/request'
+import { closeAppointmentForProvider, declineAppointmentForProvider } from 'utils/api/apiList';
+import { getAppointmentsMonthData, getAppointmentsData } from 'src/redux/features/appointmentsSlice';
 import ModalProcessAppointment from './ModalProcessAppointment';
 import ModalInvoice from './ModalInvoice';
-import { ACTIVE, ADMIN, APPOINTMENT, EVALUATION, PENDING, SUBSIDY, SUPERADMIN } from '../../routes/constant';
+import { ACTIVE, ADMIN, APPOINTMENT, EVALUATION, PENDING, SUBSIDY, SUPERADMIN } from 'routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -34,6 +33,13 @@ class ModalSessionsNeedToClose extends React.Component {
 	componentDidMount() {
 		const appointments = JSON.parse(JSON.stringify(this.props.appointments?.filter(appointment => [EVALUATION, APPOINTMENT, SUBSIDY].includes(appointment.type) && appointment.status === PENDING && moment(appointment.date).isBefore(moment()))));
 		this.setState({ appointments: appointments?.map(a => ({ ...a, key: a._id })) });
+	}
+
+	componentDidUpdate(prevProps) {
+		const { appointments } = this.props;
+		if (JSON.stringify(prevProps.appointments) != JSON.stringify(appointments)) {
+			this.setState({ appointments: JSON.parse(JSON.stringify(appointments?.filter(appointment => [EVALUATION, APPOINTMENT, SUBSIDY].includes(appointment.type) && appointment.status === PENDING && moment(appointment.date).isBefore(moment())))) });
+		}
 	}
 
 	handleMarkAsClosed = (note, publicFeedback) => {
@@ -110,8 +116,8 @@ class ModalSessionsNeedToClose extends React.Component {
 	}
 
 	updateAppointments() {
-		const { user, calendar } = this.props;
-		store.dispatch(getAppointmentsData({ role: user?.role }));
+		const { user, calendar, getAppointmentsData, getAppointmentsMonthData } = this.props;
+		getAppointmentsData({ role: user?.role });
 		const month = calendar.current?._calendarApi.getDate().getMonth() + 1;
 		const year = calendar.current?._calendarApi.getDate().getFullYear();
 		const dataFetchAppointMonth = {
@@ -121,7 +127,7 @@ class ModalSessionsNeedToClose extends React.Component {
 				year: year
 			}
 		};
-		store.dispatch(getAppointmentsMonthData(dataFetchAppointMonth));
+		getAppointmentsMonthData(dataFetchAppointMonth);
 	}
 
 	render() {
@@ -226,7 +232,7 @@ class ModalSessionsNeedToClose extends React.Component {
 		const modalProcessProps = {
 			visible: visibleProcess,
 			onDecline: this.handleDecline,
-			onConfirm: this.openModalInvoice,
+			onConfirm: this.handleMarkAsClosed,
 			onCancel: this.closeModalProcess,
 			event: event,
 		};
@@ -255,12 +261,10 @@ class ModalSessionsNeedToClose extends React.Component {
 	}
 };
 
-const mapStateToProps = state => {
-	return ({
-		appointments: state.appointments.dataAppointments,
-		user: state.auth.user,
-		skillSet: state.auth.skillSet,
-	})
-}
+const mapStateToProps = state => ({
+	appointments: state.appointments.dataAppointments,
+	user: state.auth.user,
+	skillSet: state.auth.skillSet,
+})
 
-export default compose(connect(mapStateToProps))(ModalSessionsNeedToClose);
+export default compose(connect(mapStateToProps, { getAppointmentsData, getAppointmentsMonthData }))(ModalSessionsNeedToClose);
