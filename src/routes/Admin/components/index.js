@@ -530,7 +530,6 @@ class SchedulingCenter extends React.Component {
     >
       <PanelAppointment
         onShowDrawerDetail={this.onShowDrawerDetail}
-        calendar={this.calendarRef}
         socket={this.socket}
       />
     </Panel>
