@@ -12,6 +12,7 @@ import '../../assets/styles/login.less';
 class ModalNoShow extends React.Component {
 	state = {
 		feeOption: 1,
+		loading: false,
 	}
 
 	componentDidMount() {
@@ -36,6 +37,7 @@ class ModalNoShow extends React.Component {
 	}
 
 	onFinish = (values) => {
+		this.setState({ loading: true });
 		this.props.onSubmit(values);
 	}
 
@@ -80,7 +82,7 @@ class ModalNoShow extends React.Component {
 
 	render() {
 		const { event, auth } = this.props;
-		const { feeOption } = this.state;
+		const { feeOption, loading } = this.state;
 
 		const modalProps = {
 			className: 'modal-no-show',
@@ -169,7 +171,7 @@ class ModalNoShow extends React.Component {
 						<Button key="back" onClick={this.props.onCancel}>
 							{intl.formatMessage(messages.goBack)}
 						</Button>
-						<Button key="submit" type="primary" htmlType='submit' disabled={auth.user?.role === PARENT || event?.flagStatus === CLEAR}>
+						<Button key="submit" type="primary" htmlType='submit' loading={loading} disabled={auth.user?.role === PARENT || event?.flagStatus === CLEAR}>
 							{intl.formatMessage(messages.submitFlag)}
 						</Button>
 					</Row>
@@ -179,6 +181,6 @@ class ModalNoShow extends React.Component {
 	}
 };
 
-const mapStateToProps = state => ({ auth: state.auth })
+const mapStateToProps = state => ({ auth: state.auth });
 
 export default compose(connect(mapStateToProps))(ModalNoShow);

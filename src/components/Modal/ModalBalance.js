@@ -12,6 +12,7 @@ import { ACTIVE, ADMIN, APPOINTMENT, CLEAR, CLOSED, EVALUATION, NOFLAG, PARENT, 
 class ModalBalance extends React.Component {
 	state = {
 		providerData: [],
+		loading: false,
 	}
 
 	componentDidMount() {
@@ -126,6 +127,7 @@ class ModalBalance extends React.Component {
 	}
 
 	onFinish = (values) => {
+		this.setState({ loading: true });
 		this.props.onSubmit(values);
 	}
 
@@ -144,7 +146,7 @@ class ModalBalance extends React.Component {
 	render() {
 		const { event, dependent } = this.props;
 		const { user } = this.props.auth;
-		const { providerData } = this.state;
+		const { loading, providerData } = this.state;
 		const modalProps = {
 			className: 'modal-balance',
 			title: "",
@@ -298,7 +300,7 @@ class ModalBalance extends React.Component {
 						<Button key="back" onClick={this.props.onCancel}>
 							{intl.formatMessage(messages.goBack)}
 						</Button>
-						<Button key="submit" type="primary" htmlType='submit' disabled={user?.role === PARENT || event?.flagStatus === CLEAR}>
+						<Button key="submit" type="primary" htmlType='submit' loading={loading} disabled={user?.role === PARENT || event?.flagStatus === CLEAR}>
 							{intl.formatMessage(messages.submitFlag)}
 						</Button>
 					</Row>
@@ -308,10 +310,6 @@ class ModalBalance extends React.Component {
 	}
 };
 
-const mapStateToProps = state => {
-	return ({
-		auth: state.auth,
-	})
-}
+const mapStateToProps = state => ({ auth: state.auth });
 
 export default compose(connect(mapStateToProps))(ModalBalance);
