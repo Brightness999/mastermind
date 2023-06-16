@@ -1170,6 +1170,7 @@ class Dashboard extends React.Component {
                           showSearch
                           mode='multiple'
                           allowClear={true}
+                          value={selectedLocations}
                           placeholder={intl.formatMessage(messages.startTypingProvider)}
                           optionFilterProp='children'
                           filterOption={(input, option) => option.children.join('').toLowerCase().includes(input.toLowerCase())}
@@ -1179,13 +1180,6 @@ class Dashboard extends React.Component {
                             <Select.Option key={i} value={provider._id}>{provider.firstName ?? ''} {provider.lastName ?? ''}</Select.Option>
                           ))}
                         </Select>
-                        {/* <div className='div-chip'>
-                          {selectedProviders?.map((id, i) => (
-                            <div key={i} className='chip font-12'>
-                              {listProvider?.find(a => a._id === id).firstName ?? ''} {listProvider?.find(a => a._id === id).lastName ?? ''}
-                              <BsX size={16} onClick={() => this.handleRemoveProvider(i)} /></div>
-                          ))}
-                        </div> */}
                       </Col>
                     )}
                     <Col xs={12} sm={12} md={6} className='select-small'>
@@ -1194,6 +1188,7 @@ class Dashboard extends React.Component {
                         showSearch
                         mode='multiple'
                         allowClear={true}
+                        value={selectedProviders}
                         placeholder={intl.formatMessage(messages.startTypingLocation)}
                         optionFilterProp='children'
                         filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
@@ -1203,14 +1198,6 @@ class Dashboard extends React.Component {
                           <Select.Option key={i} value={location}>{location}</Select.Option>
                         ))}
                       </Select>
-                      {/* <div className='div-chip'>
-                        {selectedLocations?.map((location, i) => (
-                          <div key={i} className='chip font-12'>
-                            {location}
-                            <BsX size={16} onClick={() => this.handleRemoveLocation(i)} />
-                          </div>
-                        ))}
-                      </div> */}
                     </Col>
                   </Row>
                   <div className='text-right'>
@@ -1251,7 +1238,6 @@ class Dashboard extends React.Component {
                   selectMirror={true}
                   dayMaxEvents={true}
                   weekends={calendarWeekends}
-                  datesSet={this.handleDates}
                   events={calendarEvents}
                   eventContent={(info) => renderEventContent(info, listAppointmentsRecent)}
                   eventClick={this.onShowDrawerDetail}
