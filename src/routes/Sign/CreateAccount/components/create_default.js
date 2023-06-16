@@ -62,7 +62,6 @@ class CreateDefault extends Component {
 				message.warning('Something went wrong. Please try again.');
 			}
 		}).catch(e => {
-			console.log(e);
 			message.warning('Something went wrong. Please try again.');
 		})
 	}
@@ -80,13 +79,9 @@ class CreateDefault extends Component {
 			}
 			return this.props.onContinue();
 		} catch (error) {
-			console.log(error);
+			message.error(error.message);
 		}
 	}
-
-	onFinishFailed = errorInfo => {
-		console.log('Failed:', errorInfo);
-	};
 
 	handleChangePassword = event => {
 		let input = this.state.input;
@@ -115,7 +110,7 @@ class CreateDefault extends Component {
 					])
 				}
 			}).catch(err => {
-				console.log(err);
+				message.warn(err.message);
 			})
 		}, 300);
 	}
@@ -132,7 +127,6 @@ class CreateDefault extends Component {
 		}
 		const error = this.form.getFieldError("email")
 		if (!!error && error.length > 0) {
-			console.log("email dang loi", error);
 			return;
 		}
 		this.timeoutCheckUsername = setTimeout(() => {
@@ -149,7 +143,6 @@ class CreateDefault extends Component {
 					this.setState({ checkEmailExist: false });
 				}
 			}).catch(err => {
-				console.log(err);
 				this.setState({ checkEmailExist: false });
 			})
 		}, 300);
@@ -279,7 +272,6 @@ class CreateDefault extends Component {
 						name="form_default"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 						initialValues={{ account_type: intl.formatMessage(messages.parent) }}
 					>

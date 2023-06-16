@@ -36,7 +36,6 @@ class SystemSetting extends React.Component {
 				this.form?.setFieldsValue({ community: this.props.community?.community?._id });
 			}).catch(error => {
 				this.setState({ loading: false });
-				console.log('get cityConnections error---', error);
 				this.setState({ cityConnections: [] });
 			})
 		} else {
@@ -57,7 +56,7 @@ class SystemSetting extends React.Component {
 					}));
 				}
 			}).catch(error => {
-				console.log('get settings error---', error);
+				message.error(error.message);
 			})
 		}
 	};
@@ -74,7 +73,6 @@ class SystemSetting extends React.Component {
 					this.setState({ cityConnections: [...cityConnections, data], newCity: '' });
 				}
 			}).catch(error => {
-				console.log('get settings error---', error);
 				message.error(error.message);
 			})
 		}

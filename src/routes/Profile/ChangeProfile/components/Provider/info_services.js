@@ -32,7 +32,6 @@ class InfoServices extends Component {
 					this.form?.setFieldsValue(data?.providerInfo);
 				}
 			}).catch(err => {
-				console.log('get provider info error---', err);
 				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
@@ -59,7 +58,6 @@ class InfoServices extends Component {
 				this.setState({ SkillSet: [] });
 			}
 		}).catch(err => {
-			console.log(err);
 			this.setState({ SkillSet: [] });
 		})
 	}
@@ -71,12 +69,8 @@ class InfoServices extends Component {
 				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
 			}));
 		} catch (error) {
-			console.log('updating provider error---', error);
+			message.error(error.message);
 		}
-	};
-
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
 	};
 
 	render() {
@@ -92,7 +86,6 @@ class InfoServices extends Component {
 						name="form_services_offered"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<Form.Item

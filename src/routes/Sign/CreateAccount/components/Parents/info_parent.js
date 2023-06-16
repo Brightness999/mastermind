@@ -73,10 +73,6 @@ class InfoParent extends Component {
 		this.props.onContinue();
 	};
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	handleChangeAddress = address => {
 		this.setState({ address: address });
 		this.setValueToReduxRegisterData('address', address);
@@ -101,7 +97,6 @@ class InfoParent extends Component {
 						name="form_contact"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<p className='font-16 mb-10 text-bold'>{intl.formatMessage(messages.family)}</p>

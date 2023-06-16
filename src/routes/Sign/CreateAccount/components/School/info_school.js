@@ -38,10 +38,6 @@ class InfoSchool extends React.Component {
 		this.props.onContinue();
 	};
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	setReduxForSchool(fieldName, value) {
 		let obj = {};
 		obj[fieldName] = value;
@@ -71,7 +67,6 @@ class InfoSchool extends React.Component {
 						name="form_school"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={(ref) => { this.form = ref }}
 					>
 						<Form.Item

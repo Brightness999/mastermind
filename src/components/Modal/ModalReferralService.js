@@ -151,10 +151,6 @@ class ModalReferralService extends React.Component {
 		})
 	}
 
-	onFinishFailed = (values) => {
-		console.log('Failed', values);
-	}
-
 	onSelectTime = (index) => {
 		this.setState({ selectedTimeIndex: index });
 	}
@@ -381,7 +377,6 @@ class ModalReferralService extends React.Component {
 						name='consultation-form'
 						layout='vertical'
 						onFinish={this.changeMeetingType}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<p className='font-16 mb-5'>{intl.formatMessage(messages.selectOptions)}</p>

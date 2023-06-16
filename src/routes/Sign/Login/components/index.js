@@ -67,7 +67,6 @@ export default class extends React.Component {
 				}
 			}
 		} catch (error) {
-			console.log(error);
 			this.form.setFields([
 				{
 					name: 'loginresult',
@@ -78,10 +77,6 @@ export default class extends React.Component {
 	}
 
 	render() {
-		const onFinishFailed = (errorInfo) => {
-			console.log('Failed:', errorInfo);
-		};
-
 		return (
 			<div className="full-layout page login-page">
 				<Row justify="center" className="row-form row-login">
@@ -92,7 +87,6 @@ export default class extends React.Component {
 						<div>
 							<Form
 								name="login"
-								onFinishFailed={onFinishFailed}
 								ref={ref => this.form = ref}
 							>
 								<Form.Item

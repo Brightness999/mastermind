@@ -46,7 +46,6 @@ class InfoFinancial extends Component {
 					this.setState({ academicLevels: levelOptions, user: data?.providerInfo, W9FormPath: data?.providerInfo?.W9FormPath });
 				}
 			}).catch(err => {
-				console.log('get provider info error ---', err);
 				message.error("Getting Profile" + err.message);
 				this.setState({ academicLevels: academicLevels, loading: false });
 			})
@@ -64,7 +63,6 @@ class InfoFinancial extends Component {
 					this.setState({ academicLevels: levelOptions, user: data, W9FormPath: data?.W9FormPath });
 				}
 			}).catch(err => {
-				console.log('get provider info error ---', err);
 				message.error("Getting Profile" + err.message);
 				this.setState({ academicLevels: academicLevels, loading: false });
 			})
@@ -80,12 +78,8 @@ class InfoFinancial extends Component {
 				_id: user?._id,
 			}))
 		} catch (error) {
-			console.log(error, 'error')
+			message.error(error.message);
 		}
-	};
-
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
 	};
 
 	onUploadChange = async (info) => {
@@ -158,7 +152,6 @@ class InfoFinancial extends Component {
 						name="form_billing_details"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<Form.Item

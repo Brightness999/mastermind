@@ -45,7 +45,6 @@ export const setInforClientChild = createAsyncThunk(
 			}
 			return result;
 		} catch (error) {
-			console.log(error, 'error')
 			message.error(error.message);
 		}
 		return false
@@ -61,7 +60,6 @@ export const setInforClientParent = createAsyncThunk(
 				message.success('Updated successfully');
 			}
 		} catch (error) {
-			console.log(error, 'error')
 			message.error(error.message);
 		}
 		return false
@@ -78,7 +76,6 @@ export const setInforProvider = createAsyncThunk(
 				return result.data;
 			}
 		} catch (error) {
-			console.log(error, 'error')
 			message.error(error.message);
 		}
 		return false
@@ -94,7 +91,6 @@ export const setInforSchool = createAsyncThunk(
 				message.success('Updated successfully');
 			}
 		} catch (error) {
-			console.log(error, 'error')
 			message.error(error.message);
 		}
 		return false

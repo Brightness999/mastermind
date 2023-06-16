@@ -67,8 +67,6 @@ class InfoConsultant extends Component {
 				})
 				this.props.auth?.user?.role < 900 && this.setState({ cityConnections: data.CityConnections ?? [] });
 			}
-		}).catch(err => {
-			console.log(err);
 		})
 	}
 
@@ -80,16 +78,11 @@ class InfoConsultant extends Component {
 					message.success('Updated successfully');
 				}
 			}).catch(err => {
-				console.log(err)
 				message.error(err.message);
 			})
 		} else {
 			message.warning('Not enough data.');
 		}
-	};
-
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
 	};
 
 	render() {
@@ -105,7 +98,6 @@ class InfoConsultant extends Component {
 						name="form_profile_provider"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<Form.Item

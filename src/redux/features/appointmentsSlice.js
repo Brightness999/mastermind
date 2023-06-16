@@ -4,6 +4,7 @@ import moment from 'moment';
 import request from 'src/utils/api/request'
 import { changeTimeAppointForAdmin, changeTimeAppointForParent, changeTimeAppointForProvider, getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getInvoices, getParentSubsidyRequests, getProviderSubsidyRequests, getSchoolSubsidyRequests } from 'src/utils/api/apiList';
 import { ADMIN, CONSULTANT, CONSULTATION, PARENT, PENDING, PROVIDER, SCHOOL, SUPERADMIN } from 'src/routes/constant';
+import { message } from 'antd';
 
 const initialState = {
 	dataAppointments: [],
@@ -35,7 +36,7 @@ export const getAppointmentsData = createAsyncThunk(
 					return result.data;
 			}
 		} catch (error) {
-			console.log('get appointments error---', error)
+			return [];
 		}
 	}
 )
@@ -63,7 +64,7 @@ export const getSubsidyRequests = createAsyncThunk(
 					return result.data.docs;
 			}
 		} catch (error) {
-			console.log('get subsidy requests error---', error);
+			return [];
 		}
 	}
 )
@@ -103,7 +104,7 @@ export const getAppointmentsMonthData = createAsyncThunk(
 			});
 			return result.data;
 		} catch (error) {
-			console.log(error, 'error')
+			return [];
 		}
 	}
 )
@@ -131,7 +132,7 @@ export const changeTime = createAsyncThunk(
 					return result.data;
 			}
 		} catch (error) {
-			console.log(error, 'error')
+			message.error(error.message);
 		}
 	}
 )
@@ -156,7 +157,7 @@ export const getInvoiceList = createAsyncThunk(
 					return result.data;
 			}
 		} catch (error) {
-			console.log(error, 'error')
+			return [];
 		}
 	}
 )

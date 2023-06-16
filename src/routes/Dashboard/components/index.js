@@ -156,7 +156,6 @@ class Dashboard extends React.Component {
           message.warning('Something went wrong. Please try again');
         }
       }).catch(err => {
-        console.log('pay flag error---', err);
         message.error(err.message);
       });
     }
@@ -306,9 +305,7 @@ class Dashboard extends React.Component {
   }
 
   handleCloseNotification = (id) => {
-    request.post(closeNotification, { appointmentId: id }).catch(err => {
-      console.log('close notification error---', err);
-    })
+    request.post(closeNotification, { appointmentId: id });
   }
 
   loadDefaultData() {
@@ -331,7 +328,6 @@ class Dashboard extends React.Component {
         this.props.setConsultants(data?.consultants ?? []);
       }
     }).catch(err => {
-      console.log('get default data error ---', err);
       this.setState({ loading: false });
     })
   }
@@ -350,7 +346,7 @@ class Dashboard extends React.Component {
     };
     this.socket = io(socketUrl, opts);
     this.socket.on('socket_result', data => {
-      console.log('socket result');
+      console.log('socket result: ', data.key);
       this.handleSocketResult(data);
     })
   }

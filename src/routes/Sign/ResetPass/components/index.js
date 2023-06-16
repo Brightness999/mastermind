@@ -25,10 +25,6 @@ export default class extends React.Component {
     return;
   };
 
-  onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
-
   sendRequestResetPassword = () => {
     const postData = { token: this.state.token, password: this.form.getFieldValue('new_pass') };
     request.post(changePassword, postData).then(result => {
@@ -128,7 +124,6 @@ export default class extends React.Component {
                 ref={ref => this.form = ref}
                 name="reset_pass"
                 onFinish={this.onFinish}
-                onFinishFailed={this.onFinishFailed}
               >
                 <Form.Item
                   name="new_pass"

@@ -60,12 +60,8 @@ class InfoSchool extends React.Component {
 			const { dispatch, auth } = this.props;
 			dispatch(setInforSchool({ ...values, _id: window.location.pathname?.includes('changeuserprofile') ? auth.selectedUser?.schoolInfo?._id : auth.user?.schoolInfo?._id }))
 		} catch (error) {
-			console.log('update school error---', error);
+			message.error(error.message);
 		}
-	};
-
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
 	};
 
 	loadCommunitiServer = () => {
@@ -89,7 +85,6 @@ class InfoSchool extends React.Component {
 				message.error(`Can't loading ${intl.formatMessage(messages.email)} ${intl.formatMessage(messages.type)}`);
 			}
 		}).catch(err => {
-			console.log('get email types error---', err);
 			message.error(`Can't loading ${intl.formatMessage(messages.email)} ${intl.formatMessage(messages.type)}`);
 		})
 	}
@@ -107,7 +102,6 @@ class InfoSchool extends React.Component {
 						name="form_school"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={(ref) => { this.form = ref }}
 					>
 						<Form.Item

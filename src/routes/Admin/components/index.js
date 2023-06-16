@@ -150,7 +150,6 @@ class SchedulingCenter extends React.Component {
           message.warning('Something went wrong. Please try again');
         }
       }).catch(err => {
-        console.log('pay flag error---', err);
         message.error(err.message);
       });
     }
@@ -191,7 +190,6 @@ class SchedulingCenter extends React.Component {
         this.props.setSchools(data?.schools ?? []);
       }
     }).catch(err => {
-      console.log('get default data error---', err);
       this.setState({ loading: false });
     });
   }
@@ -210,7 +208,7 @@ class SchedulingCenter extends React.Component {
     };
     this.socket = io(socketUrl, opts);
     this.socket.on('socket_result', data => {
-      console.log('socket result');
+      console.log('socket result: ', data.key);
       if (data.key === 'meeting_link') {
         this.props.setMeetingLink(data.data);
       }

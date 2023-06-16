@@ -31,10 +31,6 @@ class ModalNewScreening extends React.Component {
     })
   }
 
-  onFinishFailed = (error) => {
-    console.log(error);
-  }
-
   render() {
     const { provider, dependent } = this.props;
     const modalProps = {
@@ -55,7 +51,6 @@ class ModalNewScreening extends React.Component {
           <Form
             layout='vertical'
             onFinish={this.onFinish}
-            onFinishFailed={this.onFinishFailed}
             ref={ref => this.form = ref}
           >
             <Row gutter={10}>

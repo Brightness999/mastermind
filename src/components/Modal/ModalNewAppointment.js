@@ -113,7 +113,6 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	componentDidMount() {
-		console.log(this.props);
 		const { SkillSet, selectedDate } = this.props;
 		this.setState({ skillSet: SkillSet, selectedDate: moment(selectedDate) });
 	}
@@ -225,10 +224,6 @@ class ModalNewAppointment extends React.Component {
 			rate: listProvider[selectedProviderIndex]?.separateEvaluationRate ?? 0,
 		};
 		this.requestCreateAppointment(postData);
-	}
-
-	onFinishFailed = (err) => {
-		console.log('form data error---', err);
 	}
 
 	handleChangeAddress = address => {
@@ -546,7 +541,7 @@ class ModalNewAppointment extends React.Component {
 		return (
 			<Modal {...modalProps}>
 				<div className='new-appointment'>
-					<Form onFinish={() => appointmentType === SCREEN ? this.onOpenModalScreening() : this.createAppointment()} onFinishFailed={this.onFinishFailed} layout='vertical'>
+					<Form onFinish={() => appointmentType === SCREEN ? this.onOpenModalScreening() : this.createAppointment()} layout='vertical'>
 						<div className='flex gap-5 items-center'>
 							<p className='font-30 mb-10'>{appointmentType === APPOINTMENT && intl.formatMessage(messages.newAppointment)}{appointmentType === EVALUATION && intl.formatMessage(messages.newEvaluation)}{appointmentType === SCREEN && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType === EVALUATION && selectedProviderIndex > -1 && (

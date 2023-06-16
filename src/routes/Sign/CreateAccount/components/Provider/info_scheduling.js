@@ -50,10 +50,6 @@ class InfoScheduling extends Component {
 		this.props.onContinue();
 	};
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	setValueToReduxRegisterData = (fieldName, value) => {
 		const { registerData } = this.props.register;
 		const scheduling = registerData.scheduling;
@@ -76,7 +72,6 @@ class InfoScheduling extends Component {
 						name="scheduling"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={(ref) => { this.form = ref }}
 					>
 						<Form.Item

@@ -195,10 +195,6 @@ class ConsultantAvailability extends Component {
 		})
 	};
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	onSelectDay = e => {
 		e && this.setState({ currentSelectedDay: e });
 	}
@@ -370,7 +366,6 @@ class ConsultantAvailability extends Component {
 					<Form
 						name="form_availability"
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.manualSchedule)}</p>

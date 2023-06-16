@@ -80,10 +80,6 @@ class SubsidyProgram extends Component {
 		this.props.onContinue();
 	};
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	changeCheckboxValueOnRedux = (name, value) => {
 		let obj = {};
 		obj[name] = value;
@@ -108,7 +104,6 @@ class SubsidyProgram extends Component {
 						name="form_subsidy_program"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={(ref) => { this.form = ref }}
 					>
 						<div className='flex flex-row mb-10'>

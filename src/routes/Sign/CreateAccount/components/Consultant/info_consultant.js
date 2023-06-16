@@ -47,10 +47,6 @@ class InfoConsultant extends Component {
     this.props.onContinue();
   };
 
-  onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
-
   setValueToReduxRegisterData = (fieldName, value) => {
     const { registerData } = this.props.register;
     const consultantInfo = registerData.consultantInfo;
@@ -82,7 +78,6 @@ class InfoConsultant extends Component {
             name="form_profile_provider"
             layout='vertical'
             onFinish={this.onFinish}
-            onFinishFailed={this.onFinishFailed}
             ref={ref => this.form = ref}
           >
             <Form.Item name="referredToAs" label={intl.formatMessage(messages.referredAs)}>

@@ -101,10 +101,6 @@ class InfoAvailability extends Component {
 		this.props.onContinue();
 	};
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	onSelectDay = e => {
 		e && this.setState({ currentSelectedDay: e });
 	}
@@ -471,7 +467,6 @@ class InfoAvailability extends Component {
 						name="form_availability"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.locations)}</p>

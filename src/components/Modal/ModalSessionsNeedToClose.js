@@ -66,7 +66,6 @@ class ModalSessionsNeedToClose extends React.Component {
 					this.setState({ errorMessage: data });
 				}
 			}).catch(error => {
-				console.log('closed error---', error);
 				this.setState({ errorMessage: error.message });
 			})
 		}
@@ -93,7 +92,6 @@ class ModalSessionsNeedToClose extends React.Component {
 					this.setState({ errorMessage: data });
 				}
 			}).catch(error => {
-				console.log('closed error---', error);
 				this.setState({ errorMessage: error.message });
 			})
 		}

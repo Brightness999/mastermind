@@ -42,7 +42,6 @@ class InfoProfile extends Component {
 					this.setState({ isPrivateForHmgh: data?.providerInfo?.isPrivateForHmgh });
 				}
 			}).catch(err => {
-				console.log('get user profile error---', err);
 				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
@@ -55,7 +54,6 @@ class InfoProfile extends Component {
 					this.setState({ isPrivateForHmgh: user?.providerInfo?.isPrivateForHmgh });
 				}
 			}).catch(err => {
-				console.log('get provider info error---', err);
 				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
@@ -71,8 +69,6 @@ class InfoProfile extends Component {
 					EmailType: data.EmailType ?? [],
 				});
 			}
-		}).catch(err => {
-			console.log('get default value for provider error ---', err);
 		})
 	}
 
@@ -82,8 +78,6 @@ class InfoProfile extends Component {
 			if (success) {
 				this.setState({ cityConnections: data ?? [] });
 			}
-		}).catch(err => {
-			console.log('get city connections error---', err);
 		})
 	}
 
@@ -94,12 +88,8 @@ class InfoProfile extends Component {
 				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
 			}))
 		} catch (error) {
-			console.log(error, 'error')
+			message.error(error.message);
 		}
-	};
-
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
 	};
 
 	render() {
@@ -115,7 +105,6 @@ class InfoProfile extends Component {
 						name="form_profile_provider"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<div className="flex items-center justify-start gap-2 h-50">

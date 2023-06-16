@@ -205,7 +205,6 @@ class ModalInvoice extends React.Component {
 		}).catch(err => {
 			this.setState({ loadingDownload: false });
 			message.error(err.message);
-			console.log('download invoice error---', err);
 		})
 	}
 

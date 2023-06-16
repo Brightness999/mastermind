@@ -65,10 +65,6 @@ class InfoFinancial extends Component {
 		this.props.onContinue();
 	};
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	onUploadChange = async (info) => {
 		if (info.file.status !== 'uploading') {
 			this.setState(prevState => ({ fileList: [...prevState.fileList, info.file] }));
@@ -167,7 +163,6 @@ class InfoFinancial extends Component {
 						name="form_billing_details"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<Form.Item

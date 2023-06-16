@@ -187,7 +187,6 @@ class InfoNotification extends React.Component {
 				message.success("Successfully updated");
 			}
 		}).catch(err => {
-			console.log('update notification error---', err);
 			message.error(err.message);
 		})
 	}

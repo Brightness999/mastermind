@@ -34,7 +34,6 @@ class InfoParent extends Component {
 				}
 			}).catch(err => {
 				message.error("Getting Profile" + err.message);
-				console.log(err);
 			})
 		} else {
 			const parentInfo = this.props.auth.user.parentInfo;
@@ -51,7 +50,6 @@ class InfoParent extends Component {
 				user?.role < 900 && this.setState({ cityConnections: data?.cityConnections ?? [] });
 			}
 		}).catch(err => {
-			console.log('get default data for client error---', err);
 			this.setState({ loading: false });
 		})
 	}
@@ -77,10 +75,6 @@ class InfoParent extends Component {
 		}
 	};
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	handleChangeAddress = address => {
 		this.setState({ address: address });
 		this.form?.setFieldsValue({ address: address });
@@ -99,7 +93,6 @@ class InfoParent extends Component {
 						name="form_contact"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<Form.Item

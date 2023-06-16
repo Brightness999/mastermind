@@ -55,7 +55,6 @@ class ModalNewSubsidyRequest extends React.Component {
 				this.setState({ listSchools: [] })
 			}
 		}).catch(err => {
-			console.log('get all schools error---', err);
 			this.setState({ listSchools: [] })
 		})
 	}
@@ -92,10 +91,6 @@ class ModalNewSubsidyRequest extends React.Component {
 				this.form.setFields([{ name: 'documents', errors: ['error from server'] }]);
 			})
 		}
-	};
-
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
 	};
 
 	onChangeUpload = (info) => {
@@ -135,7 +130,6 @@ class ModalNewSubsidyRequest extends React.Component {
 							layout='vertical'
 							initialValues={{ remember: true }}
 							onFinish={this.onFinish}
-							onFinishFailed={this.onFinishFailed}
 							ref={ref => this.form = ref}
 						>
 							<Form.Item

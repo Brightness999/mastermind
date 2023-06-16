@@ -41,7 +41,6 @@ class SubsidyProgram extends Component {
 					})
 				}
 			}).catch(err => {
-				console.log('get provider info error---', err);
 				message.error(err.message);
 				this.setState({ loading: false });
 			})
@@ -59,7 +58,6 @@ class SubsidyProgram extends Component {
 					})
 				}
 			}).catch(err => {
-				console.log('get provider info error---', err);
 				message.error(err.message);
 				this.setState({ loading: false });
 			})
@@ -91,12 +89,8 @@ class SubsidyProgram extends Component {
 		try {
 			this.props.dispatch(setInforProvider(data))
 		} catch (error) {
-			console.log(error, 'error')
+			message.error(error.message);
 		}
-	};
-
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
 	};
 
 	render() {
@@ -112,7 +106,6 @@ class SubsidyProgram extends Component {
 						name="form_subsidy_program"
 						layout="vertical"
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={(ref) => { this.form = ref }}
 					>
 						<div className='flex flex-row mb-10'>

@@ -75,10 +75,6 @@ class InfoAdmin extends React.Component {
     }
   };
 
-  onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
-
   render() {
     const { locations, loading } = this.state;
 
@@ -92,7 +88,6 @@ class InfoAdmin extends React.Component {
             name="form_admin"
             layout="vertical"
             onFinish={this.onFinish}
-            onFinishFailed={this.onFinishFailed}
             ref={ref => this.form = ref}
           >
             <Form.Item

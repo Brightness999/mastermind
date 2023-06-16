@@ -130,10 +130,6 @@ class ModalCurrentReferralService extends React.Component {
 		})
 	}
 
-	onFinishFailed = (values) => {
-		console.log('Failed', values);
-	}
-
 	onSelectTime = (index) => {
 		this.setState({ selectedTimeIndex: index });
 	}
@@ -327,7 +323,6 @@ class ModalCurrentReferralService extends React.Component {
 						name='consultation-form'
 						layout='vertical'
 						onFinish={this.changeMeetingType}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<Row gutter={20} className='mb-10' align="bottom">

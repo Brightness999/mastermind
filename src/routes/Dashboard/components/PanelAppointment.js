@@ -142,7 +142,6 @@ class PanelAppointment extends React.Component {
             message.warning("can't cancel this appointment")
           }
         }).catch(error => {
-          console.log('closed error---', error);
           message.error(error.message);
         })
       }
@@ -193,7 +192,6 @@ class PanelAppointment extends React.Component {
           message.warning("can't close this appointment");
         }
       }).catch(error => {
-        console.log('closed error---', error);
         message.warning(error.message);
       })
     }
@@ -224,7 +222,6 @@ class PanelAppointment extends React.Component {
           message.warning("can't decline this appointment");
         }
       }).catch(error => {
-        console.log('closed error---', error);
         message.error(error.message);
       })
     }
@@ -390,7 +387,6 @@ class PanelAppointment extends React.Component {
           message.warning("can't leave feedback");
         }
       }).catch(error => {
-        console.log('closed error---', error);
         message.error(error.message);
       })
     }

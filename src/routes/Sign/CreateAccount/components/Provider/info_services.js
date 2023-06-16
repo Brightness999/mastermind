@@ -36,10 +36,6 @@ class InfoServices extends Component {
 		this.props.onContinue();
 	};
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	setValueToReduxRegisterData = (fieldName, value) => {
 		const { registerData } = this.props.register;
 		const serviceInfor = registerData.serviceInfor;
@@ -61,7 +57,6 @@ class InfoServices extends Component {
 						name="form_services_offered"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<Form.Item

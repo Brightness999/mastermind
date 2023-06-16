@@ -80,7 +80,6 @@ class InfoChild extends Component {
 				this.setState({ listSchools: [] });
 			}
 		}).catch(err => {
-			console.log('getDefaultValueForClient error---', err);
 			this.setState({ listSchools: [] });
 		})
 	}
@@ -110,13 +109,9 @@ class InfoChild extends Component {
 			const result = await this.props.dispatch(setInforClientChild(params));
 			this.form?.setFieldsValue({ children: result.payload.data?.map(item => ({ ...item, birthday: moment(item.birthday) })) });
 		} catch (error) {
-			console.log('update children error ---', error)
+			message.error(error.message);
 		}
 	}
-
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
 
 	handleSelectBirthday = (date, index) => {
 		const dependents = this.form?.getFieldsValue();
@@ -136,7 +131,6 @@ class InfoChild extends Component {
 						name="form_contact"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<Form.List name="children">

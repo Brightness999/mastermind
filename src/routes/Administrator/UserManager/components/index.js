@@ -114,7 +114,7 @@ class UserManager extends React.Component {
 				isConfirmModal: false,
 			});
 		}).catch(err => {
-			console.log('activate user error---', err);
+			message.error(err.message);
 		})
 	}
 

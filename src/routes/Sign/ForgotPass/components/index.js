@@ -45,10 +45,6 @@ export default class extends React.Component {
     })
   }
 
-  onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
-
   onFinishkeyCode = (values) => {
     if (this.state.lastTry >= 4) {
       this.props.history.push('/');
@@ -71,7 +67,6 @@ export default class extends React.Component {
         }
       }
     }).catch(err => {
-      console.log(err);
       if (!!err.response.data) {
         this.form1.setFields([
           {
@@ -98,7 +93,6 @@ export default class extends React.Component {
                 ref={ref => this.form1 = ref}
                 name="reset_pass"
                 onFinish={this.onFinish}
-                onFinishFailed={this.onFinishFailed}
               >
                 <p className='mt-1'>{intl.formatMessage(messages.enterYourEmail)}</p>
                 <Form.Item

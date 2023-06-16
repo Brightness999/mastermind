@@ -96,10 +96,6 @@ class InfoReview extends Component {
 		}
 	}
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	displayHourMin(value) {
 		return value > 9 ? value : `0${value}`;
 	}

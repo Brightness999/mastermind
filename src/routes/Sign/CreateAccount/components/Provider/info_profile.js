@@ -55,10 +55,6 @@ class InfoProfile extends Component {
 		this.props.onContinue();
 	};
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	setValueToReduxRegisterData = (fieldName, value) => {
 		const { registerData } = this.props.register;
 		const profileInfor = registerData.profileInfor;
@@ -81,7 +77,6 @@ class InfoProfile extends Component {
 						name="form_profile_provider"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<div className="flex items-center justify-start gap-2 h-50">

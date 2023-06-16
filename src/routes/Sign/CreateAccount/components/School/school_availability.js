@@ -165,10 +165,6 @@ class SchoolAvailability extends React.Component {
 		return newArr;
 	}
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	setReduxForSchool(fieldName, value) {
 		let obj = {};
 		obj[fieldName] = value;
@@ -377,7 +373,6 @@ class SchoolAvailability extends React.Component {
 						name="form_school"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={(ref) => { this.form = ref }}
 					>
 						<div className='div-availability'>

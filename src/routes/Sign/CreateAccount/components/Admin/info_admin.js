@@ -46,13 +46,8 @@ class AdminInfo extends React.Component {
         this.props.onContinue(true);
       }
     }).catch(err => {
-      console.log('create admin user error---', err);
       message.error(err.message);
     })
-  };
-
-  onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
   };
 
   render() {
@@ -67,7 +62,6 @@ class AdminInfo extends React.Component {
           <Form
             name="form_admin"
             onFinish={this.onFinish}
-            onFinishFailed={this.onFinishFailed}
             layout="vertical"
             ref={ref => this.form = ref}
           >

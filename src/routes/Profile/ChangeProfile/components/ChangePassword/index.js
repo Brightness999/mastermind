@@ -39,13 +39,9 @@ class ChangePassword extends React.Component {
       if (!err.response.data.data.password) {
         message.warning('Current password does not match');
       } else {
-        console.log('update password error ---', err);
+        message.error(err.message);
       }
     })
-  };
-
-  onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
   };
 
   validatePassword(_, value, type) {
@@ -136,7 +132,6 @@ class ChangePassword extends React.Component {
             name="form_admin"
             layout='vertical'
             onFinish={this.onFinish}
-            onFinishFailed={this.onFinishFailed}
             ref={ref => this.form = ref}
           >
             <Form.Item

@@ -140,10 +140,6 @@ class ModalCurrentAppointment extends React.Component {
 		this.onSelectDate(moment(event?.date));
 	}
 
-	onFinishFailed = (err) => {
-		console.log('form data error---', err);
-	}
-
 	handleChangeAddress = address => {
 		this.setState({ address: address });
 		this.onSelectDate();
@@ -361,7 +357,6 @@ class ModalCurrentAppointment extends React.Component {
 						name="current-appointment"
 						layout='vertical'
 						onFinish={this.handleReschedule}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<div className='flex gap-5 items-center'>

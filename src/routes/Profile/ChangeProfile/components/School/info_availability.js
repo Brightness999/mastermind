@@ -186,7 +186,7 @@ class InfoAvailability extends React.Component {
 				message.success('Updated successfully');
 			}
 		}).catch(err => {
-			console.log('update school availability error---', err);
+			message.error(err.message);
 		})
 	};
 
@@ -207,10 +207,6 @@ class InfoAvailability extends React.Component {
 		}
 		return newArr;
 	}
-
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
 
 	onSelectDay = e => {
 		e && this.setState({ dayIsSelected: e });
@@ -380,7 +376,6 @@ class InfoAvailability extends React.Component {
 					<Form
 						name="form_school"
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={(ref) => { this.form = ref }}
 					>
 						<div className='div-availability'>

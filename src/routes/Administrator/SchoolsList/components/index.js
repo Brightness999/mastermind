@@ -106,7 +106,6 @@ export default class extends React.Component {
 				});
 			}
 		}).catch(err => {
-			console.log('activate user error---', err);
 			message.error(err.message);
 		})
 	}

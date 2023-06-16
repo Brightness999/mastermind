@@ -75,10 +75,6 @@ class InfoChild extends Component {
 		this.props.onContinue();
 	};
 
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
-	};
-
 	handleSelectBirthday = (date, index) => {
 		if (date) {
 			const dependents = this.form?.getFieldsValue();
@@ -101,7 +97,6 @@ class InfoChild extends Component {
 						name="form_contact"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<Form.List name="children">

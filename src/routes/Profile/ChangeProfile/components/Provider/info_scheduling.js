@@ -34,7 +34,6 @@ class InfoScheduling extends Component {
 					})
 				}
 			}).catch(err => {
-				console.log('get provider info error---', err);
 				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
@@ -50,7 +49,6 @@ class InfoScheduling extends Component {
 					})
 				}
 			}).catch(err => {
-				console.log('get provider info error---', err);
 				message.error("Getting Profile" + err.message);
 				this.setState({ loading: false });
 			})
@@ -72,7 +70,6 @@ class InfoScheduling extends Component {
 				});
 			}
 		}).catch(err => {
-			console.log(err);
 			this.setState({
 				durations: [],
 				cancellationWindow: [],
@@ -87,12 +84,8 @@ class InfoScheduling extends Component {
 				_id: window.location.pathname?.includes('changeuserprofile') ? this.props.auth.selectedUser?.providerInfo?._id : this.props.auth.user?.providerInfo?._id,
 			}));
 		} catch (error) {
-			console.log(error, 'error')
+			message.error(error.message);
 		}
-	};
-
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
 	};
 
 	render() {
@@ -108,7 +101,6 @@ class InfoScheduling extends Component {
 						name="scheduling"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={(ref) => { this.form = ref }}
 					>
 						<Form.Item

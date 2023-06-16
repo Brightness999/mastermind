@@ -27,7 +27,6 @@ module.exports = override(
   addWebpackPlugin(new UglifyJsPlugin({
     uglifyOptions: {
       compress: {
-        drop_console: true, // Disable console.log statements
         unused: true, // Remove unused variables and functions
         dead_code: true, // Remove unreachable code
         reduce_vars: true, // Optimize variable names

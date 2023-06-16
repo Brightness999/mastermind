@@ -173,7 +173,6 @@ class InfoAvailability extends Component {
 					this.setState({ listSchool: data });
 				}
 			}).catch(err => {
-				console.log('get all schools for parent error---', err);
 				this.setState({ listSchool: [] });
 			})
 		} else {
@@ -183,7 +182,6 @@ class InfoAvailability extends Component {
 					this.setState({ listSchool: data });
 				}
 			}).catch(err => {
-				console.log('get all schools for parent error---', err);
 				this.setState({ listSchool: [] });
 			})
 		}
@@ -238,7 +236,6 @@ class InfoAvailability extends Component {
 				}
 			}).catch(err => {
 				message.error("Can't update availability");
-				console.log('update provider availability error---', err);
 			})
 		} else {
 			request.post(updateMyProviderAvailability, { ...values, isJewishHolidays, isLegalHolidays, _id: this.props.auth.user.providerInfo?._id }).then(result => {
@@ -259,13 +256,8 @@ class InfoAvailability extends Component {
 				}
 			}).catch(err => {
 				message.error("Can't update availability");
-				console.log('update provider availability error---', err);
 			})
 		}
-	};
-
-	onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
 	};
 
 	onSelectDay = e => {
@@ -565,7 +557,6 @@ class InfoAvailability extends Component {
 						name="form_availability"
 						layout='vertical'
 						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
 						ref={ref => this.form = ref}
 					>
 						<p className='font-18 mb-10 text-center'>{intl.formatMessage(messages.locations)}</p>

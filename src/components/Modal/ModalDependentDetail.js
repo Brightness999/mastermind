@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Input, Divider, Card, Button } from 'antd';
+import { Modal, Input, Divider, Card, Button, message } from 'antd';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import { connect } from 'react-redux';
@@ -52,7 +52,7 @@ class ModalDependentDetail extends React.Component {
 					});
 				}
 			}).catch(err => {
-				console.log('update private note error---', err);
+				message.error(err.message);
 			})
 		}
 	}
@@ -74,7 +74,7 @@ class ModalDependentDetail extends React.Component {
 				}
 			}
 		}).catch(err => {
-			console.log('activate user error---', err);
+			message.error(err.message);
 		})
 	}
 
@@ -96,7 +96,7 @@ class ModalDependentDetail extends React.Component {
 				this.setState({ dependent: this.state.dependent, isNew: false });
 			}
 		}).catch(err => {
-			console.log('update private note error---', err);
+			message.error(err.message);
 		})
 	}
 
