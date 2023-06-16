@@ -14,6 +14,10 @@ import '../../assets/styles/login.less';
 moment.locale('en');
 
 class ModalNewScreening extends React.Component {
+  state = {
+    loading: false,
+  }
+
   componentDidMount() {
     const { dependent, event, notes } = this.props;
     if (event) {
@@ -24,6 +28,7 @@ class ModalNewScreening extends React.Component {
   }
 
   onFinish = (values) => {
+    this.setState({ loading: true });
     this.props.onSubmit({
       phoneNumber: values.phoneNumber,
       notes: values.notes,
@@ -32,6 +37,7 @@ class ModalNewScreening extends React.Component {
   }
 
   render() {
+    const { loading } = this.state;
     const { provider, dependent } = this.props;
     const modalProps = {
       className: 'modal-new',
@@ -96,7 +102,7 @@ class ModalNewScreening extends React.Component {
               <Button key="back" onClick={this.props.onCancel}>
                 {intl.formatMessage(messages.goBack).toUpperCase()}
               </Button>
-              <Button key="submit" type="primary" htmlType="submit">
+              <Button key="submit" type="primary" htmlType="submit" loading={loading}>
                 {intl.formatMessage(messages.screening).toUpperCase()}
               </Button>
             </Row>
