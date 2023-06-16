@@ -227,13 +227,12 @@ class ModalCurrentAppointment extends React.Component {
 			date: hour?.valueOf(),
 			location: address,
 			notes: notes,
-			status: PENDING,
 		};
 
 		if (isFeeToParent) {
 			postData = {
 				...postData,
-				type: InvoiceType.RESCHEDULE,
+				isFeeToParent,
 				items: [{
 					type: 'Fee',
 					date: moment(event.date).format('MM/DD/YYYY hh:mm a'),

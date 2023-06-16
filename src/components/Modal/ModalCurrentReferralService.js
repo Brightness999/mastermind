@@ -96,8 +96,6 @@ class ModalCurrentReferralService extends React.Component {
 			meetingLink: isGoogleMeet ? meetingLink : undefined,
 			addtionalDocuments: fileList.length > 0 ? [fileList[0].response.data] : [],
 			notes: note,
-			type: CONSULTATION,
-			status: PENDING,
 		};
 
 		this.setState({ loadingSchedule: true });
@@ -503,4 +501,4 @@ const mapStateToProps = state => ({
 	auth: state.auth,
 });
 
-export default compose(connect(mapStateToProps, { setMeetingLink, setSelectedTime, setSelectedUser }))(ModalCurrentReferralService);
+export default compose(connect(mapStateToProps, { setMeetingLink, setSelectedTime, setSelectedUser, setAppointments, setAppointmentsInMonth }))(ModalCurrentReferralService);
