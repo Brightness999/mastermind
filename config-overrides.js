@@ -31,10 +31,20 @@ module.exports = override(
         unused: true, // Remove unused variables and functions
         dead_code: true, // Remove unreachable code
         reduce_vars: true, // Optimize variable names
+        drop_debugger: true, // Remove debugger statements
+        passes: 2, // Number of optimization passes
+      },
+      mangle: {
+        toplevel: true, // Mangle top-level variables and function names
+        keep_fnames: false, // Do not preserve original function names
       },
       output: {
         comments: false, // Remove comments
+        beautify: false, // Disable code beautification
       },
+      sourceMap: false, // Disable source map generation
+      warnings: false, // Disable warnings
+      ie8: false, // Do not support IE8
     },
   }))
 );
