@@ -209,6 +209,12 @@ class SchedulingCenter extends React.Component {
       autoConnect: true,
     };
     this.socket = io(socketUrl, opts);
+    this.socket.on('socket_result', data => {
+      console.log('socket result');
+      if (data.key === 'meeting_link') {
+        this.props.setMeetingLink(data.data);
+      }
+    })
   }
 
   onShowFilter = () => {
