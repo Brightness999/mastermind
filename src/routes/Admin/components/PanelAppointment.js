@@ -130,7 +130,6 @@ class PanelAppointment extends React.Component {
   }
 
   handleConfirmCancel = () => {
-    const { appointments, appointmentsMonth } = this.props;
     const { isFeeToParent } = this.state;
     this.setState({ visibleCancel: false }, () => {
       const { event } = this.state;
@@ -153,11 +152,7 @@ class PanelAppointment extends React.Component {
         request.post(cancelAppointmentForParent, postData).then(result => {
           const { success, data } = result;
           if (success) {
-            const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-            const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-
-            this.props.setAppointments(newAppointments);
-            this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+            this.updateAppointments(data);
             this.setState({ isFeeToParent: false });
           } else {
             message.warning("can't cancel this appointment")
@@ -188,7 +183,6 @@ class PanelAppointment extends React.Component {
   }
 
   handleMarkAsClosed = (note, publicFeedback) => {
-    const { appointments, appointmentsMonth } = this.props;
     const { event, items } = this.state;
     this.closeModalProcess();
 
@@ -206,11 +200,7 @@ class PanelAppointment extends React.Component {
       request.post(closeAppointmentForProvider, updateData).then(result => {
         const { success, data } = result;
         if (success) {
-          const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-          const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-
-          this.props.setAppointments(newAppointments);
-          this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+          this.updateAppointments(data);
         } else {
           message.warning("can't close this appointment");
         }
@@ -221,7 +211,6 @@ class PanelAppointment extends React.Component {
   }
 
   handleDecline = (note, publicFeedback) => {
-    const { appointments, appointmentsMonth } = this.props;
     const { event, items } = this.state;
     this.closeModalProcess();
 
@@ -236,11 +225,7 @@ class PanelAppointment extends React.Component {
       request.post(declineAppointmentForProvider, postData).then(result => {
         const { success, data } = result;
         if (success) {
-          const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-          const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-
-          this.props.setAppointments(newAppointments);
-          this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+          this.updateAppointments(data);
         } else {
           message.warning("can't decline this appointment");
         }
@@ -268,7 +253,7 @@ class PanelAppointment extends React.Component {
 
   onSubmitFlagBalance = (values) => {
     const { notes } = values;
-    const { appointments, appointmentsMonth } = this.props;
+    const { appointments } = this.props;
     const { event } = this.state;
     const providerIds = Object.keys(values).filter(a => a.includes('invoiceId')).map(a => a.split("-")[1]);
     let bulkData = [];
@@ -319,14 +304,11 @@ class PanelAppointment extends React.Component {
     })
 
     if (bulkData.length) {
-      request.post(setFlagBalance, { bulkData, dependent: event?.dependent?._id }).then(result => {
+      request.post(setFlagBalance, { bulkData, dependent: event?.dependent?._id, appointmentId: event?._id }).then(result => {
         const { success, data } = result;
         if (success) {
-          const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-          const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-
-          this.props.setAppointments(newAppointments);
-          this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+          this.updateAppointments(data);
+          this.props.getInvoiceList({ role: user.role });
           this.closeModalBalance();
         }
       }).catch(err => message.error(err.message));
@@ -334,7 +316,7 @@ class PanelAppointment extends React.Component {
   }
 
   onSubmitFlagNoShow = (values) => {
-    const { appointments, appointmentsMonth, user } = this.props;
+    const { user } = this.props;
     const { event } = this.state;
     const { penalty, program, notes, invoiceId, balance, feeOption } = values;
     const postData = {
@@ -365,11 +347,7 @@ class PanelAppointment extends React.Component {
     request.post(invoiceId ? updateNoshowFlag : setFlag, postData).then(result => {
       const { success, data } = result;
       if (success) {
-        const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-        const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-
-        this.props.setAppointments(newAppointments);
-        this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+        this.updateAppointments(data);
         this.props.getInvoiceList({ role: user.role });
         this.closeModalNoShow();
       }
@@ -385,7 +363,6 @@ class PanelAppointment extends React.Component {
   }
 
   handleLeaveFeedback = (note, publicFeedback) => {
-    const { appointments, appointmentsMonth } = this.props;
     const { event } = this.state;
 
     if (!note?.trim() && !publicFeedback?.trim()) {
@@ -403,11 +380,7 @@ class PanelAppointment extends React.Component {
       request.post(leaveFeedbackForProvider, postData).then(result => {
         const { success, data } = result;
         if (success) {
-          const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-          const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-
-          this.props.setAppointments(newAppointments);
-          this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+          this.updateAppointments(data);
           this.closeModalFeedback();
         } else {
           message.warning("can't leave feedback");
@@ -416,6 +389,16 @@ class PanelAppointment extends React.Component {
         message.error(error.message);
       })
     }
+  }
+
+  updateAppointments = (data) => {
+    const { appointments, appointmentsMonth } = this.props;
+    const { event } = this.state;
+    const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+    const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+
+    this.props.setAppointments(newAppointments);
+    this.props.setAppointmentsInMonth(newAppointmentsInMonth);
   }
 
   render() {

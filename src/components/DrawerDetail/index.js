@@ -18,7 +18,7 @@ import msgModal from 'components/Modal/messages';
 import msgDashboard from 'routes/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import request, { encryptParam } from 'utils/api/request';
-import { getAppointmentsData, getAppointmentsMonthData } from 'src/redux/features/appointmentsSlice';
+import { setAppointments, setAppointmentsInMonth, getInvoiceList } from 'src/redux/features/appointmentsSlice';
 import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from 'utils/api/apiList';
 import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from 'routes/constant';
 import './style/index.less';
@@ -135,7 +135,7 @@ class DrawerDetail extends Component {
         request.post(cancelAppointmentForParent, data).then(result => {
           if (result.success) {
             this.setState({ errorMessage: '', isFeeToParent: false });
-            this.updateAppointments();
+            this.updateAppointments(result.data);
           } else {
             this.setState({ errorMessage: result.data, isFeeToParent: false });
           }
@@ -148,12 +148,10 @@ class DrawerDetail extends Component {
 
   submitModalCurrent = () => {
     this.setState({ visibleCurrent: false });
-    this.updateAppointments();
   }
 
   submitModalCurrentReferral = () => {
     this.setState({ visibleCurrentReferral: false });
-    this.updateAppointments();
   }
 
   closeModalCurrent = () => {
@@ -244,7 +242,7 @@ class DrawerDetail extends Component {
             isShowEditNotes: false,
           });
           message.success('Successfully Updated');
-          this.updateAppointments();
+          this.updateAppointments(res.data);
         }
       }).catch(err => {
         this.setState({ errorMessage: err.message });
@@ -278,7 +276,7 @@ class DrawerDetail extends Component {
       request.post(closeAppointmentForProvider, data).then(result => {
         if (result.success) {
           this.setState({ errorMessage: '' });
-          this.updateAppointments();
+          this.updateAppointments(result.data);
         } else {
           this.setState({ errorMessage: result.data });
         }
@@ -301,7 +299,7 @@ class DrawerDetail extends Component {
       request.post(closeAppointmentAsNoshow, data).then(result => {
         if (result.success) {
           this.setState({ errorMessage: '' });
-          this.updateAppointments();
+          this.updateAppointments(result.data);
         } else {
           this.setState({ errorMessage: result.data });
         }
@@ -325,7 +323,7 @@ class DrawerDetail extends Component {
       request.post(declineAppointmentForProvider, data).then(result => {
         if (result.success) {
           this.setState({ errorMessage: '' });
-          this.updateAppointments();
+          this.updateAppointments(result.data);
         } else {
           this.setState({ errorMessage: result.data });
         }
@@ -365,7 +363,7 @@ class DrawerDetail extends Component {
 
   handleUpdateInvoice = (items) => {
     this.closeModalInvoice();
-    const { event } = this.props;
+    const { event, auth } = this.props;
 
     if (event?._id) {
       let postData = {
@@ -397,7 +395,7 @@ class DrawerDetail extends Component {
       request.post(updateInvoice, postData).then(result => {
         if (result.success) {
           this.setState({ errorMessage: '' });
-          this.updateAppointments();
+          this.props.getInvoiceList({ role: auth.user.role });
         } else {
           this.setState({ errorMessage: result.data });
         }
@@ -415,7 +413,7 @@ class DrawerDetail extends Component {
     request.post(leaveFeedbackForProvider, data).then(result => {
       if (result.success) {
         this.setState({ errorMessage: '', isShowFeedback: false });
-        this.updateAppointments();
+        this.updateAppointments(result.data);
       } else {
         this.setState({ errorMessage: result.data });
       }
@@ -438,21 +436,13 @@ class DrawerDetail extends Component {
     })
   }
 
-  updateAppointments() {
-    const { calendar, getAppointmentsData, getAppointmentsMonthData } = this.props;
-    const { userRole } = this.state;
+  updateAppointments(data) {
+    const { event, appointments, appointmentsMonth } = this.props;
+    const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+    const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
 
-    getAppointmentsData({ role: userRole });
-    const month = calendar.current?._calendarApi.getDate().getMonth() + 1;
-    const year = calendar.current?._calendarApi.getDate().getFullYear();
-    const dataFetchAppointMonth = {
-      role: userRole,
-      data: {
-        month: month,
-        year: year
-      }
-    };
-    getAppointmentsMonthData(dataFetchAppointMonth);
+    this.props.setAppointments(newAppointments);
+    this.props.setAppointmentsInMonth(newAppointmentsInMonth);
   }
 
   openModalProcess() {
@@ -472,7 +462,7 @@ class DrawerDetail extends Component {
   };
 
   onSubmitFlagNoShow = (values) => {
-    const { event } = this.props;
+    const { event, auth } = this.props;
     const { penalty, program, notes, invoiceId, balance, feeOption } = values;
     const data = {
       _id: event?._id,
@@ -503,7 +493,8 @@ class DrawerDetail extends Component {
       const { success } = result;
       if (success) {
         this.setState({ visibleNoShow: false });
-        this.updateAppointments();
+        this.updateAppointments(result.data);
+        this.getInvoiceList({ role: auth.user.role });
       }
     })
   }
@@ -518,7 +509,7 @@ class DrawerDetail extends Component {
 
   onSubmitFlagBalance = (values) => {
     const { notes } = values;
-    const { listAppointmentsRecent, event } = this.props;
+    const { auth, listAppointmentsRecent, event } = this.props;
     const providerIds = Object.keys(values).filter(a => a.includes('invoiceId')).map(a => a.split("-")[1]);
     let bulkData = [];
 
@@ -567,11 +558,12 @@ class DrawerDetail extends Component {
       })
     })
 
-    request.post(setFlagBalance, { bulkData, dependent: event?.dependent?._id }).then(result => {
-      const { success } = result;
+    request.post(setFlagBalance, { bulkData, dependent: event?.dependent?._id, appointmentId: event?._id }).then(result => {
+      const { success, data } = result;
       if (success) {
         this.onCloseModalBalance();
-        this.updateAppointments();
+        this.updateAppointments(data);
+        this.getInvoiceList({ role: auth.user.role });
       }
     }).catch(err => message.error(err.message));
   }
@@ -609,7 +601,7 @@ class DrawerDetail extends Component {
     request.post(acceptDeclinedScreening, { _id: this.props.event?._id, status: 0 }).then(res => {
       if (res.success) {
         message.success('Accepted successfully');
-        this.updateAppointments();
+        this.updateAppointments(res.data);
       }
     }).catch(err => {
       message.error(err.message);
@@ -637,7 +629,7 @@ class DrawerDetail extends Component {
     request.post(rescheduleAppointmentForParent, rescheduleData).then(result => {
       if (result.success) {
         this.closeModalCurrent();
-        this.updateAppointments();
+        this.updateAppointments(result.data);
         message.success("Updated successfully");
       }
     }).catch(err => {
@@ -648,10 +640,10 @@ class DrawerDetail extends Component {
   handleClearFlag = () => {
     const { event } = this.props;
     request.post(clearFlag, { invoiceId: event?.flagInvoice?._id }).then(result => {
-      const { success } = result;
+      const { success, data } = result;
       if (success) {
         message.success('Cleared successfully');
-        this.updateAppointments();
+        this.updateAppointments(data);
       }
     }).catch(err => {
       message.error('Clear Flag: ' + err.message);
@@ -686,7 +678,7 @@ class DrawerDetail extends Component {
         if (res.success) {
           this.setState({ errorMessage: '' });
           message.success("Updated successfully");
-          this.updateAppointments();
+          this.updateAppointments(res.data);
         }
       })
       .catch(err => this.setState({ errorMessage: err.message }));
@@ -710,9 +702,9 @@ class DrawerDetail extends Component {
                 message.warning(res.data.message);
               } else {
                 message.success("Claimed successfully");
+                this.updateAppointments(res.data);
               }
             }
-            this.updateAppointments();
           })
           .catch(err => this.setState({ errorMessage: err.message }));
       } else {
@@ -726,7 +718,7 @@ class DrawerDetail extends Component {
       .then(res => {
         if (res.success) {
           this.setState({ errorMessage: '' });
-          this.updateAppointments();
+          this.updateAppointments(res.data);
           message.success("Switched successfully");
         }
       })
@@ -738,7 +730,7 @@ class DrawerDetail extends Component {
       .then(res => {
         if (res.success) {
           this.setState({ errorMessage: '' });
-          this.updateAppointments();
+          this.updateAppointments(res.data);
           message.success("Removed successfully");
         }
       })
@@ -1395,7 +1387,8 @@ class DrawerDetail extends Component {
 
 const mapStateToProps = state => ({
   appointments: state.appointments.dataAppointments,
+  appointmentsMonth: state.appointments.dataAppointmentsMonth,
   auth: state.auth,
 });
 
-export default compose(connect(mapStateToProps, { getAppointmentsData, getAppointmentsMonthData }))(DrawerDetail);
+export default compose(connect(mapStateToProps, { setAppointments, setAppointmentsInMonth, getInvoiceList }))(DrawerDetail);
