@@ -1,5 +1,6 @@
-const { override, addDecoratorsLegacy, disableEsLint, addBundleVisualizer, addWebpackAlias, adjustWorkbox, addLessLoader } = require('customize-cra');
+const { override, addDecoratorsLegacy, disableEsLint, addBundleVisualizer, addWebpackAlias, adjustWorkbox, addLessLoader, addWebpackPlugin } = require('customize-cra');
 const path = require('path');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = override(
   addDecoratorsLegacy(),
@@ -18,10 +19,22 @@ module.exports = override(
       exclude: (wb.exclude || []).concat('index.html')
     })
   ),
-
   addLessLoader({
     localIdentName: '[local]--[hash:base64:8]',
     javascriptEnabled: true,
     modifyVars: {}
-  })
+  }),
+  addWebpackPlugin(new UglifyJsPlugin({
+    uglifyOptions: {
+      compress: {
+        drop_console: true, // Disable console.log statements
+        unused: true, // Remove unused variables and functions
+        dead_code: true, // Remove unreachable code
+        reduce_vars: true, // Optimize variable names
+      },
+      output: {
+        comments: false, // Remove comments
+      },
+    },
+  }))
 );
