@@ -600,6 +600,7 @@ select:-webkit-autofill:focus {
 }
 
 @media (min-width: 376px) {
+
   /* Scroll bar style */
   ::-webkit-scrollbar {
     height: 5px;
@@ -614,14 +615,10 @@ select:-webkit-autofill:focus {
 
   ::-webkit-scrollbar-thumb {
     background-color: #637099;
-    // background-color: #DBDBDB;
-
   }
 
   ::-webkit-scrollbar-thumb:hover {
     background-color: #637099;
-    // background-color: #DBDBDB;
-
   }
 
   ::-webkit-scrollbar-track {
@@ -2252,4 +2249,22 @@ table.notification-settings {
 
 .events-none {
   pointer-events: none;
+}
+
+.popup-session-expired {
+  font-size: 30px;
+  margin-top: 50vh;
+
+  .ant-message-notice-content {
+    padding: 15px 25px;
+  }
+
+  .anticon {
+    color: @warning-color;
+
+    svg {
+      width: 30px;
+      height: 30px;
+    }
+  }
 }

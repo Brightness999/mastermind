@@ -3,7 +3,7 @@ import { Link } from 'dva/router';
 import { FaChild, FaFileInvoiceDollar, FaUserAlt, FaUserEdit } from 'react-icons/fa';
 import { BiLogOutCircle, BiBell } from 'react-icons/bi';
 import { BsSearch } from 'react-icons/bs';
-import { Badge, Avatar, Input, Dropdown } from 'antd';
+import { Badge, Avatar, Input, Dropdown, message } from 'antd';
 import intl from "react-intl-universal";
 import Cookies from 'js-cookie';
 import { connect } from 'react-redux';
@@ -63,6 +63,16 @@ class MainHeader extends Component {
       const token = Cookies.get('tk');
       if (token) {
         Cookies.set('tk', token, { expires: new Date(Date.now() + 10 * 60 * 1000) });
+      } else {
+        if (window.location.pathname.includes('/account') || window.location.pathname.includes('/administrator')) {
+          message.warning({
+            content: 'Your session has expired.',
+            className: 'popup-session-expired',
+            duration: 1,
+          }).then(() => {
+            window.location.href = '/';
+          })
+        }
       }
       clearTimeout(this.state.intervalId);
     }
