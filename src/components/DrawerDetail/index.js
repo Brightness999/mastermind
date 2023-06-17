@@ -666,7 +666,7 @@ class DrawerDetail extends Component {
     this.onCloseModalCreateNote();
     message.success("Your request has been submitted. Please allow up to 24 hours for the provider to review this.");
 
-    request.post(requestClearance, { appointmentId: this.props.event?._id, message: requestMessage }).catch(err => {
+    request.post(requestClearance, { invoiceId: this.props.flagInvoice?._id, message: requestMessage }).catch(err => {
       message.error(err.message);
     })
   }

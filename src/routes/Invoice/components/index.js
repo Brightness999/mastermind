@@ -6,14 +6,14 @@ import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import { ModalInvoice } from 'components/Modal';
+import { ModalCreateNote, ModalInvoice } from 'components/Modal';
 import msgMainHeader from 'components/MainHeader/messages';
 import messages from 'routes/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import msgModal from 'components/Modal/messages';
 import msgDrawer from 'components/DrawerDetail/messages';
 import request, { decryptParam, encryptParam } from 'utils/api/request';
-import { clearFlag, payInvoice, updateInvoice } from 'utils/api/apiList';
+import { clearFlag, payInvoice, requestClearance, updateInvoice } from 'utils/api/apiList';
 import { getInvoiceList, setInvoiceList } from 'src/redux/features/appointmentsSlice';
 import PageLoading from 'components/Loading/PageLoading';
 import { InvoiceType, PARENT, PROVIDER } from 'src/routes/constant';
@@ -27,6 +27,7 @@ class InvoiceList extends React.Component {
       selectedInvoice: {},
       tabInvoices: [],
       selectedTab: 0,
+      visibleCreateNote: false,
     };
     this.searchInput = createRef(null);
   }
@@ -177,8 +178,31 @@ class InvoiceList extends React.Component {
     })
   }
 
+
+  onOpenModalCreateNote = (invoice) => {
+    this.setState({ visibleCreateNote: true, selectedInvoice: invoice });
+  }
+
+  onCloseModalCreateNote = () => {
+    this.setState({ visibleCreateNote: false, selectedInvoice: {} });
+  }
+
+  handleRequestClearance = (requestMessage) => {
+    const { selectedInvoice } = this.state;
+    if (selectedInvoice) {
+      this.onCloseModalCreateNote();
+      message.success("Your request has been submitted. Please allow up to 24 hours for the provider to review this.");
+
+      request.post(requestClearance, { invoiceId: selectedInvoice?._id, message: requestMessage }).catch(err => {
+        message.error(err.message);
+      })
+    } else {
+      message.warn("Something went wrong. Please try again.");
+    }
+  }
+
   render() {
-    const { loading, selectedInvoice, selectedTab, tabInvoices, visibleInvoice } = this.state;
+    const { loading, selectedInvoice, selectedTab, tabInvoices, visibleCreateNote, visibleInvoice } = this.state;
     const { user, academicLevels } = this.props.auth;
     const grades = JSON.parse(JSON.stringify(academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
     const columns = [
@@ -312,9 +336,9 @@ class InvoiceList extends React.Component {
       },
       {
         title: intl.formatMessage(messages.action), key: 'action', align: 'center',
-        render: invoice => (invoice.isPaid || invoice.totalPayment == 0) ? null : (
-          <div className='flex'>
-            {user?.role === PARENT ? (
+        render: invoice => invoice.isPaid ? null : (
+          <div>
+            {(user?.role === PARENT && invoice.totalPayment > 0) ? (
               <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
                 <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
                 <input type="hidden" name="business" value="office@helpmegethelp.org" />
@@ -332,6 +356,16 @@ class InvoiceList extends React.Component {
                   <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
                 </Button>
               </form>
+            ) : null}
+            {(user?.role === PARENT && invoice.totalPayment == 0) ? (
+              <Popconfirm
+                title="Are you sure to send clearnace request?"
+                onConfirm={() => this.onOpenModalCreateNote(invoice)}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button type='link' className='px-5'><span className='text-primary'>Request clearance</span></Button>
+              </Popconfirm>
             ) : null}
             {([4, 5].includes(invoice.type) && user?.role === PROVIDER) ? (
               <Popconfirm
@@ -395,6 +429,12 @@ class InvoiceList extends React.Component {
       onCancel: this.closeModalInvoice,
       invoice: selectedInvoice,
     }
+    const modalCreateNoteProps = {
+      visible: visibleCreateNote,
+      onSubmit: this.handleRequestClearance,
+      onCancel: this.onCloseModalCreateNote,
+      title: "Request Message"
+    };
 
     return (
       <div className="full-layout page usermanager-page">
@@ -411,6 +451,7 @@ class InvoiceList extends React.Component {
           onChange={this.handleChangeTab}
         />
         {visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
+        {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
         <PageLoading loading={loading} isBackground={true} />
       </div>
     );
