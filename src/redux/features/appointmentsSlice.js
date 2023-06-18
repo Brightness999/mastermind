@@ -178,6 +178,9 @@ export const appointmentsSlice = createSlice({
 		setInvoiceList(state, action) {
 			state.dataInvoices = action.payload;
 		},
+		initializeAppointments(state, action) {
+			state = initialState;
+		},
 	},
 	extraReducers: {
 		[getAppointmentsData.fulfilled]: (state, action) => {
@@ -200,6 +203,6 @@ export const appointmentsSlice = createSlice({
 	}
 });
 
-export const { getDatadAppointments, setAppointments, setAppointmentsInMonth, setSubsidyRequests, setInvoiceList } = appointmentsSlice.actions;
+export const { getDatadAppointments, initializeAppointments, setAppointments, setAppointmentsInMonth, setSubsidyRequests, setInvoiceList } = appointmentsSlice.actions;
 
 export default appointmentsSlice.reducer;

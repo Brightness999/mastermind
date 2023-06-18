@@ -146,8 +146,8 @@ export const authSlice = createSlice({
 		setCountOfUnreadNotifications(state, action) {
 			state.countOfUnreadNotifications = action.payload
 		},
-		logout(state) {
-			state.user = {};
+		initializeAuth(state) {
+			state = initialState;
 		},
 	},
 	extraReducers: {
@@ -158,7 +158,7 @@ export const authSlice = createSlice({
 });
 
 export const {
-	logout,
+	initializeAuth,
 	setUser,
 	setDependents,
 	setProviders,

@@ -7,7 +7,8 @@ import Cookies from 'js-cookie';
 
 import { checkPermission } from 'utils/auth/checkPermission';
 import { routerLinks } from "routes/constant";
-import { setUser } from 'src/redux/features/authSlice';
+import { setUser, initializeAuth } from 'src/redux/features/authSlice';
+import { initializeAppointments } from 'src/redux/features/appointmentsSlice';
 import { store } from 'src/redux/store';
 import { socketUrl } from 'utils/api/baseUrl';
 import '../assets/styles/index.less';
@@ -33,12 +34,19 @@ class MainLayout extends React.PureComponent {
         this.handleSocketEvents();
       }).catch(err => {
         Cookies.remove('tk');
-        this.props.history.push('/');
+        this.logout();
+        this.props.history.push(routerLinks.Home);
       })
       return;
     } else {
-      this.props.history.push('/');
+      this.logout();
+      this.props.history.push(routerLinks.Home);
     }
+  }
+
+  logout = () => {
+    store.dispatch(initializeAuth());
+    store.dispatch(initializeAppointments());
   }
 
   handleSocketEvents = () => {

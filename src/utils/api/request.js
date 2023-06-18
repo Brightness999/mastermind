@@ -1,8 +1,12 @@
-import { url } from './baseUrl';
 import axios from 'axios'
 import Cookies from 'js-cookie';
 import { message } from 'antd';
 import CryptoJS from 'crypto-js';
+import { routerLinks } from 'routes/constant';
+import { url } from './baseUrl';
+import { store } from 'src/redux/store';
+import { initializeAppointments } from 'src/redux/features/appointmentsSlice';
+import { initializeAuth } from 'src/redux/features/authSlice';
 
 // config aioxs
 const instance = axios.create({
@@ -28,7 +32,9 @@ instance.interceptors.request.use(
 					className: 'popup-session-expired',
 					duration: 1,
 				}).then(() => {
-					window.location.href = '/';
+					store.dispatch(initializeAuth());
+					store.dispatch(initializeAppointments());
+					window.location.href = routerLinks.Home;
 				})
 			} else {
 				delete instance.defaults.headers.common.Authorization;

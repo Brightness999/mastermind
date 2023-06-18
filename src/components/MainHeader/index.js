@@ -13,7 +13,8 @@ import { MdOutlineSpaceDashboard } from 'react-icons/md';
 import messages from './messages';
 import msgSidebar from 'src/components/SideBar/messages';
 import { ADMIN, CONSULTANT, PARENT, PROVIDER, SCHOOL, SUPERADMIN, routerLinks } from 'routes/constant';
-import { logout, setCommunity, setCountOfUnreadNotifications } from 'src/redux/features/authSlice';
+import { initializeAuth, setCommunity, setCountOfUnreadNotifications } from 'src/redux/features/authSlice';
+import { initializeAppointments } from 'src/redux/features/appointmentsSlice';
 import { helper } from 'utils/auth/helper';
 import request from 'utils/api/request';
 import { getSettings } from 'utils/api/apiList';
@@ -70,7 +71,8 @@ class MainHeader extends Component {
             className: 'popup-session-expired',
             duration: 1,
           }).then(() => {
-            window.location.href = '/';
+            this.logout();
+            window.location.href = routerLinks.Home;
           })
         }
       }
@@ -125,7 +127,8 @@ class MainHeader extends Component {
     }
     this.socket.emit("action_tracking", data);
     Cookies.remove('tk');
-    this.props.logout();
+    this.props.initializeAuth();
+    this.props.initializeAppointments();
   }
 
   handleClickLink = (link) => {
@@ -231,7 +234,7 @@ class MainHeader extends Component {
         <div className='div-account'>
           <div className='account-icon'>
             <Dropdown menu={{ items }} placement="bottomLeft" trigger="click">
-              <Badge size="small" count={countOfUnreadNotifications}>
+              <Badge size="small" count={user.role < 900 ? countOfUnreadNotifications : 0}>
                 <Avatar icon={<FaUserAlt size={17} className='text-white' />} />
               </Badge>
             </Dropdown>
@@ -255,4 +258,4 @@ const mapStateToProps = state => ({
   community: state.auth.currentCommunity,
 });
 
-export default compose(connect(mapStateToProps, { logout, setCommunity, setCountOfUnreadNotifications }))(MainHeader);
+export default compose(connect(mapStateToProps, { initializeAppointments, initializeAuth, setCommunity, setCountOfUnreadNotifications }))(MainHeader);
