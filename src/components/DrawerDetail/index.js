@@ -77,6 +77,15 @@ class DrawerDetail extends Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.event?.notes != this.props.event?.notes) {
+      this.setState({ notes: this.props.event?.notes });
+    }
+    if (prevProps.event?.publicFeedback != this.props.event?.publicFeedback) {
+      this.setState({ publicFeedback: this.props.event?.publicFeedback, isLeftFeedback: !!this.props.event?.publicFeedback });
+    }
+  }
+
   handleProviderHoverChange = (visible) => {
     this.setState({ isProviderHover: visible });
   };
@@ -1278,7 +1287,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(userRole === 3 && event?.status === DECLINED && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type)) && (
+              {((userRole === 3 || userRole > 900) && event?.status === DECLINED && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type)) && (
                 <Col span={12}>
                   <Button type='primary' icon={<TbSend size={12} />} block onClick={this.openModalMessage}>
                     {intl.formatMessage(msgModal.appeal)}
@@ -1292,7 +1301,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(userRole === 3 && [CLOSED, DECLINED].includes(event?.status) && !isLeftFeedback) && (
+              {((userRole === 3 || userRole > 900) && [CLOSED, DECLINED].includes(event?.status) && !isLeftFeedback) && (
                 <Col span={12}>
                   <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.handleRequestFeedback}>
                     {intl.formatMessage(messages.requestFeedback)}
