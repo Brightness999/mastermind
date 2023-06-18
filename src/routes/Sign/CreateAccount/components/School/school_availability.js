@@ -117,6 +117,7 @@ class SchoolAvailability extends React.Component {
 		const { sessionsAfterSchool, sessionsInSchool, isLegalHolidays, isJewishHolidays } = this.state;
 		const invalidInSchoolDay = sessionsInSchool?.findIndex(times => (times.openHour == undefined && times.closeHour != undefined) || (times.openHour != undefined && times.closeHour == undefined) || (times.openHour != undefined && times.closeHour != undefined && moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin }))));
 		const invalidAfterSchoolDay = sessionsAfterSchool?.findIndex(times => (times.openHour == undefined && times.closeHour != undefined) || (times.openHour != undefined && times.closeHour == undefined) || (times.openHour != undefined && times.closeHour != undefined && moment().set({ hours: times.openHour, minutes: times.openMin }).isAfter(moment().set({ hours: times.closeHour, minutes: times.closeMin }))));
+		const incorrectAfterSchoolDay = sessionsAfterSchool?.findIndex((times, i) => times.openHour != undefined && times.closeHour != undefined && sessionsInSchool[i].openHour != undefined && sessionsInSchool[i].closeHour != undefined && moment().set({ hours: times.openHour, minutes: times.openMin }).isBefore(moment().set({ hours: sessionsInSchool[i].closeHour, minutes: sessionsInSchool[i].closeMin })));
 
 		if (invalidAfterSchoolDay > -1) {
 			message.error(`The selected After-school session time is not valid on ${day_week[invalidAfterSchoolDay]?.label}`);
@@ -125,6 +126,11 @@ class SchoolAvailability extends React.Component {
 
 		if (invalidInSchoolDay > -1) {
 			message.error(`The selected In-school session time is not valid on ${day_week[invalidInSchoolDay]?.label}`);
+			return;
+		}
+
+		if (incorrectAfterSchoolDay > -1) {
+			message.error(`The selected After-school session time must be later than In-school session time on ${day_week[incorrectAfterSchoolDay]?.label}`);
 			return;
 		}
 
