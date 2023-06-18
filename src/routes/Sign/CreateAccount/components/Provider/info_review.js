@@ -184,7 +184,7 @@ class InfoReview extends Component {
 											</div>
 										))}
 									</div>
-									{registerData?.scheduling?.isSeparateEvaluationRate ? <div className='mb-10'><span className='font-700'>Evaluation Rate:</span> {registerData?.financialInfor?.separateEvaluationRate ?? ''}</div> : null}
+									{registerData?.scheduling?.isSeparateEvaluationRate ? <div className='mb-10'><span className='font-700'>Evaluation Rate:</span> ${registerData?.financialInfor?.separateEvaluationRate ?? ''}</div> : null}
 								</div>
 								<div className='mt-10'>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.subsidyProgram)}</p>
