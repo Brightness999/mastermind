@@ -111,7 +111,7 @@ export default class extends React.Component {
     this.setState({ keyActive: val });
     const { user } = this.state;
     let data = {
-      user: user?._id,
+      user: store.getState().auth.user?._id,
       action: 'User Manage',
     }
 
