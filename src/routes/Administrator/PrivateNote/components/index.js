@@ -274,7 +274,7 @@ class PrivateNote extends React.Component {
       {
         title: intl.formatMessage(messages.action), key: 'action', fixed: 'right',
         render: dependent => {
-          const countOfUnpaidInvoices = dependent?.invoices?.filter(a => a.provider === auth.user.providerInfo?._id && !a.isPaid && a.type === 1)?.length || 0;
+          const countOfUnpaidInvoices = dependent?.invoices?.filter(a => !a.isPaid && a.type === 1)?.length;
 
           if (countOfUnpaidInvoices) {
             return (
