@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { Modal, Button, Input, Form, Row, Col, Divider } from 'antd';
+import { Modal, Button, Input, Form, Row, Col, Divider, message } from 'antd';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import { connect } from 'react-redux';
@@ -127,6 +127,12 @@ class ModalBalance extends React.Component {
 	}
 
 	onFinish = (values) => {
+		for (const key of Object.keys(values)) {
+			if (key.includes('totalPayment') && values[key] && values[key] < 0) {
+				message.warn("Total amount is not valid.");
+				return;
+			}
+		}
 		this.setState({ loading: true });
 		this.props.onSubmit(values);
 	}
