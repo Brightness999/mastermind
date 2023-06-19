@@ -1170,7 +1170,7 @@ class Dashboard extends React.Component {
                           showSearch
                           mode='multiple'
                           allowClear={true}
-                          value={selectedLocations}
+                          value={selectedProviders}
                           placeholder={intl.formatMessage(messages.startTypingProvider)}
                           optionFilterProp='children'
                           filterOption={(input, option) => option.children.join('').toLowerCase().includes(input.toLowerCase())}
@@ -1188,7 +1188,7 @@ class Dashboard extends React.Component {
                         showSearch
                         mode='multiple'
                         allowClear={true}
-                        value={selectedProviders}
+                        value={selectedLocations}
                         placeholder={intl.formatMessage(messages.startTypingLocation)}
                         optionFilterProp='children'
                         filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
