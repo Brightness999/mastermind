@@ -88,7 +88,7 @@ class AdminLayout extends React.PureComponent {
 					<MainHeader />
 				</Header>
 				<Layout>
-					<Sider trigger={null} collapsible collapsed={collapsed}>
+					<Sider trigger={null} collapsible collapsed={collapsed} className='overflow-y-scroll'>
 						<LeftSiderBar />
 					</Sider>
 					<Content>

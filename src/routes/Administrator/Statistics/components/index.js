@@ -127,8 +127,8 @@ export default class extends React.Component {
             case PROVIDER: return `${user.providerInfo?.firstName} ${user.providerInfo?.lastName}`;
             case SCHOOL: return user.schoolInfo?.name || '';
             case CONSULTANT: return user.username || '';
-            case ADMIN: return user.fullName || '';
-            case SUPERADMIN: return user.fullName || '';
+            case ADMIN: return user.fullName || user.username;
+            case SUPERADMIN: return user.fullName || user.username;
             default: return;
           }
         },
@@ -267,16 +267,16 @@ export default class extends React.Component {
     ];
 
     return (
-      <div className="full-layout page statistics-page">
+      <div className="full-layout page statistics-page flex flex-col h-100">
         <div className='div-title-admin'>
           <p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.statistics)}</p>
           <Divider />
         </div>
-        <Space direction='vertical' className='flex'>
-          <Table bordered size='middle' pagination={false} dataSource={trackedLogs} columns={columns} />
+        <Space direction='vertical' className='flex flex-1 overflow-y-scroll'>
+          <Table bordered size='middle' pagination={false} dataSource={trackedLogs} columns={columns} scroll={{ y: 'calc(100vh - 260px)' }} />
           <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} onChange={this.handleChangePagination} />
         </Space>
-				<PageLoading loading={loading} isBackground={true} />
+        <PageLoading loading={loading} isBackground={true} />
       </div>
     );
   }

@@ -136,7 +136,7 @@ class SideBar extends Component {
         mode="inline"
         items={items}
         defaultSelectedKeys={[location.pathname]}
-        className="overflow-y-scroll overflow-x-hidden h-100"
+        className="overflow-x-hidden min-h-100"
       />
     );
   }
