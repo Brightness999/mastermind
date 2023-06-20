@@ -500,7 +500,7 @@ class PanelAppointment extends React.Component {
           {visibleCancelForAdmin && <ModalCancelForAdmin {...modalCancelForAdminProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(msgDashboard.unprocessed)} key="2">
-          {appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && a.flagStatus != ACTIVE && [PENDING, CANCELLED].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && a.flagStatus != ACTIVE && ((a.status === PENDING && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }))) || a.status === CANCELLED))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               <div className={`item-right gap-1 ${data.status === CANCELLED && 'd-none'}`}>
@@ -509,7 +509,7 @@ class PanelAppointment extends React.Component {
               </div>
             </div>
           ))}
-          {(appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && [PENDING, CANCELLED].includes(a.status) && a.flagStatus != ACTIVE && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
+          {(appointments?.filter(a => (a.type === APPOINTMENT || a.type === SUBSIDY) && ((a.status === PENDING && a.flagStatus != ACTIVE && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }))) || a.status === CANCELLED))?.length == 0) && (
             <div key={1} className='list-item justify-center'>
               <p className='p-10'>No unprocess appoiment</p>
             </div>

@@ -478,7 +478,7 @@ class PanelAppointment extends React.Component {
           {visiblePayment && <ModalPayment {...modalPaymentProps} />}
         </Tabs.TabPane>
         <Tabs.TabPane tab={intl.formatMessage(messages.unprocessed)} key="2">
-          {appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && a.flagStatus != ACTIVE && [PENDING, CANCELLED].includes(a.status) && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.map((data, index) => (
+          {appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && a.flagStatus != ACTIVE && ((a.status === PENDING && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }))) || a.status === CANCELLED))?.map((data, index) => (
             <div key={index} className='list-item'>
               {this.renderItemLeft(data)}
               {this.props.user?.role > 3 ? (
@@ -489,7 +489,7 @@ class PanelAppointment extends React.Component {
               ) : null}
             </div>
           ))}
-          {(appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && [PENDING, CANCELLED].includes(a.status) && a.flagStatus != ACTIVE && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })))?.length == 0) && (
+          {(appointments?.filter(a => [APPOINTMENT, SUBSIDY].includes(a.type) && ((a.status === PENDING && a.flagStatus != ACTIVE && moment().set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).isSameOrAfter(moment(a.date).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }))) || a.status === CANCELLED))?.length == 0) && (
             <div key={1} className='list-item p-10 justify-center'>
               <span>No unprocess appoiment</span>
             </div>
