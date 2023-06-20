@@ -341,7 +341,7 @@ class SchedulingCenter extends React.Component {
     } else {
       if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && moment(date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
         data.revert();
-        const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
+        const desc = <span>A fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid to reschedule.</span>
         message.warn(desc);
         this.setState({ visibleCancelForAdmin: true, selectedEvent: event, dragInfo: data });
       } else {

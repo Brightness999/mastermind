@@ -102,7 +102,7 @@ class DrawerDetail extends Component {
     const { event, auth } = this.props;
 
     if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && [PARENT, ADMIN, SUPERADMIN].includes(auth.user.role) && moment(event.date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
-      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
+      const desc = <span>A fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid to cancel.</span>
       if (auth.user.role === PARENT) {
         this.setState({ paymentDescription: desc });
         message.warn(desc, 2).then(() => {
@@ -173,7 +173,7 @@ class DrawerDetail extends Component {
     const { user } = this.props.auth;
 
     if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && [PARENT, ADMIN, SUPERADMIN].includes(user.role) && moment(event.date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
-      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
+      const desc = <span>A fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid to reschedule.</span>
       if (user.role === PARENT) {
         this.setState({ paymentDescription: desc });
         message.warn(desc, 2).then(() => {

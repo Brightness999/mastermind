@@ -93,7 +93,7 @@ class PanelAppointment extends React.Component {
     const { user } = this.props;
 
     if (user.role === PARENT && moment(event.date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
-      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
+      const desc = <span>A fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid to reschedule.</span>
       this.setState({ paymentDescription: desc, event: event });
       message.warn(desc).then(() => {
         this.setState({ visiblePayment: true, cancellationType: RESCHEDULE });
@@ -115,7 +115,7 @@ class PanelAppointment extends React.Component {
     const { user } = this.props;
 
     if (user.role === PARENT && moment(event.date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
-      const desc = <span>A cancellation fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid.</span>
+      const desc = <span>A fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid to cancel.</span>
       this.setState({ paymentDescription: desc, event: event });
       message.warn(desc).then(() => {
         this.setState({ visiblePayment: true, cancellationType: CANCEL });

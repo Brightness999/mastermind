@@ -45,6 +45,7 @@ class ModalPayment extends React.Component {
 
 		return (
 			<Modal {...modalProps}>
+				<p className='font-16'>Are your sure to {this.props.cancellationType?.toLowerCase()}?</p>
 				<p className='font-16'>{this.props.description}</p>
 			</Modal>
 		);
