@@ -108,15 +108,6 @@ class ModalCurrentReferralService extends React.Component {
 
 				this.props.setAppointments(newAppointments);
 				this.props.setAppointmentsInMonth(newAppointmentsInMonth);
-
-				this.setState({
-					selectedDate: undefined,
-					selectedTimeIndex: -1,
-					arrTime: [],
-					selectedDependent: undefined,
-					selectedSkillSet: undefined,
-				})
-				this.form.setFieldsValue({ selectedDependent: undefined, selectedSkillSet: undefined, meetingLink: undefined });
 				this.props.setMeetingLink('');
 				this.props.onSubmit();
 			} else {

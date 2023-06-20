@@ -415,22 +415,15 @@ class Dashboard extends React.Component {
     const { userRole } = this.state;
     switch (data.key) {
       case 'new_appoint_from_client':
-        this.updateCalendarEvents(userRole);
-        this.getMyAppointments(userRole);
         this.showNotificationForAppointment(data.data);
         return;
       case 'update_appointment':
-        this.updateCalendarEvents(userRole);
-        this.getMyAppointments(userRole);
         this.showNotificationForAppointmentUpdate(data.data);
         return;
       case 'missed_consultation':
-        this.updateCalendarEvents(userRole);
-        this.getMyAppointments(userRole);
         this.showNotificationForMissedConsultation(data.data);
         return;
       case 'new_subsidy_request_from_client':
-        this.props.getSubsidyRequests({ role: userRole });
         this.panelSubsidiariesReload && typeof this.panelSubsidiariesReload == 'function' && this.panelSubsidiariesReload(true);
         this.showNotificationForSubsidy(data);
         return;

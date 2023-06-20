@@ -129,15 +129,6 @@ class ModalReferralService extends React.Component {
 			this.setState({ loadingSchedule: false });
 			const { success, data } = result;
 			if (success) {
-				this.setState({
-					selectedDate: undefined,
-					selectedTimeIndex: -1,
-					arrTime: [],
-					selectedDependent: undefined,
-					selectedSkillSet: undefined,
-					selectedSubsidy: undefined,
-				})
-				this.form.setFieldsValue({ selectedDependent: undefined, selectedSkillSet: undefined, meetingLink: undefined, selectedSubsidy: undefined });
 				this.props.setMeetingLink('');
 				this.props.setAppointments([...this.props.appointments, data]);
 				this.props.setAppointmentsInMonth([...this.props.appointmentsInMonth, data]);
