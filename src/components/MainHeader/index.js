@@ -73,7 +73,7 @@ class MainHeader extends Component {
             duration: 1,
           }).then(() => {
             this.logout();
-            window.location.href = routerLinks.Home;
+            helper.history.push(routerLinks.Home);
           })
         }
       }

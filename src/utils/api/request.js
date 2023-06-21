@@ -7,6 +7,7 @@ import { url } from './baseUrl';
 import { store } from 'src/redux/store';
 import { initializeAppointments } from 'src/redux/features/appointmentsSlice';
 import { initializeAuth } from 'src/redux/features/authSlice';
+import { helper } from 'utils/auth/helper';
 
 // config aioxs
 const instance = axios.create({
@@ -34,7 +35,7 @@ instance.interceptors.request.use(
 				}).then(() => {
 					store.dispatch(initializeAuth());
 					store.dispatch(initializeAppointments());
-					window.location.href = routerLinks.Home;
+					helper.history.push(routerLinks.Home);
 				})
 			} else {
 				delete instance.defaults.headers.common.Authorization;
