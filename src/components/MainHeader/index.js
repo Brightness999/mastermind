@@ -3,7 +3,7 @@ import { Link } from 'dva/router';
 import { FaChild, FaFileInvoiceDollar, FaUserAlt, FaUserEdit } from 'react-icons/fa';
 import { BiLogOutCircle, BiBell } from 'react-icons/bi';
 import { BsSearch } from 'react-icons/bs';
-import { Badge, Avatar, Input, Dropdown, message } from 'antd';
+import { Badge, Avatar, Input, Dropdown, message, notification } from 'antd';
 import intl from "react-intl-universal";
 import Cookies from 'js-cookie';
 import { connect } from 'react-redux';
@@ -12,9 +12,10 @@ import { MdOutlineSpaceDashboard } from 'react-icons/md';
 
 import messages from './messages';
 import msgSidebar from 'src/components/SideBar/messages';
-import { ADMIN, CONSULTANT, PARENT, PROVIDER, SCHOOL, SUPERADMIN, routerLinks } from 'routes/constant';
-import { initializeAuth, setCommunity, setCountOfUnreadNotifications } from 'src/redux/features/authSlice';
-import { initializeAppointments } from 'src/redux/features/appointmentsSlice';
+import msgModal from 'components/Modal/messages';
+import { ADMIN, APPOINTMENT, CONSULTANT, CONSULTATION, EVALUATION, PARENT, PROVIDER, SCHOOL, SCREEN, SUBSIDY, SUPERADMIN, routerLinks } from 'routes/constant';
+import { initializeAuth, setCommunity, setCountOfUnreadNotifications, setMeetingLink } from 'src/redux/features/authSlice';
+import { getSubsidyRequests, initializeAppointments } from 'src/redux/features/appointmentsSlice';
 import { helper } from 'utils/auth/helper';
 import request from 'utils/api/request';
 import { getSettings } from 'utils/api/apiList';
@@ -98,24 +99,105 @@ class MainHeader extends Component {
     }
 
     this.socket.on('socket_result', data => {
+      console.log("socket result: ", data.key);
       switch (data.key) {
         case "countOfUnreadNotifications": this.props.setCountOfUnreadNotifications(data.count); break;
         case "subsidy_change_status":
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          this.props.getSubsidyRequests({ role: user.role });
+          this.showNotificationForSubsidyChange(data.data);
+          break;
         case "invoice_updated":
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          break;
         case "missed_consultation":
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          this.showNotificationForMissedConsultation(data.data);
+          break;
         case "noshow_created":
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          break;
         case "update_noshow":
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          break;
         case "balance_created":
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          break;
         case "flag_cleared":
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          break;
         case "new_appoint_from_client":
+          this.showNotificationForAppointment(data.data);
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          break;
         case "new_subsidy_request_from_client":
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          this.showNotificationForSubsidy(data.data);
+          break;
         case "appeal_subsidy":
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          this.props.getSubsidyRequests({ role: user.role });
+          this.showNotificationForSubsidyChange(data.data);
+          break;
         case "cancel_subsidy":
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          break;
         case "paid":
-        case "update_appointment": this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1); break;
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          break;
+        case "update_appointment":
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          this.showNotificationForAppointmentUpdate(data.data);
+          break;
+        case 'meeting_link': this.props.setMeetingLink(data.data); break;
         default: break;
       }
     })
+  }
+
+  showNotificationForAppointmentUpdate(data) {
+    notification.open({
+      message: data.type.toUpperCase(),
+      duration: 10,
+      description: `1 ${data?.appointment?.type === SCREEN ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data?.appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data?.appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data?.appointment?.type === CONSULTATION ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data?.appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''} has been ${data.type}.`,
+      onClick: () => notification.destroy(),
+    });
+  }
+
+  showNotificationForAppointment(data) {
+    notification.open({
+      message: 'You have new Appointment',
+      duration: 10,
+      description: `A parent has sent 1 ${data.type === SCREEN ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data.type === EVALUATION ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data.type === APPOINTMENT ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data.type === CONSULTATION ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''}.`,
+      onClick: () => notification.destroy(),
+    });
+  }
+
+  showNotificationForMissedConsultation(data) {
+    notification.open({
+      message: data.type.toUpperCase(),
+      duration: 10,
+      description: `${data?.appointment?.dependent?.firstName} ${data?.appointment?.dependent?.lastName}'s consultation ${data.type === 'noshow' ? 'has been closed as no-show' : 'has been canceled.'} Please reschedule again.`,
+      onClick: () => notification.destroy(),
+    });
+  }
+
+  showNotificationForSubsidy(data) {
+    notification.open({
+      message: 'You have new Subsidy',
+      duration: 10,
+      description: `${data.student?.firstName} ${data.student?.lastName}'s subsidy request has been created.`,
+      onClick: () => notification.destroy(),
+    });
+  }
+
+  showNotificationForSubsidyChange(message) {
+    notification.open({
+      message: 'Subsidy Status changed',
+      duration: 10,
+      description: message,
+      onClick: () => notification.destroy(),
+    });
   }
 
   logout = () => {
@@ -258,4 +340,4 @@ const mapStateToProps = state => ({
   community: state.auth.currentCommunity,
 });
 
-export default compose(connect(mapStateToProps, { initializeAppointments, initializeAuth, setCommunity, setCountOfUnreadNotifications }))(MainHeader);
+export default compose(connect(mapStateToProps, { getSubsidyRequests, initializeAppointments, initializeAuth, setCommunity, setCountOfUnreadNotifications, setMeetingLink }))(MainHeader);
