@@ -54,14 +54,14 @@ class Dashboard extends React.Component {
       isGridDayView: 'Grid',
       canDrop: true,
       calendarWeekends: true,
-      calendarEvents: [],
+      calendarEvents: this.props.appointmentsInMonth,
       userRole: this.props.user?.role,
       listDependents: [],
       parentInfo: {},
       providerInfo: {},
       schoolInfo: {},
       consultantInfo: {},
-      listAppointmentsRecent: [],
+      listAppointmentsRecent: this.props.appointments,
       listAppoinmentsFilter: [],
       SkillSet: [],
       selectedProviders: [],
@@ -501,8 +501,7 @@ class Dashboard extends React.Component {
   }
 
   async getMyAppointments(userRole, dependentId) {
-    const appointments = await this.props.getAppointmentsData({ role: userRole, dependentId: dependentId });
-    this.setState({ listAppointmentsRecent: appointments?.payload ?? [] });
+    this.props.getAppointmentsData({ role: userRole, dependentId: dependentId });
   }
 
   onCollapseChange = (v => {
