@@ -192,8 +192,7 @@ class ModalBalance extends React.Component {
 												onKeyDown={(e) => {
 													(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
 													if (e.key > -1 && e.key < 10 && e.target.value === '0') {
-														e.preventDefault();
-														e.target.value = e.key;
+														e.target.value = '';
 													}
 												}}
 												onChange={() => this.handleChangeLateFee(p.provider?._id)}
@@ -241,8 +240,7 @@ class ModalBalance extends React.Component {
 												onKeyDown={(e) => {
 													(e.key === '.' || e.key === 'e' || (e.key === '-' && e.target.value != '')) && e.preventDefault();
 													if (e.key > -1 && e.key < 10 && e.target.value === '0') {
-														e.preventDefault();
-														e.target.value = e.key;
+														e.target.value = '';
 													}
 													if (e.key === '-' && e.target.value === '') {
 														e.target.value = '-';
@@ -289,8 +287,7 @@ class ModalBalance extends React.Component {
 											onKeyDown={(e) => {
 												(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
 												if (e.key > -1 && e.key < 10 && e.target.value === '0') {
-													e.preventDefault();
-													e.target.value = e.key;
+													e.target.value = '';
 												}
 											}}
 										/>

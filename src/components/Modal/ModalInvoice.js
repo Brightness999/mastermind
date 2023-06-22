@@ -374,8 +374,7 @@ class ModalInvoice extends React.Component {
 																onKeyDown={(e) => {
 																	(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
 																	if (e.key > -1 && e.key < 10 && e.target.value === '0') {
-																		e.preventDefault();
-																		e.target.value = e.key;
+																		e.target.value = '';
 																	}
 																}}
 															/>
@@ -392,8 +391,7 @@ class ModalInvoice extends React.Component {
 																onKeyDown={(e) => {
 																	(e.key === '.' || e.key === 'e' || (e.key === '-' && e.target.value != '')) && e.preventDefault();
 																	if (e.key > -1 && e.key < 10 && e.target.value === '0') {
-																		e.preventDefault();
-																		e.target.value = e.key;
+																		e.target.value = '';
 																	}
 																	if (e.key === '-' && e.target.value === '') {
 																		e.target.value = '-';
@@ -442,8 +440,7 @@ class ModalInvoice extends React.Component {
 									onKeyDown={(e) => {
 										(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
 										if (e.key > -1 && e.key < 10 && e.target.value === '0') {
-											e.preventDefault();
-											e.target.value = e.key;
+											e.target.value = '';
 										}
 									}}
 									onChange={e => this.setState({ minimumPayment: e.target.value * 1 || 0 })}

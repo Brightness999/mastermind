@@ -613,8 +613,7 @@ class ModalSubsidyProgress extends React.Component {
 							onKeyDown={(e) => {
 								(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
 								if (e.key > -1 && e.key < 10 && e.target.value === '0') {
-									e.preventDefault();
-									e.target.value = e.key;
+									e.target.value = '';
 								}
 							}}
 							onChange={e => this.setState({ numberOfSessions: e.target.value, totalPayment: e.target.value * pricePerSession })}
@@ -631,8 +630,7 @@ class ModalSubsidyProgress extends React.Component {
 							onKeyDown={(e) => {
 								(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
 								if (e.key > -1 && e.key < 10 && e.target.value === '0') {
-									e.preventDefault();
-									e.target.value = e.key;
+									e.target.value = '';
 								}
 							}}
 							onChange={e => this.setState({ pricePerSession: e.target.value, totalPayment: e.target.value * numberOfSessions })}
@@ -649,8 +647,7 @@ class ModalSubsidyProgress extends React.Component {
 							onKeyDown={(e) => {
 								(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
 								if (e.key > -1 && e.key < 10 && e.target.value === '0') {
-									e.preventDefault();
-									e.target.value = e.key;
+									e.target.value = '';
 								}
 							}}
 							onChange={e => this.setState({ totalPayment: e.target.value, pricePerSession: numberOfSessions > 0 ? e.target.value / numberOfSessions : 0 })}
