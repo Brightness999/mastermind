@@ -1233,9 +1233,16 @@ class DrawerDetail extends Component {
             <Row gutter={15} className='list-btn-detail'>
               {event?.type === CONSULTATION && event?.status === PENDING && moment().isBefore(moment(event?.date)) && !event?.consultant?._id && userRole === 100 && (
                 <Col span={12}>
-                  <Button type='primary' icon={<AiFillTag size={15} />} block onClick={this.handleTag} className='flex items-center gap-2 h-30'>
-                    {intl.formatMessage(messages.tag)}
-                  </Button>
+                  <Popconfirm
+                    title="Are you sure to tag this consultation?"
+                    onConfirm={this.handleTag}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    <Button type='primary' icon={<AiFillTag size={15} />} block className='flex items-center gap-2 h-30'>
+                      {intl.formatMessage(messages.tag)}
+                    </Button>
+                  </Popconfirm>
                 </Col>
               )}
               {(event?.status === PENDING && userRole > 3 && ([SCREEN, EVALUATION].includes(event?.type) || (event?.type === CONSULTATION && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)))) && (
@@ -1334,9 +1341,17 @@ class DrawerDetail extends Component {
               )}
               {(event?.status === PENDING && moment().isBefore(moment(event?.date)) && event?.type === CONSULTATION && event?.consultant?._id && (event?.consultant?._id === auth.user?.consultantInfo?._id || userRole > 900)) && (
                 <Col span={12}>
-                  <Button type='primary' icon={<MdOutlineRemove size={15} />} block onClick={this.handleRemoveTag}>
-                    {intl.formatMessage(messages.removeTag)}
-                  </Button>
+                  <Popconfirm
+                    title="Are you sure to remove tag?"
+                    onConfirm={this.handleRemoveTag}
+                    okText="Yes"
+                    cancelText="No"
+                    placement='left'
+                  >
+                    <Button type='primary' icon={<MdOutlineRemove size={15} />} block>
+                      {intl.formatMessage(messages.removeTag)}
+                    </Button>
+                  </Popconfirm>
                 </Col>
               )}
               {(event?.flagStatus === NOFLAG && userRole > 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === PENDING && moment().isAfter(moment(event?.date))) && (
