@@ -1399,7 +1399,7 @@ function renderEventContent(eventInfo, appointments) {
   return (
     <div className={`flex flex-col p-3 relative rounded-2 relative text-white bg-${[DECLINED, CANCELLED, NOSHOW].includes(status) ? 'cancelled' : eventType.toLowerCase()}`}>
       <div className="flex flex-col">
-        <div className={`text-bold flex items-center ${[DECLINED, CANCELLED].includes(status) && 'text-cancelled'}`} title={event?.skillSet?.name}>{[DECLINED, CANCELLED].includes(status) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}<div className='text-ellipsis'>{event?.skillSet?.name}</div></div>
+        <div className={`text-bold flex items-center ${[DECLINED, CANCELLED, NOSHOW].includes(status) && 'text-cancelled'}`} title={event?.skillSet?.name}>{[DECLINED, CANCELLED, NOSHOW].includes(status) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}<div className='text-ellipsis'>{event?.skillSet?.name}</div></div>
         <div className='text-ellipsis' title={moment(eventInfo.event.start).format('hh:mm a')}>{moment(eventInfo.event.start).format('hh:mm a')}</div>
         <div className='text-ellipsis' title={`Dependent: ${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
         {(user.role === 30 || user.role === 100) ? null : <div className='text-ellipsis' title={`${eventType} with ${eventInfo.event.title}`}>{eventType} with {eventInfo.event.title}</div>}
