@@ -685,7 +685,7 @@ class ModalNewAppointmentForParents extends React.Component {
 											/>
 										</Col>
 									</Row>
-									<div className='doctor-list' onWheel={(e) => { e.preventDefault(); this.scrollElement.current.scrollLeft += e.deltaY / 2 }} ref={this.scrollElement}>
+									<div className='doctor-list' onWheel={(e) => this.scrollElement.current.scrollLeft += e.deltaY / 2} ref={this.scrollElement}>
 										{loadingSearchProvider ? <Spin spinning={loadingSearchProvider} /> : listProvider?.length > 0 ? listProvider?.map((provider, index) => (
 											<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
 												<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
