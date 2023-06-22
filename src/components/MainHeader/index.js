@@ -156,7 +156,10 @@ class MainHeader extends Component {
   }
 
   showNotificationForAppointmentUpdate(data) {
+    notification.close('update-appointment');
     notification.open({
+      key: 'update-appointment',
+      type: 'info',
       message: data.type.toUpperCase(),
       duration: 10,
       description: `1 ${data?.appointment?.type === SCREEN ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data?.appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data?.appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data?.appointment?.type === CONSULTATION ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data?.appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''} has been ${data.type}.`,
@@ -165,8 +168,11 @@ class MainHeader extends Component {
   }
 
   showNotificationForAppointment(data) {
+    notification.close('new-appointment');
     notification.open({
-      message: 'You have new Appointment',
+      key: 'new-appointment',
+      type: 'info',
+      message: 'New Appointment',
       duration: 10,
       description: `A parent has sent 1 ${data.type === SCREEN ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data.type === EVALUATION ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data.type === APPOINTMENT ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data.type === CONSULTATION ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''}.`,
       onClick: () => notification.destroy(),
@@ -174,7 +180,10 @@ class MainHeader extends Component {
   }
 
   showNotificationForMissedConsultation(data) {
+    notification.close('missed-consultation');
     notification.open({
+      key: 'missed-consultation',
+      type: 'info',
       message: data.type.toUpperCase(),
       duration: 10,
       description: `${data?.appointment?.dependent?.firstName} ${data?.appointment?.dependent?.lastName}'s consultation ${data.type === 'noshow' ? 'has been closed as no-show' : 'has been canceled.'} Please reschedule again.`,
@@ -183,8 +192,11 @@ class MainHeader extends Component {
   }
 
   showNotificationForSubsidy(data) {
+    notification.close('new-subsidy');
     notification.open({
-      message: 'You have new Subsidy',
+      key: 'new-subsidy',
+      type: 'info',
+      message: 'Subsidy Request',
       duration: 10,
       description: `${data.student?.firstName} ${data.student?.lastName}'s subsidy request has been created.`,
       onClick: () => notification.destroy(),
@@ -192,8 +204,11 @@ class MainHeader extends Component {
   }
 
   showNotificationForSubsidyChange(message) {
+    notification.close('update-subsidy');
     notification.open({
-      message: 'Subsidy Status changed',
+      key: 'update-subsidy',
+      type: 'info',
+      message: 'Subsidy Request',
       duration: 10,
       description: message,
       onClick: () => notification.destroy(),
