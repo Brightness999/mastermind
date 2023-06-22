@@ -328,6 +328,7 @@
   "components.Modal.totalPayment": "Total payment",
   "components.Modal.minimumPayment": "Minimum payment",
   "components.Modal.appeal": "Appeal",
+  "components.Modal.appealed": "Appealed",
   "components.Modal.submitFlag": "Submit Flag",
   "components.Modal.noShowPenalty": "No show penalty",
   "components.Modal.penaltyAmount": "Penalty amount",

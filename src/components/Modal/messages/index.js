@@ -269,6 +269,10 @@ export default {
     id: `${scope}.appeal`,
     defaultMessage: 'Appeal',
   },
+  appealed: {
+    id: `${scope}.appealed`,
+    defaultMessage: 'Appealed',
+  },
   submitFlag: {
     id: `${scope}.submitFlag`,
     defaultMessage: 'Submit Flag',
