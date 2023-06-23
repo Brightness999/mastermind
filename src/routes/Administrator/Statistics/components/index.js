@@ -53,7 +53,9 @@ export default class extends React.Component {
       const { success, data } = result;
       if (success) {
         this.setState({
-          trackedLogs: data.actions || [],
+          trackedLogs: data.actions?.map((action, i) => {
+            action['key'] = i; return action;
+          }) ?? [],
           totalSize: data.totalCount || 0
         });
       }
