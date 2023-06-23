@@ -397,6 +397,7 @@ class InfoAvailability extends Component {
 						if (!((value.isSame(inOpenTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterOpenTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
 							message.warning("The school is not available at that time. Please select another time.", 5);
 						} else {
+							message.destroy();
 							this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: value }) : d));
 						}
 					}
@@ -404,6 +405,7 @@ class InfoAvailability extends Component {
 						if (!((value.isSame(inCloseTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterCloseTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
 							message.warning("The school is not available at that time. Please select another time.", 5);
 						} else {
+							message.destroy();
 							this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, to_time: value }) : d));
 						}
 					}
