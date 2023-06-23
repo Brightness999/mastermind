@@ -474,7 +474,7 @@ class Dashboard extends React.Component {
     this.setState({ visibleNewAppoint: true, selectedDate: moment(date.date) });
   }
 
-  handleEventDragStop = (data) => {
+  handleEventDrop = (data) => {
     const event = data.oldEvent.extendedProps;
     const date = data.oldEvent.start;
     const { user } = this.props;
@@ -491,7 +491,12 @@ class Dashboard extends React.Component {
           });
         });
       } else {
-        this.handleEventChange(data);
+        if (event.type === CONSULTATION && !event.consultant) {
+          data.revert();
+          message.warning('You have to claim the consultation request to reschedule.');
+        } else {
+          this.handleEventChange(data);
+        }
       }
     }
   }
@@ -1140,7 +1145,7 @@ class Dashboard extends React.Component {
                   eventClick={this.onShowDrawerDetail}
                   dateClick={userRole !== 30 && this.handleClickDate}
                   eventResize={(info) => info.revert()}
-                  eventDrop={this.handleEventDragStop}
+                  eventDrop={this.handleEventDrop}
                   height="calc(100vh - 165px)"
                 />
               </div>
