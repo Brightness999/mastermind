@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'dva/router';
-import { FaChild, FaFileInvoiceDollar, FaUserAlt, FaUserEdit } from 'react-icons/fa';
+import { FaChild, FaFileInvoice, FaFileInvoiceDollar, FaUserAlt, FaUserEdit } from 'react-icons/fa';
 import { BiLogOutCircle, BiBell } from 'react-icons/bi';
 import { BsSearch } from 'react-icons/bs';
 import { Badge, Avatar, Input, Dropdown, message, notification } from 'antd';
@@ -261,6 +261,10 @@ class MainHeader extends Component {
         data.action = 'User Manage';
         data.description = `Viewed ${intl.formatMessage(messages.invoiceList)}`;
         break;
+      case intl.formatMessage(messages.consultationList):
+        data.action = 'User Manage';
+        data.description = `Viewed ${intl.formatMessage(messages.consultationList)}`;
+        break;
       default:
         break;
     }
@@ -322,6 +326,15 @@ class MainHeader extends Component {
       label: (
         <Link to={routerLinks.InvoiceList} onClick={() => this.handleClickLink(intl.formatMessage(messages.invoiceList))}>
           {intl.formatMessage(messages.invoiceList)}
+        </Link>
+      ),
+    });
+    CONSULTANT === user?.role && items.splice(4, 0, {
+      key: '6',
+      icon: <FaFileInvoice size={18} color='#495057' />,
+      label: (
+        <Link to={routerLinks.ConsultationList} onClick={() => this.handleClickLink(intl.formatMessage(messages.consultationList))}>
+          {intl.formatMessage(messages.consultationList)}
         </Link>
       ),
     });

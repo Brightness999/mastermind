@@ -173,4 +173,8 @@ export default {
     id: `${scope}.claimed`,
     defaultMessage: 'Claimed',
   },
+  unclaimed: {
+    id: `${scope}.unclaimed`,
+    defaultMessage: 'Unclaimed',
+  },
 };

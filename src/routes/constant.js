@@ -21,6 +21,7 @@ export const routerLinks = {
   Notification: '/account/notifications',
   PrivateNote: '/account/privatenote',
   InvoiceList: '/account/invoicelist',
+  ConsultationList: '/account/consultationlist',
   Blank: '/widget/blank',
   Home: '/home',
   Donate: '/donate',

@@ -265,6 +265,7 @@
   "components.mainheader.notification": "Notification",
   "components.mainheader.dependentList": "Dependent List",
   "components.mainheader.invoiceList": "Invoice List",
+  "components.mainheader.consultationList": "Consultation List",
   "components.mainheader.logOut": "Log Out",
 
   "components.Modal.edit": "Edit",
@@ -453,6 +454,7 @@
   "components.drawerdetail.switchTag": "Switch Tag",
   "components.drawerdetail.removeTag": "Remove Tag",
   "components.drawerdetail.claimed": "Claimed",
+  "components.drawerdetail.unclaimed": "Unclaimed",
   "components.drawerdetail.editFlag": "Edit Flag",
     
   "components.Notification.prompt": "Prompt",

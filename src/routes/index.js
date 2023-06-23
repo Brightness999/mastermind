@@ -28,6 +28,7 @@ import Statistics from './Administrator/Statistics';
 import Private from './Administrator/PrivateNote';
 import PrivateNote from './PrivateNote';
 import Notification from './Notifications';
+import ConsultationList from './ConsultationList';
 import CreateUser from './Administrator/CreateAccount';
 import InvoiceList from './Invoice';
 import Invoices from './Administrator/Invoice';
@@ -44,6 +45,7 @@ const routesConfig = app => [
       PrivateNote(app),
       Notification(app),
       InvoiceList(app),
+      ConsultationList(app),
     ]
   },
   {

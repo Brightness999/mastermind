@@ -29,6 +29,10 @@ export default {
     id: `${scope}.invoiceList`,
     defaultMessage: 'Invoice List',
   },
+  consultationList: {
+    id: `${scope}.consultationList`,
+    defaultMessage: 'Consultation List',
+  },
   notification: {
     id: `${scope}.notification`,
     defaultMessage: 'Notification',
