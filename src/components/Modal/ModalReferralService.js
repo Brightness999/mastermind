@@ -373,21 +373,23 @@ class ModalReferralService extends React.Component {
 						<p className='font-16 mb-5'>{intl.formatMessage(messages.selectOptions)}</p>
 						<Row gutter={20} className='mb-10' align="bottom">
 							<Col xs={24} sm={24} md={8} className='select-small'>
-								<Form.Item
-									name='selectedSubsidy'
-									label={intl.formatMessage(msgCreateAccount.subsidyRequest)}
-								>
-									<Select
-										placeholder={intl.formatMessage(msgCreateAccount.subsidyRequest)}
-										value={selectedSubsidy}
-										onChange={v => this.handleSelectSubsidy(v)}
-										disabled={!!subsidy}
+								{!!subsidiaries?.length ? (
+									<Form.Item
+										name='selectedSubsidy'
+										label={intl.formatMessage(msgCreateAccount.subsidyRequest)}
 									>
-										{subsidiaries?.map((s, index) => (
-											<Select.Option key={index} value={s._id}>{s?.student?.firstName ?? ''} {s?.student?.lastName ?? ''}({s?.skillSet?.name ?? ''})</Select.Option>
-										))}
-									</Select>
-								</Form.Item>
+										<Select
+											placeholder={intl.formatMessage(msgCreateAccount.subsidyRequest)}
+											value={selectedSubsidy}
+											onChange={v => this.handleSelectSubsidy(v)}
+											disabled={!!subsidy}
+										>
+											{subsidiaries?.map((s, index) => (
+												<Select.Option key={index} value={s._id}>{s?.student?.firstName ?? ''} {s?.student?.lastName ?? ''}({s?.skillSet?.name ?? ''})</Select.Option>
+											))}
+										</Select>
+									</Form.Item>
+								) : null}
 								<Form.Item
 									name='selectedDependent'
 									label={intl.formatMessage(msgCreateAccount.dependent)}
