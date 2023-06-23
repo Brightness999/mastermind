@@ -274,7 +274,8 @@ class InfoAvailability extends Component {
 		day_week.map((newDay) => {
 			if (newDay != dayForCopy) {
 				if (this.form?.getFieldValue(newDay)) {
-					this.form?.setFieldValue(newDay, [...this.form?.getFieldValue(newDay), arrToCopy[index]]);
+					const newRanges = this.form.getFieldValue(newDay)?.filter(a => !(!a.from_date && !a.to_date && !a.from_time && !a.to_time));
+					this.form?.setFieldValue(newDay, [...newRanges, arrToCopy[index]]);
 				} else {
 					this.form?.setFieldValue(newDay, [arrToCopy[index]]);
 				}

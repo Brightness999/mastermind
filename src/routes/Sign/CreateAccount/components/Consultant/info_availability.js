@@ -94,16 +94,16 @@ class ConsultantAvailability extends Component {
         if (scheduleItem.from_time && scheduleItem.to_time) {
           manualSchedule.push({
             "dayInWeek": i,
-            "fromYear": scheduleItem.from_date.year() ?? 1,
-            "fromMonth": scheduleItem.from_date.month() ?? 0,
-            "fromDate": scheduleItem.from_date.date() ?? 1,
-            "toYear": scheduleItem.to_date.year() ?? 10000,
-            "toMonth": scheduleItem.to_date.month() ?? 0,
-            "toDate": scheduleItem.to_date.date() ?? 0,
-            "openHour": scheduleItem.from_time.hour() ?? 0,
-            "openMin": scheduleItem.from_time.minutes() ?? 0,
-            "closeHour": scheduleItem.to_time.hour() ?? 0,
-            "closeMin": scheduleItem.to_time.minutes() ?? 0,
+            "fromYear": scheduleItem.from_date?.year() || 1,
+            "fromMonth": scheduleItem.from_date?.month() || 0,
+            "fromDate": scheduleItem.from_date.date() || 1,
+            "toYear": scheduleItem.to_date?.year() || 10000,
+            "toMonth": scheduleItem.to_date?.month() || 0,
+            "toDate": scheduleItem.to_date?.date() || 0,
+            "openHour": scheduleItem.from_time?.hour() || 0,
+            "openMin": scheduleItem.from_time?.minutes() || 0,
+            "closeHour": scheduleItem.to_time?.hour() || 0,
+            "closeMin": scheduleItem.to_time?.minutes() || 0,
           })
         }
       }
@@ -147,7 +147,8 @@ class ConsultantAvailability extends Component {
     day_week.map((newDay) => {
       if (newDay != dayForCopy) {
         if (this.form?.getFieldValue(newDay)) {
-          this.form?.setFieldValue(newDay, [...this.form?.getFieldValue(newDay), arrToCopy[index]]);
+					const newRanges = this.form.getFieldValue(newDay)?.filter(a => !(!a.from_date && !a.to_date && !a.from_time && !a.to_time));
+          this.form?.setFieldValue(newDay, [...newRanges, arrToCopy[index]]);
         } else {
           this.form?.setFieldValue(newDay, [arrToCopy[index]]);
         }
