@@ -30,7 +30,7 @@ export const routerLinks = {
 
 export const BASE_CALENDAR_URL = "https://www.googleapis.com/calendar/v3/calendars";
 export const BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY = "holiday@group.v.calendar.google.com";
-export const GOOGLE_CALENDAR_API_KEY = "AIzaSyA77lKHRvtdisK7_UhwalO8Hzgd4P_kaDk";
+export const GOOGLE_CALENDAR_API_KEY = "AIzaSyDBN1t-9owQFgpRbPU1YvFTYFl89o2wm24";
 export const USA_CALENDAR_REGION = "en.usa";
 export const JEWISH_CALENDAR_REGION = "en.jewish";
 
