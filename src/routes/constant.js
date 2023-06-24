@@ -86,3 +86,15 @@ export const InvoiceType = {
   NOSHOW: 4,
   BALANCE: 5,
 }
+
+export const ContactNumberType = [
+  'Home',
+  'Work',
+  'Mobile',
+  'Fax',
+];
+
+export const EmailType = [
+  'Personal',
+  'Work'
+];

@@ -3,8 +3,8 @@ import { Divider, Table, Space, Button, Input, message, Pagination } from 'antd'
 import intl from 'react-intl-universal';
 import { SearchOutlined } from '@ant-design/icons';
 
-import { routerLinks } from 'routes/constant';
-import { ModalConfirm, ModalInputCode } from 'components/Modal';
+import { routerLinks, BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from 'routes/constant';
+import { ModalConfirm, ModalInputCode, ModalSchoolDetail } from 'components/Modal';
 import mgsSidebar from 'components/SideBar/messages';
 import request from 'utils/api/request';
 import { activateUser, getSchools } from 'utils/api/apiList';
@@ -26,12 +26,17 @@ export default class extends React.Component {
 			pageSize: 10,
 			pageNumber: 1,
 			totalSize: 0,
+			visibleSchoolDetail: false,
+			selectedSchool: undefined,
+			jewishHolidays: [],
+			legalHolidays: [],
 		};
 		this.searchInput = createRef(null);
 	}
 
 	componentDidMount() {
 		this.getSchoolList();
+		this.getHolidays();
 	}
 
 	handleChangePagination = (newPageNumber, newPageSize) => {
@@ -63,7 +68,7 @@ export default class extends React.Component {
 	}
 
 	onShowModalInputCode = (user) => {
-		this.setState({ visibleInputCode: true, selectedUser: user })
+		this.setState({ visibleInputCode: true, selectedSchool: user })
 	}
 
 	onCloseModalInputCode = () => {
@@ -73,7 +78,7 @@ export default class extends React.Component {
 	verifyCode = (code) => {
 		if (code == 613) {
 			this.onCloseModalInputCode();
-			store.dispatch(setSelectedUser(this.state.selectedUser));
+			store.dispatch(setSelectedUser(this.state.selectedSchool));
 			this.props.history.push(routerLinks.ChangeUserProfile);
 		} else {
 			message.warning('Invalid code. Try again.');
@@ -114,8 +119,33 @@ export default class extends React.Component {
 		this.setState({ isConfirmModal: false });
 	}
 
+	openModalSchoolDetail = (school) => {
+		this.setState({ visibleSchoolDetail: true, selectedSchool: school });
+	}
+
+	closeModalSchoolDetail = () => {
+		this.setState({ visibleSchoolDetail: false, selectedSchool: undefined });
+	}
+
+	getHolidays = async () => {
+		try {
+			const usa_url = `${BASE_CALENDAR_URL}/${USA_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+			const jewish_url = `${BASE_CALENDAR_URL}/${JEWISH_CALENDAR_REGION}%23${BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY}/events?key=${GOOGLE_CALENDAR_API_KEY}`
+
+			const usa_data = await fetch(usa_url).then(response => response.json());
+			const jewish_data = await fetch(jewish_url).then(response => response.json());
+
+			this.setState({
+				jewishHolidays: jewish_data?.items ?? [],
+				legalHolidays: usa_data?.items ?? [],
+			});
+		} catch (error) {
+			this.setState({ jewishHolidays: [], legalHolidays: [] });
+		}
+	}
+
 	render() {
-		const { pageNumber, pageSize, totalSize, visibleInputCode, schools, isConfirmModal, confirmMessage, loading } = this.state;
+		const { jewishHolidays, legalHolidays, pageNumber, pageSize, totalSize, visibleInputCode, schools, isConfirmModal, confirmMessage, loading, selectedSchool, visibleSchoolDetail } = this.state;
 		const columns = [
 			{ title: 'User Name', dataIndex: 'username', key: 'username', fixed: 'left', sorter: (a, b) => a.username > b.username ? 1 : -1 },
 			{ title: 'Email', dataIndex: 'email', key: 'email', sorter: (a, b) => a.email > b.email ? 1 : -1 },
@@ -196,6 +226,16 @@ export default class extends React.Component {
 			onCancel: this.handleCancel,
 		}
 
+		const modalSchoolDetailProps = {
+			visible: visibleSchoolDetail,
+			onSubmit: this.closeModalSchoolDetail,
+			onCancel: this.closeModalSchoolDetail,
+			jewishHolidays: jewishHolidays,
+			legalHolidays: legalHolidays,
+			school: selectedSchool,
+			user: store.getState().auth.user,
+		}
+
 		return (
 			<div className="full-layout page usermanager-page">
 				<div className='div-title-admin'>
@@ -203,10 +243,14 @@ export default class extends React.Component {
 					<Divider />
 				</div>
 				<Space direction='vertical' className='flex'>
-					<Table bordered size='middle' pagination={false} dataSource={schools} columns={columns} scroll={{ x: 1000 }} />
+					<Table bordered size='middle' pagination={false} dataSource={schools} columns={columns} scroll={{ x: true }} onRow={(school) => ({
+						onClick: (e) => e.target.className.includes('ant-table-cell') && this.openModalSchoolDetail(school),
+						onDoubleClick: (e) => e.target.className.includes('ant-table-cell') && this.openModalSchoolDetail(school),
+					})} />
 					<Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
 				</Space>
 				{visibleInputCode && <ModalInputCode {...modalInputCodeProps} />}
+				{visibleSchoolDetail && <ModalSchoolDetail {...modalSchoolDetailProps} />}
 				<ModalConfirm {...confirmModalProps} />
 				<PageLoading loading={loading} isBackground={true} />
 			</div>
