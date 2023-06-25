@@ -16,7 +16,7 @@ import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import msgDrawer from 'components/DrawerDetail/messages';
 import request from 'utils/api/request';
 import { rescheduleAppointmentForParent } from 'utils/api/apiList';
-import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, InvoiceType, PENDING, SCREEN, SUBSIDY } from 'routes/constant';
+import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, PENDING, SCREEN, SUBSIDY } from 'routes/constant';
 import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
 import './style/index.less';
 import '../../assets/styles/login.less';

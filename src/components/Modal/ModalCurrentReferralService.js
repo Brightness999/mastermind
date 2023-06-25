@@ -16,7 +16,7 @@ import request from 'utils/api/request';
 import { getAllConsultantForParent, getAuthorizationUrl, rescheduleAppointmentForParent } from 'utils/api/apiList';
 import { setMeetingLink, setSelectedTime, setSelectedUser } from '../../redux/features/authSlice';
 import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
-import { APPOINTMENT, CONSULTATION, EVALUATION, PENDING, SCREEN } from 'routes/constant';
+import { APPOINTMENT, CONSULTATION, EVALUATION, SCREEN } from 'routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -224,7 +224,7 @@ class ModalCurrentReferralService extends React.Component {
 							consultants.forEach(consultant => {
 								const availableTime = consultant.manualSchedule.find(s => s.dayInWeek == dayInWeek);
 								const fromDate = moment().set({ years: availableTime?.fromYear, months: availableTime?.fromMonth, date: availableTime?.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
-								const toDate = moment().set({ years: availableTime?.toYear, months: availableTime?.toMonth, date: availableTime?.toDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+								const toDate = moment().set({ years: availableTime?.toYear, months: availableTime?.toMonth, date: availableTime?.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 999 });
 								const openTime = moment().set({ years, months, date, hours: availableTime?.openHour, minutes: availableTime?.openMin, seconds: 0, milliseconds: 0 });
 								const closeTime = moment().set({ years, months, date, hours: availableTime?.closeHour, minutes: availableTime?.closeMin, seconds: 0, milliseconds: 0 });
 								if (newValue.isBetween(fromDate, toDate) && (time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime))) {
