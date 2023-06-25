@@ -44,7 +44,7 @@ class ConsultationRequest extends React.Component {
     ]
 
     return (
-      <div className="full-layout page usermanager-page">
+      <div className="full-layout page consultationrequests-page">
         <div className='div-title-admin'>
           <p className='font-16 font-500'>{intl.formatMessage(msgSidebar.consultationRequests)}</p>
           <Divider />

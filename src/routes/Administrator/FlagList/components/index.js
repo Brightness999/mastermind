@@ -412,7 +412,7 @@ class FlagList extends React.Component {
     }
 
     return (
-      <div className="full-layout page usermanager-page">
+      <div className="full-layout page flaglist-page">
         <div className='div-title-admin'>
           <p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.flagList)}</p>
           <Divider />

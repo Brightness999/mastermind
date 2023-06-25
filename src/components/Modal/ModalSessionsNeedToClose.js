@@ -133,7 +133,7 @@ class ModalSessionsNeedToClose extends React.Component {
 		const { skillSet, user } = this.props;
 		const skills = JSON.parse(JSON.stringify(skillSet ?? []))?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; });
 		const modalProps = {
-			className: 'modal-referral-service',
+			className: 'modal-sessions-need-to-close',
 			title: (<span className='font-18 text-bold'>Sessions need to close</span>),
 			open: this.props.visible,
 			onOk: this.props.onSubmit,

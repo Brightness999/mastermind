@@ -145,7 +145,7 @@ class ModalFlagExpand extends React.Component {
 		const { selectedFlag, tabFlags, visibleCreateNote, visibleInvoice } = this.state;
 		const { auth } = this.props;
 		const modalProps = {
-			className: 'modal-referral-service',
+			className: 'modal-flag-expand',
 			title: "Flags",
 			open: this.props.visible,
 			onOk: this.props.onSubmit,

@@ -772,7 +772,7 @@ class PrivateNote extends React.Component {
     }
 
     return (
-      <div className="full-layout page usermanager-page">
+      <div className="full-layout page dependentlist-page">
         <div className='div-title-admin'>
           <div className='font-16 font-500'>{intl.formatMessage(msgMainHeader.dependentList)}</div>
           <Divider />

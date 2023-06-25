@@ -237,7 +237,7 @@ export default class extends React.Component {
 		}
 
 		return (
-			<div className="full-layout page usermanager-page">
+			<div className="full-layout page schoollist-page">
 				<div className='div-title-admin'>
 					<p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.schoolsList)}</p>
 					<Divider />
