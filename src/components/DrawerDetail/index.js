@@ -1021,7 +1021,7 @@ class DrawerDetail extends Component {
           <div className='detail-item flex'>
             <div className='title'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.what)}</p>
-              <BiDollarCircle size={18} className='mx-10 text-green500' />
+              {event?.type === SUBSIDY ? <BiDollarCircle size={18} className='mx-10 text-green500' /> : null}
             </div>
             <p className='font-16 flex flex-col'><span>{event?.skillSet?.name}</span><span>{event?.type === CONSULTATION ? '(HMGH Consultation)' : ''}</span></p>
           </div>
