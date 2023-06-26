@@ -127,6 +127,7 @@
   "routes.Createaccount.serviceableSchools": "Serviceable schools",
   "routes.Createaccount.academicLevel": "Academic level",
   "routes.Createaccount.rate": "Rate",
+  "routes.Createaccount.totalDue": "Total due",
   "routes.Createaccount.duration": "Duration",
   "routes.Createaccount.standardSessionDuration": "Standard session duration",
   "routes.Createaccount.evaluationDuration": "Evaluation duration",

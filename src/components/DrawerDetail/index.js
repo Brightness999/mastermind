@@ -1073,9 +1073,20 @@ class DrawerDetail extends Component {
           {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(msgCreateAccount.rate)}</p>
-              <p className={`font-18 ${(event?.status === CLOSED || event?.status === NOSHOW) ? 'text-underline cursor' : ''} ${(!event?.sessionInvoice?.isPaid && !event?.flagInvoice?.isPaid) && 'text-red'}`} onClick={() => (event?.status === CLOSED || event?.status === NOSHOW) && this.onOpenModalInvoice()}>${event?.rate}</p>
+              <p className='font-18'>${event?.rate}</p>
             </div>
           )}
+          {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) ? event?.sessionInvoice?._id ? (
+            <div className='detail-item flex'>
+              <p className='font-18 font-700 title'>{intl.formatMessage(msgCreateAccount.totalDue)}</p>
+              <p className={`font-18 text-underline cursor ${!event?.sessionInvoice?.isPaid && 'text-red'}`} onClick={this.onOpenModalInvoice}>${event?.sessionInvoice?.totalPayment}</p>
+            </div>
+          ) : event?.flagInvoice?._id ? (
+            <div className='detail-item flex'>
+              <p className='font-18 font-700 title'>{intl.formatMessage(msgCreateAccount.totalDue)}</p>
+              <p className={`font-18 text-underline cursor ${!event?.flagInvoice?.isPaid && 'text-red'}`} onClick={this.onOpenModalInvoice}>${event?.flagInvoice?.totalPayment}</p>
+            </div>
+          ) : null : null}
           {[SCREEN, CONSULTATION].includes(event?.type) && (
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{(event?.type === CONSULTATION && event?.meetingLink) ? intl.formatMessage(messages.meeting) : intl.formatMessage(messages.phonenumber)}</p>

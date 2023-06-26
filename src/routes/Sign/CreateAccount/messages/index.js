@@ -434,6 +434,10 @@ export default ({
     id: `${scope}.rate`,
     defaultMessage: 'Rate',
   },
+  totalDue: {
+    id: `${scope}.totalDue`,
+    defaultMessage: 'Total due',
+  },
   standardSessionDuration: {
     id: `${scope}.standardSessionDuration`,
     defaultMessage: 'Standard session duration',
