@@ -98,3 +98,6 @@ export const EmailType = [
   'Personal',
   'Work'
 ];
+
+export const DEPENDENTHOME = 'Dependent Home';
+export const PROVIDEROFFICE = 'Provider Office';

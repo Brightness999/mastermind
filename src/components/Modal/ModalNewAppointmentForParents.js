@@ -17,7 +17,7 @@ import request from 'src/utils/api/request';
 import { createAppointmentForParent, searchProvidersForAdmin } from 'src/utils/api/apiList';
 import ModalNewScreening from './ModalNewScreening';
 import ModalConfirm from './ModalConfirm';
-import { ADMINAPPROVED, APPOINTMENT, CLOSED, EVALUATION, PENDING, SCREEN, SUBSIDY } from 'src/routes/constant';
+import { ADMINAPPROVED, APPOINTMENT, CLOSED, DEPENDENTHOME, EVALUATION, PENDING, PROVIDEROFFICE, SCREEN, SUBSIDY } from 'src/routes/constant';
 import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
 import './style/index.less';
 import '../../assets/styles/login.less';
@@ -473,7 +473,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		this.setState({
 			selectedDependent: dependentId,
 			skillSet: user.role === 30 ? listDependents?.find(dependent => dependent._id === dependentId)?.services?.filter(s => user.providerInfo?.skillSet?.find(skill => skill?._id === s?._id)) : listDependents?.find(dependent => dependent._id === dependentId)?.services,
-			addressOptions: listDependents?.find(dependent => dependent._id === dependentId)?.school?.name ? ['Dependent Home', 'Provider Office', listDependents?.find(dependent => dependent._id === dependentId)?.school?.name] : ['Dependent Home', 'Provider Office'],
+			addressOptions: listDependents?.find(dependent => dependent._id === dependentId)?.school?.name ? [DEPENDENTHOME, PROVIDEROFFICE, listDependents?.find(dependent => dependent._id === dependentId)?.school?.name] : [DEPENDENTHOME, PROVIDEROFFICE],
 			subsidyAvailable: false,
 			isSubsidyOnly: false,
 		}, () => {

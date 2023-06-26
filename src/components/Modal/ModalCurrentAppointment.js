@@ -16,7 +16,7 @@ import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import msgDrawer from 'components/DrawerDetail/messages';
 import request from 'utils/api/request';
 import { rescheduleAppointmentForParent } from 'utils/api/apiList';
-import { APPOINTMENT, CLOSED, CONSULTATION, EVALUATION, PENDING, SCREEN, SUBSIDY } from 'routes/constant';
+import { APPOINTMENT, CLOSED, CONSULTATION, DEPENDENTHOME, EVALUATION, PENDING, PROVIDEROFFICE, SCREEN, SUBSIDY } from 'routes/constant';
 import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
 import './style/index.less';
 import '../../assets/styles/login.less';
@@ -130,7 +130,7 @@ class ModalCurrentAppointment extends React.Component {
 		this.setState({
 			skillSet: auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.services ?? [],
 			selectedDate: moment(event?.date),
-			addressOptions: ['Dependent Home', 'Provider Office', auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.school?.name],
+			addressOptions: [DEPENDENTHOME, PROVIDEROFFICE, auth.dependents?.find(dependent => dependent._id == event?.dependent?._id)?.school?.name],
 			standardRate: standardRate ? standardRate : '',
 			subsidizedRate: subsidizedRate ? subsidizedRate : '',
 			duration: event?.type === EVALUATION ? event?.provider?.separateEvaluationDuration : event?.provider?.duration,

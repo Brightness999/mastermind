@@ -9,13 +9,13 @@ import moment from 'moment';
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
 
-import messages from '../../../../Sign/CreateAccount/messages';
-import msgSidebar from '../../../../../components/SideBar/messages';
-import request from '../../../../../utils/api/request';
-import { getAllSchoolsForParent, getMyProviderInfo, getUserProfile, updateMyProviderAvailability } from '../../../../../utils/api/apiList';
-import { setUser } from '../../../../../redux/features/authSlice';
-import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
-import PageLoading from '../../../../../components/Loading/PageLoading';
+import messages from 'routes/Sign/CreateAccount/messages';
+import msgSidebar from 'components/SideBar/messages';
+import request from 'utils/api/request';
+import { getAllSchoolsForParent, getMyProviderInfo, getUserProfile, updateMyProviderAvailability } from 'utils/api/apiList';
+import { setUser } from 'src/redux/features/authSlice';
+import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, DEPENDENTHOME, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, PROVIDEROFFICE, USA_CALENDAR_REGION } from 'routes/constant';
+import PageLoading from 'components/Loading/PageLoading';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -79,8 +79,8 @@ class InfoAvailability extends Component {
 						}));
 					});
 					let locations = [];
-					data?.providerInfo?.isHomeVisit && locations.push('Dependent Home');
-					data?.providerInfo?.privateOffice && locations.push('Provider Office');
+					data?.providerInfo?.isHomeVisit && locations.push(DEPENDENTHOME);
+					data?.providerInfo?.privateOffice && locations.push(PROVIDEROFFICE);
 					data?.providerInfo?.serviceableSchool?.length && data?.providerInfo?.serviceableSchool?.forEach(school => locations.push(school.name));
 
 					this.setState({
@@ -123,8 +123,8 @@ class InfoAvailability extends Component {
 						}));
 					});
 					let locations = [];
-					data?.isHomeVisit && locations.push('Dependent Home');
-					data?.privateOffice && locations.push('Provider Office');
+					data?.isHomeVisit && locations.push(DEPENDENTHOME);
+					data?.privateOffice && locations.push(PROVIDEROFFICE);
 					data?.serviceableSchool?.length && data?.serviceableSchool?.forEach(school => locations.push(school.name));
 
 					this.setState({
@@ -296,17 +296,17 @@ class InfoAvailability extends Component {
 		if (state) {
 			this.setState({
 				isHomeVisit: state,
-				locations: ['Dependent Home', ...this.state.locations],
+				locations: [DEPENDENTHOME, ...this.state.locations],
 			});
 		} else {
 			message.warning("All availability for dependent's home will also be deleted.").then(() => {
 				day_week.forEach(day => {
-					this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a.location != 'Dependent Home'));
+					this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a.location != DEPENDENTHOME));
 				})
 			});
 			this.setState({
 				isHomeVisit: state,
-				locations: this.state.locations?.filter(location => location != 'Dependent Home'),
+				locations: this.state.locations?.filter(location => location != DEPENDENTHOME),
 			});
 		}
 	}
@@ -315,17 +315,17 @@ class InfoAvailability extends Component {
 		if (state) {
 			this.setState({
 				isPrivateOffice: state,
-				locations: ['Provider Office', ...this.state.locations],
+				locations: [PROVIDEROFFICE, ...this.state.locations],
 			});
 		} else {
 			message.warning('All availability for your office will also be deleted.').then(() => {
 				day_week.forEach(day => {
-					this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a.location != 'Provider Office'));
+					this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a.location != PROVIDEROFFICE));
 				})
 			});
 			this.setState({
 				isPrivateOffice: state,
-				locations: this.state.locations?.filter(location => location != 'Provider Office'),
+				locations: this.state.locations?.filter(location => location != PROVIDEROFFICE),
 			});
 		}
 	}
@@ -335,16 +335,16 @@ class InfoAvailability extends Component {
 			this.setState({ isSchools: state });
 		} else {
 			const { locations } = this.state;
-			const selectedSchools = locations?.filter(location => location !== 'Provider Office' && location !== 'Dependent Home');
+			const selectedSchools = locations?.filter(location => location !== PROVIDEROFFICE && location !== DEPENDENTHOME);
 
 			if (selectedSchools?.length) {
 				message.warning('All availability for those school will also be deleted.').then(() => {
 					day_week.forEach(day => {
-						this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a.location == 'Provider Office' || a.location == 'Dependent Home'));
+						this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.filter(a => a.location === PROVIDEROFFICE || a.location === DEPENDENTHOME));
 					})
 				});
 				this.setState({
-					locations: this.state.locations?.filter(location => location == 'Provider Office' || location == 'Dependent Home'),
+					locations: this.state.locations?.filter(location => location === PROVIDEROFFICE || location === DEPENDENTHOME),
 				});
 			}
 			this.setState({ isSchools: state });
