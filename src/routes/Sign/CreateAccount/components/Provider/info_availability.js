@@ -111,18 +111,59 @@ class InfoAvailability extends Component {
 		this.props.setRegisterData({ availability: { ...this.form?.getFieldsValue(), isPrivateOffice, isHomeVisit, isSchools, isJewishHolidays, isLegalHolidays } });
 	}
 
-	copyToFullWeek = (dayForCopy, index) => {
+	copyToFullWeek = async (dayForCopy, index) => {
 		const arrToCopy = this.form?.getFieldValue(dayForCopy);
-		day_week.map((newDay) => {
+		for (const newDay of day_week) {
 			if (newDay != dayForCopy) {
-				if (this.form?.getFieldValue(newDay)) {
-					const newRanges = this.form.getFieldValue(newDay)?.filter(a => !(!a.from_date && !a.to_date && !a.from_time && !a.to_time));
-					this.form?.setFieldValue(newDay, [...newRanges, arrToCopy[index]]);
+				const { listSchool } = this.state;
+				const school = listSchool?.find(school => school.name == arrToCopy[index].location);
+				if (school) {
+					const dayIndex = this.getDayOfWeekIndex(newDay);
+					if (dayIndex > -1) {
+						const inOpenTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.openHour, minutes: school.sessionsInSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
+						const inCloseTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.closeHour, minutes: school.sessionsInSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
+						const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.openHour, minutes: school.sessionsAfterSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
+						const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.closeHour, minutes: school.sessionsAfterSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
+						const fromTime = arrToCopy[index]?.from_time?.set({ seconds: 0, milliseconds: 0 });
+						const toTime = arrToCopy[index]?.to_time?.set({ seconds: 0, milliseconds: 0 });
+						let isNotValidFromTime = false, isNotValidToTime = false;
+
+						if (fromTime) {
+							if (fromTime.isSame(inOpenTime) || fromTime.isBetween(inOpenTime, inCloseTime) || fromTime.isSame(afterOpenTime) || fromTime.isBetween(afterOpenTime, afterCloseTime)) {
+								message.destroy();
+							} else {
+								isNotValidFromTime = true;
+							}
+						}
+						if (toTime) {
+							if (toTime.isSame(inCloseTime) || toTime.isBetween(inOpenTime, inCloseTime) || toTime.isSame(afterCloseTime) || toTime.isBetween(afterOpenTime, afterCloseTime)) {
+								message.destroy();
+							} else {
+								isNotValidToTime = true;
+							}
+						}
+
+						if (isNotValidFromTime || isNotValidToTime) {
+							await message.warning(`Cannot copy the range on ${newDay}, as the school is not available on ${newDay}.`, 5);
+						} else {
+							if (this.form?.getFieldValue(newDay)) {
+								const newRanges = this.form.getFieldValue(newDay)?.filter(a => !(!a.from_date && !a.to_date && !a.from_time && !a.to_time));
+								this.form?.setFieldValue(newDay, [...newRanges, arrToCopy[index]]);
+							} else {
+								this.form?.setFieldValue(newDay, [arrToCopy[index]]);
+							}
+						}
+					}
 				} else {
-					this.form?.setFieldValue(newDay, [arrToCopy[index]]);
+					if (this.form?.getFieldValue(newDay)) {
+						const newRanges = this.form.getFieldValue(newDay)?.filter(a => !(!a.from_date && !a.to_date && !a.from_time && !a.to_time));
+						this.form?.setFieldValue(newDay, [...newRanges, arrToCopy[index]]);
+					} else {
+						this.form?.setFieldValue(newDay, [arrToCopy[index]]);
+					}
 				}
 			}
-		})
+		}
 	}
 
 	handleRemoveRange = (day) => {
@@ -225,50 +266,11 @@ class InfoAvailability extends Component {
 		}
 	}
 
-	handleSelectTime = (value, type, day, index) => {
-		const { listSchool } = this.state;
-		const dayTime = this.form?.getFieldValue(day);
-		const location = dayTime?.[index]?.location;
-		if (location) {
-			const school = listSchool?.find(school => school.name == location);
-			if (school) {
-				const dayIndex = this.getDayOfWeekIndex(day);
-				if (dayIndex > -1) {
-					value = value.set({ seconds: 0, milliseconds: 0 });
-					const inOpenTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.openHour, minutes: school.sessionsInSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
-					const inCloseTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.closeHour, minutes: school.sessionsInSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
-					const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.openHour, minutes: school.sessionsAfterSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
-					const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.closeHour, minutes: school.sessionsAfterSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
-					if (type == 'from_time') {
-						if (!((value.isSame(inOpenTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterOpenTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
-							message.warning("The school is not available at that time. Please select another time.", 5);
-						} else {
-							message.destroy();
-							this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: value }) : d));
-						}
-					}
-					if (type == 'to_time') {
-						if (!((value.isSame(inCloseTime) || value.isBetween(inOpenTime, inCloseTime)) || (value.isSame(afterCloseTime) || value.isBetween(afterOpenTime, afterCloseTime)))) {
-							message.warning("The school is not available at that time. Please select another time.", 5);
-						} else {
-							message.destroy();
-							this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, to_time: value }) : d));
-						}
-					}
-				}
-			} else {
-				this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: value }) : d));
-			}
-		} else {
-			this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: value }) : d));
-		}
-		this.onChangeScheduleValue();
-	}
-
 	handleSelectLocation = (location, day, index) => {
+		this.setState({ selectedLocation: location });
+
 		const { listSchool } = this.state;
 		const dayTime = this.form?.getFieldValue(day);
-
 		const school = listSchool?.find(school => school.name == location);
 		if (school) {
 			const dayIndex = this.getDayOfWeekIndex(day);
@@ -277,29 +279,69 @@ class InfoAvailability extends Component {
 				const inCloseTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.closeHour, minutes: school.sessionsInSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
 				const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.openHour, minutes: school.sessionsAfterSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
 				const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.closeHour, minutes: school.sessionsAfterSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
+				const fromTime = dayTime[index].from_time?.set({ seconds: 0, milliseconds: 0 });
+				const toTime = dayTime[index].to_time?.set({ seconds: 0, milliseconds: 0 });
+				let isNotValidFromTime = false, isNotValidToTime = false;
 
-				if (dayTime[index]?.from_time) {
-					const fromTime = moment(dayTime[index]?.from_time).set({ seconds: 0, milliseconds: 0 });
-					if (!((fromTime.isSame(inOpenTime) || fromTime.isBetween(inOpenTime, inCloseTime)) || (fromTime.isSame(afterOpenTime) || fromTime.isBetween(afterOpenTime, afterCloseTime)))) {
-						message.warning("The school is not available at the from_time. Please select another location.", 5);
-						this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: null }) : d));
+				if (fromTime) {
+					if (fromTime.isSame(inOpenTime) || fromTime.isBetween(inOpenTime, inCloseTime) || fromTime.isSame(afterOpenTime) || fromTime.isBetween(afterOpenTime, afterCloseTime)) {
+						message.destroy();
 					} else {
-						this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: location }) : d));
+						message.warning("The school is not available at that time. Please select another from-time.", 5);
+						isNotValidFromTime = true;
 					}
 				}
-				if (dayTime[index]?.to_time) {
-					const toTime = moment(dayTime[index]?.to_time).set({ seconds: 0, milliseconds: 0 });
-					if (!((toTime.isSame(inCloseTime) || toTime.isBetween(inOpenTime, inCloseTime)) || (toTime.isSame(afterCloseTime) || toTime.isBetween(afterOpenTime, afterCloseTime)))) {
-						message.warning("The school is not available at the to_time. Please select another location.", 5);
-						this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: null }) : d));
+				if (toTime) {
+					if (toTime.isSame(inCloseTime) || toTime.isBetween(inOpenTime, inCloseTime) || toTime.isSame(afterCloseTime) || toTime.isBetween(afterOpenTime, afterCloseTime)) {
+						message.destroy();
 					} else {
-						this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: location }) : d));
+						message.warning("The school is not available at that time. Please select another to-time.", 5);
+						isNotValidToTime = true;
+					}
+				}
+				this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: isNotValidFromTime ? undefined : d.from_time, to_time: isNotValidToTime ? undefined : d.to_time }) : d));
+			}
+		}
+	}
+
+	handleSelectTime = (value, type, day, index) => {
+		const { listSchool } = this.state;
+		const dayTime = this.form?.getFieldValue(day);
+		const location = dayTime?.[index]?.location;
+		const selectedHour = value.split(' ')?.[0]?.split(':')?.[0] * 1;
+		const selectedMin = value.split(' ')?.[0]?.split(':')?.[1] * 1;
+		const timePeriod = value.split(' ')?.[1];
+		value = moment().set({ hours: timePeriod?.toLowerCase() === 'pm' ? selectedHour + 12 : selectedHour, minutes: selectedMin, seconds: 0, milliseconds: 0 });
+
+		if (location) {
+			const school = listSchool?.find(school => school.name === location);
+			if (school) {
+				const dayIndex = this.getDayOfWeekIndex(day);
+				if (dayIndex > -1) {
+					const inOpenTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.openHour, minutes: school.sessionsInSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
+					const inCloseTime = moment().set({ hours: school.sessionsInSchool[dayIndex]?.closeHour, minutes: school.sessionsInSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
+					const afterOpenTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.openHour, minutes: school.sessionsAfterSchool[dayIndex]?.openMin, seconds: 0, milliseconds: 0 });
+					const afterCloseTime = moment().set({ hours: school.sessionsAfterSchool[dayIndex]?.closeHour, minutes: school.sessionsAfterSchool[dayIndex]?.closeMin, seconds: 0, milliseconds: 0 });
+					if (type == 'from_time') {
+						if (value.isSame(inOpenTime) || value.isBetween(inOpenTime, inCloseTime) || value.isSame(afterOpenTime) || value.isBetween(afterOpenTime, afterCloseTime)) {
+							message.destroy();
+						} else {
+							message.warning("The school is not available at that time. Please select another from-time.", 5);
+							this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: undefined }) : d));
+						}
+					}
+					if (type == 'to_time') {
+						if (value.isSame(inCloseTime) || value.isBetween(inOpenTime, inCloseTime) || value.isSame(afterCloseTime) || value.isBetween(afterOpenTime, afterCloseTime)) {
+							message.destroy();
+						} else {
+							message.warning("The school is not available at that time. Please select another to-time.", 5);
+							this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, to_time: undefined }) : d));
+						}
 					}
 				}
 			}
-		} else {
-			this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, location: location }) : d));
 		}
+		this.onChangeScheduleValue();
 	}
 
 	getHolidays = async () => {
@@ -559,7 +601,8 @@ class InfoAvailability extends Component {
 																		format="h:mm a"
 																		popupClassName='timepicker'
 																		placeholder={intl.formatMessage(messages.from)}
-																		onSelect={(v) => this.handleSelectTime(v, 'from_time', day, i)}
+																		onSelect={(v) => this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.map((d, j) => j === i ? ({ ...d, from_time: v }) : d))}
+																		onBlur={(e) => this.handleSelectTime(e.target.value, 'from_time', day, i)}
 																	/>
 																</Form.Item>
 															</Col>
@@ -571,7 +614,8 @@ class InfoAvailability extends Component {
 																		format="h:mm a"
 																		popupClassName='timepicker'
 																		placeholder={intl.formatMessage(messages.to)}
-																		onSelect={(v) => this.handleSelectTime(v, 'to_time', day, i)}
+																		onSelect={(v) => this.form?.setFieldValue(day, this.form?.getFieldValue(day)?.map((d, j) => j === i ? ({ ...d, to_time: v }) : d))}
+																		onBlur={(e) => this.handleSelectTime(e.target.value, 'to_time', day, i)}
 																	/>
 																</Form.Item>
 																<BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day); }} />
