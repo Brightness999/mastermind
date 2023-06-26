@@ -17,6 +17,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
+import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
 
 import { ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote, ModalPayment, ModalInvoice } from 'components/Modal';
 import DrawerDetail from 'components/DrawerDetail';
@@ -1409,6 +1410,7 @@ function renderEventContent(eventInfo, appointments) {
         <div className='text-ellipsis' title={`Dependent: ${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
         {(user.role === 30 || user.role === 100) ? null : <div className='text-ellipsis' title={`${eventType} with ${eventInfo.event.title}`}>{eventType} with {eventInfo.event.title}</div>}
       </div>
+      {type === CONSULTATION ? event?.consultant ? <AiFillStar color="#ffff00" size={20} className="flag-icons" /> : <AiOutlineStar color="#ffff00" size={20} className="flag-icons" /> : null}
       {type === SUBSIDY && <FaHandHoldingUsd size={20} className='text-green500 mr-5' />}
       {event?.flagStatus === ACTIVE && event?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
       {status === PENDING && event?.flagStatus === NOFLAG && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
