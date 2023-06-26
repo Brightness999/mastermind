@@ -44,6 +44,7 @@ class ClaimedConsultationRequest extends React.Component {
     request.post(getConsultationList, { pageNumber, pageSize, isClaimed: true }).then(result => {
       this.setState({ loading: false });
       const { success, data } = result;
+      console.log(data)
       if (success) {
         this.setState({
           consultationList: data?.consultations?.map((consultation, i) => {
@@ -173,6 +174,7 @@ class ClaimedConsultationRequest extends React.Component {
         },
         render: (appointment) => `${appointment?.consultant?.username ?? ''}`,
       },
+      { title: 'Subsidy ID', key: 'subsidy', dataIndex: 'subsidy', sorter: (a, b) => !a.subsidy ? -1 : !b.subsidy ? 1 : a.subsidy > b.subsidy ? 1 : -1 },
       { title: 'Age', key: 'age', width: 100, sorter: (a, b) => a.dependent?.birthday > b.dependent?.birthday ? 1 : -1, render: (appointment) => moment().year() - moment(appointment.dependent?.birthday).year() },
       { title: 'Grade', key: 'grade', render: (appointment) => appointment.dependent?.currentGrade },
       { title: 'School', key: 'school', render: appointment => appointment?.dependent?.school?.name },
