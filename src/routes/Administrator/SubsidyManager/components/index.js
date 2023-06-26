@@ -42,6 +42,12 @@ const SubsidyManager = (props) => {
     setVisibleSubsidy(true);
   }
 
+  const onSubmitModalSubsidy = () => {
+    props.getSubsidyRequests({ role: user.role });
+    setVisibleSubsidy(false);
+    setSelectedSubsidyId(undefined);
+  };
+
   const onCloseModalSubsidy = () => {
     setVisibleSubsidy(false);
     setSelectedSubsidyId(undefined);
@@ -254,7 +260,7 @@ const SubsidyManager = (props) => {
 
   const modalSubsidyProps = {
     visible: visibleSubsidy,
-    onSubmit: onCloseModalSubsidy,
+    onSubmit: onSubmitModalSubsidy,
     onCancel: onCloseModalSubsidy,
     subsidyId: selectedSubsidyId,
   }
