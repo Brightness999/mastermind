@@ -994,6 +994,9 @@ class DrawerDetail extends Component {
           {event?.flagStatus !== ACTIVE && event?.type === CONSULTATION && event?.status === PENDING && event?.consultant?._id && event?.consultant?._id !== auth.user?.consultantInfo?._id && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.claimed)}]</div>
           )}
+          {event?.flagStatus !== ACTIVE && event?.type === CONSULTATION && event?.status === PENDING && !event?.consultant && (
+            <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.unclaimed)}]</div>
+          )}
           {event?.flagStatus !== ACTIVE && event?.status === CLOSED && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.accepted)}]</div>
           )}
@@ -1038,7 +1041,7 @@ class DrawerDetail extends Component {
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.with)}</p>
               <div className='flex flex-row flex-1'>
-                <div className='font-18'>Consultant</div>
+                <div className='font-18'>{event?.consultantName || ''}</div>
               </div>
             </div>
           ) : (
