@@ -727,9 +727,9 @@ class ModalNewAppointmentForParents extends React.Component {
 											)}
 										</div>
 										<div className='flex-1 font-12'>
-											{standardRate && <p>{intl.formatMessage(msgCreateAccount.rate)}: ${standardRate}</p>}
-											{(subsidizedRate && subsidizedRate != standardRate) && <p>{intl.formatMessage(messages.subsidizedRate)}: ${subsidizedRate}</p>}
-											{cancellationFee && <p>{intl.formatMessage(msgCreateAccount.cancellationFee)}: ${cancellationFee}</p>}
+											{standardRate ? <p>{intl.formatMessage(msgCreateAccount.rate)}: ${standardRate}</p> : ''}
+											{(subsidizedRate && subsidizedRate != standardRate) ? <p>{intl.formatMessage(messages.subsidizedRate)}: ${subsidizedRate}</p> : ''}
+											{cancellationFee ? <p>{intl.formatMessage(msgCreateAccount.cancellationFee)}: ${cancellationFee}</p> : ''}
 										</div>
 									</div>
 									<div className='flex mt-10'>
