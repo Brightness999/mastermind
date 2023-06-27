@@ -9,6 +9,7 @@ import mgsSidebar from 'components/SideBar/messages';
 import msgMainHeader from 'components/MainHeader/messages';
 import messages from 'routes/Dashboard/messages';
 import request from 'utils/api/request';
+import { store } from 'src/redux/store';
 import { getTrackedActions } from 'utils/api/apiList';
 import { ADMIN, CONSULTANT, PARENT, PROVIDER, SCHOOL, SUPERADMIN } from 'routes/constant';
 import PageLoading from 'components/Loading/PageLoading';
@@ -67,6 +68,18 @@ export default class extends React.Component {
 
   render() {
     const { loading, pageNumber, pageSize, totalSize, trackedLogs, userSearch, actionSearch, dateRange } = this.state;
+    const roleFilterOptions = [
+      { text: 'Admin', value: 999 },
+      { text: 'Consultant', value: 100 },
+      { text: 'School', value: 60 },
+      { text: 'Provider', value: 30 },
+      { text: 'Parent', value: 3 },
+    ];
+
+    if (store.getState().auth.user?.role === 999) {
+      roleFilterOptions.splice(0, 1);
+    }
+
     const columns = [
       {
         title: 'User', dataIndex: 'user', key: 'user',
@@ -137,18 +150,10 @@ export default class extends React.Component {
       },
       {
         title: 'Role', dataIndex: 'user', key: 'role',
-        filters: [
-          { text: 'Super Admin', value: 1000 },
-          { text: 'Admin', value: 999 },
-          { text: 'Consultant', value: 100 },
-          { text: 'School', value: 60 },
-          { text: 'Provider', value: 30 },
-          { text: 'Parent', value: 3 },
-        ],
+        filters: roleFilterOptions,
         onFilter: (value, record) => record.user?.role === value,
         render: (user) => {
           switch (user?.role) {
-            case 1000: return 'Super Admin';
             case 999: return 'Admin';
             case 100: return 'Consultant';
             case 60: return 'School';
