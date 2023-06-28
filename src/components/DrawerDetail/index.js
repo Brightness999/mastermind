@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { AiFillTag, AiOutlineUserSwitch } from 'react-icons/ai';
 
-import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalPayment, ModalProcessAppointment } from 'components/Modal';
+import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalPay, ModalPayment, ModalProcessAppointment } from 'components/Modal';
 import messages from './messages';
 import msgModal from 'components/Modal/messages';
 import msgDashboard from 'routes/Dashboard/messages';
@@ -57,6 +57,8 @@ class DrawerDetail extends Component {
       visibleCancelForAdmin: false,
       cancellationType: '',
       isFeeToParent: false,
+      visiblePay: false,
+      returnUrl: '',
     };
   }
 
@@ -746,6 +748,14 @@ class DrawerDetail extends Component {
       .catch(err => this.setState({ errorMessage: err.message }));
   }
 
+  openModalPay = (url) => {
+    this.setState({ visiblePay: true, returnUrl: url });
+  }
+
+  closeModalpay = () => {
+    this.setState({ visiblePay: false, returnUrl: '' });
+  }
+
   render() {
     const {
       isProviderHover,
@@ -774,6 +784,8 @@ class DrawerDetail extends Component {
       visibleCancelForAdmin,
       isFeeToParent,
       cancellationType,
+      visiblePay,
+      returnUrl,
     } = this.state;
     const { event, listAppointmentsRecent, auth } = this.props;
     const dependent = { ...event?.dependent, appointments: listAppointmentsRecent?.filter(a => a.dependent?._id === event?.dependent?._id) };
@@ -927,6 +939,12 @@ class DrawerDetail extends Component {
       onSubmit: this.waiveFee,
       applyFeeToParent: this.applyFeeToParent,
       onCancel: this.onCloseModalCancelForAdmin,
+    };
+    const modalPayProps = {
+      visible: visiblePay,
+      onSubmit: this.closeModalpay,
+      onCancel: this.closeModalpay,
+      returnUrl,
     };
 
     const contentConfirm = (
@@ -1117,23 +1135,9 @@ class DrawerDetail extends Component {
                     <Button type='primary' className='flex-1 h-30 p-0' onClick={this.onOpenModalInvoice}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
-                    <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                      <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-                      <input type="hidden" name="business" value="office@helpmegethelp.org" />
-                      <input type="hidden" name="cmd" value="_donations" />
-                      <input type="hidden" name="item_name" value="Help Me Get Help" />
-                      <input type="hidden" name="item_number" />
-                      <input type="hidden" name="amount" value={event?.flagInvoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-                      <input type="hidden" name="shipping" value="0.00" />
-                      <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-                      <input type="hidden" name="rm" value="0" />
-                      <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.flagInvoice?._id)}`} />
-                      <input type="hidden" name="cancel_return" value={window.location.href} />
-                      <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                      <Button type='primary' block className='h-30 p-0' htmlType='submit'>
-                        {intl.formatMessage(messages.payFlag)}
-                      </Button>
-                    </form>
+                    <Button type='primary' block className='h-30 p-0' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.flagInvoice?._id)}`)}>
+                      {intl.formatMessage(messages.payFlag)}
+                    </Button>
                   </>
                 )}
               </div>
@@ -1176,23 +1180,9 @@ class DrawerDetail extends Component {
                     <Button type='primary' className='flex-1 h-30 p-0' onClick={this.onOpenModalInvoice}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
-                    <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                      <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-                      <input type="hidden" name="business" value="office@helpmegethelp.org" />
-                      <input type="hidden" name="cmd" value="_donations" />
-                      <input type="hidden" name="item_name" value="Help Me Get Help" />
-                      <input type="hidden" name="item_number" />
-                      <input type="hidden" name="amount" value={event?.flagInvoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-                      <input type="hidden" name="shipping" value="0.00" />
-                      <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-                      <input type="hidden" name="rm" value="0" />
-                      <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.flagInvoice?._id)}`} />
-                      <input type="hidden" name="cancel_return" value={window.location.href} />
-                      <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                      <Button type='primary' block className='h-30 p-0' htmlType='submit'>
-                        {intl.formatMessage(messages.payFlag)}
-                      </Button>
-                    </form>
+                    <Button type='primary' block className='h-30 p-0' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.flagInvoice?._id)}`)}>
+                      {intl.formatMessage(messages.payFlag)}
+                    </Button>
                     <Popconfirm
                       title="Are you sure to clear this flag?"
                       onConfirm={this.handleClearFlag}
@@ -1275,23 +1265,9 @@ class DrawerDetail extends Component {
               )}
               {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === CLOSED && !event?.sessionInvoice?.isPaid && !event?.flagInvoice?.isPaid && (userRole === 3 || userRole > 900) && (
                 <Col span={12}>
-                  <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                    <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-                    <input type="hidden" name="business" value="office@helpmegethelp.org" />
-                    <input type="hidden" name="cmd" value="_donations" />
-                    <input type="hidden" name="item_name" value="Help Me Get Help" />
-                    <input type="hidden" name="item_number" />
-                    <input type="hidden" name="amount" value={event?.sessionInvoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-                    <input type="hidden" name="shipping" value="0.00" />
-                    <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-                    <input type="hidden" name="rm" value="0" />
-                    <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.sessionInvoice?._id)}`} />
-                    <input type="hidden" name="cancel_return" value={window.location.href} />
-                    <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                    <Button type='primary' icon={<BsPaypal size={15} color="#fff" />} block htmlType='submit'>
-                      {intl.formatMessage(messages.payInvoice)}
-                    </Button>
-                  </form>
+                  <Button type='primary' icon={<BsPaypal size={15} color="#fff" />} block onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.sessionInvoice?._id)}`)}>
+                    {intl.formatMessage(messages.payInvoice)}
+                  </Button>
                 </Col>
               )}
               {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === CLOSED && (
@@ -1418,6 +1394,7 @@ class DrawerDetail extends Component {
         {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
         {visiblePayment && <ModalPayment {...modalPaymentProps} />}
         {visibleCancelForAdmin && <ModalCancelForAdmin {...modalCancelForAdminProps} />}
+        {visiblePay && <ModalPay {...modalPayProps} />}
       </Drawer >
     );
   }

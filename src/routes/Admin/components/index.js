@@ -19,7 +19,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
 
-import { ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm, ModalCreateNote, ModalCancelForAdmin, ModalInvoice } from 'components/Modal';
+import { ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalNewAppointment, ModalSessionsNeedToClose, ModalFlagExpand, ModalConfirm, ModalCreateNote, ModalCancelForAdmin, ModalInvoice, ModalPay } from 'components/Modal';
 import DrawerDetail from 'components/DrawerDetail';
 import messages from 'src/routes/Dashboard/messages';
 import msgCreateAccount from 'src/routes/Sign/CreateAccount/messages';
@@ -81,6 +81,8 @@ class SchedulingCenter extends React.Component {
       dragInfo: {},
       visibleInvoice: false,
       selectedFlag: {},
+      visiblePay: false,
+      returnUrl: '',
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -708,6 +710,14 @@ class SchedulingCenter extends React.Component {
     this.socket.emit("action_tracking", data);
   }
 
+  openModalPay = (url) => {
+    this.setState({ visiblePay: true, returnUrl: url });
+  }
+
+  closeModalPay = () => {
+    this.setState({ visiblePay: false, returnUrl: '' });
+  }
+
   render() {
     const {
       isFilter,
@@ -744,6 +754,8 @@ class SchedulingCenter extends React.Component {
       visibleCancelForAdmin,
       selectedFlag,
       visibleInvoice,
+      visiblePay,
+      returnUrl,
     } = this.state;
     const { invoices } = this.props;
 
@@ -870,6 +882,13 @@ class SchedulingCenter extends React.Component {
       onSubmit: this.handleUpdateInvoice,
       onCancel: this.closeModalInvoice,
       invoice: selectedFlag,
+    }
+
+    const modalPayProps = {
+      visible: visiblePay,
+      onSubmit: this.openModalPay,
+      onCancel: this.closeModalPay,
+      returnUrl,
     }
 
     return (
@@ -1212,33 +1231,18 @@ class SchedulingCenter extends React.Component {
         {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
         {visibleCancelForAdmin && <ModalCancelForAdmin {...modalCancelForAdminProps} />}
         {visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
+        {visiblePay && <ModalPay {...modalPayProps} />}
         <Modal title="Flag Action" open={visibleFlagAction} footer={null} onCancel={this.closeFlagAction}>
           <div className='flex items-center gap-2'>
-            {(selectedFlag?.totalPayment == 0) ? (
-              <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' onClick={() => this.onOpenModalCreateNote()}>{intl.formatMessage(msgDrawer.requestClearance)}</Button>
-            ) : null}
+            <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' onClick={() => this.onOpenModalCreateNote()}>{intl.formatMessage(msgDrawer.requestClearance)}</Button>
             {selectedFlag?.isPaid ? (
               <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' disabled>
                 {intl.formatMessage(msgDrawer.paid)}
               </Button>
             ) : selectedFlag?.totalPayment == 0 ? null : (
-              <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post" className='flex-1'>
-                <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-                <input type="hidden" name="business" value="office@helpmegethelp.org" />
-                <input type="hidden" name="cmd" value="_donations" />
-                <input type="hidden" name="item_name" value="Help Me Get Help" />
-                <input type="hidden" name="item_number" />
-                <input type="hidden" name="amount" value={selectedFlag?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-                <input type="hidden" name="shipping" value="0.00" />
-                <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-                <input type="hidden" name="rm" value="0" />
-                <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(selectedFlag?._id)}`} />
-                <input type="hidden" name="cancel_return" value={window.location.href} />
-                <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                <Button type='primary' htmlType='submit' block className='font-16 flag-action whitespace-nowrap'>
-                  {intl.formatMessage(msgDrawer.payFlag)}
-                </Button>
-              </form>
+              <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(selectedFlag?._id)}`)}>
+                {intl.formatMessage(msgDrawer.payFlag)}
+              </Button>
             )}
             <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' onClick={() => this.onOpenModalConfirm()}>{intl.formatMessage(msgDrawer.clearFlag)}</Button>
           </div>

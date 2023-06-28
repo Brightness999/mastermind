@@ -17,7 +17,7 @@ import request, { decryptParam, encryptParam } from 'utils/api/request';
 import { clearFlag, payInvoice, updateInvoice } from 'utils/api/apiList';
 import PageLoading from 'components/Loading/PageLoading';
 import { getInvoiceList, setInvoiceList } from 'src/redux/features/appointmentsSlice';
-import { ModalInvoice } from 'components/Modal';
+import { ModalInvoice, ModalPay } from 'components/Modal';
 import { socketUrl } from 'utils/api/baseUrl';
 
 class FlagList extends React.Component {
@@ -31,6 +31,8 @@ class FlagList extends React.Component {
       selectedFlag: {},
       csvData: [],
       sortedFlags: [],
+      visiblePay: false,
+      returnUrl: '',
     };
     this.searchInput = createRef(null);
     this.socket = undefined;
@@ -181,8 +183,16 @@ class FlagList extends React.Component {
     return true;
   }
 
+  openModalPay = (url) => {
+    this.setState({ visiblePay: true, returnUrl: url });
+  }
+
+  closeModalPay = () => {
+    this.setState({ visiblePay: false, returnUrl: '' });
+  }
+
   render() {
-    const { csvData, tabFlags, loading, selectedTab, visibleInvoice, selectedFlag } = this.state;
+    const { csvData, tabFlags, loading, selectedTab, visibleInvoice, selectedFlag, visiblePay, returnUrl } = this.state;
     const { auth } = this.props;
     const csvHeaders = ["Flag Type", "Student Name", "Age", "Student Grade", "Provider", "Amount", "Created Date", "Updated Date"];
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
@@ -316,23 +326,9 @@ class FlagList extends React.Component {
         title: 'Action', key: 'action', align: 'center', fixed: 'right', width: 160,
         render: (invoice) => (invoice.isPaid || invoice.totalPayment == 0) ? null : (
           <div className='flex'>
-            <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-              <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-              <input type="hidden" name="business" value="office@helpmegethelp.org" />
-              <input type="hidden" name="cmd" value="_donations" />
-              <input type="hidden" name="item_name" value="Help Me Get Help" />
-              <input type="hidden" name="item_number" />
-              <input type="hidden" name="amount" value={invoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-              <input type="hidden" name="shipping" value="0.00" />
-              <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-              <input type="hidden" name="rm" value="0" />
-              <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
-              <input type="hidden" name="cancel_return" value={window.location.href} />
-              <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-              <Button type='link' htmlType='submit' className='px-5'>
-                <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
-              </Button>
-            </form>
+            <Button type='link' className='px-5' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
+              <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
+            </Button>
             <Popconfirm
               title="Are you sure to clear this flag?"
               onConfirm={() => this.handleClearFlag(invoice)}
@@ -411,6 +407,13 @@ class FlagList extends React.Component {
       invoice: selectedFlag,
     }
 
+    const modalPayProps = {
+      visible: visiblePay,
+      onSubmit: this.openModalPay,
+      onCancel: this.closeModalPay,
+      returnUrl,
+    }
+
     return (
       <div className="full-layout page flaglist-page">
         <div className='div-title-admin'>
@@ -426,6 +429,7 @@ class FlagList extends React.Component {
           onChange={this.handleChangeTab}
         />
         {visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
+        {visiblePay && <ModalPay {...modalPayProps} />}
         <PageLoading loading={loading} isBackground={true} />
       </div>
     );

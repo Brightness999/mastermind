@@ -11,7 +11,7 @@ import moment from 'moment';
 import messages from '../messages';
 import msgModal from 'components/Modal/messages';
 import request, { encryptParam } from 'utils/api/request'
-import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalPayment, ModalProcessAppointment } from 'components/Modal';
+import { ModalBalance, ModalCancelAppointment, ModalCurrentAppointment, ModalFeedback, ModalInvoice, ModalNoShow, ModalPay, ModalPayment, ModalProcessAppointment } from 'components/Modal';
 import { setAppointments, setAppointmentsInMonth, getInvoiceList } from 'src/redux/features/appointmentsSlice';
 import { cancelAppointmentForParent, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, setFlag, setFlagBalance, updateNoshowFlag } from 'utils/api/apiList';
 import { ACTIVE, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, DECLINED, EVALUATION, NOSHOW, PARENT, PENDING, RESCHEDULE, SUBSIDY } from 'routes/constant';
@@ -35,6 +35,8 @@ class PanelAppointment extends React.Component {
       visiblePayment: false,
       paymentDescription: '',
       cancellationType: '',
+      visiblePay: false,
+      returnUrl: '',
     };
   }
 
@@ -376,6 +378,14 @@ class PanelAppointment extends React.Component {
     this.props.setAppointmentsInMonth(newAppointmentsInMonth);
   }
 
+  openModalPay = (url) => {
+    this.setState({ visiblePay: true, returnUrl: url });
+  }
+
+  closeModalPay = () => {
+    this.setState({ visiblePay: false, returnUrl: '' });
+  }
+
   render() {
     const {
       appointments,
@@ -390,6 +400,8 @@ class PanelAppointment extends React.Component {
       visiblePayment,
       paymentDescription,
       cancellationType,
+      visiblePay,
+      returnUrl,
     } = this.state;
     const dependent = { ...event?.dependent, appointments: appointments?.filter(a => a.dependent?._id === event?.dependent?._id) };
 
@@ -454,6 +466,13 @@ class PanelAppointment extends React.Component {
       cancellationType,
     };
 
+    const modalPayProps = {
+      visible: visiblePay,
+      onSubmit: this.openModalPay,
+      onCancel: this.closeModalPay,
+      returnUrl,
+    }
+
     return (
       <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleTabChange}>
         <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
@@ -504,23 +523,9 @@ class PanelAppointment extends React.Component {
               {this.renderItemLeft(data)}
               {(this.props.user?.role === PARENT && data?.sessionInvoice && !data?.sessionInvoice?.isPaid) ? (
                 <div className={`item-right cursor gap-1 ${data?.status === DECLINED && 'display-none events-none'}`}>
-                  <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                    <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-                    <input type="hidden" name="business" value="office@helpmegethelp.org" />
-                    <input type="hidden" name="cmd" value="_donations" />
-                    <input type="hidden" name="item_name" value="Help Me Get Help" />
-                    <input type="hidden" name="item_number" />
-                    <input type="hidden" name="amount" value={data?.sessionInvoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-                    <input type="hidden" name="shipping" value="0.00" />
-                    <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-                    <input type="hidden" name="rm" value="0" />
-                    <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(data?.sessionInvoice?._id)}`} />
-                    <input type="hidden" name="cancel_return" value={window.location.href} />
-                    <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                    <button className='flag-action pay-flag-button'>
-                      <BsPaypal size={15} color="#1976D2" />
-                    </button>
-                  </form>
+                  <button className='flag-action pay-flag-button' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(data?.sessionInvoice?._id)}`)}>
+                    <BsPaypal size={15} color="#1976D2" />
+                  </button>
                 </div>
               ) : null}
               {this.props.user?.role > 3 ? (
@@ -538,6 +543,7 @@ class PanelAppointment extends React.Component {
           )}
           {visibleFeedback && <ModalFeedback {...modalFeedbackProps} />}
           {visibleBalance && <ModalBalance {...modalBalanceProps} />}
+          {visiblePay && <ModalPay {...modalPayProps} />}
         </Tabs.TabPane>
       </Tabs>
     )

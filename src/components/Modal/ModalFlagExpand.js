@@ -14,6 +14,7 @@ import ModalInvoice from './ModalInvoice';
 import { getInvoiceList, setInvoiceList } from '../../redux/features/appointmentsSlice';
 import { InvoiceType } from '../../routes/constant';
 import ModalCreateNote from './ModalCreateNote';
+import ModalPay from './ModalPay';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -26,6 +27,8 @@ class ModalFlagExpand extends React.Component {
 			selectedFlag: {},
 			tabFlags: [],
 			selectedTab: 0,
+			visiblePay: false,
+			returnUrl: '',
 		}
 		this.searchInput = React.createRef(null);
 	}
@@ -141,8 +144,16 @@ class ModalFlagExpand extends React.Component {
 		}
 	}
 
+	openModalPay = (url) => {
+		this.setState({ visiblePay: true, returnUrl: url });
+	}
+
+	closeModalPay = (url) => {
+		this.setState({ visiblePay: false, returnUrl: '' });
+	}
+
 	render() {
-		const { selectedFlag, tabFlags, visibleCreateNote, visibleInvoice } = this.state;
+		const { returnUrl, selectedFlag, tabFlags, visibleCreateNote, visibleInvoice, visiblePay } = this.state;
 		const { auth } = this.props;
 		const modalProps = {
 			className: 'modal-flag-expand',
@@ -275,23 +286,9 @@ class ModalFlagExpand extends React.Component {
 					<Space size="small">
 						{(invoice?.totalPayment == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
 						{invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
-							<form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-								<input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-								<input type="hidden" name="business" value="office@helpmegethelp.org" />
-								<input type="hidden" name="cmd" value="_donations" />
-								<input type="hidden" name="item_name" value="Help Me Get Help" />
-								<input type="hidden" name="item_number" />
-								<input type="hidden" name="amount" value={invoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-								<input type="hidden" name="shipping" value="0.00" />
-								<input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-								<input type="hidden" name="rm" value="0" />
-								<input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
-								<input type="hidden" name="cancel_return" value={window.location.href} />
-								<input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-								<button className='flag-action pay-flag-button'>
-									{intl.formatMessage(msgDrawer.payFlag)}
-								</button>
-							</form>
+							<div className='text-primary cursor' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
+								{intl.formatMessage(msgDrawer.payFlag)}
+							</div>
 						)}
 					</Space>
 				)
@@ -360,23 +357,9 @@ class ModalFlagExpand extends React.Component {
 					<Space size="small">
 						{(invoice?.totalPayment == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
 						{invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
-							<form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-								<input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-								<input type="hidden" name="business" value="office@helpmegethelp.org" />
-								<input type="hidden" name="cmd" value="_donations" />
-								<input type="hidden" name="item_name" value="Help Me Get Help" />
-								<input type="hidden" name="item_number" />
-								<input type="hidden" name="amount" value={invoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-								<input type="hidden" name="shipping" value="0.00" />
-								<input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-								<input type="hidden" name="rm" value="0" />
-								<input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
-								<input type="hidden" name="cancel_return" value={window.location.href} />
-								<input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-								<button className='flag-action pay-flag-button'>
-									{intl.formatMessage(msgDrawer.payFlag)}
-								</button>
-							</form>
+							<button className='flag-action pay-flag-button' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
+								{intl.formatMessage(msgDrawer.payFlag)}
+							</button>
 						)}
 						<Popconfirm
 							title="Are you sure to clear this flag?"
@@ -403,6 +386,13 @@ class ModalFlagExpand extends React.Component {
 			onSubmit: this.handleUpdateInvoice,
 			onCancel: this.closeModalInvoice,
 			invoice: selectedFlag,
+		}
+
+		const modalPayProps = {
+			visible: visiblePay,
+			onSubmit: this.closeModalPay,
+			onCancel: this.closeModalPay,
+			returnUrl,
 		}
 
 		return (
@@ -441,6 +431,7 @@ class ModalFlagExpand extends React.Component {
 				</Tabs>
 				{visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
 				{visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
+				{visiblePay && <ModalPay {...modalPayProps} />}
 			</Modal>
 		);
 	}

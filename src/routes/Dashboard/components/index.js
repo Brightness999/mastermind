@@ -19,7 +19,7 @@ import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
 
-import { ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote, ModalPayment, ModalInvoice } from 'components/Modal';
+import { ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote, ModalPayment, ModalInvoice, ModalPay } from 'components/Modal';
 import DrawerDetail from 'components/DrawerDetail';
 import messages from '../messages';
 import messagesCreateAccount from 'routes/Sign/CreateAccount/messages';
@@ -86,6 +86,8 @@ class Dashboard extends React.Component {
       paymentDescription: '',
       selectedFlag: {},
       visibleInvoice: false,
+      visiblePay: false,
+      returnUrl: '',
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -839,6 +841,14 @@ class Dashboard extends React.Component {
     this.socket.emit("action_tracking", data);
   }
 
+  openModalPay = (url) => {
+    this.setState({ visiblePay: true, returnUrl: url });
+  }
+
+  closeModalPay = () => {
+    this.setState({ visiblePay: false, returnUrl: '' });
+  }
+
   render() {
     const {
       isFilter,
@@ -875,6 +885,8 @@ class Dashboard extends React.Component {
       paymentDescription,
       visibleInvoice,
       selectedFlag,
+      visiblePay,
+      returnUrl,
     } = this.state;
     const { invoices } = this.props;
 
@@ -1001,6 +1013,13 @@ class Dashboard extends React.Component {
       onSubmit: this.handleUpdateInvoice,
       onCancel: this.closeModalInvoice,
       invoice: selectedFlag,
+    }
+
+    const modalPayProps = {
+      visible: visiblePay,
+      onSubmit: this.openModalPay,
+      onCancel: this.closeModalPay,
+      returnUrl,
     }
 
     if (userRole == 60) {
@@ -1308,23 +1327,9 @@ class Dashboard extends React.Component {
                                   <span className='font-12 text-primary cursor' id='action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</span>
                                 ) : null}
                                 {invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
-                                  <form aria-live="polite" data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                                    <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-                                    <input type="hidden" name="business" value="office@helpmegethelp.org" />
-                                    <input type="hidden" name="cmd" value="_donations" />
-                                    <input type="hidden" name="item_name" value="Help Me Get Help" />
-                                    <input type="hidden" name="item_number" />
-                                    <input type="hidden" name="amount" value={invoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-                                    <input type="hidden" name="shipping" value="0.00" />
-                                    <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-                                    <input type="hidden" name="rm" value="0" />
-                                    <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
-                                    <input type="hidden" name="cancel_return" value={window.location.href} />
-                                    <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                                    <button id='action' className='font-12 flag-action pay-flag-button'>
-                                      {intl.formatMessage(msgDrawer.payFlag)}
-                                    </button>
-                                  </form>
+                                  <button id='action' className='font-12 flag-action pay-flag-button' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
+                                    {intl.formatMessage(msgDrawer.payFlag)}
+                                  </button>
                                 )}
                               </>
                             ) : (
@@ -1388,6 +1393,7 @@ class Dashboard extends React.Component {
           {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
           {visiblePayment && <ModalPayment {...modalPaymentProps} />}
           {visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
+          {visiblePay && <ModalPay {...modalPayProps} />}
           <PageLoading loading={loading} isBackground={true} />
         </div>
       );

@@ -6,7 +6,7 @@ import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import { ModalCreateNote, ModalInvoice } from 'components/Modal';
+import { ModalCreateNote, ModalInvoice, ModalPay } from 'components/Modal';
 import msgMainHeader from 'components/MainHeader/messages';
 import messages from 'routes/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
@@ -28,6 +28,8 @@ class InvoiceList extends React.Component {
       tabInvoices: [],
       selectedTab: 0,
       visibleCreateNote: false,
+      visiblePay: false,
+      returnUrl: '',
     };
     this.searchInput = createRef(null);
   }
@@ -201,8 +203,16 @@ class InvoiceList extends React.Component {
     }
   }
 
+  openModalPay = (url) => {
+    this.setState({ visiblePay: true, returnUrl: url });
+  }
+
+  closeModalPay = () => {
+    this.setState({ visiblePay: false, returnUrl: '' });
+  }
+
   render() {
-    const { loading, selectedInvoice, selectedTab, tabInvoices, visibleCreateNote, visibleInvoice } = this.state;
+    const { loading, selectedInvoice, selectedTab, tabInvoices, visibleCreateNote, visibleInvoice, visiblePay, returnUrl } = this.state;
     const { user, academicLevels } = this.props.auth;
     const grades = JSON.parse(JSON.stringify(academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
     const columns = [
@@ -339,23 +349,9 @@ class InvoiceList extends React.Component {
         render: invoice => invoice.isPaid ? null : (
           <div>
             {(user?.role === PARENT && invoice.totalPayment > 0) ? (
-              <form aria-live="polite" className='flex-1' data-ux="Form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                <input type="hidden" name="edit_selector" data-aid="EDIT_PANEL_EDIT_PAYMENT_ICON" />
-                <input type="hidden" name="business" value="office@helpmegethelp.org" />
-                <input type="hidden" name="cmd" value="_donations" />
-                <input type="hidden" name="item_name" value="Help Me Get Help" />
-                <input type="hidden" name="item_number" />
-                <input type="hidden" name="amount" value={invoice?.totalPayment} data-aid="PAYMENT_HIDDEN_AMOUNT" />
-                <input type="hidden" name="shipping" value="0.00" />
-                <input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
-                <input type="hidden" name="rm" value="0" />
-                <input type="hidden" name="return" value={`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`} />
-                <input type="hidden" name="cancel_return" value={window.location.href} />
-                <input type="hidden" name="cbt" value="Return to Help Me Get Help" />
-                <Button type='link' htmlType='submit'>
-                  <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
-                </Button>
-              </form>
+              <Button type='link' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
+                <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
+              </Button>
             ) : null}
             {(user?.role === PARENT && invoice.totalPayment == 0) ? (
               <Popconfirm
@@ -436,6 +432,13 @@ class InvoiceList extends React.Component {
       title: "Request Message"
     };
 
+    const modalPayProps = {
+      visible: visiblePay,
+      onSubmit: this.openModalPay,
+      onCancel: this.closeModalPay,
+      returnUrl,
+    }
+
     return (
       <div className="full-layout page invoicelist-page">
         <div className='div-title-admin'>
@@ -452,6 +455,7 @@ class InvoiceList extends React.Component {
         />
         {visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
         {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
+        {visiblePay && <ModalPay {...modalPayProps} />}
         <PageLoading loading={loading} isBackground={true} />
       </div>
     );

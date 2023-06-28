@@ -24,6 +24,7 @@ import ModalNewScreening from './ModalNewScreening';
 import ModalSchoolSubsidyApproval from './ModalSchoolSubsidyApproval';
 import ModalCancelForAdmin from './ModalCancelForAdmin';
 import ModalSchoolDetail from './ModalSchoolDetail';
+import ModalPay from './ModalPay';
 
 export {
   ModalCreateDone,
@@ -52,4 +53,5 @@ export {
   ModalSchoolSubsidyApproval,
   ModalCancelForAdmin,
   ModalSchoolDetail,
+  ModalPay,
 }
