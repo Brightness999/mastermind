@@ -547,34 +547,6 @@ class ModalSubsidyProgress extends React.Component {
 			)
 		}
 
-		if (subsidy.status === 5) {
-			return (
-				<div className='subsidy-detail'>
-					<div className='flex flex-row justify-between'>
-						<p className='font-20 font-700'>{intl.formatMessage(messages.subsidyDetails)}</p>
-					</div>
-					<Row gutter={15}>
-						<Col xs={24} sm={24} md={8} className='flex flex-col justify-end'>
-							<p className='font-700'>{intl.formatMessage(msgCreateAccount.provider)}</p>
-							<p className='font-700'>{subsidy.selectedProviderFromAdmin?.firstName ?? ''} {subsidy.selectedProviderFromAdmin?.lastName ?? ''}</p>
-							<p className='font-700'>{intl.formatMessage(messages.subsidizedRate)}</p>
-							<p className='font-700'>${subsidizedRate}</p>
-						</Col>
-						<Col xs={24} sm={24} md={8} className='flex flex-col justify-end'>
-							<p className='font-700'>{intl.formatMessage(messages.numberApprovedSessions)}</p>
-							<p className='font-700'>{numberOfSessions}</p>
-							<p className='font-700'>{intl.formatMessage(messages.hmghExpensePerSession)}</p>
-							<p className='font-700'>${pricePerSession}</p>
-						</Col>
-						<Col xs={24} sm={24} md={8} className='flex flex-col justify-end'>
-							<p className='font-700'>{intl.formatMessage(messages.totalPayment)}</p>
-							<p className='font-700'>${pricePerSession * numberOfSessions}</p>
-						</Col>
-					</Row>
-				</div >
-			)
-		}
-
 		if (isNotAdmin || (!isNotAdmin && referral?.status != -1)) {
 			return;
 		}
@@ -588,7 +560,7 @@ class ModalSubsidyProgress extends React.Component {
 					<Col xs={24} sm={24} md={8} className='flex flex-col justify-between'>
 						<p className='font-700'>*{intl.formatMessage(msgCreateAccount.provider)}</p>
 						<Select
-							disabled={isNotAdmin || subsidy.status === 5}
+							disabled={isNotAdmin}
 							value={selectedProviderFromAdmin}
 							onChange={v => this.handleSelectProvider(v)}
 							placeholder={intl.formatMessage(msgCreateAccount.provider)}
@@ -605,7 +577,7 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-700'>*{intl.formatMessage(messages.numberApprovedSessions)}</p>
 						<Input
 							name='NumberOfSessions'
-							disabled={isNotAdmin || subsidy.status === 5}
+							disabled={isNotAdmin}
 							value={numberOfSessions}
 							type="number"
 							min={0}
@@ -621,7 +593,7 @@ class ModalSubsidyProgress extends React.Component {
 						<p className='font-700'>*{intl.formatMessage(messages.hmghExpensePerSession)}</p>
 						<Input
 							name='PricePerSession'
-							disabled={isNotAdmin || subsidy.status === 5}
+							disabled={isNotAdmin}
 							value={pricePerSession}
 							type="number"
 							min={0}
@@ -652,7 +624,7 @@ class ModalSubsidyProgress extends React.Component {
 							}}
 							onChange={e => this.setState({ totalPayment: e.target.value, pricePerSession: numberOfSessions > 0 ? e.target.value / numberOfSessions : 0 })}
 							className='h-40'
-							disabled={isNotAdmin || subsidy.status === 5}
+							disabled={isNotAdmin}
 						/>
 					</Col>
 				</Row>
@@ -883,7 +855,7 @@ class ModalSubsidyProgress extends React.Component {
 			]
 		}
 
-		if (subsidy?.status === 3 && user?.role > 900 && [-1, -2].includes(referral?.status)) {
+		if ((subsidy?.status === 3 && user?.role > 900 && [-1, -2].includes(referral?.status)) || subsidy?.status === 5) {
 			return [
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.goBack).toUpperCase()}
@@ -909,7 +881,7 @@ class ModalSubsidyProgress extends React.Component {
 					cancelText="No"
 				>
 					<Button key="approve" type='primary'>
-						{intl.formatMessage(messages.approve).toUpperCase()}
+						{subsidy?.status === 5 ? intl.formatMessage(messages.edit).toUpperCase() : intl.formatMessage(messages.approve).toUpperCase()}
 					</Button>
 				</Popconfirm>,
 			]
