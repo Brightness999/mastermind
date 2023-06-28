@@ -297,6 +297,14 @@ class PrivateNote extends React.Component {
         },
       })
       columns.splice(9, 0, {
+        title: 'Active Flags', key: 'activeflags', dataIndex: 'invoices', type: 'number',
+        render: (invoices) => invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid)?.length || 0,
+      })
+      columns.splice(10, 0, {
+        title: 'Past Flags', key: 'pastflags', dataIndex: 'invoices', type: 'number',
+        render: (invoices) => invoices?.filter(a => [4, 5].includes(a.type) && a.isPaid)?.length || 0,
+      })
+      columns.splice(11, 0, {
         title: intl.formatMessage(messages.recentSessionDate), dataIndex: 'appointments', key: 'recentSession',
         sorter: (a, b) => {
           const aLastSession = a.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
@@ -352,6 +360,14 @@ class PrivateNote extends React.Component {
         },
       })
       columns.splice(9, 0, {
+        title: 'Active Flags', key: 'activeflags', dataIndex: 'invoices', type: 'number',
+        render: (invoices) => invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid && a.provider?._id === auth.user?.providerInfo)?.length || 0,
+      })
+      columns.splice(10, 0, {
+        title: 'Past Flags', key: 'pastflags', dataIndex: 'invoices', type: 'number',
+        render: (invoices) => invoices?.filter(a => [4, 5].includes(a.type) && a.isPaid && a.provider?._id === auth.user?.providerInfo)?.length || 0,
+      })
+      columns.splice(11, 0, {
         title: intl.formatMessage(messages.recentSessionDate), dataIndex: 'appointments', key: 'recentSession',
         sorter: (a, b) => {
           const aLastSession = a.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
@@ -372,7 +388,7 @@ class PrivateNote extends React.Component {
           return lastSession.date ? moment(lastSession.date).format('MM/DD/YYYY hh:mm A') : ''
         },
       })
-      columns.splice(10, 0, {
+      columns.splice(12, 0, {
         title: intl.formatMessage(messages.action), key: 'action',
         render: dependent => {
           const countOfUnpaidInvoices = dependent?.invoices?.filter(a => a.provider === auth.user.providerInfo?._id && !a.isPaid && a.type === 1)?.length || 0;

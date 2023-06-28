@@ -251,6 +251,14 @@ class PrivateNote extends React.Component {
         },
       },
       {
+        title: 'Active Flags', key: 'activeflags', dataIndex: 'invoices', type: 'number',
+        render: (invoices) => invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid)?.length || 0,
+      },
+      {
+        title: 'Past Flags', key: 'pastflags', dataIndex: 'invoices', type: 'number',
+        render: (invoices) => invoices?.filter(a => [4, 5].includes(a.type) && a.isPaid)?.length || 0,
+      },
+      {
         title: intl.formatMessage(messages.recentSessionDate), dataIndex: 'appointments', key: 'recentSession',
         sorter: (a, b) => {
           const aLastSession = a.appointments?.filter(a => [EVALUATION, APPOINTMENT, SUBSIDY].includes(a.type) && a.status === CLOSED)?.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b, {});
