@@ -52,7 +52,7 @@ class InfoReview extends Component {
 		const arr = ["email", "role", "isAcceptProBono", "isAcceptReduceRate", "isWillingOpenPrivate", "password", "username"];
 		const availability = this.validAvaiability(registerData.availability);
 		let obj = { ...registerData.profileInfor, ...registerData.subsidy, ...registerData.serviceInfor, ...registerData.financialInfor, ...registerData.scheduling, ...availability };
-		for (let i = 0; i < arr.length; i++) {
+		for (let i = 0; i < arr?.length; i++) {
 			obj["" + arr[i]] = registerData["" + arr[i]];
 		}
 		obj.W9FormPath = registerData.uploaded_path;
@@ -62,8 +62,8 @@ class InfoReview extends Component {
 	validAvaiability = (availability) => {
 		const { registerData } = this.props.register;
 		let manualSchedule = [];
-		for (let i = 0; i < day_week.length; i++) {
-			for (let j = 0; j < availability['' + day_week[i]].length; j++) {
+		for (let i = 0; i < day_week?.length; i++) {
+			for (let j = 0; j < availability['' + day_week[i]]?.length; j++) {
 				const scheduleItem = availability['' + day_week[i]][j];
 				if (scheduleItem.from_time && scheduleItem.to_time && scheduleItem.location) {
 					manualSchedule.push({
