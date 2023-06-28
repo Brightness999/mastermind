@@ -253,7 +253,7 @@ class PanelAppointment extends React.Component {
 
   onSubmitFlagBalance = (values) => {
     const { notes } = values;
-    const { appointments } = this.props;
+    const { appointments, user } = this.props;
     const { event } = this.state;
     const providerIds = Object.keys(values).filter(a => a.includes('invoiceId')).map(a => a.split("-")[1]);
     let bulkData = [];
