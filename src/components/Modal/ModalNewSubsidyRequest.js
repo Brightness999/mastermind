@@ -31,8 +31,9 @@ class ModalNewSubsidyRequest extends React.Component {
 			this.setState({
 				documentUploaded: [],
 				skillSet: dependent?.services,
-				listSchools: [dependent?.school],
+				listSchools: dependent?.school?._id ? [dependent?.school] : [],
 				dependents: [dependent],
+				isRequestRav: !dependent?.school?._id,
 			})
 			this.form.setFieldsValue({ student: dependent?._id, school: dependent?.school?._id });
 		} else {
@@ -64,6 +65,7 @@ class ModalNewSubsidyRequest extends React.Component {
 		this.setState({
 			skillSet: dependents?.find(d => d._id == dependentId)?.services,
 			listSchools: dependents?.find(d => d._id == dependentId)?.school ? [dependents?.find(d => d._id == dependentId)?.school] : undefined,
+			isRequestRav: !dependents?.find(d => d._id == dependentId)?.school?._id,
 		})
 		this.form.setFieldsValue({ school: dependents?.find(d => d._id == dependentId)?.school?._id });
 	}
@@ -165,7 +167,7 @@ class ModalNewSubsidyRequest extends React.Component {
 								</Form.Item>
 							)}
 							<div className='flex flex-row items-center pb-10'>
-								<Switch size="small" onChange={() => this.setState({ isRequestRav: !isRequestRav })} />
+								<Switch size="small" checked={isRequestRav} disabled={!listSchools?.length} onChange={() => this.setState({ isRequestRav: !isRequestRav })} />
 								<p className='font-12 ml-10 mb-0'>{intl.formatMessage(messages.requestRav)}</p>
 							</div>
 							{isRequestRav ? (
