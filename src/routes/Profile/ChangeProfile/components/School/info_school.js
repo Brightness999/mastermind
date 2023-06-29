@@ -6,12 +6,13 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import messages from '../../../../Sign/CreateAccount/messages';
-import messagesLogin from '../../../../Sign/Login/messages';
-import { getCommunitiServer, getDefaultValueForProvider, getMySchoolInfo, getUserProfile } from '../../../../../utils/api/apiList'
-import { setInforSchool } from '../../../../../redux/features/authSlice';
-import request from '../../../../../utils/api/request';
-import PageLoading from '../../../../../components/Loading/PageLoading';
+import messages from 'routes/Sign/CreateAccount/messages';
+import messagesLogin from 'routes/Sign/Login/messages';
+import { getCommunitiServer, getMySchoolInfo, getUserProfile } from 'utils/api/apiList'
+import { setInforSchool } from 'src/redux/features/authSlice';
+import request from 'utils/api/request';
+import PageLoading from 'components/Loading/PageLoading';
+import { EmailType } from 'routes/constant';
 
 class InfoSchool extends React.Component {
 	constructor(props) {
@@ -19,7 +20,6 @@ class InfoSchool extends React.Component {
 		this.state = {
 			school_address: '',
 			listCommunitiServer: [],
-			emailTypes: [],
 			loading: false,
 		}
 	}
@@ -76,21 +76,10 @@ class InfoSchool extends React.Component {
 		}).catch(err => {
 			message.error(`Can't loading ${intl.formatMessage(messages.communitiesServed)}`)
 		})
-
-		request.post(getDefaultValueForProvider).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({ emailTypes: data?.EmailType });
-			} else {
-				message.error(`Can't loading ${intl.formatMessage(messages.email)} ${intl.formatMessage(messages.type)}`);
-			}
-		}).catch(err => {
-			message.error(`Can't loading ${intl.formatMessage(messages.email)} ${intl.formatMessage(messages.type)}`);
-		})
 	}
 
 	render() {
-		const { listCommunitiServer, school_address, emailTypes, loading } = this.state;
+		const { listCommunitiServer, school_address, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -195,7 +184,7 @@ class InfoSchool extends React.Component {
 													style={{ marginTop: field.key === 0 ? 0 : 14 }}
 												>
 													<Select placeholder={intl.formatMessage(messages.type)}>
-														{emailTypes?.map((value, index) => (
+														{EmailType?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
 													</Select>

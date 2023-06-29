@@ -7,8 +7,9 @@ import { compose } from 'redux'
 import PlacesAutocomplete from 'react-places-autocomplete';
 
 import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import messagesLogin from 'routes/Sign/Login/messages';
+import { setRegisterData } from 'src/redux/features/registerSlice';
+import { ContactNumberType, EmailType } from 'routes/constant';
 
 class InfoProfile extends Component {
 	constructor(props) {
@@ -65,7 +66,6 @@ class InfoProfile extends Component {
 
 	render() {
 		const { service_address, cityConnections, isPrivateForHmgh } = this.state;
-		const { contactNumberTypes, emailTypes } = this.props.auth.generalData;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -205,7 +205,7 @@ class InfoProfile extends Component {
 													style={{ marginTop: key === 0 ? 0 : 14 }}
 												>
 													<Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.setValueToReduxRegisterData("contactNumber", this.form?.getFieldValue('contactNumber'))}>
-														{contactNumberTypes?.map((value, index) => (
+														{ContactNumberType?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
 													</Select>
@@ -263,7 +263,7 @@ class InfoProfile extends Component {
 													style={{ marginTop: key === 0 ? 0 : 14 }}
 												>
 													<Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.setValueToReduxRegisterData("contactEmail", this.form?.getFieldValue('contactEmail'))}>
-														{emailTypes?.map((value, index) => (
+														{EmailType?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
 													</Select>

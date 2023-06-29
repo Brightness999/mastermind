@@ -6,20 +6,19 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import PlacesAutocomplete from 'react-places-autocomplete';
 
-import messages from '../../../../Sign/CreateAccount/messages';
-import messagesLogin from '../../../../Sign/Login/messages';
-import { setInforProvider } from '../../../../../redux/features/authSlice';
-import request from '../../../../../utils/api/request';
-import { getMyProviderInfo, getDefaultValueForProvider, getCityConnections, getUserProfile } from '../../../../../utils/api/apiList';
-import PageLoading from '../../../../../components/Loading/PageLoading';
+import messages from 'routes/Sign/CreateAccount/messages';
+import messagesLogin from 'routes/Sign/Login/messages';
+import { setInforProvider } from 'src/redux/features/authSlice';
+import request from 'utils/api/request';
+import { getMyProviderInfo, getCityConnections, getUserProfile } from 'utils/api/apiList';
+import PageLoading from 'components/Loading/PageLoading';
+import { EmailType, ContactNumberType } from 'routes/constant';
 
 class InfoProfile extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			service_address: '',
-			EmailType: [],
-			ContactNumberType: [],
 			contactEmail: [],
 			cityConnections: [],
 			loading: false,
@@ -30,7 +29,6 @@ class InfoProfile extends Component {
 	componentDidMount() {
 		const { selectedUser, user } = this.props.auth;
 
-		this.getDataFromServer();
 		this.setState({ loading: true });
 		user?.role > 900 ? this.setState({ cityConnections: user?.adminCommunity }) : this.searchCityConnection();
 		if (window.location.pathname?.includes('changeuserprofile')) {
@@ -60,18 +58,6 @@ class InfoProfile extends Component {
 		}
 	}
 
-	getDataFromServer = () => {
-		request.post(getDefaultValueForProvider).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({
-					ContactNumberType: data.ContactNumberType ?? [],
-					EmailType: data.EmailType ?? [],
-				});
-			}
-		})
-	}
-
 	searchCityConnection() {
 		request.post(getCityConnections).then(result => {
 			const { success, data } = result;
@@ -93,7 +79,7 @@ class InfoProfile extends Component {
 	};
 
 	render() {
-		const { service_address, cityConnections, ContactNumberType, EmailType, loading, isPrivateForHmgh } = this.state;
+		const { service_address, cityConnections, loading, isPrivateForHmgh } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">

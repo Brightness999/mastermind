@@ -7,8 +7,9 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 
 import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
-import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
+import messagesLogin from 'routes/Sign/Login/messages';
+import { setRegisterData, removeRegisterData } from 'src/redux/features/registerSlice';
+import { EmailType } from 'routes/constant';
 
 class InfoSchool extends React.Component {
 	constructor(props) {
@@ -55,7 +56,6 @@ class InfoSchool extends React.Component {
 
 	render() {
 		const { listCommunitiServer, school_address } = this.state;
-		const { emailTypes } = this.props.auth.generalData;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -170,7 +170,7 @@ class InfoSchool extends React.Component {
 													style={{ marginTop: field.key === 0 ? 0 : 14 }}
 												>
 													<Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.setReduxForSchool('contactEmail', this.form?.getFieldValue('contactEmail'))}>
-														{emailTypes?.map((value, index) => (
+														{EmailType?.map((value, index) => (
 															<Select.Option key={index} value={value}>{value}</Select.Option>
 														))}
 													</Select>

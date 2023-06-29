@@ -6,8 +6,9 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 
 import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import messagesLogin from 'routes/Sign/Login/messages';
+import { setRegisterData } from 'src/redux/features/registerSlice';
+import { ContactNumberType, EmailType } from 'routes/constant';
 
 class InfoConsultant extends Component {
   constructor(props) {
@@ -66,7 +67,7 @@ class InfoConsultant extends Component {
 
   render() {
     const { cityConnections } = this.state;
-    const { consultantSkill, emailTypes, contactNumberTypes } = this.props.auth.generalData;
+    const { consultantSkill } = this.props.auth.generalData;
 
     return (
       <Row justify="center" className="row-form">
@@ -155,7 +156,7 @@ class InfoConsultant extends Component {
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                         >
                           <Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.handelChange('contactNumber', this.form?.getFieldValue('contactNumber'))}>
-                            {contactNumberTypes?.map((value, index) => (
+                            {ContactNumberType?.map((value, index) => (
                               <Select.Option key={index} value={value}>{value}</Select.Option>
                             ))}
                           </Select>
@@ -216,7 +217,7 @@ class InfoConsultant extends Component {
                           style={{ marginTop: key === 0 ? 0 : 14 }}
                         >
                           <Select placeholder={intl.formatMessage(messages.type)} onChange={() => this.handelChange('contactEmail', this.form?.getFieldValue('contactEmail'))}>
-                            {emailTypes?.map((value, index) => (
+                            {EmailType?.map((value, index) => (
                               <Select.Option key={index} value={value}>{value}</Select.Option>
                             ))}
                           </Select>

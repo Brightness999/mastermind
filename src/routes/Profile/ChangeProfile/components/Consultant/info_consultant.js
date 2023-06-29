@@ -5,18 +5,17 @@ import intl from 'react-intl-universal';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 
-import messages from '../../../../Sign/CreateAccount/messages';
-import messagesLogin from '../../../../Sign/Login/messages';
-import request from '../../../../../utils/api/request';
-import { getDefaultValuesForConsultant, getMyConsultantInfo, getUserProfile, updateConsultantInfo } from '../../../../../utils/api/apiList';
-import PageLoading from '../../../../../components/Loading/PageLoading';
+import messages from 'routes/Sign/CreateAccount/messages';
+import messagesLogin from 'routes/Sign/Login/messages';
+import request from 'utils/api/request';
+import { getDefaultValuesForConsultant, getMyConsultantInfo, getUserProfile, updateConsultantInfo } from 'utils/api/apiList';
+import PageLoading from 'components/Loading/PageLoading';
+import { EmailType, ContactNumberType } from 'routes/constant';
 
 class InfoConsultant extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			EmailType: [],
-			ContactNumberType: [],
 			contactEmail: [],
 			SkillSet: [],
 			cityConnections: [],
@@ -61,8 +60,6 @@ class InfoConsultant extends Component {
 			const { success, data } = result;
 			if (success) {
 				this.setState({
-					ContactNumberType: data?.ContactNumberType ?? [],
-					EmailType: data?.EmailType ?? [],
 					SkillSet: data?.SkillSet ?? [],
 				})
 				this.props.auth?.user?.role < 900 && this.setState({ cityConnections: data.CityConnections ?? [] });
@@ -86,7 +83,7 @@ class InfoConsultant extends Component {
 	};
 
 	render() {
-		const { cityConnections, SkillSet, EmailType, ContactNumberType, loading } = this.state;
+		const { cityConnections, SkillSet, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
