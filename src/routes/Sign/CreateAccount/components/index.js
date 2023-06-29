@@ -1,9 +1,9 @@
 import React from 'react';
 import { Button, Steps } from 'antd';
 import { BiChevronLeft } from 'react-icons/bi';
-import { ModalCreateDone } from '../../../../components/Modal';
 import intl from 'react-intl-universal';
 
+import { ModalCreateDone } from 'components/Modal';
 import messages from '../messages';
 import CreateDefault from './create_default';
 import InfoParent from './Parents/info_parent';
@@ -18,12 +18,10 @@ import InfoReview from './Provider/info_review';
 import InfoFinancial from './Provider/info_financial';
 import InfoSchool from './School/info_school';
 import SchoolAvailability from './School/school_availability';
-import InfoAdmin from './Admin/info_admin';
-import InfoConsultant from './Consultant/info_consultant';
-import ConsultantAvailability from './Consultant/info_availability';
-import { routerLinks } from "../../../constant";
+import InfoNotificationSetting from 'routes/Profile/ChangeProfile/components/info_notification';
+import { routerLinks } from "routes/constant";
 import './index.less';
-import '../../../../assets/styles/login.less';
+import 'assets/styles/login.less';
 
 export default class extends React.Component {
   constructor(props) {
@@ -48,7 +46,7 @@ export default class extends React.Component {
       this.openModalCreateDone();
       return;
     }
-    if (this.state.currentStep <= 7) {
+    if (this.state.currentStep < 9) {
       this.nextStep();
     }
   }
@@ -61,10 +59,6 @@ export default class extends React.Component {
         return this.setState({ accountType: intl.formatMessage(messages.provider) })
       case intl.formatMessage(messages.school):
         return this.setState({ accountType: intl.formatMessage(messages.school) })
-      case intl.formatMessage(messages.admin):
-        return this.setState({ accountType: intl.formatMessage(messages.admin) })
-      case intl.formatMessage(messages.consultant):
-        return this.setState({ accountType: intl.formatMessage(messages.consultant) })
     }
   }
 
@@ -82,13 +76,14 @@ export default class extends React.Component {
             { title: intl.formatMessage(messages.accountInfo), icon: (<p>1</p>) },
             { title: intl.formatMessage(messages.contactInfo), icon: (<p>2</p>) },
             { title: intl.formatMessage(messages.dependentsInfo), icon: (<p>3</p>) },
-            { title: intl.formatMessage(messages.reviewInfo), icon: (<p>4</p>) },
+            { title: intl.formatMessage(messages.notificationSetting), icon: (<p>4</p>) },
+            { title: intl.formatMessage(messages.reviewInfo), icon: (<p>5</p>) },
           ]}>
           </Steps>
         )
       case intl.formatMessage(messages.provider):
         return (
-          <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 450 }} className="provider-steps" items={[
+          <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 500 }} className="provider-steps" items={[
             { title: intl.formatMessage(messages.accountInfo), icon: (<p>1</p>) },
             { title: intl.formatMessage(messages.generalInformation), icon: (<p>2</p>) },
             { title: intl.formatMessage(messages.professionalInformation), icon: (<p>3</p>) },
@@ -96,18 +91,10 @@ export default class extends React.Component {
             { title: intl.formatMessage(messages.billingDetails), icon: (<p>5</p>) },
             { title: intl.formatMessage(messages.subsidyProgram), icon: (<p>6</p>) },
             { title: intl.formatMessage(messages.availability), icon: (<p>7</p>) },
-            { title: intl.formatMessage(messages.reviewInfo), icon: (<p>8</p>) },
+            { title: intl.formatMessage(messages.notificationSetting), icon: (<p>8</p>) },
+            { title: intl.formatMessage(messages.reviewInfo), icon: (<p>9</p>) },
           ]}>
           </Steps >
-        )
-      case intl.formatMessage(messages.consultant):
-        return (
-          <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 450 }} items={[
-            { title: intl.formatMessage(messages.accountInfo), icon: (<p>1</p>) },
-            { title: intl.formatMessage(messages.profileInfo), icon: (<p>2</p>) },
-            { title: intl.formatMessage(messages.availabilityInfo), icon: (<p>3</p>) },
-          ]}>
-          </Steps>
         )
       case intl.formatMessage(messages.school):
         return (
@@ -115,6 +102,7 @@ export default class extends React.Component {
             { title: intl.formatMessage(messages.accountInfo), icon: (<p>1</p>) },
             { title: intl.formatMessage(messages.schoolDetails), icon: (<p>2</p>) },
             { title: intl.formatMessage(messages.availabilityInfo), icon: (<p>3</p>) },
+            { title: intl.formatMessage(messages.notificationSetting), icon: (<p>4</p>) },
           ]}>
           </Steps>
         )
@@ -137,15 +125,11 @@ export default class extends React.Component {
       case 1:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<InfoParent onFinishRegister={this.openModalCreateDone} onContinue={this.handleContinue} />)
+            return (<InfoParent onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoProfile onContinue={this.handleContinue} />)
-          case intl.formatMessage(messages.consultant):
-            return (<InfoConsultant onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.school):
             return (<InfoSchool onContinue={this.handleContinue} />)
-          case intl.formatMessage(messages.admin):
-            return (<InfoAdmin onContinue={this.handleContinue} />)
         }
       case 2:
         switch (this.state.accountType) {
@@ -153,20 +137,22 @@ export default class extends React.Component {
             return (<InfoChild onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoServices onContinue={this.handleContinue} />)
-          case intl.formatMessage(messages.consultant):
-            return (<ConsultantAvailability onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.school):
             return (<SchoolAvailability onContinue={this.handleContinue} />)
         }
       case 3:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<ReviewAccount onContinue={this.handleContinue} />)
+            return (<InfoNotificationSetting onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoScheduling onContinue={this.handleContinue} />)
+          case intl.formatMessage(messages.school):
+            return (<InfoNotificationSetting onContinue={this.handleContinue} />)
         }
       case 4:
         switch (this.state.accountType) {
+          case intl.formatMessage(messages.parent):
+            return (<ReviewAccount onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoFinancial onContinue={this.handleContinue} />)
         }
@@ -175,7 +161,9 @@ export default class extends React.Component {
       case 6:
         return (<InfoAvailability onContinue={this.handleContinue} />)
       case 7:
-        return (<InfoReview onContinue={this.handleContinue} onFinishRegister={this.openModalCreateDone} />)
+        return (<InfoNotificationSetting onContinue={this.handleContinue} />)
+      case 8:
+        return (<InfoReview onContinue={this.handleContinue} />)
     }
   }
 

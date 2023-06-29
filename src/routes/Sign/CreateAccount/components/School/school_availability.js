@@ -8,10 +8,8 @@ import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
 
 import messages from '../../messages';
-import { userSignUp } from '../../../../../utils/api/apiList'
-import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
-import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
-import request from '../../../../../utils/api/request';
+import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from 'routes/constant';
+import { setRegisterData, removeRegisterData } from 'src/redux/features/registerSlice';
 
 const day_week = [
 	{
@@ -35,7 +33,6 @@ class SchoolAvailability extends React.Component {
 			dayIsSelected: 1,
 			sessionsInSchool: [],
 			sessionsAfterSchool: [],
-			isSubmit: false,
 			legalHolidays: [],
 			jewishHolidays: [],
 			isLegalHolidays: false,
@@ -140,17 +137,8 @@ class SchoolAvailability extends React.Component {
 		newRegisterData.sessionsInSchool = this.arrDayScheduleFormat(sessionsInSchool);
 		newRegisterData.sessionsAfterSchool = this.arrDayScheduleFormat(sessionsAfterSchool);
 
-		// post to server
-		this.setState({ isSubmit: true });
-		const response = await request.post(userSignUp, { ...newRegisterData, isJewishHolidays, isLegalHolidays });
-		this.setState({ isSubmit: false });
-		const { success } = response;
-		if (success) {
-			this.props.onContinue(true);
-			this.props.removeRegisterData();
-		} else {
-			message.error(error?.response?.data?.data ?? error.message);
-		}
+		this.props.setRegisterData({ ...newRegisterData, isJewishHolidays, isLegalHolidays });
+		this.props.onContinue();
 	};
 
 	arrDayScheduleFormat = (arr) => {
@@ -367,7 +355,7 @@ class SchoolAvailability extends React.Component {
 	}
 
 	render() {
-		const { dayIsSelected, sessionsInSchool, sessionsAfterSchool, isSubmit, isLegalHolidays, isJewishHolidays } = this.state;
+		const { dayIsSelected, sessionsInSchool, sessionsAfterSchool, isLegalHolidays, isJewishHolidays } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -464,10 +452,8 @@ class SchoolAvailability extends React.Component {
 								block
 								type="primary"
 								htmlType="submit"
-								loading={isSubmit}
-								disabled={isSubmit}
 							>
-								{intl.formatMessage(messages.submit).toUpperCase()}
+								{intl.formatMessage(messages.continue).toUpperCase()}
 							</Button>
 						</Form.Item>
 					</Form>

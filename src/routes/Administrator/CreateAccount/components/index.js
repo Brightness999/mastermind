@@ -1,26 +1,27 @@
 import React from 'react';
 import { Button, Steps } from 'antd';
 import { BiChevronLeft } from 'react-icons/bi';
-import { ModalCreateDone } from '../../../../components/Modal';
 import intl from 'react-intl-universal';
 
-import messages from '../../../Sign/CreateAccount/messages';
-import CreateDefault from '../../../Sign/CreateAccount/components/create_default';
-import InfoParent from '../../../Sign/CreateAccount/components/Parents/info_parent';
-import InfoChild from '../../../Sign/CreateAccount/components/Parents/info_child';
-import ReviewAccount from '../../../Sign/CreateAccount/components/Parents/review_account';
-import InfoProfile from '../../../Sign/CreateAccount/components/Provider/info_profile';
-import InfoServices from '../../../Sign/CreateAccount/components/Provider/info_services';
-import InfoScheduling from '../../../Sign/CreateAccount/components/Provider/info_scheduling';
-import InfoAvailability from '../../../Sign/CreateAccount/components/Provider/info_availability';
-import SubsidyProgram from '../../../Sign/CreateAccount/components/Provider/subsidy_program';
-import InfoReview from '../../../Sign/CreateAccount/components/Provider/info_review';
-import InfoFinancial from '../../../Sign/CreateAccount/components/Provider/info_financial';
-import InfoSchool from '../../../Sign/CreateAccount/components/School/info_school';
-import SchoolAvailability from '../../../Sign/CreateAccount/components/School/school_availability';
-import InfoAdmin from '../../../Sign/CreateAccount/components/Admin/info_admin';
-import InfoConsultant from '../../../Sign/CreateAccount/components/Consultant/info_consultant';
-import ConsultantAvailability from '../../../Sign/CreateAccount/components/Consultant/info_availability';
+import messages from 'routes/Sign/CreateAccount/messages';
+import { ModalCreateDone } from 'components/Modal';
+import CreateDefault from 'routes/Sign/CreateAccount/components/create_default';
+import InfoParent from 'routes/Sign/CreateAccount/components/Parents/info_parent';
+import InfoChild from 'routes/Sign/CreateAccount/components/Parents/info_child';
+import ReviewAccount from 'routes/Sign/CreateAccount/components/Parents/review_account';
+import InfoProfile from 'routes/Sign/CreateAccount/components/Provider/info_profile';
+import InfoServices from 'routes/Sign/CreateAccount/components/Provider/info_services';
+import InfoScheduling from 'routes/Sign/CreateAccount/components/Provider/info_scheduling';
+import InfoAvailability from 'routes/Sign/CreateAccount/components/Provider/info_availability';
+import SubsidyProgram from 'routes/Sign/CreateAccount/components/Provider/subsidy_program';
+import InfoReview from 'routes/Sign/CreateAccount/components/Provider/info_review';
+import InfoFinancial from 'routes/Sign/CreateAccount/components/Provider/info_financial';
+import InfoSchool from 'routes/Sign/CreateAccount/components/School/info_school';
+import SchoolAvailability from 'routes/Sign/CreateAccount/components/School/school_availability';
+import InfoAdmin from 'routes/Sign/CreateAccount/components/Admin/info_admin';
+import InfoConsultant from 'routes/Sign/CreateAccount/components/Consultant/info_consultant';
+import ConsultantAvailability from 'routes/Sign/CreateAccount/components/Consultant/info_availability';
+import InfoNotificationSetting from 'routes/Profile/ChangeProfile/components/info_notification';
 import './index.less';
 import '../../../../assets/styles/login.less';
 
@@ -47,7 +48,7 @@ export default class extends React.Component {
       this.openModalCreateDone();
       return;
     }
-    if (this.state.currentStep <= 7) {
+    if (this.state.currentStep < 9) {
       this.nextStep();
     }
   }
@@ -81,8 +82,8 @@ export default class extends React.Component {
             { title: intl.formatMessage(messages.accountInfo), icon: (<p>1</p>) },
             { title: intl.formatMessage(messages.contactInfo), icon: (<p>2</p>) },
             { title: intl.formatMessage(messages.dependentsInfo), icon: (<p>3</p>) },
-            // { title: intl.formatMessage(messages.dependentAvailability), icon: (<p>1</p>) },
-            { title: intl.formatMessage(messages.reviewInfo), icon: (<p>4</p>) },
+            { title: intl.formatMessage(messages.notificationSetting), icon: (<p>4</p>) },
+            { title: intl.formatMessage(messages.reviewInfo), icon: (<p>5</p>) },
           ]}>
           </Steps>
         )
@@ -96,7 +97,8 @@ export default class extends React.Component {
             { title: intl.formatMessage(messages.billingDetails), icon: (<p>5</p>) },
             { title: intl.formatMessage(messages.subsidyProgram), icon: (<p>6</p>) },
             { title: intl.formatMessage(messages.availability), icon: (<p>7</p>) },
-            { title: intl.formatMessage(messages.reviewInfo), icon: (<p>8</p>) },
+            { title: intl.formatMessage(messages.notificationSetting), icon: (<p>8</p>) },
+            { title: intl.formatMessage(messages.reviewInfo), icon: (<p>9</p>) },
           ]}>
           </Steps >
         )
@@ -105,7 +107,8 @@ export default class extends React.Component {
           <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 450 }} items={[
             { title: intl.formatMessage(messages.accountInfo), icon: (<p>1</p>) },
             { title: intl.formatMessage(messages.profileInfo), icon: (<p>2</p>) },
-            { title: intl.formatMessage(messages.availabilityInfo), icon: (<p>3</p>) },
+            { title: intl.formatMessage(messages.notificationSetting), icon: (<p>3</p>) },
+            { title: intl.formatMessage(messages.availabilityInfo), icon: (<p>4</p>) },
           ]}>
           </Steps>
         )
@@ -114,7 +117,8 @@ export default class extends React.Component {
           <Steps current={this.state.currentStep} responsive={false} style={{ maxWidth: 450 }} items={[
             { title: intl.formatMessage(messages.accountInfo), icon: (<p>1</p>) },
             { title: intl.formatMessage(messages.schoolDetails), icon: (<p>2</p>) },
-            { title: intl.formatMessage(messages.availabilityInfo), icon: (<p>3</p>) },
+            { title: intl.formatMessage(messages.notificationSetting), icon: (<p>3</p>) },
+            { title: intl.formatMessage(messages.availabilityInfo), icon: (<p>4</p>) },
           ]}>
           </Steps>
         )
@@ -136,7 +140,7 @@ export default class extends React.Component {
       case 1:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<InfoParent onFinishRegister={this.openModalCreateDone} onContinue={this.handleContinue} />)
+            return (<InfoParent onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoProfile onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.consultant):
@@ -152,23 +156,26 @@ export default class extends React.Component {
             return (<InfoChild onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoServices onContinue={this.handleContinue} />)
-          case intl.formatMessage(messages.consultant):
-            return (<ConsultantAvailability onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.school):
             return (<SchoolAvailability onContinue={this.handleContinue} />)
+          case intl.formatMessage(messages.consultant):
+            return (<ConsultantAvailability onContinue={this.handleContinue} />)
         }
       case 3:
         switch (this.state.accountType) {
           case intl.formatMessage(messages.parent):
-            return (<ReviewAccount onContinue={this.handleContinue} />)
-          // return (<DependentAvailability onContinue={this.handleContinue} />)
+            return (<InfoNotificationSetting onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoScheduling onContinue={this.handleContinue} />)
+          case intl.formatMessage(messages.school):
+            return (<InfoNotificationSetting onContinue={this.handleContinue} />)
+          case intl.formatMessage(messages.consultant):
+            return (<InfoNotificationSetting onContinue={this.handleContinue} />)
         }
       case 4:
         switch (this.state.accountType) {
-          // case intl.formatMessage(messages.parent):
-          //   return (<ReviewAccount onContinue={this.handleContinue} />)
+          case intl.formatMessage(messages.parent):
+            return (<ReviewAccount onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.provider):
             return (<InfoFinancial onContinue={this.handleContinue} />)
         }
@@ -177,7 +184,9 @@ export default class extends React.Component {
       case 6:
         return (<InfoAvailability onContinue={this.handleContinue} />)
       case 7:
-        return (<InfoReview onContinue={this.handleContinue} onFinishRegister={this.openModalCreateDone} />)
+        return (<InfoNotificationSetting onContinue={this.handleContinue} />)
+      case 8:
+        return (<InfoReview onContinue={this.handleContinue} />)
     }
   }
 

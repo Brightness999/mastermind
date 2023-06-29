@@ -10,11 +10,9 @@ import DatePanel from "react-multi-date-picker/plugins/date_panel"
 import moment from 'moment';
 
 import messages from '../../messages';
-import { setRegisterData, removeRegisterData } from '../../../../../redux/features/registerSlice';
-import { userSignUp } from '../../../../../utils/api/apiList';
-import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
-import request from '../../../../../utils/api/request';
-import PageLoading from '../../../../../components/Loading/PageLoading';
+import { setRegisterData, removeRegisterData } from 'src/redux/features/registerSlice';
+import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from 'routes/constant';
+import PageLoading from 'components/Loading/PageLoading';
 
 const day_week = [
   intl.formatMessage(messages.sunday),
@@ -31,7 +29,6 @@ class ConsultantAvailability extends Component {
     super(props);
     this.state = {
       currentSelectedDay: day_week[0],
-      isSubmit: false,
       loading: false,
       legalHolidays: [],
       jewishHolidays: [],
@@ -120,17 +117,8 @@ class ConsultantAvailability extends Component {
       ...registerData.consultantInfo
     }
 
-    // post to server
-    this.setState({ isSubmit: true });
-    const response = await request.post(userSignUp, newRegisterData);
-    this.setState({ isSubmit: false });
-    const { success } = response;
-    if (success) {
-      this.props.removeRegisterData();
-      this.props.onContinue(true);
-    } else {
-      message.error(error?.response?.data?.data ?? error.message);
-    }
+    this.props.setRegisterData({ ...newRegisterData });
+		this.props.onContinue();
   };
 
   onSelectDay = e => {
@@ -327,7 +315,7 @@ class ConsultantAvailability extends Component {
   }
 
   render() {
-    const { currentSelectedDay, isSubmit, loading, isJewishHolidays, isLegalHolidays } = this.state;
+    const { currentSelectedDay, loading, isJewishHolidays, isLegalHolidays } = this.state;
 
     return (
       <Row justify="center" className="row-form">
@@ -438,8 +426,6 @@ class ConsultantAvailability extends Component {
                 block
                 type="primary"
                 htmlType="submit"
-                loading={isSubmit}
-                disabled={isSubmit}
               >
                 {intl.formatMessage(messages.submit).toUpperCase()}
               </Button>

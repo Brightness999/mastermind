@@ -7,87 +7,131 @@ import Cookies from 'js-cookie';
 
 import messages from 'routes/Sign/CreateAccount/messages';
 import request from 'utils/api/request';
-import { updateNotificationSetting } from 'utils/api/apiList';
+import { updateNotificationSetting, userSignUp } from 'utils/api/apiList';
 import { socketUrl } from 'utils/api/baseUrl';
 import { setUser, setCountOfUnreadNotifications } from 'src/redux/features/authSlice';
+import { CONSULTANT, SCHOOL, routerLinks } from 'routes/constant';
+import { removeRegisterData, setRegisterData } from 'src/redux/features/registerSlice';
 
 class InfoNotification extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			isNewSessionEmail: false,
-			isNewSessionPush: false,
-			isNewSessionText: false,
-			isRescheduleSessionEmail: false,
-			isRescheduleSessionPush: false,
-			isRescheduleSessionText: false,
-			isCloseSessionEmail: false,
-			isCloseSessionPush: false,
-			isCloseSessionText: false,
-			isSessionReminderEmail: false,
-			isSessionReminderPush: false,
-			isSessionReminderText: false,
-			isCancelSessionEmail: false,
-			isCancelSessionPush: false,
-			isCancelSessionText: false,
-			isSubsidyUpdateEmail: false,
-			isSubsidyUpdatePush: false,
-			isSubsidyUpdateText: false,
-			isSubsidyCreateEmail: false,
-			isSubsidyCreatePush: false,
-			isSubsidyCreateText: false,
-			isFlagClearedEmail: false,
-			isFlagClearedPush: false,
-			isFlagClearedText: false,
-			isFlagCreatedEmail: false,
-			isFlagCreatedPush: false,
-			isFlagCreatedText: false,
-			isInvoiceUpdatedEmail: false,
-			isInvoiceUpdatedPush: false,
-			isInvoiceUpdatedText: false,
-			isInvoicePaidEmail: false,
-			isInvoicePaidPush: false,
-			isInvoicePaidText: false,
+			isNewSessionEmail: true,
+			isNewSessionPush: true,
+			isNewSessionText: true,
+			isRescheduleSessionEmail: true,
+			isRescheduleSessionPush: true,
+			isRescheduleSessionText: true,
+			isCloseSessionEmail: true,
+			isCloseSessionPush: true,
+			isCloseSessionText: true,
+			isSessionReminderEmail: true,
+			isSessionReminderPush: true,
+			isSessionReminderText: true,
+			isCancelSessionEmail: true,
+			isCancelSessionPush: true,
+			isCancelSessionText: true,
+			isSubsidyUpdateEmail: true,
+			isSubsidyUpdatePush: true,
+			isSubsidyUpdateText: true,
+			isSubsidyCreateEmail: true,
+			isSubsidyCreatePush: true,
+			isSubsidyCreateText: true,
+			isFlagClearedEmail: true,
+			isFlagClearedPush: true,
+			isFlagClearedText: true,
+			isFlagCreatedEmail: true,
+			isFlagCreatedPush: true,
+			isFlagCreatedText: true,
+			isInvoiceUpdatedEmail: true,
+			isInvoiceUpdatedPush: true,
+			isInvoiceUpdatedText: true,
+			isInvoicePaidEmail: true,
+			isInvoicePaidPush: true,
+			isInvoicePaidText: true,
+			isSubmit: false,
 		};
 	}
 
 	componentDidMount() {
-		this.setState({
-			isNewSessionEmail: this.props.user.notificationSetting?.isNewSessionEmail,
-			isNewSessionPush: this.props.user.notificationSetting?.isNewSessionPush,
-			isNewSessionText: this.props.user.notificationSetting?.isNewSessionText,
-			isRescheduleSessionEmail: this.props.user.notificationSetting?.isRescheduleSessionEmail,
-			isRescheduleSessionPush: this.props.user.notificationSetting?.isRescheduleSessionPush,
-			isRescheduleSessionText: this.props.user.notificationSetting?.isRescheduleSessionText,
-			isCloseSessionEmail: this.props.user.notificationSetting?.isCloseSessionEmail,
-			isCloseSessionPush: this.props.user.notificationSetting?.isCloseSessionPush,
-			isCloseSessionText: this.props.user.notificationSetting?.isCloseSessionText,
-			isSessionReminderEmail: this.props.user.notificationSetting?.isSessionReminderEmail,
-			isSessionReminderPush: this.props.user.notificationSetting?.isSessionReminderPush,
-			isSessionReminderText: this.props.user.notificationSetting?.isSessionReminderText,
-			isCancelSessionEmail: this.props.user.notificationSetting?.isCancelSessionEmail,
-			isCancelSessionPush: this.props.user.notificationSetting?.isCancelSessionPush,
-			isCancelSessionText: this.props.user.notificationSetting?.isCancelSessionText,
-			isSubsidyUpdateEmail: this.props.user.notificationSetting?.isSubsidyUpdateEmail,
-			isSubsidyUpdatePush: this.props.user.notificationSetting?.isSubsidyUpdatePush,
-			isSubsidyUpdateText: this.props.user.notificationSetting?.isSubsidyUpdateText,
-			isSubsidyCreateEmail: this.props.user.notificationSetting?.isSubsidyCreateEmail,
-			isSubsidyCreatePush: this.props.user.notificationSetting?.isSubsidyCreatePush,
-			isSubsidyCreateText: this.props.user.notificationSetting?.isSubsidyCreateText,
-			isFlagClearedEmail: this.props.user.notificationSetting?.isFlagClearedEmail,
-			isFlagClearedPush: this.props.user.notificationSetting?.isFlagClearedPush,
-			isFlagClearedText: this.props.user.notificationSetting?.isFlagClearedText,
-			isFlagCreatedEmail: this.props.user.notificationSetting?.isFlagCreatedEmail,
-			isFlagCreatedPush: this.props.user.notificationSetting?.isFlagCreatedPush,
-			isFlagCreatedText: this.props.user.notificationSetting?.isFlagCreatedText,
-			isInvoiceUpdatedEmail: this.props.user.notificationSetting?.isInvoiceUpdatedEmail,
-			isInvoiceUpdatedPush: this.props.user.notificationSetting?.isInvoiceUpdatedPush,
-			isInvoiceUpdatedText: this.props.user.notificationSetting?.isInvoiceUpdatedText,
-			isInvoicePaidEmail: this.props.user.notificationSetting?.isInvoicePaidEmail,
-			isInvoicePaidPush: this.props.user.notificationSetting?.isInvoicePaidPush,
-			isInvoicePaidText: this.props.user.notificationSetting?.isInvoicePaidText,
-		});
-		this.scriptLoaded();
+		if (window.location.pathname.includes(routerLinks.CreateAccount)) {
+			const { registerData } = this.props.register;
+			if (registerData.notificationSetting) {
+				this.setState({
+					isNewSessionEmail: registerData.notificationSetting.isNewSessionEmail,
+					isNewSessionPush: registerData.notificationSetting.isNewSessionPush,
+					isNewSessionText: registerData.notificationSetting.isNewSessionText,
+					isRescheduleSessionEmail: registerData.notificationSetting.isRescheduleSessionEmail,
+					isRescheduleSessionPush: registerData.notificationSetting.isRescheduleSessionPush,
+					isRescheduleSessionText: registerData.notificationSetting.isRescheduleSessionText,
+					isCloseSessionEmail: registerData.notificationSetting.isCloseSessionEmail,
+					isCloseSessionPush: registerData.notificationSetting.isCloseSessionPush,
+					isCloseSessionText: registerData.notificationSetting.isCloseSessionText,
+					isSessionReminderEmail: registerData.notificationSetting.isSessionReminderEmail,
+					isSessionReminderPush: registerData.notificationSetting.isSessionReminderPush,
+					isSessionReminderText: registerData.notificationSetting.isSessionReminderText,
+					isCancelSessionEmail: registerData.notificationSetting.isCancelSessionEmail,
+					isCancelSessionPush: registerData.notificationSetting.isCancelSessionPush,
+					isCancelSessionText: registerData.notificationSetting.isCancelSessionText,
+					isSubsidyUpdateEmail: registerData.notificationSetting.isSubsidyUpdateEmail,
+					isSubsidyUpdatePush: registerData.notificationSetting.isSubsidyUpdatePush,
+					isSubsidyUpdateText: registerData.notificationSetting.isSubsidyUpdateText,
+					isSubsidyCreateEmail: registerData.notificationSetting.isSubsidyCreateEmail,
+					isSubsidyCreatePush: registerData.notificationSetting.isSubsidyCreatePush,
+					isSubsidyCreateText: registerData.notificationSetting.isSubsidyCreateText,
+					isFlagClearedEmail: registerData.notificationSetting.isFlagClearedEmail,
+					isFlagClearedPush: registerData.notificationSetting.isFlagClearedPush,
+					isFlagClearedText: registerData.notificationSetting.isFlagClearedText,
+					isFlagCreatedEmail: registerData.notificationSetting.isFlagCreatedEmail,
+					isFlagCreatedPush: registerData.notificationSetting.isFlagCreatedPush,
+					isFlagCreatedText: registerData.notificationSetting.isFlagCreatedText,
+					isInvoiceUpdatedEmail: registerData.notificationSetting.isInvoiceUpdatedEmail,
+					isInvoiceUpdatedPush: registerData.notificationSetting.isInvoiceUpdatedPush,
+					isInvoiceUpdatedText: registerData.notificationSetting.isInvoiceUpdatedText,
+					isInvoicePaidEmail: registerData.notificationSetting.isInvoicePaidEmail,
+					isInvoicePaidPush: registerData.notificationSetting.isInvoicePaidPush,
+					isInvoicePaidText: registerData.notificationSetting.isInvoicePaidText,
+				});
+			}
+		} else {
+			this.setState({
+				isNewSessionEmail: this.props.user.notificationSetting?.isNewSessionEmail,
+				isNewSessionPush: this.props.user.notificationSetting?.isNewSessionPush,
+				isNewSessionText: this.props.user.notificationSetting?.isNewSessionText,
+				isRescheduleSessionEmail: this.props.user.notificationSetting?.isRescheduleSessionEmail,
+				isRescheduleSessionPush: this.props.user.notificationSetting?.isRescheduleSessionPush,
+				isRescheduleSessionText: this.props.user.notificationSetting?.isRescheduleSessionText,
+				isCloseSessionEmail: this.props.user.notificationSetting?.isCloseSessionEmail,
+				isCloseSessionPush: this.props.user.notificationSetting?.isCloseSessionPush,
+				isCloseSessionText: this.props.user.notificationSetting?.isCloseSessionText,
+				isSessionReminderEmail: this.props.user.notificationSetting?.isSessionReminderEmail,
+				isSessionReminderPush: this.props.user.notificationSetting?.isSessionReminderPush,
+				isSessionReminderText: this.props.user.notificationSetting?.isSessionReminderText,
+				isCancelSessionEmail: this.props.user.notificationSetting?.isCancelSessionEmail,
+				isCancelSessionPush: this.props.user.notificationSetting?.isCancelSessionPush,
+				isCancelSessionText: this.props.user.notificationSetting?.isCancelSessionText,
+				isSubsidyUpdateEmail: this.props.user.notificationSetting?.isSubsidyUpdateEmail,
+				isSubsidyUpdatePush: this.props.user.notificationSetting?.isSubsidyUpdatePush,
+				isSubsidyUpdateText: this.props.user.notificationSetting?.isSubsidyUpdateText,
+				isSubsidyCreateEmail: this.props.user.notificationSetting?.isSubsidyCreateEmail,
+				isSubsidyCreatePush: this.props.user.notificationSetting?.isSubsidyCreatePush,
+				isSubsidyCreateText: this.props.user.notificationSetting?.isSubsidyCreateText,
+				isFlagClearedEmail: this.props.user.notificationSetting?.isFlagClearedEmail,
+				isFlagClearedPush: this.props.user.notificationSetting?.isFlagClearedPush,
+				isFlagClearedText: this.props.user.notificationSetting?.isFlagClearedText,
+				isFlagCreatedEmail: this.props.user.notificationSetting?.isFlagCreatedEmail,
+				isFlagCreatedPush: this.props.user.notificationSetting?.isFlagCreatedPush,
+				isFlagCreatedText: this.props.user.notificationSetting?.isFlagCreatedText,
+				isInvoiceUpdatedEmail: this.props.user.notificationSetting?.isInvoiceUpdatedEmail,
+				isInvoiceUpdatedPush: this.props.user.notificationSetting?.isInvoiceUpdatedPush,
+				isInvoiceUpdatedText: this.props.user.notificationSetting?.isInvoiceUpdatedText,
+				isInvoicePaidEmail: this.props.user.notificationSetting?.isInvoicePaidEmail,
+				isInvoicePaidPush: this.props.user.notificationSetting?.isInvoicePaidPush,
+				isInvoicePaidText: this.props.user.notificationSetting?.isInvoicePaidText,
+			});
+			this.scriptLoaded();
+		}
 	}
 
 	scriptLoaded = () => {
@@ -106,7 +150,8 @@ class InfoNotification extends React.Component {
 		})
 	}
 
-	handleSaveSetting = () => {
+	handleSaveSetting = async () => {
+		const { registerData } = this.props.register;
 		const data = {
 			isNewSessionEmail: this.state.isNewSessionEmail,
 			isNewSessionPush: this.state.isNewSessionPush,
@@ -143,55 +188,77 @@ class InfoNotification extends React.Component {
 			isInvoicePaidText: this.state.isInvoicePaidText,
 		}
 
-		request.post(updateNotificationSetting, data).then(res => {
-			const { success } = res;
-			let user = JSON.parse(JSON.stringify(this.props.user));
-			user.notificationSetting = {
-				...user.notificationSetting,
-				isNewSessionEmail: this.state.isNewSessionEmail,
-				isNewSessionPush: this.state.isNewSessionPush,
-				isNewSessionText: this.state.isNewSessionText,
-				isRescheduleSessionEmail: this.state.isRescheduleSessionEmail,
-				isRescheduleSessionPush: this.state.isRescheduleSessionPush,
-				isRescheduleSessionText: this.state.isRescheduleSessionText,
-				isCloseSessionEmail: this.state.isCloseSessionEmail,
-				isCloseSessionPush: this.state.isCloseSessionPush,
-				isCloseSessionText: this.state.isCloseSessionText,
-				isSessionReminderEmail: this.state.isSessionReminderEmail,
-				isSessionReminderPush: this.state.isSessionReminderPush,
-				isSessionReminderText: this.state.isSessionReminderText,
-				isCancelSessionEmail: this.state.isCancelSessionEmail,
-				isCancelSessionPush: this.state.isCancelSessionPush,
-				isCancelSessionText: this.state.isCancelSessionText,
-				isSubsidyUpdateEmail: this.state.isSubsidyUpdateEmail,
-				isSubsidyUpdatePush: this.state.isSubsidyUpdatePush,
-				isSubsidyUpdateText: this.state.isSubsidyUpdateText,
-				isSubsidyCreateEmail: this.state.isSubsidyCreateEmail,
-				isSubsidyCreatePush: this.state.isSubsidyCreatePush,
-				isSubsidyCreateText: this.state.isSubsidyCreateText,
-				isFlagClearedEmail: this.state.isFlagClearedEmail,
-				isFlagClearedPush: this.state.isFlagClearedPush,
-				isFlagClearedText: this.state.isFlagClearedText,
-				isFlagCreatedEmail: this.state.isFlagCreatedEmail,
-				isFlagCreatedPush: this.state.isFlagCreatedPush,
-				isFlagCreatedText: this.state.isFlagCreatedText,
-				isInvoiceUpdatedEmail: this.state.isInvoiceUpdatedEmail,
-				isInvoiceUpdatedPush: this.state.isInvoiceUpdatedPush,
-				isInvoiceUpdatedText: this.state.isInvoiceUpdatedText,
-				isInvoicePaidEmail: this.state.isInvoicePaidEmail,
-				isInvoicePaidPush: this.state.isInvoicePaidPush,
-				isInvoicePaidText: this.state.isInvoicePaidText,
-			};
-			if (success) {
-				this.props.setUser(user);
-				message.success("Successfully updated");
+		if (window.location.pathname.includes(routerLinks.CreateAccount)) {
+			if ([SCHOOL, CONSULTANT].includes(registerData.role)) {
+				this.setState({ isSubmit: true });
+				const response = await request.post(userSignUp, { ...registerData, notificationSetting: data });
+				this.setState({ isSubmit: false });
+				const { success } = response;
+				if (success) {
+					this.props.onContinue(true);
+					this.props.removeRegisterData();
+				} else {
+					message.error(error?.response?.data?.data ?? error.message);
+				}
+			} else {
+				this.props.setRegisterData({ notificationSetting: data });
+				this.props.onContinue();
 			}
-		}).catch(err => {
-			message.error(err.message);
-		})
+		} else {
+			this.setState({ isSubmit: true });
+			request.post(updateNotificationSetting, data).then(res => {
+				this.setState({ isSubmit: false });
+				const { success } = res;
+				let user = JSON.parse(JSON.stringify(this.props.user));
+				user.notificationSetting = {
+					...user.notificationSetting,
+					isNewSessionEmail: this.state.isNewSessionEmail,
+					isNewSessionPush: this.state.isNewSessionPush,
+					isNewSessionText: this.state.isNewSessionText,
+					isRescheduleSessionEmail: this.state.isRescheduleSessionEmail,
+					isRescheduleSessionPush: this.state.isRescheduleSessionPush,
+					isRescheduleSessionText: this.state.isRescheduleSessionText,
+					isCloseSessionEmail: this.state.isCloseSessionEmail,
+					isCloseSessionPush: this.state.isCloseSessionPush,
+					isCloseSessionText: this.state.isCloseSessionText,
+					isSessionReminderEmail: this.state.isSessionReminderEmail,
+					isSessionReminderPush: this.state.isSessionReminderPush,
+					isSessionReminderText: this.state.isSessionReminderText,
+					isCancelSessionEmail: this.state.isCancelSessionEmail,
+					isCancelSessionPush: this.state.isCancelSessionPush,
+					isCancelSessionText: this.state.isCancelSessionText,
+					isSubsidyUpdateEmail: this.state.isSubsidyUpdateEmail,
+					isSubsidyUpdatePush: this.state.isSubsidyUpdatePush,
+					isSubsidyUpdateText: this.state.isSubsidyUpdateText,
+					isSubsidyCreateEmail: this.state.isSubsidyCreateEmail,
+					isSubsidyCreatePush: this.state.isSubsidyCreatePush,
+					isSubsidyCreateText: this.state.isSubsidyCreateText,
+					isFlagClearedEmail: this.state.isFlagClearedEmail,
+					isFlagClearedPush: this.state.isFlagClearedPush,
+					isFlagClearedText: this.state.isFlagClearedText,
+					isFlagCreatedEmail: this.state.isFlagCreatedEmail,
+					isFlagCreatedPush: this.state.isFlagCreatedPush,
+					isFlagCreatedText: this.state.isFlagCreatedText,
+					isInvoiceUpdatedEmail: this.state.isInvoiceUpdatedEmail,
+					isInvoiceUpdatedPush: this.state.isInvoiceUpdatedPush,
+					isInvoiceUpdatedText: this.state.isInvoiceUpdatedText,
+					isInvoicePaidEmail: this.state.isInvoicePaidEmail,
+					isInvoicePaidPush: this.state.isInvoicePaidPush,
+					isInvoicePaidText: this.state.isInvoicePaidText,
+				};
+				if (success) {
+					this.props.setUser(user);
+					message.success("Successfully updated");
+				}
+			}).catch(err => {
+				this.setState({ isSubmit: false });
+				message.error(err.message);
+			})
+		}
 	}
 
 	render() {
+		const { registerData } = this.props.register;
 		const {
 			isNewSessionEmail,
 			isNewSessionPush,
@@ -226,7 +293,10 @@ class InfoNotification extends React.Component {
 			isInvoicePaidEmail,
 			isInvoicePaidPush,
 			isInvoicePaidText,
+			isSubmit,
 		} = this.state;
+
+		const isCreate = window.location.pathname.includes(routerLinks.CreateAccount);
 
 		return (
 			<div className='col-form'>
@@ -335,7 +405,7 @@ class InfoNotification extends React.Component {
 								</tbody>
 							</table>
 							<div className='mt-10 flex justify-end'>
-								<Button type='primary' className='px-20' onClick={() => this.handleSaveSetting()}>Save</Button>
+								<Button type='primary' loading={isSubmit} block={isCreate} className='px-20' onClick={() => this.handleSaveSetting()}>{isCreate ? [SCHOOL, CONSULTANT].includes(registerData.role) ? intl.formatMessage(messages.submit).toUpperCase() : intl.formatMessage(messages.continue).toUpperCase() : 'Save'}</Button>
 							</div>
 						</Card>
 					</Col>
@@ -345,6 +415,9 @@ class InfoNotification extends React.Component {
 	}
 }
 
-const mapStateToProps = state => ({ user: state.auth.user });
+const mapStateToProps = state => ({
+	register: state.register,
+	user: state.auth.user,
+});
 
-export default compose(connect(mapStateToProps, { setUser, setCountOfUnreadNotifications }))(InfoNotification);
+export default compose(connect(mapStateToProps, { removeRegisterData, setUser, setCountOfUnreadNotifications, setRegisterData }))(InfoNotification);
