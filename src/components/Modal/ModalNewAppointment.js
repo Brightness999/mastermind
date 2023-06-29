@@ -388,11 +388,19 @@ class ModalNewAppointment extends React.Component {
 
 			if (selectedSkill) {
 				const dependent = listDependents?.find(d => d._id === selectedDependent);
-				const subsidy = dependent?.subsidy?.find(s => s.skillSet === selectedSkill && s.status === ADMINAPPROVED);
-				if (subsidy) {
+				const subsidies = dependent?.subsidy?.filter(s => s.skillSet === selectedSkill && s.status === ADMINAPPROVED);
+				if (subsidies?.length) {
 					const subsidyAppointments = dependent?.appointments?.filter(a => a.skillSet === selectedSkill && a.type === SUBSIDY && [PENDING, CLOSED].includes(a.status))?.length ?? 0;
-					const totalSessions = subsidy.numberOfSessions ?? 0;
-					this.setState({ subsidyAvailable: true, restSessions: totalSessions - subsidyAppointments, isSubsidyOnly: true });
+					const totalSessions = subsidies?.reduce((a, b) => a + b * 1, 0);
+					if (totalSessions - subsidyAppointments > 0) {
+						if (totalSessions - subsidyAppointments === 2) {
+							message.warn("Only 2 of allotted subsidized sessions remain.");
+						}
+						if (totalSessions - subsidyAppointments === 1) {
+							message.warn("Only 1 of allotted subsidized sessions remain.");
+						}
+						this.setState({ subsidyAvailable: true, restSessions: totalSessions - subsidyAppointments, isSubsidyOnly: true });
+					}
 				}
 			}
 		}
