@@ -191,7 +191,7 @@ class ModalNewAppointment extends React.Component {
 			subsidyOnly: appointmentType === APPOINTMENT && subsidyAvailable && isSubsidyOnly,
 			subsidy: (appointmentType === APPOINTMENT && isSubsidyOnly && subsidyAvailable) ? subsidy?._id : undefined,
 			status: PENDING,
-			rate: appointmentType === EVALUATION ? listProvider[selectedProviderIndex]?.separateEvaluationRate : (appointmentType === APPOINTMENT && subsidyAvailable && isSubsidyOnly) ? subsidizedRate : appointmentType === APPOINTMENT ? standardRate : 0,
+			rate: appointmentType === EVALUATION ? listProvider[selectedProviderIndex]?.separateEvaluationRate : (appointmentType === APPOINTMENT && subsidyAvailable && isSubsidyOnly) ? subsidizedRate || standardRate : appointmentType === APPOINTMENT ? standardRate : 0,
 			screeningTime: appointmentType === SCREEN ? data.time : '',
 		};
 		this.setState({ visibleModalScreening: false });

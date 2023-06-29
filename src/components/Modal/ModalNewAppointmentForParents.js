@@ -204,7 +204,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			subsidyOnly: appointmentType === APPOINTMENT && subsidyAvailable && isSubsidyOnly,
 			subsidy: (appointmentType === APPOINTMENT && isSubsidyOnly && subsidyAvailable) ? subsidy?._id : undefined,
 			status: 0,
-			rate: appointmentType === EVALUATION ? listProvider[selectedProviderIndex]?.separateEvaluationRate : (appointmentType === APPOINTMENT && subsidyAvailable && isSubsidyOnly) ? subsidizedRate : appointmentType === APPOINTMENT ? standardRate : 0,
+			rate: appointmentType === EVALUATION ? listProvider[selectedProviderIndex]?.separateEvaluationRate : (appointmentType === APPOINTMENT && subsidyAvailable && isSubsidyOnly) ? subsidizedRate || standardRate : appointmentType === APPOINTMENT ? standardRate : 0,
 			screeningTime: appointmentType === SCREEN ? data.time : '',
 			duration: appointmentType === EVALUATION ? listProvider[selectedProviderIndex]?.separateEvaluationDuration : listProvider[selectedProviderIndex]?.duration,
 		};
