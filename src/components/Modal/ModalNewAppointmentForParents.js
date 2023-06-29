@@ -444,6 +444,7 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	requestCreateAppointment(postData) {
 		const { appointments, appointmentsInMonth, setAppointments, setAppointmentsInMonth, onSubmit } = this.props;
+		const { appointmentType } = this.state;
 		this.setState({ loadingSchedule: true });
 		request.post(createAppointmentForParent, postData).then(result => {
 			this.setState({ loadingSchedule: false });
@@ -452,7 +453,7 @@ class ModalNewAppointmentForParents extends React.Component {
 				this.setState({ errorMessage: '' });
 				setAppointments([...appointments || [], data]);
 				setAppointmentsInMonth([...appointmentsInMonth || [], data]);
-				onSubmit();
+				onSubmit(appointmentType);
 			} else {
 				this.setState({ errorMessage: data });
 			}

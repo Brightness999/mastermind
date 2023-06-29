@@ -388,10 +388,10 @@ class Dashboard extends React.Component {
     this.setState({ visibleNewAppoint: false });
   };
 
-  onSubmitModalNewAppoint = () => {
+  onSubmitModalNewAppoint = (appointmentType) => {
     this.setState({ visibleNewAppoint: false });
     message.success({
-      content: intl.formatMessage(messages.appointmentScheduled),
+      content: `${appointmentType === SCREEN ? 'Screening' : appointmentType === EVALUATION ? 'Evaluation' : appointmentType === APPOINTMENT ? 'Standard Session' : appointmentType === CONSULTATION ? 'Consultation' : appointmentType === SUBSIDY ? 'Subsidized Session' : ''} Scheduled`,
       className: 'popup-scheduled',
     });
   };
@@ -421,7 +421,7 @@ class Dashboard extends React.Component {
   onSubmitModalReferral = () => {
     this.setState({ visiblReferralService: false });
     message.success({
-      content: intl.formatMessage(messages.appointmentScheduled),
+      content: 'Consultation Scheduled',
       className: 'popup-scheduled',
     });
   };
