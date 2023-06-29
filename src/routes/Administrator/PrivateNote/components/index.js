@@ -235,7 +235,15 @@ class PrivateNote extends React.Component {
         render: appointments => appointments?.filter(a => a.type === CONSULTATION && moment().isAfter(moment(a.date)) && a.status === CLOSED)?.length
       },
       {
-        title: intl.formatMessage(msgCreateAccount.subsidy), key: 'subsidy',
+        title: 'Total subsidy requests', key: 'subsidy',
+        sorter: (a, b) => a?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length > b?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length ? 1 : -1,
+        render: dependent => {
+          const approvedSubsidy = dependent.subsidy?.filter(s => s?.status === ADMINAPPROVED);
+          return approvedSubsidy.length || 'No subsidy';
+        }
+      },
+      {
+        title: 'Subsidized sessions', key: 'subsidy',
         sorter: (a, b) => a?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length > b?.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status))?.length ? 1 : -1,
         render: dependent => {
           const approvedSubsidy = dependent.subsidy?.filter(s => s?.status === ADMINAPPROVED);
@@ -246,7 +254,7 @@ class PrivateNote extends React.Component {
 
             return `${totalUsedSessions}/${totalAllowedSessions}`;
           } else {
-            return 'No Subsidy';
+            return '';
           }
         },
       },
