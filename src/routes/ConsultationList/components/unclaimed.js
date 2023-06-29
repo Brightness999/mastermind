@@ -1,5 +1,5 @@
 import React, { createRef } from 'react';
-import { Table, Space, Button, Input, message, Pagination } from 'antd';
+import { Table, Space, Button, Input, message, Pagination, Popconfirm } from 'antd';
 import { CheckCircleFilled, SearchOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -9,7 +9,7 @@ import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
 
 import request from 'utils/api/request';
-import { getConsultationList } from 'utils/api/apiList';
+import { claimConsultation, getConsultationList } from 'utils/api/apiList';
 import PageLoading from 'components/Loading/PageLoading';
 import { CANCELLED, CLOSED, DECLINED, NOSHOW, PENDING } from 'routes/constant';
 
@@ -79,6 +79,35 @@ class UnclaimedConsultationRequest extends React.Component {
     return true;
   }
 
+  handleTag = (consultation) => {
+    const { auth, appointments } = this.props;
+    const { pageNumber, pageSize } = this.state;
+
+    if (appointments?.find(a => a?.consultant?._id === auth.user?.consultantInfo?._id && a.date === consultation?.date)) {
+      message.warning("You already scheduled at this time.");
+    } else {
+      const appointmentDate = moment(consultation?.date);
+      const ranges = auth.user?.consultantInfo?.manualSchedule?.filter(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+
+      if (ranges?.length) {
+        request.post(claimConsultation, { appointmentId: consultation?._id })
+          .then(res => {
+            if (res.success) {
+              if (res.data.message) {
+                message.warning(res.data.message);
+              } else {
+                message.success("Claimed successfully");
+                this.getConsultations(pageNumber, pageSize);
+              }
+            }
+          })
+          .catch(err => message.error(err.message));
+      } else {
+        message.warning("You are not available at this event time.");
+      }
+    }
+  }
+
   render() {
     const { pageNumber, pageSize, totalSize, consultationList, skillSet, loading, csvData } = this.state;
     const csvHeaders = ["Student Name", "Referrer", "Student Grade", "Service Requested", "PhoneNumber/Google Meet", "Date"];
@@ -142,7 +171,17 @@ class UnclaimedConsultationRequest extends React.Component {
         render: (appointment) => appointment?.phoneNumber ? appointment?.phoneNumber : appointment?.meetingLink,
       },
       { title: 'Referral Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm a') },
-      { title: 'Status', dataIndex: 'status', key: 'status', fixed: 'right', render: (status) => status === PENDING ? 'Pending' : status === CLOSED ? 'Closed' : status === DECLINED ? 'Declined' : status === CANCELLED ? 'Canceled' : status === NOSHOW ? 'No Show' : '' },
+      { title: 'Status', dataIndex: 'status', key: 'status', render: (status) => status === PENDING ? 'Pending' : status === CLOSED ? 'Closed' : status === DECLINED ? 'Declined' : status === CANCELLED ? 'Canceled' : status === NOSHOW ? 'No Show' : '' },
+      {
+        title: 'Action', key: 'action', fixed: 'right', render: (consultation) => consultation.status === PENDING ? (
+          <Popconfirm
+            title="Are you sure to tag this consultation?"
+            onConfirm={() => this.handleTag(consultation)}
+            okText="Yes"
+            cancelText="No"
+          ><span className='text-primary text-underline'>Tag</span></Popconfirm>
+        ) : null
+      },
     ];
 
     return (
@@ -162,6 +201,9 @@ class UnclaimedConsultationRequest extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({ auth: state.auth });
+const mapStateToProps = state => ({
+  auth: state.auth,
+  appointments: state.appointments.dataAppointments,
+});
 
 export default compose(connect(mapStateToProps))(UnclaimedConsultationRequest);
