@@ -8,8 +8,8 @@ import { compose } from 'redux';
 import moment from 'moment';
 
 import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import messagesLogin from 'routes/Sign/Login/messages';
+import { setRegisterData } from 'src/redux/features/registerSlice';
 
 class InfoChild extends Component {
 	constructor(props) {
@@ -79,6 +79,18 @@ class InfoChild extends Component {
 		if (date) {
 			const dependents = this.form?.getFieldsValue();
 			this.form?.setFieldsValue({ children: dependents?.children?.map((child, i) => i === index ? { ...child, age: moment().year() - date.year() } : child) });
+		}
+	}
+
+	handleChangeBirthDay = (date, index) => {
+		if (date) {
+			const dateArr = date.split('-');
+			if (dateArr.length === 3 && dateArr[0].length === 4 && dateArr[1].length === 2 && dateArr[2].length === 2) {
+				if (moment(date).isValid()) {
+					const dependents = this.form?.getFieldsValue();
+					this.form?.setFieldsValue({ children: dependents?.children?.map((child, i) => i === index ? { ...child, age: date ? moment().year() - moment(date).year() : 0, birthday: moment(date) } : child) });
+				}
+			}
 		}
 	}
 
@@ -209,6 +221,27 @@ class InfoChild extends Component {
 														>
 															<DatePicker
 																format='YYYY-MM-DD'
+																inputRender={(props) => {
+																	return <Input
+																		aria-required={props['aria-required']}
+																		aria-describedby={props['aria-describedby']}
+																		aria-invalid={props['aria-invalid']}
+																		autoComplete={props.autoComplete}
+																		autoFocus={props.autoFocus}
+																		disabled={props.disabled}
+																		id={props.id}
+																		onBlur={props.onBlur}
+																		onChange={(e) => { props.onChange(e); this.handleChangeBirthDay(e.target.value, index) }}
+																		onFocus={props.onFocus}
+																		onKeyDown={props.onKeyDown}
+																		onMouseDown={props.onMouseDown}
+																		placeholder={props.placeholder}
+																		readOnly={props.readOnly}
+																		value={props.value}
+																		title={props.title}
+																		size={props.size}
+																	/>
+																}}
 																placeholder={intl.formatMessage(messages.dateBirth)}
 																onSelect={(date) => this.handleSelectBirthday(date, index)}
 																onChange={date => { this.handleSelectBirthday(date, index); this.updateReduxValueForDepedent(index, "birthday", date); }}
