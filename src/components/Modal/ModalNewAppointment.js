@@ -187,11 +187,11 @@ class ModalNewAppointment extends React.Component {
 			phoneNumber: appointmentType === SCREEN ? data?.phoneNumber : '',
 			notes: appointmentType === SCREEN ? data?.notes : notes,
 			duration: duration,
-			type: (appointmentType === APPOINTMENT && subsidyAvailable && isSubsidyOnly) ? SUBSIDY : appointmentType,
-			subsidyOnly: appointmentType === APPOINTMENT && subsidyAvailable && isSubsidyOnly,
-			subsidy: (appointmentType === APPOINTMENT && isSubsidyOnly && subsidyAvailable) ? subsidy?._id : undefined,
+			type: appointmentType,
+			subsidyOnly: appointmentType === SUBSIDY,
+			subsidy: appointmentType === SUBSIDY ? subsidy?._id : undefined,
 			status: PENDING,
-			rate: appointmentType === EVALUATION ? listProvider[selectedProviderIndex]?.separateEvaluationRate : (appointmentType === APPOINTMENT && subsidyAvailable && isSubsidyOnly) ? subsidizedRate || standardRate : appointmentType === APPOINTMENT ? standardRate : 0,
+			rate: appointmentType === EVALUATION ? listProvider[selectedProviderIndex]?.separateEvaluationRate : (appointmentType === SUBSIDY) ? subsidizedRate || standardRate : appointmentType === APPOINTMENT ? standardRate : 0,
 			screeningTime: appointmentType === SCREEN ? data.time : '',
 		};
 		this.setState({ visibleModalScreening: false });
@@ -391,7 +391,7 @@ class ModalNewAppointment extends React.Component {
 				const subsidies = dependent?.subsidy?.filter(s => s.skillSet === selectedSkill && s.status === ADMINAPPROVED);
 				if (subsidies?.length) {
 					const subsidyAppointments = dependent?.appointments?.filter(a => a.skillSet === selectedSkill && a.type === SUBSIDY && [PENDING, CLOSED].includes(a.status))?.length ?? 0;
-					const totalSessions = subsidies?.reduce((a, b) => a + b * 1, 0);
+					const totalSessions = subsidies?.reduce((a, b) => a + b.numberOfSessions, 0);
 					if (totalSessions - subsidyAppointments > 0) {
 						if (totalSessions - subsidyAppointments === 2) {
 							message.warn("Only 2 of allotted subsidized sessions remain.");
@@ -399,7 +399,7 @@ class ModalNewAppointment extends React.Component {
 						if (totalSessions - subsidyAppointments === 1) {
 							message.warn("Only 1 of allotted subsidized sessions remain.");
 						}
-						this.setState({ subsidyAvailable: true, restSessions: totalSessions - subsidyAppointments, isSubsidyOnly: true });
+						this.setState({ subsidyAvailable: true, restSessions: totalSessions - subsidyAppointments, isSubsidyOnly: true, appointmentType: SUBSIDY });
 					}
 				}
 			}
@@ -552,7 +552,7 @@ class ModalNewAppointment extends React.Component {
 				<div className='new-appointment'>
 					<Form onFinish={() => appointmentType === SCREEN ? this.onOpenModalScreening() : this.createAppointment()} layout='vertical'>
 						<div className='flex gap-5 items-center'>
-							<p className='font-30 mb-10'>{appointmentType === APPOINTMENT && intl.formatMessage(messages.newAppointment)}{appointmentType === EVALUATION && intl.formatMessage(messages.newEvaluation)}{appointmentType === SCREEN && intl.formatMessage(messages.newScreening)}</p>
+							<p className='font-30 mb-10'>{(appointmentType === APPOINTMENT || appointmentType === SUBSIDY) && intl.formatMessage(messages.newAppointment)}{appointmentType === EVALUATION && intl.formatMessage(messages.newEvaluation)}{appointmentType === SCREEN && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType === EVALUATION && selectedProviderIndex > -1 && (
 								<div className='font-20'>
 									<div>{durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
@@ -562,11 +562,11 @@ class ModalNewAppointment extends React.Component {
 						</div>
 						<div className='flex flex-row items-center mb-10'>
 							<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}<sup>*</sup></p>
-							{appointmentType === APPOINTMENT && subsidyAvailable && (
+							{appointmentType === SUBSIDY && (
 								<div className='flex flex-row items-center ml-20 gap-5'>
 									<p className='mb-0'>Number of Sessions: {restSessions}</p>
 									<div className='flex items-center gap-2'>
-										<Switch size="small" checked={isSubsidyOnly} onChange={v => this.setState({ isSubsidyOnly: v })} />
+										<Switch size="small" checked={isSubsidyOnly} onChange={v => this.setState({ isSubsidyOnly: v, appointmentType: v ? SUBSIDY : APPOINTMENT })} />
 										<p className='mb-0'>{intl.formatMessage(messages.subsidyOnly)}</p>
 									</div>
 								</div>
