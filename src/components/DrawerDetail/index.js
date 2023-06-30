@@ -1121,11 +1121,9 @@ class DrawerDetail extends Component {
             )}
             {event?.flagStatus === ACTIVE ? userRole === 3 ? (
               <div className='flex items-center justify-between gap-2'>
-                {(event?.flagInvoice?.totalPayment == 0) ? (
-                  <Button type='primary' block className='flex-1 h-30 p-0' onClick={this.onOpenModalCreateNote}>
-                    {intl.formatMessage(messages.requestClearance)}
-                  </Button>
-                ) : null}
+                <Button type='primary' block className='flex-1 h-30 p-0' onClick={this.onOpenModalCreateNote}>
+                  {intl.formatMessage(messages.requestClearance)}
+                </Button>
                 {event?.flagInvoice?.isPaid ? (
                   <Button type='primary' block className='flex-1 h-30 p-0' disabled>
                     {intl.formatMessage(messages.paid)}
@@ -1166,11 +1164,9 @@ class DrawerDetail extends Component {
               )
             ) : (
               <div className='flex items-center justify-between gap-2 flex-2'>
-                {(event?.flagInvoice?.totalPayment == 0) ? (
-                  <Button type='primary' block className='flex-1 h-30 p-0 px-5' onClick={this.onOpenModalCreateNote}>
-                    {intl.formatMessage(messages.requestClearance)}
-                  </Button>
-                ) : null}
+                <Button type='primary' block className='flex-1 h-30 p-0 px-5' onClick={this.onOpenModalCreateNote}>
+                  {intl.formatMessage(messages.requestClearance)}
+                </Button>
                 {event?.flagInvoice?.isPaid ? (
                   <Button type='primary' block className='flex-1 h-30 p-0' disabled>
                     {intl.formatMessage(messages.paid)}
@@ -1356,7 +1352,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {(userRole === 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.flagStatus === ACTIVE && event?.flagInvoice?.totalPayment == 0) && (
+              {(userRole === 3 && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.flagStatus === ACTIVE) && (
                 <Col span={12}>
                   <Button type='primary' icon={<FaFileContract size={12} />} block onClick={this.onOpenModalCreateNote}>
                     {intl.formatMessage(messages.requestClearance)}

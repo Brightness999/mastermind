@@ -284,7 +284,7 @@ class ModalFlagExpand extends React.Component {
 			columns.splice(6, 0, {
 				title: 'Action', key: 'action', render: (invoice) => (
 					<Space size="small">
-						{(invoice?.totalPayment == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
+						<div className='text-primary cursor' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</div>
 						{invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
 							<div className='text-primary cursor' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
 								{intl.formatMessage(msgDrawer.payFlag)}
@@ -355,7 +355,7 @@ class ModalFlagExpand extends React.Component {
 			columns.splice(6, 0, {
 				title: 'Action', key: 'action', render: (invoice) => (
 					<Space size="small">
-						{(invoice?.totalPayment == 0) ? <a className='btn-blue action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</a> : null}
+						<div className='text-primary cursor' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</div>
 						{invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
 							<button className='flag-action pay-flag-button' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
 								{intl.formatMessage(msgDrawer.payFlag)}

@@ -1323,9 +1323,7 @@ class Dashboard extends React.Component {
                             {userRole === PARENT ? (
                               <>
                                 <div className='font-12'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
-                                {(invoice?.totalPayment == 0) ? (
-                                  <span className='font-12 text-primary cursor' id='action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</span>
-                                ) : null}
+                                <span className='font-12 text-primary cursor' id='action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</span>
                                 {invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
                                   <button id='action' className='font-12 flag-action pay-flag-button' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
                                     {intl.formatMessage(msgDrawer.payFlag)}
