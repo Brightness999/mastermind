@@ -20,7 +20,10 @@ import SchoolDeclined from './SchoolDeclined';
 import AdminPreApproved from './AdminPreApproved';
 import AdminDeclined from './AdminDeclined';
 import AdminApproved from './AdminApproved';
+import SchoolAppealed from './SchoolAppealed';
+import AdminAppealed from './AdminAppealed';
 import { socketUrl } from 'utils/api/baseUrl';
+import { CANCELLED, CLOSED, DECLINED, NOSHOW, PENDING } from 'routes/constant';
 import './index.less';
 
 const SubsidyManager = (props) => {
@@ -62,7 +65,21 @@ const SubsidyManager = (props) => {
   }
 
   const handleChangeTab = v => {
-    setRequests(props.listSubsidy?.filter(s => s.status == v));
+    if (v === '1' || v === '5') {
+      setRequests(props.listSubsidy?.filter(s => s.status == v));
+    } else if (v === '2') {
+      setRequests(props.listSubsidy?.filter(s => s.status == v && s.isAppeal < 1));
+    } else if (v === '3') {
+      setRequests(props.listSubsidy?.filter(s => s.status == v && [PENDING, CANCELLED].includes(s.consultation?.status)));
+    } else if (v === '4') {
+      setRequests(props.listSubsidy?.filter(s => s.status == v && s.isAppeal < 1));
+    } else if (v === '6') {
+      setRequests(props.listSubsidy?.filter(s => s.status == 2 && s.isAppeal === 1));
+    } else if (v === '7') {
+      setRequests(props.listSubsidy?.filter(s => s.status == 4 && s.isAppeal === 1));
+    } else if (v === '8') {
+      setRequests(props.listSubsidy?.filter(s => s.status == 3 && [CLOSED, DECLINED, NOSHOW].includes(s.consultation?.status)));
+    }
     setStatus(v);
   }
 
@@ -196,8 +213,38 @@ const SubsidyManager = (props) => {
       ),
     },
     {
+      key: '6',
+      label: <span className="font-16">{intl.formatMessage(msgCreateAccount.school)} {intl.formatMessage(msgModal.appealed)}</span>,
+      children: (
+        <SchoolAppealed
+          requests={requests}
+          skills={skills}
+          grades={grades}
+          schools={schoolInfos}
+          onShowModalSubsidy={onShowModalSubsidy}
+          socket={socket}
+          user={user}
+        />
+      ),
+    },
+    {
       key: '3',
       label: <span className="font-16">{intl.formatMessage(messages.preApproved)}</span>,
+      children: (
+        <AdminPreApproved
+          requests={requests}
+          skills={skills}
+          grades={grades}
+          schools={schoolInfos}
+          onShowModalSubsidy={onShowModalSubsidy}
+          socket={socket}
+          user={user}
+        />
+      ),
+    },
+    {
+      key: '8',
+      label: <span className="font-16">{intl.formatMessage(messages.postConsultation)}</span>,
       children: (
         <AdminPreApproved
           requests={requests}
@@ -215,6 +262,21 @@ const SubsidyManager = (props) => {
       label: <span className="font-16">{intl.formatMessage(messages.declined)}</span>,
       children: (
         <AdminDeclined
+          requests={requests}
+          skills={skills}
+          grades={grades}
+          schools={schoolInfos}
+          onShowModalSubsidy={onShowModalSubsidy}
+          socket={socket}
+          user={user}
+        />
+      ),
+    },
+    {
+      key: '7',
+      label: <span className="font-16">{intl.formatMessage(msgModal.appealed)}</span>,
+      children: (
+        <AdminAppealed
           requests={requests}
           skills={skills}
           grades={grades}

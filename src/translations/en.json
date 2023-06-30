@@ -219,6 +219,7 @@
   "routes.dashboard.declined": "Declined",
   "routes.dashboard.approved": "Approved",
   "routes.dashboard.preApproved": "Pre-Approved",
+  "routes.dashboard.postConsultation": "Post consultation",
   "routes.dashboard.appointmentScheduled": "Appointment Scheduled",
   "routes.dashboard.recurring": "Recurring",
   "routes.dashboard.cancelEvent": "Cancel Event",

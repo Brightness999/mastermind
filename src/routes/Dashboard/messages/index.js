@@ -122,6 +122,10 @@ export default ({
     id: `${scope}.preApproved`,
     defaultMessage: 'Pre-Approved',
   },
+  postConsultation: {
+    id: `${scope}.postConsultation`,
+    defaultMessage: 'Post consultation',
+  },
   appointmentScheduled: {
     id: `${scope}.appointmentScheduled`,
     defaultMessage: 'Appointment Scheduled',

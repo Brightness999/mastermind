@@ -598,7 +598,7 @@ class ModalSubsidyProgress extends React.Component {
 							type="number"
 							min={0}
 							className='h-40'
-							addonBefore="$"
+							prefix="$"
 							onKeyDown={(e) => {
 								(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
 								if (e.key > -1 && e.key < 10 && e.target.value === '0') {
@@ -615,7 +615,7 @@ class ModalSubsidyProgress extends React.Component {
 							value={totalPayment}
 							type="number"
 							min={0}
-							addonBefore="$"
+							prefix="$"
 							onKeyDown={(e) => {
 								(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
 								if (e.key > -1 && e.key < 10 && e.target.value === '0') {
@@ -822,7 +822,7 @@ class ModalSubsidyProgress extends React.Component {
 			]
 		}
 
-		if ([2, 4].includes(subsidy?.status) && subsidy?.isAppeal > 0 && (user?.role === 60 || user?.role > 900)) {
+		if ([2, 4].includes(subsidy?.status) && subsidy?.isAppeal === 1 && (user?.role === 60 || user?.role > 900)) {
 			return [
 				<div key="warning">User has sent appeal for this, please choose an action </div>,
 				<Button key="back" type='link' onClick={this.props.onCancel}>
@@ -855,7 +855,7 @@ class ModalSubsidyProgress extends React.Component {
 			]
 		}
 
-		if ((subsidy?.status === 3 && user?.role > 900 && [-1, -2].includes(referral?.status)) || subsidy?.status === 5) {
+		if ((subsidy?.status === 3 && user?.role > 900 && [-1, -3, 2].includes(referral?.status)) || subsidy?.status === 5) {
 			return [
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.goBack).toUpperCase()}
