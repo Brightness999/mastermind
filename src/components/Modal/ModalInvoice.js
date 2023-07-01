@@ -63,7 +63,7 @@ class ModalInvoice extends React.Component {
 		} else if (invoice) {
 			let items = [];
 			switch (invoice.type) {
-				case 1: case 2: case 3: items = invoice.data?.[0]?.items || []; break;
+				case 1: case 2: case 3: case 6: items = invoice.data?.[0]?.items || []; break;
 				case 4: items = invoice.data?.[0]?.items?.data || []; break;
 				case 5: items = invoice.data?.map(a => a.items.data)?.flat();
 				default:
