@@ -125,6 +125,14 @@ export default {
     id: `${scope}.unpaid`,
     defaultMessage: 'Unpaid',
   },
+  outstanding: {
+    id: `${scope}.outstanding`,
+    defaultMessage: 'Outstanding',
+  },
+  subsidyProcessed: {
+    id: `${scope}.subsidyProcessed`,
+    defaultMessage: 'Subsidy-Processed',
+  },
   payFlag: {
     id: `${scope}.payFlag`,
     defaultMessage: 'Pay Flag',
