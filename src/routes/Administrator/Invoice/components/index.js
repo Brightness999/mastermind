@@ -67,15 +67,15 @@ class InvoiceList extends React.Component {
         this.setState({
           tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && i.type != 6)?.map(f => ({ ...f, key: f._id })),
         })
-      } else if (value === '1') {
+      } else if (selectedTab === '1') {
         this.setState({
           tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && i.type != 6)?.map(f => ({ ...f, key: f._id })),
         })
-      } else if (value === '2') {
+      } else if (selectedTab === '2') {
         this.setState({
           tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })),
         })
-      } else if (value === '3') {
+      } else if (selectedTab === '3') {
         this.setState({
           tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })),
         })

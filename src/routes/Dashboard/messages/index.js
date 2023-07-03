@@ -230,4 +230,8 @@ export default ({
     id: `${scope}.updatedDate`,
     defaultMessage: 'Updated Date',
   },
+  method: {
+    id: `${scope}.method`,
+    defaultMessage: 'Method',
+  },
 });

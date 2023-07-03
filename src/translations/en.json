@@ -246,6 +246,7 @@
   "routes.dashboard.invoiceType": "Invoice Type",
   "routes.dashboard.createdDate": "Created Date",
   "routes.dashboard.updatedDate": "Updated Date",
+  "routes.dashboard.method": "Method",
 
   "routes.forgotpass.resetYourPassword": "Reset Your Password",
   "routes.forgotpass.enterYourEmail": "Enter your user account's verified email address and we will new password to email.",

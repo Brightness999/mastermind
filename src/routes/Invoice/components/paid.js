@@ -11,7 +11,7 @@ import msgMainHeader from 'components/MainHeader/messages';
 import messages from 'routes/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 
-class SubsidyProcessed extends React.Component {
+class PaidList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -34,9 +34,21 @@ class SubsidyProcessed extends React.Component {
     const { selectedInvoice, visibleInvoice } = this.state;
     const { auth, invoices } = this.props;
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
+    const invoiceTypeFilterOptions = [
+      { text: 'Session', value: 1 },
+      { text: 'Reschedule', value: 2 },
+      { text: 'Cancel', value: 3 },
+      { text: 'No show', value: 4 },
+      { text: 'Past due balance', value: 5 },
+    ]
+
+    if (auth.user.role === 30) {
+      invoiceTypeFilterOptions.push({ text: 'Admin', value: 6 });
+    }
+
     const columns = [
       {
-        title: intl.formatMessage(messages.studentName), dataIndex: 'dependent', key: 'name', fixed: 'left',
+        title: intl.formatMessage(messages.studentName), dataIndex: 'dependent', key: 'name',
         sorter: (a, b) => (a.dependent.firstName || '' + a.dependent.lastName || '').toLowerCase() > (b.dependent.firstName || '' + b.dependent.lastName || '').toLowerCase() ? 1 : -1,
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
@@ -82,11 +94,18 @@ class SubsidyProcessed extends React.Component {
       },
       {
         title: intl.formatMessage(messages.invoiceType), dataIndex: 'type', key: 'invoicetype',
-        render: () => 'Subsidy',
+        filters: invoiceTypeFilterOptions,
+        onFilter: (value, record) => record.type === value,
+        render: type => type === 1 ? 'Session' : type === 2 ? 'Reschedule' : type === 3 ? 'Cancel' : type === 4 ? 'No show' : type === 5 ? 'Past due balance' : type === 6 ? 'Admin-Subsidy' : '',
       },
       {
         title: intl.formatMessage(messages.method), dataIndex: 'method', key: 'method',
-        render: (method) => method === 1 ? 'Waived' : method === 2 ? 'PayPal' : '',
+        filters: [
+          { text: 'Waived', value: 1 },
+          { text: 'PayPal', value: 2 },
+        ],
+        onFilter: (value, record) => record.method === value,
+        render: method => method === 1 ? 'Waived' : method === 2 ? 'PayPal' : '',
       },
       {
         title: intl.formatMessage(msgCreateAccount.age), dataIndex: 'dependent', key: 'age', type: 'datetime',
@@ -137,7 +156,7 @@ class SubsidyProcessed extends React.Component {
         filterIcon: (filtered) => (
           <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
         ),
-        onFilter: (value, record) => (record?.provider?.firstName || '')?.toLowerCase()?.includes((value).toLowerCase()) || (record?.provider?.lastName || '')?.toLowerCase()?.includes((value).toLowerCase()),
+        onFilter: (value, record) => (record.provider?.firstName || '')?.toLowerCase()?.includes((value).toLowerCase()) || (record.provider?.lastName || '')?.toLowerCase()?.includes((value).toLowerCase()),
         onFilterDropdownOpenChange: visible => {
           if (visible) {
             setTimeout(() => this.searchInput.current?.select(), 100);
@@ -152,12 +171,12 @@ class SubsidyProcessed extends React.Component {
       {
         title: intl.formatMessage(messages.createdDate), dataIndex: 'createdAt', type: 'date', key: 'createdat',
         sorter: (a, b) => a.createdAt > b.createdAt ? 1 : -1,
-        render: createdAt => moment(createdAt).format("MM/DD/YYYY hh:mm A"),
+        render: createdAt => moment(createdAt).format("MM/DD/YYYY hh:mm a"),
       },
       {
         title: intl.formatMessage(messages.updatedDate), dataIndex: 'updatedAt', type: 'date', key: 'updatedat',
         sorter: (a, b) => a.updatedAt > b.updatedAt ? 1 : -1,
-        render: updatedAt => moment(updatedAt).format("MM/DD/YYYY hh:mm A"),
+        render: updatedAt => moment(updatedAt).format("MM/DD/YYYY hh:mm a"),
       },
     ];
 
@@ -191,4 +210,4 @@ const mapStateToProps = state => ({
   auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps))(SubsidyProcessed);
+export default compose(connect(mapStateToProps))(PaidList);

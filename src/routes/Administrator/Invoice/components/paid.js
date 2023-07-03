@@ -94,6 +94,15 @@ class Paid extends React.Component {
         render: type => type === 1 ? 'Session' : type === 2 ? 'Reschedule' : type === 3 ? 'Cancel' : type === 4 ? 'No show' : type === 5 ? 'Past due balance' : '',
       },
       {
+        title: intl.formatMessage(messages.method), dataIndex: 'method', key: 'method',
+        filters: [
+          { text: 'Waived', value: 1 },
+          { text: 'PayPal', value: 2 },
+        ],
+        onFilter: (value, record) => record.method === value,
+        render: method => method === 1 ? 'Waived' : method === 2 ? 'PayPal' : '',
+      },
+      {
         title: intl.formatMessage(msgCreateAccount.age), dataIndex: 'dependent', key: 'age', type: 'datetime',
         sorter: (a, b) => a.dependent.birthday > b.dependent.birthday ? 1 : -1,
         render: (dependent) => moment().year() - moment(dependent.birthday).year(),
