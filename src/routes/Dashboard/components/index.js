@@ -35,7 +35,7 @@ import { changeTime, getAppointmentsData, getAppointmentsMonthData, getInvoiceLi
 import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance, updateInvoice } from 'utils/api/apiList';
 import Subsidiaries from './school';
 import PageLoading from 'components/Loading/PageLoading';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from 'routes/constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, MethodType, NOFLAG, NOSHOW, PARENT, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from 'routes/constant';
 import './index.less';
 
 const { Panel } = Collapse;
@@ -102,7 +102,7 @@ class Dashboard extends React.Component {
     const appointmentId = decryptParam(params.get('a')?.replaceAll(' ', '+') || '');
     const cancellationType = decryptParam(params.get('t')?.replaceAll(' ', '+') || '');
     if (success === 'true' && (invoiceId || appointmentId)) {
-      request.post(payInvoice, { invoiceId, appointmentId, cancellationType }).then(res => {
+      request.post(payInvoice, { invoiceId, appointmentId, cancellationType, method: MethodType.PAYPAL }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
           const url = window.location.href;

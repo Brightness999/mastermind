@@ -87,6 +87,11 @@ export const InvoiceType = {
   BALANCE: 5,
 }
 
+export const MethodType = {
+  WAIVED: 1,
+  PAYPAL: 2,
+}
+
 export const ContactNumberType = [
   'Home',
   'Work',

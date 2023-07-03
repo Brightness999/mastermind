@@ -16,7 +16,7 @@ import request, { decryptParam, encryptParam } from 'utils/api/request';
 import { clearFlag, payInvoice, requestClearance, updateInvoice } from 'utils/api/apiList';
 import { getInvoiceList, setInvoiceList } from 'src/redux/features/appointmentsSlice';
 import PageLoading from 'components/Loading/PageLoading';
-import { InvoiceType, PARENT, PROVIDER } from 'src/routes/constant';
+import { InvoiceType, MethodType, PARENT, PROVIDER } from 'src/routes/constant';
 
 class InvoiceList extends React.Component {
   constructor(props) {
@@ -41,7 +41,7 @@ class InvoiceList extends React.Component {
     const success = decryptParam(params.get('s')?.replaceAll(' ', '+') || '');
     const invoiceId = decryptParam(params.get('i')?.replaceAll(' ', '+') || '');
     if (success === 'true' && (invoiceId)) {
-      request.post(payInvoice, { invoiceId }).then(res => {
+      request.post(payInvoice, { invoiceId, method: MethodType.PAYPAL }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
           const url = window.location.href;

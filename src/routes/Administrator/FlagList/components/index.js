@@ -9,7 +9,7 @@ import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
 import Cookies from 'js-cookie';
 
-import { InvoiceType } from 'routes/constant';
+import { InvoiceType, MethodType } from 'routes/constant';
 import mgsSidebar from 'components/SideBar/messages';
 import msgModal from 'components/Modal/messages';
 import msgDrawer from 'components/DrawerDetail/messages';
@@ -45,7 +45,7 @@ class FlagList extends React.Component {
     const success = decryptParam(params.get('s')?.replace(' ', '+') || '');
     const invoiceId = decryptParam(params.get('i')?.replace(' ', '+') || '');
     if (success === 'true' && (invoiceId)) {
-      request.post(payInvoice, { invoiceId }).then(res => {
+      request.post(payInvoice, { invoiceId, method: MethodType.PAYPAL }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
           const url = window.location.href;

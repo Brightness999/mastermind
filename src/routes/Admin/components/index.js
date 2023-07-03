@@ -33,7 +33,7 @@ import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance, sendEm
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
 import PageLoading from 'components/Loading/PageLoading';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from 'routes/constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, MethodType, NOFLAG, NOSHOW, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from 'routes/constant';
 import './index.less';
 
 const { Panel } = Collapse;
@@ -96,7 +96,7 @@ class SchedulingCenter extends React.Component {
     const invoiceId = decryptParam(params.get('i')?.replaceAll(' ', '+') || '');
     const appointmentId = decryptParam(params.get('a')?.replaceAll(' ', '+') || '');
     if (success === 'true' && (invoiceId || appointmentId)) {
-      request.post(payInvoice, { invoiceId, appointmentId }).then(res => {
+      request.post(payInvoice, { invoiceId, appointmentId, method: MethodType.PAYPAL }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
           const url = window.location.href;
