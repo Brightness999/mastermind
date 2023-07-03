@@ -215,18 +215,24 @@ class InvoiceList extends React.Component {
     const { loading, selectedInvoice, selectedTab, tabInvoices, visibleCreateNote, visibleInvoice, visiblePay, returnUrl } = this.state;
     const { user, academicLevels } = this.props.auth;
     const grades = JSON.parse(JSON.stringify(academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
+    const invoiceTypeFilterOptions = [
+      { text: 'Session', value: 1 },
+      { text: 'Reschedule', value: 2 },
+      { text: 'Cancel', value: 3 },
+      { text: 'No show', value: 4 },
+      { text: 'Past due balance', value: 5 },
+    ]
+
+    if (user.role === 30) {
+      invoiceTypeFilterOptions.push({ text: 'Admin', value: 6 });
+    }
+
     const columns = [
       {
         title: intl.formatMessage(messages.invoiceType), dataIndex: 'type', key: 'invoicetype',
-        filters: [
-          { text: 'Session', value: 1 },
-          { text: 'Reschedule', value: 2 },
-          { text: 'Cancel', value: 3 },
-          { text: 'No show', value: 4 },
-          { text: 'Past due balance', value: 5 },
-        ],
+        filters: invoiceTypeFilterOptions,
         onFilter: (value, record) => record.type === value,
-        render: type => type === 1 ? 'Session' : type === 2 ? 'Reschedule' : type === 3 ? 'Cancel' : type === 4 ? 'No show' : type === 5 ? 'Past due balance' : '',
+        render: type => type === 1 ? 'Session' : type === 2 ? 'Reschedule' : type === 3 ? 'Cancel' : type === 4 ? 'No show' : type === 5 ? 'Past due balance' : type === 6 ? 'Admin' : '',
       },
       {
         title: intl.formatMessage(messages.studentName), dataIndex: 'dependent', key: 'name',
@@ -353,7 +359,7 @@ class InvoiceList extends React.Component {
                 <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
               </Button>
             ) : null}
-            {(user?.role === PARENT && invoice.totalPayment == 0) ? (
+            {user?.role === PARENT ? (
               <Popconfirm
                 title="Are you sure to send clearnace request?"
                 onConfirm={() => this.onOpenModalCreateNote(invoice)}
