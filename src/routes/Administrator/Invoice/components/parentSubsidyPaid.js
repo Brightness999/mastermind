@@ -11,7 +11,7 @@ import msgMainHeader from 'components/MainHeader/messages';
 import messages from 'routes/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 
-class SubsidyProcessed extends React.Component {
+class ParentSubsidyPaidList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -192,4 +192,4 @@ const mapStateToProps = state => ({
   auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps))(SubsidyProcessed);
+export default compose(connect(mapStateToProps))(ParentSubsidyPaidList);

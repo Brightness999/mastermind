@@ -15,6 +15,8 @@ import SubsidyProcessed from './subsidyProcessed';
 import Paid from './paid';
 import Outstanding from './outstanding';
 import { MethodType } from 'routes/constant';
+import ParentSubsidyList from './parentSubsidy';
+import ParentSubsidyPaidList from './parentSubsidyPaid';
 
 class InvoiceList extends React.Component {
   constructor(props) {
@@ -65,11 +67,11 @@ class InvoiceList extends React.Component {
     if (JSON.stringify(prevProps.invoices) != JSON.stringify(invoices)) {
       if (selectedTab === '0') {
         this.setState({
-          tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && i.type != 6)?.map(f => ({ ...f, key: f._id })),
+          tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && (i.type != 6 && !(i.type === 1 && i.data[0]?.appointment?.type === 5)))?.map(f => ({ ...f, key: f._id })),
         })
       } else if (selectedTab === '1') {
         this.setState({
-          tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && i.type != 6)?.map(f => ({ ...f, key: f._id })),
+          tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && (i.type != 6 && !(i.type === 1 && i.data[0]?.appointment?.type === 5)))?.map(f => ({ ...f, key: f._id })),
         })
       } else if (selectedTab === '2') {
         this.setState({
@@ -78,6 +80,14 @@ class InvoiceList extends React.Component {
       } else if (selectedTab === '3') {
         this.setState({
           tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })),
+        })
+      } else if (selectedTab === '4') {
+        this.setState({
+          tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && i.type === 1 && i.data[0]?.appointment?.type === 5)?.map(f => ({ ...f, key: f._id })),
+        })
+      } else if (selectedTab === '5') {
+        this.setState({
+          tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && i.type === 1 && i.data[0]?.appointment?.type === 5)?.map(f => ({ ...f, key: f._id })),
         })
       } else {
         this.setState({
@@ -92,12 +102,12 @@ class InvoiceList extends React.Component {
 
     if (value === '0') {
       this.setState({
-        tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && i.type != 6)?.map(f => ({ ...f, key: f._id })),
+        tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && (i.type != 6 && !(i.type === 1 && i.data[0]?.appointment?.type === 5)))?.map(f => ({ ...f, key: f._id })),
         selectedTab: value,
       })
     } else if (value === '1') {
       this.setState({
-        tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && i.type != 6)?.map(f => ({ ...f, key: f._id })),
+        tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && (i.type != 6 && !(i.type === 1 && i.data[0]?.appointment?.type === 5)))?.map(f => ({ ...f, key: f._id })),
         selectedTab: value,
       })
     } else if (value === '2') {
@@ -108,6 +118,16 @@ class InvoiceList extends React.Component {
     } else if (value === '3') {
       this.setState({
         tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })),
+        selectedTab: value,
+      })
+    } else if (value === '4') {
+      this.setState({
+        tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && i.type === 1 && i.data[0]?.appointment?.type === 5)?.map(f => ({ ...f, key: f._id })),
+        selectedTab: value,
+      })
+    } else if (value === '5') {
+      this.setState({
+        tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && i.type === 1 && i.data[0]?.appointment?.type === 5)?.map(f => ({ ...f, key: f._id })),
         selectedTab: value,
       })
     } else {
@@ -130,6 +150,16 @@ class InvoiceList extends React.Component {
         key: '3',
         label: <span className="font-16">{intl.formatMessage(msgDrawer.subsidyProcessed)}</span>,
         children: (<SubsidyProcessed invoices={tabInvoices} />),
+      },
+      {
+        key: '4',
+        label: <span className="font-16">{intl.formatMessage(msgCreateAccount.parentSubsidy)}</span>,
+        children: (<ParentSubsidyList invoices={tabInvoices} />),
+      },
+      {
+        key: '5',
+        label: <span className="font-16">{intl.formatMessage(msgCreateAccount.parentSubsidyPaid)}</span>,
+        children: (<ParentSubsidyPaidList invoices={tabInvoices} />),
       },
       {
         key: '1',

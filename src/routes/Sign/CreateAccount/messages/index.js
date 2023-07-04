@@ -578,6 +578,14 @@ export default ({
     id: `${scope}.subsidy`,
     defaultMessage: 'Subsidy',
   },
+  parentSubsidy: {
+    id: `${scope}.parentSubsidy`,
+    defaultMessage: 'Parent Subsidy',
+  },
+  parentSubsidyPaid: {
+    id: `${scope}.parentSubsidyPaid`,
+    defaultMessage: 'Parent Subsidy Paid',
+  },
   providerInfo: {
     id: `${scope}.providerInfo`,
     defaultMessage: 'Provider info',

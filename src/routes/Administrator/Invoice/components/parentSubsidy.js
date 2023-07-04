@@ -6,17 +6,22 @@ import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import { ModalInvoice } from 'components/Modal';
+import { ModalInvoice, ModalPay } from 'components/Modal';
 import msgMainHeader from 'components/MainHeader/messages';
 import messages from 'routes/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
+import msgModal from 'components/Modal/messages';
+import { encryptParam } from 'src/utils/api/request';
+import { getInvoiceList, setInvoiceList } from 'src/redux/features/appointmentsSlice';
 
-class SubsidyProcessed extends React.Component {
+class ParentSubsidyList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       visibleInvoice: false,
       selectedInvoice: {},
+      visiblePay: false,
+      returnUrl: '',
     };
     this.searchInput = createRef(null);
   }
@@ -30,8 +35,16 @@ class SubsidyProcessed extends React.Component {
     this.setState({ visibleInvoice: false, selectedInvoice: {} });
   }
 
+  openModalPay = (url) => {
+    this.setState({ visiblePay: true, returnUrl: url });
+  }
+
+  closeModalPay = () => {
+    this.setState({ visiblePay: false, returnUrl: '' });
+  }
+
   render() {
-    const { selectedInvoice, visibleInvoice } = this.state;
+    const { selectedInvoice, visibleInvoice, visiblePay, returnUrl } = this.state;
     const { auth, invoices } = this.props;
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
     const columns = [
@@ -79,15 +92,6 @@ class SubsidyProcessed extends React.Component {
           }
         },
         render: (dependent) => `${dependent.firstName ?? ''} ${dependent.lastName ?? ''}`,
-      },
-      {
-        title: intl.formatMessage(messages.method), dataIndex: 'method', key: 'method',
-        filters: [
-          { text: 'Waived', value: 1 },
-          { text: 'PayPal', value: 2 },
-        ],
-        onFilter: (value, record) => record.method === value,
-        render: (method) => method === 1 ? 'Waived' : method === 2 ? 'PayPal' : '',
       },
       {
         title: intl.formatMessage(msgCreateAccount.age), dataIndex: 'dependent', key: 'age', type: 'datetime',
@@ -160,6 +164,14 @@ class SubsidyProcessed extends React.Component {
         sorter: (a, b) => a.updatedAt > b.updatedAt ? 1 : -1,
         render: updatedAt => moment(updatedAt).format("MM/DD/YYYY hh:mm A"),
       },
+      {
+        title: intl.formatMessage(messages.action), key: 'action', align: 'center', fixed: 'right',
+        render: invoice => invoice.isPaid ? null : (
+          <Button type='link' className='px-5' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
+            <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
+          </Button>
+        ),
+      },
     ];
 
     const modalInvoiceProps = {
@@ -167,6 +179,13 @@ class SubsidyProcessed extends React.Component {
       onSubmit: this.closeModalInvoice,
       onCancel: this.closeModalInvoice,
       invoice: selectedInvoice,
+    }
+
+    const modalPayProps = {
+      visible: visiblePay,
+      onSubmit: this.openModalPay,
+      onCancel: this.closeModalPay,
+      returnUrl,
     }
 
     return (
@@ -177,12 +196,13 @@ class SubsidyProcessed extends React.Component {
           dataSource={invoices}
           columns={columns}
           onRow={invoice => ({
-            onClick: () => this.openModalInvoice(invoice._id),
-            onDoubleClick: () => this.openModalInvoice(invoice._id),
+            onClick: (e) => e.target.className.includes('ant-table-cell') && this.openModalInvoice(invoice._id),
+            onDoubleClick: (e) => e.target.className.includes('ant-table-cell') && this.openModalInvoice(invoice._id),
           })}
           scroll={{ x: true }}
         />
         {visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
+        {visiblePay && <ModalPay {...modalPayProps} />}
       </div>
     );
   }
@@ -192,4 +212,4 @@ const mapStateToProps = state => ({
   auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps))(SubsidyProcessed);
+export default compose(connect(mapStateToProps, { getInvoiceList, setInvoiceList }))(ParentSubsidyList);

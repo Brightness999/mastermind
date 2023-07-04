@@ -163,6 +163,8 @@
   "routes.Createaccount.timesAvailable": "times you're available",
   "routes.Createaccount.level": "Level",
   "routes.Createaccount.subsidy": "Subsidy",
+  "routes.Createaccount.parentSubsidy": "Parent Subsidy",
+  "routes.Createaccount.parentSubsidyPaid": "Parent Subsidy Paid",
   "routes.Createaccount.providerInfo": "Provider info",
   "routes.Createaccount.ratesInfo": "Rates info",
   "routes.Createaccount.subsidyOptions": "Subsidy options",
