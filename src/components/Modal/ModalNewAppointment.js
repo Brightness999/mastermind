@@ -388,7 +388,7 @@ class ModalNewAppointment extends React.Component {
 
 			if (selectedSkill) {
 				const dependent = listDependents?.find(d => d._id === selectedDependent);
-				const subsidies = dependent?.subsidy?.filter(s => s.skillSet === selectedSkill && s.status === ADMINAPPROVED);
+				const subsidies = dependent?.subsidy?.filter(s => s.skillSet === selectedSkill && s.status === ADMINAPPROVED && s.selectedProviderFromAdmin === listProvider[providerIndex]._id);
 				if (subsidies?.length) {
 					const subsidyAppointments = dependent?.appointments?.filter(a => a.skillSet === selectedSkill && a.type === SUBSIDY && [PENDING, CLOSED].includes(a.status))?.length ?? 0;
 					const totalSessions = subsidies?.reduce((a, b) => a + b.numberOfSessions, 0);
