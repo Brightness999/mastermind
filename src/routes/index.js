@@ -31,6 +31,7 @@ import Notification from './User/Notifications';
 import ConsultationList from './User/ConsultationList';
 import CreateUser from './Administrator/CreateAccount';
 import InvoiceList from './User/Invoice';
+import SubsidyRequests from './User/SubsidyRequests';
 import Invoices from './Administrator/Invoice';
 
 const routesConfig = app => [
@@ -46,6 +47,7 @@ const routesConfig = app => [
       Notification(app),
       InvoiceList(app),
       ConsultationList(app),
+      SubsidyRequests(app),
     ]
   },
   {

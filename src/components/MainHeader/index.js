@@ -265,6 +265,10 @@ class MainHeader extends Component {
         data.action = 'User Manage';
         data.description = `Viewed ${intl.formatMessage(messages.consultationList)}`;
         break;
+      case intl.formatMessage(msgSidebar.subsidyManager):
+        data.action = 'User Manage';
+        data.description = `Viewed ${intl.formatMessage(msgSidebar.subsidyManager)}`;
+        break;
       default:
         break;
     }
@@ -326,6 +330,15 @@ class MainHeader extends Component {
       label: (
         <Link to={routerLinks.InvoiceList} onClick={() => this.handleClickLink(intl.formatMessage(messages.invoiceList))}>
           {intl.formatMessage(messages.invoiceList)}
+        </Link>
+      ),
+    });
+    PARENT === user?.role && items.splice(5, 0, {
+      key: '7',
+      icon: <FaFileInvoice size={18} color='#495057' />,
+      label: (
+        <Link to={routerLinks.SubsidyRequests} onClick={() => this.handleClickLink(intl.formatMessage(msgSidebar.subsidyManager))}>
+          {intl.formatMessage(msgSidebar.subsidyManager)}
         </Link>
       ),
     });
