@@ -162,6 +162,7 @@ class InfoReview extends Component {
 									<div><span className='font-700'>New client screening: </span>{registerData?.scheduling?.isNewClientScreening}</div>
 									{registerData?.scheduling?.isSeparateEvaluationRate ? <div><span className='font-700'>Evaluation duration: </span>{registerData?.scheduling?.separateEvaluationDuration}min</div> : null}
 									<div><span className='font-700'>CancellationWindow: </span>{registerData?.scheduling?.cancellationWindow}</div>
+									<div><span className='font-700'>Scheduling Limit: </span>{registerData?.scheduling?.durationValue ? `${registerData?.scheduling?.durationValue} ${registerData?.scheduling?.durationType}` : null}</div>
 								</div>
 								<div className='mt-10'>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.billingDetails)}</p>

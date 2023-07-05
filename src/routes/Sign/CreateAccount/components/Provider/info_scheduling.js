@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Select, Switch } from 'antd';
+import { Row, Col, Form, Button, Select, Switch, InputNumber } from 'antd';
 import moment from 'moment';
 import 'moment/locale/en-au';
 import intl from 'react-intl-universal';
@@ -9,7 +9,7 @@ import { compose } from 'redux'
 import messages from '../../messages';
 import messagesLogin from 'routes/Sign/Login/messages';
 import { setRegisterData } from 'src/redux/features/registerSlice';
-import { CancellationWindow, Durations } from 'routes/constant';
+import { CancellationWindow, DurationType, Durations } from 'routes/constant';
 
 moment.locale('en');
 
@@ -41,6 +41,8 @@ class InfoScheduling extends Component {
 			isSeparateEvaluationRate: true,
 			separateEvaluationDuration: undefined,
 			cancellationWindow: undefined,
+			durationType: 'days',
+			durationValue: undefined,
 		}
 	}
 
@@ -137,6 +139,44 @@ class InfoScheduling extends Component {
 									))}
 								</Select>
 							</Form.Item>
+						</Row>
+						<p className='mb-5'>Scheduling Limit</p>
+						<Row gutter={14}>
+							<Col xs={16} sm={16} md={16}>
+								<Form.Item
+									name='durationValue'
+									label={intl.formatMessage(messages.duration)}
+									className='bottom-0 float-label-item'
+									style={{ marginTop: 14 }}
+								>
+									<InputNumber
+										min={0}
+										onKeyDown={(e) => {
+											(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
+											if (e.key > -1 && e.key < 10 && e.target.value === '0') {
+												e.target.value = '';
+											}
+										}}
+										placeholder={intl.formatMessage(messages.duration)}
+										className='w-100'
+										onChange={value => this.setValueToReduxRegisterData("durationValue", value)}
+									/>
+								</Form.Item>
+							</Col>
+							<Col xs={8} sm={8} md={8}>
+								<Form.Item
+									name='durationType'
+									label={intl.formatMessage(messages.type)}
+									className='bottom-0 float-label-item'
+									style={{ marginTop: 14 }}
+								>
+									<Select placeholder={intl.formatMessage(messages.type)}>
+										{DurationType?.map((d, index) => (
+											<Select.Option key={index} value={d.value}>{d.label}</Select.Option>
+										))}
+									</Select>
+								</Form.Item>
+							</Col>
 						</Row>
 						<Form.Item className="form-btn continue-btn" >
 							<Button block type="primary" htmlType="submit">

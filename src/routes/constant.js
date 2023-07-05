@@ -100,6 +100,12 @@ export const ContactNumberType = [
   'Fax',
 ];
 
+export const DurationType = [
+  { label: 'Day', value: 'days' },
+  { label: 'Week', value: 'weeks' },
+  { label: 'Month', value: 'months' },
+];
+
 export const EmailType = [
   'Personal',
   'Work'
