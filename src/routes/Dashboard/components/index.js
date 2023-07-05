@@ -1163,7 +1163,7 @@ class Dashboard extends React.Component {
                   events={calendarEvents}
                   eventContent={(info) => renderEventContent(info, listAppointmentsRecent)}
                   eventClick={this.onShowDrawerDetail}
-                  dateClick={userRole !== 30 && this.handleClickDate}
+                  dateClick={this.handleClickDate}
                   eventResize={(info) => info.revert()}
                   eventDrop={this.handleEventDrop}
                   height="calc(100vh - 165px)"
