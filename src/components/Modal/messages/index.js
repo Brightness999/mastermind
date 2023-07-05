@@ -305,9 +305,9 @@ export default {
     id: `${scope}.daysPastDue`,
     defaultMessage: 'Days past due',
   },
-  scheduleConsultation: {
-    id: `${scope}.scheduleConsultation`,
-    defaultMessage: 'Schedule Consultation',
+  bookYourConsultation: {
+    id: `${scope}.bookYourConsultation`,
+    defaultMessage: 'Book Your Consultation',
   },
   createGoogleMeet: {
     id: `${scope}.createGoogleMeet`,
@@ -364,6 +364,18 @@ export default {
   schedule: {
     id: `${scope}.schedule`,
     defaultMessage: 'Schedule',
+  },
+  bookYourScreening: {
+    id: `${scope}.bookYourScreening`,
+    defaultMessage: 'Book Your Screening',
+  },
+  bookYourEvaluation: {
+    id: `${scope}.bookYourEvaluation`,
+    defaultMessage: 'Book Your Evaluation',
+  },
+  bookYourSession: {
+    id: `${scope}.bookYourSession`,
+    defaultMessage: 'Book Your Session',
   },
   screening: {
     id: `${scope}.screening`,

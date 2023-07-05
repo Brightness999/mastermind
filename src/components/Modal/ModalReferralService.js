@@ -551,7 +551,7 @@ class ModalReferralService extends React.Component {
 								{intl.formatMessage(messages.goBack).toUpperCase()}
 							</Button>
 							<Button key="submit" type="primary" htmlType='submit' loading={loadingSchedule}>
-								{intl.formatMessage(messages.scheduleConsultation).toUpperCase()}
+								{intl.formatMessage(messages.bookYourConsultation).toUpperCase()}
 							</Button>
 						</Row>
 					</Form>

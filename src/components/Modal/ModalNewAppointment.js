@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Form, message, Spin } from 'antd';
+import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Form, message, Spin, Dropdown } from 'antd';
 import { BiChevronLeft, BiChevronRight, BiSearch } from 'react-icons/bi';
 import { BsCheck } from 'react-icons/bs';
 import { GoPrimitiveDot } from 'react-icons/go';
@@ -10,6 +10,7 @@ import moment from 'moment';
 import 'moment/locale/en-au';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { DownOutlined } from '@ant-design/icons';
 
 import messages from './messages';
 import msgCreateAccount from 'src/routes/Sign/CreateAccount/messages';
@@ -159,8 +160,9 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	createAppointment = (data) => {
-		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration, standardRate, subsidizedRate, subsidyAvailable, isSubsidyOnly } = this.state;
+		const { selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration, standardRate, subsidizedRate } = this.state;
 		const { durations, listDependents } = this.props;
+		const appointmentType = data?.isEvaluation ? EVALUATION : this.state.appointmentType;
 
 		if (selectedProvider == undefined) {
 			this.setState({ providerErrorMessage: intl.formatMessage(messages.selectProvider) })
@@ -199,7 +201,7 @@ class ModalNewAppointment extends React.Component {
 		if (appointmentType === EVALUATION) {
 			this.setState({
 				visibleModalConfirm: true,
-				confirmMessage: (<span><span className='text-bold'>{listProvider[selectedProviderIndex]?.firstName ?? ''} {listProvider[selectedProviderIndex]?.lastName ?? ''}</span> requires a <span className='text-bold'>{durations?.find(a => a.value == postData?.duration)?.label}</span> evaluation. Please proceed to schedule.</span>)
+				confirmMessage: (<span><span className='text-bold'>{listProvider[selectedProviderIndex]?.firstName ?? ''} {listProvider[selectedProviderIndex]?.lastName ?? ''}</span> requires a <span className='text-bold'>{durations?.find(a => a.value == postData?.duration)?.label}</span> evaluation. Please proceed to schedule.</span>),
 			});
 		} else {
 			this.requestCreateAppointment(postData);
@@ -208,7 +210,7 @@ class ModalNewAppointment extends React.Component {
 
 	onConfirmEvaluation = () => {
 		this.onCloseModalConfirm();
-		const { appointmentType, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration } = this.state;
+		const { selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration } = this.state;
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
 		const postData = {
@@ -219,7 +221,7 @@ class ModalNewAppointment extends React.Component {
 			location: address,
 			notes: notes,
 			duration: duration,
-			type: appointmentType,
+			type: EVALUATION,
 			status: 0,
 			rate: listProvider[selectedProviderIndex]?.separateEvaluationRate ?? 0,
 		};
@@ -228,7 +230,7 @@ class ModalNewAppointment extends React.Component {
 
 	handleChangeAddress = address => {
 		const { searchKey, selectedSkill, selectedDependent } = this.state;
-		this.setState({ address: address, subsidyAvailable: false, isSubsidyOnly: false });
+		this.setState({ address: address, subsidyAvailable: false, isSubsidyOnly: false, appointmentType: APPOINTMENT });
 		this.searchProvider(searchKey, address, selectedSkill, selectedDependent);
 	};
 
@@ -422,7 +424,6 @@ class ModalNewAppointment extends React.Component {
 
 	requestCreateAppointment(postData) {
 		const { appointments, appointmentsInMonth, onSubmit, setAppointments, setAppointmentsInMonth } = this.props;
-		const { appointmentType } = this.state;
 		this.setState({ loadingSchedule: true });
 		request.post(createAppointmentForParent, postData).then(result => {
 			this.setState({ loadingSchedule: false });
@@ -431,7 +432,7 @@ class ModalNewAppointment extends React.Component {
 				this.setState({ errorMessage: '' });
 				setAppointments([...appointments, data]);
 				setAppointmentsInMonth([...appointmentsInMonth, data]);
-				onSubmit(appointmentType);
+				onSubmit(postData.type);
 			} else {
 				this.setState({ errorMessage: data });
 			}
@@ -447,7 +448,7 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	handleSelectDependent = (dependentId) => {
-		const { searchKey, address, selectedSkill } = this.state;
+		const { searchKey } = this.state;
 		const { listDependents } = this.props;
 		this.setState({
 			selectedDependent: dependentId,
@@ -455,13 +456,17 @@ class ModalNewAppointment extends React.Component {
 			addressOptions: listDependents?.find(dependent => dependent._id === dependentId)?.school?.name ? [DEPENDENTHOME, PROVIDEROFFICE, listDependents?.find(dependent => dependent._id === dependentId)?.school?.name] : [DEPENDENTHOME, PROVIDEROFFICE],
 			subsidyAvailable: false,
 			isSubsidyOnly: false,
+			appointmentType: APPOINTMENT,
+			address: undefined,
+			selectedSkill: undefined,
 		});
-		this.searchProvider(searchKey, address, selectedSkill, dependentId);
+		this.searchProvider(searchKey, undefined, undefined, dependentId);
+		this.form.setFieldsValue({ address: undefined, skill: undefined });
 	}
 
 	handleSelectSkill = (skill) => {
 		const { searchKey, address, selectedDependent } = this.state;
-		this.setState({ selectedSkill: skill, subsidyAvailable: false, isSubsidyOnly: false });
+		this.setState({ selectedSkill: skill, subsidyAvailable: false, isSubsidyOnly: false, appointmentType: APPOINTMENT });
 		this.searchProvider(searchKey, address, skill, selectedDependent);
 	}
 
@@ -511,7 +516,6 @@ class ModalNewAppointment extends React.Component {
 			subsidizedRate,
 			visibleModalScreening,
 			selectedDependent,
-			subsidyAvailable,
 			restSessions,
 			loadingSearchProvider,
 			notes,
@@ -550,7 +554,7 @@ class ModalNewAppointment extends React.Component {
 		return (
 			<Modal {...modalProps}>
 				<div className='new-appointment'>
-					<Form onFinish={() => appointmentType === SCREEN ? this.onOpenModalScreening() : this.createAppointment()} layout='vertical'>
+					<Form onFinish={() => appointmentType === SCREEN ? this.onOpenModalScreening() : this.createAppointment()} layout='vertical' ref={ref => this.form = ref}>
 						<div className='flex gap-5 items-center'>
 							<p className='font-30 mb-10'>{(appointmentType === APPOINTMENT || appointmentType === SUBSIDY) && intl.formatMessage(messages.newAppointment)}{appointmentType === EVALUATION && intl.formatMessage(messages.newEvaluation)}{appointmentType === SCREEN && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType === EVALUATION && selectedProviderIndex > -1 && (
@@ -653,7 +657,7 @@ class ModalNewAppointment extends React.Component {
 									</Col>
 								</Row>
 								<div className='doctor-list' onWheel={(e) => this.scrollElement.current.scrollLeft += e.deltaY / 2} ref={this.scrollElement}>
-									{loadingSearchProvider ? <Spin spinning={loadingSearchProvider} /> : listProvider?.length > 0 ? listProvider?.map((provider, index) => (
+									{loadingSearchProvider ? <Spin spinning={loadingSearchProvider} size='large' className='p-10' /> : listProvider?.length > 0 ? listProvider?.map((provider, index) => (
 										<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
 											<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
 											<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
@@ -811,13 +815,36 @@ class ModalNewAppointment extends React.Component {
 							<Button key="back" onClick={this.props.onCancel}>
 								{intl.formatMessage(messages.goBack).toUpperCase()}
 							</Button>
-							<Button key="submit" type="primary" htmlType='submit' loading={loadingSchedule}>
-								{intl.formatMessage(messages.schedule)?.toUpperCase()}
-							</Button>
+							{(appointmentType === APPOINTMENT || appointmentType === SUBSIDY) && listProvider[selectedProviderIndex]?.separateEvaluationDuration ? (
+								<Dropdown.Button
+									loading={loadingSchedule}
+									icon={<DownOutlined />}
+									type='primary'
+									htmlType='submit'
+									style={{ width: 'auto' }}
+									placement='topRight'
+									trigger='click'
+									menu={{
+										items: [
+											{
+												label: intl.formatMessage(messages.bookYourEvaluation),
+												key: '1',
+												onClick: () => this.createAppointment({ isEvaluation: true }),
+											},
+										]
+									}}
+								>
+									{intl.formatMessage(messages.bookYourSession)}
+								</Dropdown.Button>
+							) : (
+								<Button key="submit" type="primary" htmlType='submit' loading={loadingSchedule}>
+									{intl.formatMessage(appointmentType === 1 ? messages.bookYourScreening : appointmentType === 2 ? messages.bookYourEvaluation : messages.bookYourSession)?.toUpperCase()}
+								</Button>
+							)}
 						</Row>
 					</Form>
 				</div>
-			</Modal>
+			</Modal >
 		);
 	}
 };
