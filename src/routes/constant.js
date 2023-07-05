@@ -107,3 +107,21 @@ export const EmailType = [
 
 export const DEPENDENTHOME = 'Dependent Home';
 export const PROVIDEROFFICE = 'Provider Office';
+
+export const CancellationWindow = [
+  { label: '12 hrs', value: 12 },
+  { label: '24 hrs', value: 24 },
+];
+
+export const Durations = [
+  { label: '15 mins', value: 15 },
+  { label: '30 mins', value: 30 },
+  { label: '45 mins', value: 45 },
+  { label: '1 hr', value: 60 },
+  { label: '1.5 hrs', value: 90 },
+  { label: '2 hrs', value: 120 },
+  { label: '2.5 hrs', value: 150 },
+  { label: '3 hrs', value: 180 },
+  { label: '3.5 hrs', value: 210 },
+  { label: '4 hrs', value: 240 },
+];

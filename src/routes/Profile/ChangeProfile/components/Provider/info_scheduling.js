@@ -5,10 +5,11 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 
 import messages from 'routes/Sign/CreateAccount/messages';
-import { getDefaultValueForProvider, getMyProviderInfo, getUserProfile } from 'utils/api/apiList';
+import { getMyProviderInfo, getUserProfile } from 'utils/api/apiList';
 import request from 'utils/api/request';
 import { setInforProvider } from 'src/redux/features/authSlice';
 import PageLoading from 'components/Loading/PageLoading';
+import { CancellationWindow, Durations } from 'routes/constant';
 
 class InfoScheduling extends Component {
 	state = {
@@ -21,7 +22,6 @@ class InfoScheduling extends Component {
 
 	componentDidMount() {
 		this.setState({ loading: true });
-		this.getDataFromServer();
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(result => {
 				this.setState({ loading: false });
@@ -55,28 +55,6 @@ class InfoScheduling extends Component {
 		}
 	}
 
-	getDataFromServer = () => {
-		request.post(getDefaultValueForProvider).then(result => {
-			const { success, data } = result;
-			if (success) {
-				this.setState({
-					durations: data?.durations,
-					cancellationWindow: data?.CancellationWindow,
-				})
-			} else {
-				this.setState({
-					durations: [],
-					cancellationWindow: [],
-				});
-			}
-		}).catch(err => {
-			this.setState({
-				durations: [],
-				cancellationWindow: [],
-			});
-		})
-	}
-
 	onFinish = (values) => {
 		try {
 			this.props.dispatch(setInforProvider({
@@ -89,7 +67,7 @@ class InfoScheduling extends Component {
 	};
 
 	render() {
-		const { durations, cancellationWindow, isSeparateEvaluationRate, isNewClientScreening, loading } = this.state;
+		const { isSeparateEvaluationRate, isNewClientScreening, loading } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -110,7 +88,7 @@ class InfoScheduling extends Component {
 							className='w-100 float-label-item'
 						>
 							<Select placeholder={intl.formatMessage(messages.standardSessionDuration)}>
-								{durations?.map((duration, index) => (
+								{Durations?.map((duration, index) => (
 									<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
 								))}
 							</Select>
@@ -146,7 +124,7 @@ class InfoScheduling extends Component {
 									rules={[{ required: isSeparateEvaluationRate }]}
 								>
 									<Select placeholder={intl.formatMessage(messages.duration)}>
-										{durations?.map((duration, index) => (
+										{Durations?.map((duration, index) => (
 											<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
 										))}
 									</Select>
@@ -161,7 +139,7 @@ class InfoScheduling extends Component {
 								className='w-100 float-label-item'
 							>
 								<Select placeholder={intl.formatMessage(messages.cancellationWindow)}>
-									{cancellationWindow?.map((c, index) => (
+									{CancellationWindow?.map((c, index) => (
 										<Select.Option key={index} value={c.value}>{c.label}</Select.Option>
 									))}
 								</Select>

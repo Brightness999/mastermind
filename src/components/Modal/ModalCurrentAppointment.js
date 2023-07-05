@@ -16,7 +16,7 @@ import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import msgDrawer from 'components/DrawerDetail/messages';
 import request from 'utils/api/request';
 import { rescheduleAppointmentForParent } from 'utils/api/apiList';
-import { APPOINTMENT, CLOSED, CONSULTATION, DEPENDENTHOME, EVALUATION, PENDING, PROVIDEROFFICE, SCREEN, SUBSIDY } from 'routes/constant';
+import { APPOINTMENT, CLOSED, CONSULTATION, DEPENDENTHOME, Durations, EVALUATION, PENDING, PROVIDEROFFICE, SCREEN, SUBSIDY } from 'routes/constant';
 import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
 import './style/index.less';
 import '../../assets/styles/login.less';
@@ -204,7 +204,6 @@ class ModalCurrentAppointment extends React.Component {
 
 	handleReschedule = () => {
 		const { selectedDate, address, notes, selectedTimeIndex, arrTime } = this.state;
-		const { durations } = this.props.auth;
 		const { appointments, appointmentsMonth, event, isFeeToParent } = this.props;
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
@@ -256,7 +255,7 @@ class ModalCurrentAppointment extends React.Component {
 				this.props.setAppointmentsInMonth(newAppointmentsInMonth);
 
 				if (event?.type == EVALUATION) {
-					message.success(`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''} requires a ${durations?.find(a => a.value == this.state.duration)?.label} evaluation. Please proceed to schedule.`);
+					message.success(`${event?.provider?.firstName ?? ''} ${event?.provider?.lastName ?? ''} requires a ${Durations?.find(a => a.value == this.state.duration)?.label} evaluation. Please proceed to schedule.`);
 				} else {
 					message.success('Successfully Rescheduled');
 				}
@@ -362,7 +361,7 @@ class ModalCurrentAppointment extends React.Component {
 							<p className='font-30 mb-10'>{event?.type == APPOINTMENT && intl.formatMessage(messages.newAppointment)}{event?.type === EVALUATION && intl.formatMessage(messages.newEvaluation)}{event?.type === SCREEN && intl.formatMessage(messages.newScreening)}</p>
 							{event?.type === EVALUATION && (
 								<div className='font-20'>
-									<div>{auth.durations?.find(a => a.value == event?.provider?.separateEvaluationDuration)?.label} evaluation</div>
+									<div>{Durations?.find(a => a.value == event?.provider?.separateEvaluationDuration)?.label} evaluation</div>
 									<div>Rate: ${event?.provider?.separateEvaluationRate}</div>
 								</div>
 							)}

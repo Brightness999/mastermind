@@ -13,13 +13,13 @@ import { compose } from 'redux';
 import { DownOutlined } from '@ant-design/icons';
 
 import messages from './messages';
-import msgCreateAccount from 'src/routes/Sign/CreateAccount/messages';
-import request from 'src/utils/api/request'
-import { createAppointmentForParent, searchProvidersForAdmin } from 'src/utils/api/apiList';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
+import request from 'utils/api/request'
+import { createAppointmentForParent, searchProvidersForAdmin } from 'utils/api/apiList';
 import ModalNewScreening from './ModalNewScreening';
 import ModalConfirm from './ModalConfirm';
 import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
-import { ADMINAPPROVED, APPOINTMENT, CLOSED, DEPENDENTHOME, EVALUATION, PENDING, PROVIDEROFFICE, SCREEN, SUBSIDY } from 'src/routes/constant';
+import { ADMINAPPROVED, APPOINTMENT, CLOSED, DEPENDENTHOME, Durations, EVALUATION, PENDING, PROVIDEROFFICE, SCREEN, SUBSIDY } from 'routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -161,7 +161,7 @@ class ModalNewAppointment extends React.Component {
 
 	createAppointment = (data) => {
 		const { selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration, standardRate, subsidizedRate } = this.state;
-		const { durations, listDependents } = this.props;
+		const { listDependents } = this.props;
 		const appointmentType = data?.isEvaluation ? EVALUATION : this.state.appointmentType;
 
 		if (selectedProvider == undefined) {
@@ -201,7 +201,7 @@ class ModalNewAppointment extends React.Component {
 		if (appointmentType === EVALUATION) {
 			this.setState({
 				visibleModalConfirm: true,
-				confirmMessage: (<span><span className='text-bold'>{listProvider[selectedProviderIndex]?.firstName ?? ''} {listProvider[selectedProviderIndex]?.lastName ?? ''}</span> requires a <span className='text-bold'>{durations?.find(a => a.value == postData?.duration)?.label}</span> evaluation. Please proceed to schedule.</span>),
+				confirmMessage: (<span><span className='text-bold'>{listProvider[selectedProviderIndex]?.firstName ?? ''} {listProvider[selectedProviderIndex]?.lastName ?? ''}</span> requires a <span className='text-bold'>{Durations?.find(a => a.value == postData?.duration)?.label}</span> evaluation. Please proceed to schedule.</span>),
 			});
 		} else {
 			this.requestCreateAppointment(postData);
@@ -526,7 +526,7 @@ class ModalNewAppointment extends React.Component {
 			cancellationFee,
 			loadingSchedule,
 		} = this.state;
-		const { durations, listDependents } = this.props;
+		const { listDependents } = this.props;
 		const modalProps = {
 			className: 'modal-new',
 			title: "",
@@ -559,7 +559,7 @@ class ModalNewAppointment extends React.Component {
 							<p className='font-30 mb-10'>{(appointmentType === APPOINTMENT || appointmentType === SUBSIDY) && intl.formatMessage(messages.newAppointment)}{appointmentType === EVALUATION && intl.formatMessage(messages.newEvaluation)}{appointmentType === SCREEN && intl.formatMessage(messages.newScreening)}</p>
 							{appointmentType === EVALUATION && selectedProviderIndex > -1 && (
 								<div className='font-20'>
-									<div>{durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
+									<div>{Durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
 									<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
 								</div>
 							)}
@@ -850,7 +850,6 @@ class ModalNewAppointment extends React.Component {
 };
 
 const mapStateToProps = state => ({
-	durations: state.auth.durations,
 	appointments: state.appointments.dataAppointments,
 	appointmentsInMonth: state.appointments.dataAppointmentsMonth,
 });

@@ -9,6 +9,7 @@ import { compose } from 'redux'
 import messages from '../../messages';
 import messagesLogin from 'routes/Sign/Login/messages';
 import { setRegisterData } from 'src/redux/features/registerSlice';
+import { CancellationWindow, Durations } from 'routes/constant';
 
 moment.locale('en');
 
@@ -60,7 +61,6 @@ class InfoScheduling extends Component {
 
 	render() {
 		const { isSeparateEvaluationRate, isNewClientScreening } = this.state;
-		const { durations, cancellationWindow } = this.props.auth.generalData;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -81,7 +81,7 @@ class InfoScheduling extends Component {
 							className='w-100'
 						>
 							<Select placeholder={intl.formatMessage(messages.duration)} onChange={duration => this.setValueToReduxRegisterData("duration", duration)}>
-								{durations?.map((duration, index) => (
+								{Durations?.map((duration, index) => (
 									<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
 								))}
 							</Select>
@@ -117,7 +117,7 @@ class InfoScheduling extends Component {
 									rules={[{ required: isSeparateEvaluationRate, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.duration) }]}
 								>
 									<Select placeholder={intl.formatMessage(messages.duration)} onChange={separateEvaluationDuration => this.setValueToReduxRegisterData("separateEvaluationDuration", separateEvaluationDuration)}>
-										{durations?.map((duration, index) => (
+										{Durations?.map((duration, index) => (
 											<Select.Option key={index} value={duration.value}>{duration.label}</Select.Option>
 										))}
 									</Select>
@@ -132,7 +132,7 @@ class InfoScheduling extends Component {
 								className='w-100'
 							>
 								<Select placeholder={intl.formatMessage(messages.cancellationWindow)} onChange={cancellationWindow => this.setValueToReduxRegisterData("cancellationWindow", cancellationWindow)}>
-									{cancellationWindow?.map((c, index) => (
+									{CancellationWindow?.map((c, index) => (
 										<Select.Option key={index} value={c.value}>{c.label}</Select.Option>
 									))}
 								</Select>
