@@ -65,7 +65,7 @@ const SubsidyManager = (props) => {
   }
 
   const handleChangeTab = v => {
-    if (v === '1' || v === '5') {
+    if (['0', '1', '5'].includes(v)) {
       setRequests(props.listSubsidy?.filter(s => s.status == v));
     } else if (v === '2') {
       setRequests(props.listSubsidy?.filter(s => s.status == v && s.isAppeal < 1));
