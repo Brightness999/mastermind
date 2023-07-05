@@ -174,7 +174,7 @@ class MainHeader extends Component {
       type: 'info',
       message: 'New Appointment',
       duration: 10,
-      description: `A parent has sent 1 ${data.type === SCREEN ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data.type === EVALUATION ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data.type === APPOINTMENT ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data.type === CONSULTATION ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''}.`,
+      description: `1 ${data.type === SCREEN ? intl.formatMessage(msgModal.screening).toLocaleLowerCase() : data.type === EVALUATION ? intl.formatMessage(msgModal.evaluation).toLocaleLowerCase() : data.type === APPOINTMENT ? intl.formatMessage(msgModal.appointment).toLocaleLowerCase() : data.type === CONSULTATION ? intl.formatMessage(msgModal.consultation).toLocaleLowerCase() : data.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession).toLocaleLowerCase() : ''} has been created.`,
       onClick: () => notification.destroy(),
     });
   }
