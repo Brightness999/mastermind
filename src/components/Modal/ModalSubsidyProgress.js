@@ -9,7 +9,7 @@ import { AiFillWarning } from 'react-icons/ai';
 
 import messages from './messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
-import msgDashboard from 'routes/Dashboard/messages';
+import msgDashboard from 'routes/User/Dashboard/messages';
 import msgDrawer from '../DrawerDetail/messages';
 import request from 'utils/api/request'
 import { url, switchPathWithRole } from 'utils/api/baseUrl'

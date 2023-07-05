@@ -8,11 +8,11 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { SearchOutlined } from '@ant-design/icons';
 import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
-
-import messages from '../../../Dashboard/messages';
-import msgCreateAccount from '../../../Sign/CreateAccount/messages';
-import msgModal from '../../../../components/Modal/messages';
 import { AiFillWarning } from 'react-icons/ai';
+
+import messages from 'routes/User/Dashboard/messages';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
+import msgModal from 'components/Modal/messages';
 
 const SchoolApproved = (props) => {
   const type = 'DraggableBodyRow';

@@ -6,9 +6,9 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 
 import messages from '../../messages';
-import msgLogin from '../../../Login/messages';
-import msgModal from '../../../../../components/Modal/messages';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import msgLogin from 'routes/Sign/Login/messages';
+import msgModal from 'components/Modal/messages';
+import { setRegisterData } from 'src/redux/features/registerSlice';
 
 class SubsidyProgram extends Component {
 	state = {

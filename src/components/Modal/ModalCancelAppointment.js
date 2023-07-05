@@ -3,7 +3,7 @@ import { Modal, Button } from 'antd';
 import intl from 'react-intl-universal';
 
 import messages from './messages';
-import { APPOINTMENT, CONSULTATION, EVALUATION, SCREEN, SUBSIDY } from '../../routes/constant';
+import { APPOINTMENT, CONSULTATION, EVALUATION, SCREEN, SUBSIDY } from 'routes/constant';
 import './style/index.less';
 
 class ModalCancelAppointment extends React.Component {

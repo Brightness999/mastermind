@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 
 import messages from './messages';
-import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import { ACTIVE, ADMIN, APPOINTMENT, CLEAR, CLOSED, EVALUATION, NOFLAG, PARENT, PROVIDER, SUBSIDY, SUPERADMIN } from '../../routes/constant';
 
 class ModalBalance extends React.Component {

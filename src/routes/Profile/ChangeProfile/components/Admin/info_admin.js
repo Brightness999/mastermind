@@ -4,11 +4,11 @@ import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import messages from '../../../../Sign/CreateAccount/messages';
-import messagesLogin from '../../../../Sign/Login/messages';
-import request from '../../../../../utils/api/request';
-import { getAdminInfo, getCityConnections, getUserProfile, updateAdminInfo } from '../../../../../utils/api/apiList';
-import PageLoading from '../../../../../components/Loading/PageLoading';
+import messages from 'routes/Sign/CreateAccount/messages';
+import messagesLogin from 'routes/Sign/Login/messages';
+import request from 'utils/api/request';
+import { getAdminInfo, getCityConnections, getUserProfile, updateAdminInfo } from 'utils/api/apiList';
+import PageLoading from 'components/Loading/PageLoading';
 
 class InfoAdmin extends React.Component {
   constructor(props) {

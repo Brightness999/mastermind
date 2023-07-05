@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 
 import messages from './messages';
-import msgMainHeader from 'src/components/MainHeader/messages';
+import msgMainHeader from 'components/MainHeader/messages';
 import { routerLinks } from 'routes/constant';
 import { socketUrl, socketUrlJSFile } from 'utils/api/baseUrl';
 import './style/index.less';

@@ -5,13 +5,13 @@ import intl from 'react-intl-universal';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 
-import messages from '../../../../Sign/CreateAccount/messages';
-import msgLogin from '../../../../Sign/Login/messages';
-import msgModal from '../../../../../components/Modal/messages';
-import { setInforProvider } from '../../../../../redux/features/authSlice';
-import request from '../../../../../utils/api/request';
-import { getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
-import PageLoading from '../../../../../components/Loading/PageLoading';
+import messages from 'routes/Sign/CreateAccount/messages';
+import msgLogin from 'routes/Sign/Login/messages';
+import msgModal from 'components/Modal/messages';
+import { setInforProvider } from 'src/redux/features/authSlice';
+import request from 'utils/api/request';
+import { getMyProviderInfo, getUserProfile } from 'utils/api/apiList';
+import PageLoading from 'components/Loading/PageLoading';
 
 class SubsidyProgram extends Component {
 	state = {

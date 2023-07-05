@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 
 import messages from './messages';
-import { APPOINTMENT, CLEAR, EVALUATION, NOFLAG, PARENT, SUBSIDY } from '../../routes/constant';
+import { APPOINTMENT, CLEAR, EVALUATION, NOFLAG, PARENT, SUBSIDY } from 'routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 

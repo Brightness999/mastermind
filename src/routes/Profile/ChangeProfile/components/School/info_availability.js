@@ -8,11 +8,11 @@ import { compose } from 'redux';
 import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
 
-import messages from '../../../../Sign/CreateAccount/messages';
-import { getMySchoolInfo, getUserProfile, updateSchoolAvailability } from '../../../../../utils/api/apiList'
-import request from '../../../../../utils/api/request';
-import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from '../../../../../routes/constant';
-import PageLoading from '../../../../../components/Loading/PageLoading';
+import messages from 'routes/Sign/CreateAccount/messages';
+import { getMySchoolInfo, getUserProfile, updateSchoolAvailability } from 'utils/api/apiList'
+import request from 'utils/api/request';
+import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from 'routes/constant';
+import PageLoading from 'components/Loading/PageLoading';
 
 const day_week = [
 	{

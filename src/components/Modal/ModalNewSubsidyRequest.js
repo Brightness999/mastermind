@@ -5,11 +5,11 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 
 import messages from './messages';
-import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import msgLogin from '../../routes/Sign/Login/messages';
-import request from '../../utils/api/request'
-import { url } from '../../utils/api/baseUrl'
-import { createSubsidyRequest, getAllSchoolsForParent } from '../../utils/api/apiList';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
+import msgLogin from 'routes/Sign/Login/messages';
+import request from 'utils/api/request'
+import { url } from 'utils/api/baseUrl'
+import { createSubsidyRequest, getAllSchoolsForParent } from 'utils/api/apiList';
 import './style/index.less';
 
 class ModalNewSubsidyRequest extends React.Component {

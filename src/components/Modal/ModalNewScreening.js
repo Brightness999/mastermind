@@ -6,8 +6,8 @@ import 'moment/locale/en-au';
 import TextArea from 'antd/lib/input/TextArea';
 
 import messages from './messages';
-import msgLogin from '../../routes/Sign/Login/messages';
-import { store } from '../../redux/store';
+import msgLogin from 'routes/Sign/Login/messages';
+import { store } from 'src/redux/store';
 import './style/index.less';
 import '../../assets/styles/login.less';
 

@@ -7,10 +7,10 @@ import moment from 'moment';
 import { CheckCircleTwoTone, CloseCircleTwoTone, DeleteTwoTone, DownloadOutlined, EditTwoTone, PrinterTwoTone, SendOutlined } from '@ant-design/icons';
 
 import messages from './messages';
-import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import { downloadInvoice, sendEmailInvoice } from '../../utils/api/apiList';
-import request from '../../utils/api/request';
-import { APPOINTMENT, CLOSED, EVALUATION, NOSHOW, PENDING, SUBSIDY } from '../../routes/constant';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
+import { downloadInvoice, sendEmailInvoice } from 'utils/api/apiList';
+import request from 'utils/api/request';
+import { APPOINTMENT, CLOSED, EVALUATION, NOSHOW, PENDING, SUBSIDY } from 'routes/constant';
 
 class ModalInvoice extends React.Component {
 	constructor(props) {

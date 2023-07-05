@@ -5,12 +5,12 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { BsDashCircle, BsPlusCircle } from 'react-icons/bs';
 
-import messages from '../../../../Sign/CreateAccount/messages';
-import messagesLogin from '../../../../Sign/Login/messages';
-import { setInforProvider } from '../../../../../redux/features/authSlice';
-import { getDefaultValueForProvider, getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
-import request from '../../../../../utils/api/request';
-import PageLoading from '../../../../../components/Loading/PageLoading';
+import messages from 'routes/Sign/CreateAccount/messages';
+import messagesLogin from 'routes/Sign/Login/messages';
+import { setInforProvider } from 'src/redux/features/authSlice';
+import { getDefaultValueForProvider, getMyProviderInfo, getUserProfile } from 'utils/api/apiList';
+import request from 'utils/api/request';
+import PageLoading from 'components/Loading/PageLoading';
 
 class InfoServices extends Component {
 	constructor(props) {

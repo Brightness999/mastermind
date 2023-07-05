@@ -1,11 +1,13 @@
 import React from 'react';
 import { Row, Form, Button, Input } from 'antd';
 import intl from 'react-intl-universal';
+
 import messages from '../messages';
-import msgLogin from '../../Login/messages';
+import msgLogin from 'routes/Sign/Login/messages';
+import request from 'utils/api/request';
+import { changePassword } from 'utils/api/apiList';
 import './index.less';
-import request from '../../../../utils/api/request';
-import { changePassword } from '../../../../utils/api/apiList';
+
 const notCheck = 0;
 const valid = 1;
 const invalid = -1;

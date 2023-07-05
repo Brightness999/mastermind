@@ -15,7 +15,7 @@ import { AiFillTag, AiOutlineUserSwitch } from 'react-icons/ai';
 import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalPay, ModalPayment, ModalProcessAppointment } from 'components/Modal';
 import messages from './messages';
 import msgModal from 'components/Modal/messages';
-import msgDashboard from 'routes/Dashboard/messages';
+import msgDashboard from 'routes/User/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import request, { encryptParam } from 'utils/api/request';
 import { setAppointments, setAppointmentsInMonth, getInvoiceList } from 'src/redux/features/appointmentsSlice';

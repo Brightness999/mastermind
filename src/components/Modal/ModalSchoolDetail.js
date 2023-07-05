@@ -5,7 +5,6 @@ import * as MultiDatePicker from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel"
 import moment from 'moment';
 import PlacesAutocomplete from 'react-places-autocomplete';
-import { BsDashCircle } from 'react-icons/bs';
 
 import messages from './messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';

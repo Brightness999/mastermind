@@ -3,11 +3,12 @@ import { Row, Form, Button, Input, Select, message } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+
 import messages from '../../messages';
-import messagesLogin from '../../../../Sign/Login/messages';
-import request from '../../../../../utils/api/request';
-import { getCityConnections, userSignUp } from '../../../../../utils/api/apiList';
-import { removeRegisterData, setRegisterData } from '../../../../../redux/features/registerSlice';
+import messagesLogin from 'routes/Sign/Login/messages';
+import request from 'utils/api/request';
+import { getCityConnections, userSignUp } from 'utils/api/apiList';
+import { removeRegisterData, setRegisterData } from 'src/redux/features/registerSlice';
 
 class AdminInfo extends React.Component {
   constructor(props) {

@@ -8,7 +8,7 @@ import { compose } from 'redux';
 
 import { ModalInvoice } from 'components/Modal';
 import msgMainHeader from 'components/MainHeader/messages';
-import messages from 'routes/Dashboard/messages';
+import messages from 'routes/User/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 
 class SubsidyProcessed extends React.Component {

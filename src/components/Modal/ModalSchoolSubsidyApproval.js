@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 
 import messages from './messages';
-import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
 

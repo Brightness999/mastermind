@@ -6,8 +6,8 @@ import moment from 'moment';
 import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
 
-import messages from '../../../Dashboard/messages';
-import msgCreateAccount from '../../../Sign/CreateAccount/messages';
+import messages from 'routes/User/Dashboard/messages';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 
 const AdminApproved = (props) => {
   const { skills, grades, requests, schools } = props;

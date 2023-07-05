@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Button, Input } from 'antd';
 import intl from 'react-intl-universal';
 import messages from './messages';
-import msgForgotPass from '../../routes/Sign/ForgotPass/messages';
+import msgForgotPass from 'routes/Sign/ForgotPass/messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
 

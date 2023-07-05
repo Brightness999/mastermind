@@ -6,7 +6,7 @@ import { compose } from 'redux';
 import Cookies from 'js-cookie';
 
 import mgsSidebar from 'components/SideBar/messages';
-import messages from 'routes/Dashboard/messages';
+import messages from 'routes/User/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import msgModal from 'components/Modal/messages';
 import request from 'utils/api/request'

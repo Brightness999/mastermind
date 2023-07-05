@@ -5,13 +5,14 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { BsCheck, BsDot, BsX } from 'react-icons/bs';
 import intl from 'react-intl-universal';
+
 import messages from '../messages';
 import messagesLogin from '../../Login/messages';
-import { setRegisterData } from '../../../../redux/features/registerSlice';
-import { setGeneralData } from '../../../../redux/features/authSlice';
-import { checkEmailRegistered, getDataForCreatingUser } from '../../../../utils/api/apiList';
+import { setRegisterData } from 'src/redux/features/registerSlice';
+import { setGeneralData } from 'src/redux/features/authSlice';
+import { checkEmailRegistered, getDataForCreatingUser } from 'utils/api/apiList';
+import request from 'utils/api/request';
 import './index.less';
-import request from '../../../../utils/api/request';
 
 const notCheck = 0;
 const valid = 1;

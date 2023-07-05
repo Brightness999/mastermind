@@ -4,11 +4,11 @@ import intl from 'react-intl-universal';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 
-import messages from '../../../../Sign/CreateAccount/messages';
-import { getDefaultValueForProvider, getMyProviderInfo, getUserProfile } from '../../../../../utils/api/apiList';
-import request from '../../../../../utils/api/request';
-import { setInforProvider } from '../../../../../redux/features/authSlice';
-import PageLoading from '../../../../../components/Loading/PageLoading';
+import messages from 'routes/Sign/CreateAccount/messages';
+import { getDefaultValueForProvider, getMyProviderInfo, getUserProfile } from 'utils/api/apiList';
+import request from 'utils/api/request';
+import { setInforProvider } from 'src/redux/features/authSlice';
+import PageLoading from 'components/Loading/PageLoading';
 
 class InfoScheduling extends Component {
 	state = {

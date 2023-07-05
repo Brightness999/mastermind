@@ -5,12 +5,12 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import PlacesAutocomplete from 'react-places-autocomplete';
 
-import messages from '../../../../Sign/CreateAccount/messages';
-import messagesLogin from '../../../../Sign/Login/messages';
-import request from '../../../../../utils/api/request';
-import { setInforClientParent, setUser } from '../../../../../redux/features/authSlice';
-import { getDefaultValueForClient, getUserProfile } from '../../../../../utils/api/apiList';
-import PageLoading from '../../../../../components/Loading/PageLoading';
+import messages from 'routes/Sign/CreateAccount/messages';
+import messagesLogin from 'routes/Sign/Login/messages';
+import request from 'utils/api/request';
+import { setInforClientParent, setUser } from 'src/redux/features/authSlice';
+import { getDefaultValueForClient, getUserProfile } from 'utils/api/apiList';
+import PageLoading from 'components/Loading/PageLoading';
 
 class InfoParent extends Component {
 	constructor(props) {

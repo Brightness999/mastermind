@@ -6,13 +6,13 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 import PlacesAutocomplete from 'react-places-autocomplete';
 
-import messages from '../../../../Sign/CreateAccount/messages';
-import messagesLogin from '../../../../Sign/Login/messages';
-import { getMyProviderInfo, getUserProfile, uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
-import request from '../../../../../utils/api/request';
-import { url } from '../../../../../utils/api/baseUrl';
-import { setInforProvider } from '../../../../../redux/features/authSlice';
-import PageLoading from '../../../../../components/Loading/PageLoading';
+import messages from 'routes/Sign/CreateAccount/messages';
+import messagesLogin from 'routes/Sign/Login/messages';
+import { getMyProviderInfo, getUserProfile, uploadTempW9FormForProvider } from 'utils/api/apiList';
+import request from 'utils/api/request';
+import { url } from 'utils/api/baseUrl';
+import { setInforProvider } from 'src/redux/features/authSlice';
+import PageLoading from 'components/Loading/PageLoading';
 
 class InfoFinancial extends Component {
 	constructor(props) {

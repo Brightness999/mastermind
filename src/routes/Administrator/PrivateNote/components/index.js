@@ -9,7 +9,7 @@ import intl from 'react-intl-universal';
 import { ADMINAPPROVED, APPOINTMENT, BALANCE, CLOSED, CONSULTATION, EVALUATION, PENDING, SUBSIDY } from 'routes/constant';
 import { ModalBalance, ModalDependentDetail } from 'components/Modal';
 import msgMainHeader from 'components/MainHeader/messages';
-import messages from 'routes/Dashboard/messages';
+import messages from 'routes/User/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import msgDraweDetail from 'components/DrawerDetail/messages';
 import msgModal from 'components/Modal/messages';

@@ -8,11 +8,11 @@ import moment from 'moment';
 
 import messages from './messages';
 import msgDrawer from '../DrawerDetail/messages';
-import request, { encryptParam } from '../../utils/api/request'
-import { clearFlag, requestClearance, updateInvoice } from '../../utils/api/apiList';
+import request, { encryptParam } from 'utils/api/request'
+import { clearFlag, requestClearance, updateInvoice } from 'utils/api/apiList';
 import ModalInvoice from './ModalInvoice';
-import { getInvoiceList, setInvoiceList } from '../../redux/features/appointmentsSlice';
-import { InvoiceType } from '../../routes/constant';
+import { getInvoiceList, setInvoiceList } from 'src/redux/features/appointmentsSlice';
+import { InvoiceType } from 'routes/constant';
 import ModalCreateNote from './ModalCreateNote';
 import ModalPay from './ModalPay';
 import './style/index.less';

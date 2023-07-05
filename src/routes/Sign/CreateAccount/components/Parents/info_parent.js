@@ -6,8 +6,8 @@ import { compose } from 'redux';
 import PlacesAutocomplete from 'react-places-autocomplete';
 
 import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import messagesLogin from 'routes/Sign/Login/messages';
+import { setRegisterData } from 'src/redux/features/registerSlice';
 
 class InfoParent extends Component {
 	constructor(props) {

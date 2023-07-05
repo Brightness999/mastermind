@@ -1,12 +1,13 @@
 import React from 'react';
 import { Row, Form, Button, Input } from 'antd';
 import intl from 'react-intl-universal';
+
 import messages from '../messages';
-import msgLogin from '../../Login/messages';
-import msgCreate from '../../CreateAccount/messages';
+import msgLogin from 'routes/Sign/Login/messages';
+import msgCreate from 'routes/Sign/CreateAccount/messages';
+import { forgotPassword, confirmForgotPassword } from 'utils/api/apiList';
+import request from 'utils/api/request';
 import './index.less';
-import { forgotPassword, confirmForgotPassword } from '../../../../utils/api/apiList';
-import request from '../../../../utils/api/request';
 
 export default class extends React.Component {
   state = {

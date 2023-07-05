@@ -14,7 +14,7 @@ import msgLogin from 'routes/Sign/Login/messages';
 import { url } from 'utils/api/baseUrl';
 import request from 'utils/api/request';
 import { getAllConsultantForParent, getAuthorizationUrl, rescheduleAppointmentForParent } from 'utils/api/apiList';
-import { setMeetingLink, setSelectedTime, setSelectedUser } from '../../redux/features/authSlice';
+import { setMeetingLink, setSelectedTime, setSelectedUser } from 'src/redux/features/authSlice';
 import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
 import { APPOINTMENT, CONSULTATION, EVALUATION, SCREEN } from 'routes/constant';
 import './style/index.less';

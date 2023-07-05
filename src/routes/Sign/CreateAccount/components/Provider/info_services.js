@@ -6,8 +6,8 @@ import { compose } from 'redux'
 import { BsDashCircle, BsPlusCircle } from 'react-icons/bs';
 
 import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import messagesLogin from 'routes/Sign/Login/messages';
+import { setRegisterData } from 'src/redux/features/registerSlice';
 
 class InfoServices extends Component {
 	constructor(props) {

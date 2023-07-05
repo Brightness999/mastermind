@@ -7,7 +7,7 @@ import { SearchOutlined } from '@ant-design/icons';
 
 import mgsSidebar from 'components/SideBar/messages';
 import msgMainHeader from 'components/MainHeader/messages';
-import messages from 'routes/Dashboard/messages';
+import messages from 'routes/User/Dashboard/messages';
 import request from 'utils/api/request';
 import { store } from 'src/redux/store';
 import { getTrackedActions } from 'utils/api/apiList';

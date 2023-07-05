@@ -7,11 +7,11 @@ import { compose } from 'redux'
 import PlacesAutocomplete from 'react-places-autocomplete';
 
 import messages from '../../messages';
-import msgLogin from '../../../Login/messages';
-import msgModal from '../../../../../components/Modal/messages';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
-import { url } from '../../../../../utils/api/baseUrl';
-import { uploadTempW9FormForProvider } from '../../../../../utils/api/apiList';
+import msgLogin from 'routes/Sign/Login/messages';
+import msgModal from 'components/Modal/messages';
+import { setRegisterData } from 'src/redux/features/registerSlice';
+import { url } from 'utils/api/baseUrl';
+import { uploadTempW9FormForProvider } from 'utils/api/apiList';
 
 class InfoFinancial extends Component {
 	constructor(props) {

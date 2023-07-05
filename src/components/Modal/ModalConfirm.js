@@ -3,7 +3,7 @@ import { Modal, Button } from 'antd';
 import intl from 'react-intl-universal';
 
 import messages from './messages';
-import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import './style/index.less';
 import '../../assets/styles/login.less';
 

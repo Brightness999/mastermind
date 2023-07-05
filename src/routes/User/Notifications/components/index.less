@@ -1,0 +1,33 @@
+@import '../../../../assets/styles/variables.less';
+
+.message {
+  position: relative;
+  display: flex;
+}
+
+.message-content {
+  display: inline-block;
+  width: 100%;
+  background-color: #2196f3;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  animation: new-message 1s ease-in-out;
+}
+
+@keyframes new-message {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

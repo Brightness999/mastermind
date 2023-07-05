@@ -7,8 +7,8 @@ import { connect } from 'react-redux'
 import { compose } from 'redux'
 
 import messages from '../../messages';
-import messagesLogin from '../../../Login/messages';
-import { setRegisterData } from '../../../../../redux/features/registerSlice';
+import messagesLogin from 'routes/Sign/Login/messages';
+import { setRegisterData } from 'src/redux/features/registerSlice';
 
 moment.locale('en');
 
