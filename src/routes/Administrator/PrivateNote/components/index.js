@@ -1,5 +1,5 @@
 import React, { createRef } from 'react';
-import { Divider, Table, Space, Input, Button, message, Pagination } from 'antd';
+import { Divider, Table, Space, Input, Button, message, Pagination, Popover } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { connect } from 'react-redux';
@@ -208,11 +208,19 @@ class PrivateNote extends React.Component {
         onFilter: (value, record) => record?.currentGrade === value,
       },
       {
-        title: intl.formatMessage(msgCreateAccount.school), dataIndex: 'school', key: 'school',
+        title: intl.formatMessage(msgCreateAccount.school), key: 'school',
         sorter: (a, b) => !a.school ? 1 : a?.school?.name > b?.school?.name ? 1 : -1,
         filters: schools,
         onFilter: (value, record) => record?.school?._id === value,
-        render: school => school?.name,
+        render: dependent => dependent?.school?.name || (
+          <Popover content={(<div>
+            <div><span className='font-700'>Name:</span> {dependent?.otherName}</div>
+            <div><span className='font-700'>Phone:</span> {dependent?.otherContactNumber}</div>
+            <div><span className='font-700'>Notes:</span> {dependent?.otherNotes}</div>
+          </div>)} trigger="click">
+            <span className='text-primary text-underline cursor action' onClick={() => console.log('ddddd')}>Other</span>
+          </Popover>
+        ),
       },
       {
         title: 'Closed Sessions', dataIndex: 'appointments', key: 'countOfClosedSessionsPast',
