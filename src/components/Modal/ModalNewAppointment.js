@@ -763,6 +763,16 @@ class ModalNewAppointment extends React.Component {
 															if (listProvider[selectedProviderIndex]?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() === date.year() && moment(blackoutDate).month() === date.month() && moment(blackoutDate).date() === date.date())) {
 																return true;
 															}
+
+															if (listProvider[selectedProviderIndex]?.durationValue) {
+																if (date.isSameOrAfter(moment().add(listProvider[selectedProviderIndex]?.durationValue, listProvider[selectedProviderIndex]?.durationType).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }))) {
+																	return true;
+																}
+															} else {
+																if (date.isSameOrAfter(moment().add(15, 'years').set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }))) {
+																	return true;
+																}
+															}
 														}
 
 														return false;
