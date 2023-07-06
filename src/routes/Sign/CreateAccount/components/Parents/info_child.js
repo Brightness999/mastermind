@@ -8,12 +8,16 @@ import { compose } from 'redux';
 import moment from 'moment';
 
 import messages from '../../messages';
-import messagesLogin from 'routes/Sign/Login/messages';
+import msgLogin from 'routes/Sign/Login/messages';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import { setRegisterData } from 'src/redux/features/registerSlice';
 
 class InfoChild extends Component {
 	constructor(props) {
 		super(props);
+		this.state = {
+			otherSchools: [],
+		}
 	}
 
 	componentDidMount() {
@@ -23,6 +27,9 @@ class InfoChild extends Component {
 		this.props.setRegisterData({ studentInfos: studentInfos });
 		studentInfos = studentInfos?.map(student => student.birthday ? { ...student, birthday: moment(student.birthday) } : student);
 		this.form?.setFieldsValue({ children: studentInfos });
+		let otherSchools = [];
+		studentInfos?.map((a, i) => a.school === 'other' && otherSchools.push(i));
+		this.setState({ otherSchools });
 	}
 
 	getDefaultChildObj(parentInfo) {
@@ -89,6 +96,7 @@ class InfoChild extends Component {
 				if (moment(date).isValid()) {
 					const dependents = this.form?.getFieldsValue();
 					this.form?.setFieldsValue({ children: dependents?.children?.map((child, i) => i === index ? { ...child, age: date ? moment().year() - moment(date).year() : 0, birthday: moment(date) } : child) });
+					this.updateReduxValueForDepedent(index, "birthday", moment(date));
 				}
 			}
 		}
@@ -96,6 +104,7 @@ class InfoChild extends Component {
 
 	render() {
 		const { schools, skillSets, academicLevels } = this.props.auth.generalData;
+		const { otherSchools } = this.state;
 		const { registerData } = this.props.register;
 		const listSchools = schools?.filter(school => school.communityServed?._id === registerData.parentInfo?.cityConnection) ?? [];
 
@@ -128,6 +137,7 @@ class InfoChild extends Component {
 														onClick={() => {
 															remove(field.name);
 															this.onRemoveDepenent(index);
+															this.setState({ otherSchools: otherSchools?.filter(a => a != field.key) });
 														}}
 													>{intl.formatMessage(messages.remove)}</Button>}
 												</div>
@@ -136,7 +146,7 @@ class InfoChild extends Component {
 														<Form.Item
 															name={[field.name, "firstName"]}
 															label={intl.formatMessage(messages.firstName)}
-															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.firstName) }]}
+															rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.firstName) }]}
 														>
 															<Input
 																onChange={v => this.updateReduxValueForDepedent(index, "firstName", v.target.value)}
@@ -148,7 +158,7 @@ class InfoChild extends Component {
 														<Form.Item
 															name={[field.name, "lastName"]}
 															label={intl.formatMessage(messages.lastName)}
-															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.lastName) }]}
+															rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.lastName) }]}
 														>
 															<Input
 																onChange={v => this.updateReduxValueForDepedent(index, "lastName", v.target.value)}
@@ -162,7 +172,11 @@ class InfoChild extends Component {
 														<Form.Item
 															name={[field.name, "guardianPhone"]}
 															className='float-label-item'
-															label={intl.formatMessage(messages.guardianPhone)}>
+															label={intl.formatMessage(messages.guardianPhone)}
+															rules={[
+																{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
+															]}
+														>
 															<Input
 																onChange={v => this.updateReduxValueForDepedent(index, "guardianPhone", v.target.value)}
 																placeholder={intl.formatMessage(messages.contactNumber)}
@@ -172,7 +186,11 @@ class InfoChild extends Component {
 													<Col xs={24} sm={24} md={12}>
 														<Form.Item className='float-label-item'
 															name={[field.name, "guardianEmail"]}
-															label={intl.formatMessage(messages.guardianEmail)}>
+															label={intl.formatMessage(messages.guardianEmail)}
+															rules={[
+																{ type: 'email', message: intl.formatMessage(msgLogin.emailNotValid) },
+															]}
+														>
 															<Input
 																onChange={v => this.updateReduxValueForDepedent(index, "guardianEmail", v.target.value)}
 																placeholder={intl.formatMessage(messages.contactEmail)}
@@ -185,17 +203,26 @@ class InfoChild extends Component {
 														<Form.Item
 															name={[field.name, "school"]}
 															label={intl.formatMessage(messages.school)}
+															rules={[{ required: true }]}
 														>
 															<Select
 																showArrow
 																placeholder={intl.formatMessage(messages.school)}
 																optionLabelProp="label"
-																onChange={v => this.updateReduxValueForDepedent(index, "school", v)}
-																allowClear={true}
+																onChange={v => {
+																	this.updateReduxValueForDepedent(index, "school", v)
+																	if (v === 'other') {
+																		otherSchools.push(field.key);
+																		this.setState({ otherSchools: otherSchools });
+																	} else {
+																		this.setState({ otherSchools: otherSchools?.filter(a => a != field.key) });
+																	}
+																}}
 															>
 																{listSchools?.map((school, index) => (
 																	<Select.Option key={index} label={school.name} value={school._id}>{school.name}</Select.Option>
 																))}
+																<Select.Option key={listSchools?.length || 0} label='Other' value='other'>Other</Select.Option>
 															</Select>
 														</Form.Item>
 													</Col>
@@ -203,7 +230,7 @@ class InfoChild extends Component {
 														<Form.Item
 															name={[field.name, "primaryTeacher"]}
 															label={intl.formatMessage(messages.primaryTeacher)}
-															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
+															rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.primaryTeacher) }]}
 														>
 															<Input
 																onChange={v => this.updateReduxValueForDepedent(index, "primaryTeacher", v.target.value)}
@@ -212,12 +239,56 @@ class InfoChild extends Component {
 														</Form.Item>
 													</Col>
 												</Row>
+												{otherSchools?.includes(field.key) ? (
+													<>
+														<Row gutter={14}>
+															<Col xs={24} sm={24} md={12}>
+																<Form.Item
+																	name={[field.name, "otherName"]}
+																	label="Other's contact name"
+																	className='float-label-item'
+																	rules={[{ required: true }]}
+																>
+																	<Input placeholder={intl.formatMessage(messages.name)} onChange={v => this.updateReduxValueForDepedent(index, "otherName", v.target.value)} />
+																</Form.Item>
+															</Col>
+															<Col xs={24} sm={24} md={12}>
+																<Form.Item
+																	name={[field.name, "otherContactNumber"]}
+																	label="Other's contact number"
+																	rules={[
+																		{ required: true },
+																		{
+																			pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
+																			message: intl.formatMessage(messages.phoneNumberValid)
+																		},
+																	]}
+																	className='float-label-item'
+																>
+																	<Input placeholder={intl.formatMessage(messages.contactNumber)} onChange={v => this.updateReduxValueForDepedent(index, "otherContactNumber", v.target.value)} />
+																</Form.Item>
+															</Col>
+														</Row>
+														<Row>
+															<Col span={24}>
+																<Form.Item
+																	name={[field.name, "otherNotes"]}
+																	label={intl.formatMessage(msgCreateAccount.notes)}
+																	className='float-label-item'
+																	rules={[{ required: true }]}
+																>
+																	<Input.TextArea rows={4} placeholder={intl.formatMessage(msgCreateAccount.notes)} onChange={v => this.updateReduxValueForDepedent(index, "otherNotes", v.target.value)} />
+																</Form.Item>
+															</Col>
+														</Row>
+													</>
+												) : null}
 												<Row gutter={14}>
 													<Col xs={24} sm={24} md={8}>
 														<Form.Item
 															name={[field.name, "birthday"]}
 															label={intl.formatMessage(messages.dateBirth)}
-															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.dateBirth) }]}
+															rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.dateBirth) }]}
 														>
 															<DatePicker
 																format='YYYY-MM-DD'
@@ -261,7 +332,7 @@ class InfoChild extends Component {
 														<Form.Item
 															name={[field.name, "currentGrade"]}
 															label={intl.formatMessage(messages.currentGrade)}
-															rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.currentGrade) }]}
+															rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.currentGrade) }]}
 														>
 															<Select
 																placeholder={intl.formatMessage(messages.currentGrade)}
@@ -278,7 +349,7 @@ class InfoChild extends Component {
 													<Form.Item
 														name={[field.name, 'services']}
 														label={intl.formatMessage(messages.services)}
-														rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
+														rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.servicesRequired) }]}
 														className='add-services flex-1'
 													>
 														<Select
@@ -299,7 +370,7 @@ class InfoChild extends Component {
 												<Form.Item
 													name={[field.name, "backgroundInfor"]}
 													label={intl.formatMessage(messages.briefProfile)}
-													rules={[{ required: true, message: intl.formatMessage(messagesLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.briefProfile) }]}
+													rules={[{ required: true, message: intl.formatMessage(msgLogin.pleaseEnter) + ' ' + intl.formatMessage(messages.briefProfile) }]}
 												>
 													<Input.TextArea
 														onChange={v => this.updateReduxValueForDepedent(index, "backgroundInfor", v.target.value)}

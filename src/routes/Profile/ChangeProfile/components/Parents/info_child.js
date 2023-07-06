@@ -25,6 +25,7 @@ class InfoChild extends Component {
 			children: [],
 			loading: false,
 			user: this.props.auth.user,
+			otherSchools: [],
 		}
 	}
 
@@ -36,11 +37,14 @@ class InfoChild extends Component {
 				this.setState({ loading: false });
 				const { success, data } = result;
 				if (success) {
-					this.setState({ user: data, children: data?.studentInfos?.filter(s => !s.isRemoved) });
+					let otherSchools = [];
+					data?.studentInfos?.forEach((a, i) => !a.school && otherSchools.push(i));
+					this.setState({ user: data, children: data?.studentInfos?.filter(s => !s.isRemoved), otherSchools });
 					data?.studentInfos?.map(item => {
 						item.services = item.services.map(item => item._id);
 						item.birthday = moment(item.birthday);
 						item.age = moment().year() - moment(item.birthday).year() ?? 0;
+						item.school = item.school ? item.school : 'other';
 						return item;
 					})
 					this.form?.setFieldsValue({ children: data?.studentInfos?.filter(s => !s.isRemoved) });
@@ -55,10 +59,14 @@ class InfoChild extends Component {
 				const { success, data } = result;
 				if (success) {
 					this.setState({ children: data });
+					let otherSchools = [];
+					data?.forEach((a, i) => !a.school && otherSchools.push(i));
+					this.setState({ otherSchools });
 					data?.map(item => {
 						item.services = item.services.map(item => item._id);
 						item.birthday = moment(item.birthday);
 						item.age = moment().year() - moment(item.birthday).year() ?? 0;
+						item.school = item.school ? item.school : 'other';
 						return item;
 					})
 					this.form?.setFieldsValue({ children: data });
@@ -95,9 +103,9 @@ class InfoChild extends Component {
 	onFinish = async (values) => {
 		try {
 			const { children } = this.state;
-			const additionalChildren = values.children?.filter(child => !child._id);
-			const updateChildren = values.children?.filter(child => child._id);
-			const removedChildren = children.filter(child => !values.children?.find(item => item._id == child._id))?.map(child => ({ ...child, isRemoved: true }));
+			const additionalChildren = values.children?.filter(child => !child._id)?.map(child => ({ ...child, school: child.school === 'other' ? undefined : child.school }));
+			const updateChildren = values.children?.filter(child => child._id)?.map(child => ({ ...child, school: child.school === 'other' ? undefined : child.school }));
+			const removedChildren = children.filter(child => !values.children?.find(item => item._id == child._id))?.map(child => ({ ...child, isRemoved: true, school: child.school === 'other' ? undefined : child.school }));
 			const params = {
 				additionalChildren: additionalChildren,
 				updateChildren: updateChildren,
@@ -131,7 +139,7 @@ class InfoChild extends Component {
 	}
 
 	render() {
-		const { listServices, listSchools, academicLevels, loading, user } = this.state;
+		const { listServices, listSchools, academicLevels, loading, otherSchools, user } = this.state;
 
 		return (
 			<Row justify="center" className="row-form">
@@ -156,7 +164,7 @@ class InfoChild extends Component {
 												</div>
 												<Popconfirm
 													title={<div className='text-center'><div>Are you sure to remove your child?</div><div>This cannot be undone & you may lose your slots & won't get them back.</div></div>}
-													onConfirm={() => remove(field.name)}
+													onConfirm={() => { remove(field.name); this.setState({ otherSchools: otherSchools?.filter(a => a != field.key) }); }}
 													okText="Yes"
 													cancelText="No"
 													overlayClassName='remove-child-confirm'
@@ -187,7 +195,6 @@ class InfoChild extends Component {
 														<Input placeholder={intl.formatMessage(messages.lastName)} />
 													</Form.Item>
 												</Col>
-
 											</Row>
 											<Row gutter={14}>
 												<Col xs={24} sm={24} md={12}>
@@ -195,7 +202,9 @@ class InfoChild extends Component {
 														name={[field.name, "guardianPhone"]}
 														className='float-label-item'
 														label={intl.formatMessage(messages.guardianPhone)}
-														rules={[{ required: true }]}
+														rules={[
+															{ pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$', message: intl.formatMessage(messages.phoneNumberValid) },
+														]}
 													>
 														<Input placeholder={intl.formatMessage(messages.contactNumber)} />
 													</Form.Item>
@@ -205,7 +214,9 @@ class InfoChild extends Component {
 														name={[field.name, "guardianEmail"]}
 														label={intl.formatMessage(messages.guardianEmail)}
 														className='float-label-item'
-														rules={[{ required: true }]}
+														rules={[
+															{ type: 'email', message: intl.formatMessage(msgLogin.emailNotValid) },
+														]}
 													>
 														<Input placeholder={intl.formatMessage(messages.contactEmail)} />
 													</Form.Item>
@@ -217,16 +228,25 @@ class InfoChild extends Component {
 														name={[field.name, "school"]}
 														label={intl.formatMessage(messages.school)}
 														className='float-label-item'
+														rules={[{ required: true }]}
 													>
 														<Select
 															showArrow
 															placeholder={intl.formatMessage(messages.school)}
 															optionLabelProp="label"
-															allowClear={true}
+															onChange={school => {
+																if (school === 'other') {
+																	otherSchools.push(field.key);
+																	this.setState({ otherSchools: otherSchools });
+																} else {
+																	this.setState({ otherSchools: otherSchools?.filter(a => a != field.key) });
+																}
+															}}
 														>
 															{listSchools?.map((school, index) => (
 																<Select.Option key={index} label={school.name} value={school._id}>{school.name}</Select.Option>
 															))}
+															<Select.Option key={listSchools?.length || 0} label='Other' value='other'>Other</Select.Option>
 														</Select>
 													</Form.Item>
 												</Col>
@@ -241,6 +261,50 @@ class InfoChild extends Component {
 													</Form.Item>
 												</Col>
 											</Row>
+											{otherSchools.includes(field.key) ? (
+												<>
+													<Row gutter={14}>
+														<Col xs={24} sm={24} md={12}>
+															<Form.Item
+																name={[field.name, "otherName"]}
+																label="Other's contact name"
+																className='float-label-item'
+																rules={[{ required: true }]}
+															>
+																<Input placeholder={intl.formatMessage(messages.name)} />
+															</Form.Item>
+														</Col>
+														<Col xs={24} sm={24} md={12}>
+															<Form.Item
+																name={[field.name, "otherContactNumber"]}
+																label="Other's contact number"
+																rules={[
+																	{ required: true },
+																	{
+																		pattern: '^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$',
+																		message: intl.formatMessage(messages.phoneNumberValid)
+																	},
+																]}
+																className='float-label-item'
+															>
+																<Input placeholder={intl.formatMessage(messages.contactNumber)} />
+															</Form.Item>
+														</Col>
+													</Row>
+													<Row>
+														<Col span={24}>
+															<Form.Item
+																name={[field.name, "otherNotes"]}
+																label={intl.formatMessage(msgCreateAccount.notes)}
+																className='float-label-item'
+																rules={[{ required: true }]}
+															>
+																<Input.TextArea rows={4} placeholder={intl.formatMessage(msgCreateAccount.notes)} />
+															</Form.Item>
+														</Col>
+													</Row>
+												</>
+											) : null}
 											<Row gutter={14}>
 												<Col xs={24} sm={24} md={8}>
 													<Form.Item

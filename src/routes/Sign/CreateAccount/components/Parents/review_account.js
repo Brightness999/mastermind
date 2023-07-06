@@ -30,9 +30,7 @@ class ReviewAccount extends Component {
 		const { registerData } = this.props.register;
 		const customData = JSON.parse(JSON.stringify(registerData));
 		for (let i = 0; i < customData.studentInfos.length; i++) {
-			if (!!customData.studentInfos[i].subsidyRequest && customData.studentInfos[i].subsidyRequest.documentUploaded.length > 0) {
-				customData.studentInfos[i].subsidyRequest.documents = customData.studentInfos[i].subsidyRequest.documentUploaded;
-			}
+			customData.studentInfos[i].school = customData.studentInfos[i].school === 'other' ? undefined : customData.studentInfos[i].school;
 		}
 		this.setState({ isSubmit: true });
 		const response = await request.post(userSignUp, customData);
@@ -84,7 +82,14 @@ class ReviewAccount extends Component {
 							{registerData?.studentInfos?.map((item, index) => (
 								<div key={index}>
 									<p className='font-14 font-700 mb-10'>{item.firstName} {item.lastName} - {new Date(item.birthday).toDateString()}</p>
-									<p>School : {listSchools?.find(school => school._id == item.school)?.name}</p>
+									<p>School : {listSchools?.find(school => school._id == item.school)?.name || 'Other'}</p>
+									{!listSchools?.find(school => school._id == item.school)?.name ? (
+										<>
+											<p>Other Contact Name : {item.otherName}</p>
+											<p>Other Contact Phonenumber : {item.otherContactNumber}</p>
+											<p>Other Notes : {item.otherNotes}</p>
+										</>
+									) : null}
 									<div className='review-item'>
 										<p>Teacher : {item.primaryTeacher} </p>
 										<p>Grade : {item.currentGrade}</p>
