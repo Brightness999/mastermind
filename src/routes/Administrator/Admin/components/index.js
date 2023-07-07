@@ -83,6 +83,9 @@ class SchedulingCenter extends React.Component {
       selectedFlag: {},
       visiblePay: false,
       returnUrl: '',
+      totalPayment: 0,
+      minimumPayment: 0,
+      paidAmount: 0,
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -95,8 +98,9 @@ class SchedulingCenter extends React.Component {
     const success = decryptParam(params.get('s')?.replaceAll(' ', '+') || '');
     const invoiceId = decryptParam(params.get('i')?.replaceAll(' ', '+') || '');
     const appointmentId = decryptParam(params.get('a')?.replaceAll(' ', '+') || '');
+    const amount = decryptParam(params.get('v')?.replaceAll(' ', '+') || '');
     if (success === 'true' && (invoiceId || appointmentId)) {
-      request.post(payInvoice, { invoiceId, appointmentId, method: MethodType.PAYPAL }).then(res => {
+      request.post(payInvoice, { invoiceId, appointmentId, method: MethodType.PAYPAL, amount }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
           const url = window.location.href;
@@ -104,26 +108,51 @@ class SchedulingCenter extends React.Component {
           window.history.replaceState({}, document.title, cleanUrl);
           if (invoiceId) {
             const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => {
+              const totalPaidAmount = (a.paidAmount || 0) + amount;
               if (a.sessionInvoice?._id === invoiceId) {
-                a.sessionInvoice = { ...a.sessionInvoice, isPaid: 1 }
+                a.sessionInvoice = {
+                  ...a.sessionInvoice,
+                  paidAmount: totalPaidAmount,
+                  isPaid: totalPaidAmount >= a.totalPayment ? 1 : 0,
+                  method: MethodType.PAYPAL,
+                }
               }
               if (a.flagInvoice?._id === invoiceId) {
-                a.flagInvoice = { ...a.flagInvoice, isPaid: 1 }
+                a.flagInvoice = {
+                  ...a.flagInvoice,
+                  paidAmount: totalPaidAmount,
+                  isPaid: a.type === 5 ? totalPaidAmount >= a.minimumPayment ? 1 : 0 : totalPaidAmount >= a.totalPayment ? 1 : 0,
+                  method: MethodType.PAYPAL,
+                }
               }
               return a;
             })
             const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsInMonth))?.map(a => {
+              const totalPaidAmount = (a.paidAmount || 0) + amount;
               if (a.sessionInvoice?._id === invoiceId) {
-                a.sessionInvoice = { ...a.sessionInvoice, isPaid: 1 }
+                a.sessionInvoice = {
+                  ...a.sessionInvoice,
+                  paidAmount: totalPaidAmount,
+                  isPaid: totalPaidAmount >= a.totalPayment ? 1 : 0,
+                  method: MethodType.PAYPAL,
+                }
               }
               if (a.flagInvoice?._id === invoiceId) {
-                a.flagInvoice = { ...a.flagInvoice, isPaid: 1 }
+                a.flagInvoice = {
+                  ...a.flagInvoice,
+                  paidAmount: totalPaidAmount,
+                  isPaid: a.type === 5 ? totalPaidAmount >= a.minimumPayment ? 1 : 0 : totalPaidAmount >= a.totalPayment ? 1 : 0,
+                  method: MethodType.PAYPAL,
+                }
               }
               return a;
             })
             const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(a => {
+              const totalPaidAmount = (a.paidAmount || 0) + amount;
               if (a._id === invoiceId) {
-                a.isPaid = 1;
+                a.paidAmount = totalPaidAmount;
+                a.isPaid = a.type === 5 ? totalPaidAmount >= a.minimumPayment ? 1 : 0 : totalPaidAmount >= a.totalPayment ? 1 : 0;
+                a.method = MethodType.PAYPAL;
               }
               return a;
             })
@@ -710,12 +739,12 @@ class SchedulingCenter extends React.Component {
     this.socket.emit("action_tracking", data);
   }
 
-  openModalPay = (url) => {
-    this.setState({ visiblePay: true, returnUrl: url });
+  openModalPay = (url, paidAmount, totalPayment, minimumPayment = 0) => {
+    this.setState({ visiblePay: true, returnUrl: url, totalPayment, minimumPayment, paidAmount });
   }
 
   closeModalPay = () => {
-    this.setState({ visiblePay: false, returnUrl: '' });
+    this.setState({ visiblePay: false, returnUrl: '', totalPayment: 0, minimumPayment: 0, paidAmount: 0 });
   }
 
   render() {
@@ -756,6 +785,9 @@ class SchedulingCenter extends React.Component {
       visibleInvoice,
       visiblePay,
       returnUrl,
+      totalPayment,
+      minimumPayment,
+      paidAmount,
     } = this.state;
     const { invoices } = this.props;
 
@@ -888,7 +920,7 @@ class SchedulingCenter extends React.Component {
       visible: visiblePay,
       onSubmit: this.openModalPay,
       onCancel: this.closeModalPay,
-      returnUrl,
+      returnUrl, totalPayment, minimumPayment, paidAmount,
     }
 
     return (
@@ -1240,7 +1272,7 @@ class SchedulingCenter extends React.Component {
                 {intl.formatMessage(msgDrawer.paid)}
               </Button>
             ) : selectedFlag?.totalPayment == 0 ? null : (
-              <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(selectedFlag?._id)}`)}>
+              <Button type='primary' block className='font-16 flag-action whitespace-nowrap flex-1' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(selectedFlag?._id)}`, selectedFlag?.paidAmount, selectedFlag?.totalPayment, selectedFlag?.minimumPayment)}>
                 {intl.formatMessage(msgDrawer.payFlag)}
               </Button>
             )}

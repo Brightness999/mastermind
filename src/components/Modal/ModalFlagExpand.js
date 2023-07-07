@@ -29,6 +29,9 @@ class ModalFlagExpand extends React.Component {
 			selectedTab: 0,
 			visiblePay: false,
 			returnUrl: '',
+			totalPayment: 0,
+			minimumPayment: 0,
+			paidAmount: 0,
 		}
 		this.searchInput = React.createRef(null);
 	}
@@ -144,16 +147,16 @@ class ModalFlagExpand extends React.Component {
 		}
 	}
 
-	openModalPay = (url) => {
-		this.setState({ visiblePay: true, returnUrl: url });
+	openModalPay = (url, paidAmount, totalPayment, minimumPayment = 0) => {
+		this.setState({ visiblePay: true, returnUrl: url, totalPayment, minimumPayment, paidAmount });
 	}
 
-	closeModalPay = (url) => {
-		this.setState({ visiblePay: false, returnUrl: '' });
+	closeModalPay = () => {
+		this.setState({ visiblePay: false, returnUrl: '', totalPayment: 0, minimumPayment: 0, paidAmount: 0 });
 	}
 
 	render() {
-		const { returnUrl, selectedFlag, tabFlags, visibleCreateNote, visibleInvoice, visiblePay } = this.state;
+		const { paidAmount, totalPayment, minimumPayment, returnUrl, selectedFlag, tabFlags, visibleCreateNote, visibleInvoice, visiblePay } = this.state;
 		const { auth } = this.props;
 		const modalProps = {
 			className: 'modal-flag-expand',
@@ -286,7 +289,7 @@ class ModalFlagExpand extends React.Component {
 					<Space size="small">
 						<div className='text-primary cursor' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</div>
 						{invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
-							<div className='text-primary cursor' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
+							<div className='text-primary cursor' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`, invoice?.paidAmount, invoice?.totalPayment, invoice?.minimumPayment)}>
 								{intl.formatMessage(msgDrawer.payFlag)}
 							</div>
 						)}
@@ -357,7 +360,7 @@ class ModalFlagExpand extends React.Component {
 					<Space size="small">
 						<div className='text-primary cursor' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</div>
 						{invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
-							<button className='flag-action pay-flag-button' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
+							<button className='flag-action pay-flag-button' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`, invoice?.paidAmount, invoice?.totalPayment, invoice?.minimumPayment)}>
 								{intl.formatMessage(msgDrawer.payFlag)}
 							</button>
 						)}
@@ -392,7 +395,7 @@ class ModalFlagExpand extends React.Component {
 			visible: visiblePay,
 			onSubmit: this.closeModalPay,
 			onCancel: this.closeModalPay,
-			returnUrl,
+			returnUrl, totalPayment, minimumPayment, paidAmount,
 		}
 
 		return (

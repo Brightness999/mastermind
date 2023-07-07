@@ -26,6 +26,9 @@ class Outstanding extends React.Component {
       visibleCreateNote: false,
       visiblePay: false,
       returnUrl: '',
+      totalPayment: 0,
+      minimumPayment: 0,
+      paidAmount: 0,
     };
     this.searchInput = createRef(null);
   }
@@ -148,16 +151,16 @@ class Outstanding extends React.Component {
     }
   }
 
-  openModalPay = (url) => {
-    this.setState({ visiblePay: true, returnUrl: url });
+  openModalPay = (url, paidAmount, totalPayment, minimumPayment = 0) => {
+    this.setState({ visiblePay: true, returnUrl: url, totalPayment, minimumPayment, paidAmount });
   }
 
   closeModalPay = () => {
-    this.setState({ visiblePay: false, returnUrl: '' });
+    this.setState({ visiblePay: false, returnUrl: '', totalPayment: 0, minimumPayment: 0, paidAmount: 0 });
   }
 
   render() {
-    const { selectedInvoice, visibleCreateNote, visibleInvoice, visiblePay, returnUrl } = this.state;
+    const { paidAmount, selectedInvoice, totalPayment, minimumPayment, visibleCreateNote, visibleInvoice, visiblePay, returnUrl } = this.state;
     const { auth, invoices } = this.props;
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
     const columns = [
@@ -294,7 +297,7 @@ class Outstanding extends React.Component {
         render: invoice => invoice.isPaid ? null : (
           <div>
             {invoice.totalPayment > 0 ? (
-              <Button type='link' className='px-5' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
+              <Button type='link' className='px-5' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`, invoice?.paidAmount, invoice?.totalPayment, invoice?.minimumPayment)}>
                 <span className='text-primary text-underline'>{intl.formatMessage(msgModal.paynow)}</span>
               </Button>
             ) : null}
@@ -336,7 +339,7 @@ class Outstanding extends React.Component {
       visible: visiblePay,
       onSubmit: this.openModalPay,
       onCancel: this.closeModalPay,
-      returnUrl,
+      returnUrl, totalPayment, minimumPayment, paidAmount,
     }
 
     return (

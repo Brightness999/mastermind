@@ -88,6 +88,9 @@ class Dashboard extends React.Component {
       visibleInvoice: false,
       visiblePay: false,
       returnUrl: '',
+      totalPayment: 0,
+      minimumPayment: 0,
+      paidAmount: 0,
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -101,8 +104,9 @@ class Dashboard extends React.Component {
     const invoiceId = decryptParam(params.get('i')?.replaceAll(' ', '+') || '');
     const appointmentId = decryptParam(params.get('a')?.replaceAll(' ', '+') || '');
     const cancellationType = decryptParam(params.get('t')?.replaceAll(' ', '+') || '');
+    const amount = decryptParam(params.get('v')?.replaceAll(' ', '+') || '');
     if (success === 'true' && (invoiceId || appointmentId)) {
-      request.post(payInvoice, { invoiceId, appointmentId, cancellationType, method: MethodType.PAYPAL }).then(res => {
+      request.post(payInvoice, { invoiceId, appointmentId, cancellationType, method: MethodType.PAYPAL, amount }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
           const url = window.location.href;
@@ -110,26 +114,51 @@ class Dashboard extends React.Component {
           window.history.replaceState({}, document.title, cleanUrl);
           if (invoiceId) {
             const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => {
+              const totalPaidAmount = (a.paidAmount || 0) + amount;
               if (a.sessionInvoice?._id === invoiceId) {
-                a.sessionInvoice = { ...a.sessionInvoice, isPaid: 1 }
+                a.sessionInvoice = {
+                  ...a.sessionInvoice,
+                  paidAmount: totalPaidAmount,
+                  isPaid: totalPaidAmount >= a.totalPayment ? 1 : 0,
+                  method: MethodType.PAYPAL,
+                }
               }
               if (a.flagInvoice?._id === invoiceId) {
-                a.flagInvoice = { ...a.flagInvoice, isPaid: 1 }
+                a.flagInvoice = {
+                  ...a.flagInvoice,
+                  paidAmount: totalPaidAmount,
+                  isPaid: a.type === 5 ? totalPaidAmount >= a.minimumPayment ? 1 : 0 : totalPaidAmount >= a.totalPayment ? 1 : 0,
+                  method: MethodType.PAYPAL,
+                }
               }
               return a;
             })
             const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsInMonth))?.map(a => {
+              const totalPaidAmount = (a.paidAmount || 0) + amount;
               if (a.sessionInvoice?._id === invoiceId) {
-                a.sessionInvoice = { ...a.sessionInvoice, isPaid: 1 }
+                a.sessionInvoice = {
+                  ...a.sessionInvoice,
+                  paidAmount: totalPaidAmount,
+                  isPaid: totalPaidAmount >= a.totalPayment ? 1 : 0,
+                  method: MethodType.PAYPAL,
+                }
               }
               if (a.flagInvoice?._id === invoiceId) {
-                a.flagInvoice = { ...a.flagInvoice, isPaid: 1 }
+                a.flagInvoice = {
+                  ...a.flagInvoice,
+                  paidAmount: totalPaidAmount,
+                  isPaid: a.type === 5 ? totalPaidAmount >= a.minimumPayment ? 1 : 0 : totalPaidAmount >= a.totalPayment ? 1 : 0,
+                  method: MethodType.PAYPAL,
+                }
               }
               return a;
             })
             const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(a => {
+              const totalPaidAmount = (a.paidAmount || 0) + amount;
               if (a._id === invoiceId) {
-                a.isPaid = 1;
+                a.paidAmount = totalPaidAmount;
+                a.isPaid = a.type === 5 ? totalPaidAmount >= a.minimumPayment ? 1 : 0 : totalPaidAmount >= a.totalPayment ? 1 : 0;
+                a.method = MethodType.PAYPAL;
               }
               return a;
             })
@@ -841,12 +870,12 @@ class Dashboard extends React.Component {
     this.socket.emit("action_tracking", data);
   }
 
-  openModalPay = (url) => {
-    this.setState({ visiblePay: true, returnUrl: url });
+  openModalPay = (url, paidAmount, totalPayment, minimumPayment = 0) => {
+    this.setState({ visiblePay: true, returnUrl: url, totalPayment, minimumPayment, paidAmount });
   }
 
   closeModalPay = () => {
-    this.setState({ visiblePay: false, returnUrl: '' });
+    this.setState({ visiblePay: false, returnUrl: '', totalPayment: 0, minimumPayment: 0, paidAmount: 0 });
   }
 
   render() {
@@ -887,6 +916,9 @@ class Dashboard extends React.Component {
       selectedFlag,
       visiblePay,
       returnUrl,
+      totalPayment,
+      minimumPayment,
+      paidAmount,
     } = this.state;
     const { invoices } = this.props;
 
@@ -1019,7 +1051,7 @@ class Dashboard extends React.Component {
       visible: visiblePay,
       onSubmit: this.openModalPay,
       onCancel: this.closeModalPay,
-      returnUrl,
+      returnUrl, totalPayment, minimumPayment, paidAmount,
     }
 
     if (userRole == 60) {
@@ -1325,7 +1357,7 @@ class Dashboard extends React.Component {
                                 <div className='font-12'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
                                 <span className='font-12 text-primary cursor' id='action' onClick={() => this.onOpenModalCreateNote(invoice)}>{intl.formatMessage(msgDrawer.requestClearance)}</span>
                                 {invoice?.isPaid ? 'Paid' : invoice?.totalPayment == 0 ? null : (
-                                  <button id='action' className='font-12 flag-action pay-flag-button' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
+                                  <button id='action' className='font-12 flag-action pay-flag-button' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`, invoice?.paidAmount, invoice?.totalPayment, invoice?.minimumPayment)}>
                                     {intl.formatMessage(msgDrawer.payFlag)}
                                   </button>
                                 )}

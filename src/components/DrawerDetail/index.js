@@ -59,6 +59,9 @@ class DrawerDetail extends Component {
       isFeeToParent: false,
       visiblePay: false,
       returnUrl: '',
+      totalPayment: 0,
+      minimumPayment: 0,
+      paidAmount: 0,
     };
   }
 
@@ -748,12 +751,12 @@ class DrawerDetail extends Component {
       .catch(err => this.setState({ errorMessage: err.message }));
   }
 
-  openModalPay = (url) => {
-    this.setState({ visiblePay: true, returnUrl: url });
+  openModalPay = (url, paidAmount, totalPayment, minimumPayment = 0) => {
+    this.setState({ visiblePay: true, returnUrl: url, paidAmount, totalPayment, minimumPayment });
   }
 
   closeModalpay = () => {
-    this.setState({ visiblePay: false, returnUrl: '' });
+    this.setState({ visiblePay: false, returnUrl: '', paidAmount: 0, totalPayment: 0, minimumPayment: 0 });
   }
 
   render() {
@@ -786,6 +789,9 @@ class DrawerDetail extends Component {
       cancellationType,
       visiblePay,
       returnUrl,
+      totalPayment,
+      minimumPayment,
+      paidAmount,
     } = this.state;
     const { event, listAppointmentsRecent, auth } = this.props;
     const dependent = { ...event?.dependent, appointments: listAppointmentsRecent?.filter(a => a.dependent?._id === event?.dependent?._id) };
@@ -944,7 +950,7 @@ class DrawerDetail extends Component {
       visible: visiblePay,
       onSubmit: this.closeModalpay,
       onCancel: this.closeModalpay,
-      returnUrl,
+      returnUrl, totalPayment, minimumPayment, paidAmount,
     };
 
     const contentConfirm = (
@@ -1133,7 +1139,7 @@ class DrawerDetail extends Component {
                     <Button type='primary' className='flex-1 h-30 p-0' onClick={this.onOpenModalInvoice}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
-                    <Button type='primary' block className='h-30 p-0' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.flagInvoice?._id)}`)}>
+                    <Button type='primary' block className='h-30 p-0' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.flagInvoice?._id)}`, event?.flagInvoice?.paidAmount, event?.flagInvoice?.totalPayment, event?.flagInvoice?.minimumPayment)}>
                       {intl.formatMessage(messages.payFlag)}
                     </Button>
                   </>
@@ -1176,7 +1182,7 @@ class DrawerDetail extends Component {
                     <Button type='primary' className='flex-1 h-30 p-0' onClick={this.onOpenModalInvoice}>
                       {intl.formatMessage(messages.flagDetails)}
                     </Button>
-                    <Button type='primary' block className='h-30 p-0' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.flagInvoice?._id)}`)}>
+                    <Button type='primary' block className='h-30 p-0' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.flagInvoice?._id)}`, event?.flagInvoice?.paidAmount, event?.flagInvoice?.totalPayment, event?.flagInvoice?.minimumPayment)}>
                       {intl.formatMessage(messages.payFlag)}
                     </Button>
                     <Popconfirm
@@ -1261,7 +1267,7 @@ class DrawerDetail extends Component {
               )}
               {[EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type) && event?.status === CLOSED && !event?.sessionInvoice?.isPaid && !event?.flagInvoice?.isPaid && (userRole === 3 || userRole > 900) && (
                 <Col span={12}>
-                  <Button type='primary' icon={<BsPaypal size={15} color="#fff" />} block onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.sessionInvoice?._id)}`)}>
+                  <Button type='primary' icon={<BsPaypal size={15} color="#fff" />} block onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(event?.sessionInvoice?._id)}`, event?.sessionInvoice?.paidAmount, event?.sessionInvoice?.totalPayment)}>
                     {intl.formatMessage(messages.payInvoice)}
                   </Button>
                 </Col>

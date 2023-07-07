@@ -22,6 +22,9 @@ class ParentSubsidyList extends React.Component {
       selectedInvoice: {},
       visiblePay: false,
       returnUrl: '',
+      totalPayment: 0,
+      minimumPayment: 0,
+      paidAmount: 0,
     };
     this.searchInput = createRef(null);
   }
@@ -35,16 +38,16 @@ class ParentSubsidyList extends React.Component {
     this.setState({ visibleInvoice: false, selectedInvoice: {} });
   }
 
-  openModalPay = (url) => {
-    this.setState({ visiblePay: true, returnUrl: url });
+  openModalPay = (url, paidAmount, totalPayment, minimumPayment = 0) => {
+    this.setState({ visiblePay: true, returnUrl: url, totalPayment, minimumPayment, paidAmount });
   }
 
   closeModalPay = () => {
-    this.setState({ visiblePay: false, returnUrl: '' });
+    this.setState({ visiblePay: false, returnUrl: '', totalPayment: 0, minimumPayment: 0, paidAmount: 0 });
   }
 
   render() {
-    const { selectedInvoice, visibleInvoice, visiblePay, returnUrl } = this.state;
+    const { paidAmount, selectedInvoice, totalPayment, minimumPayment, visibleInvoice, visiblePay, returnUrl } = this.state;
     const { auth, invoices } = this.props;
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
     const columns = [
@@ -167,7 +170,7 @@ class ParentSubsidyList extends React.Component {
       {
         title: intl.formatMessage(messages.action), key: 'action', align: 'center', fixed: 'right',
         render: invoice => invoice.isPaid ? null : (
-          <Button type='link' className='px-5' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
+          <Button type='link' className='px-5' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`, invoice?.paidAmount, invoice?.totalPayment, invoice?.minimumPayment)}>
             <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
           </Button>
         ),
@@ -185,7 +188,7 @@ class ParentSubsidyList extends React.Component {
       visible: visiblePay,
       onSubmit: this.openModalPay,
       onCancel: this.closeModalPay,
-      returnUrl,
+      returnUrl, totalPayment, minimumPayment, paidAmount,
     }
 
     return (

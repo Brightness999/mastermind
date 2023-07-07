@@ -37,6 +37,8 @@ class PanelAppointment extends React.Component {
       cancellationType: '',
       visiblePay: false,
       returnUrl: '',
+      totalPayment: 0,
+      paidAmount: 0,
     };
   }
 
@@ -378,12 +380,12 @@ class PanelAppointment extends React.Component {
     this.props.setAppointmentsInMonth(newAppointmentsInMonth);
   }
 
-  openModalPay = (url) => {
-    this.setState({ visiblePay: true, returnUrl: url });
+  openModalPay = (url, paidAmount, totalPayment) => {
+    this.setState({ visiblePay: true, returnUrl: url, totalPayment, paidAmount });
   }
 
   closeModalPay = () => {
-    this.setState({ visiblePay: false, returnUrl: '' });
+    this.setState({ visiblePay: false, returnUrl: '', totalPayment: 0, paidAmount: 0 });
   }
 
   render() {
@@ -402,6 +404,8 @@ class PanelAppointment extends React.Component {
       cancellationType,
       visiblePay,
       returnUrl,
+      totalPayment,
+      paidAmount,
     } = this.state;
     const dependent = { ...event?.dependent, appointments: appointments?.filter(a => a.dependent?._id === event?.dependent?._id) };
 
@@ -470,7 +474,7 @@ class PanelAppointment extends React.Component {
       visible: visiblePay,
       onSubmit: this.openModalPay,
       onCancel: this.closeModalPay,
-      returnUrl,
+      returnUrl, totalPayment, paidAmount,
     }
 
     return (
@@ -523,7 +527,7 @@ class PanelAppointment extends React.Component {
               {this.renderItemLeft(data)}
               {(this.props.user?.role === PARENT && data?.sessionInvoice && !data?.sessionInvoice?.isPaid) ? (
                 <div className={`item-right cursor gap-1 ${data?.status === DECLINED && 'display-none events-none'}`}>
-                  <button className='flag-action pay-flag-button' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(data?.sessionInvoice?._id)}`)}>
+                  <button className='flag-action pay-flag-button' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(data?.sessionInvoice?._id)}`, data?.sessionInvoice?.paidAmount, data?.sessionInvoice?.totalPayment)}>
                     <BsPaypal size={15} color="#1976D2" />
                   </button>
                 </div>

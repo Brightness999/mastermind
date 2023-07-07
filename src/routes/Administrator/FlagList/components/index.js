@@ -33,6 +33,9 @@ class FlagList extends React.Component {
       sortedFlags: [],
       visiblePay: false,
       returnUrl: '',
+      totalPayment: 0,
+      minimumPayment: 0,
+      paidAmount: 0,
     };
     this.searchInput = createRef(null);
     this.socket = undefined;
@@ -44,13 +47,24 @@ class FlagList extends React.Component {
     const params = new URLSearchParams(window.location.search);
     const success = decryptParam(params.get('s')?.replace(' ', '+') || '');
     const invoiceId = decryptParam(params.get('i')?.replace(' ', '+') || '');
+    const amount = decryptParam(params.get('v')?.replaceAll(' ', '+') || '');
     if (success === 'true' && (invoiceId)) {
-      request.post(payInvoice, { invoiceId, method: MethodType.PAYPAL }).then(res => {
+      request.post(payInvoice, { invoiceId, method: MethodType.PAYPAL, amount }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
           const url = window.location.href;
           const cleanUrl = url.split('?')[0];
           window.history.replaceState({}, document.title, cleanUrl);
+          const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(a => {
+            const totalPaidAmount = (a.paidAmount || 0) + amount;
+            if (a._id === invoiceId) {
+              a.paidAmount = totalPaidAmount;
+              a.isPaid = a.type === 5 ? totalPaidAmount >= a.minimumPayment ? 1 : 0 : totalPaidAmount >= a.totalPayment ? 1 : 0;
+              a.method = MethodType.PAYPAL;
+            }
+            return a;
+          })
+          this.props.setInvoiceList(newInvoices);
         } else {
           message.warning('Something went wrong. Please try again');
         }
@@ -89,6 +103,7 @@ class FlagList extends React.Component {
         const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(a => {
           if (a._id === invoice?._id) {
             a.isPaid = true;
+            a.method = MethodType.WAIVED;
           }
           return a;
         })
@@ -183,16 +198,16 @@ class FlagList extends React.Component {
     return true;
   }
 
-  openModalPay = (url) => {
-    this.setState({ visiblePay: true, returnUrl: url });
+  openModalPay = (url, paidAmount, totalPayment, minimumPayment = 0) => {
+    this.setState({ visiblePay: true, returnUrl: url, totalPayment, minimumPayment, paidAmount });
   }
 
   closeModalPay = () => {
-    this.setState({ visiblePay: false, returnUrl: '' });
+    this.setState({ visiblePay: false, returnUrl: '', totalPayment: 0, minimumPayment: 0, paidAmount: 0 });
   }
 
   render() {
-    const { csvData, tabFlags, loading, selectedTab, visibleInvoice, selectedFlag, visiblePay, returnUrl } = this.state;
+    const { csvData, tabFlags, loading, selectedTab, totalPayment, minimumPayment, paidAmount, visibleInvoice, selectedFlag, visiblePay, returnUrl } = this.state;
     const { auth } = this.props;
     const csvHeaders = ["Flag Type", "Student Name", "Age", "Student Grade", "Provider", "Amount", "Created Date", "Updated Date"];
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
@@ -326,7 +341,7 @@ class FlagList extends React.Component {
         title: 'Action', key: 'action', align: 'center', fixed: 'right', width: 160,
         render: (invoice) => (invoice.isPaid || invoice.totalPayment == 0) ? null : (
           <div className='flex'>
-            <Button type='link' className='px-5' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`)}>
+            <Button type='link' className='px-5' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`, invoice?.paidAmount, invoice?.totalPayment, invoice?.minimumPayment)}>
               <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
             </Button>
             <Popconfirm
@@ -411,7 +426,7 @@ class FlagList extends React.Component {
       visible: visiblePay,
       onSubmit: this.openModalPay,
       onCancel: this.closeModalPay,
-      returnUrl,
+      returnUrl, totalPayment, minimumPayment, paidAmount,
     }
 
     return (

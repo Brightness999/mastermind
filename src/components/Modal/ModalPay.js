@@ -4,6 +4,7 @@ import intl from 'react-intl-universal';
 
 import messages from './messages';
 import './style/index.less';
+import { encryptParam } from 'utils/api/request';
 
 class ModalPay extends React.Component {
 	state = {
@@ -32,7 +33,7 @@ class ModalPay extends React.Component {
 					<input type="hidden" name="shipping" value="0.00" />
 					<input type="hidden" name="currency_code" value="USD" data-aid="PAYMENT_HIDDEN_CURRENCY" />
 					<input type="hidden" name="rm" value="0" />
-					<input type="hidden" name="return" value={this.props.returnUrl} />
+					<input type="hidden" name="return" value={this.props.returnUrl + `&v=${encryptParam(payamount)}`} />
 					<input type="hidden" name="cancel_return" value={window.location.href} />
 					<input type="hidden" name="cbt" value="Return to Help Me Get Help" />
 					<Button key="submit" type="primary" htmlType='submit'>
@@ -45,6 +46,9 @@ class ModalPay extends React.Component {
 
 		return (
 			<Modal {...modalProps}>
+				<p>Total due: ${this.props.totalPayment}</p>
+				{this.props.minimumPayment ? <p>Minimum due: ${this.props.minimumPayment}</p> : null}
+				<p>Paid amount: ${this.props.paidAmount}</p>
 				<Input
 					type="number"
 					min={1}

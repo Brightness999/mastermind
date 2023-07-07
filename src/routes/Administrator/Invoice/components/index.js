@@ -33,8 +33,9 @@ class InvoiceList extends React.Component {
     const params = new URLSearchParams(window.location.search);
     const success = decryptParam(params.get('s')?.replaceAll(' ', '+') || '');
     const invoiceId = decryptParam(params.get('i')?.replaceAll(' ', '+') || '');
+    const amount = decryptParam(params.get('v')?.replaceAll(' ', '+') || '');
     if (success === 'true' && invoiceId) {
-      request.post(payInvoice, { invoiceId, method: MethodType.PAYPAL }).then(res => {
+      request.post(payInvoice, { invoiceId, method: MethodType.PAYPAL, amount }).then(res => {
         if (res.success) {
           message.success('Paid successfully');
           const url = window.location.href;
@@ -42,8 +43,11 @@ class InvoiceList extends React.Component {
           window.history.replaceState({}, document.title, cleanUrl);
           if (invoiceId) {
             const newInvoices = JSON.parse(JSON.stringify(invoices))?.map(a => {
+              const totalPaidAmount = (a.paidAmount || 0) + amount;
               if (a._id === invoiceId) {
-                a.isPaid = 1;
+                a.paidAmount = totalPaidAmount;
+                a.isPaid = a.type === 5 ? totalPaidAmount >= a.minimumPayment ? 1 : 0 : totalPaidAmount >= a.totalPayment ? 1 : 0;
+                a.method = MethodType.PAYPAL;
               }
               return a;
             })
