@@ -18,6 +18,7 @@ import request from 'utils/api/request';
 import { rescheduleAppointmentForParent } from 'utils/api/apiList';
 import { APPOINTMENT, CLOSED, CONSULTATION, DEPENDENTHOME, Durations, EVALUATION, PENDING, PROVIDEROFFICE, SCREEN, SUBSIDY } from 'routes/constant';
 import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
+import { url } from 'utils/api/baseUrl'
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -273,6 +274,10 @@ class ModalCurrentAppointment extends React.Component {
 		return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.duration, 'minutes').format('hh:mm a')}`;
 	}
 
+	getFileUrl(path) {
+		return url + 'uploads/' + path;
+	}
+
 	render() {
 		const {
 			selectedDate,
@@ -292,7 +297,7 @@ class ModalCurrentAppointment extends React.Component {
 			cancellationFee,
 			loadingSchedule,
 		} = this.state;
-		const { event, auth } = this.props;
+		const { event } = this.props;
 		const modalProps = {
 			className: 'modal-current',
 			title: "",
@@ -431,10 +436,25 @@ class ModalCurrentAppointment extends React.Component {
 								</Form.Item>
 							</Col>
 						</Row>
-						<Row>
-							<Col xs={24}>
+						<Row gutter={14}>
+							<Col xs={24} sm={24} md={12}>
 								<Form.Item name="notes" label={intl.formatMessage(msgCreateAccount.notes)}>
 									<Input.TextArea rows={3} onChange={e => this.handleChangeNote(e.target.value)} placeholder='Additional information you’d like to share with the provider' />
+								</Form.Item>
+							</Col>
+							<Col xs={24} sm={24} md={12}>
+								<Form.Item name="additionalDocuments" label={intl.formatMessage(messages.additionalDocuments)}>
+									<div>
+										{event?.addtionalDocuments?.map((document, index) => (
+											<a
+												key={index}
+												href={this.getFileUrl(document.url)}
+												target="_blank"
+											>
+												{document.name}
+											</a>
+										))}
+									</div>
 								</Form.Item>
 							</Col>
 						</Row>

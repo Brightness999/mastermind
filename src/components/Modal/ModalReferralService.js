@@ -116,7 +116,7 @@ class ModalReferralService extends React.Component {
 			date: selectedTime,
 			phoneNumber: isGoogleMeet ? undefined : phoneNumber,
 			meetingLink: isGoogleMeet ? meetingLink : undefined,
-			addtionalDocuments: fileList.length > 0 ? [fileList[0].response.data] : [],
+			addtionalDocuments: fileList.length > 0 ? [{ name: fileList[0].name, url: fileList[0].response.data }] : [],
 			notes: note,
 			type: CONSULTATION,
 			status: PENDING,

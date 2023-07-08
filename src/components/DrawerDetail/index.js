@@ -21,6 +21,7 @@ import request, { encryptParam } from 'utils/api/request';
 import { setAppointments, setAppointmentsInMonth, getInvoiceList } from 'src/redux/features/appointmentsSlice';
 import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from 'utils/api/apiList';
 import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from 'routes/constant';
+import { url } from 'utils/api/baseUrl'
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -759,6 +760,10 @@ class DrawerDetail extends Component {
     this.setState({ visiblePay: false, returnUrl: '', paidAmount: 0, totalPayment: 0, minimumPayment: 0 });
   }
 
+  getFileUrl(path) {
+    return url + 'uploads/' + path;
+  }
+
   render() {
     const {
       isProviderHover,
@@ -1117,6 +1122,23 @@ class DrawerDetail extends Component {
               <p className={`font-18 cursor ${(event?.type === CONSULTATION && event?.meetingLink) ? 'text-underline text-primary' : ''}`} onClick={() => (event?.type === CONSULTATION && event?.meetingLink) && window.open(event?.meetingLink)} >{(event?.type === CONSULTATION && event?.meetingLink) ? event?.meetingLink : event?.phoneNumber}</p>
             </div>
           )}
+          {event?.addtionalDocuments?.length > 0 ? (
+            <div className='detail-item flex'>
+              <p className='font-18 font-700 title'>Documents</p>
+              <div>
+                {event?.addtionalDocuments?.map((document, index) => (
+                  <a
+                    key={index}
+                    href={this.getFileUrl(document.url)}
+                    className='font-18'
+                    target="_blank"
+                  >
+                    {document.name}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
         {(flagEvent && (event?.flagStatus === ACTIVE || moment().isBefore(moment(event?.date)))) ? (
           <div className='text-center font-18 mt-2'>

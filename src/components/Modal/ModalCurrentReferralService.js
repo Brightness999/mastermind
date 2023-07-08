@@ -1,6 +1,6 @@
 import React from 'react';
-import { Modal, Button, Row, Col, Switch, Select, Calendar, Upload, Input, message, Form } from 'antd';
-import { BiChevronLeft, BiChevronRight, BiUpload } from 'react-icons/bi';
+import { Modal, Button, Row, Col, Switch, Select, Calendar, Input, message, Form } from 'antd';
+import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 import intl from 'react-intl-universal';
 import moment from 'moment';
@@ -260,6 +260,10 @@ class ModalCurrentReferralService extends React.Component {
 		}
 	}
 
+	getFileUrl(path) {
+		return url + 'uploads/' + path;
+	}
+
 	render() {
 		const { loadingSchedule, selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, dependents, skillSet, consultants } = this.state;
 		const { event } = this.props;
@@ -385,13 +389,15 @@ class ModalCurrentReferralService extends React.Component {
 							<Col xs={24} sm={24} md={8}>
 								<div className='provider-profile'>
 									<p className='font-14 font-700'>{intl.formatMessage(messages.additionalDocuments)}</p>
-									<div className='upload-document flex-1 mb-10'>
-										<Upload {...props}>
-											<Button size='small' type='primary' className='btn-upload'>
-												{intl.formatMessage(messages.upload).toUpperCase()} <BiUpload size={16} />
-											</Button>
-										</Upload>
-									</div>
+									{event?.addtionalDocuments?.map((document, index) => (
+										<a
+											key={index}
+											href={this.getFileUrl(document.url)}
+											target="_blank"
+										>
+											{document.name}
+										</a>
+									))}
 									<Input.TextArea
 										name='ReferralNote'
 										value={note}

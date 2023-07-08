@@ -1,6 +1,6 @@
 import React from 'react';
-import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Form, message, Spin, Dropdown } from 'antd';
-import { BiChevronLeft, BiChevronRight, BiSearch } from 'react-icons/bi';
+import { Modal, Button, Row, Col, Switch, Select, Typography, Calendar, Avatar, Input, Form, message, Spin, Dropdown, Upload } from 'antd';
+import { BiChevronLeft, BiChevronRight, BiSearch, BiUpload } from 'react-icons/bi';
 import { BsCheck } from 'react-icons/bs';
 import { GoPrimitiveDot } from 'react-icons/go';
 import { MdAdminPanelSettings } from 'react-icons/md';
@@ -20,6 +20,7 @@ import ModalNewScreening from './ModalNewScreening';
 import ModalConfirm from './ModalConfirm';
 import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
 import { ADMINAPPROVED, APPOINTMENT, CLOSED, DEPENDENTHOME, Durations, EVALUATION, PENDING, PROVIDEROFFICE, SCREEN, SUBSIDY } from 'routes/constant';
+import { url } from 'src/utils/api/baseUrl'
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -56,6 +57,7 @@ class ModalNewAppointment extends React.Component {
 		isSubsidyOnly: true,
 		cancellationFee: '',
 		loadingSchedule: false,
+		fileList: [],
 	}
 	scrollElement = React.createRef();
 
@@ -160,7 +162,7 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	createAppointment = (data) => {
-		const { selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration, standardRate, subsidizedRate } = this.state;
+		const { fileList, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration, standardRate, subsidizedRate } = this.state;
 		const { listDependents } = this.props;
 		const appointmentType = data?.isEvaluation ? EVALUATION : this.state.appointmentType;
 
@@ -195,6 +197,7 @@ class ModalNewAppointment extends React.Component {
 			status: PENDING,
 			rate: appointmentType === EVALUATION ? listProvider[selectedProviderIndex]?.separateEvaluationRate : (appointmentType === SUBSIDY) ? subsidizedRate || standardRate : appointmentType === APPOINTMENT ? standardRate : 0,
 			screeningTime: appointmentType === SCREEN ? data.time : '',
+			addtionalDocuments: fileList.length > 0 ? [{ name: fileList[0].name, url: fileList[0].response.data }] : [],
 		};
 		this.setState({ visibleModalScreening: false });
 
@@ -210,7 +213,7 @@ class ModalNewAppointment extends React.Component {
 
 	onConfirmEvaluation = () => {
 		this.onCloseModalConfirm();
-		const { selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration } = this.state;
+		const { fileList, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration } = this.state;
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime[selectedTimeIndex]?.value.clone().set({ years, months, date });
 		const postData = {
@@ -224,6 +227,7 @@ class ModalNewAppointment extends React.Component {
 			type: EVALUATION,
 			status: 0,
 			rate: listProvider[selectedProviderIndex]?.separateEvaluationRate ?? 0,
+			addtionalDocuments: fileList.length > 0 ? [{ name: fileList[0].name, url: fileList[0].response.data }] : [],
 		};
 		this.requestCreateAppointment(postData);
 	}
@@ -499,6 +503,18 @@ class ModalNewAppointment extends React.Component {
 		this.setState({ visibleModalConfirm: false });
 	}
 
+	onChangeUpload = (info) => {
+		if (info.file.status == 'removed') {
+			this.setState({ fileList: [] })
+			return;
+		}
+		if (info.file.status == 'done') {
+			this.setState(prevState => ({
+				fileList: info.fileList,
+			}));
+		}
+	}
+
 	render() {
 		const {
 			selectedDate,
@@ -527,6 +543,16 @@ class ModalNewAppointment extends React.Component {
 			loadingSchedule,
 		} = this.state;
 		const { listDependents } = this.props;
+		const props = {
+			name: 'file',
+			action: url + "clients/upload_document",
+			headers: {
+				authorization: 'authorization-text',
+			},
+			onChange: this.onChangeUpload,
+			maxCount: 1,
+		};
+
 		const modalProps = {
 			className: 'modal-new',
 			title: "",
@@ -636,10 +662,19 @@ class ModalNewAppointment extends React.Component {
 								</Form.Item>
 							</Col>
 						</Row>
-						<Row>
-							<Col xs={24}>
+						<Row gutter={14}>
+							<Col xs={24} sm={24} md={12}>
 								<Form.Item name="notes" label={intl.formatMessage(msgCreateAccount.notes)}>
 									<Input.TextArea rows={3} onChange={e => this.handleChangeNote(e.target.value)} placeholder='Additional information you’d like to share with the provider' />
+								</Form.Item>
+							</Col>
+							<Col xs={24} sm={24} md={12}>
+								<Form.Item name="additionalDocuments" label={intl.formatMessage(messages.additionalDocuments)}>
+									<Upload {...props}>
+										<Button size='small' type='primary' className='btn-upload'>
+											{intl.formatMessage(messages.upload).toUpperCase()} <BiUpload size={16} />
+										</Button>
+									</Upload>
 								</Form.Item>
 							</Col>
 						</Row>
