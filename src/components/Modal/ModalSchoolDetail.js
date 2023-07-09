@@ -43,16 +43,8 @@ class ModalSchoolDetail extends React.Component {
 	}
 
 	async componentDidMount() {
-		const { jewishHolidays, legalHolidays, school } = this.props;
-		const holidays = [...legalHolidays, ...jewishHolidays];
+		const { school } = this.props;
 		this.form?.setFieldsValue(school?.schoolInfo);
-
-		await this.updateBlackoutDates(school?.schoolInfo?.blackoutDates?.map(date => new Date(date)));
-		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			let name = document.createElement("div");
-			name.textContent = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary ?? '';
-			el.after(name);
-		})
 
 		const sessionsInSchool = school?.schoolInfo?.sessionsInSchool?.filter(s => s.dayInWeek === 0 || s.dayInWeek === 1 || s.dayInWeek === 5);
 		const sessionsAfterSchool = school?.schoolInfo?.sessionsAfterSchool?.filter(s => s.dayInWeek === 0 || s.dayInWeek === 1 || s.dayInWeek === 5);
@@ -100,8 +92,27 @@ class ModalSchoolDetail extends React.Component {
 		e && this.setState({ dayIsSelected: e });
 	}
 
-	updateBlackoutDates = async (dates) => {
-		this.form?.setFieldsValue({ blackoutDates: dates });
+	handleChangeTab = async (v) => {
+		if (v === '1') {
+			const { jewishHolidays, legalHolidays } = this.props;
+			const holidays = [...legalHolidays, ...jewishHolidays];
+			await this.updateBlackoutDates();
+			document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
+				const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
+				if (name) {
+					if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
+						el.nextElementSibling.innerText = name;
+					} else {
+						let newElement = document.createElement("div");
+						newElement.textContent = name;
+						el.after(newElement);
+					}
+				}
+			})
+		}
+	}
+
+	updateBlackoutDates = async () => {
 		return new Promise((resolveOuter) => {
 			resolveOuter(
 				new Promise((resolveInner) => {
@@ -113,6 +124,7 @@ class ModalSchoolDetail extends React.Component {
 
 	render() {
 		const { dayIsSelected, isLegalHolidays, isJewishHolidays, sessionsAfterSchool, sessionsInSchool } = this.state;
+		const blackoutDates = this.props.school?.schoolInfo?.blackoutDates?.map(date => new Date(date));
 		const modalProps = {
 			className: 'modal-school-detail',
 			title: "School Detail",
@@ -126,7 +138,8 @@ class ModalSchoolDetail extends React.Component {
 				<Button key="submit" type="primary" onClick={this.props.onSubmit}>
 					{intl.formatMessage(messages.ok)}
 				</Button>
-			]
+			],
+			width: 550,
 		};
 
 		const items = [
@@ -329,6 +342,7 @@ class ModalSchoolDetail extends React.Component {
 					<Form
 						name="form_school"
 						ref={(ref) => { this.form = ref }}
+						initialValues={{ blackoutDates }}
 					>
 						<div className='div-availability'>
 							<Segmented options={day_week} block={true} onChange={this.onSelectDay} />
@@ -421,6 +435,7 @@ class ModalSchoolDetail extends React.Component {
 					size='small'
 					items={items}
 					className="bg-white p-10 h-100 overflow-y-scroll overflow-x-hidden"
+					onChange={this.handleChangeTab}
 				/>
 			</Modal>
 		);
