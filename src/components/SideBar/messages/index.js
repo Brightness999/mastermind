@@ -17,6 +17,10 @@ export default {
     id: `${scope}.schoolsList`,
     defaultMessage: 'Schools List',
   },
+  providerList: {
+    id: `${scope}.providerList`,
+    defaultMessage: 'Provider List',
+  },
   flagList: {
     id: `${scope}.flagList`,
     defaultMessage: 'Flag List',

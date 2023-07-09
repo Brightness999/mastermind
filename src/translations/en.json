@@ -415,6 +415,7 @@
   "components.sidebar.statistics": "Statistics",
   "components.sidebar.appointments": "Appointments",
   "components.sidebar.schoolsList": "Schools List",
+  "components.sidebar.providerList": "Provider List",
   "components.sidebar.flagList": "Flag List",
   "components.sidebar.consultationRequests": "Consultation Requests",
   "components.sidebar.schedulingCenter": "Scheduling Center",

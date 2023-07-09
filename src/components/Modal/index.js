@@ -25,6 +25,7 @@ import ModalSchoolSubsidyApproval from './ModalSchoolSubsidyApproval';
 import ModalCancelForAdmin from './ModalCancelForAdmin';
 import ModalSchoolDetail from './ModalSchoolDetail';
 import ModalPay from './ModalPay';
+import ModalProviderDetail from './ModalProviderDetail';
 
 export {
   ModalCreateDone,
@@ -54,4 +55,5 @@ export {
   ModalCancelForAdmin,
   ModalSchoolDetail,
   ModalPay,
+  ModalProviderDetail,
 }

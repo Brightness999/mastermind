@@ -6,6 +6,7 @@ export const routerLinks = {
 
   Dashboard: '/account/dashboard',
   SchoolsList: '/administrator/schoolslist',
+  ProviderList: '/administrator/providerlist',
   FlagList: '/administrator/flaglist',
   ConsultationRequests: '/administrator/consultationrequests',
   Admin: '/administrator/admin',

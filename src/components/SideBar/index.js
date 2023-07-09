@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Menu } from 'antd';
-import { FaUsers, FaFileInvoice, FaRegChartBar, FaFlag, FaSchool, FaChild, FaFileInvoiceDollar } from 'react-icons/fa';
+import { FaUsers, FaFileInvoice, FaRegChartBar, FaFlag, FaSchool, FaChild, FaFileInvoiceDollar, FaUserMd } from 'react-icons/fa';
 import { AiOutlineSchedule } from 'react-icons/ai';
 import { IoSettingsSharp } from 'react-icons/io5';
 import { Link } from 'dva/router';
@@ -45,36 +45,15 @@ class SideBar extends Component {
   }
 
   handleClickLink = (link) => {
-    const { user } = this.props.auth;
-    let data = {
-      user: user?._id,
-      action: 'Admin Manage',
+    if (link) {
+      const { user } = this.props.auth;
+      let data = {
+        user: user?._id,
+        action: 'Admin Manage',
+        description: `Viewed ${link}`,
+      }
+      this.socket.emit('action_tracking', data);
     }
-    switch (link) {
-      case intl.formatMessage(messages.userManager):
-        data['description'] = `Viewed ${intl.formatMessage(messages.userManager)}`; break;
-      case intl.formatMessage(messages.schoolsList):
-        data['description'] = `Viewed ${intl.formatMessage(messages.schoolsList)}`; break;
-      case intl.formatMessage(messages.flagList):
-        data['description'] = `Viewed ${intl.formatMessage(messages.flagList)}`; break;
-      case intl.formatMessage(messages.consultationRequests):
-        data['description'] = `Viewed ${intl.formatMessage(messages.consultationRequests)}`; break;
-      case intl.formatMessage(messages.subsidyManager):
-        data['description'] = `Viewed ${intl.formatMessage(messages.subsidyManager)}`; break;
-      case intl.formatMessage(messages.schedulingCenter):
-        data['description'] = `Viewed ${intl.formatMessage(messages.schedulingCenter)}`; break;
-      case intl.formatMessage(msgMainHeader.dependentList):
-        data['description'] = `Viewed ${intl.formatMessage(msgMainHeader.dependentList)}`; break;
-      case intl.formatMessage(msgMainHeader.invoiceList):
-        data['description'] = `Viewed ${intl.formatMessage(msgMainHeader.invoiceList)}`; break;
-      case intl.formatMessage(messages.systemSetting):
-        data['description'] = `Viewed ${intl.formatMessage(messages.systemSetting)}`; break;
-      case intl.formatMessage(messages.actionTracker):
-        data['description'] = `Viewed ${intl.formatMessage(messages.actionTracker)}`; break;
-      default:
-        break;
-    }
-    this.socket.emit('action_tracking', data);
   }
 
   render() {
@@ -88,6 +67,11 @@ class SideBar extends Component {
         label: <Link to={routerLinks.SchoolsList} onClick={() => this.handleClickLink(intl.formatMessage(messages.schoolsList))}>{intl.formatMessage(messages.schoolsList)}</Link>,
         key: routerLinks.SchoolsList,
         icon: <FaSchool size={20} />
+      },
+      {
+        label: <Link to={routerLinks.ProviderList} onClick={() => this.handleClickLink(intl.formatMessage(messages.providerList))}>{intl.formatMessage(messages.providerList)}</Link>,
+        key: routerLinks.ProviderList,
+        icon: <FaUserMd size={20} />
       },
       {
         label: <Link to={routerLinks.FlagList} onClick={() => this.handleClickLink(intl.formatMessage(messages.flagList))}>{intl.formatMessage(messages.flagList)}</Link>,

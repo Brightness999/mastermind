@@ -1326,6 +1326,7 @@ ol {
 }
 
 .schoollist-page,
+.providerlist-page,
 .flaglist-page,
 .consultationrequests-page,
 .subsidymanager-page,
@@ -2303,4 +2304,42 @@ table.notification-settings {
 
 .overflow-x-hidden {
   overflow-x: hidden !important;
+}
+
+.service-dropdown {
+  background-color: transparent !important;
+  box-shadow: unset;
+  padding: 1px;
+
+  .ant-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    max-height: 200px;
+    overflow-y: auto;
+
+    .ant-checkbox-group-item {
+      background-color: @white;
+      border: 1px solid @primary-color;
+      color: @gray800;
+      margin-bottom: 5px;
+      border-radius: 4px;
+      font-size: 12px;
+      text-align: left;
+      padding: 5px 12px;
+      margin-right: 0px;
+
+      &:hover, &.ant-checkbox-wrapper-checked {
+        color: white;
+        background-color: @primary-color-dark;
+        border-color: @primary-color-dark;
+      }
+    }
+  }
+
+  &-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-top: solid 1px gainsboro;
+  }
 }

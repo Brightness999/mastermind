@@ -33,6 +33,7 @@ import CreateUser from './Administrator/CreateAccount';
 import InvoiceList from './User/Invoice';
 import SubsidyRequests from './User/SubsidyRequests';
 import Invoices from './Administrator/Invoice';
+import ProviderList from './Administrator/ProviderList';
 
 const routesConfig = app => [
   {
@@ -68,6 +69,7 @@ const routesConfig = app => [
       CreateUser(app),
       Statistics(app),
       Invoices(app),
+      ProviderList(app),
     ]
   },
   {
