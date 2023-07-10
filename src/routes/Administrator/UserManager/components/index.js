@@ -1,9 +1,9 @@
 import React, { createRef } from 'react';
-import { Divider, Table, Space, Button, Input, message, Pagination } from 'antd';
+import { Divider, Table, Space, Button, Input, message, Pagination, Checkbox } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import { SearchOutlined } from '@ant-design/icons';
+import { FilterFilled, SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
 import mgsSidebar from 'components/SideBar/messages';
@@ -31,6 +31,10 @@ class UserManager extends React.Component {
 			pageSize: 10,
 			pageNumber: 1,
 			totalSize: 0,
+			selectedStatus: [],
+			selectedRoles: [],
+			searchEmail: '',
+			searchUsername: '',
 		};
 		this.searchInput = createRef(null);
 	}
@@ -40,13 +44,23 @@ class UserManager extends React.Component {
 	}
 
 	handleChangePagination = (newPageNumber, newPageSize) => {
-		this.setState({ pageNumber: newPageNumber, pageSize: newPageSize });
-		this.getUserList(newPageNumber, newPageSize);
+		this.setState({ pageNumber: newPageNumber, pageSize: newPageSize }, () => {
+			this.getUserList(newPageNumber, newPageSize);
+		});
 	}
 
-	getUserList = (pageNumber = 1, pageSize = 10) => {
+	getUserList = () => {
 		this.setState({ loading: true });
-		request.post(getUsers, { pageNumber, pageSize }).then(result => {
+		const { pageNumber, pageSize, searchEmail, searchUsername, selectedRoles, selectedStatus } = this.state;
+		const postData = {
+			pageNumber, pageSize,
+			email: searchEmail,
+			username: searchUsername,
+			roles: selectedRoles,
+			status: selectedStatus,
+		}
+
+		request.post(getUsers, postData).then(result => {
 			const { success, data } = result;
 			this.setState({ loading: false });
 			if (success) {
@@ -123,26 +137,35 @@ class UserManager extends React.Component {
 	}
 
 	render() {
-		const { pageNumber, pageSize, totalSize, visibleInputCode, users, isConfirmModal, confirmMessage, loading } = this.state;
+		const { pageNumber, pageSize, searchEmail, searchUsername, selectedRoles, selectedStatus, totalSize, visibleInputCode, users, isConfirmModal, confirmMessage, loading } = this.state;
 		const columns = [
 			{
 				title: 'UserName', dataIndex: 'username', key: 'name', fixed: 'left',
 				sorter: (a, b) => a.username > b.username ? 1 : -1,
-				filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+				filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
 					<div style={{ padding: 8 }}>
 						<Input
 							name='SearchName'
 							ref={this.searchInput}
-							placeholder={`Search User Name`}
-							value={selectedKeys[0]}
-							onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-							onPressEnter={() => confirm()}
+							placeholder={`Search Username`}
+							value={searchUsername}
+							onChange={e => {
+								setSelectedKeys(e.target.value ? [e.target.value] : []);
+								this.setState({ searchUsername: e.target.value });
+							}}
+							onPressEnter={() => {
+								confirm();
+								this.getUserList();
+							}}
 							style={{ marginBottom: 8, display: 'block' }}
 						/>
 						<Space>
 							<Button
 								type="primary"
-								onClick={() => confirm()}
+								onClick={() => {
+									confirm();
+									this.getUserList();
+								}}
 								icon={<SearchOutlined />}
 								size="small"
 								style={{ width: 90 }}
@@ -150,7 +173,13 @@ class UserManager extends React.Component {
 								Search
 							</Button>
 							<Button
-								onClick={() => clearFilters()}
+								onClick={() => {
+									clearFilters();
+									confirm();
+									this.setState({ searchUsername: '' }, () => {
+										this.getUserList();
+									});
+								}}
 								size="small"
 								style={{ width: 90 }}
 							>
@@ -162,20 +191,111 @@ class UserManager extends React.Component {
 				filterIcon: (filtered) => (
 					<SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
 				),
-				onFilter: (value, record) =>
-					record['username']
-						.toString()
-						.toLowerCase()
-						.includes((value).toLowerCase()),
 				onFilterDropdownOpenChange: visible => {
 					if (visible) {
 						setTimeout(() => this.searchInput.current?.select(), 100);
 					}
 				}
 			},
-			{ title: 'Email', dataIndex: 'email', key: 'email', sorter: (a, b) => a.email > b.email ? 1 : -1 },
 			{
-				title: 'Role', dataIndex: 'role', key: 'role', render: (role) => {
+				title: 'Email', dataIndex: 'email', key: 'email',
+				sorter: (a, b) => a.email > b.email ? 1 : -1,
+				filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+					<div style={{ padding: 8 }}>
+						<Input
+							name='SearchEmail'
+							ref={this.searchInput}
+							placeholder={`Search Email`}
+							value={searchEmail}
+							onChange={e => {
+								setSelectedKeys(e.target.value ? [e.target.value] : []);
+								this.setState({ searchEmail: e.target.value });
+							}}
+							onPressEnter={() => {
+								confirm();
+								this.getUserList();
+							}}
+							style={{ marginBottom: 8, display: 'block' }}
+						/>
+						<Space>
+							<Button
+								type="primary"
+								onClick={() => {
+									confirm();
+									this.getUserList();
+								}}
+								icon={<SearchOutlined />}
+								size="small"
+								style={{ width: 90 }}
+							>
+								Search
+							</Button>
+							<Button
+								onClick={() => {
+									clearFilters();
+									confirm();
+									this.setState({ searchEmail: '' }, () => {
+										this.getUserList();
+									});
+								}}
+								size="small"
+								style={{ width: 90 }}
+							>
+								Reset
+							</Button>
+						</Space>
+					</div>
+				),
+				filterIcon: (filtered) => (
+					<SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+				),
+				onFilterDropdownOpenChange: visible => {
+					if (visible) {
+						setTimeout(() => this.searchInput.current?.select(), 100);
+					}
+				}
+			},
+			{
+				title: 'Role', dataIndex: 'role', key: 'role',
+				filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+					<div className='service-dropdown'>
+						<Checkbox.Group
+							options={[
+								{ label: 'Admin', value: 999 },
+								{ label: 'Consultant', value: 100 },
+								{ label: 'School', value: 60 },
+								{ label: 'Provider', value: 30 },
+								{ label: 'Parent', value: 3 },
+							]}
+							value={selectedRoles}
+							onChange={(values) => {
+								this.setState({ selectedRoles: values });
+								setSelectedKeys(values);
+							}}
+						/>
+						<div className='service-dropdown-footer'>
+							<Button type="primary" size="small" onClick={() => {
+								confirm();
+								this.getUserList();
+							}}>
+								Filter
+							</Button>
+							<Button size="small" onClick={() => {
+								clearFilters();
+								confirm();
+								this.setState({ selectedRoles: [] }, () => {
+									this.getUserList();
+								});
+							}}>
+								Reset
+							</Button>
+						</div>
+					</div>
+				),
+				filterIcon: filtered => (
+					<FilterFilled style={{ color: filtered ? '#3E92CF' : undefined }} />
+				),
+				render: (role) => {
 					switch (role) {
 						case 1000: return 'Super Admin';
 						case 999: return 'Admin';
@@ -186,23 +306,45 @@ class UserManager extends React.Component {
 						default: return 'Banner User';
 					}
 				},
-				filters: [
-					{ text: 'Admin', value: 999 },
-					{ text: 'Consultant', value: 100 },
-					{ text: 'School', value: 60 },
-					{ text: 'Provider', value: 30 },
-					{ text: 'Parent', value: 3 },
-				],
-				onFilter: (value, record) => record.role == value,
 			},
 			{
 				title: 'Active', dataIndex: 'isActive', key: 'isActive',
+				filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+					<div className='service-dropdown'>
+						<Checkbox.Group
+							options={[
+								{ label: 'True', value: 1 },
+								{ label: 'False', value: 0 },
+							]}
+							value={selectedStatus}
+							onChange={(values) => {
+								this.setState({ selectedStatus: values });
+								setSelectedKeys(values);
+							}}
+						/>
+						<div className='service-dropdown-footer'>
+							<Button type="primary" size="small" onClick={() => {
+								confirm();
+								this.getUserList();
+							}}>
+								Filter
+							</Button>
+							<Button size="small" onClick={() => {
+								clearFilters();
+								confirm();
+								this.setState({ selectedStatus: [] }, () => {
+									this.getUserList();
+								});
+							}}>
+								Reset
+							</Button>
+						</div>
+					</div>
+				),
+				filterIcon: filtered => (
+					<FilterFilled style={{ color: filtered ? '#3E92CF' : undefined }} />
+				),
 				render: (isActive) => isActive ? 'True' : 'False',
-				filters: [
-					{ text: 'True', value: 1 },
-					{ text: 'False', value: 0 },
-				],
-				onFilter: (value, record) => record.isActive == value,
 			},
 			{
 				title: 'Last Activity', dataIndex: 'activity', key: 'lastActivity', type: 'datetime',
