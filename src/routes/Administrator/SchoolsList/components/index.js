@@ -41,7 +41,7 @@ export default class extends React.Component {
 
 	handleChangePagination = (newPageNumber, newPageSize) => {
 		this.setState({ pageNumber: newPageNumber, pageSize: newPageSize });
-		this.getUserList(newPageNumber, newPageSize);
+		this.getSchoolList(newPageNumber, newPageSize);
 	}
 
 	getSchoolList = (pageNumber = 1, pageSize = 10) => {
