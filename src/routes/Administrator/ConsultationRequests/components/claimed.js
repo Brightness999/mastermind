@@ -1,6 +1,6 @@
 import React, { createRef } from 'react';
-import { Table, Space, Button, Input, message, Pagination } from 'antd';
-import { CheckCircleFilled, SearchOutlined } from '@ant-design/icons';
+import { Table, Space, Button, Input, message, Pagination, Checkbox, Popover } from 'antd';
+import { CheckCircleFilled, FilterFilled, SearchOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import moment from 'moment';
@@ -24,27 +24,42 @@ class ClaimedConsultationRequest extends React.Component {
       pageSize: 10,
       pageNumber: 1,
       totalSize: 0,
+      searchDependentName: '',
+      searchConsultantName: '',
+      selectedGrades: [],
+      selectedSchools: [],
+      selectedServices: [],
     };
     this.searchInput = createRef(null);
   }
 
   componentDidMount() {
     const skillSet = JSON.parse(JSON.stringify(this.props.auth.skillSet));
-    this.setState({ skillSet: skillSet?.map(skill => { skill['text'] = skill.name, skill['value'] = skill._id; return skill; }) });
+    this.setState({ skillSet: skillSet?.map(skill => { skill['label'] = skill.name, skill['value'] = skill._id; return skill; }) });
     this.getConsultations();
   }
 
   handleChangePagination = (newPageNumber, newPageSize) => {
     this.setState({ pageNumber: newPageNumber, pageSize: newPageSize });
-    this.getConsultations(newPageNumber, newPageSize);
+    this.getConsultations();
   }
 
-  getConsultations = (pageNumber = 1, pageSize = 10) => {
+  getConsultations = () => {
     this.setState({ loading: true });
-    request.post(getConsultationList, { pageNumber, pageSize, isClaimed: true }).then(result => {
+    const { pageNumber, pageSize, searchConsultantName, searchDependentName, selectedGrades, selectedSchools, selectedServices } = this.state;
+    const postData = {
+      pageNumber, pageSize,
+      isClaimed: true,
+      name: searchDependentName,
+      grades: selectedGrades,
+      schools: selectedSchools,
+      services: selectedServices,
+      consultantName: searchConsultantName,
+    }
+
+    request.post(getConsultationList, postData).then(result => {
       this.setState({ loading: false });
       const { success, data } = result;
-      console.log(data)
       if (success) {
         this.setState({
           consultationList: data?.consultations?.map((consultation, i) => {
@@ -81,27 +96,40 @@ class ClaimedConsultationRequest extends React.Component {
   }
 
   render() {
-    const { pageNumber, pageSize, totalSize, consultationList, skillSet, loading, csvData } = this.state;
+    const { pageNumber, pageSize, searchConsultantName, searchDependentName, selectedGrades, selectedSchools, selectedServices, totalSize, consultationList, skillSet, loading, csvData } = this.state;
+    const { auth } = this.props;
+    const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ label: level, value: level }));
+    const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(school => ({ label: school.schoolInfo?.name, value: school.schoolInfo?._id })) || [];
+    schools.push({ label: 'Other', value: 'other' });
     const csvHeaders = ["Student Name", "Referrer", "Student Grade", "Service Requested", "PhoneNumber/Google Meet", "Date"];
     const columns = [
       {
-        title: 'Dependent', key: 'dependent', fixed: 'left',
+        title: 'Student', key: 'dependent', fixed: 'left',
         sorter: (a, b) => a.dependent?.firstName + a.dependent?.lastName > b.dependent?.firstName + b.dependent?.lastName ? 1 : -1,
-        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
               name='SearchName'
               ref={this.searchInput}
-              placeholder={`Search Dependent Name`}
-              value={selectedKeys[0]}
-              onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-              onPressEnter={() => confirm()}
+              placeholder={`Search Student Name`}
+              value={searchDependentName}
+              onChange={e => {
+                setSelectedKeys(e.target.value ? [e.target.value] : []);
+                this.setState({ searchDependentName: e.target.value });
+              }}
+              onPressEnter={() => {
+                confirm();
+                this.getConsultations();
+              }}
               style={{ marginBottom: 8, display: 'block' }}
             />
             <Space>
               <Button
                 type="primary"
-                onClick={() => confirm()}
+                onClick={() => {
+                  confirm();
+                  this.getConsultations();
+                }}
                 icon={<SearchOutlined />}
                 size="small"
                 style={{ width: 90 }}
@@ -109,7 +137,13 @@ class ClaimedConsultationRequest extends React.Component {
                 Search
               </Button>
               <Button
-                onClick={() => clearFilters()}
+                onClick={() => {
+                  clearFilters();
+                  confirm();
+                  this.setState({ searchDependentName: '' }, () => {
+                    this.getConsultations();
+                  })
+                }}
                 size="small"
                 style={{ width: 90 }}
               >
@@ -121,7 +155,6 @@ class ClaimedConsultationRequest extends React.Component {
         filterIcon: (filtered) => (
           <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
         ),
-        onFilter: (value, record) => record.dependent?.firstName?.toString()?.toLowerCase()?.includes((value).toLowerCase()) || record.dependent?.lastName?.toString()?.toLowerCase()?.includes((value).toLowerCase()),
         onFilterDropdownOpenChange: visible => {
           if (visible) {
             setTimeout(() => this.searchInput.current?.select(), 100);
@@ -132,21 +165,30 @@ class ClaimedConsultationRequest extends React.Component {
       {
         title: 'Consultant', key: 'consultant',
         sorter: (a, b) => a.consultant?.username > b.consultant?.username ? 1 : -1,
-        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
               name='SearchName'
               ref={this.searchInput}
-              placeholder={`Search Dependent Name`}
-              value={selectedKeys[0]}
-              onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-              onPressEnter={() => confirm()}
+              placeholder={`Search Consultant Name`}
+              value={searchConsultantName}
+              onChange={e => {
+                setSelectedKeys(e.target.value ? [e.target.value] : []);
+                this.setState({ searchConsultantName: e.target.value });
+              }}
+              onPressEnter={() => {
+                confirm();
+                this.getConsultations();
+              }}
               style={{ marginBottom: 8, display: 'block' }}
             />
             <Space>
               <Button
                 type="primary"
-                onClick={() => confirm()}
+                onClick={() => {
+                  confirm();
+                  this.getConsultations();
+                }}
                 icon={<SearchOutlined />}
                 size="small"
                 style={{ width: 90 }}
@@ -154,7 +196,13 @@ class ClaimedConsultationRequest extends React.Component {
                 Search
               </Button>
               <Button
-                onClick={() => clearFilters()}
+                onClick={() => {
+                  clearFilters();
+                  confirm();
+                  this.setState({ searchConsultantName: '' }, () => {
+                    this.getConsultations();
+                  })
+                }}
                 size="small"
                 style={{ width: 90 }}
               >
@@ -166,7 +214,6 @@ class ClaimedConsultationRequest extends React.Component {
         filterIcon: (filtered) => (
           <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
         ),
-        onFilter: (value, record) => record.consultant?.username?.toString()?.toLowerCase()?.includes((value).toLowerCase()),
         onFilterDropdownOpenChange: visible => {
           if (visible) {
             setTimeout(() => this.searchInput.current?.select(), 100);
@@ -176,11 +223,120 @@ class ClaimedConsultationRequest extends React.Component {
       },
       { title: 'Subsidy Request', key: 'subsidy', dataIndex: 'subsidy', align: 'center', render: (subsidy) => !!subsidy ? <CheckCircleFilled className='text-green500' /> : null },
       { title: 'Age', key: 'age', width: 100, sorter: (a, b) => a.dependent?.birthday > b.dependent?.birthday ? 1 : -1, render: (appointment) => moment().year() - moment(appointment.dependent?.birthday).year() },
-      { title: 'Grade', key: 'grade', render: (appointment) => appointment.dependent?.currentGrade },
-      { title: 'School', key: 'school', render: appointment => appointment?.dependent?.school?.name },
       {
-        title: 'Service', dataIndex: 'skillSet', key: 'skillSet', filters: skillSet,
-        onFilter: (value, record) => record.skillSet?._id == value,
+        title: 'Grade', key: 'grade',
+        filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+          <div className='service-dropdown'>
+            <Checkbox.Group
+              options={grades}
+              value={selectedGrades}
+              onChange={(values) => {
+                this.setState({ selectedGrades: values });
+                setSelectedKeys(values);
+              }}
+            />
+            <div className='service-dropdown-footer'>
+              <Button type="primary" size="small" onClick={() => {
+                confirm();
+                this.getConsultations();
+              }}>
+                Filter
+              </Button>
+              <Button size="small" onClick={() => {
+                this.setState({ selectedGrades: [] }, () => {
+                  this.getConsultations();
+                });
+                clearFilters();
+                confirm();
+              }}>
+                Reset
+              </Button>
+            </div>
+          </div>
+        ),
+        filterIcon: filtered => (
+          <FilterFilled style={{ color: filtered ? '#3E92CF' : undefined }} />
+        ),
+        render: (appointment) => appointment.dependent?.currentGrade,
+      },
+      {
+        title: 'School', key: 'school',
+        filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+          <div className='service-dropdown'>
+            <Checkbox.Group
+              options={schools}
+              value={selectedSchools}
+              onChange={(values) => {
+                this.setState({ selectedSchools: values });
+                setSelectedKeys(values);
+              }}
+            />
+            <div className='service-dropdown-footer'>
+              <Button type="primary" size="small" onClick={() => {
+                confirm();
+                this.getConsultations();
+              }}>
+                Filter
+              </Button>
+              <Button size="small" onClick={() => {
+                this.setState({ selectedSchools: [] }, () => {
+                  this.getConsultations();
+                });
+                clearFilters();
+                confirm();
+              }}>
+                Reset
+              </Button>
+            </div>
+          </div>
+        ),
+        filterIcon: filtered => (
+          <FilterFilled style={{ color: filtered ? '#3E92CF' : undefined }} />
+        ),
+        render: appointment => appointment?.dependent?.school?.name || (
+          <Popover content={(<div>
+            <div><span className='font-700'>Name:</span> {appointment?.dependent?.otherName}</div>
+            <div><span className='font-700'>Phone:</span> {appointment?.dependent?.otherContactNumber}</div>
+            <div><span className='font-700'>Notes:</span> {appointment?.dependent?.otherNotes}</div>
+          </div>)} trigger="click">
+            <span className='text-primary text-underline cursor action'>Other</span>
+          </Popover>
+        ),
+      },
+      {
+        title: 'Service', dataIndex: 'skillSet', key: 'skillSet',
+        filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+          <div className='service-dropdown'>
+            <Checkbox.Group
+              options={skillSet}
+              value={selectedServices}
+              onChange={(values) => {
+                this.setState({ selectedServices: values });
+                setSelectedKeys(values);
+              }}
+            />
+            <div className='service-dropdown-footer'>
+              <Button type="primary" size="small" onClick={() => {
+                confirm();
+                this.getConsultations();
+              }}>
+                Filter
+              </Button>
+              <Button size="small" onClick={() => {
+                this.setState({ selectedServices: [] }, () => {
+                  this.getConsultations();
+                });
+                clearFilters();
+                confirm();
+              }}>
+                Reset
+              </Button>
+            </div>
+          </div>
+        ),
+        filterIcon: filtered => (
+          <FilterFilled style={{ color: filtered ? '#3E92CF' : undefined }} />
+        ),
         render: skill => skill?.name,
       },
       {
