@@ -202,8 +202,11 @@ export default class extends React.Component {
 							</Button>
 							<Button
 								onClick={() => {
-									this.setState({ searchUsername: '' });
+									this.setState({ searchUsername: '' }, () => {
+										this.getProviderList();
+									});
 									clearFilters();
+									confirm();
 								}}
 								size="small"
 								style={{ width: 90 }}
@@ -257,8 +260,11 @@ export default class extends React.Component {
 							</Button>
 							<Button
 								onClick={() => {
-									this.setState({ searchEmail: '' });
+									this.setState({ searchEmail: '' }, () => {
+										this.getProviderList();
+									});
 									clearFilters();
+									confirm();
 								}}
 								size="small"
 								style={{ width: 90 }}
@@ -312,8 +318,11 @@ export default class extends React.Component {
 							</Button>
 							<Button
 								onClick={() => {
-									this.setState({ searchName: '' });
+									this.setState({ searchName: '' }, () => {
+										this.getProviderList();
+									});
 									clearFilters();
+									confirm();
 								}}
 								size="small"
 								style={{ width: 90 }}
@@ -353,8 +362,11 @@ export default class extends React.Component {
 								Filter
 							</Button>
 							<Button size="small" onClick={() => {
-								this.setState({ selectedServices: [] });
+								this.setState({ selectedServices: [] }, () => {
+									this.getProviderList();
+								});
 								clearFilters();
+								confirm();
 							}}>
 								Reset
 							</Button>
@@ -401,8 +413,11 @@ export default class extends React.Component {
 							</Button>
 							<Button
 								onClick={() => {
-									this.setState({ searchAddress: '' });
+									this.setState({ searchAddress: '' }, () => {
+										this.getProviderList();
+									});
 									clearFilters();
+									confirm();
 								}}
 								size="small"
 								style={{ width: 90 }}
@@ -445,8 +460,11 @@ export default class extends React.Component {
 								Filter
 							</Button>
 							<Button size="small" onClick={() => {
-								this.setState({ selectedStatus: [] });
+								this.setState({ selectedStatus: [] }, () => {
+									this.getProviderList();
+								});
 								clearFilters();
+								confirm();
 							}}>
 								Reset
 							</Button>

@@ -198,8 +198,11 @@ export default class extends React.Component {
 							</Button>
 							<Button
 								onClick={() => {
+									this.setState({ searchUsername: '' }, () => {
+										this.getSchoolList();
+									});
 									clearFilters();
-									this.setState({ searchUsername: '' });
+									confirm();
 								}}
 								size="small"
 								style={{ width: 90 }}
@@ -254,7 +257,10 @@ export default class extends React.Component {
 							<Button
 								onClick={() => {
 									clearFilters();
-									this.setState({ searchEmail: '' });
+									confirm();
+									this.setState({ searchEmail: '' }, () => {
+										this.getSchoolList();
+									});
 								}}
 								size="small"
 								style={{ width: 90 }}
@@ -309,7 +315,10 @@ export default class extends React.Component {
 							<Button
 								onClick={() => {
 									clearFilters();
-									this.setState({ searchSchoolName: '' });
+									confirm();
+									this.setState({ searchSchoolName: '' }, () => {
+										this.getSchoolList();
+									});
 								}}
 								size="small"
 								style={{ width: 90 }}
@@ -364,8 +373,11 @@ export default class extends React.Component {
 							</Button>
 							<Button
 								onClick={() => {
-									this.setState({ searchAddress: '' });
+									this.setState({ searchAddress: '' }, () => {
+										this.getSchoolList();
+									});
 									clearFilters();
+									confirm();
 								}}
 								size="small"
 								style={{ width: 90 }}
@@ -408,8 +420,11 @@ export default class extends React.Component {
 								Filter
 							</Button>
 							<Button size="small" onClick={() => {
-								this.setState({ selectedStatus: [] });
+								this.setState({ selectedStatus: [] }, () => {
+									this.getSchoolList();
+								});
 								clearFilters();
+								confirm();
 							}}>
 								Reset
 							</Button>
