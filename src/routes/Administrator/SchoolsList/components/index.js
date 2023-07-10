@@ -1,7 +1,7 @@
 import React, { createRef } from 'react';
-import { Divider, Table, Space, Button, Input, message, Pagination } from 'antd';
+import { Divider, Table, Space, Button, Input, message, Pagination, Checkbox } from 'antd';
 import intl from 'react-intl-universal';
-import { SearchOutlined } from '@ant-design/icons';
+import { FilterFilled, SearchOutlined } from '@ant-design/icons';
 
 import { routerLinks, BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from 'routes/constant';
 import { ModalConfirm, ModalInputCode, ModalSchoolDetail } from 'components/Modal';
@@ -30,6 +30,11 @@ export default class extends React.Component {
 			selectedSchool: undefined,
 			jewishHolidays: [],
 			legalHolidays: [],
+			searchAddress: '',
+			selectedStatus: [],
+			searchUsername: '',
+			searchEmail: '',
+			searchSchoolName: '',
 		};
 		this.searchInput = createRef(null);
 	}
@@ -40,13 +45,24 @@ export default class extends React.Component {
 	}
 
 	handleChangePagination = (newPageNumber, newPageSize) => {
-		this.setState({ pageNumber: newPageNumber, pageSize: newPageSize });
-		this.getSchoolList(newPageNumber, newPageSize);
+		this.setState({ pageNumber: newPageNumber, pageSize: newPageSize }, () => {
+			this.getSchoolList();
+		});
 	}
 
-	getSchoolList = (pageNumber = 1, pageSize = 10) => {
+	getSchoolList = () => {
 		this.setState({ loading: true });
-		request.post(getSchools, { pageNumber, pageSize }).then(result => {
+		const { pageNumber, pageSize, searchAddress, searchEmail, searchSchoolName, searchUsername, selectedStatus } = this.state;
+		const postData = {
+			pageNumber, pageSize,
+			address: searchAddress,
+			email: searchEmail,
+			name: searchSchoolName,
+			username: searchUsername,
+			status: selectedStatus,
+		}
+
+		request.post(getSchools, postData).then(result => {
 			this.setState({ loading: false });
 			const { success, data } = result;
 			if (success) {
@@ -145,29 +161,35 @@ export default class extends React.Component {
 	}
 
 	render() {
-		const { jewishHolidays, legalHolidays, pageNumber, pageSize, totalSize, visibleInputCode, schools, isConfirmModal, confirmMessage, loading, selectedSchool, visibleSchoolDetail } = this.state;
+		const { jewishHolidays, legalHolidays, pageNumber, pageSize, searchAddress, searchEmail, searchSchoolName, searchUsername, selectedStatus, totalSize, visibleInputCode, schools, isConfirmModal, confirmMessage, loading, selectedSchool, visibleSchoolDetail } = this.state;
 		const columns = [
-			{ title: 'User Name', dataIndex: 'username', key: 'username', fixed: 'left', sorter: (a, b) => a.username > b.username ? 1 : -1 },
-			{ title: 'Email', dataIndex: 'email', key: 'email', sorter: (a, b) => a.email > b.email ? 1 : -1 },
-			{ title: 'School Name', dataIndex: 'schoolInfo', key: 'schoolname', sorter: (a, b) => a?.schoolInfo?.name > b?.schoolInfo?.name ? 1 : -1, render: (schoolInfo) => schoolInfo?.name },
 			{
-				title: 'Address', dataIndex: 'schoolInfo', key: 'address',
-				sorter: (a, b) => a?.schoolInfo?.valueForContact > b?.schoolInfo?.valueForContact ? 1 : -1, render: (schoolInfo) => schoolInfo?.valueForContact,
-				filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+				title: 'User Name', dataIndex: 'username', key: 'username', fixed: 'left',
+				sorter: (a, b) => a.username > b.username ? 1 : -1,
+				filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
 					<div style={{ padding: 8 }}>
 						<Input
-							name='SearchName'
+							name='SearchUsername'
 							ref={this.searchInput}
-							placeholder={`Search Address`}
-							value={selectedKeys[0]}
-							onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-							onPressEnter={() => confirm()}
+							placeholder={`Search Username`}
+							value={searchUsername}
+							onChange={e => {
+								setSelectedKeys(e.target.value ? [e.target.value] : []);
+								this.setState({ searchUsername: e.target.value });
+							}}
+							onPressEnter={() => {
+								confirm();
+								this.getSchoolList();
+							}}
 							style={{ marginBottom: 8, display: 'block' }}
 						/>
 						<Space>
 							<Button
 								type="primary"
-								onClick={() => confirm()}
+								onClick={() => {
+									confirm();
+									this.getSchoolList();
+								}}
 								icon={<SearchOutlined />}
 								size="small"
 								style={{ width: 90 }}
@@ -175,7 +197,10 @@ export default class extends React.Component {
 								Search
 							</Button>
 							<Button
-								onClick={() => clearFilters() && confirm()}
+								onClick={() => {
+									clearFilters();
+									this.setState({ searchUsername: '' });
+								}}
 								size="small"
 								style={{ width: 90 }}
 							>
@@ -187,21 +212,214 @@ export default class extends React.Component {
 				filterIcon: (filtered) => (
 					<SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
 				),
-				onFilter: (value, record) => record?.schoolInfo?.valueForContact.toString().toLowerCase().includes((value).toLowerCase()),
 				onFilterDropdownOpenChange: visible => {
 					if (visible) {
 						setTimeout(() => this.searchInput.current?.select(), 100);
 					}
-				}
+				},
+			},
+			{
+				title: 'Email', dataIndex: 'email', key: 'email',
+				sorter: (a, b) => a.email > b.email ? 1 : -1,
+				filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+					<div style={{ padding: 8 }}>
+						<Input
+							name='SearchEmail'
+							ref={this.searchInput}
+							placeholder={`Search Email`}
+							value={searchEmail}
+							onChange={e => {
+								setSelectedKeys(e.target.value ? [e.target.value] : []);
+								this.setState({ searchEmail: e.target.value });
+							}}
+							onPressEnter={() => {
+								confirm();
+								this.getSchoolList();
+							}}
+							style={{ marginBottom: 8, display: 'block' }}
+						/>
+						<Space>
+							<Button
+								type="primary"
+								onClick={() => {
+									confirm();
+									this.getSchoolList();
+								}}
+								icon={<SearchOutlined />}
+								size="small"
+								style={{ width: 90 }}
+							>
+								Search
+							</Button>
+							<Button
+								onClick={() => {
+									clearFilters();
+									this.setState({ searchEmail: '' });
+								}}
+								size="small"
+								style={{ width: 90 }}
+							>
+								Reset
+							</Button>
+						</Space>
+					</div>
+				),
+				filterIcon: (filtered) => (
+					<SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+				),
+				onFilterDropdownOpenChange: visible => {
+					if (visible) {
+						setTimeout(() => this.searchInput.current?.select(), 100);
+					}
+				},
+			},
+			{
+				title: 'School Name', dataIndex: 'schoolInfo', key: 'schoolname',
+				sorter: (a, b) => a?.schoolInfo?.name > b?.schoolInfo?.name ? 1 : -1,
+				filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+					<div style={{ padding: 8 }}>
+						<Input
+							name='SearchSchoolName'
+							ref={this.searchInput}
+							placeholder={`Search School Name`}
+							value={searchSchoolName}
+							onChange={e => {
+								setSelectedKeys(e.target.value ? [e.target.value] : []);
+								this.setState({ searchSchoolName: e.target.value });
+							}}
+							onPressEnter={() => {
+								confirm();
+								this.getSchoolList();
+							}}
+							style={{ marginBottom: 8, display: 'block' }}
+						/>
+						<Space>
+							<Button
+								type="primary"
+								onClick={() => {
+									confirm();
+									this.getSchoolList();
+								}}
+								icon={<SearchOutlined />}
+								size="small"
+								style={{ width: 90 }}
+							>
+								Search
+							</Button>
+							<Button
+								onClick={() => {
+									clearFilters();
+									this.setState({ searchSchoolName: '' });
+								}}
+								size="small"
+								style={{ width: 90 }}
+							>
+								Reset
+							</Button>
+						</Space>
+					</div>
+				),
+				filterIcon: (filtered) => (
+					<SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+				),
+				onFilterDropdownOpenChange: visible => {
+					if (visible) {
+						setTimeout(() => this.searchInput.current?.select(), 100);
+					}
+				},
+				render: (schoolInfo) => schoolInfo?.name,
+			},
+			{
+				title: 'Address', dataIndex: 'schoolInfo', key: 'address',
+				sorter: (a, b) => a?.schoolInfo?.valueForContact > b?.schoolInfo?.valueForContact ? 1 : -1,
+				filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+					<div style={{ padding: 8 }}>
+						<Input
+							name='SearchName'
+							ref={this.searchInput}
+							placeholder={`Search Address`}
+							value={searchAddress}
+							onChange={e => {
+								setSelectedKeys(e.target.value ? [e.target.value] : []);
+								this.setState({ searchAddress: e.target.value });
+							}}
+							onPressEnter={() => {
+								confirm();
+								this.getSchoolList();
+							}}
+							style={{ marginBottom: 8, display: 'block' }}
+						/>
+						<Space>
+							<Button
+								type="primary"
+								onClick={() => {
+									confirm();
+									this.getSchoolList();
+								}}
+								icon={<SearchOutlined />}
+								size="small"
+								style={{ width: 90 }}
+							>
+								Search
+							</Button>
+							<Button
+								onClick={() => {
+									this.setState({ searchAddress: '' });
+									clearFilters();
+								}}
+								size="small"
+								style={{ width: 90 }}
+							>
+								Reset
+							</Button>
+						</Space>
+					</div>
+				),
+				filterIcon: (filtered) => (
+					<SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+				),
+				onFilterDropdownOpenChange: visible => {
+					if (visible) {
+						setTimeout(() => this.searchInput.current?.select(), 100);
+					}
+				},
+				render: (schoolInfo) => schoolInfo?.valueForContact,
 			},
 			{
 				title: 'Active', dataIndex: 'isActive', key: 'isActive',
+				filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+					<div className='service-dropdown'>
+						<Checkbox.Group
+							options={[
+								{ label: 'True', value: 1 },
+								{ label: 'False', value: 0 },
+							]}
+							value={selectedStatus}
+							onChange={(values) => {
+								this.setState({ selectedStatus: values });
+								setSelectedKeys(values);
+							}}
+						/>
+						<div className='service-dropdown-footer'>
+							<Button type="primary" size="small" onClick={() => {
+								confirm();
+								this.getSchoolList();
+							}}>
+								Filter
+							</Button>
+							<Button size="small" onClick={() => {
+								this.setState({ selectedStatus: [] });
+								clearFilters();
+							}}>
+								Reset
+							</Button>
+						</div>
+					</div>
+				),
+				filterIcon: filtered => (
+					<FilterFilled style={{ color: filtered ? '#3E92CF' : undefined }} />
+				),
 				render: (isActive) => isActive ? 'True' : 'False',
-				filters: [
-					{ text: 'True', value: 1 },
-					{ text: 'False', value: 0 },
-				],
-				onFilter: (value, record) => record.isActive == value,
 			},
 			{
 				title: 'Action', key: 'action', fixed: 'right', render: (user) => (
