@@ -28,7 +28,7 @@ import msgDrawer from 'components/DrawerDetail/messages';
 import { socketUrl } from 'utils/api/baseUrl';
 import request, { decryptParam, encryptParam } from 'utils/api/request'
 import { changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, setAppointments, setAppointmentsInMonth, getInvoiceList, setInvoiceList } from 'src/redux/features/appointmentsSlice'
-import { setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, setSchools } from 'src/redux/features/authSlice';
+import { setAcademicLevels, setCityConnections, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, setSchools } from 'src/redux/features/authSlice';
 import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance, sendEmailInvoice, updateInvoice } from 'utils/api/apiList';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
@@ -220,6 +220,7 @@ class SchedulingCenter extends React.Component {
         this.props.setDurations(data?.durations ?? []);
         this.props.setConsultants(data?.consultants ?? []);
         this.props.setSchools(data?.schools ?? []);
+        this.props.setCityConnections(data?.cityConnections ?? []);
       }
     }).catch(err => {
       this.setState({ loading: false });
@@ -1317,4 +1318,4 @@ const mapStateToProps = state => ({
   auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps, { changeTime, getAppointmentsData, getAppointmentsMonthData, setAcademicLevels, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, getSubsidyRequests, setSchools, setAppointments, setAppointmentsInMonth, getInvoiceList, setInvoiceList }))(SchedulingCenter);
+export default compose(connect(mapStateToProps, { changeTime, getAppointmentsData, getAppointmentsMonthData, setAcademicLevels, setCityConnections, setDependents, setDurations, setMeetingLink, setProviders, setSkillSet, setConsultants, getSubsidyRequests, setSchools, setAppointments, setAppointmentsInMonth, getInvoiceList, setInvoiceList }))(SchedulingCenter);

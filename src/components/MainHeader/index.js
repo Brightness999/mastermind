@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'dva/router';
-import { FaChild, FaFileInvoice, FaFileInvoiceDollar, FaUserAlt, FaUserEdit } from 'react-icons/fa';
+import { FaChild, FaFileInvoice, FaFileInvoiceDollar, FaUserAlt, FaUserEdit, FaUserMd } from 'react-icons/fa';
 import { BiLogOutCircle, BiBell } from 'react-icons/bi';
 import { BsSearch } from 'react-icons/bs';
 import { Badge, Avatar, Input, Dropdown, message, notification } from 'antd';
@@ -249,27 +249,9 @@ class MainHeader extends Component {
         data.action = 'Profile';
         data.description = 'Viewed Profile';
         break;
-      case intl.formatMessage(messages.notification):
-        data.action = 'User Manage';
-        data.description = `Viewed ${intl.formatMessage(messages.notification)}`;
-        break;
-      case intl.formatMessage(messages.dependentList):
-        data.action = 'User Manage';
-        data.description = `Viewed ${intl.formatMessage(messages.dependentList)}`;
-        break;
-      case intl.formatMessage(messages.invoiceList):
-        data.action = 'User Manage';
-        data.description = `Viewed ${intl.formatMessage(messages.invoiceList)}`;
-        break;
-      case intl.formatMessage(messages.consultationList):
-        data.action = 'User Manage';
-        data.description = `Viewed ${intl.formatMessage(messages.consultationList)}`;
-        break;
-      case intl.formatMessage(msgSidebar.subsidyManager):
-        data.action = 'User Manage';
-        data.description = `Viewed ${intl.formatMessage(msgSidebar.subsidyManager)}`;
-        break;
       default:
+        data.action = 'User Manage';
+        data.description = `Viewed ${link}`;
         break;
     }
     this.socket.emit("action_tracking", data);
@@ -342,12 +324,39 @@ class MainHeader extends Component {
         </Link>
       ),
     });
+    [PARENT].includes(user?.role) && items.splice(6, 0, {
+      key: '8',
+      icon: <FaUserMd size={18} color='#495057' />,
+      label: (
+        <Link to={routerLinks.Providers} onClick={() => this.handleClickLink(intl.formatMessage(msgSidebar.providerList))}>
+          {intl.formatMessage(msgSidebar.providerList)}
+        </Link>
+      ),
+    });
     CONSULTANT === user?.role && items.splice(4, 0, {
       key: '6',
       icon: <FaFileInvoice size={18} color='#495057' />,
       label: (
         <Link to={routerLinks.ConsultationList} onClick={() => this.handleClickLink(intl.formatMessage(messages.consultationList))}>
           {intl.formatMessage(messages.consultationList)}
+        </Link>
+      ),
+    });
+    [CONSULTANT].includes(user?.role) && items.splice(5, 0, {
+      key: '8',
+      icon: <FaUserMd size={18} color='#495057' />,
+      label: (
+        <Link to={routerLinks.Providers} onClick={() => this.handleClickLink(intl.formatMessage(msgSidebar.providerList))}>
+          {intl.formatMessage(msgSidebar.providerList)}
+        </Link>
+      ),
+    });
+    [SCHOOL].includes(user?.role) && items.splice(4, 0, {
+      key: '8',
+      icon: <FaUserMd size={18} color='#495057' />,
+      label: (
+        <Link to={routerLinks.Providers} onClick={() => this.handleClickLink(intl.formatMessage(msgSidebar.providerList))}>
+          {intl.formatMessage(msgSidebar.providerList)}
         </Link>
       ),
     });

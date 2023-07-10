@@ -23,6 +23,7 @@ export const routerLinks = {
   PrivateNote: '/account/privatenote',
   InvoiceList: '/account/invoicelist',
   ConsultationList: '/account/consultationlist',
+  Providers: '/account/providerlist',
   SubsidyRequests: '/account/subsidyrequests',
   Blank: '/widget/blank',
   Home: '/home',

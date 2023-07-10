@@ -21,6 +21,7 @@ const initialState = {
 	durations: [],
 	consultants: [],
 	schools: [],
+	cityConnections: [],
 	generalData: {
 		contactNumberTypes: [],
 		emailTypes: [],
@@ -143,6 +144,9 @@ export const authSlice = createSlice({
 		setSchools(state, action) {
 			state.schools = action.payload
 		},
+		setCityConnections(state, action) {
+			state.cityConnections = action.payload
+		},
 		setCountOfUnreadNotifications(state, action) {
 			state.countOfUnreadNotifications = action.payload
 		},
@@ -174,6 +178,7 @@ export const {
 	setConsultants,
 	setSchools,
 	setCountOfUnreadNotifications,
+	setCityConnections,
 } = authSlice.actions;
 
 export default authSlice.reducer;

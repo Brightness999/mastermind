@@ -30,7 +30,7 @@ import request, { decryptParam, encryptParam } from 'utils/api/request'
 import { store } from 'src/redux/store';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
-import { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from 'src/redux/features/authSlice';
+import { setAcademicLevels, setCityConnections, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from 'src/redux/features/authSlice';
 import { changeTime, getAppointmentsData, getAppointmentsMonthData, getInvoiceList, getSubsidyRequests, setInvoiceList, setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice'
 import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance, updateInvoice } from 'utils/api/apiList';
 import Subsidiaries from './school';
@@ -358,6 +358,7 @@ class Dashboard extends React.Component {
         this.props.setAcademicLevels(data?.academicLevels ?? []);
         this.props.setDurations(data?.durations ?? []);
         this.props.setConsultants(data?.consultants ?? []);
+        this.props.setCityConnections(data?.cityConnections ?? []);
       }
     }).catch(err => {
       this.setState({ loading: false });
@@ -1463,4 +1464,4 @@ const mapStateToProps = state => ({
   user: state.auth.user,
 })
 
-export default compose(connect(mapStateToProps, { setAcademicLevels, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, getInvoiceList, setInvoiceList, setAppointments, setAppointmentsInMonth }))(Dashboard);
+export default compose(connect(mapStateToProps, { setAcademicLevels, setCityConnections, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, getInvoiceList, setInvoiceList, setAppointments, setAppointmentsInMonth }))(Dashboard);

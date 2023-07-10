@@ -164,7 +164,7 @@ export default class extends React.Component {
 
 	render() {
 		const { jewishHolidays, legalHolidays, pageNumber, pageSize, searchAddress, searchEmail, searchName, searchUsername, selectedServices, selectedStatus, totalSize, visibleInputCode, providers, isConfirmModal, confirmMessage, loading, selectedProvider, visibleProviderDetail } = this.state;
-		const { skillSet } = store.getState().auth;
+		const { skillSet, user } = store.getState().auth;
 		const skills = JSON.parse(JSON.stringify(skillSet ?? []))?.map(skill => { skill['label'] = skill.name, skill['value'] = skill._id; return skill; });
 		const columns = [
 			{
@@ -467,6 +467,10 @@ export default class extends React.Component {
 				),
 			},
 		];
+
+		if (user?.role < 900) {
+			columns.splice(-1);
+		}
 
 		const modalInputCodeProps = {
 			visible: visibleInputCode,

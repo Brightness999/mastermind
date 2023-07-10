@@ -173,7 +173,7 @@ class ModalSchoolDetail extends React.Component {
 								placeholder={intl.formatMessage(msgCreateAccount.cityConnections)}
 								showSearch
 							>
-								{auth.user?.adminCommunity?.map((value, index) => (
+								{auth.cityConnections?.map((value, index) => (
 									<Select.Option key={index} value={value._id}>{value.name}</Select.Option>
 								))}
 							</Select>
@@ -475,58 +475,62 @@ class ModalSchoolDetail extends React.Component {
 						layout='vertical'
 						initialValues={provider?.providerInfo}
 					>
-						<Form.Item
-							name="legalName"
-							label={intl.formatMessage(msgCreateAccount.legalName)}
-							className="float-label-item events-none"
-						>
-							<Input className='h-40' placeholder={intl.formatMessage(msgCreateAccount.legalName)} />
-						</Form.Item>
-						<Form.Item
-							name="billingAddress"
-							label={intl.formatMessage(msgCreateAccount.billingAddress)}
-							className="float-label-item events-none"
-						>
-							<PlacesAutocomplete value={service_address}>
-								{({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-									<div key='billingaddress'>
-										<Input {...getInputProps({
-											placeholder: 'Billing Address',
-											className: 'location-search-input h-40',
-										})} />
-										<div className="autocomplete-dropdown-container">
-											{loading && <div>Loading...</div>}
-											{suggestions.map(suggestion => {
-												const className = suggestion.active
-													? 'suggestion-item--active'
-													: 'suggestion-item';
-												// inline style for demonstration purpose
-												const style = suggestion.active
-													? { backgroundColor: '#fafafa', cursor: 'pointer' }
-													: { backgroundColor: '#ffffff', cursor: 'pointer' };
-												return (
-													<div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
-														<span>{suggestion.description}</span>
-													</div>
-												);
-											})}
-										</div>
-									</div>
-								)}
-							</PlacesAutocomplete>
-						</Form.Item>
-						<Row gutter={14} className='events-none'>
-							<Col xs={16} sm={16} md={16}>
-								<Form.Item name="licenseNumber" label={intl.formatMessage(msgCreateAccount.licenseNumber)} className="float-label-item">
-									<Input className='h-40' placeholder={intl.formatMessage(msgCreateAccount.licenseNumber)} />
+						{auth.user?.role > 900 ? (
+							<>
+								<Form.Item
+									name="legalName"
+									label={intl.formatMessage(msgCreateAccount.legalName)}
+									className="float-label-item events-none"
+								>
+									<Input className='h-40' placeholder={intl.formatMessage(msgCreateAccount.legalName)} />
 								</Form.Item>
-							</Col>
-							<Col xs={8} sm={8} md={8}>
-								<Form.Item name="SSN" label="SSN" className="float-label-item">
-									<Input className='h-40' placeholder='SSN' />
+								<Form.Item
+									name="billingAddress"
+									label={intl.formatMessage(msgCreateAccount.billingAddress)}
+									className="float-label-item events-none"
+								>
+									<PlacesAutocomplete value={service_address}>
+										{({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+											<div key='billingaddress'>
+												<Input {...getInputProps({
+													placeholder: 'Billing Address',
+													className: 'location-search-input h-40',
+												})} />
+												<div className="autocomplete-dropdown-container">
+													{loading && <div>Loading...</div>}
+													{suggestions.map(suggestion => {
+														const className = suggestion.active
+															? 'suggestion-item--active'
+															: 'suggestion-item';
+														// inline style for demonstration purpose
+														const style = suggestion.active
+															? { backgroundColor: '#fafafa', cursor: 'pointer' }
+															: { backgroundColor: '#ffffff', cursor: 'pointer' };
+														return (
+															<div {...getSuggestionItemProps(suggestion, { className, style })} key={suggestion.index}>
+																<span>{suggestion.description}</span>
+															</div>
+														);
+													})}
+												</div>
+											</div>
+										)}
+									</PlacesAutocomplete>
 								</Form.Item>
-							</Col>
-						</Row>
+								<Row gutter={14} className='events-none'>
+									<Col xs={16} sm={16} md={16}>
+										<Form.Item name="licenseNumber" label={intl.formatMessage(msgCreateAccount.licenseNumber)} className="float-label-item">
+											<Input className='h-40' placeholder={intl.formatMessage(msgCreateAccount.licenseNumber)} />
+										</Form.Item>
+									</Col>
+									<Col xs={8} sm={8} md={8}>
+										<Form.Item name="SSN" label="SSN" className="float-label-item">
+											<Input className='h-40' placeholder='SSN' />
+										</Form.Item>
+									</Col>
+								</Row>
+							</>
+						) : null}
 						<Form.List name="academicLevel">
 							{(fields) => (
 								<div>
@@ -602,15 +606,17 @@ class ModalSchoolDetail extends React.Component {
 								</Form.Item>
 							</Col>
 						</Row>
-						<div className='flex gap-2'>
-							<div>W-9 Form:</div>
-							<a
-								href={url + 'uploads/' + provider?.providerInfo?.W9FormPath}
-								target="_blank"
-							>
-								{provider?.providerInfo?.upload_w_9}
-							</a>
-						</div>
+						{auth.user?.role > 900 ? (
+							<div className='flex gap-2'>
+								<div>W-9 Form:</div>
+								<a
+									href={url + 'uploads/' + provider?.providerInfo?.W9FormPath}
+									target="_blank"
+								>
+									{provider?.providerInfo?.upload_w_9}
+								</a>
+							</div>
+						) : null}
 					</Form>
 				)
 			},

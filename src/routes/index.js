@@ -34,6 +34,7 @@ import InvoiceList from './User/Invoice';
 import SubsidyRequests from './User/SubsidyRequests';
 import Invoices from './Administrator/Invoice';
 import ProviderList from './Administrator/ProviderList';
+import Providers from './User/Providers';
 
 const routesConfig = app => [
   {
@@ -49,6 +50,7 @@ const routesConfig = app => [
       InvoiceList(app),
       ConsultationList(app),
       SubsidyRequests(app),
+      Providers(app),
     ]
   },
   {
