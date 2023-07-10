@@ -1,6 +1,6 @@
 import React, { createRef } from 'react';
-import { Divider, Table, Space, Input, Button, message, Pagination, Popover } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Divider, Table, Space, Input, Button, message, Pagination, Popover, Checkbox } from 'antd';
+import { FilterFilled, SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -32,6 +32,9 @@ class PrivateNote extends React.Component {
       pageSize: 10,
       pageNumber: 1,
       totalSize: 0,
+      searchDependentName: '',
+      selectedGrades: [],
+      selectedSchools: [],
     };
     this.searchInput = createRef(null);
   }
@@ -41,13 +44,22 @@ class PrivateNote extends React.Component {
   }
 
   handleChangePagination = (newPageNumber, newPageSize) => {
-    this.setState({ pageNumber: newPageNumber, pageSize: newPageSize });
-    this.getDependentList(newPageNumber, newPageSize);
+    this.setState({ pageNumber: newPageNumber, pageSize: newPageSize }, () => {
+      this.getDependentList();
+    });
   }
 
-  getDependentList(pageNumber = 1, pageSize = 10) {
+  getDependentList() {
     this.setState({ loading: true });
-    request.post(getDependents, { pageNumber, pageSize }).then(result => {
+    const { pageNumber, pageSize, searchDependentName, selectedGrades, selectedSchools } = this.state;
+    const postData = {
+      pageNumber, pageSize,
+      name: searchDependentName,
+      grades: selectedGrades,
+      schools: selectedSchools,
+    }
+
+    request.post(getDependents, postData).then(result => {
       this.setState({ loading: false });
       const { success, data } = result;
       if (success) {
@@ -82,7 +94,7 @@ class PrivateNote extends React.Component {
 
   handleSubmitFlagBalance = (values) => {
     const { notes } = values;
-    const { selectedDependent, pageNumber, pageSize } = this.state;
+    const { selectedDependent } = this.state;
     const providerIds = Object.keys(values).filter(a => a.includes('invoiceId')).map(a => a.split("-")[1]);
     let bulkData = [];
     providerIds.forEach(providerId => {
@@ -134,7 +146,7 @@ class PrivateNote extends React.Component {
       const { success } = result;
       if (success) {
         this.onCloseModalBalance();
-        this.getDependentList(pageNumber, pageSize);
+        this.getDependentList();
       }
     }).catch(err => message.error(err.message));
   }
@@ -144,30 +156,40 @@ class PrivateNote extends React.Component {
   }
 
   render() {
-    const { dependents, pageNumber, pageSize, totalSize, visibleDependent, selectedDependent, loading, visibleBalance } = this.state;
+    const { dependents, pageNumber, pageSize, searchDependentName, selectedGrades, selectedSchools, totalSize, visibleDependent, selectedDependent, loading, visibleBalance } = this.state;
     const { auth } = this.props;
-    const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
-    const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(s => s?.schoolInfo)?.map(school => { school['text'] = school.name, school['value'] = school._id; return school; });
+    const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ label: level, value: level }));
+    const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(s => s?.schoolInfo)?.map(school => { school['label'] = school.name, school['value'] = school._id; return school; });
+    schools.push({ label: 'Other', value: 'other' });
 
     const columns = [
       {
         title: intl.formatMessage(messages.studentName), key: 'name', fixed: 'left',
         sorter: (a, b) => (a.firstName || '' + a.lastName || '').toLowerCase() > (b.firstName || '' + b.lastName || '').toLowerCase() ? 1 : -1,
-        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
           <div style={{ padding: 8 }}>
             <Input
               name='SearchName'
               ref={this.searchInput}
-              placeholder={`Search Dependent Name`}
-              value={selectedKeys[0]}
-              onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-              onPressEnter={() => confirm()}
+              placeholder={`Search Student Name`}
+              value={searchDependentName}
+              onChange={e => {
+                setSelectedKeys(e.target.value ? [e.target.value] : []);
+                this.setState({ searchDependentName: e.target.value });
+              }}
+              onPressEnter={() => {
+                confirm();
+                this.getDependentList();
+              }}
               style={{ marginBottom: 8, display: 'block' }}
             />
             <Space>
               <Button
                 type="primary"
-                onClick={() => confirm()}
+                onClick={() => {
+                  confirm();
+                  this.getDependentList();
+                }}
                 icon={<SearchOutlined />}
                 size="small"
                 style={{ width: 90 }}
@@ -175,7 +197,13 @@ class PrivateNote extends React.Component {
                 Search
               </Button>
               <Button
-                onClick={() => clearFilters()}
+                onClick={() => {
+                  clearFilters();
+                  confirm();
+                  this.setState({ searchDependentName: '' }, () => {
+                    this.getDependentList();
+                  })
+                }}
                 size="small"
                 style={{ width: 90 }}
               >
@@ -187,8 +215,6 @@ class PrivateNote extends React.Component {
         filterIcon: (filtered) => (
           <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
         ),
-        onFilter: (value, record) =>
-          record['firstName']?.toString()?.toLowerCase()?.includes((value).toLowerCase()) || record['lastName']?.toString()?.toLowerCase()?.includes((value).toLowerCase()),
         onFilterDropdownOpenChange: visible => {
           if (visible) {
             setTimeout(() => this.searchInput.current?.select(), 100);
@@ -204,21 +230,81 @@ class PrivateNote extends React.Component {
       {
         title: intl.formatMessage(msgCreateAccount.currentGrade), dataIndex: 'currentGrade', key: 'grade',
         sorter: (a, b) => (a.currentGrade || '').toLowerCase() > (b.currentGrade || '').toLowerCase() ? 1 : -1,
-        filters: grades,
-        onFilter: (value, record) => record?.currentGrade === value,
+        filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+          <div className='service-dropdown'>
+            <Checkbox.Group
+              options={grades}
+              value={selectedGrades}
+              onChange={(values) => {
+                this.setState({ selectedGrades: values });
+                setSelectedKeys(values);
+              }}
+            />
+            <div className='service-dropdown-footer'>
+              <Button type="primary" size="small" onClick={() => {
+                confirm();
+                this.getDependentList();
+              }}>
+                Filter
+              </Button>
+              <Button size="small" onClick={() => {
+                this.setState({ selectedGrades: [] }, () => {
+                  this.getDependentList();
+                });
+                clearFilters();
+                confirm();
+              }}>
+                Reset
+              </Button>
+            </div>
+          </div>
+        ),
+        filterIcon: filtered => (
+          <FilterFilled style={{ color: filtered ? '#3E92CF' : undefined }} />
+        ),
       },
       {
         title: intl.formatMessage(msgCreateAccount.school), key: 'school',
         sorter: (a, b) => !a.school ? 1 : a?.school?.name > b?.school?.name ? 1 : -1,
-        filters: schools,
-        onFilter: (value, record) => record?.school?._id === value,
+        filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+          <div className='service-dropdown'>
+            <Checkbox.Group
+              options={schools}
+              value={selectedSchools}
+              onChange={(values) => {
+                this.setState({ selectedSchools: values });
+                setSelectedKeys(values);
+              }}
+            />
+            <div className='service-dropdown-footer'>
+              <Button type="primary" size="small" onClick={() => {
+                confirm();
+                this.getDependentList();
+              }}>
+                Filter
+              </Button>
+              <Button size="small" onClick={() => {
+                this.setState({ selectedSchools: [] }, () => {
+                  this.getDependentList();
+                });
+                clearFilters();
+                confirm();
+              }}>
+                Reset
+              </Button>
+            </div>
+          </div>
+        ),
+        filterIcon: filtered => (
+          <FilterFilled style={{ color: filtered ? '#3E92CF' : undefined }} />
+        ),
         render: dependent => dependent?.school?.name || (
           <Popover content={(<div>
             <div><span className='font-700'>Name:</span> {dependent?.otherName}</div>
             <div><span className='font-700'>Phone:</span> {dependent?.otherContactNumber}</div>
             <div><span className='font-700'>Notes:</span> {dependent?.otherNotes}</div>
           </div>)} trigger="click">
-            <span className='text-primary text-underline cursor action' onClick={() => console.log('ddddd')}>Other</span>
+            <span className='text-primary text-underline cursor action'>Other</span>
           </Popover>
         ),
       },
