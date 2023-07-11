@@ -1,5 +1,5 @@
 import React, { createRef, useState } from 'react';
-import { Table, Space, Input, Button } from 'antd';
+import { Table, Space, Input, Button, Popover } from 'antd';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import { SearchOutlined } from '@ant-design/icons';
@@ -62,7 +62,7 @@ const AdminPreApproved = (props) => {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
-      render: (subsidy) => <span>{subsidy?.student.firstName ?? ''} {subsidy?.student.lastName ?? ''}</span>,
+      render: (subsidy) => `${subsidy?.student.firstName ?? ''} ${subsidy?.student.lastName ?? ''}`,
     },
     {
       title: <span className="font-16">{intl.formatMessage(msgCreateAccount.school)}</span>,
@@ -71,7 +71,16 @@ const AdminPreApproved = (props) => {
       filters: schools,
       onFilter: (value, record) => record.school?._id === value,
       sorter: (a, b) => (a?.school?.name ?? '').toLowerCase() > (b?.school?.name ?? '').toLowerCase() ? 1 : -1,
-      render: (subsidy) => <span>{subsidy?.school?.name ?? ''}</span>,
+      render: (subsidy) =>
+        subsidy?.school?.name || (
+          <Popover content={(<div>
+            <div><span className='font-700'>Name:</span> {subsidy?.student?.otherName}</div>
+            <div><span className='font-700'>Phone:</span> {subsidy?.student?.otherContactNumber}</div>
+            <div><span className='font-700'>Notes:</span> {subsidy?.student?.otherNotes}</div>
+          </div>)} trigger="click">
+            <span className='text-primary text-underline cursor action'>Other</span>
+          </Popover>
+        ),
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.studentGrade)}</span>,
@@ -80,7 +89,7 @@ const AdminPreApproved = (props) => {
       filters: grades,
       onFilter: (value, record) => record.student?.currentGrade === value,
       sorter: (a, b) => (a?.student?.currentGrade ?? '').toLowerCase() > (b?.student?.currentGrade ?? '').toLowerCase() ? 1 : -1,
-      render: (subsidy) => <span>{subsidy?.student.currentGrade}</span>
+      render: (subsidy) => subsidy?.student.currentGrade,
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.serviceRequested)}</span>,
@@ -89,7 +98,7 @@ const AdminPreApproved = (props) => {
       filters: skills,
       onFilter: (value, record) => record.skillSet?._id === value,
       sorter: (a, b) => (a?.skillSet?.name ?? '').toLowerCase() > (b?.skillSet?.name ?? '').toLowerCase() ? 1 : -1,
-      render: (subsidy) => <span>{subsidy?.skillSet.name}</span>
+      render: (subsidy) => subsidy?.skillSet.name,
     },
     {
       title: <span className="font-16">{intl.formatMessage(msgCreateAccount.notes)}</span>,
@@ -136,7 +145,7 @@ const AdminPreApproved = (props) => {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
-      render: (subsidy) => <span>{subsidy?.note}</span>
+      render: (subsidy) => subsidy?.note,
     },
     {
       title: <span className="font-16">{intl.formatMessage(msgCreateAccount.provider)}</span>,
@@ -191,9 +200,9 @@ const AdminPreApproved = (props) => {
         }
       },
       render: (subsidy) => (
-        subsidy?.selectedProvider ? <div>{subsidy?.selectedProvider?.firstName ?? ''} {subsidy?.selectedProvider?.lastName ?? ''}</div>
-          : <div>{subsidy?.otherProvider}</div>
-      )
+        subsidy?.selectedProvider ? `${subsidy?.selectedProvider?.firstName ?? ''} ${subsidy?.selectedProvider?.lastName ?? ''}`
+          : subsidy?.otherProvider
+      ),
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.consultationDate)}</span>,
@@ -240,7 +249,7 @@ const AdminPreApproved = (props) => {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
-      render: (subsidy) => <span>{subsidy?.consultation?.date ? moment(subsidy?.consultation?.date).format('MM/DD/YYYY hh:mm A') : ''}</span>
+      render: (subsidy) => subsidy?.consultation?.date ? moment(subsidy?.consultation?.date).format('MM/DD/YYYY hh:mm A') : '',
     },
   ];
 
@@ -278,8 +287,8 @@ const AdminPreApproved = (props) => {
         scroll={{ x: 1300 }}
         onChange={(_, __, ___, extra) => setSortedRequests(extra.currentDataSource)}
         onRow={(subsidy) => ({
-          onClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
-          onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
+          onClick: (e) => e.target.className.includes('ant-table-cell') && props.onShowModalSubsidy(subsidy?._id),
+          onDoubleClick: (e) => e.target.className.includes('ant-table-cell') && props.onShowModalSubsidy(subsidy?._id),
         })}
         className='mt-1 pb-10'
       />

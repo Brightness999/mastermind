@@ -1,5 +1,5 @@
 import React, { createRef, useState } from 'react';
-import { Table, Space, Input, Button, Popconfirm } from 'antd';
+import { Table, Space, Input, Button, Popconfirm, Popover } from 'antd';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import { SearchOutlined } from '@ant-design/icons';
@@ -73,7 +73,15 @@ const SchoolPending = (props) => {
       filters: schools,
       onFilter: (value, record) => record.school?._id === value,
       sorter: (a, b) => (a?.school?.name ?? '').toLowerCase() > (b?.school?.name ?? '').toLowerCase() ? 1 : -1,
-      render: (subsidy) => subsidy?.school?.name ?? '',
+      render: (subsidy) => subsidy?.school?.name || (
+        <Popover content={(<div>
+          <div><span className='font-700'>Name:</span> {subsidy?.student?.otherName}</div>
+          <div><span className='font-700'>Phone:</span> {subsidy?.student?.otherContactNumber}</div>
+          <div><span className='font-700'>Notes:</span> {subsidy?.student?.otherNotes}</div>
+        </div>)} trigger="click">
+          <span className='text-primary text-underline cursor action'>Other</span>
+        </Popover>
+      ),
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.studentGrade)}</span>,
@@ -252,8 +260,8 @@ const SchoolPending = (props) => {
         className='mt-1 pb-10'
         onChange={(_, __, ___, extra) => setSortedRequests(extra.currentDataSource)}
         onRow={(subsidy) => ({
-          onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && props.onShowModalSubsidy(subsidy?._id),
-          onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && props.onShowModalSubsidy(subsidy?._id),
+          onClick: (e) => e.target.className.includes('ant-table-cell') && props.onShowModalSubsidy(subsidy?._id),
+          onDoubleClick: (e) => e.target.className.includes('ant-table-cell') && props.onShowModalSubsidy(subsidy?._id),
         })}
       />
     </div>

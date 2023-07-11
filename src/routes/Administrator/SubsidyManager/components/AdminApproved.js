@@ -1,5 +1,5 @@
 import React, { createRef, useState } from 'react';
-import { Table, Space, Input, Button } from 'antd';
+import { Table, Space, Input, Button, Popover } from 'antd';
 import intl from 'react-intl-universal';
 import { SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
@@ -60,7 +60,7 @@ const AdminApproved = (props) => {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
-      render: (subsidy) => <span>{subsidy?.student.firstName ?? ''} {subsidy?.student.lastName ?? ''}</span>,
+      render: (subsidy) => `${subsidy?.student.firstName ?? ''} ${subsidy?.student.lastName ?? ''}`,
     },
     {
       title: <span className="font-16">{intl.formatMessage(msgCreateAccount.school)}</span>,
@@ -69,7 +69,15 @@ const AdminApproved = (props) => {
       filters: schools,
       onFilter: (value, record) => record.school?._id === value,
       sorter: (a, b) => (a?.school?.name ?? '').toLowerCase() > (b?.school?.name ?? '').toLowerCase() ? 1 : -1,
-      render: (subsidy) => <span>{subsidy?.school?.name ?? ''}</span>,
+      render: (subsidy) => subsidy?.school?.name || (
+        <Popover content={(<div>
+          <div><span className='font-700'>Name:</span> {subsidy?.student?.otherName}</div>
+          <div><span className='font-700'>Phone:</span> {subsidy?.student?.otherContactNumber}</div>
+          <div><span className='font-700'>Notes:</span> {subsidy?.student?.otherNotes}</div>
+        </div>)} trigger="click">
+          <span className='text-primary text-underline cursor action'>Other</span>
+        </Popover>
+      ),
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.studentGrade)}</span>,
@@ -78,7 +86,7 @@ const AdminApproved = (props) => {
       filters: grades,
       onFilter: (value, record) => record.student?.currentGrade === value,
       sorter: (a, b) => (a?.student?.currentGrade ?? '').toLowerCase() > (b?.student?.currentGrade ?? '').toLowerCase() ? 1 : -1,
-      render: (subsidy) => <span>{subsidy?.student.currentGrade}</span>
+      render: (subsidy) => subsidy?.student.currentGrade,
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.serviceRequested)}</span>,
@@ -87,7 +95,7 @@ const AdminApproved = (props) => {
       filters: skills,
       onFilter: (value, record) => record.skillSet?._id === value,
       sorter: (a, b) => (a?.skillSet?.name ?? '').toLowerCase() > (b?.skillSet?.name ?? '').toLowerCase() ? 1 : -1,
-      render: (subsidy) => <span>{subsidy?.skillSet.name}</span>
+      render: (subsidy) => subsidy?.skillSet.name,
     },
     {
       title: <span className="font-16">{intl.formatMessage(msgCreateAccount.notes)}</span>,
@@ -134,7 +142,7 @@ const AdminApproved = (props) => {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
-      render: (subsidy) => <span>{subsidy?.note}</span>
+      render: (subsidy) => subsidy?.note,
     },
     {
       title: <span className="font-16">{intl.formatMessage(msgCreateAccount.provider)}</span>,
@@ -189,9 +197,9 @@ const AdminApproved = (props) => {
         }
       },
       render: (subsidy) => (
-        subsidy?.selectedProviderFromAdmin ? <div>{subsidy?.selectedProviderFromAdmin?.firstName ?? ''} {subsidy?.selectedProviderFromAdmin?.lastName ?? ''}</div>
-          : <div>{subsidy?.otherProvider}</div>
-      )
+        subsidy?.selectedProviderFromAdmin ? `${subsidy?.selectedProviderFromAdmin?.firstName ?? ''} ${subsidy?.selectedProviderFromAdmin?.lastName ?? ''}`
+          : subsidy?.otherProvider
+      ),
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.approvalDate)}</span>,
@@ -238,7 +246,7 @@ const AdminApproved = (props) => {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
-      render: (subsidy) => <span>{moment(subsidy?.approvalDate).format('MM/DD/YYYY hh:mm A')}</span>
+      render: (subsidy) => moment(subsidy?.approvalDate).format('MM/DD/YYYY hh:mm A'),
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.recentSessionDate)}</span>,
@@ -285,21 +293,21 @@ const AdminApproved = (props) => {
           setTimeout(() => searchInput.current?.select(), 100);
         }
       },
-      render: (subsidy) => <span>{subsidy?.appointments?.length ? moment(subsidy?.appointments?.[0]?.date).format('MM/DD/YYYY hh:mm A') : ''}</span>
+      render: (subsidy) => subsidy?.appointments?.length ? moment(subsidy?.appointments?.[0]?.date).format('MM/DD/YYYY hh:mm A') : '',
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.HMGHExpensePerSession)}</span>,
       key: 'HMGHExpensePerSession',
       align: 'center',
       sorter: (a, b) => a?.pricePerSession > b?.pricePerSession ? 1 : -1,
-      render: (subsidy) => <span>{subsidy?.pricePerSession ?? ''}</span>
+      render: (subsidy) => subsidy?.pricePerSession ?? '',
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.totalHMGHExpense)}</span>,
       key: 'totalHMGHExpense',
       align: 'center',
       sorter: (a, b) => a?.pricePerSession * a?.numberOfSessions > b?.pricePerSession * b?.numberOfSessions ? 1 : -1,
-      render: (subsidy) => <span>{subsidy?.pricePerSession * subsidy?.numberOfSessions ? subsidy?.pricePerSession * subsidy?.numberOfSessions : ''}</span>
+      render: (subsidy) => subsidy?.pricePerSession * subsidy?.numberOfSessions ? subsidy?.pricePerSession * subsidy?.numberOfSessions : '',
     },
     {
       title: <span className="font-16">{intl.formatMessage(messages.status)}</span>,
@@ -307,7 +315,7 @@ const AdminApproved = (props) => {
       align: 'center',
       fixed: 'right',
       sorter: (a, b) => a?.appointments?.length > b?.appointments?.length ? 1 : -1,
-      render: (subsidy) => <span>{subsidy?.appointments?.length ?? 0} / {subsidy?.numberOfSessions}</span>
+      render: (subsidy) => `${subsidy?.appointments?.length ?? 0} / ${subsidy?.numberOfSessions}`,
     },
   ];
 
@@ -348,8 +356,8 @@ const AdminApproved = (props) => {
         scroll={{ x: true }}
         onChange={(_, __, ___, extra) => setSortedRequests(extra.currentDataSource)}
         onRow={(subsidy) => ({
-          onClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
-          onDoubleClick: (e) => e.target.className !== 'btn-blue' && props.onShowModalSubsidy(subsidy?._id),
+          onClick: (e) => e.target.className.includes('ant-table-cell') && props.onShowModalSubsidy(subsidy?._id),
+          onDoubleClick: (e) => e.target.className.includes('ant-table-cell') && props.onShowModalSubsidy(subsidy?._id),
         })}
         className='mt-1 pb-10'
       />
