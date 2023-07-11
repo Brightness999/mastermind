@@ -1,5 +1,5 @@
 import React from 'react';
-import { Divider, Pagination, Space, Table, message } from 'antd';
+import { Button, Checkbox, Divider, Pagination, Space, Table, message } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -15,6 +15,7 @@ import { socketUrl } from 'utils/api/baseUrl';
 import { setCountOfUnreadNotifications } from 'src/redux/features/authSlice';
 import PageLoading from 'components/Loading/PageLoading';
 import './index.less';
+import { FilterFilled } from '@ant-design/icons';
 
 class NotificationSetting extends React.Component {
   constructor(props) {
@@ -26,12 +27,12 @@ class NotificationSetting extends React.Component {
       pageNumber: 1,
       totalSize: 0,
       loading: false,
+      selectedRoles: [],
     }
   }
 
   componentDidMount() {
-    const { pageNumber, pageSize } = this.state;
-    this.getNotificationList(pageNumber, pageSize);
+    this.getNotificationList();
     this.handleSocket();
   }
 
@@ -52,24 +53,31 @@ class NotificationSetting extends React.Component {
   }
 
   handleChangePagination = (newPageNumber, newPageSize) => {
-    this.setState({ pageNumber: newPageNumber, pageSize: newPageSize });
-    this.getNotificationList(newPageNumber, newPageSize);
+    this.setState({ pageNumber: newPageNumber, pageSize: newPageSize }, () => {
+      this.getNotificationList();
+    });
   }
 
-  getNotificationList = (pageNumber = 1, pageSize = 10) => {
+  getNotificationList = () => {
     const { user } = this.props;
+    const { pageNumber, pageSize, selectedRoles } = this.state;
     this.setState({ loading: true });
-    request.post(getUserNotifications, { pageNumber, pageSize }).then(result => {
+    const postData = {
+      pageNumber, pageSize,
+      roles: selectedRoles,
+    }
+
+    request.post(getUserNotifications, postData).then(result => {
       this.setState({ loading: false });
       const { success, data } = result;
       if (success) {
         this.setState({
-          notifications: data?.docs?.map((notification, i) => {
+          notifications: data?.notifications?.map((notification, i) => {
             notification['key'] = i; return notification;
           }) ?? [],
           totalSize: data?.total || 0,
         });
-        const readData = data?.docs?.filter(a => !a.isRead).map(a => ({
+        const readData = data?.notifications?.filter(a => !a.isRead).map(a => ({
           updateOne: {
             filter: { _id: a._id },
             update: { $set: { isRead: true } },
@@ -89,7 +97,7 @@ class NotificationSetting extends React.Component {
   }
 
   render() {
-    const { loading, notifications, pageNumber, pageSize, totalSize } = this.state;
+    const { loading, notifications, pageNumber, pageSize, selectedRoles, totalSize } = this.state;
     const columns = [
       {
         title: 'Author', dataIndex: 'fromUser', key: 'author',
@@ -107,15 +115,45 @@ class NotificationSetting extends React.Component {
       },
       {
         title: 'Role', dataIndex: 'fromUser', key: 'role',
-        filters: [
-          { text: 'Super Admin', value: 1000 },
-          { text: 'Admin', value: 999 },
-          { text: 'Consultant', value: 100 },
-          { text: 'School', value: 60 },
-          { text: 'Provider', value: 30 },
-          { text: 'Parent', value: 3 },
-        ],
-        onFilter: (value, record) => record.fromUser?.role === value,
+        filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+          <div className='service-dropdown'>
+            <Checkbox.Group
+              options={[
+                { label: 'Super Admin', value: 1000 },
+                { label: 'Admin', value: 999 },
+                { label: 'Consultant', value: 100 },
+                { label: 'School', value: 60 },
+                { label: 'Provider', value: 30 },
+                { label: 'Parent', value: 3 },
+              ]}
+              value={selectedRoles}
+              onChange={(values) => {
+                this.setState({ selectedRoles: values });
+                setSelectedKeys(values);
+              }}
+            />
+            <div className='service-dropdown-footer'>
+              <Button type="primary" size="small" onClick={() => {
+                confirm();
+                this.getNotificationList();
+              }}>
+                Filter
+              </Button>
+              <Button size="small" onClick={() => {
+                this.setState({ selectedRoles: [] }, () => {
+                  this.getNotificationList();
+                });
+                clearFilters();
+                confirm();
+              }}>
+                Reset
+              </Button>
+            </div>
+          </div>
+        ),
+        filterIcon: filtered => (
+          <FilterFilled style={{ color: filtered ? '#3E92CF' : undefined }} />
+        ),
         render: (user) => {
           switch (user?.role) {
             case 1000: return 'Super Admin';
