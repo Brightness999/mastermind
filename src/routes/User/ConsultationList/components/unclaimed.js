@@ -39,8 +39,9 @@ class UnclaimedConsultationRequest extends React.Component {
   }
 
   handleChangePagination = (newPageNumber, newPageSize) => {
-    this.setState({ pageNumber: newPageNumber, pageSize: newPageSize });
-    this.getConsultations();
+    this.setState({ pageNumber: newPageNumber, pageSize: newPageSize }, () => {
+      this.getConsultations();
+    });
   }
 
   getConsultations = () => {
