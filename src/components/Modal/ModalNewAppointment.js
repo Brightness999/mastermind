@@ -180,7 +180,7 @@ class ModalNewAppointment extends React.Component {
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime?.[selectedTimeIndex]?.value.clone().set({ years, months, date });
 		const dependent = listDependents?.find(d => d._id === selectedDependent);
-		const subsidy = dependent?.subsidy?.find(s => s.skillSet === selectedSkill && s.status === 5);
+		const subsidies = dependent?.subsidy?.filter(s => s.skillSet === selectedSkill && s.status === 5 && selectedProvider === s.selectedProviderFromAdmin)?.sort((a, b) => new Date(a.approvalDate) > new Date(b.approvalDate) ? -1 : 1);
 
 		const postData = {
 			skillSet: selectedSkill,
@@ -193,7 +193,7 @@ class ModalNewAppointment extends React.Component {
 			duration: duration,
 			type: appointmentType,
 			subsidyOnly: appointmentType === SUBSIDY,
-			subsidy: appointmentType === SUBSIDY ? subsidy?._id : undefined,
+			subsidy: appointmentType === SUBSIDY ? subsidies[0]?._id : undefined,
 			status: PENDING,
 			rate: appointmentType === EVALUATION ? listProvider[selectedProviderIndex]?.separateEvaluationRate : (appointmentType === SUBSIDY) ? subsidizedRate || standardRate : appointmentType === APPOINTMENT ? standardRate : 0,
 			screeningTime: appointmentType === SCREEN ? data.time : '',
@@ -541,6 +541,7 @@ class ModalNewAppointment extends React.Component {
 			isSubsidyOnly,
 			cancellationFee,
 			loadingSchedule,
+			subsidyAvailable,
 		} = this.state;
 		const { listDependents } = this.props;
 		const props = {
@@ -592,7 +593,7 @@ class ModalNewAppointment extends React.Component {
 						</div>
 						<div className='flex flex-row items-center mb-10'>
 							<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}<sup>*</sup></p>
-							{appointmentType === SUBSIDY && (
+							{subsidyAvailable && (
 								<div className='flex flex-row items-center ml-20 gap-5'>
 									<p className='mb-0'>Number of Sessions: {restSessions}</p>
 									<div className='flex items-center gap-2'>
