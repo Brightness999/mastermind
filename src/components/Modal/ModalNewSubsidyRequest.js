@@ -75,24 +75,30 @@ class ModalNewSubsidyRequest extends React.Component {
 		const { isRequestRav, documentUploaded } = this.state;
 		values.documents = documentUploaded;
 		values.requestContactRav = isRequestRav;
-		if (subsidyRequests?.find(s => [0, 1, 3, 5].includes(s.status) && s.student?._id === values?.student && s.skillSet?._id === values.skillSet)) {
+		const subsidies = subsidyRequests?.filter(s => [0, 1, 3, 5].includes(s.status) && s.student?._id === values?.student && s.skillSet?._id === values.skillSet);
+
+		if (subsidies?.find(s => [0, 1, 3].includes(s.status))) {
 			message.warning("Your subsidy request is still being processed");
-		} else {
-			this.setState({ loadingCreate: true });
-			request.post(createSubsidyRequest, values).then(result => {
-				this.setState({ loadingCreate: false });
-				if (result.success) {
-					message.success('Requested successfully.');
-					this.form.resetFields();
-					this.props.onSubmit();
-				} else {
-					this.form.setFields([{ name: 'documents', errors: ['error from server'] }]);
-				}
-			}).catch(err => {
-				this.setState({ loadingCreate: false });
-				this.form.setFields([{ name: 'documents', errors: ['error from server'] }]);
-			})
+			return;
+		} else if (subsidies?.reduce((a, b) => a + (b?.appointments?.length || 0), 0) < subsidies?.reduce((a, b) => a + (b?.numberOfSessions || 0), 0)) {
+			message.warning("Your subsidy request is still being processed");
+			return;
 		}
+
+		this.setState({ loadingCreate: true });
+		request.post(createSubsidyRequest, values).then(result => {
+			this.setState({ loadingCreate: false });
+			if (result.success) {
+				message.success('Requested successfully.');
+				this.form.resetFields();
+				this.props.onSubmit();
+			} else {
+				this.form.setFields([{ name: 'documents', errors: ['error from server'] }]);
+			}
+		}).catch(err => {
+			this.setState({ loadingCreate: false });
+			this.form.setFields([{ name: 'documents', errors: ['error from server'] }]);
+		})
 	};
 
 	onChangeUpload = (info) => {
