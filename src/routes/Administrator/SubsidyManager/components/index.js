@@ -137,15 +137,19 @@ const SubsidyManager = (props) => {
   }
 
   const schoolDenySubsidy = (declineExplanation) => {
-    setVisibleDeclineExplanation(false);
-    request.post(denySubsidyRequest, { subsidyId: selectedSubsidyId, declineExplanation }).then(result => {
-      const { success, data } = result;
-      if (success) {
-        updateSubsidiaries(selectedSubsidyId, data);
-      }
-    }).catch(err => {
-      message.error(err.message);
-    })
+    if (declineExplanation?.trim()?.length) {
+      setVisibleDeclineExplanation(false);
+      request.post(denySubsidyRequest, { subsidyId: selectedSubsidyId, declineExplanation }).then(result => {
+        const { success, data } = result;
+        if (success) {
+          updateSubsidiaries(selectedSubsidyId, data);
+        }
+      }).catch(err => {
+        message.error(err.message);
+      })
+    } else {
+      message.warn("Please fill in the decline explaintion");
+    }
   }
 
   const adminPreApproveSubsidy = (subsidyId) => {
