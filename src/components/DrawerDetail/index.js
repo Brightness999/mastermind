@@ -1301,14 +1301,20 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {((userRole === 30 || userRole > 900) && event?.status === DECLINED && event?.type === SCREEN) && (
+              {((userRole === 30 || userRole > 900) && event?.status === DECLINED && event?.isAppeal) && (
                 <Col span={12}>
                   <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={this.handleAcceptDeclinedScreening}>
                     {intl.formatMessage(msgModal.accept)}
                   </Button>
                 </Col>
               )}
-              {((userRole === 3 || userRole > 900) && event?.status === DECLINED && [EVALUATION, APPOINTMENT, SUBSIDY].includes(event?.type)) && (
+              {((userRole === 3 || userRole > 900) && event?.status === DECLINED && event?.isAppeal) ? (
+                <Col span={12}>
+                  <Button type='primary' icon={<TbSend size={12} />} block>
+                    {intl.formatMessage(msgModal.appealed)}
+                  </Button>
+                </Col>
+              ) : (
                 <Col span={12}>
                   <Button type='primary' icon={<TbSend size={12} />} block onClick={this.openModalMessage}>
                     {intl.formatMessage(msgModal.appeal)}
