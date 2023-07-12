@@ -260,10 +260,6 @@ class ModalCurrentReferralService extends React.Component {
 		}
 	}
 
-	getFileUrl(path) {
-		return url + 'uploads/' + path;
-	}
-
 	render() {
 		const { loadingSchedule, selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, dependents, skillSet, consultants } = this.state;
 		const { event } = this.props;
@@ -392,7 +388,7 @@ class ModalCurrentReferralService extends React.Component {
 									{event?.addtionalDocuments?.map((document, index) => (
 										<a
 											key={index}
-											href={this.getFileUrl(document.url)}
+											href={document.url}
 											target="_blank"
 										>
 											{document.name}

@@ -274,10 +274,6 @@ class ModalCurrentAppointment extends React.Component {
 		return `${moment(event?.date).format('MM/DD/YYYY hh:mm')} - ${moment(event?.date).add(event?.duration, 'minutes').format('hh:mm a')}`;
 	}
 
-	getFileUrl(path) {
-		return url + 'uploads/' + path;
-	}
-
 	render() {
 		const {
 			selectedDate,
@@ -448,7 +444,7 @@ class ModalCurrentAppointment extends React.Component {
 										{event?.addtionalDocuments?.map((document, index) => (
 											<a
 												key={index}
-												href={this.getFileUrl(document.url)}
+												href={document.url}
 												target="_blank"
 											>
 												{document.name}

@@ -73,26 +73,30 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(searchProvidersForAdmin, { skill: subsidy?.skillSet?._id, dependentId: subsidy?.student?._id }).then(result => {
 			const { data, success } = result;
 			if (success) {
-				const provider = data.providers?.find(p => p._id === subsidy.selectedProviderFromAdmin?._id);
-				let level;
-
-				if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(subsidy?.student?.currentGrade)) {
-					level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Early Education']?.includes(a.level));
-				} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(subsidy?.student?.currentGrade)) {
-					level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8']?.includes(a.level));
-				} else if (['Grades 7', 'Grades 8'].includes(subsidy?.student?.currentGrade)) {
-					level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8']?.includes(a.level));
-				} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(subsidy?.student?.currentGrade)) {
-					level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'High School Grades 9-12']?.includes(a.level));
+				if (subsidy?.status === 5) {
+					this.setState({ subsidizedRate: subsidy?.pricePerSession + subsidy?.dependentRate });
 				} else {
-					level = provider?.academicLevel?.find(a => a.level === subsidy?.student?.currentGrade);
+					const provider = data.providers?.find(p => p._id === subsidy.selectedProviderFromAdmin?._id);
+					let level;
+
+					if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(subsidy?.student?.currentGrade)) {
+						level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Early Education']?.includes(a.level));
+					} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(subsidy?.student?.currentGrade)) {
+						level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8']?.includes(a.level));
+					} else if (['Grades 7', 'Grades 8'].includes(subsidy?.student?.currentGrade)) {
+						level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8']?.includes(a.level));
+					} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(subsidy?.student?.currentGrade)) {
+						level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'High School Grades 9-12']?.includes(a.level));
+					} else {
+						level = provider?.academicLevel?.find(a => a.level === subsidy?.student?.currentGrade);
+					}
+					this.setState({ subsidizedRate: level ? level?.subsidizedRate ?? level?.rate : '' });
 				}
 
 				this.setState({
 					providers: data.providers ?? [],
 					selectedProviderFromAdmin: subsidy.selectedProviderFromAdmin?._id,
 					selectedProvider: subsidy.selectedProvider?._id,
-					subsidizedRate: level ? level?.subsidizedRate ?? level?.rate : '',
 				});
 			}
 		}).catch(() => {
@@ -175,18 +179,25 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	submitSubsidyFromAdmin = (subsidy) => {
-		const { selectedProviderFromAdmin, numberOfSessions, pricePerSession } = this.state;
+		const { selectedProviderFromAdmin, numberOfSessions, pricePerSession, subsidizedRate } = this.state;
+		const dependentRate = (subsidizedRate || 0) - pricePerSession;
 		const postData = {
 			selectedProviderFromAdmin,
 			numberOfSessions,
 			pricePerSession,
 			approvalDate: moment(),
 			subsidyId: subsidy?._id,
+			dependentRate,
 		}
 		if (!selectedProviderFromAdmin || !numberOfSessions || !pricePerSession) {
-			message.error('please fill all reuired field');
+			message.error('Please fill all reuired field');
 			return;
 		}
+		if (dependentRate < 0) {
+			message.error('Incorrect price. Please check the rates');
+			return;
+		}
+
 		request.post(selectFinalProviderForSubsidy, postData).then(result => {
 			if (result.success) {
 				this.updateSubsidiaries(subsidy, result.data);
@@ -209,14 +220,6 @@ class ModalSubsidyProgress extends React.Component {
 		}).catch(err => {
 			message.error(err.message);
 		})
-	}
-
-	getFileName(path) {
-		return path.replace(/^.*[\\\/]/, '')
-	}
-
-	getFileUrl(path) {
-		return url + 'uploads/' + path;
 	}
 
 	denyAppeal = (subsidy) => {
@@ -302,7 +305,7 @@ class ModalSubsidyProgress extends React.Component {
 	onSubmitModalReferral = () => {
 		this.onCloseModalReferral();
 		message.success({
-			content: intl.formatMessage(msgDashboard.appointmentScheduled),
+			content: 'Consultation Scheduled',
 			className: 'popup-scheduled',
 		});
 		this.props.onSubmit();
@@ -332,21 +335,26 @@ class ModalSubsidyProgress extends React.Component {
 
 	handleSelectProvider = (providerId) => {
 		const { providers, subsidy } = this.state;
-		const provider = providers?.find(p => p._id === providerId);
-		let level;
 
-		if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(subsidy?.student?.currentGrade)) {
-			level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Early Education']?.includes(a.level));
-		} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(subsidy?.student?.currentGrade)) {
-			level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8']?.includes(a.level));
-		} else if (['Grades 7', 'Grades 8'].includes(subsidy?.student?.currentGrade)) {
-			level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8']?.includes(a.level));
-		} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(subsidy?.student?.currentGrade)) {
-			level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'High School Grades 9-12']?.includes(a.level));
+		if (subsidy?.status === 5 && subsidy?.selectedProviderFromAdmin?._id === providerId) {
+			this.setState({ selectedProviderFromAdmin: providerId, subsidizedRate: subsidy?.pricePerSession + subsidy?.dependentRate });
 		} else {
-			level = provider?.academicLevel?.find(a => a.level === subsidy?.student?.currentGrade);
+			const provider = providers?.find(p => p._id === providerId);
+			let level;
+
+			if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(subsidy?.student?.currentGrade)) {
+				level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Early Education']?.includes(a.level));
+			} else if (['Grades 1', 'Grades 2', 'Grades 3', 'Grades 4', 'Grades 5', 'Grades 6'].includes(subsidy?.student?.currentGrade)) {
+				level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Elementary Grades 1-6', 'Elementary Grades 1-8']?.includes(a.level));
+			} else if (['Grades 7', 'Grades 8'].includes(subsidy?.student?.currentGrade)) {
+				level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'Middle Grades 7-8', 'Elementary Grades 1-8']?.includes(a.level));
+			} else if (['Grades 9', 'Grades 10', 'Grades 11', 'Grades 12'].includes(subsidy?.student?.currentGrade)) {
+				level = provider?.academicLevel?.find(a => [subsidy?.student?.currentGrade, 'High School Grades 9-12']?.includes(a.level));
+			} else {
+				level = provider?.academicLevel?.find(a => a.level === subsidy?.student?.currentGrade);
+			}
+			this.setState({ selectedProviderFromAdmin: providerId, subsidizedRate: level?.subsidizedRate ?? level?.rate });
 		}
-		this.setState({ selectedProviderFromAdmin: providerId, subsidizedRate: level?.subsidizedRate ?? level?.rate });
 	}
 
 	renderStudentParentInfo(subsidy) {
@@ -381,14 +389,15 @@ class ModalSubsidyProgress extends React.Component {
 				<Col xs={24} sm={24} md={12}>
 					<p className='font-700'>{intl.formatMessage(messages.documents)}</p>
 					{documents?.map((document, index) => (
-						<a
-							key={index}
-							href={this.getFileUrl(document)}
-							className='font-12'
-							target="_blank"
-						>
-							{this.getFileName(document)}
-						</a>
+						<div key={index}>
+							<a
+								href={document?.url}
+								className='font-12'
+								target="_blank"
+							>
+								{document?.name}
+							</a>
+						</div>
 					))}
 				</Col>
 			</Row>}
@@ -552,7 +561,7 @@ class ModalSubsidyProgress extends React.Component {
 		}
 
 		return (
-			<div className='subsidy-detail'>
+			<div className={`subsidy-detail ${(subsidy?.numberOfSessions && subsidy?.appointments?.length === subsidy?.numberOfSessions) ? 'events-none' : ''}`}>
 				<div className='flex flex-row justify-between'>
 					<p className='font-20 font-700'>{intl.formatMessage(messages.subsidyDetails)}</p>
 				</div>
@@ -875,7 +884,7 @@ class ModalSubsidyProgress extends React.Component {
 				<Popconfirm
 					key="approve"
 					icon={<AiFillWarning size={24} />}
-					title="Are you sure to approve this request?"
+					title={`Are you sure to ${subsidy?.status === 5 ? 'edit' : 'approve'} this request?`}
 					onConfirm={() => this.submitSubsidyFromAdmin(subsidy)}
 					okText="Yes"
 					cancelText="No"

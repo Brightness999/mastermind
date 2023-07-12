@@ -67,13 +67,29 @@ class ModalNewSubsidyRequest extends React.Component {
 			listSchools: dependents?.find(d => d._id == dependentId)?.school ? [dependents?.find(d => d._id == dependentId)?.school] : undefined,
 			isRequestRav: !dependents?.find(d => d._id == dependentId)?.school?._id,
 		})
-		this.form.setFieldsValue({ school: dependents?.find(d => d._id == dependentId)?.school?._id });
+		this.form.setFieldsValue({ school: dependents?.find(d => d._id == dependentId)?.school?._id, skillSet: undefined });
+	}
+
+	handleChangeService = (service) => {
+		const { subsidyRequests } = this.props;
+		const student = this.form?.getFieldValue('student');
+		const subsidies = subsidyRequests?.filter(s => [0, 1, 3, 5].includes(s.status) && s.student?._id === student && s.skillSet?._id === service);
+
+		if (subsidies?.find(s => [0, 1, 3].includes(s.status))) {
+			message.warning("Your subsidy request is still being processed");
+			return;
+		} else if (subsidies?.reduce((a, b) => a + (b?.appointments?.length || 0), 0) < subsidies?.reduce((a, b) => a + (b?.numberOfSessions || 0), 0)) {
+			message.warning("Your subsidy request is still being processed");
+			return;
+		} else {
+			message.destroy();
+		}
 	}
 
 	onFinish = (values) => {
 		const { subsidyRequests } = this.props;
 		const { isRequestRav, documentUploaded } = this.state;
-		values.documents = documentUploaded;
+		values.documents = documentUploaded?.map(d => ({ name: d.name, url: d.response.data }));
 		values.requestContactRav = isRequestRav;
 		const subsidies = subsidyRequests?.filter(s => [0, 1, 3, 5].includes(s.status) && s.student?._id === values?.student && s.skillSet?._id === values.skillSet);
 
@@ -83,6 +99,8 @@ class ModalNewSubsidyRequest extends React.Component {
 		} else if (subsidies?.reduce((a, b) => a + (b?.appointments?.length || 0), 0) < subsidies?.reduce((a, b) => a + (b?.numberOfSessions || 0), 0)) {
 			message.warning("Your subsidy request is still being processed");
 			return;
+		} else {
+			message.destroy();
 		}
 
 		this.setState({ loadingCreate: true });
@@ -102,11 +120,8 @@ class ModalNewSubsidyRequest extends React.Component {
 	};
 
 	onChangeUpload = (info) => {
-		if (info.file.status === 'done') {
-			message.success(`${info.file.name} file uploaded successfully`);
-			const arrUpload = this.state.documentUploaded || [];
-			arrUpload.push(info.file.response.data)
-			this.setState({ documentUploaded: arrUpload });
+		if (['removed', 'done'].includes(info.file.status)) {
+			this.setState({ documentUploaded: info.fileList })
 		}
 	}
 
@@ -156,7 +171,7 @@ class ModalNewSubsidyRequest extends React.Component {
 								className="float-label-item"
 								rules={[{ required: true }]}
 							>
-								<Select placeholder={intl.formatMessage(msgCreateAccount.services)}>
+								<Select placeholder={intl.formatMessage(msgCreateAccount.services)} onChange={v => this.handleChangeService(v)}>
 									{skillSet?.map((skill, index) => <Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>)}
 								</Select>
 							</Form.Item>

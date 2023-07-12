@@ -451,13 +451,18 @@ class DrawerDetail extends Component {
     })
   }
 
-  updateAppointments(data) {
+  updateAppointments(data, isSwitch) {
     const { event, appointments, appointmentsMonth } = this.props;
     const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-    const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
-
     this.props.setAppointments(newAppointments);
-    this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+    
+    if (isSwitch) {
+      const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.filter(a => a._id != event._id);
+      this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+    } else {
+      const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+      this.props.setAppointmentsInMonth(newAppointmentsInMonth);
+    }
   }
 
   openModalProcess() {
@@ -733,7 +738,7 @@ class DrawerDetail extends Component {
       .then(res => {
         if (res.success) {
           this.setState({ errorMessage: '' });
-          this.updateAppointments(res.data);
+          this.updateAppointments(res.data, true);
           message.success("Switched successfully");
         }
       })
@@ -758,10 +763,6 @@ class DrawerDetail extends Component {
 
   closeModalpay = () => {
     this.setState({ visiblePay: false, returnUrl: '', paidAmount: 0, totalPayment: 0, minimumPayment: 0 });
-  }
-
-  getFileUrl(path) {
-    return url + 'uploads/' + path;
   }
 
   render() {
@@ -1129,7 +1130,7 @@ class DrawerDetail extends Component {
                 {event?.addtionalDocuments?.map((document, index) => (
                   <a
                     key={index}
-                    href={this.getFileUrl(document.url)}
+                    href={document.url}
                     className='font-18'
                     target="_blank"
                   >
@@ -1308,7 +1309,7 @@ class DrawerDetail extends Component {
                   </Button>
                 </Col>
               )}
-              {((userRole === 3 || userRole > 900) && event?.status === DECLINED && event?.isAppeal) ? (
+              {((userRole === 3 || userRole > 900) && event?.status === DECLINED) ? event?.isAppeal ? (
                 <Col span={12}>
                   <Button type='primary' icon={<TbSend size={12} />} block>
                     {intl.formatMessage(msgModal.appealed)}
@@ -1320,7 +1321,7 @@ class DrawerDetail extends Component {
                     {intl.formatMessage(msgModal.appeal)}
                   </Button>
                 </Col>
-              )}
+              ) : null}
               {isLeaveFeedback && (
                 <Col span={12}>
                   <Button type='primary' icon={<ImPencil size={12} />} block onClick={this.showFeedback}>

@@ -162,7 +162,7 @@ class ModalNewAppointment extends React.Component {
 	}
 
 	createAppointment = (data) => {
-		const { fileList, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration, standardRate, subsidizedRate } = this.state;
+		const { fileList, selectedTimeIndex, selectedDate, selectedSkill, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, duration, standardRate } = this.state;
 		const { listDependents } = this.props;
 		const appointmentType = data?.isEvaluation ? EVALUATION : this.state.appointmentType;
 
@@ -195,7 +195,7 @@ class ModalNewAppointment extends React.Component {
 			subsidyOnly: appointmentType === SUBSIDY,
 			subsidy: appointmentType === SUBSIDY ? subsidies[0]?._id : undefined,
 			status: PENDING,
-			rate: appointmentType === EVALUATION ? listProvider[selectedProviderIndex]?.separateEvaluationRate : (appointmentType === SUBSIDY) ? subsidizedRate || standardRate : appointmentType === APPOINTMENT ? standardRate : 0,
+			rate: appointmentType === EVALUATION ? listProvider[selectedProviderIndex]?.separateEvaluationRate : appointmentType === SUBSIDY ? ((subsidies[0]?.pricePerSession || 0) + (subsidies[0]?.dependentRate || 0)) : appointmentType === APPOINTMENT ? standardRate : 0,
 			screeningTime: appointmentType === SCREEN ? data.time : '',
 			addtionalDocuments: fileList.length > 0 ? [{ name: fileList[0].name, url: fileList[0].response.data }] : [],
 		};
@@ -394,10 +394,10 @@ class ModalNewAppointment extends React.Component {
 
 			if (selectedSkill) {
 				const dependent = listDependents?.find(d => d._id === selectedDependent);
-				const subsidies = dependent?.subsidy?.filter(s => s.skillSet === selectedSkill && s.status === ADMINAPPROVED && s.selectedProviderFromAdmin === listProvider[providerIndex]._id);
+				const subsidies = dependent?.subsidy?.filter(s => s.skillSet === selectedSkill && s.status === ADMINAPPROVED && s.selectedProviderFromAdmin === listProvider[providerIndex]._id)?.sort((a, b) => new Date(a.approvalDate) > new Date(b.approvalDate) ? -1 : 1);
 				if (subsidies?.length) {
-					const subsidyAppointments = dependent?.appointments?.filter(a => a.skillSet === selectedSkill && a.type === SUBSIDY && [PENDING, CLOSED].includes(a.status))?.length ?? 0;
-					const totalSessions = subsidies?.reduce((a, b) => a + b.numberOfSessions, 0);
+					const totalSessions = subsidies[0]?.numberOfSessions || 0;
+					const subsidyAppointments = dependent?.appointments?.filter(a => a.subsidy === subsidies[0]?._id && a.type === SUBSIDY && [PENDING, CLOSED].includes(a.status))?.length || 0;
 					if (totalSessions - subsidyAppointments > 0) {
 						if (totalSessions - subsidyAppointments === 2) {
 							message.warn("Only 2 of allotted subsidized sessions remain.");
