@@ -70,7 +70,7 @@ const SubsidyManager = (props) => {
     } else if (v === '2') {
       setRequests(props.listSubsidy?.filter(s => s.status == v && s.isAppeal < 1));
     } else if (v === '3') {
-      setRequests(props.listSubsidy?.filter(s => s.status == v && [PENDING, CANCELLED].includes(s.consultation?.status)));
+      setRequests(props.listSubsidy?.filter(s => s.status == v && [PENDING, CANCELLED, undefined].includes(s.consultation?.status)));
     } else if (v === '4') {
       setRequests(props.listSubsidy?.filter(s => s.status == v && s.isAppeal < 1));
     } else if (v === '6') {
