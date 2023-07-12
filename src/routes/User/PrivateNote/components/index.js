@@ -611,7 +611,7 @@ class PrivateNote extends React.Component {
             setTimeout(() => this.searchInput.current?.select(), 100);
           }
         },
-        render: (subsidy) => <span>{subsidy?.student.firstName ?? ''} {subsidy?.student.lastName ?? ''}</span>,
+        render: (subsidy) => `${subsidy?.student.firstName ?? ''} ${subsidy?.student.lastName ?? ''}`,
       },
       {
         title: <span className="font-16">{intl.formatMessage(msgCreateAccount.school)}</span>,
@@ -620,7 +620,7 @@ class PrivateNote extends React.Component {
         filters: schools,
         onFilter: (value, record) => record.school?._id === value,
         sorter: (a, b) => (a?.school?.name ?? '').toLowerCase() > (b?.school?.name ?? '').toLowerCase() ? 1 : -1,
-        render: (subsidy) => <span>{subsidy?.school?.name ?? ''}</span>,
+        render: (subsidy) => subsidy?.school?.name ?? '',
       },
       {
         title: <span className="font-16">{intl.formatMessage(messages.studentGrade)}</span>,
@@ -629,7 +629,7 @@ class PrivateNote extends React.Component {
         filters: grades,
         onFilter: (value, record) => record.student?.currentGrade === value,
         sorter: (a, b) => (a?.student?.currentGrade ?? '').toLowerCase() > (b?.student?.currentGrade ?? '').toLowerCase() ? 1 : -1,
-        render: (subsidy) => <span>{subsidy?.student.currentGrade}</span>
+        render: (subsidy) => subsidy?.student.currentGrade,
       },
       {
         title: <span className="font-16">{intl.formatMessage(messages.serviceRequested)}</span>,
@@ -638,7 +638,7 @@ class PrivateNote extends React.Component {
         filters: skills,
         onFilter: (value, record) => record.skillSet?._id === value,
         sorter: (a, b) => (a?.skillSet?.name ?? '').toLowerCase() > (b?.skillSet?.name ?? '').toLowerCase() ? 1 : -1,
-        render: (subsidy) => <span>{subsidy?.skillSet.name}</span>
+        render: (subsidy) => subsidy?.skillSet.name,
       },
       {
         title: <span className="font-16">{intl.formatMessage(msgCreateAccount.notes)}</span>,
@@ -685,7 +685,7 @@ class PrivateNote extends React.Component {
             setTimeout(() => this.searchInput.current?.select(), 100);
           }
         },
-        render: (subsidy) => <span>{subsidy?.note}</span>
+        render: (subsidy) => subsidy?.note,
       },
       {
         title: <span className="font-16">{intl.formatMessage(msgCreateAccount.provider)}</span>,
@@ -732,9 +732,7 @@ class PrivateNote extends React.Component {
             setTimeout(() => this.searchInput.current?.select(), 100);
           }
         },
-        render: (subsidy) => (
-          <div>{subsidy?.selectedProviderFromAdmin?.firstName ?? ''} {subsidy?.selectedProviderFromAdmin?.lastName ?? ''}</div>
-        )
+        render: (subsidy) => `${subsidy?.selectedProviderFromAdmin?.firstName ?? ''} ${subsidy?.selectedProviderFromAdmin?.lastName ?? ''}`,
       },
       {
         title: <span className="font-16">{intl.formatMessage(messages.approvalDate)}</span>,
@@ -781,7 +779,7 @@ class PrivateNote extends React.Component {
             setTimeout(() => this.searchInput.current?.select(), 100);
           }
         },
-        render: (subsidy) => <span>{moment(subsidy?.approvalDate).format('MM/DD/YYYY hh:mm A')}</span>
+        render: (subsidy) => moment(subsidy?.approvalDate).format('MM/DD/YYYY hh:mm A'),
       },
       {
         title: <span className="font-16">{intl.formatMessage(messages.recentSessionDate)}</span>,
@@ -828,21 +826,21 @@ class PrivateNote extends React.Component {
             setTimeout(() => this.searchInput.current?.select(), 100);
           }
         },
-        render: (subsidy) => <span>{subsidy?.appointments?.length ? moment(subsidy?.appointments?.[0]?.date).format('MM/DD/YYYY hh:mm A') : ''}</span>
+        render: (subsidy) => subsidy?.appointments?.length ? moment(subsidy?.appointments?.[0]?.date).format('MM/DD/YYYY hh:mm A') : '',
       },
       {
         title: <span className="font-16">{intl.formatMessage(messages.HMGHExpensePerSession)}</span>,
         key: 'HMGHExpensePerSession',
         align: 'center',
         sorter: (a, b) => a?.pricePerSession > b?.pricePerSession ? 1 : -1,
-        render: (subsidy) => <span>{subsidy?.pricePerSession ?? ''}</span>
+        render: (subsidy) => subsidy?.pricePerSession ?? '',
       },
       {
         title: <span className="font-16">{intl.formatMessage(messages.totalHMGHExpense)}</span>,
         key: 'totalHMGHExpense',
         align: 'center',
         sorter: (a, b) => a?.pricePerSession * a?.numberOfSessions > b?.pricePerSession * b?.numberOfSessions ? 1 : -1,
-        render: (subsidy) => <span>{subsidy?.pricePerSession * subsidy?.numberOfSessions ? subsidy?.pricePerSession * subsidy?.numberOfSessions : ''}</span>
+        render: (subsidy) => subsidy?.pricePerSession * subsidy?.numberOfSessions ? subsidy?.pricePerSession * subsidy?.numberOfSessions : '',
       },
       {
         title: <span className="font-16">{intl.formatMessage(messages.status)}</span>,
@@ -850,7 +848,7 @@ class PrivateNote extends React.Component {
         align: 'center',
         fixed: 'right',
         sorter: (a, b) => a?.appointments?.length > b?.appointments?.length ? 1 : -1,
-        render: (subsidy) => <span>{subsidy?.appointments?.length ?? 0} / {subsidy?.numberOfSessions}</span>
+        render: (subsidy) => `${subsidy?.appointments?.length ?? 0} / ${subsidy?.numberOfSessions}`,
       },
     ];
 
@@ -886,12 +884,10 @@ class PrivateNote extends React.Component {
             size='middle'
             dataSource={dependents}
             columns={columns}
-            onRow={(dependent) => {
-              return {
-                onClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.handleClickRow(dependent),
-                onDoubleClick: (e) => e.target.className == 'ant-table-cell ant-table-cell-row-hover' && this.handleClickRow(dependent),
-              }
-            }}
+            onRow={(dependent) => ({
+              onClick: (e) => e.target.className.includes('ant-table-cell') && this.handleClickRow(dependent),
+              onDoubleClick: (e) => e.target.className.includes('ant-table-cell') && this.handleClickRow(dependent),
+            })}
             pagination={false}
             scroll={{ x: true }}
           />
@@ -911,8 +907,8 @@ class PrivateNote extends React.Component {
               columns={adminApprovedColumns}
               scroll={{ x: true }}
               onRow={(subsidy) => ({
-                onClick: (e) => e.target.className !== 'btn-blue' && this.onShowModalSubsidy(subsidy?._id),
-                onDoubleClick: (e) => e.target.className !== 'btn-blue' && this.onShowModalSubsidy(subsidy?._id),
+                onClick: (e) => e.target.className.includes('ant-table-cell') && this.onShowModalSubsidy(subsidy?._id),
+                onDoubleClick: (e) => e.target.className.includes('ant-table-cell') && this.onShowModalSubsidy(subsidy?._id),
               })}
               className='mt-1 pb-10'
               pagination={false}
