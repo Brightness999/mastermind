@@ -1,17 +1,17 @@
 import React from 'react';
-import { Modal, Input, Divider, Card, Button, message } from 'antd';
+import { Modal, Input, Divider, Card, Button, message, Row, Col, Space, Table } from 'antd';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { CheckCircleTwoTone, CloseCircleTwoTone, DeleteTwoTone, EditTwoTone } from '@ant-design/icons';
 
 import messages from './messages';
-import msgCreateAccount from '../../routes/Sign/CreateAccount/messages';
-import { createPrivateNote, deletePrivateNote, updatePrivateNote } from '../../utils/api/apiList';
-import request from '../../utils/api/request';
+import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
+import { createPrivateNote, deletePrivateNote, setFlagBalance, updatePrivateNote } from 'utils/api/apiList';
+import request from 'utils/api/request';
 import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
-import { CONSULTATION } from '../../routes/constant';
+import ModalBalance from './ModalBalance';
+import { APPOINTMENT, BALANCE, CLOSED, CONSULTATION, EVALUATION, PENDING, SUBSIDY } from 'routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
 
@@ -24,6 +24,7 @@ class ModalDependentDetail extends React.Component {
 			note: '',
 			isNew: false,
 			visibleNewSubsidy: false,
+			visibleBalance: false,
 		}
 	}
 
@@ -108,8 +109,74 @@ class ModalDependentDetail extends React.Component {
 		this.setState({ visibleNewSubsidy: false });
 	}
 
+	onShowModalBalance = () => {
+		this.setState({ visibleBalance: true });
+	}
+
+	onCloseModalBalance = () => {
+		this.setState({ visibleBalance: false });
+	}
+
+	handleSubmitFlagBalance = (values) => {
+		const { notes } = values;
+		const { dependent } = this.state;
+		const providerIds = Object.keys(values).filter(a => a.includes('invoiceId')).map(a => a.split("-")[1]);
+		let bulkData = [];
+		providerIds.forEach(providerId => {
+			let temp = [];
+			Object.entries(values)?.forEach(value => {
+				if (value?.length) {
+					const appointment = dependent.appointments?.find(a => a._id === value[0]);
+					if (appointment && appointment?.provider?._id === providerId) {
+						temp.push({
+							appointment: appointment._id,
+							items: {
+								flagType: BALANCE,
+								late: value[1] * 1,
+								balance: values[`balance-${appointment._id}`],
+								totalPayment: values[`totalPayment-${appointment.provider?._id}`],
+								minimumPayment: values[`minimumPayment-${appointment.provider?._id}`] * 1,
+								data: [
+									{
+										type: appointment?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
+										date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
+										details: `Location: ${appointment?.location}`,
+										count: appointment.type === SUBSIDY ? `[${dependent.appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status) && a?.dependent?._id === appointment?.dependent?._id && a?.provider?._id === appointment?.provider?._id)?.length}/${appointment?.subsidy?.numberOfSessions}]` : '',
+										discount: values[`discount-${appointment._id}`],
+										rate: values[`balance-${appointment._id}`],
+									},
+									{
+										type: 'Fee',
+										date: moment(appointment?.date).format("MM/DD/YYYY hh:mm a"),
+										details: 'Past Due Balance Fee',
+										rate: value[1] * 1,
+									},
+								],
+								notes,
+							}
+						})
+					}
+				}
+			})
+			bulkData.push({
+				providerId,
+				invoiceId: values[`invoiceId-${providerId}`],
+				totalPayment: values[`totalPayment-${providerId}`],
+				minimumPayment: values[`minimumPayment-${providerId}`],
+				data: temp,
+			})
+		})
+
+		request.post(setFlagBalance, { bulkData, dependent: dependent?._id }).then(result => {
+			const { success } = result;
+			if (success) {
+				this.onCloseModalBalance();
+			}
+		}).catch(err => message.error(err.message));
+	}
+
 	render() {
-		const { dependent, selectedNoteId, isNew, visibleNewSubsidy } = this.state;
+		const { dependent, selectedNoteId, isNew, visibleBalance, visibleNewSubsidy } = this.state;
 		const { user } = this.props;
 		const modalProps = {
 			className: 'modal-dependent',
@@ -117,9 +184,22 @@ class ModalDependentDetail extends React.Component {
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: this.props.onCancel,
-			closable: false,
 			footer: null,
+			width: 1200,
 		};
+		const subsidyColumn = [
+			{
+				title: 'PROVIDER', key: 'provider', dataIndex: 'selectedProviderFromAdmin',
+				render: (provider) => `${provider?.firstName} ${provider?.lastName}`,
+			},
+			{
+				title: 'SESSIONS USED', key: 'sessions',
+				render: (subsidy) => (dependent?.appointments?.filter(a => a.subsidy?._id === subsidy?._id && a.type === 5)?.length || 0) + '/' + subsidy?.numberOfSessions,
+			},
+			{
+				title: '$ AMOUNT', key: 'amount', dataIndex: 'dependentRate',
+			},
+		]
 
 		const modalNewSubsidyProps = {
 			visible: visibleNewSubsidy,
@@ -128,112 +208,148 @@ class ModalDependentDetail extends React.Component {
 			dependent: dependent,
 		};
 
+		const modalBalanceProps = {
+			visible: visibleBalance,
+			onSubmit: this.handleSubmitFlagBalance,
+			onCancel: this.onCloseModalBalance,
+			dependent,
+		}
+
+		let unpaidInvoices = dependent?.invoices?.filter(a => !a.isPaid && a.type === 1);
+		if (user.role === 30) {
+			unpaidInvoices = unpaidInvoices?.filter(a => a.provider === user.providerInfo?._id);
+		}
+
 		return (
-			<Modal {...modalProps} bodyStyle={{ overflowY: 'scroll', height: '60vh' }}>
-				<div className='flex bg-primary text-white header flex-row items-center'>
-					<b className='font-20'>{`${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`}</b>
-					{dependent.isRemoved ? "(Graduated)" : null}
+			<Modal {...modalProps} bodyStyle={{ overflowY: 'scroll', height: '80vh' }}>
+				<div className='flex bg-primary text-white header flex-row items-center gap-2'>
+					<div>
+						<b className='font-20'>NAME: {`${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`}</b>
+						{dependent.isRemoved ? "(Graduated)" : null}
+					</div>
+					{(user?.role === 3 || user?.role > 900) ? <Button type='primary' size='small' onClick={() => this.onOpenModalNewSubsidy()}>REQUEST SUBSIDY</Button> : null}
+					{user?.role != 3 ? <Button type='primary' size='small' onClick={() => this.onAddComment()}>ADD COMMENT</Button> : null}
+					{(user?.role != 3 && unpaidInvoices?.length) ? <Button type='primary' size='small' onClick={() => this.onShowModalBalance(dependent)}>FLAG DEPENDENT</Button> : null}
 				</div>
 				<Card className='bg-white'>
-					<div className='flex'>
-						<div className='flex-1'>
-							<div><span className='text-bold'>Grade:</span> {dependent?.currentGrade ?? ''}</div>
-							<div><span className='text-bold'>Age:</span> {moment().year() - moment(dependent?.birthday).year()}</div>
-							<div><span className='text-bold'>School:</span> {dependent?.school?.name}</div>
-							<div><span className='text-bold'>Birthday:</span> {moment(dependent.birthday)?.format('MM/DD/YYYY')}</div>
-						</div>
-						<div className='flex-1'>
-							{dependent?.subsidy?.length && <a>Subsidy History</a>}
-							<div><span className='text-bold'>Sessions:</span> {dependent?.appointments?.filter(d => d.status == -1 && d.flagStatus != 1)?.length ?? 0}</div>
-							<div><span className='text-bold'>Flags:</span> {dependent?.appointments?.filter(d => d.flagStatus == 1)?.length ?? 0}</div>
-						</div>
-					</div>
-					<Divider />
-					<div className='flex'>
-						<div className='flex-1'>
-							<div className='text-bold'>{intl.formatMessage(msgCreateAccount.services)}:</div>
-							{dependent?.services?.map((service, index) => (
-								<div key={index}>{service.name}</div>
-							))}
-							<br />
-							<div className='text-bold'>{intl.formatMessage(messages.providers)}:</div>
-							{[...new Set(dependent?.appointments?.filter(a => a.type != CONSULTATION)?.map(a => `${a.provider?.firstName} ${a.provider?.lastName}`))].map((name, index) => (
-								<div key={index}>{name}</div>
-							))}
-						</div>
-						<Card className='flex-1'>
-							<div>{dependent?.backgroundInfor ?? ''}</div>
-						</Card>
-					</div>
-					<Divider />
-					<div className='content'>
-						{dependent?.notes?.length ? (
-							<Card className='note-card'>
-								{dependent?.notes?.map((note, index) => (
-									<div key={index} className="mt-2">
-										<Input.TextArea
-											name='PrivateNote'
-											rows={3}
-											defaultValue={note.note}
-											disabled={selectedNoteId != note._id}
-											onChange={e => this.setState({ note: e.target.value })}
-											placeholder={intl.formatMessage(messages.privateNote)}
-											className="private-note"
-										/>
-										<div className='flex items-center gap-5 text-italic'>
-											<div className='text-left'>{note.user?.role > 900 ? 'Admin' : note.user?.username}</div>
-											<div className='text-left'>{moment(note?.updatedAt).format('MM/DD/YYYY hh:mm')}</div>
+					<Row gutter={50}>
+						<Col xs={24} sm={24} md={12}>
+							<Space direction='vertical' size={20} className='w-100'>
+								<div>
+									<div className='text-secondary'>Info</div>
+									<Divider className='mt-0 mb-10 bg-primary' />
+									<div className='flex'>
+										<div className='flex-1'>
+											<div><b>Grade:</b> {dependent?.currentGrade ?? ''}</div>
+											<div><b>Age:</b> {moment().year() - moment(dependent?.birthday).year()}</div>
+											<div><b>School:</b> {dependent?.school?.name}</div>
+											<div><b>Birthday:</b> {moment(dependent.birthday)?.format('MM/DD/YYYY')}</div>
 										</div>
-										{(user?.role > 900 || user?._id == note.user?._id) && (
-											<div className='flex justify-end gap-2'>
-												{selectedNoteId == note._id ? (
-													<>
-														<CheckCircleTwoTone twoToneColor='#02e06e' onClick={() => this.onSave(note._id)} />
-														<CloseCircleTwoTone twoToneColor='#ff0000' onClick={() => this.onCancel()} />
-													</>
-												) : (
-													<>
-														<EditTwoTone onClick={() => this.onEdit(note._id)} />
-														<DeleteTwoTone twoToneColor='#ff0000' onClick={() => this.onDelete(note._id)} />
-													</>
-												)}
-											</div>
-										)}
+										<div className='flex-1'>
+											<div><b>Member Since:</b> {moment(dependent?.createdAt).format('MM/DD/YYYY')}</div>
+											<div><b>Last Activity Date:</b> {dependent?.appointments?.length ? moment(dependent?.appointments?.sort((a, b) => moment(a.date) > moment(b.date) ? -1 : 1)?.[0]?.date).format('MM/DD/YYYY') : ''}</div>
+											<div><b>Total Sessions:</b> {dependent?.appointments?.filter(d => [2, 3, 5].includes(d.type) && d.status == -1 && d.flagStatus != 1)?.length ?? 0}</div>
+											<div><b>Total Consultations:</b> {dependent?.appointments?.filter(d => d.type === 4 && d.status == -1 && d.flagStatus != 1)?.length ?? 0}</div>
+										</div>
 									</div>
-								))}
-							</Card>
-						) : (
-							<div className='h-50 text-center'>No internal notes</div>
-						)}
-						{isNew && (
-							<div className="mt-2">
-								<Input.TextArea
-									name='NewPrivateNote'
-									rows={3}
-									onChange={e => this.setState({ note: e.target.value })}
-									placeholder={intl.formatMessage(messages.privateNote)}
-									className="private-note"
-								/>
-								<div className='flex justify-end gap-2 mt-10'>
-									<CheckCircleTwoTone twoToneColor='#02e06e' onClick={() => this.onCreate()} />
-									<CloseCircleTwoTone twoToneColor='#ff0000' onClick={() => this.onCancel()} />
 								</div>
-							</div>
-						)}
-					</div>
-					<div className={`flex gap-5 mt-2 ${dependent?.isRemoved ? 'd-none' : ''}`}>
-						<Button type='primary' block className={`${(user?.role == 3 || user?.role > 900) ? '' : 'display-none events-none'}`} onClick={() => this.onOpenModalNewSubsidy()}>Request Subsidy</Button>
-						<Button type='primary' block className={`${user?.role == 3 ? 'display-none events-none' : ''}`} onClick={() => this.onAddComment()}>Add Comment</Button>
-					</div>
+								<div>
+									<div className='text-secondary'>Payment</div>
+									<Divider className='mt-0 mb-10 bg-primary' />
+									<div className='text-bold'>Overdue Invoice(s): {dependent?.invoices?.filter(a => !a.isPaid)?.length || 0}</div>
+								</div>
+								<div>
+									<div className='text-secondary'>Subsidy</div>
+									<Divider className='mt-0 mb-10 bg-primary' />
+									<p className='text-bold'>Total Approved Request(s): {dependent?.subsidy?.filter(s => s.status === 5)?.length || 0}</p>
+									<p className='text-bold'>Total Denied Request(s): {dependent?.subsidy?.filter(s => [2, 4].includes(s.status))?.length || 0}</p>
+									<Table size='middle' dataSource={dependent?.subsidy?.filter(s => s.status === 5) || []} columns={subsidyColumn} scroll={{ x: true }} />
+								</div>
+								<div>
+									<div className='text-secondary'>Services</div>
+									<Divider className='mt-0 mb-10 bg-primary' />
+									<div className='flex gap-2'>
+										<div className='text-bold'>{intl.formatMessage(msgCreateAccount.services)}:</div>
+										<div>{dependent?.services?.map(service => service.name)?.join(', ')}</div>
+									</div>
+									<div className='flex gap-2'>
+										<div className='text-bold'>{intl.formatMessage(messages.providers)}:</div>
+										<div>{[...new Set(dependent?.appointments?.filter(a => a.type != CONSULTATION)?.map(a => `${a.provider?.firstName} ${a.provider?.lastName}`))].join(', ')}</div>
+									</div>
+								</div>
+								<div>
+									<div className='text-secondary'>About</div>
+									<Divider className='mt-0 mb-10 bg-primary' />
+									<div>{dependent?.backgroundInfor ?? ''}</div>
+								</div>
+							</Space>
+						</Col>
+						<Col xs={24} sm={24} md={12}>
+							<div className='text-secondary'>Notes</div>
+							<Divider className='mt-0 mb-10 bg-primary' />
+							{dependent?.notes?.length ? (
+								<div className='flex flex-col gap-5 notes'>
+									{isNew && (
+										<div className="mt-2">
+											<Input.TextArea
+												name='NewPrivateNote'
+												rows={3}
+												onChange={e => this.setState({ note: e.target.value })}
+												placeholder={intl.formatMessage(messages.privateNote)}
+												className="private-note"
+											/>
+											<div className='flex justify-end gap-2 mt-10'>
+												<Button type='primary' size='small' onClick={() => this.onCreate()}>SAVE</Button>
+												<Button type='primary' size='small' onClick={() => this.onCancel()}>CANCEL</Button>
+											</div>
+										</div>
+									)}
+									{dependent?.notes?.map((note, index) => (
+										<Card key={index}>
+											<Input.TextArea
+												name='PrivateNote'
+												rows={3}
+												defaultValue={note.note}
+												disabled={selectedNoteId != note._id}
+												onChange={e => this.setState({ note: e.target.value })}
+												placeholder={intl.formatMessage(messages.privateNote)}
+												className="private-note"
+											/>
+											<div className='flex items-center gap-5 text-italic'>
+												<div className='text-left'>{note.user?.role > 900 ? 'Admin' : note.user?.username}</div>
+												<div className='text-left'>{moment(note?.updatedAt).format('MM/DD/YYYY hh:mm')}</div>
+											</div>
+											{(user?.role > 900 || user?._id == note.user?._id) && (
+												<div className='flex justify-end gap-2'>
+													{selectedNoteId == note._id ? (
+														<>
+															<Button type='primary' size='small' onClick={() => this.onSave(note._id)}>SAVE</Button>
+															<Button type='primary' size='small' onClick={() => this.onCancel()}>CANCEL</Button>
+														</>
+													) : (
+														<>
+															<Button type='primary' size='small' onClick={() => this.onEdit(note._id)}>EDIT</Button>
+															<Button type='primary' size='small' onClick={() => this.onDelete(note._id)}>DELETE</Button>
+														</>
+													)}
+												</div>
+											)}
+										</Card>
+									))}
+								</div>
+							) : (
+								<div className='h-50 text-center'>No internal notes</div>
+							)}
+						</Col>
+					</Row>
 				</Card>
 				{visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
+				{visibleBalance && <ModalBalance {...modalBalanceProps} />}
 			</Modal>
 		);
 	}
 };
 
-const mapStateToProps = state => {
-	return ({ user: state.auth.user });
-}
+const mapStateToProps = state => ({ user: state.auth.user });
 
 export default compose(connect(mapStateToProps))(ModalDependentDetail);

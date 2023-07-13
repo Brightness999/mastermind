@@ -1,10 +1,6 @@
 @import '../../../assets/styles/variables.less';
 
 .antui-modalform.ant-modal {
-  //& {
-  //  .ant-modal-body {}
-  //}
-
   &.full-modal {
     bottom: 20px;
     left: 20px;
@@ -376,17 +372,130 @@
   .ant-modal-body {
     padding: 15px 30px;
   }
+
   .rmdp-day-picker {
     pointer-events: none;
   }
 }
 
 .modal-dependent {
+  padding-bottom: 0px;
+  top: 10%;
+
   .ant-modal-body {
     padding: 0px;
 
     .header {
-      padding: 10px;
+      padding: 15px 40px;
+
+      .ant-btn-primary {
+        color: #fff;
+        font-weight: 400;
+        font-size: 14px;
+        background-color: #138332;
+        border-color: #138332;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+
+        &:hover {
+          background-color: #126529;
+          border-color: #126529;
+        }
+      }
+
+      .ant-btn-sm {
+        font-size: 11px !important;
+        padding: 6px 10px;
+        height: auto !important;
+      }
+    }
+  }
+
+  .ant-modal-close {
+    .ant-modal-close-x {
+      height: 64px;
+      line-height: 64px;
+
+      svg {
+        color: white;
+      }
+    }
+  }
+
+  .ant-card-body {
+    padding: 20px 40px;
+    font-size: 15px;
+  }
+
+  .notes {
+    .ant-card {
+      background-color: rgba(85, 27, 139, 0.05);
+
+      .ant-card-body {
+        padding: 20px;
+      }
+
+      textarea {
+        background-color: transparent;
+        border-color: transparent;
+        resize: none;
+      }
+
+    }
+
+    .ant-btn-primary {
+      color: #fff;
+      font-weight: 400;
+      font-size: 14px;
+      background-color: #551B8B;
+      border-color: #551B8B;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+
+      &:hover {
+        background-color: #451473;
+        border-color: #551B8B;
+      }
+    }
+
+    .ant-btn-sm {
+      font-size: 10px !important;
+      padding: 1px 12px;
+      width: 63px;
+      height: auto !important;
+    }
+  }
+
+  table {
+    thead {
+      th {
+        background: #551B8B;
+        color: white;
+      }
+    }
+
+    tbody {
+      tr:nth-child(2n+1) {
+        background: rgba(85, 27, 139, 0.05);
+      }
+
+      tr:nth-child(2n+2) {
+        background: rgba(85, 27, 139, 0.11);
+      }
+    }
+  }
+
+  .ant-pagination-item {
+
+    &:focus,
+    &:hover,
+    &-active {
+      background-color: #551B8B !important;
+      border-color: #551B8B;
+
+      a {
+        color: @white;
+      }
     }
   }
 }
