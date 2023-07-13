@@ -381,12 +381,12 @@ class ModalSubsidyProgress extends React.Component {
 				</Col>
 			</Row>
 			<Divider style={{ margin: '12px 0', borderColor: '#d7d7d7' }} />
-			{!!documents && documents.length > 0 && <Row gutter={15}>
+			<Row gutter={15}>
 				<Col xs={24} sm={24} md={12}>
 					<p className='font-700'>{intl.formatMessage(messages.subsidyNotes)}</p>
 					<p className='font-12'>{subsidy.note}</p>
 				</Col>
-				<Col xs={24} sm={24} md={12}>
+				{!!documents && documents.length > 0 && <Col xs={24} sm={24} md={12}>
 					<p className='font-700'>{intl.formatMessage(messages.documents)}</p>
 					{documents?.map((document, index) => (
 						<div key={index}>
@@ -399,8 +399,8 @@ class ModalSubsidyProgress extends React.Component {
 							</a>
 						</div>
 					))}
-				</Col>
-			</Row>}
+				</Col>}
+			</Row>
 		</div>)
 	}
 
