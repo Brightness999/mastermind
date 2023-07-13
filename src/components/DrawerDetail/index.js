@@ -21,7 +21,6 @@ import request, { encryptParam } from 'utils/api/request';
 import { setAppointments, setAppointmentsInMonth, getInvoiceList } from 'src/redux/features/appointmentsSlice';
 import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from 'utils/api/apiList';
 import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from 'routes/constant';
-import { url } from 'utils/api/baseUrl'
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -455,7 +454,7 @@ class DrawerDetail extends Component {
     const { event, appointments, appointmentsMonth } = this.props;
     const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
     this.props.setAppointments(newAppointments);
-    
+
     if (isSwitch) {
       const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.filter(a => a._id != event._id);
       this.props.setAppointmentsInMonth(newAppointmentsInMonth);
@@ -1305,9 +1304,17 @@ class DrawerDetail extends Component {
               )}
               {((userRole === 30 || userRole > 900) && event?.status === DECLINED && event?.isAppeal) && (
                 <Col span={12}>
-                  <Button type='primary' icon={<BsCheckCircle size={15} />} block onClick={this.handleAcceptDeclinedScreening}>
-                    {intl.formatMessage(msgModal.accept)}
-                  </Button>
+                  <Popconfirm
+                    title="Are you sure to accept this request?"
+                    onConfirm={this.handleAcceptDeclinedScreening}
+                    okText="Yes"
+                    cancelText="No"
+                    placement='left'
+                  >
+                    <Button type='primary' icon={<BsCheckCircle size={15} />} block>
+                      {intl.formatMessage(msgModal.accept)}
+                    </Button>
+                  </Popconfirm>
                 </Col>
               )}
               {((userRole === 3 || userRole > 900) && event?.status === DECLINED) ? event?.isAppeal ? (
