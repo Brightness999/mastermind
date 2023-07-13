@@ -633,6 +633,7 @@ class DrawerDetail extends Component {
       if (res.success) {
         message.success('Your request has been submitted. Please allow up to 24 hours for the provider to review this.');
         this.closeModalMessage();
+        this.updateAppointments(res.data);
       }
     }).catch(err => {
       message.error(err.message);
