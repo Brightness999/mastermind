@@ -863,7 +863,7 @@ class ModalNewAppointment extends React.Component {
 							<Button key="back" onClick={this.props.onCancel}>
 								{intl.formatMessage(messages.goBack).toUpperCase()}
 							</Button>
-							{(appointmentType === APPOINTMENT || appointmentType === SUBSIDY) && listProvider[selectedProviderIndex]?.separateEvaluationDuration ? (
+							{(appointmentType === APPOINTMENT || appointmentType === SUBSIDY) && listProvider[selectedProviderIndex]?.isSeparateEvaluationRate ? (
 								<Dropdown.Button
 									loading={loadingSchedule}
 									icon={<DownOutlined />}
