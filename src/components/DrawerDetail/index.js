@@ -1024,7 +1024,7 @@ class DrawerDetail extends Component {
           {event?.flagStatus !== ACTIVE && event?.type === CONSULTATION && event?.status === PENDING && event?.consultant?._id && event?.consultant?._id !== auth.user?.consultantInfo?._id && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.claimed)}]</div>
           )}
-          {event?.flagStatus !== ACTIVE && event?.type === CONSULTATION && event?.status === PENDING && !event?.consultant && (
+          {event?.flagStatus !== ACTIVE && event?.type === CONSULTATION && event?.status === PENDING && !event?.consultant?._id && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.unclaimed)}]</div>
           )}
           {event?.flagStatus !== ACTIVE && event?.status === CLOSED && (

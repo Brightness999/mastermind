@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createRef } from 'react';
 import { Modal, Input, Divider, Card, Button, message, Row, Col, Space, Table } from 'antd';
 import intl from 'react-intl-universal';
 import moment from 'moment';
@@ -356,23 +356,23 @@ class ModalDependentDetail extends React.Component {
 						<Col xs={24} sm={24} md={12}>
 							<div className='text-secondary'>Notes</div>
 							<Divider className='mt-0 mb-10 bg-primary' />
+							{isNew && (
+								<div className="mt-2 mb-5 notes">
+									<Input.TextArea
+										name='NewPrivateNote'
+										rows={3}
+										onChange={e => this.setState({ note: e.target.value })}
+										placeholder={intl.formatMessage(messages.privateNote)}
+										className="private-note"
+									/>
+									<div className='flex justify-end gap-2 mt-10'>
+										<Button type='primary' size='small' onClick={() => this.onCreate()}>SAVE</Button>
+										<Button type='primary' size='small' onClick={() => this.onCancel()}>CANCEL</Button>
+									</div>
+								</div>
+							)}
 							{dependent?.notes?.length ? (
 								<div className='flex flex-col gap-5 notes'>
-									{isNew && (
-										<div className="mt-2">
-											<Input.TextArea
-												name='NewPrivateNote'
-												rows={3}
-												onChange={e => this.setState({ note: e.target.value })}
-												placeholder={intl.formatMessage(messages.privateNote)}
-												className="private-note"
-											/>
-											<div className='flex justify-end gap-2 mt-10'>
-												<Button type='primary' size='small' onClick={() => this.onCreate()}>SAVE</Button>
-												<Button type='primary' size='small' onClick={() => this.onCancel()}>CANCEL</Button>
-											</div>
-										</div>
-									)}
 									{dependent?.notes?.map((note, index) => (
 										<Card key={index}>
 											<Input.TextArea
