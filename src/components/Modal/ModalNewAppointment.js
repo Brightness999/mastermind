@@ -613,7 +613,7 @@ class ModalNewAppointment extends React.Component {
 									<Select
 										showSearch
 										optionFilterProp="children"
-										filterOption={(input, option) => option.children?.join('').includes(input)}
+										filterOption={(input, option) => option.children?.join('')?.toLowerCase()?.includes(input.toLowerCase())}
 										filterSort={(optionA, optionB) => optionA.children?.join('').toLowerCase().localeCompare(optionB.children?.join('').toLowerCase())}
 										onChange={value => this.handleSelectDependent(value)}
 										placeholder={intl.formatMessage(msgCreateAccount.dependent)}
@@ -633,7 +633,8 @@ class ModalNewAppointment extends React.Component {
 									<Select
 										showSearch
 										optionFilterProp="children"
-										filterOption={(input, option) => option.children?.includes(input)}
+										filterOption={(input, option) => option.children?.toLowerCase()?.includes(input?.toLowerCase())}
+										filterSort={(optionA, optionB) => optionA.children?.toLowerCase()?.localeCompare(optionB.children?.toLowerCase())}
 										onChange={v => this.handleSelectSkill(v)}
 										placeholder={intl.formatMessage(msgCreateAccount.services)}
 									>
@@ -652,7 +653,8 @@ class ModalNewAppointment extends React.Component {
 									<Select
 										showSearch
 										optionFilterProp="children"
-										filterOption={(input, option) => option.children?.includes(input)}
+										filterOption={(input, option) => option.children?.toLowerCase()?.includes(input?.toLowerCase())}
+										filterSort={(optionA, optionB) => optionA.children?.toLowerCase()?.localeCompare(optionB.children?.toLowerCase())}
 										onChange={v => this.handleChangeAddress(v)}
 										placeholder={intl.formatMessage(msgCreateAccount.location)}
 									>
