@@ -109,7 +109,7 @@ class ModalCurrentReferralService extends React.Component {
 				this.props.setAppointments(newAppointments);
 				this.props.setAppointmentsInMonth(newAppointmentsInMonth);
 				this.props.setMeetingLink('');
-				this.props.onSubmit();
+				this.props.onSubmit(data);
 			} else {
 				message.error('cannot create referral');
 			}

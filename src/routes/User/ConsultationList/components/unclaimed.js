@@ -7,11 +7,14 @@ import moment from 'moment';
 import 'moment/locale/en-au';
 import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
+import intl from "react-intl-universal";
 
+import msgDrawer from 'components/DrawerDetail/messages';
 import request from 'utils/api/request';
 import { claimConsultation, getConsultationList } from 'utils/api/apiList';
 import PageLoading from 'components/Loading/PageLoading';
 import { CANCELLED, CLOSED, DECLINED, NOSHOW, PENDING } from 'routes/constant';
+import { ModalCurrentReferralService } from 'components/Modal';
 
 class UnclaimedConsultationRequest extends React.Component {
   constructor(props) {
@@ -28,6 +31,8 @@ class UnclaimedConsultationRequest extends React.Component {
       selectedGrades: [],
       selectedSchools: [],
       selectedServices: [],
+      visibleCurrentReferral: false,
+      selectedConsultation: {},
     };
     this.searchInput = createRef(null);
   }
@@ -118,13 +123,39 @@ class UnclaimedConsultationRequest extends React.Component {
           })
           .catch(err => message.error(err.message));
       } else {
-        message.warning("You are not available at this event time.");
+        message.warning("You are not available at this consultation time.");
       }
     }
   }
 
+
+  openModalCurrent = (consultation) => {
+    this.setState({ visibleCurrentReferral: true, selectedConsultation: consultation });
+  }
+
+  closeModalCurrent = () => {
+    this.setState({ visibleCurrentReferral: false, selectedConsultation: {} });
+  }
+
+  submitModalCurrent = (data) => {
+    this.setState({
+      consultationList: this.state.consultationList?.map(consultation => {
+        if (this.state.selectedConsultation._id === consultation?._id) {
+          consultation.date = data.date;
+          consultation.phoneNumber = data.phoneNumber;
+          consultation.meetingLink = data.meetingLink;
+          consultation.notes = data.note;
+          return consultation;
+        } else {
+          return consultation;
+        }
+      })
+    })
+    this.closeModalCurrent();
+  }
+
   render() {
-    const { pageNumber, pageSize, searchDependentName, selectedGrades, selectedSchools, selectedServices, totalSize, consultationList, skillSet, loading, csvData } = this.state;
+    const { pageNumber, pageSize, searchDependentName, selectedGrades, selectedSchools, selectedServices, totalSize, consultationList, skillSet, loading, csvData, visibleCurrentReferral, selectedConsultation } = this.state;
     const { auth } = this.props;
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ label: level, value: level }));
     const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(school => ({ label: school.schoolInfo?.name, value: school.schoolInfo?._id })) || [];
@@ -315,19 +346,35 @@ class UnclaimedConsultationRequest extends React.Component {
       { title: 'Referral Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm a') },
       { title: 'Status', dataIndex: 'status', key: 'status', render: (status) => status === PENDING ? 'Pending' : status === CLOSED ? 'Closed' : status === DECLINED ? 'Declined' : status === CANCELLED ? 'Canceled' : status === NOSHOW ? 'No Show' : '' },
       {
-        title: 'Action', key: 'action', fixed: 'right', render: (consultation) => consultation.status === PENDING ? (
-          <Popconfirm
-            title="Are you sure to tag this consultation?"
-            onConfirm={() => this.handleTag(consultation)}
-            okText="Yes"
-            cancelText="No"
-          ><span className='text-primary text-underline'>Tag</span></Popconfirm>
-        ) : null
+        title: 'Action', key: 'action', fixed: 'right', render: (consultation) => {
+          return (
+            <>
+              {consultation?.status === PENDING && (moment().isBefore(moment(consultation?.date)) && auth.user?.role > 900) && (
+                <span className='text-primary cursor text-underline' onClick={() => this.openModalCurrent(consultation)}>
+                  {intl.formatMessage(msgDrawer.reschedule)}
+                </span>
+              )}
+              {consultation?.status === PENDING && moment().isBefore(moment(consultation?.date)) && !consultation?.consultant?._id && auth.user?.role === 100 && (
+                <Popconfirm
+                  title="Are you sure to tag this consultation?"
+                  onConfirm={() => this.handleTag(consultation)}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <span className='text-primary text-underline'>Tag</span>
+                </Popconfirm>
+              )}
+            </>
+          )
+        }
       },
     ];
 
-    if (auth.user?.role > 900) {
-      columns.splice(-1);
+    const modalCurrentReferralProps = {
+      visible: visibleCurrentReferral,
+      onSubmit: this.submitModalCurrent,
+      onCancel: this.closeModalCurrent,
+      event: selectedConsultation,
     }
 
     return (
@@ -338,9 +385,10 @@ class UnclaimedConsultationRequest extends React.Component {
           </Button>
         </CSVLink>
         <Space direction='vertical' className='flex'>
-          <Table bordered size='middle' pagination={false} dataSource={consultationList} columns={columns} scroll={{ x: 1200 }} />
+          <Table bordered size='middle' pagination={false} dataSource={consultationList} columns={columns} scroll={{ x: true }} />
           <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
         </Space>
+        {visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
         <PageLoading loading={loading} isBackground={true} />
       </div>
     );

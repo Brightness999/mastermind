@@ -1,5 +1,5 @@
 import React, { createRef } from 'react';
-import { Table, Space, Button, Input, message, Pagination, Checkbox, Popover } from 'antd';
+import { Table, Space, Button, Input, message, Pagination, Checkbox, Popover, Radio, Popconfirm } from 'antd';
 import { CheckCircleFilled, FilterFilled, SearchOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -7,11 +7,15 @@ import moment from 'moment';
 import 'moment/locale/en-au';
 import { CSVLink } from "react-csv";
 import { FaFileDownload } from 'react-icons/fa';
+import intl from "react-intl-universal";
 
+import msgDrawer from 'components/DrawerDetail/messages';
 import request from 'utils/api/request';
-import { getConsultationList } from 'utils/api/apiList';
+import { closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, getConsultationList, removeConsultation, switchConsultation } from 'utils/api/apiList';
 import PageLoading from 'components/Loading/PageLoading';
-import { CANCELLED, CLOSED, DECLINED, NOSHOW, PENDING } from 'routes/constant';
+import { CANCELLED, CLOSED, CONSULTATION, DECLINED, NOSHOW, PENDING } from 'routes/constant';
+import { ModalCurrentReferralService, ModalProcessAppointment } from 'components/Modal';
+import 'components/DrawerDetail/style/index.less';
 
 class ClaimedConsultationRequest extends React.Component {
   constructor(props) {
@@ -29,6 +33,9 @@ class ClaimedConsultationRequest extends React.Component {
       selectedGrades: [],
       selectedSchools: [],
       selectedServices: [],
+      visibleProcess: false,
+      visibleCurrentReferral: false,
+      selectedConsultation: {},
     };
     this.searchInput = createRef(null);
   }
@@ -96,9 +103,158 @@ class ClaimedConsultationRequest extends React.Component {
     return true;
   }
 
+  openModalProcess(consultation) {
+    this.setState({ visibleProcess: true, selectedConsultation: consultation });
+  }
+
+  closeModalProcess = () => {
+    this.setState({ visibleProcess: false, selectedConsultation: {} });
+  }
+
+  handleDecline = (note, publicFeedback) => {
+    this.closeModalProcess();
+    const { selectedConsultation } = this.state;
+
+    if (selectedConsultation?._id) {
+      const data = {
+        appointmentId: selectedConsultation._id,
+        publicFeedback,
+        note,
+      }
+      request.post(declineAppointmentForProvider, data).then(result => {
+        if (result.success) {
+          message.success("Declined Successfully!");
+          this.setState({
+            consultationList: this.state.consultationList?.map(consultation => {
+              if (selectedConsultation._id === consultation?._id) {
+                consultation.publicFeedback = data.publicFeedback;
+                consultation.status = DECLINED;
+                return consultation;
+              } else {
+                return consultation;
+              }
+            })
+          })
+        } else {
+          message.warn("Something went wrong. Please try again.");
+        }
+      }).catch(error => {
+        message.error(error.message);
+      })
+    }
+  }
+
+  handleMarkAsClosed = (note, publicFeedback) => {
+    this.closeModalProcess();
+    const { selectedConsultation } = this.state;
+
+    if (selectedConsultation?._id) {
+      const data = {
+        appointmentId: selectedConsultation._id,
+        publicFeedback: publicFeedback,
+        note: note,
+      }
+      request.post(closeAppointmentForProvider, data).then(result => {
+        if (result.success) {
+          message.success("Closed Successfully!");
+          this.setState({
+            consultationList: this.state.consultationList?.map(consultation => {
+              if (selectedConsultation._id === consultation?._id) {
+                consultation.publicFeedback = data.publicFeedback;
+                consultation.status = CLOSED;
+                return consultation;
+              } else {
+                return consultation;
+              }
+            })
+          })
+        } else {
+          message.warn("Something went wrong. Please try again.");
+        }
+      }).catch(error => {
+        message.error(error.message);
+      })
+    }
+  }
+
+  handleMarkAsNoShow = (note, publicFeedback) => {
+    this.closeModalProcess();
+    const { selectedConsultation } = this.state;
+
+    if (selectedConsultation?._id) {
+      const data = {
+        appointmentId: selectedConsultation._id,
+        publicFeedback, note,
+      }
+      request.post(closeAppointmentAsNoshow, data).then(result => {
+        if (result.success) {
+          message.success("Closed Successfully!");
+          this.setState({
+            consultationList: this.state.consultationList?.map(consultation => {
+              if (selectedConsultation._id === consultation?._id) {
+                consultation.publicFeedback = data.publicFeedback;
+                consultation.status = NOSHOW;
+                return consultation;
+              } else {
+                return consultation;
+              }
+            })
+          })
+        } else {
+          message.warn("Something went wrong. Please try again.");
+        }
+      }).catch(error => {
+        message.error(error.message);
+      })
+    }
+  }
+
+  openModalCurrent = (consultation) => {
+    this.setState({ visibleCurrentReferral: true, selectedConsultation: consultation });
+  }
+
+  closeModalCurrent = () => {
+    this.setState({ visibleCurrentReferral: false, selectedConsultation: {} });
+  }
+
+  submitModalCurrent = (data) => {
+    this.setState({
+      consultationList: this.state.consultationList?.map(consultation => {
+        if (this.state.selectedConsultation._id === consultation?._id) {
+          consultation.date = data.date;
+          consultation.phoneNumber = data.phoneNumber;
+          consultation.meetingLink = data.meetingLink;
+          consultation.notes = data.note;
+          return consultation;
+        } else {
+          return consultation;
+        }
+      })
+    })
+    this.closeModalCurrent();
+  }
+
+  handleSwitchTag = (consultationId, consultantId) => {
+    request.post(switchConsultation, { appointmentId: consultationId, consultantId }).then(res => {
+      if (res.success) {
+        message.success("Switched successfully");
+        this.getConsultations();
+      }
+    }).catch(err => message.error(err.message));
+  }
+
+  handleRemoveTag = (consultationId) => {
+    request.post(removeConsultation, { appointmentId: consultationId }).then(res => {
+      if (res.success) {
+        message.success("Removed successfully");
+        this.getConsultations();
+      }
+    }).catch(err => message.error(err.message));
+  }
+
   render() {
-    const { pageNumber, pageSize, searchConsultantName, searchDependentName, selectedGrades, selectedSchools, selectedServices, totalSize, consultationList, skillSet, loading, csvData } = this.state;
-    const { auth } = this.props;
+    const { pageNumber, pageSize, searchConsultantName, searchDependentName, selectedGrades, selectedSchools, selectedServices, totalSize, consultationList, skillSet, loading, csvData, selectedConsultation, visibleCurrentReferral, visibleProcess } = this.state;
+    const { auth, appointments } = this.props;
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ label: level, value: level }));
     const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(school => ({ label: school.schoolInfo?.name, value: school.schoolInfo?._id })) || [];
     schools.push({ label: 'Other', value: 'other' });
@@ -344,9 +500,82 @@ class ClaimedConsultationRequest extends React.Component {
         title: <span className='whitespace-nowrap'>PhoneNumber / Google Meet</span>,
         render: (appointment) => appointment?.phoneNumber ? appointment?.phoneNumber : appointment?.meetingLink,
       },
-      { title: 'Referral Date', dataIndex: 'date', key: 'date', type: 'datetime', sorter: (a, b) => a.date > b.date ? 1 : -1, render: (date) => moment(date).format('MM/DD/YYYY hh:mm a') },
-      { title: 'Status', dataIndex: 'status', key: 'status', fixed: 'right', render: (status) => status === PENDING ? 'Pending' : status === CLOSED ? 'Closed' : status === DECLINED ? 'Declined' : status === CANCELLED ? 'Canceled' : status === NOSHOW ? 'No Show' : '' },
+      {
+        title: 'Referral Date', dataIndex: 'date', key: 'date', type: 'datetime',
+        sorter: (a, b) => a.date > b.date ? 1 : -1,
+        render: (date) => moment(date).format('MM/DD/YYYY hh:mm a')
+      },
+      {
+        title: 'Status', dataIndex: 'status', key: 'status',
+        render: (status) => status === PENDING ? 'Pending' : status === CLOSED ? 'Closed' : status === DECLINED ? 'Declined' : status === CANCELLED ? 'Canceled' : status === NOSHOW ? 'No Show' : ''
+      },
+      {
+        title: 'Action', key: 'action', fixed: 'right', width: 240,
+        render: (consultation) => {
+          const appointmentDate = moment(consultation?.date);
+          const consultants = auth.consultants?.filter(consultant => consultant?._id != consultation?.consultant?._id && !appointments?.find(a => a?.consultant?._id === consultant?.consultantInfo?._id && a.date === consultation?.date) && consultant?.consultantInfo?.manualSchedule?.find(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 999 })) && appointmentDate.isBetween(appointmentDate.clone().set({ hours: a.openHour, minutes: a.openMin }), appointmentDate.clone().set({ hours: a.closeHour, minutes: a.closeMin }))));
+
+          return (
+            <div className='grid grid-columns-2 gap-2'>
+              {(consultation?.status === PENDING && consultation?.consultant?._id && (consultation?.consultant?._id === auth.user?.consultantInfo?._id || auth.user?.role > 900)) && (
+                <span className='text-primary cursor text-underline' onClick={() => this.openModalProcess(consultation)}>
+                  {intl.formatMessage(msgDrawer.markClosed)}
+                </span>
+              )}
+              {consultation?.status === PENDING && (moment().isBefore(moment(consultation?.date)) && (auth.user?.role > 900 || (auth.user?.role === 100 && consultation?.consultant?._id && consultation?.consultant?._id === auth.user?.consultantInfo?._id))) && (
+                <span className='text-primary cursor text-underline' onClick={() => this.openModalCurrent(consultation)}>
+                  {intl.formatMessage(msgDrawer.reschedule)}
+                </span>
+              )}
+              {(consultation?.status === PENDING && moment().isBefore(moment(consultation?.date)) && consultation?.type === CONSULTATION && consultation?.consultant?._id && (consultation?.consultant?._id === auth.user?.consultantInfo?._id || auth.user?.role > 900)) && (
+                <Popover
+                  trigger="click"
+                  placement='bottom'
+                  overlayClassName='consultant'
+                  content={consultants?.length ? (
+                    <Radio.Group onChange={e => this.handleSwitchTag(consultation?._id, e.target.value)} className="box-card p-10 bg-pastel">
+                      <Space direction="vertical">
+                        {consultants?.map((consultant, i) => (
+                          <Radio key={i} value={consultant?.consultantInfo?._id} className="nobr">{consultant?.username}</Radio>
+                        ))}
+                      </Space>
+                    </Radio.Group>
+                  ) : <div className='p-10 bg-pastel'>No consultants to switch</div>}
+                >
+                  <span className='text-primary cursor text-underline'>{intl.formatMessage(msgDrawer.switchTag)}</span>
+                </Popover>
+              )}
+              {(consultation?.status === PENDING && moment().isBefore(moment(consultation?.date)) && consultation?.consultant?._id && (consultation?.consultant?._id === auth.user?.consultantInfo?._id || auth.user?.role > 900)) && (
+                <Popconfirm
+                  title="Are you sure to remove tag?"
+                  onConfirm={() => this.handleRemoveTag(consultation?._id)}
+                  okText="Yes"
+                  cancelText="No"
+                  placement='left'
+                >
+                  <span className='text-primary cursor text-underline'>{intl.formatMessage(msgDrawer.removeTag)}</span>
+                </Popconfirm>
+              )}
+            </div>
+          )
+        }
+      },
     ];
+
+    const modalProcessProps = {
+      visible: visibleProcess,
+      onDecline: this.handleDecline,
+      onConfirm: this.handleMarkAsClosed,
+      onConfirmNoShow: this.handleMarkAsNoShow,
+      onCancel: this.closeModalProcess,
+      event: selectedConsultation,
+    };
+    const modalCurrentReferralProps = {
+      visible: visibleCurrentReferral,
+      onSubmit: this.submitModalCurrent,
+      onCancel: this.closeModalCurrent,
+      event: selectedConsultation,
+    }
 
     return (
       <div>
@@ -356,15 +585,20 @@ class ClaimedConsultationRequest extends React.Component {
           </Button>
         </CSVLink>
         <Space direction='vertical' className='flex'>
-          <Table bordered size='middle' pagination={false} dataSource={consultationList} columns={columns} scroll={{ x: 1200 }} />
+          <Table bordered size='middle' pagination={false} dataSource={consultationList} columns={columns} scroll={{ x: true }} />
           <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
         </Space>
+        {visibleProcess && <ModalProcessAppointment {...modalProcessProps} />}
+        {visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
         <PageLoading loading={loading} isBackground={true} />
       </div>
     );
   }
 }
 
-const mapStateToProps = state => ({ auth: state.auth });
+const mapStateToProps = state => ({
+  auth: state.auth,
+  appointments: state.appointments.dataAppointments,
+});
 
 export default compose(connect(mapStateToProps))(ClaimedConsultationRequest);

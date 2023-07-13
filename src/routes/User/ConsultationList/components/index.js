@@ -46,7 +46,8 @@ class ConsultationRequest extends React.Component {
     return (
       <div className="full-layout page consultationrequests-page">
         <div className='div-title-admin'>
-          <div className='font-16 font-500'>{intl.formatMessage(msgSidebar.consultationRequests)}</div>
+          {this.props.auth.user?.role === 100 && <div className='font-16 font-500'>{intl.formatMessage(msgSidebar.consultationRequests)}</div>}
+          {this.props.auth.user?.role > 900 && <p className='font-16 font-500'>{intl.formatMessage(msgSidebar.consultationRequests)}</p>}
           <Divider />
         </div>
         <Tabs
