@@ -28,7 +28,7 @@ class InfoScheduling extends Component {
 				const { success, data } = result;
 				if (success) {
 					this.form?.setFieldsValue(data?.providerInfo);
-					if (!data?.durationType) {
+					if (!data?.providerInfo?.durationType) {
 						this.form?.setFieldsValue({ durationType: 'days' });
 					}
 					this.setState({
