@@ -326,6 +326,10 @@ class UnclaimedConsultationRequest extends React.Component {
       },
     ];
 
+    if (auth.user?.role > 900) {
+      columns.splice(-1);
+    }
+
     return (
       <div>
         <CSVLink onClick={this.exportToExcel} data={csvData} headers={csvHeaders} filename="Approved Requests">
