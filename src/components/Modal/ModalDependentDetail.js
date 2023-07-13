@@ -7,7 +7,7 @@ import { compose } from 'redux';
 
 import messages from './messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
-import { createPrivateNote, deletePrivateNote, setFlagBalance, updatePrivateNote } from 'utils/api/apiList';
+import { createPrivateNote, deletePrivateNote, setFlagBalance, updateInvoice, updatePrivateNote } from 'utils/api/apiList';
 import request from 'utils/api/request';
 import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
 import ModalBalance from './ModalBalance';
@@ -25,6 +25,7 @@ class ModalDependentDetail extends React.Component {
 			isNew: false,
 			visibleNewSubsidy: false,
 			visibleBalance: false,
+			isUpdated: false,
 		}
 	}
 
@@ -168,22 +169,90 @@ class ModalDependentDetail extends React.Component {
 		})
 
 		request.post(setFlagBalance, { bulkData, dependent: dependent?._id }).then(result => {
-			const { success } = result;
+			const { success, data } = result;
 			if (success) {
+				this.setState({ isUpdated: ture });
 				this.onCloseModalBalance();
+				let newDependentInvoices = dependent.invoices?.map(invoice => {
+					const updatedInvoice = data?.find(d => d._id === invoice._id);
+					if (updatedInvoice) {
+						invoice.data = updatedInvoice.data;
+						invoice.requester = updatedInvoice.requester;
+						invoice.minimumPayment = updatedInvoice.minimumPayment;
+						invoice.totalPayment = updatedInvoice.totalPayment;
+						return invoice;
+					} else {
+						return invoice;
+					}
+				});
+
+				let newDependentAppointments = dependent.appointments?.map(appointment => {
+					const updatedInvoice = data?.find(d => d._id === appointment?.flagInvoice?._id);
+					if (updatedInvoice) {
+						appointment.flagInvoice.data = updatedInvoice.data;
+						appointment.flagInvoice.requester = updatedInvoice.requester;
+						appointment.flagInvoice.minimumPayment = updatedInvoice.minimumPayment;
+						appointment.flagInvoice.totalPayment = updatedInvoice.totalPayment;
+						return appointment;
+					} else {
+						return appointment;
+					}
+				})
+
+				const newAppointmentIds = data?.filter(d => d.isNew)?.map(d => d.data)?.flat()?.map(d => d.appointment);
+				newDependentInvoices = newDependentInvoices?.filter(invoice => !(invoice?.type === 1 && newAppointmentIds.includes(invoice?.data?.[0]?.appointment)));
+
+				data?.filter(d => d.isNew)?.forEach(d => {
+					newDependentInvoices.push({
+						_id: d._id,
+						isPaid: 0,
+						requester: d.requester,
+						type: 5,
+						invoiceNumber: d.invoiceNumber,
+						dependent: d.dependent,
+						provider: d.provider,
+						totalPayment: d.totalPayment,
+						minimumPayment: d.minimumPayment,
+						data: d.data,
+					})
+
+					newDependentAppointments?.map(appointment => {
+						if (d?.data?.find(a => a.appointment === appointment?._id)) {
+							appointment.sessionInvoice = undefined;
+							appointment.flagStatus = 1;
+							appointment.flagInvoice = {
+								_id: d._id,
+								isPaid: 0,
+								requester: d.requester,
+								type: BALANCE,
+								invoiceNumber: d.invoiceNumber,
+								dependent: d.dependent,
+								provider: d.provider,
+								totalPayment: d.totalPayment,
+								minimumPayment: d.minimumPayment,
+								data: d.data,
+							}
+							return appointment;
+						} else {
+							return appointment;
+						}
+					})
+				})
+
+				this.setState({ dependent: { ...dependent, invoices: newDependentInvoices, appointments: newDependentAppointments } })
 			}
 		}).catch(err => message.error(err.message));
 	}
 
 	render() {
-		const { dependent, selectedNoteId, isNew, visibleBalance, visibleNewSubsidy } = this.state;
+		const { dependent, selectedNoteId, isNew, isUpdated, visibleBalance, visibleNewSubsidy } = this.state;
 		const { user } = this.props;
 		const modalProps = {
 			className: 'modal-dependent',
 			title: "",
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
-			onCancel: this.props.onCancel,
+			onCancel: () => this.props.onCancel(isUpdated),
 			footer: null,
 			width: 1200,
 		};

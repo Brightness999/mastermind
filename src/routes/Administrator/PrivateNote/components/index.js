@@ -76,8 +76,9 @@ class PrivateNote extends React.Component {
     })
   }
 
-  onCloseModalDependent = () => {
+  onCloseModalDependent = (isUpdated) => {
     this.setState({ visibleDependent: false });
+    isUpdated && this.getDependentList();
   }
 
   onShowModalBalance = (dependent) => {
