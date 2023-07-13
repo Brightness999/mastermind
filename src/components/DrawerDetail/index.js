@@ -514,7 +514,7 @@ class DrawerDetail extends Component {
       if (success) {
         this.setState({ visibleNoShow: false });
         this.updateAppointments(result.data);
-        this.getInvoiceList({ role: auth.user.role });
+        this.props.getInvoiceList({ role: auth.user.role });
       }
     })
   }
@@ -583,7 +583,7 @@ class DrawerDetail extends Component {
       if (success) {
         this.onCloseModalBalance();
         this.updateAppointments(data);
-        this.getInvoiceList({ role: auth.user.role });
+        this.props.getInvoiceList({ role: auth.user.role });
       }
     }).catch(err => message.error(err.message));
   }
