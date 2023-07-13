@@ -15,6 +15,7 @@ import { closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointme
 import PageLoading from 'components/Loading/PageLoading';
 import { CANCELLED, CLOSED, CONSULTATION, DECLINED, NOSHOW, PENDING } from 'routes/constant';
 import { ModalCurrentReferralService, ModalProcessAppointment } from 'components/Modal';
+import DrawerDetail from 'components/DrawerDetail';
 import 'components/DrawerDetail/style/index.less';
 
 class ClaimedConsultationRequest extends React.Component {
@@ -36,6 +37,7 @@ class ClaimedConsultationRequest extends React.Component {
       visibleProcess: false,
       visibleCurrentReferral: false,
       selectedConsultation: {},
+      visibleDrawer: false,
     };
     this.searchInput = createRef(null);
   }
@@ -87,7 +89,7 @@ class ClaimedConsultationRequest extends React.Component {
     const { consultationList } = this.state;
     const data = consultationList?.map(c => ({
       "Student Name": `${c?.dependent?.firstName ?? ''} ${c?.dependent?.lastName ?? ''}`,
-      "Referrer": c?.consultant?.referredToAs ?? '',
+      "Referrer": c?.consultant?.consultantInfo?.referredToAs ?? '',
       "Student Grade": c?.dependent?.currentGrade,
       "Service Requested": c?.skillSet?.name,
       "PhoneNumber/Google Meet": c?.meetingLink ? c.meetingLink : c.phoneNumber ? c.phoneNumber : '',
@@ -252,8 +254,16 @@ class ClaimedConsultationRequest extends React.Component {
     }).catch(err => message.error(err.message));
   }
 
+  onShowDrawerDetail = (consultation) => {
+    this.setState({ selectedConsultation: { ...consultation, consultant: consultation?.consultant?.consultantInfo }, visibleDrawer: true });
+  };
+
+  onCloseDrawerDetail = () => {
+    this.setState({ selectedConsultation: {}, visibleDrawer: false });
+  };
+
   render() {
-    const { pageNumber, pageSize, searchConsultantName, searchDependentName, selectedGrades, selectedSchools, selectedServices, totalSize, consultationList, skillSet, loading, csvData, selectedConsultation, visibleCurrentReferral, visibleProcess } = this.state;
+    const { pageNumber, pageSize, searchConsultantName, searchDependentName, selectedGrades, selectedSchools, selectedServices, totalSize, consultationList, skillSet, loading, csvData, selectedConsultation, visibleCurrentReferral, visibleProcess, visibleDrawer } = this.state;
     const { auth, appointments } = this.props;
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ label: level, value: level }));
     const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(school => ({ label: school.schoolInfo?.name, value: school.schoolInfo?._id })) || [];
@@ -517,17 +527,17 @@ class ClaimedConsultationRequest extends React.Component {
 
           return (
             <div className='grid grid-columns-2 gap-2'>
-              {(consultation?.status === PENDING && consultation?.consultant?._id && (consultation?.consultant?._id === auth.user?.consultantInfo?._id || auth.user?.role > 900)) && (
+              {(consultation?.status === PENDING && consultation?.consultant?.consultantInfo?._id && (consultation?.consultant?.consultantInfo?._id === auth.user?.consultantInfo?._id || auth.user?.role > 900)) && (
                 <span className='text-primary cursor text-underline' onClick={() => this.openModalProcess(consultation)}>
                   {intl.formatMessage(msgDrawer.markClosed)}
                 </span>
               )}
-              {consultation?.status === PENDING && (moment().isBefore(moment(consultation?.date)) && (auth.user?.role > 900 || (auth.user?.role === 100 && consultation?.consultant?._id && consultation?.consultant?._id === auth.user?.consultantInfo?._id))) && (
+              {consultation?.status === PENDING && (moment().isBefore(moment(consultation?.date)) && (auth.user?.role > 900 || (auth.user?.role === 100 && consultation?.consultant?.consultantInfo?._id && consultation?.consultant?.consultantInfo?._id === auth.user?.consultantInfo?._id))) && (
                 <span className='text-primary cursor text-underline' onClick={() => this.openModalCurrent(consultation)}>
                   {intl.formatMessage(msgDrawer.reschedule)}
                 </span>
               )}
-              {(consultation?.status === PENDING && moment().isBefore(moment(consultation?.date)) && consultation?.type === CONSULTATION && consultation?.consultant?._id && (consultation?.consultant?._id === auth.user?.consultantInfo?._id || auth.user?.role > 900)) && (
+              {(consultation?.status === PENDING && moment().isBefore(moment(consultation?.date)) && consultation?.type === CONSULTATION && consultation?.consultant?.consultantInfo?._id && (consultation?.consultant?.consultantInfo?._id === auth.user?.consultantInfo?._id || auth.user?.role > 900)) && (
                 <Popover
                   trigger="click"
                   placement='bottom'
@@ -545,7 +555,7 @@ class ClaimedConsultationRequest extends React.Component {
                   <span className='text-primary cursor text-underline'>{intl.formatMessage(msgDrawer.switchTag)}</span>
                 </Popover>
               )}
-              {(consultation?.status === PENDING && moment().isBefore(moment(consultation?.date)) && consultation?.consultant?._id && (consultation?.consultant?._id === auth.user?.consultantInfo?._id || auth.user?.role > 900)) && (
+              {(consultation?.status === PENDING && moment().isBefore(moment(consultation?.date)) && consultation?.consultant?.consultantInfo?._id && (consultation?.consultant?.consultantInfo?._id === auth.user?.consultantInfo?._id || auth.user?.role > 900)) && (
                 <Popconfirm
                   title="Are you sure to remove tag?"
                   onConfirm={() => this.handleRemoveTag(consultation?._id)}
@@ -576,6 +586,13 @@ class ClaimedConsultationRequest extends React.Component {
       onCancel: this.closeModalCurrent,
       event: selectedConsultation,
     }
+    const drawerDetailProps = {
+      visible: visibleDrawer,
+      onClose: this.onCloseDrawerDetail,
+      event: selectedConsultation,
+      listAppointmentsRecent: this.props.appointments,
+      socket: this.props.socket,
+    };
 
     return (
       <div>
@@ -585,11 +602,23 @@ class ClaimedConsultationRequest extends React.Component {
           </Button>
         </CSVLink>
         <Space direction='vertical' className='flex'>
-          <Table bordered size='middle' pagination={false} dataSource={consultationList} columns={columns} scroll={{ x: true }} />
+          <Table
+            bordered
+            size='middle'
+            pagination={false}
+            dataSource={consultationList}
+            columns={columns}
+            scroll={{ x: true }}
+            onRow={(consultation) => ({
+              onClick: (e) => e.target.className.includes('ant-table-cell') && this.onShowDrawerDetail(consultation),
+              onDoubleClick: (e) => e.target.className.includes('ant-table-cell') && this.onShowDrawerDetail(consultation),
+            })}
+          />
           <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
         </Space>
         {visibleProcess && <ModalProcessAppointment {...modalProcessProps} />}
         {visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
+        {visibleDrawer && <DrawerDetail {...drawerDetailProps} />}
         <PageLoading loading={loading} isBackground={true} />
       </div>
     );

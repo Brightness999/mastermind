@@ -15,6 +15,7 @@ import { claimConsultation, getConsultationList } from 'utils/api/apiList';
 import PageLoading from 'components/Loading/PageLoading';
 import { CANCELLED, CLOSED, DECLINED, NOSHOW, PENDING } from 'routes/constant';
 import { ModalCurrentReferralService } from 'components/Modal';
+import DrawerDetail from 'components/DrawerDetail';
 
 class UnclaimedConsultationRequest extends React.Component {
   constructor(props) {
@@ -33,6 +34,7 @@ class UnclaimedConsultationRequest extends React.Component {
       selectedServices: [],
       visibleCurrentReferral: false,
       selectedConsultation: {},
+      visibleDrawer: false,
     };
     this.searchInput = createRef(null);
   }
@@ -83,7 +85,7 @@ class UnclaimedConsultationRequest extends React.Component {
     const { consultationList } = this.state;
     const data = consultationList?.map(c => ({
       "Student Name": `${c?.dependent?.firstName ?? ''} ${c?.dependent?.lastName ?? ''}`,
-      "Referrer": c?.consultant?.referredToAs ?? '',
+      "Referrer": c?.consultant?.consultantInfo?.referredToAs ?? '',
       "Student Grade": c?.dependent?.currentGrade,
       "Service Requested": c?.skillSet?.name,
       "PhoneNumber/Google Meet": c?.meetingLink ? c.meetingLink : c.phoneNumber ? c.phoneNumber : '',
@@ -154,8 +156,16 @@ class UnclaimedConsultationRequest extends React.Component {
     this.closeModalCurrent();
   }
 
+  onShowDrawerDetail = (consultation) => {
+    this.setState({ selectedConsultation: { ...consultation, consultant: consultation?.consultant?.consultantInfo }, visibleDrawer: true });
+  };
+
+  onCloseDrawerDetail = () => {
+    this.setState({ selectedConsultation: {}, visibleDrawer: false });
+  };
+
   render() {
-    const { pageNumber, pageSize, searchDependentName, selectedGrades, selectedSchools, selectedServices, totalSize, consultationList, skillSet, loading, csvData, visibleCurrentReferral, selectedConsultation } = this.state;
+    const { pageNumber, pageSize, searchDependentName, selectedGrades, selectedSchools, selectedServices, totalSize, consultationList, skillSet, loading, csvData, visibleCurrentReferral, selectedConsultation, visibleDrawer } = this.state;
     const { auth } = this.props;
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ label: level, value: level }));
     const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(school => ({ label: school.schoolInfo?.name, value: school.schoolInfo?._id })) || [];
@@ -347,14 +357,16 @@ class UnclaimedConsultationRequest extends React.Component {
       { title: 'Status', dataIndex: 'status', key: 'status', render: (status) => status === PENDING ? 'Pending' : status === CLOSED ? 'Closed' : status === DECLINED ? 'Declined' : status === CANCELLED ? 'Canceled' : status === NOSHOW ? 'No Show' : '' },
       {
         title: 'Action', key: 'action', fixed: 'right', render: (consultation) => {
+          const appointmentDate = moment(consultation?.date);
+
           return (
             <>
-              {consultation?.status === PENDING && (moment().isBefore(moment(consultation?.date)) && auth.user?.role > 900) && (
+              {consultation?.status === PENDING && (moment().isBefore(appointmentDate) && auth.user?.role > 900) && (
                 <span className='text-primary cursor text-underline' onClick={() => this.openModalCurrent(consultation)}>
                   {intl.formatMessage(msgDrawer.reschedule)}
                 </span>
               )}
-              {consultation?.status === PENDING && moment().isBefore(moment(consultation?.date)) && !consultation?.consultant?._id && auth.user?.role === 100 && (
+              {consultation?.status === PENDING && moment().isBefore(appointmentDate) && !consultation?.consultant?.consultantInfo?._id && auth.user?.role === 100 && auth.user?.consultantInfo?.manualSchedule?.find(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })) && appointmentDate.isBetween(appointmentDate.clone().set({ hours: a.openHour, minutes: a.openMin }), appointmentDate.clone().set({ hours: a.closeHour, minutes: a.closeMin }))) && (
                 <Popconfirm
                   title="Are you sure to tag this consultation?"
                   onConfirm={() => this.handleTag(consultation)}
@@ -376,6 +388,13 @@ class UnclaimedConsultationRequest extends React.Component {
       onCancel: this.closeModalCurrent,
       event: selectedConsultation,
     }
+    const drawerDetailProps = {
+      visible: visibleDrawer,
+      onClose: this.onCloseDrawerDetail,
+      event: selectedConsultation,
+      listAppointmentsRecent: this.props.appointments,
+      socket: this.props.socket,
+    };
 
     return (
       <div>
@@ -385,10 +404,22 @@ class UnclaimedConsultationRequest extends React.Component {
           </Button>
         </CSVLink>
         <Space direction='vertical' className='flex'>
-          <Table bordered size='middle' pagination={false} dataSource={consultationList} columns={columns} scroll={{ x: true }} />
+          <Table
+            bordered
+            size='middle'
+            pagination={false}
+            dataSource={consultationList}
+            columns={columns}
+            scroll={{ x: true }}
+            onRow={(consultation) => ({
+              onClick: (e) => e.target.className.includes('ant-table-cell') && this.onShowDrawerDetail(consultation),
+              onDoubleClick: (e) => e.target.className.includes('ant-table-cell') && this.onShowDrawerDetail(consultation),
+            })}
+          />
           <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
         </Space>
         {visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
+        {visibleDrawer && <DrawerDetail {...drawerDetailProps} />}
         <PageLoading loading={loading} isBackground={true} />
       </div>
     );
