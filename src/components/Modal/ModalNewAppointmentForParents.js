@@ -81,6 +81,10 @@ class ModalNewAppointmentForParents extends React.Component {
 				return [];
 			} else if (provider?.blackoutDates?.includes(a => moment(a).year() == date.year() && moment(a).month() == date.month() && moment(a).date() == date.date())) {
 				return [];
+			} else if (provider?.durationValue && date.isSameOrAfter(moment().add(provider?.durationValue, provider?.durationType).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }))) {
+				return [];
+			} else if (date.isSameOrAfter(moment().add(15, 'years').set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }))) {
+				return [];
 			} else {
 				let ranges = [];
 				if (user.role === 3 || user.role === 60) {
