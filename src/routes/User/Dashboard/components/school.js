@@ -35,12 +35,24 @@ const Subsidiaries = (props) => {
   }, [props.listSubsidiaries]);
 
   const handleChangeTab = v => {
-    setRequests(props.listSubsidiaries?.filter(s => s.status == v));
     setStatus(v);
     switch (v) {
-      case '0': props.socket.emit('action_tracking', {user: user._id, action: 'Subsidy Request', description: 'Viewed pending subsidy requests'}); break;
-      case '1': props.socket.emit('action_tracking', {user: user._id, action: 'Subsidy Request', description: 'Viewed approved subsidy requests'}); break;
-      case '2': props.socket.emit('action_tracking', {user: user._id, action: 'Subsidy Request', description: 'Viewed declined subsidy requests'}); break;
+      case '0':
+        setRequests(props.listSubsidiaries?.filter(s => s.status === 0));
+        props.socket.emit('action_tracking', { user: user._id, action: 'Subsidy Request', description: 'Viewed pending subsidy requests' });
+        break;
+      case '1':
+        setRequests(props.listSubsidiaries?.filter(s => s.status === 1));
+        props.socket.emit('action_tracking', { user: user._id, action: 'Subsidy Request', description: 'Viewed approved subsidy requests' });
+        break;
+      case '2':
+        setRequests(props.listSubsidiaries?.filter(s => s.status === 2 && s.isAppeal < 1));
+        props.socket.emit('action_tracking', { user: user._id, action: 'Subsidy Request', description: 'Viewed declined subsidy requests' });
+        break;
+      case '3':
+        setRequests(props.listSubsidiaries?.filter(s => s.status === 2 && s.isAppeal === 1));
+        props.socket.emit('action_tracking', { user: user._id, action: 'Subsidy Request', description: 'Viewed appealed subsidy requests' });
+        break;
       default: break;
     }
   }
@@ -163,6 +175,20 @@ const Subsidiaries = (props) => {
     {
       key: '2',
       label: <span className="font-16">{intl.formatMessage(messages.declined)}</span>,
+      children: (
+        <Declined
+          requests={requests}
+          skills={skills}
+          grades={grades}
+          onShowModalSubsidy={onShowModalSubsidy}
+          socket={props.socket}
+          user={user}
+        />
+      ),
+    },
+    {
+      key: '3',
+      label: <span className="font-16">{intl.formatMessage(msgModal.appealed)}</span>,
       children: (
         <Declined
           requests={requests}
