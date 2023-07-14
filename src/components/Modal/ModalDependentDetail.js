@@ -292,7 +292,7 @@ class ModalDependentDetail extends React.Component {
 		}
 
 		return (
-			<Modal {...modalProps} bodyStyle={{ overflowY: 'scroll', height: '80vh' }}>
+			<Modal {...modalProps}>
 				<div className='flex justify-between bg-primary text-white header flex-row items-center gap-2'>
 					<div className='flex-1 flex items-center gap-2'>
 						<div>
