@@ -255,7 +255,7 @@ class ClaimedConsultationRequest extends React.Component {
   }
 
   onShowDrawerDetail = (consultation) => {
-    this.setState({ selectedConsultation: { ...consultation, consultant: consultation?.consultant?.consultantInfo }, visibleDrawer: true });
+    this.setState({ selectedConsultation: { ...consultation, consultant: consultation?.consultant?.consultantInfo, consultantName: consultation?.consultant?.consultantInfo ? consultation?.consultant?.username : '' }, visibleDrawer: true });
   };
 
   onCloseDrawerDetail = () => {
