@@ -59,7 +59,7 @@ const StyledSwitch = styled(Switch)({
 
 const Donate = () => {
   const [donateMonthly, setDonateMonthly] = useState(true)
-  const [sponsoredChildren, setSponsoredChildren] = useState(1)
+  const [sponsoredChildren, setSponsoredChildren] = useState(donateMonthly ? 12 : 1)
 
   const package_plans = [
     {
@@ -100,14 +100,14 @@ const Donate = () => {
   useEffect(() => {
     if (packageSelected?.amount) setAmount(packageSelected.amount * sponsoredChildren)
   }, [packageSelected, sponsoredChildren])
-  
+
   const onManClick = (index) => {
     setSponsoredChildren(index + 1)
     drawMen()
   }
-  
+
   const drawMen = () => ([...Array(12)].map((item, index) => sponsoredChildren >= (index + 1) ? <ManFilled key={index} onClick={() => onManClick(index)} style={{ cursor: "pointer" }} /> : <ManUnfilled key={index} onClick={() => onManClick(index)} style={{ cursor: "pointer" }} />))
-  
+
   const handleIncrement = () => {
     setSponsoredChildren((previousValue) => previousValue + 1)
   }
@@ -129,7 +129,7 @@ const Donate = () => {
           <FirstDonateSection />
         </Box>
         <Grid item xs={12} style={{
-          padding: "50px",                  
+          padding: "50px",
           width: "75%",
           minWidth: "1000px",
           maxWidth: "1440px",
@@ -189,7 +189,7 @@ const Donate = () => {
                 backgroundColor: packageSelected.name === p.name ? '#35735C' : '#B5E6D3',
                 color: packageSelected.name === p.name ? 'white' : '#35735C'
               }}>
-                {p.name === "Custom" ? 
+                {p.name === "Custom" ?
                   <>
                     <TextField
                       type="number"
@@ -207,32 +207,32 @@ const Donate = () => {
                     {p.icon}
                     <Typography>
                       {p.name}
-                      <br/>
+                      <br />
                       {p.sessions} Sessions
                     </Typography>
                     <Chip label={`$${p.amount}`} />
                   </>
-                  }
-                </StyledBoxGreen>
+                }
+              </StyledBoxGreen>
             ))}
           </Box>
         </Grid>
         <Grid item xs={12} style={{
-          padding: "50px",        
+          padding: "50px",
           width: "75%",
           minWidth: "1000px",
           maxWidth: "1440px",
           margin: "auto",
         }}>
           <Typography style={{
-              fontFamily: 'Quincy',
-              fontSize: '52px',
-              color: '#35735C',
-              lineHeight: 1,
-              paddingBottom: "30px",
-              textAlign: "center"
-            }}>
-              {"Amount of children you'd like to sponsor"}
+            fontFamily: 'Quincy',
+            fontSize: '52px',
+            color: '#35735C',
+            lineHeight: 1,
+            paddingBottom: "30px",
+            textAlign: "center"
+          }}>
+            {"Amount of children you'd like to sponsor"}
           </Typography>
           <Box display="flex" flexDirection="column" gap="20px" alignItems="center">
             <Box display="flex">
@@ -252,7 +252,7 @@ const Donate = () => {
                       lineHeight: '.5'
                     }}>
                       {sponsoredChildren}
-                    </Typography>                
+                    </Typography>
                     <BiCaretDown onClick={handleDecrement} style={{
                       fontSize: "65px",
                       cursor: "pointer"
@@ -260,10 +260,13 @@ const Donate = () => {
                   </ButtonGroup>
                 </StyledBoxTan>
                 <StyledBoxTan style={{ display: "flex", alignItems: "center" }}>
-                  <FormControlLabel 
+                  <FormControlLabel
                     control={<StyledSwitch
                       checked={donateMonthly}
-                      onChange={(event) => setDonateMonthly(event.target.checked)}
+                      onChange={(event) => {
+                        setDonateMonthly(event.target.checked);
+                        setSponsoredChildren(event.target.checked ? 12 : 1);
+                      }}
                     />}
                     label={donateMonthly ? "monthly" : "once"}
                     labelPlacement="bottom"
@@ -310,13 +313,13 @@ const Donate = () => {
           padding: "50px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",                  
+          justifyContent: "space-between",
           width: "75%",
           minWidth: "1000px",
           maxWidth: "1440px",
           margin: "auto",
         }}>
-          
+
         </Grid>
         <Grid item xs={12} style={{
           backgroundColor: "#FBF2D4",
