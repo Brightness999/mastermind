@@ -46,7 +46,7 @@ class ModalPay extends React.Component {
 
 		return (
 			<Modal {...modalProps}>
-				<p>Total due: ${this.props.totalPayment}</p>
+				<p>Total due: ${this.props.totalPayment || 0}</p>
 				{this.props.minimumPayment ? <p>Minimum due: ${this.props.minimumPayment}</p> : null}
 				<p>Paid amount: ${this.props.paidAmount || 0}</p>
 				<Input

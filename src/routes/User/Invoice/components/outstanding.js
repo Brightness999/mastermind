@@ -302,7 +302,11 @@ class OutstandingList extends React.Component {
       },
       {
         title: intl.formatMessage(messages.action), key: 'action', align: 'center',
-        render: invoice => invoice.isPaid ? null : (
+        render: invoice => invoice.isPaid ? (invoice.method === 2 && invoice.paidAmount < invoice.totalPayment) ? (
+          <Button type='link' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`, invoice?.paidAmount, invoice?.totalPayment, invoice?.minimumPayment)}>
+            <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
+          </Button>
+        ) : null : (
           <div>
             {(auth.user?.role === PARENT && invoice.totalPayment > 0) ? (
               <Button type='link' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`, invoice?.paidAmount, invoice?.totalPayment, invoice?.minimumPayment)}>
@@ -315,6 +319,7 @@ class OutstandingList extends React.Component {
                 onConfirm={() => this.onOpenModalCreateNote(invoice)}
                 okText="Yes"
                 cancelText="No"
+                placement='left'
               >
                 <Button type='link' className='px-5'><span className='text-primary'>Request clearance</span></Button>
               </Popconfirm>
@@ -325,6 +330,7 @@ class OutstandingList extends React.Component {
                 onConfirm={() => this.handleClearFlag(invoice)}
                 okText="Yes"
                 cancelText="No"
+                placement='left'
               >
                 <Button type='link'><span className='text-primary'>Clear flag</span></Button>
               </Popconfirm>

@@ -28,7 +28,7 @@ class InvoiceList extends React.Component {
 
   componentDidMount() {
     const { auth, invoices } = this.props;
-    const { selectedTab } = this.state;
+    console.log(invoices)
     const params = new URLSearchParams(window.location.search);
     const success = decryptParam(params.get('s')?.replaceAll(' ', '+') || '');
     const invoiceId = decryptParam(params.get('i')?.replaceAll(' ', '+') || '');
@@ -60,7 +60,7 @@ class InvoiceList extends React.Component {
         message.error(err.message);
       });
     }
-    this.setState({ tabInvoices: invoices?.length ? JSON.parse(JSON.stringify(invoices))?.filter(i => i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) : [] });
+    this.setState({ tabInvoices: invoices?.length ? invoices?.filter(i => !i.isPaid || (i.isPaid && i.paidAmount < i.totalPayment && i.method != 1))?.map(f => ({ ...f, key: f._id })) : [] });
     this.props.getInvoiceList({ role: auth.user.role });
   }
 
@@ -68,7 +68,7 @@ class InvoiceList extends React.Component {
     const { selectedTab } = this.state;
     const { invoices } = this.props;
     if (JSON.stringify(prevProps.invoices) != JSON.stringify(invoices)) {
-      this.setState({ tabInvoices: JSON.parse(JSON.stringify(invoices))?.filter(i => i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) });
+      this.setState({ tabInvoices: invoices?.filter(i => i.isPaid == selectedTab)?.map(f => ({ ...f, key: f._id })) });
     }
   }
 
@@ -83,10 +83,21 @@ class InvoiceList extends React.Component {
 
   handleChangeTab = (value) => {
     const { invoices } = this.props;
-    this.setState({
-      tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid == value)?.map(f => ({ ...f, key: f._id })),
-      selectedTab: value,
-    })
+
+    if (value === '0') {
+      this.setState({
+        tabInvoices: invoices?.filter(i => !i.isPaid || (i.isPaid && i.paidAmount < i.totalPayment && i.method != 1))?.map(f => ({ ...f, key: f._id })),
+        selectedTab: value,
+      })
+      return;
+    }
+    if (value === '1') {
+      this.setState({
+        tabInvoices: invoices?.filter(i => i.isPaid && (i.method === 1 || (i.paidAmount >= i.totalPayment && i.method != 1)))?.map(f => ({ ...f, key: f._id })),
+        selectedTab: value,
+      })
+      return;
+    }
   }
 
   render() {

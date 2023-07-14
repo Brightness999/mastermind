@@ -61,7 +61,7 @@ class InvoiceList extends React.Component {
         message.error(err.message);
       });
     }
-    this.setState({ tabInvoices: invoices?.length ? JSON.parse(JSON.stringify(invoices))?.filter(i => !i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })) : [] });
+    this.setState({ tabInvoices: invoices?.length ? invoices?.filter(i => !i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })) : [] });
     this.props.getInvoiceList({ role: auth.user.role });
   }
 
@@ -71,27 +71,27 @@ class InvoiceList extends React.Component {
     if (JSON.stringify(prevProps.invoices) != JSON.stringify(invoices)) {
       if (selectedTab === '0') {
         this.setState({
-          tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && (i.type != 6 && !(i.type === 1 && i.data[0]?.appointment?.type === 5)))?.map(f => ({ ...f, key: f._id })),
+          tabInvoices: invoices?.filter(i => (!i.isPaid || (i.isPaid && i.paidAmount < i.totalPayment && i.method != 1)) && (i.type != 6 && !(i.type === 1 && i.data[0]?.appointment?.type === 5)))?.map(f => ({ ...f, key: f._id })),
         })
       } else if (selectedTab === '1') {
         this.setState({
-          tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && (i.type != 6 && !(i.type === 1 && i.data[0]?.appointment?.type === 5)))?.map(f => ({ ...f, key: f._id })),
+          tabInvoices: invoices?.filter(i => i.isPaid && (i.method === 1 || (i.paidAmount >= i.totalPayment && i.method != 1)) && (i.type != 6 && !(i.type === 1 && i.data[0]?.appointment?.type === 5)))?.map(f => ({ ...f, key: f._id })),
         })
       } else if (selectedTab === '2') {
         this.setState({
-          tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })),
+          tabInvoices: invoices?.filter(i => !i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })),
         })
       } else if (selectedTab === '3') {
         this.setState({
-          tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })),
+          tabInvoices: invoices?.filter(i => i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })),
         })
       } else if (selectedTab === '4') {
         this.setState({
-          tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && i.type === 1 && i.data[0]?.appointment?.type === 5)?.map(f => ({ ...f, key: f._id })),
+          tabInvoices: invoices?.filter(i => !i.isPaid && i.type === 1 && i.data[0]?.appointment?.type === 5)?.map(f => ({ ...f, key: f._id })),
         })
       } else if (selectedTab === '5') {
         this.setState({
-          tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && i.type === 1 && i.data[0]?.appointment?.type === 5)?.map(f => ({ ...f, key: f._id })),
+          tabInvoices: invoices?.filter(i => i.isPaid && i.type === 1 && i.data[0]?.appointment?.type === 5)?.map(f => ({ ...f, key: f._id })),
         })
       } else {
         this.setState({
@@ -106,32 +106,32 @@ class InvoiceList extends React.Component {
 
     if (value === '0') {
       this.setState({
-        tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && (i.type != 6 && !(i.type === 1 && i.data[0]?.appointment?.type === 5)))?.map(f => ({ ...f, key: f._id })),
+        tabInvoices: invoices?.filter(i => (!i.isPaid || (i.isPaid && i.paidAmount < i.totalPayment && i.method != 1)) && (i.type != 6 && !(i.type === 1 && i.data[0]?.appointment?.type === 5)))?.map(f => ({ ...f, key: f._id })),
         selectedTab: value,
       })
     } else if (value === '1') {
       this.setState({
-        tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && (i.type != 6 && !(i.type === 1 && i.data[0]?.appointment?.type === 5)))?.map(f => ({ ...f, key: f._id })),
+        tabInvoices: invoices?.filter(i => i.isPaid && (i.method === 1 || (i.paidAmount >= i.totalPayment && i.method != 1)) && (i.type != 6 && !(i.type === 1 && i.data[0]?.appointment?.type === 5)))?.map(f => ({ ...f, key: f._id })),
         selectedTab: value,
       })
     } else if (value === '2') {
       this.setState({
-        tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })),
+        tabInvoices: invoices?.filter(i => !i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })),
         selectedTab: value,
       })
     } else if (value === '3') {
       this.setState({
-        tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })),
+        tabInvoices: invoices?.filter(i => i.isPaid && i.type === 6)?.map(f => ({ ...f, key: f._id })),
         selectedTab: value,
       })
     } else if (value === '4') {
       this.setState({
-        tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => !i.isPaid && i.type === 1 && i.data[0]?.appointment?.type === 5)?.map(f => ({ ...f, key: f._id })),
+        tabInvoices: invoices?.filter(i => !i.isPaid && i.type === 1 && i.data[0]?.appointment?.type === 5)?.map(f => ({ ...f, key: f._id })),
         selectedTab: value,
       })
     } else if (value === '5') {
       this.setState({
-        tabInvoices: JSON.parse(JSON.stringify(invoices)).filter(i => i.isPaid && i.type === 1 && i.data[0]?.appointment?.type === 5)?.map(f => ({ ...f, key: f._id })),
+        tabInvoices: invoices?.filter(i => i.isPaid && i.type === 1 && i.data[0]?.appointment?.type === 5)?.map(f => ({ ...f, key: f._id })),
         selectedTab: value,
       })
     } else {
