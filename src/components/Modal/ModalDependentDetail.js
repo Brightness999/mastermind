@@ -301,7 +301,7 @@ class ModalDependentDetail extends React.Component {
 						</div>
 						{(user?.role === 3 || user?.role > 900) ? <Button type='primary' size='small' onClick={() => this.onOpenModalNewSubsidy()}>REQUEST SUBSIDY</Button> : null}
 						{user?.role != 3 ? <Button type='primary' size='small' onClick={() => this.onAddComment()}>ADD COMMENT</Button> : null}
-						{(user?.role != 3 && unpaidInvoices?.length) ? <Button type='primary' size='small' onClick={() => this.onShowModalBalance(dependent)}>FLAG DEPENDENT</Button> : null}
+						{((user?.role === 30 || user?.role > 900) && unpaidInvoices?.length) ? <Button type='primary' size='small' onClick={() => this.onShowModalBalance(dependent)}>FLAG DEPENDENT</Button> : null}
 					</div>
 					<CloseOutlined onClick={this.props.onCancel} />
 				</div>
