@@ -1,9 +1,10 @@
-import React, { createRef } from 'react';
+import React from 'react';
 import { Modal, Input, Divider, Card, Button, message, Row, Col, Space, Table } from 'antd';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { CloseOutlined } from '@ant-design/icons';
 
 import messages from './messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
@@ -254,6 +255,7 @@ class ModalDependentDetail extends React.Component {
 			onOk: this.props.onSubmit,
 			onCancel: () => this.props.onCancel(isUpdated),
 			footer: null,
+			closable: false,
 			width: 1200,
 		};
 		const subsidyColumn = [
@@ -291,14 +293,17 @@ class ModalDependentDetail extends React.Component {
 
 		return (
 			<Modal {...modalProps} bodyStyle={{ overflowY: 'scroll', height: '80vh' }}>
-				<div className='flex bg-primary text-white header flex-row items-center gap-2'>
-					<div>
-						<b className='font-20'>NAME: {`${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`}</b>
-						{dependent.isRemoved ? "(Graduated)" : null}
+				<div className='flex justify-between bg-primary text-white header flex-row items-center gap-2'>
+					<div className='flex-1 flex items-center gap-2'>
+						<div>
+							<b className='font-20'>NAME: {`${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`}</b>
+							{dependent.isRemoved ? "(Graduated)" : null}
+						</div>
+						{(user?.role === 3 || user?.role > 900) ? <Button type='primary' size='small' onClick={() => this.onOpenModalNewSubsidy()}>REQUEST SUBSIDY</Button> : null}
+						{user?.role != 3 ? <Button type='primary' size='small' onClick={() => this.onAddComment()}>ADD COMMENT</Button> : null}
+						{(user?.role != 3 && unpaidInvoices?.length) ? <Button type='primary' size='small' onClick={() => this.onShowModalBalance(dependent)}>FLAG DEPENDENT</Button> : null}
 					</div>
-					{(user?.role === 3 || user?.role > 900) ? <Button type='primary' size='small' onClick={() => this.onOpenModalNewSubsidy()}>REQUEST SUBSIDY</Button> : null}
-					{user?.role != 3 ? <Button type='primary' size='small' onClick={() => this.onAddComment()}>ADD COMMENT</Button> : null}
-					{(user?.role != 3 && unpaidInvoices?.length) ? <Button type='primary' size='small' onClick={() => this.onShowModalBalance(dependent)}>FLAG DEPENDENT</Button> : null}
+					<CloseOutlined onClick={this.props.onCancel} />
 				</div>
 				<Card className='bg-white'>
 					<Row gutter={50}>
