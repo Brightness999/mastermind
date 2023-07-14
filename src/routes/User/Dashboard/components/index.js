@@ -49,7 +49,7 @@ class Dashboard extends React.Component {
       userDrawerVisible: false,
       visibleNewAppoint: false,
       visibleSubsidy: false,
-      visiblReferralService: false,
+      visibleReferralService: false,
       visibleNewSubsidy: false,
       isMonth: 1,
       isGridDayView: 'Grid',
@@ -436,7 +436,7 @@ class Dashboard extends React.Component {
 
   onShowModalReferral = (subsidy, callbackForReload) => {
     if (!this.state.loading) {
-      this.setState({ visiblReferralService: true });
+      this.setState({ visibleReferralService: true });
       if (callbackForReload == undefined) {
         callbackForReload = this.panelAppoimentsReload;
       }
@@ -445,11 +445,11 @@ class Dashboard extends React.Component {
   };
 
   onCloseModalReferral = () => {
-    this.setState({ visiblReferralService: false });
+    this.setState({ visibleReferralService: false });
   };
 
   onSubmitModalReferral = () => {
-    this.setState({ visiblReferralService: false });
+    this.setState({ visibleReferralService: false });
     message.success({
       content: 'Consultation Scheduled',
       className: 'popup-scheduled',
@@ -883,7 +883,7 @@ class Dashboard extends React.Component {
     const {
       isFilter,
       userDrawerVisible,
-      visiblReferralService,
+      visibleReferralService,
       isMonth,
       isGridDayView,
       SkillSet,
@@ -966,7 +966,7 @@ class Dashboard extends React.Component {
     ];
 
     const modalReferralServiceProps = {
-      visible: visiblReferralService,
+      visible: visibleReferralService,
       onSubmit: this.onSubmitModalReferral,
       onCancel: this.onCloseModalReferral,
       setLoadData: reload => this.loadDataModalReferral = reload,
@@ -1418,7 +1418,7 @@ class Dashboard extends React.Component {
           {visibleFlagExpand && <ModalFlagExpand {...modalFlagExpandProps} />}
           {visibleSubsidy && <ModalSubsidyProgress {...modalSubsidyProps} />}
           {visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
-          {visiblReferralService && <ModalReferralService {...modalReferralServiceProps} />}
+          {visibleReferralService && <ModalReferralService {...modalReferralServiceProps} />}
           {visibleConfirm && <ModalConfirm {...modalConfirmProps} />}
           {visibleSessionsNeedToClose && <ModalSessionsNeedToClose {...modalSessionsNeedToCloseProps} />}
           {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}
