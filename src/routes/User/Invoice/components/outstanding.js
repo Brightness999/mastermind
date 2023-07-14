@@ -377,7 +377,6 @@ class OutstandingList extends React.Component {
 
 const mapStateToProps = state => ({
   auth: state.auth,
-  invoices: state.appointments.dataInvoices,
 })
 
 export default compose(connect(mapStateToProps, { getInvoiceList, setInvoiceList }))(OutstandingList);
