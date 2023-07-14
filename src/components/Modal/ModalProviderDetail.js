@@ -8,21 +8,13 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 
 import messages from './messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
-import msgModal from 'components/Modal/messages';
 import msgSidebar from 'components/SideBar/messages';
 import { CancellationWindow, ContactNumberType, DEPENDENTHOME, DurationType, Durations, EmailType, PROVIDEROFFICE } from 'routes/constant';
 import { url } from 'utils/api/baseUrl'
 import './style/index.less';
 import 'assets/styles/login.less';
 
-const day_week = [
-	intl.formatMessage(msgCreateAccount.sunday),
-	intl.formatMessage(msgCreateAccount.monday),
-	intl.formatMessage(msgCreateAccount.tuesday),
-	intl.formatMessage(msgCreateAccount.wednesday),
-	intl.formatMessage(msgCreateAccount.thursday),
-	intl.formatMessage(msgCreateAccount.friday),
-]
+const day_week = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 class ModalSchoolDetail extends React.Component {
 	constructor(props) {
@@ -685,7 +677,7 @@ class ModalSchoolDetail extends React.Component {
 												<Col xs={12} sm={12} md={6} className='item-remove'>
 													<Form.Item
 														name={[field.name, "subsidizedRate"]}
-														label={intl.formatMessage(msgModal.subsidizedRate)}
+														label={intl.formatMessage(messages.subsidizedRate)}
 													>
 														<InputNumber
 															type="number"

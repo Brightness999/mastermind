@@ -15,15 +15,15 @@ import 'assets/styles/login.less';
 
 const day_week = [
 	{
-		label: intl.formatMessage(msgCreateAccount.sunday),
+		label: 'Sunday',
 		value: 1
 	},
 	{
-		label: intl.formatMessage(msgCreateAccount.monday) + '-' + intl.formatMessage(msgCreateAccount.thursday),
+		label: 'Monday-Thursday',
 		value: 2
 	},
 	{
-		label: intl.formatMessage(msgCreateAccount.friday),
+		label: 'Friday',
 		value: 3
 	},
 ];
