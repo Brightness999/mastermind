@@ -3,7 +3,7 @@ import { Link } from 'dva/router';
 import { FaChild, FaFileInvoice, FaFileInvoiceDollar, FaUserAlt, FaUserEdit, FaUserMd } from 'react-icons/fa';
 import { BiLogOutCircle, BiBell } from 'react-icons/bi';
 import { BsSearch } from 'react-icons/bs';
-import { Badge, Avatar, Input, Dropdown, message, notification } from 'antd';
+import { Badge, Avatar, Input, Dropdown, message, notification, Button } from 'antd';
 import intl from "react-intl-universal";
 import Cookies from 'js-cookie';
 import { connect } from 'react-redux';
@@ -11,7 +11,7 @@ import { compose } from 'redux';
 import { MdOutlineSpaceDashboard } from 'react-icons/md';
 
 import messages from './messages';
-import msgSidebar from 'src/components/SideBar/messages';
+import msgSidebar from 'components/SideBar/messages';
 import msgModal from 'components/Modal/messages';
 import { ADMIN, APPOINTMENT, CONSULTANT, CONSULTATION, EVALUATION, PARENT, PROVIDER, SCHOOL, SCREEN, SUBSIDY, SUPERADMIN, routerLinks } from 'routes/constant';
 import { initializeAuth, setCommunity, setCountOfUnreadNotifications, setMeetingLink } from 'src/redux/features/authSlice';
@@ -20,6 +20,7 @@ import { helper } from 'utils/auth/helper';
 import request from 'utils/api/request';
 import { getSettings } from 'utils/api/apiList';
 import { socketUrl, socketUrlJSFile } from 'utils/api/baseUrl';
+import { ModalReferralService } from 'components/Modal';
 import './style/index.less';
 
 class MainHeader extends Component {
@@ -28,6 +29,7 @@ class MainHeader extends Component {
     this.socket = undefined;
     this.state = {
       intervalId: 0,
+      visibleReferralService: false,
     };
   }
 
@@ -203,16 +205,34 @@ class MainHeader extends Component {
     });
   }
 
-  showNotificationForSubsidyChange(message) {
+  showNotificationForSubsidyChange(data) {
     notification.close('update-subsidy');
-    notification.open({
-      key: 'update-subsidy',
-      type: 'info',
-      message: 'Subsidy Request',
-      duration: 10,
-      description: message,
-      onClick: () => notification.destroy(),
-    });
+    if (data?.status === 3) {
+      notification.open({
+        key: 'update-subsidy',
+        type: 'info',
+        message: 'Subsidy Request',
+        duration: 10,
+        description: (
+          <div>
+            <div>{data.message}</div>
+            <div className='flex justify-end'>
+              <Button type='primary' onClick={this.openModalReferral}>Schedule a consultation</Button>
+            </div>
+          </div>
+        ),
+        onClick: (e) => !e.target.className.includes('action') && notification.destroy(),
+      });
+    } else {
+      notification.open({
+        key: 'update-subsidy',
+        type: 'info',
+        message: 'Subsidy Request',
+        duration: 10,
+        description: data,
+        onClick: () => notification.destroy(),
+      });
+    }
   }
 
   logout = () => {
@@ -257,8 +277,26 @@ class MainHeader extends Component {
     this.socket.emit("action_tracking", data);
   }
 
+  openModalReferral = () => {
+    this.setState({ visibleReferralService: true });
+    notification.destroy();
+  }
+
+  closeModalReferral = () => {
+    this.setState({ visibleReferralService: false });
+  }
+
+  submitModalReferral = () => {
+    this.closeModalReferral();
+    message.success({
+      content: 'Consultation Scheduled',
+      className: 'popup-scheduled',
+    });
+  };
+
   render() {
     const { user, community, countOfUnreadNotifications } = this.props;
+    const { visibleReferralService } = this.state;
     const items = [
       {
         key: '1',
@@ -361,6 +399,12 @@ class MainHeader extends Component {
       ),
     });
 
+    const modalReferralServiceProps = {
+      visible: visibleReferralService,
+      onSubmit: this.submitModalReferral,
+      onCancel: this.closeModalReferral,
+    };
+
     return (
       <div className='component-mainheader'>
         <div className='div-account'>
@@ -380,6 +424,7 @@ class MainHeader extends Component {
           <BsSearch size={18} />
           <Input name='search' placeholder={`${intl.formatMessage(messages.search)}...`} />
         </div>
+        {visibleReferralService && <ModalReferralService {...modalReferralServiceProps} />}
       </div>
     );
   }
