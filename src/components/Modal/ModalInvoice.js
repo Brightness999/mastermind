@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Popover, Input, message, Col } from 'antd';
+import { Modal, Button, Popover, Input, message, Col, InputNumber } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -38,6 +38,7 @@ class ModalInvoice extends React.Component {
 			isPaid: false,
 			invoiceId: '',
 			minimumPayment: 0,
+			paidAmount: 0,
 		};
 	}
 
@@ -83,6 +84,7 @@ class ModalInvoice extends React.Component {
 				service: [...new Set(invoice.data?.map(a => a?.appointment?.skillSet?.name))].join(', '),
 				isPaid: invoice.isPaid,
 				minimumPayment: invoice.minimumPayment || 0,
+				paidAmount: invoice.paidAmount || 0,
 				invoiceId: invoice._id,
 			});
 		} else if (event?.flagInvoice) {
@@ -109,6 +111,7 @@ class ModalInvoice extends React.Component {
 				isPaid: event.flagInvoice?.isPaid,
 				invoiceId: event.flagInvoice?._id,
 				minimumPayment: event.flagInvoice?.minimumPayment || 0,
+				paidAmount: invoice.paidAmount || 0,
 			});
 		} else {
 			const initItems = [{
@@ -228,7 +231,7 @@ class ModalInvoice extends React.Component {
 
 	render() {
 		const { event, user, invoice } = this.props;
-		const { invoiceId, isPaid, items, minimumPayment, selectedItemIndex, loadingDownload, loadingEmail, invoiceNumber, invoiceDate, providerBillingAddress, providerEmail, providerName, providerPhonenumber, parentAddress, parentName, dependentName, service } = this.state;
+		const { invoiceId, isPaid, items, minimumPayment, paidAmount, selectedItemIndex, loadingDownload, loadingEmail, invoiceNumber, invoiceDate, providerBillingAddress, providerEmail, providerName, providerPhonenumber, parentAddress, parentName, dependentName, service } = this.state;
 		const subTotal = items?.reduce((a, b) => a += b?.rate * 1 || 0, 0) || 0;
 		const discount = items?.reduce((a, b) => a += b?.discount * 1 || 0, 0) || 0;
 		const totalPayment = subTotal + discount;
@@ -424,18 +427,17 @@ class ModalInvoice extends React.Component {
 						</tr>
 					</tbody>
 				</table>
-				<table>
+				<table className='w-100 table-fixed'>
 					<tbody>
 						<tr>
 							<td colSpan={4}>
-								<Input
-									type='number'
-									size='large'
+								<InputNumber
+									size='middle'
 									prefix="$"
 									min={0}
 									disabled={user?.role === 3 || isPaid}
 									addonBefore="Minimum due to unlock account:"
-									className={`mt-10 ${(invoice?.type === 5 || event?.flagInvoice?.type === 5) ? '' : 'd-none'}`}
+									className={`w-100 ${(invoice?.type === 5 || event?.flagInvoice?.type === 5) ? '' : 'd-none'}`}
 									value={minimumPayment}
 									onKeyDown={(e) => {
 										(e.key === '-' || e.key === 'Subtract' || e.key === '.' || e.key === 'e') && e.preventDefault();
@@ -443,10 +445,23 @@ class ModalInvoice extends React.Component {
 											e.target.value = '';
 										}
 									}}
-									onChange={e => this.setState({ minimumPayment: e.target.value * 1 || 0 })}
+									onChange={value => this.setState({ minimumPayment: value || 0 })}
 								/>
 							</td>
-							<td colSpan={8}></td>
+							<td colSpan={4}></td>
+							{event?.status != 0 && (
+								<td colSpan={4}>
+									<InputNumber
+										size='middle'
+										prefix="$"
+										min={0}
+										disabled
+										addonBefore="Paid Amount:"
+										value={paidAmount}
+										className='w-100'
+									/>
+								</td>
+							)}
 						</tr>
 					</tbody>
 				</table>
