@@ -11,7 +11,7 @@ import intl from "react-intl-universal";
 
 import msgDrawer from 'components/DrawerDetail/messages';
 import request from 'utils/api/request';
-import { closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, getConsultationList, removeConsultation, switchConsultation } from 'utils/api/apiList';
+import { closeAppointmentAsNoshow, closeAppointmentForProvider, getConsultationList, removeConsultation, switchConsultation } from 'utils/api/apiList';
 import PageLoading from 'components/Loading/PageLoading';
 import { CANCELLED, CLOSED, CONSULTATION, DECLINED, NOSHOW, PENDING } from 'routes/constant';
 import { ModalCurrentReferralService, ModalProcessAppointment } from 'components/Modal';
@@ -111,39 +111,6 @@ class ClaimedConsultationRequest extends React.Component {
 
   closeModalProcess = () => {
     this.setState({ visibleProcess: false, selectedConsultation: {} });
-  }
-
-  handleDecline = (note, publicFeedback) => {
-    this.closeModalProcess();
-    const { selectedConsultation } = this.state;
-
-    if (selectedConsultation?._id) {
-      const data = {
-        appointmentId: selectedConsultation._id,
-        publicFeedback,
-        note,
-      }
-      request.post(declineAppointmentForProvider, data).then(result => {
-        if (result.success) {
-          message.success("Declined Successfully!");
-          this.setState({
-            consultationList: this.state.consultationList?.map(consultation => {
-              if (selectedConsultation._id === consultation?._id) {
-                consultation.publicFeedback = data.publicFeedback;
-                consultation.status = DECLINED;
-                return consultation;
-              } else {
-                return consultation;
-              }
-            })
-          })
-        } else {
-          message.warn("Something went wrong. Please try again.");
-        }
-      }).catch(error => {
-        message.error(error.message);
-      })
-    }
   }
 
   handleMarkAsClosed = (note, publicFeedback) => {
@@ -574,7 +541,6 @@ class ClaimedConsultationRequest extends React.Component {
 
     const modalProcessProps = {
       visible: visibleProcess,
-      onDecline: this.handleDecline,
       onConfirm: this.handleMarkAsClosed,
       onConfirmNoShow: this.handleMarkAsNoShow,
       onCancel: this.closeModalProcess,

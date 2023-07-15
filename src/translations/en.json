@@ -395,7 +395,6 @@
   "components.Modal.generalNotes": "General notes",
   "components.Modal.documents": "Documents",
   "components.Modal.emailNotValid": "Email is not a valid",
-  "components.Modal.dependent": "Dependent",
   "components.Modal.requestContactRav": "Request contact (optional)",
   "components.Modal.therapistPhone": "Therapist’s Phone",
   "components.Modal.nameOfTherapist": "Name of Therapist",

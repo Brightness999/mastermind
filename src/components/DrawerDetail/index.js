@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { AiFillTag, AiOutlineUserSwitch } from 'react-icons/ai';
 
-import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalEvaluationProcess, ModalInvoice, ModalNewScreening, ModalNoShow, ModalPay, ModalPayment, ModalProcessAppointment } from 'components/Modal';
+import { ModalBalance, ModalCancelAppointment, ModalCancelForAdmin, ModalCreateNote, ModalCurrentAppointment, ModalCurrentReferralService, ModalInvoice, ModalNewScreening, ModalNoShow, ModalPay, ModalPayment, ModalProcessAppointment } from 'components/Modal';
 import messages from './messages';
 import msgModal from 'components/Modal/messages';
 import msgDashboard from 'routes/User/Dashboard/messages';
@@ -46,7 +46,6 @@ class DrawerDetail extends Component {
       visibleNoShow: false,
       visibleBalance: false,
       note: '',
-      visibleEvaluationProcess: false,
       items: [],
       visibleModalMessage: false,
       visibleCurrentScreen: false,
@@ -363,11 +362,7 @@ class DrawerDetail extends Component {
     if (items.isEdit) {
       this.handleUpdateInvoice(items);
     } else {
-      if (this.props.event?.type == EVALUATION) {
-        this.setState({ visibleInvoice: false, visibleEvaluationProcess: true, items: items });
-      } else {
-        this.setState({ visibleInvoice: false, visibleProcess: true, items: items });
-      }
+      this.setState({ visibleInvoice: false, visibleProcess: true, items: items });
     }
   }
 
@@ -596,22 +591,6 @@ class DrawerDetail extends Component {
     })
   }
 
-  declineEvaluation = () => {
-    const { note, publicFeedback } = this.state;
-    this.onCloseModalEvaluationProcess();
-    this.handleDecline(note, publicFeedback);
-  }
-
-  closeEvaluation = () => {
-    const { items, note, publicFeedback } = this.state;
-    this.onCloseModalEvaluationProcess();
-    this.handleMarkAsClosed(items, false, note, publicFeedback);
-  }
-
-  onCloseModalEvaluationProcess = () => {
-    this.setState({ visibleEvaluationProcess: false });
-  }
-
   displayTime = (value) => {
     return `${value?.split(' ')[0]?.split(':')[0]}:${value?.split(' ')[0]?.split(':')[1]} ${value?.split(' ')[1]}`;
   }
@@ -782,7 +761,6 @@ class DrawerDetail extends Component {
       isShowFeedback,
       visibleNoShow,
       visibleBalance,
-      visibleEvaluationProcess,
       errorMessage,
       visibleModalMessage,
       visibleCurrentScreen,
@@ -911,12 +889,6 @@ class DrawerDetail extends Component {
       onCancel: this.onCloseModalBalance,
       event: listAppointmentsRecent?.find(a => a?._id === event?._id),
       dependent,
-    };
-    const modalEvaluationProcessProps = {
-      visible: visibleEvaluationProcess,
-      onSubmit: this.closeEvaluation,
-      onDecline: this.declineEvaluation,
-      onCancel: this.onCloseModalEvaluationProcess,
     };
     const modalMessageProps = {
       visible: visibleModalMessage,
@@ -1427,7 +1399,6 @@ class DrawerDetail extends Component {
         {visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
         {visibleNoShow && <ModalNoShow {...modalNoShowProps} />}
         {visibleBalance && <ModalBalance {...modalBalanceProps} />}
-        {visibleEvaluationProcess && <ModalEvaluationProcess {...modalEvaluationProcessProps} />}
         {visibleModalMessage && <ModalCreateNote {...modalMessageProps} />}
         {visibleCurrentScreen && <ModalNewScreening {...modalCurrentScreeningProps} />}
         {visibleCreateNote && <ModalCreateNote {...modalCreateNoteProps} />}

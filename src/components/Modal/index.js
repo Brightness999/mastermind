@@ -19,7 +19,6 @@ import ModalFlagExpand from './ModalFlagExpand';
 import ModalSessionsNeedToClose from './ModalSessionsNeedToClose';
 import ModalPayment from './ModalPayment';
 import ModalFeedback from './ModalFeedback';
-import ModalEvaluationProcess from './ModalEvaluationProcess';
 import ModalNewScreening from './ModalNewScreening';
 import ModalSchoolSubsidyApproval from './ModalSchoolSubsidyApproval';
 import ModalCancelForAdmin from './ModalCancelForAdmin';
@@ -49,7 +48,6 @@ export {
   ModalSessionsNeedToClose,
   ModalPayment,
   ModalFeedback,
-  ModalEvaluationProcess,
   ModalNewScreening,
   ModalSchoolSubsidyApproval,
   ModalCancelForAdmin,
