@@ -54,7 +54,7 @@ class InfoAvailability extends Component {
 			await this.updateBlackoutDates(registerData?.availability?.blackoutDates?.map(date => new Date(date)));
 			document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
 				let name = document.createElement("div");
-				name.textContent = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary ?? '';
+				name.textContent = holidays?.find(a => moment(new Date(a?.end?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary ?? '';
 				el.after(name);
 			})
 
@@ -375,14 +375,14 @@ class InfoAvailability extends Component {
 		let uniqueDates = [];
 
 		if (status) {
-			[...dates ?? [], ...[...new Set(legalHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+			[...dates ?? [], ...[...new Set(legalHolidays?.map(a => a.end.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
 				if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
 					uniqueDates.push(c);
 				}
 			})
 		} else {
 			if (isJewishHolidays) {
-				uniqueDates = jewishHolidays.map(a => new Date(a.start.date))?.sort((a, b) => a - b);
+				uniqueDates = jewishHolidays.map(a => new Date(a.end.date))?.sort((a, b) => a - b);
 			}
 		}
 
@@ -402,7 +402,7 @@ class InfoAvailability extends Component {
 		}
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
+			const name = holidays?.find(a => moment(new Date(a?.end?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
@@ -424,14 +424,14 @@ class InfoAvailability extends Component {
 		let uniqueDates = [];
 
 		if (status) {
-			[...dates ?? [], ...[...new Set(jewishHolidays?.map(a => a.start.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
+			[...dates ?? [], ...[...new Set(jewishHolidays?.map(a => a.end.date))]?.map(a => new Date(a)) ?? []]?.sort((a, b) => a - b)?.forEach(c => {
 				if (!uniqueDates.find(d => d.toLocaleDateString() == c.toLocaleDateString())) {
 					uniqueDates.push(c);
 				}
 			})
 		} else {
 			if (isLegalHolidays) {
-				uniqueDates = legalHolidays.map(a => new Date(a.start.date))?.sort((a, b) => a - b);
+				uniqueDates = legalHolidays.map(a => new Date(a.end.date))?.sort((a, b) => a - b);
 			}
 		}
 
@@ -451,7 +451,7 @@ class InfoAvailability extends Component {
 		}
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
+			const name = holidays?.find(a => moment(new Date(a?.end?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
@@ -481,7 +481,7 @@ class InfoAvailability extends Component {
 		const { legalHolidays, jewishHolidays } = this.state;
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = [...legalHolidays ?? [], ...jewishHolidays ?? []]?.find(a => a.start.date == el.innerText)?.summary;
+			const name = [...legalHolidays ?? [], ...jewishHolidays ?? []]?.find(a => a.end.date == el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;
