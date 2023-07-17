@@ -438,7 +438,7 @@ class ModalDependentDetail extends React.Component {
 							</Popconfirm>
 						) : null}
 					</div>
-					<CloseOutlined onClick={this.props.onCancel} />
+					<CloseOutlined onClick={() => this.props.onCancel(isUpdated)} />
 				</div>
 				<Card className='bg-white'>
 					<Row gutter={50}>
@@ -456,7 +456,7 @@ class ModalDependentDetail extends React.Component {
 										</div>
 										<div className='flex-1'>
 											<div><b>Member Since:</b> {moment(dependent?.createdAt).format('MM/DD/YYYY')}</div>
-											<div><b>Last Activity Date:</b> {dependent?.appointments?.length ? moment(dependent?.appointments?.sort((a, b) => moment(a.date) > moment(b.date) ? -1 : 1)?.[0]?.date).format('MM/DD/YYYY') : ''}</div>
+											<div><b>Last Activity Date:</b> {dependent?.appointments?.length ? moment(dependent?.appointments?.filter(a => a.status === -1)?.sort((a, b) => moment(a.date) > moment(b.date) ? -1 : 1)?.[0]?.date).format('MM/DD/YYYY') : ''}</div>
 											<div><b>Total Sessions:</b> {dependent?.appointments?.filter(d => [2, 3, 5].includes(d.type) && d.status == -1 && d.flagStatus != 1)?.length ?? 0}</div>
 											<div><b>Total Consultations:</b> {dependent?.appointments?.filter(d => d.type === 4 && d.status == -1 && d.flagStatus != 1)?.length ?? 0}</div>
 										</div>
