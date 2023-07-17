@@ -118,7 +118,7 @@ class ModalInvoice extends React.Component {
 				type: event?.type === EVALUATION ? intl.formatMessage(messages.evaluation) : event?.type === APPOINTMENT ? intl.formatMessage(messages.standardSession) : event?.type === SUBSIDY ? intl.formatMessage(messages.subsidizedSession) : '',
 				date: `${moment(event?.date).format('MM/DD/YYYY hh:mm a')}`,
 				details: `Location: ${event?.location}`,
-				count: event?.type === SUBSIDY ? `[${appointments?.filter(a => a?.type === SUBSIDY && [PENDING, CLOSED].includes(a?.status) && a?.dependent?._id === event?.dependent?._id && a?.provider?._id === event?.provider?._id)?.length}/${event?.subsidy?.numberOfSessions}]` : '',
+				count: event?.type === SUBSIDY ? `[${appointments?.filter(a => a?.type === SUBSIDY && a.subsidy?._id === event?.subsidy?._id && [PENDING, CLOSED].includes(a?.status) && a?.dependent?._id === event?.dependent?._id && a?.provider?._id === event?.provider?._id)?.length}/${event?.subsidy?.numberOfSessions}]` : '',
 				discount: event?.type === SUBSIDY ? (event?.subsidy?.pricePerSession || 0) * -1 : undefined,
 				rate: event?.rate,
 			}]
