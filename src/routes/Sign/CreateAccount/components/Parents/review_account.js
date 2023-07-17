@@ -203,6 +203,23 @@ class ReviewAccount extends Component {
 										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidText} disabled /></div></td>
 										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidPush} disabled /></div></td>
 									</tr>
+									<tr>
+										<td colSpan={4} className="bg-pastel">
+											<div className='header'>Dependent</div>
+										</td>
+									</tr>
+									<tr>
+										<td>Dependent Declined</td>
+										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedEmail} disabled /></div></td>
+										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedText} disabled /></div></td>
+										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedPush} disabled /></div></td>
+									</tr>
+									<tr>
+										<td>Dependent Accpted</td>
+										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedEmail} disabled /></div></td>
+										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedText} disabled /></div></td>
+										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedPush} disabled /></div></td>
+									</tr>
 								</tbody>
 							</table>
 						</Col>

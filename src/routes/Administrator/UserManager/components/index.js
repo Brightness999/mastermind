@@ -14,7 +14,6 @@ import { activateUser, getUsers } from 'utils/api/apiList';
 import { removeRegisterData } from 'src/redux/features/registerSlice';
 import { setSelectedUser } from 'src/redux/features/authSlice';
 import PageLoading from 'components/Loading/PageLoading';
-import './index.less';
 
 class UserManager extends React.Component {
 	constructor(props) {

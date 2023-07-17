@@ -1,4 +1,244 @@
 // Page style
 @import '../../../../assets/styles/variables.less';
-.createaccount-page {
+
+.ant-steps {
+  margin: auto;
+  padding-left: 30px;
+
+  &.ant-steps-horizontal {
+    &:not(.ant-steps-label-vertical) {
+      .ant-steps-item {
+        padding-left: 0;
+      }
+
+      .ant-steps-item-tail {
+        display: block;
+      }
+    }
+  }
+
+  &:not(.ant-steps-vertical) .ant-steps-item-custom .ant-steps-item-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .ant-steps-item {
+    overflow: visible;
+
+    &-finish {
+      &>.ant-steps-item-container>.ant-steps-item-tail::after {
+        background-color: #3E92CF;
+      }
+
+      &>.ant-steps-item-container>.ant-steps-item-icon>.ant-steps-icon::after {
+        background-color: @primary-color-dark;
+      }
+
+      &>.ant-steps-item-container>.ant-steps-item-content>.ant-steps-item-title {
+        display: none;
+      }
+
+      .ant-steps-item-icon {
+        background-color: @primary-color-dark !important;
+
+        &>.ant-steps-icon {
+          color: @white;
+        }
+      }
+    }
+
+    &-wait>.ant-steps-item-container>.ant-steps-item-content>.ant-steps-item-title {
+      display: none;
+    }
+
+    &-wait .ant-steps-item-icon {
+      background-color: @gray200 !important;
+    }
+
+    &-custom {
+      &>.ant-steps-item-container>.ant-steps-item-icon>.ant-steps-icon {
+        font-size: 14px;
+        width: 22px;
+        height: 22px;
+        line-height: 22px;
+      }
+
+      &.ant-steps-item-process .ant-steps-item-icon>.ant-steps-icon {
+        color: @white;
+      }
+    }
+
+    &-process>.ant-steps-item-container>.ant-steps-item-icon {
+      background-color: @primary-color-dark;
+    }
+
+    &:last-child>.ant-steps-item-container>.ant-steps-item-tail,
+    &:last-child>.ant-steps-item-container>.ant-steps-item-content>.ant-steps-item-title::after {
+      display: none;
+    }
+
+    .ant-steps-item-tail {
+      top: 10px;
+      width: 100%;
+      margin: 0 0 0 10px;
+      padding: 0;
+
+      &::after {
+        width: calc(100% - 20px);
+        height: 3px;
+        margin-left: 12px;
+        display: inline-block;
+        background: #e8e8e8;
+        border-radius: 1px;
+        content: '';
+      }
+    }
+
+    .ant-steps-item-icon {
+      display: block;
+    }
+
+    .ant-steps-item-content {
+      width: 140px;
+      display: block;
+      text-align: center;
+      margin-left: -60px;
+
+      .ant-steps-item-title {
+        font-size: 14px;
+        padding-right: 0;
+
+        &::after {
+          display: none;
+        }
+      }
+    }
+
+    .ant-steps-item-container {
+      width: 60px;
+    }
+  }
+}
+
+.ant-steps.provider-steps {
+  .ant-steps-item {
+    .ant-steps-item-container {
+      width: 52px;
+    }
+  }
+}
+
+.ant-form-item {
+  margin-bottom: 14px;
+
+  &-control-input {
+    min-height: unset;
+
+    .ant-input {
+      font-size: 16px;
+      color: @black87;
+      border-color: @gray250;
+      height: 38px;
+
+      &::placeholder {
+        color: @black06;
+      }
+
+      &:active,
+      &:focus {
+        border-color: #65aedb;
+      }
+    }
+
+    .ant-input-sm {
+      font-size: 12px;
+      color: @black87;
+      border-color: @gray250;
+      height: 24px;
+
+    }
+
+    .ant-input-affix-wrapper {
+      padding: 0;
+      font-size: 16px;
+      height: 42px;
+
+      .ant-input {
+        border: 0;
+        color: @black87;
+        padding: 0 5px 0 11px;
+        border-color: @gray250;
+      }
+
+      .ant-input-prefix {
+        margin-left: 11px;
+      }
+
+      .ant-input-suffix {
+        margin-right: 11px;
+      }
+    }
+  }
+
+  textarea.ant-input {
+    height: auto !important;
+    padding: 10px;
+  }
+
+  &.input-download {
+    .ant-input-affix-wrapper {
+      border-color: @gray250;
+      border-left: 0;
+    }
+
+    .ant-input-group-addon {
+      background-color: @gray250;
+    }
+  }
+
+  &.bottom-0 {
+    margin-bottom: 0px;
+  }
+}
+
+.input-download {
+  border-radius: 4px;
+  align-items: unset !important;
+  overflow: hidden;
+
+  p {
+    margin-bottom: 0;
+  }
+
+  .div-document {
+    padding: 10px;
+    background-color: @gray250;
+    display: flex;
+    align-items: center;
+  }
+
+  .div-upload {
+    border: 1px solid @gray250;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    padding: 10px 10px 10px 0;
+
+    .ant-upload.ant-upload-select {
+      float: right;
+      height: 100%;
+      display: flex;
+      align-items: center;
+
+      .ant-upload {
+        display: inline-block;
+      }
+    }
+
+    .ant-upload-list {
+      display: flex;
+      flex-direction: column;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+  }
 }

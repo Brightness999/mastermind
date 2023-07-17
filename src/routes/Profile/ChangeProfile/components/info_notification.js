@@ -388,7 +388,7 @@ class InfoNotification extends React.Component {
 										<td><div className='text-center'><Switch checked={isSessionReminderText} onChange={v => this.setState({ isSessionReminderText: v })} /></div></td>
 										<td><div className='text-center'><Switch checked={isSessionReminderPush} onChange={v => this.setState({ isSessionReminderPush: v })} /></div></td>
 									</tr>
-									{(user?.role === 3 || user?.role === 60) && (
+									{(user?.role === 3 || user?.role === 60 || registerData?.role === 3 || registerData?.role === 60) && (
 										<>
 											<tr>
 												<td colSpan={4} className="bg-pastel">
@@ -409,7 +409,7 @@ class InfoNotification extends React.Component {
 											</tr>
 										</>
 									)}
-									{(user?.role === 3 || user?.role === 30) && (
+									{(user?.role === 3 || user?.role === 30 || registerData?.role === 3 || registerData?.role === 30) && (
 										<>
 											<tr>
 												<td colSpan={4} className="bg-pastel">

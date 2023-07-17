@@ -103,7 +103,7 @@ class CreateDefault extends Component {
 		this.timeoutCheckUsername = setTimeout(() => {
 			request.post(checkEmailRegistered, { searchData: { username: event.target.value } }).then(result => {
 				if (result.data > 0) {
-					this.form.setFields([
+					this.form?.setFields([
 						{
 							name: 'username',
 							errors: [intl.formatMessage(messagesLogin.userExist)],
@@ -133,7 +133,7 @@ class CreateDefault extends Component {
 		this.timeoutCheckUsername = setTimeout(() => {
 			request.post(checkEmailRegistered, { searchData: { email: event.target.value } }).then(result => {
 				if (result.data > 0) {
-					this.form.setFields([
+					this.form?.setFields([
 						{
 							name: 'email',
 							errors: [intl.formatMessage(messagesLogin.emailExist)],

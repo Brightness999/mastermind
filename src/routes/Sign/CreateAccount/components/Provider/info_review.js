@@ -289,28 +289,30 @@ class InfoReview extends Component {
 								</div>
 								<div className='mt-10'>
 									<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.blackoutDates)}</p>
-									{registerData?.availability?.isLegalHolidays ? (
-										<>
-											<p className='font-16 font-700 text-underline'>Legal Holidays</p>
-											{registerData?.legalHolidays?.filter(a => registerData?.availability?.blackoutDates?.find(date => new Date(a?.start?.date).toLocaleDateString() == new Date(date.toString()).toLocaleDateString()))?.map(a => ({ date: new Date(a.start.date), summary: a.summary }))?.sort((a, b) => a.date - b.date)?.map((date, index) => (
-												<div className='flex gap-2' key={index}>
-													<div>{new Date(date?.date?.toString()).toLocaleDateString()}</div>
-													<div>{date.summary}</div>
-												</div>
-											))}
-										</>
-									) : null}
-									{registerData?.availability?.isJewishHolidays ? (
-										<>
-											<p className='font-16 font-700 text-underline'>Jewish Holidays</p>
-											{registerData?.jewishHolidays?.filter(a => registerData?.availability?.blackoutDates?.find(date => new Date(a?.start?.date).toLocaleDateString() == new Date(date.toString()).toLocaleDateString()))?.map(a => ({ date: new Date(a.start.date), summary: a.summary }))?.sort((a, b) => a.date - b.date)?.map((date, index) => (
-												<div className='flex gap-2' key={index}>
-													<div>{new Date(date?.date?.toString()).toLocaleDateString()}</div>
-													<div>{date.summary}</div>
-												</div>
-											))}
-										</>
-									) : null}
+									<div style={{ height: 300, overflowY: 'auto', border: 'solid 1px', padding: 10 }}>
+										{registerData?.availability?.isLegalHolidays ? (
+											<>
+												<p className='font-16 font-700 text-underline'>Legal Holidays</p>
+												{registerData?.legalHolidays?.filter(a => registerData?.availability?.blackoutDates?.find(date => new Date(a?.start?.date).toLocaleDateString() == new Date(date.toString()).toLocaleDateString()))?.map(a => ({ date: new Date(a.start.date), summary: a.summary }))?.sort((a, b) => a.date - b.date)?.map((date, index) => (
+													<div className='flex gap-2' key={index}>
+														<div>{new Date(date?.date?.toString()).toLocaleDateString()}</div>
+														<div>{date.summary}</div>
+													</div>
+												))}
+											</>
+										) : null}
+										{registerData?.availability?.isJewishHolidays ? (
+											<>
+												<p className='font-16 font-700 text-underline'>Jewish Holidays</p>
+												{registerData?.jewishHolidays?.filter(a => registerData?.availability?.blackoutDates?.find(date => new Date(a?.start?.date).toLocaleDateString() == new Date(date.toString()).toLocaleDateString()))?.map(a => ({ date: new Date(a.start.date), summary: a.summary }))?.sort((a, b) => a.date - b.date)?.map((date, index) => (
+													<div className='flex gap-2' key={index}>
+														<div>{new Date(date?.date?.toString()).toLocaleDateString()}</div>
+														<div>{date.summary}</div>
+													</div>
+												))}
+											</>
+										) : null}
+									</div>
 								</div>
 							</Col>
 							<Col xs={24} sm={24} md={12} xl={6} >
@@ -362,23 +364,6 @@ class InfoReview extends Component {
 										</tr>
 										<tr>
 											<td colSpan={4} className="bg-pastel">
-												<div className='header'>Subsidy</div>
-											</td>
-										</tr>
-										<tr>
-											<td>Subsidy Create</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyCreateEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyCreateText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyCreatePush} disabled /></div></td>
-										</tr>
-										<tr>
-											<td>Subsidy Update</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyUpdateEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyUpdateText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyUpdatePush} disabled /></div></td>
-										</tr>
-										<tr>
-											<td colSpan={4} className="bg-pastel">
 												<div className='header'>Flag</div>
 											</td>
 										</tr>
@@ -410,6 +395,23 @@ class InfoReview extends Component {
 											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidEmail} disabled /></div></td>
 											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidText} disabled /></div></td>
 											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidPush} disabled /></div></td>
+										</tr>
+										<tr>
+											<td colSpan={4} className="bg-pastel">
+												<div className='header'>Dependent</div>
+											</td>
+										</tr>
+										<tr>
+											<td>Dependent Declined</td>
+											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedEmail} disabled /></div></td>
+											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedText} disabled /></div></td>
+											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedPush} disabled /></div></td>
+										</tr>
+										<tr>
+											<td>Dependent Accpted</td>
+											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedEmail} disabled /></div></td>
+											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedText} disabled /></div></td>
+											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedPush} disabled /></div></td>
 										</tr>
 									</tbody>
 								</table>
