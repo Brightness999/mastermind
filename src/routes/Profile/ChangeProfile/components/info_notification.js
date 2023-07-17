@@ -50,6 +50,12 @@ class InfoNotification extends React.Component {
 			isInvoicePaidEmail: true,
 			isInvoicePaidPush: true,
 			isInvoicePaidText: true,
+			isDependentDeclinedEmail: true,
+			isDependentDeclinedPush: true,
+			isDependentDeclinedText: true,
+			isDependentAcceptedEmail: true,
+			isDependentAcceptedPush: true,
+			isDependentAcceptedText: true,
 			isSubmit: false,
 		};
 	}
@@ -92,6 +98,12 @@ class InfoNotification extends React.Component {
 					isInvoicePaidEmail: registerData.notificationSetting.isInvoicePaidEmail,
 					isInvoicePaidPush: registerData.notificationSetting.isInvoicePaidPush,
 					isInvoicePaidText: registerData.notificationSetting.isInvoicePaidText,
+					isDependentDeclinedEmail: registerData.notificationSetting.isDependentDeclinedEmail,
+					isDependentDeclinedPush: registerData.notificationSetting.isDependentDeclinedPush,
+					isDependentDeclinedText: registerData.notificationSetting.isDependentDeclinedText,
+					isDependentAcceptedEmail: registerData.notificationSetting.isDependentAcceptedEmail,
+					isDependentAcceptedPush: registerData.notificationSetting.isDependentAcceptedPush,
+					isDependentAcceptedText: registerData.notificationSetting.isDependentAcceptedText,
 				});
 			}
 		} else {
@@ -129,6 +141,12 @@ class InfoNotification extends React.Component {
 				isInvoicePaidEmail: this.props.user.notificationSetting?.isInvoicePaidEmail,
 				isInvoicePaidPush: this.props.user.notificationSetting?.isInvoicePaidPush,
 				isInvoicePaidText: this.props.user.notificationSetting?.isInvoicePaidText,
+				isDependentDeclinedEmail: this.props.user.notificationSetting?.isDependentDeclinedEmail,
+				isDependentDeclinedPush: this.props.user.notificationSetting?.isDependentDeclinedPush,
+				isDependentDeclinedText: this.props.user.notificationSetting?.isDependentDeclinedText,
+				isDependentAcceptedEmail: this.props.user.notificationSetting?.isDependentAcceptedEmail,
+				isDependentAcceptedPush: this.props.user.notificationSetting?.isDependentAcceptedPush,
+				isDependentAcceptedText: this.props.user.notificationSetting?.isDependentAcceptedText,
 			});
 			this.scriptLoaded();
 		}
@@ -186,6 +204,12 @@ class InfoNotification extends React.Component {
 			isInvoicePaidEmail: this.state.isInvoicePaidEmail,
 			isInvoicePaidPush: this.state.isInvoicePaidPush,
 			isInvoicePaidText: this.state.isInvoicePaidText,
+			isDependentDeclinedEmail: this.state.isDependentDeclinedEmail,
+			isDependentDeclinedPush: this.state.isDependentDeclinedPush,
+			isDependentDeclinedText: this.state.isDependentDeclinedText,
+			isDependentAcceptedEmail: this.state.isDependentAcceptedEmail,
+			isDependentAcceptedPush: this.state.isDependentAcceptedPush,
+			isDependentAcceptedText: this.state.isDependentAcceptedText,
 		}
 
 		if (window.location.pathname.includes(routerLinks.CreateAccount)) {
@@ -245,6 +269,12 @@ class InfoNotification extends React.Component {
 					isInvoicePaidEmail: this.state.isInvoicePaidEmail,
 					isInvoicePaidPush: this.state.isInvoicePaidPush,
 					isInvoicePaidText: this.state.isInvoicePaidText,
+					isDependentDeclinedEmail: this.state.isDependentDeclinedEmail,
+					isDependentDeclinedPush: this.state.isDependentDeclinedPush,
+					isDependentDeclinedText: this.state.isDependentDeclinedText,
+					isDependentAcceptedEmail: this.state.isDependentAcceptedEmail,
+					isDependentAcceptedPush: this.state.isDependentAcceptedPush,
+					isDependentAcceptedText: this.state.isDependentAcceptedText,
 				};
 				if (success) {
 					this.props.setUser(user);
@@ -259,6 +289,7 @@ class InfoNotification extends React.Component {
 
 	render() {
 		const { registerData } = this.props.register;
+		const { user } = this.props;
 		const {
 			isNewSessionEmail,
 			isNewSessionPush,
@@ -293,6 +324,12 @@ class InfoNotification extends React.Component {
 			isInvoicePaidEmail,
 			isInvoicePaidPush,
 			isInvoicePaidText,
+			isDependentDeclinedEmail,
+			isDependentDeclinedPush,
+			isDependentDeclinedText,
+			isDependentAcceptedEmail,
+			isDependentAcceptedPush,
+			isDependentAcceptedText,
 			isSubmit,
 		} = this.state;
 
@@ -351,57 +388,82 @@ class InfoNotification extends React.Component {
 										<td><div className='text-center'><Switch checked={isSessionReminderText} onChange={v => this.setState({ isSessionReminderText: v })} /></div></td>
 										<td><div className='text-center'><Switch checked={isSessionReminderPush} onChange={v => this.setState({ isSessionReminderPush: v })} /></div></td>
 									</tr>
-									<tr>
-										<td colSpan={4} className="bg-pastel">
-											<div className='header'>Subsidy</div>
-										</td>
-									</tr>
-									<tr>
-										<td>Subsidy Create</td>
-										<td><div className='text-center'><Switch checked={isSubsidyCreateEmail} onChange={v => this.setState({ isSubsidyCreateEmail: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isSubsidyCreateText} onChange={v => this.setState({ isSubsidyCreateText: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isSubsidyCreatePush} onChange={v => this.setState({ isSubsidyCreatePush: v })} /></div></td>
-									</tr>
-									<tr>
-										<td>Subsidy Update</td>
-										<td><div className='text-center'><Switch checked={isSubsidyUpdateEmail} onChange={v => this.setState({ isSubsidyUpdateEmail: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isSubsidyUpdateText} onChange={v => this.setState({ isSubsidyUpdateText: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isSubsidyUpdatePush} onChange={v => this.setState({ isSubsidyUpdatePush: v })} /></div></td>
-									</tr>
-									<tr>
-										<td colSpan={4} className="bg-pastel">
-											<div className='header'>Flag</div>
-										</td>
-									</tr>
-									<tr>
-										<td>Flag Created</td>
-										<td><div className='text-center'><Switch checked={isFlagCreatedEmail} onChange={v => this.setState({ isFlagCreatedEmail: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isFlagCreatedText} onChange={v => this.setState({ isFlagCreatedText: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isFlagCreatedPush} onChange={v => this.setState({ isFlagCreatedPush: v })} /></div></td>
-									</tr>
-									<tr>
-										<td>Flag Cleared</td>
-										<td><div className='text-center'><Switch checked={isFlagClearedEmail} onChange={v => this.setState({ isFlagClearedEmail: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isFlagClearedText} onChange={v => this.setState({ isFlagClearedText: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isFlagClearedPush} onChange={v => this.setState({ isFlagClearedPush: v })} /></div></td>
-									</tr>
-									<tr>
-										<td colSpan={4} className="bg-pastel">
-											<div className='header'>Invoice</div>
-										</td>
-									</tr>
-									<tr>
-										<td>Invoice Updated</td>
-										<td><div className='text-center'><Switch checked={isInvoiceUpdatedEmail} onChange={v => this.setState({ isInvoiceUpdatedEmail: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isInvoiceUpdatedText} onChange={v => this.setState({ isInvoiceUpdatedText: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isInvoiceUpdatedPush} onChange={v => this.setState({ isInvoiceUpdatedPush: v })} /></div></td>
-									</tr>
-									<tr>
-										<td>Invoice Paid</td>
-										<td><div className='text-center'><Switch checked={isInvoicePaidEmail} onChange={v => this.setState({ isInvoicePaidEmail: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isInvoicePaidText} onChange={v => this.setState({ isInvoicePaidText: v })} /></div></td>
-										<td><div className='text-center'><Switch checked={isInvoicePaidPush} onChange={v => this.setState({ isInvoicePaidPush: v })} /></div></td>
-									</tr>
+									{(user?.role === 3 || user?.role === 60) && (
+										<>
+											<tr>
+												<td colSpan={4} className="bg-pastel">
+													<div className='header'>Subsidy</div>
+												</td>
+											</tr>
+											<tr>
+												<td>Subsidy Create</td>
+												<td><div className='text-center'><Switch checked={isSubsidyCreateEmail} onChange={v => this.setState({ isSubsidyCreateEmail: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isSubsidyCreateText} onChange={v => this.setState({ isSubsidyCreateText: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isSubsidyCreatePush} onChange={v => this.setState({ isSubsidyCreatePush: v })} /></div></td>
+											</tr>
+											<tr>
+												<td>Subsidy Update</td>
+												<td><div className='text-center'><Switch checked={isSubsidyUpdateEmail} onChange={v => this.setState({ isSubsidyUpdateEmail: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isSubsidyUpdateText} onChange={v => this.setState({ isSubsidyUpdateText: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isSubsidyUpdatePush} onChange={v => this.setState({ isSubsidyUpdatePush: v })} /></div></td>
+											</tr>
+										</>
+									)}
+									{(user?.role === 3 || user?.role === 30) && (
+										<>
+											<tr>
+												<td colSpan={4} className="bg-pastel">
+													<div className='header'>Flag</div>
+												</td>
+											</tr>
+											<tr>
+												<td>Flag Created</td>
+												<td><div className='text-center'><Switch checked={isFlagCreatedEmail} onChange={v => this.setState({ isFlagCreatedEmail: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isFlagCreatedText} onChange={v => this.setState({ isFlagCreatedText: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isFlagCreatedPush} onChange={v => this.setState({ isFlagCreatedPush: v })} /></div></td>
+											</tr>
+											<tr>
+												<td>Flag Cleared</td>
+												<td><div className='text-center'><Switch checked={isFlagClearedEmail} onChange={v => this.setState({ isFlagClearedEmail: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isFlagClearedText} onChange={v => this.setState({ isFlagClearedText: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isFlagClearedPush} onChange={v => this.setState({ isFlagClearedPush: v })} /></div></td>
+											</tr>
+											<tr>
+												<td colSpan={4} className="bg-pastel">
+													<div className='header'>Invoice</div>
+												</td>
+											</tr>
+											<tr>
+												<td>Invoice Updated</td>
+												<td><div className='text-center'><Switch checked={isInvoiceUpdatedEmail} onChange={v => this.setState({ isInvoiceUpdatedEmail: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isInvoiceUpdatedText} onChange={v => this.setState({ isInvoiceUpdatedText: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isInvoiceUpdatedPush} onChange={v => this.setState({ isInvoiceUpdatedPush: v })} /></div></td>
+											</tr>
+											<tr>
+												<td>Invoice Paid</td>
+												<td><div className='text-center'><Switch checked={isInvoicePaidEmail} onChange={v => this.setState({ isInvoicePaidEmail: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isInvoicePaidText} onChange={v => this.setState({ isInvoicePaidText: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isInvoicePaidPush} onChange={v => this.setState({ isInvoicePaidPush: v })} /></div></td>
+											</tr>
+											<tr>
+												<td colSpan={4} className="bg-pastel">
+													<div className='header'>Dependent</div>
+												</td>
+											</tr>
+											<tr>
+												<td>Dependent Declined</td>
+												<td><div className='text-center'><Switch checked={isDependentDeclinedEmail} onChange={v => this.setState({ isDependentDeclinedEmail: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isDependentDeclinedText} onChange={v => this.setState({ isDependentDeclinedText: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isDependentDeclinedPush} onChange={v => this.setState({ isDependentDeclinedPush: v })} /></div></td>
+											</tr>
+											<tr>
+												<td>Dependent Accpted</td>
+												<td><div className='text-center'><Switch checked={isDependentAcceptedEmail} onChange={v => this.setState({ isDependentAcceptedEmail: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isDependentAcceptedText} onChange={v => this.setState({ isDependentAcceptedText: v })} /></div></td>
+												<td><div className='text-center'><Switch checked={isDependentAcceptedPush} onChange={v => this.setState({ isDependentAcceptedPush: v })} /></div></td>
+											</tr>
+										</>
+									)}
 								</tbody>
 							</table>
 							<div className='mt-10 flex justify-end'>
