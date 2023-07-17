@@ -239,20 +239,14 @@ class InfoAvailability extends Component {
 			})
 		} else {
 			request.post(updateMyProviderAvailability, { ...values, isJewishHolidays, isLegalHolidays, _id: this.props.auth.user.providerInfo?._id }).then(result => {
-				const { success } = result;
+				const { success, data } = result;
 				if (success) {
 					message.success('Updated successfully');
 					let newUser = {
 						...this.props.auth.user,
-						providerInfo: {
-							...this.props.auth.user.providerInfo,
-							isHomeVisit: values.isHomeVisit,
-							privateOffice: values.privateOffice,
-							serviceableSchool: listSchool?.filter(school => values.serviceableSchool?.find(id => id == school._id)),
-							isJewishHolidays, isLegalHolidays,
-						}
+						providerInfo: data,
 					}
-					this.props.dispatch(setUser(newUser));
+					this.props.setUser(newUser);
 				}
 			}).catch(err => {
 				message.error("Can't update availability");
@@ -822,4 +816,4 @@ class InfoAvailability extends Component {
 const mapStateToProps = state => ({
 	auth: state.auth
 })
-export default compose(connect(mapStateToProps))(InfoAvailability);
+export default compose(connect(mapStateToProps, { setUser }))(InfoAvailability);

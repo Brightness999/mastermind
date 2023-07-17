@@ -13,6 +13,7 @@ import { getMySchoolInfo, getUserProfile, updateSchoolAvailability } from 'utils
 import request from 'utils/api/request';
 import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR_API_KEY, JEWISH_CALENDAR_REGION, USA_CALENDAR_REGION } from 'routes/constant';
 import PageLoading from 'components/Loading/PageLoading';
+import { setUser } from 'src/redux/features/authSlice';
 
 const day_week = [
 	{
@@ -190,6 +191,11 @@ class InfoAvailability extends React.Component {
 		request.post(updateSchoolAvailability, params).then(res => {
 			if (res.success) {
 				message.success('Updated successfully');
+				let newUser = {
+					...this.props.auth.user,
+					schoolInfo: res.data,
+				}
+				this.props.setUser(newUser);
 			}
 		}).catch(err => {
 			message.error(err.message);
@@ -479,4 +485,4 @@ const mapStateToProps = state => ({
 	auth: state.auth
 })
 
-export default compose(connect(mapStateToProps))(InfoAvailability);
+export default compose(connect(mapStateToProps, { setUser }))(InfoAvailability);

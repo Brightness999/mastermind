@@ -14,6 +14,7 @@ import { BASE_CALENDAR_ID_FOR_PUBLIC_HOLIDAY, BASE_CALENDAR_URL, GOOGLE_CALENDAR
 import request from 'utils/api/request';
 import { getMyConsultantInfo, getUserProfile, updateConsultantAvailability } from 'utils/api/apiList';
 import PageLoading from 'components/Loading/PageLoading';
+import { setUser } from 'src/redux/features/authSlice';
 
 const day_week = [
 	intl.formatMessage(messages.sunday),
@@ -189,6 +190,11 @@ class ConsultantAvailability extends Component {
 		request.post(updateConsultantAvailability, params).then(res => {
 			if (res.success) {
 				message.success('Updated successfully');
+				let newUser = {
+					...this.props.auth.user,
+					consultantInfo: res.data,
+				}
+				this.props.setUser(newUser);
 			}
 		}).catch(err => {
 			message.error(err.message);
@@ -485,4 +491,4 @@ const mapStateToProps = state => ({
 	auth: state.auth,
 })
 
-export default compose(connect(mapStateToProps))(ConsultantAvailability);
+export default compose(connect(mapStateToProps, { setUser }))(ConsultantAvailability);
