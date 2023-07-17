@@ -314,9 +314,9 @@ class ModalNewAppointmentForParents extends React.Component {
 		const appointments = listProvider[providerIndex]?.appointments ?? [];
 
 		const flagAppointments = appointments?.filter(a => a?.dependent === selectedDependent && a?.flagStatus === 1);
-		const declinedAppointments = appointments?.filter(a => a?.dependent === selectedDependent && a?.status === -3);
+		const declinedProvider = listDependents?.find(d => d?._id === selectedDependent)?.declinedProviders?.find(p => p.provider === listProvider[providerIndex]?._id);
 
-		if (declinedAppointments?.length) {
+		if (declinedProvider) {
 			message.error('The provider declined your request');
 			return;
 		}
