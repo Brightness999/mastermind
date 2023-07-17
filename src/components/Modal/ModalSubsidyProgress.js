@@ -12,7 +12,7 @@ import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import msgDashboard from 'routes/User/Dashboard/messages';
 import msgDrawer from '../DrawerDetail/messages';
 import request from 'utils/api/request'
-import { url, switchPathWithRole } from 'utils/api/baseUrl'
+import { switchPathWithRole } from 'utils/api/baseUrl'
 import { acceptSubsidyRequest, appealSubsidy, denyAppealSubsidy, denySubsidyRequest, getLastConsulation, preApproveSubsidy, schoolAcceptAppealSubsidy, searchProvidersForAdmin, selectFinalProviderForSubsidy, updateApprovedRequest } from 'utils/api/apiList';
 import { setSubsidyRequests } from 'src/redux/features/appointmentsSlice';
 import ModalReferralService from './ModalReferralService';
@@ -194,7 +194,7 @@ class ModalSubsidyProgress extends React.Component {
 			return;
 		}
 		if (dependentRate < 0) {
-			message.error('Incorrect price. Please check the rates');
+			message.warning('Incorrect price. Please check the rates');
 			return;
 		}
 
