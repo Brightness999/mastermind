@@ -116,6 +116,7 @@ class ModalReferralService extends React.Component {
 
 	onSelectTime = (index) => {
 		this.setState({ selectedTimeIndex: index });
+		this.setState({ errorMessage: '' });
 	}
 
 	onChangeUpload = (info) => {
