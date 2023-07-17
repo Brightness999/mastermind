@@ -65,21 +65,22 @@ class PanelAppointment extends React.Component {
   }
 
   renderItemLeft = (event) => {
-    const { user } = this.props;
-
     return (
-      <div className={`item-left ${[-2, -3].includes(event.status) ? 'line-through' : ''}`} onClick={() => this.props.onShowDrawerDetail(event._id)}>
+      <div className={`item-left gap-2 ${[-2, -3].includes(event.status) ? 'line-through' : ''}`} onClick={() => this.props.onShowDrawerDetail(event._id)}>
         <Avatar size={24} icon={<FaUser size={12} />} />
-        <div className='div-service'>
-          {user?.role === 3 ? <p className='font-09 mb-0'>{`${event.provider.firstName ?? ''} ${event.provider.lastName ?? ''}`}</p>
-            : user?.role === 30 ? <p className='font-09 mb-0'>{`${event.dependent.firstName ?? ''} ${event.dependent.lastName ?? ''}`}</p>
-              : <div><p className='font-09'>{`${event.dependent.firstName ?? ''} ${event.dependent.lastName ?? ''}`}</p><p className='font-09 mb-0'>{`${event.provider.firstName ?? ''} ${event.provider.lastName ?? ''}`}</p></div>}
-
-        </div>
-        <p className='font-11 mb-0 ml-auto mr-5'>{event.location}</p>
-        <div className='ml-auto'>
-          <p className='font-12 mb-0'>{moment(event.date).format("hh:mm a")}</p>
-          <p className='font-12 font-700 mb-0 whitespace-nowrap'>{moment(event.date).format('MM/DD/YYYY')}</p>
+        <div className='flex justify-between items-center flex-1'>
+          <div className='flex-1'>
+            <div className='font-11'>{`${event.dependent.firstName ?? ''} ${event.dependent.lastName ?? ''}`}</div>
+            <div className='font-09'>{`${event.provider.firstName ?? ''} ${event.provider.lastName ?? ''}`}</div>
+          </div>
+          <div className='flex-1'>
+            <div className='font-11'>{event.skillSet?.name}</div>
+            <div className='font-09'>{event.location}</div>
+          </div>
+          <div className='flex-1'>
+            <div className='font-12'>{moment(event.date).format("hh:mm a")}</div>
+            <div className='font-12 font-700 whitespace-nowrap'>{moment(event.date).format('MM/DD/YYYY')}</div>
+          </div>
         </div>
       </div>
     );

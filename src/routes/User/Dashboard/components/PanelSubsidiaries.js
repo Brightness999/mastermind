@@ -96,11 +96,11 @@ class PanelSubsidiaries extends React.Component {
       <div className='item-left gap-2' onClick={() => this.callOpenSubsidyDetail(subsidy)}>
         <Avatar size={24} icon={<FaUser size={12} />} />
         <div className='flex justify-between items-center flex-1 gap-2'>
-          <div>
+          <div className='flex-1'>
             <div className='font-11'>{subsidy?.student?.firstName} {subsidy?.student?.lastName}</div>
             <div className='font-11'>{subsidy?.skillSet?.name}</div>
           </div>
-          <div className='font-11'>{subsidy?.school?.name}</div>
+          <div className='font-11 flex-1'>{subsidy?.school?.name}</div>
           <div className='font-12'>{this.renderStatus(subsidy.status)}</div>
         </div>
       </div>

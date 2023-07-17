@@ -1075,38 +1075,42 @@ class SchedulingCenter extends React.Component {
                 <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleChangeReferralTab}>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {listAppointmentsRecent?.filter(a => a.type === CONSULTATION && a.status === PENDING)?.map((appointment, index) =>
-                      <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                      <div key={index} className={`list-item padding-item gap-2 ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
-                        <div className='div-service'>
-                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                          <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
-                        </div>
-                        <div className='text-center ml-auto mr-5'>
-                          <p className='font-11 mb-0'>{appointment?.meetingLink ? intl.formatMessage(msgDrawer.meeting) : intl.formatMessage(messages.phoneCall)}</p>
-                          <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
-                        </div>
-                        <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
-                          <p className='font-12 font-700 mb-0 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
+                        <div className='flex jsutify-between items-center flex-1'>
+                          <div className='flex-1'>
+                            <div className='font-11'>{appointment.skillSet?.name}</div>
+                            <div className='font-09'>{appointment?.referrer?.name}</div>
+                          </div>
+                          <div className='flex-1'>
+                            <div className='font-11'>{appointment?.meetingLink ? intl.formatMessage(msgDrawer.meeting) : intl.formatMessage(messages.phoneCall)}</div>
+                            <div className='font-11'>{appointment.phoneNumber}</div>
+                          </div>
+                          <div className='flex-1'>
+                            <div className='font-12'>{moment(appointment.date).format('hh:mm a')}</div>
+                            <div className='font-12 font-700 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
+                          </div>
                         </div>
                       </div>
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
                     {listAppointmentsRecent?.filter(a => a.type === CONSULTATION && a.status !== PENDING)?.map((appointment, index) =>
-                      <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                      <div key={index} className={`list-item padding-item gap-2 ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
-                        <div className='div-service'>
-                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                          <p className='font-09 mb-0'>{appointment?.referrer?.name}</p>
-                        </div>
-                        <div className='text-center ml-auto mr-5'>
-                          <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
-                          <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
-                        </div>
-                        <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
-                          <p className='font-12 font-700 mb-0 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
+                        <div className='flex justify-between items-center flex-1'>
+                          <div className='flex-1'>
+                            <div className='font-11'>{appointment.skillSet?.name}</div>
+                            <div className='font-09'>{appointment?.referrer?.name}</div>
+                          </div>
+                          <div className='flex-1'>
+                            <div className='font-11'>{intl.formatMessage(messages.phoneCall)}</div>
+                            <div className='font-11'>{appointment.phoneNumber}</div>
+                          </div>
+                          <div className='flex-1'>
+                            <div className='font-12'>{moment(appointment.date).format('hh:mm a')}</div>
+                            <div className='font-12 font-700 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1117,36 +1121,40 @@ class SchedulingCenter extends React.Component {
                 <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleChangeScreeningTab}>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {listAppointmentsRecent?.filter(a => a.type === SCREEN && a.status === PENDING)?.map((appointment, index) =>
-                      <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                      <div key={index} className={`list-item padding-item gap-2 ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
-                        <div className='div-service flex-1'>
-                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                          <p className='font-09 mb-0'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
-                        </div>
-                        <div className='text-center ml-auto mr-5 flex-1'>
-                          <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
-                          <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
-                        </div>
-                        <div className='ml-auto flex-1 text-center'>
-                          <p className='font-12 mb-0'>{appointment.screeningTime ?? ''}</p>
+                        <div className='flex justify-between items-center flex-1'>
+                          <div className='flex-1'>
+                            <div className='font-11'>{appointment.skillSet?.name}</div>
+                            <div className='font-09'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
+                          </div>
+                          <div className='flex-1'>
+                            <div className='font-11'>{intl.formatMessage(messages.phoneCall)}</div>
+                            <div className='font-11'>{appointment.phoneNumber}</div>
+                          </div>
+                          <div className='flex-1'>
+                            <div className='font-12'>{appointment.screeningTime ?? ''}</div>
+                          </div>
                         </div>
                       </div>
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
                     {listAppointmentsRecent?.filter(a => a.type === SCREEN && a.status !== PENDING)?.map((appointment, index) =>
-                      <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                      <div key={index} className={`list-item padding-item gap-2 ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
-                        <div className='div-service flex-1'>
-                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                          <p className='font-09 mb-0'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
-                        </div>
-                        <div className='text-center ml-auto mr-5 flex-1'>
-                          <p className='font-11 mb-0'>{intl.formatMessage(messages.phoneCall)}</p>
-                          <p className='font-11 mb-0'>{appointment.phoneNumber}</p>
-                        </div>
-                        <div className='ml-auto flex-1 text-center'>
-                          <p className='font-12 mb-0'>{appointment.screeningTime ?? ''}</p>
+                        <div className='flex justify-between items-center flex-1'>
+                          <div className='flex-1'>
+                            <div className='font-11'>{appointment.skillSet?.name}</div>
+                            <div className='font-09'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
+                          </div>
+                          <div className='flex-1'>
+                            <div className='font-11'>{intl.formatMessage(messages.phoneCall)}</div>
+                            <div className='font-11'>{appointment.phoneNumber}</div>
+                          </div>
+                          <div className='flex-1'>
+                            <div className='font-12'>{appointment.screeningTime ?? ''}</div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1157,32 +1165,36 @@ class SchedulingCenter extends React.Component {
                 <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleChangeEvaluationTab}>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {listAppointmentsRecent?.filter(a => a.type === EVALUATION && a.status === PENDING && a.flagStatus !== ACTIVE)?.map((appointment, index) =>
-                      <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                      <div key={index} className={`list-item padding-item gap-2 ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
-                        <div className='div-service'>
-                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                          <p className='font-09 mb-0'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
-                        </div>
-                        <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
-                        <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
-                          <p className='font-12 font-700 mb-0 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
+                        <div className='flex justify-between items-center flex-1'>
+                          <div>
+                            <div className='font-11'>{appointment.skillSet?.name}</div>
+                            <div className='font-09'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
+                          </div>
+                          <div className='font-11'>{appointment.location}</div>
+                          <div>
+                            <div className='font-12'>{moment(appointment.date).format('hh:mm a')}</div>
+                            <div className='font-12 font-700 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
+                          </div>
                         </div>
                       </div>
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
                     {listAppointmentsRecent?.filter(a => a.type === EVALUATION && a.status !== PENDING && a.flagStatus !== ACTIVE)?.map((appointment, index) =>
-                      <div key={index} className={`list-item padding-item ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
+                      <div key={index} className={`list-item padding-item gap-2 ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
-                        <div className='div-service'>
-                          <p className='font-11 mb-0'>{appointment.skillSet?.name}</p>
-                          <p className='font-09 mb-0'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</p>
-                        </div>
-                        <p className='font-11 mb-0 ml-auto mr-5'>{appointment.location}</p>
-                        <div className='ml-auto'>
-                          <p className='font-12 mb-0'>{moment(appointment.date).format('hh:mm a')}</p>
-                          <p className='font-12 font-700 mb-0 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</p>
+                        <div className='flex justify-between items-center flex-1'>
+                          <div>
+                            <div className='font-11'>{appointment.skillSet?.name}</div>
+                            <div className='font-09'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
+                          </div>
+                          <div className='font-11'>{appointment.location}</div>
+                          <div>
+                            <div className='font-12'>{moment(appointment.date).format('hh:mm a')}</div>
+                            <div className='font-12 font-700 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1205,29 +1217,33 @@ class SchedulingCenter extends React.Component {
                 <Tabs defaultActiveKey="1" type="card" size='small' onChange={this.handleChangeFlagTab}>
                   <Tabs.TabPane tab={intl.formatMessage(messages.upcoming)} key="1">
                     {invoices?.filter(a => [4, 5].includes(a.type) && !a.isPaid)?.map((invoice, index) =>
-                      <div key={index} className='list-item padding-item justify-between' onClick={(e) => e.target.id != 'action' && this.openModalInvoice(invoice)}>
+                      <div key={index} className='list-item padding-item gap-2' onClick={(e) => e.target.id != 'action' && this.openModalInvoice(invoice)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
-                        <div className='div-service'>
-                          <p className='font-12 mb-0'>{invoice.dependent?.firstName ?? ''} {invoice.dependent?.lastName ?? ''}</p>
-                          <p className='font-12 mb-0'>{invoice.provider?.firstName ?? ''} {invoice.provider?.lastName ?? ''}</p>
+                        <div className='flex justify-between items-center flex-1'>
+                          <div>
+                            <div className='font-11'>{invoice.dependent?.firstName ?? ''} {invoice.dependent?.lastName ?? ''}</div>
+                            <div className='font-09'>{invoice.provider?.firstName ?? ''} {invoice.provider?.lastName ?? ''}</div>
+                          </div>
+                          <div className='font-11'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
+                          <span className='font-12 text-primary cursor' id='action' onClick={() => this.openFlagAction(invoice)}>{intl.formatMessage(messages.action)}</span>
                         </div>
-                        <div className='font-12'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
-                        <span className='font-12 text-primary cursor' id='action' onClick={() => this.openFlagAction(invoice)}>{intl.formatMessage(messages.action)}</span>
                       </div>
                     )}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={intl.formatMessage(messages.past)} key="2">
                     {invoices?.filter(a => [4, 5].includes(a.type) && a.isPaid)?.map((invoice, index) =>
-                      <div key={index} className='list-item padding-item justify-between' onClick={() => this.openModalInvoice(invoice)}>
+                      <div key={index} className='list-item padding-item gap-2' onClick={() => this.openModalInvoice(invoice)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
-                        <div className='div-service'>
-                          <p className='font-12 mb-0'>{invoice.dependent?.firstName ?? ''} {invoice.dependent?.lastName ?? ''}</p>
-                          <p className='font-12 mb-0'>{invoice.provider?.firstName ?? ''} {invoice.provider?.lastName ?? ''}</p>
-                        </div>
-                        <div className='font-12'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
-                        <div>
-                          <div className='font-12'>{moment(invoice.updatedAt).format("hh:mm a")}</div>
-                          <div className='font-12 font-700 whitespace-nowrap'>{moment(invoice.updatedAt).format('MM/DD/YYYY')}</div>
+                        <div className='flex justify-between items-center flex-1'>
+                          <div>
+                            <div className='font-11'>{invoice.dependent?.firstName ?? ''} {invoice.dependent?.lastName ?? ''}</div>
+                            <div className='font-09'>{invoice.provider?.firstName ?? ''} {invoice.provider?.lastName ?? ''}</div>
+                          </div>
+                          <div className='font-11'>{invoice?.type === InvoiceType.BALANCE ? 'Past Due Balance' : invoice?.type === InvoiceType.NOSHOW ? 'No Show' : ''}</div>
+                          <div>
+                            <div className='font-12'>{moment(invoice.updatedAt).format("hh:mm a")}</div>
+                            <div className='font-12 font-700 whitespace-nowrap'>{moment(invoice.updatedAt).format('MM/DD/YYYY')}</div>
+                          </div>
                         </div>
                       </div>
                     )}
