@@ -7,6 +7,7 @@ import moment from 'moment';
 import 'moment/locale/en-au';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+moment.locale('en');
 
 import messages from './messages';
 import msgCreateAccount from 'src/routes/Sign/CreateAccount/messages';
@@ -17,10 +18,9 @@ import { createAppointmentForParent, getAllConsultantForParent, getAuthorization
 import { setMeetingLink, setSelectedTime, setSelectedUser } from 'src/redux/features/authSlice';
 import { setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice';
 import { ADMINPREAPPROVED, CONSULTANT, CONSULTATION, PENDING } from 'src/routes/constant';
+import ModalSelectSubsidy from './ModalSelectSubsidy';
 import './style/index.less';
 import '../../assets/styles/login.less';
-
-moment.locale('en');
 
 class ModalReferralService extends React.Component {
 	state = {
@@ -39,6 +39,7 @@ class ModalReferralService extends React.Component {
 		skillSet: this.props.auth.skillSet,
 		selectedSubsidy: undefined,
 		loadingSchedule: false,
+		visibleSelectSubsidy: false,
 	}
 
 	componentDidMount = () => {
@@ -52,13 +53,11 @@ class ModalReferralService extends React.Component {
 		if (subsidy) {
 			const dependent = this.props.auth.dependents?.find(d => d._id == subsidy?.student?._id);
 			this.setState({
-				selectedSubsidy: subsidy?._id,
 				selectedDependent: subsidy?.student?._id,
 				skillSet: subsidy?.student?.services,
 				selectedSkillSet: subsidy?.skillSet?._id,
 			})
 			this.form.setFieldsValue({
-				selectedSubsidy: subsidy?._id,
 				selectedDependent: subsidy?.student?._id,
 				phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber,
 				selectedSkillSet: subsidy?.skillSet?._id,
@@ -91,10 +90,10 @@ class ModalReferralService extends React.Component {
 		});
 	}
 
-	createConsultation = () => {
-		const { selectedDependent, selectedSkillSet, phoneNumber, fileList, note, selectedTimeIndex, selectedDate, arrTime, isGoogleMeet, selectedSubsidy } = this.state;
-		const { subsidy, auth } = this.props;
-		const meetingLink = this.form.getFieldValue("meetingLink");
+	verifyData = () => {
+		const { selectedDependent, selectedSkillSet, selectedTimeIndex, selectedDate, arrTime } = this.state;
+		const { listSubsidy } = this.props;
+		const subsidiaries = listSubsidy?.filter(s => s.status === ADMINPREAPPROVED && s.student?._id === selectedDependent && s.skillSet?._id === selectedSkillSet && !s.consultation?.date) ?? [];
 
 		if (!selectedDate?.isAfter(new Date()) || selectedTimeIndex < 0) {
 			this.setState({ errorMessage: 'Please select a date and time' });
@@ -108,38 +107,11 @@ class ModalReferralService extends React.Component {
 			return;
 		}
 
-		const { years, months, date } = selectedDate.toObject();
-		const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
-		const postData = {
-			dependent: selectedDependent,
-			skillSet: selectedSkillSet,
-			date: selectedTime,
-			phoneNumber: isGoogleMeet ? undefined : phoneNumber,
-			meetingLink: isGoogleMeet ? meetingLink : undefined,
-			addtionalDocuments: fileList.length > 0 ? [{ name: fileList[0].name, url: fileList[0].response.data }] : [],
-			notes: note,
-			type: CONSULTATION,
-			status: PENDING,
-			subsidy: subsidy ? subsidy?._id : selectedSubsidy,
-			consultant: auth.user.role === CONSULTANT ? auth.user.consultantInfo?._id : undefined,
-		};
-
-		this.setState({ loadingSchedule: true });
-		request.post(createAppointmentForParent, postData).then(result => {
-			this.setState({ loadingSchedule: false });
-			const { success, data } = result;
-			if (success) {
-				this.props.setMeetingLink('');
-				this.props.setAppointments([...this.props.appointments, data]);
-				this.props.setAppointmentsInMonth([...this.props.appointmentsInMonth, data]);
-				this.props.onSubmit();
-			} else {
-				message.error('cannot create referral');
-			}
-		}).catch(err => {
-			message.error(err.message);
-			this.setState({ loadingSchedule: false });
-		})
+		if (subsidiaries?.length) {
+			this.setState({ visibleSelectSubsidy: true });
+		} else {
+			this.createConsultation();
+		}
 	}
 
 	onSelectTime = (index) => {
@@ -160,20 +132,24 @@ class ModalReferralService extends React.Component {
 
 	changeMeetingType = () => {
 		const { selectedTimeIndex, selectedDate, arrTime, isGoogleMeet, selectedDependent } = this.state;
-		const { dependents } = this.props.auth;
+		const { auth, setSelectedTime, setSelectedUser } = this.props;
 		const meetingLink = this.form.getFieldValue('meetingLink');
 		if (isGoogleMeet && !meetingLink) {
 			const { years, months, date } = selectedDate.toObject();
 			const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
 
-			this.props.setSelectedTime(selectedTime);
-			this.props.setSelectedUser(dependents?.find(a => a?._id == selectedDependent)?.parent);
+			setSelectedTime(selectedTime);
+			setSelectedUser(auth.dependents?.find(a => a?._id == selectedDependent)?.parent);
 			request.post(getAuthorizationUrl).then(res => {
 				window.open(res.data);
 			})
 		} else {
-			this.createConsultation();
+			this.verifyData();
 		}
+	}
+
+	closeModalSelectSubsidy = () => {
+		this.setState({ visibleSelectSubsidy: false });
 	}
 
 	prevMonth = () => {
@@ -200,20 +176,16 @@ class ModalReferralService extends React.Component {
 			selectedSkillSet: undefined,
 		});
 
-		this.form.setFieldsValue({ selectedSubsidy: undefined });
 		if (this.props.auth.user?.role > 3) {
-			this.form.setFieldsValue({
-				phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber,
-				selectedSkillSet: undefined,
-			});
+			this.form.setFieldsValue({ phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber });
 			this.setState({ phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber });
 		}
+		this.form.setFieldsValue({ selectedSkillSet: undefined });
 		this.getConsultationData(dependentId);
 	}
 
 	handleSelectSkillSet = (skill) => {
 		this.setState({ selectedSkillSet: skill });
-		this.form.setFieldsValue({ selectedSubsidy: undefined });
 	}
 
 	handleSwitchMeeting = (status) => {
@@ -222,26 +194,6 @@ class ModalReferralService extends React.Component {
 
 	handleChangePhonenumber = (phoneNumber) => {
 		this.setState({ phoneNumber: phoneNumber });
-	}
-
-	handleSelectSubsidy = (subsidyId) => {
-		const subsidy = this.props.listSubsidy?.find(s => s._id === subsidyId);
-		const dependent = this.props.auth.dependents?.find(d => d._id == subsidy?.student?._id);
-		this.setState({
-			selectedDependent: subsidy?.student?._id,
-			skillSet: subsidy?.student?.services,
-			selectedSkillSet: subsidy?.skillSet?._id,
-			selectedSubsidy: subsidyId,
-		})
-		this.form.setFieldsValue({
-			selectedDependent: subsidy?.student?._id,
-			phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber,
-			selectedSkillSet: subsidy?.skillSet?._id,
-		});
-		if (this.props.auth.user?.role > 3) {
-			this.setState({ phoneNumber: dependent?.parent?.fatherPhoneNumber ?? dependent?.parent?.motherPhoneNumber });
-		}
-		this.getConsultationData(subsidy?.student?._id);
 	}
 
 	onSelectDate = (newValue) => {
@@ -332,10 +284,48 @@ class ModalReferralService extends React.Component {
 		}
 	}
 
+	createConsultation = (data) => {
+		this.closeModalSelectSubsidy();
+		const { selectedDependent, selectedSkillSet, phoneNumber, fileList, note, selectedTimeIndex, selectedDate, arrTime, isGoogleMeet } = this.state;
+		const { subsidy, auth, setMeetingLink, setAppointments, setAppointmentsInMonth, onSubmit } = this.props;
+		const meetingLink = this.form.getFieldValue("meetingLink");
+		const { years, months, date } = selectedDate.toObject();
+		const selectedTime = arrTime[selectedTimeIndex]?.value.set({ years, months, date });
+		const postData = {
+			dependent: selectedDependent,
+			skillSet: selectedSkillSet,
+			date: selectedTime,
+			phoneNumber: isGoogleMeet ? undefined : phoneNumber,
+			meetingLink: isGoogleMeet ? meetingLink : undefined,
+			addtionalDocuments: fileList.length > 0 ? [{ name: fileList[0].name, url: fileList[0].response.data }] : [],
+			notes: note,
+			type: CONSULTATION,
+			status: PENDING,
+			subsidy: subsidy ? subsidy?._id : data?.subsidy,
+			consultant: auth.user.role === CONSULTANT ? auth.user.consultantInfo?._id : undefined,
+		};
+
+		this.setState({ loadingSchedule: true });
+		request.post(createAppointmentForParent, postData).then(result => {
+			this.setState({ loadingSchedule: false });
+			const { success, data } = result;
+			if (success) {
+				setMeetingLink('');
+				setAppointments([...this.props.appointments, data]);
+				setAppointmentsInMonth([...this.props.appointmentsInMonth, data]);
+				onSubmit();
+			} else {
+				message.error('cannot create referral');
+			}
+		}).catch(err => {
+			message.error(err.message);
+			this.setState({ loadingSchedule: false });
+		});
+	}
+
 	render() {
-		const { loadingSchedule, selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, skillSet, consultants, selectedSubsidy } = this.state;
+		const { loadingSchedule, selectedDate, selectedTimeIndex, selectedDependent, selectedSkillSet, phoneNumber, note, isGoogleMeet, errorMessage, arrTime, skillSet, consultants, visibleSelectSubsidy } = this.state;
 		const { auth, listSubsidy, subsidy } = this.props;
-		const subsidiaries = listSubsidy?.filter(s => s.status === ADMINPREAPPROVED && !s.consultation?.date) ?? [];
 
 		const modalProps = {
 			className: 'modal-referral-service',
@@ -356,6 +346,12 @@ class ModalReferralService extends React.Component {
 			onChange: this.onChangeUpload,
 			maxCount: 1,
 		};
+		const modalSelectSubsidyProps = {
+			visible: visibleSelectSubsidy,
+			onSubmit: this.createConsultation,
+			onCancel: this.closeModalSelectSubsidy,
+			subsidies: listSubsidy?.filter(s => s.status === ADMINPREAPPROVED && s.student?._id === selectedDependent && s.skillSet?._id === selectedSkillSet && !s.consultation?.date),
+		}
 
 		return (
 			<Modal {...modalProps}>
@@ -373,23 +369,6 @@ class ModalReferralService extends React.Component {
 						<p className='font-16 mb-5'>{intl.formatMessage(messages.selectOptions)}</p>
 						<Row gutter={20} className='mb-10' align="bottom">
 							<Col xs={24} sm={24} md={8} className='select-small'>
-								{!!subsidiaries?.length ? (
-									<Form.Item
-										name='selectedSubsidy'
-										label={intl.formatMessage(msgCreateAccount.subsidyRequest)}
-									>
-										<Select
-											placeholder={intl.formatMessage(msgCreateAccount.subsidyRequest)}
-											value={selectedSubsidy}
-											onChange={v => this.handleSelectSubsidy(v)}
-											disabled={!!subsidy}
-										>
-											{subsidiaries?.map((s, index) => (
-												<Select.Option key={index} value={s._id}>{s?.student?.firstName ?? ''} {s?.student?.lastName ?? ''}({s?.skillSet?.name ?? ''})</Select.Option>
-											))}
-										</Select>
-									</Form.Item>
-								) : null}
 								<Form.Item
 									name='selectedDependent'
 									label={intl.formatMessage(msgCreateAccount.dependent)}
@@ -546,6 +525,7 @@ class ModalReferralService extends React.Component {
 							</Col>
 						</Row>
 						{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
+						{visibleSelectSubsidy && <ModalSelectSubsidy {...modalSelectSubsidyProps} />}
 						<Row justify='end' className='gap-2 mt-10'>
 							<Button key="back" onClick={this.props.onCancel}>
 								{intl.formatMessage(messages.goBack).toUpperCase()}
