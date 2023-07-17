@@ -846,9 +846,6 @@ class SchedulingCenter extends React.Component {
       visible: visibleNewAppoint,
       onSubmit: this.onSubmitModalNewAppoint,
       onCancel: this.onCloseModalNewAppoint,
-      listDependents: listDependents,
-      SkillSet: SkillSet,
-      listAppointmentsRecent: listAppointmentsRecent,
       selectedDate: selectedDate,
     };
 

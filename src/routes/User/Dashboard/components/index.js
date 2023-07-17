@@ -976,8 +976,6 @@ class Dashboard extends React.Component {
       visible: visibleNewAppoint,
       onSubmit: this.onSubmitModalNewAppoint,
       onCancel: this.onCloseModalNewAppoint,
-      listDependents: listDependents,
-      SkillSet: SkillSet,
       selectedDate: selectedDate,
     };
 

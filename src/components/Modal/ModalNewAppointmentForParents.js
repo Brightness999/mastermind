@@ -15,7 +15,7 @@ import { DownOutlined } from '@ant-design/icons';
 import messages from './messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import request from 'utils/api/request';
-import { createAppointmentForParent, searchProvidersForAdmin } from 'utils/api/apiList';
+import { createAppointmentForParent, getDefaultDataForAdmin, searchProvidersForAdmin } from 'utils/api/apiList';
 import ModalNewScreening from './ModalNewScreening';
 import ModalConfirm from './ModalConfirm';
 import { ADMINAPPROVED, APPOINTMENT, CLOSED, DEPENDENTHOME, Durations, EVALUATION, PENDING, PROVIDER, PROVIDEROFFICE, SCREEN, SUBSIDY } from 'routes/constant';
@@ -40,7 +40,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		selectedProvider: undefined,
 		arrTime: [],
 		errorMessage: '',
-		skillSet: [],
+		skillSet: this.props.skillSet,
 		searchKey: '',
 		appointmentType: APPOINTMENT,
 		notes: '',
@@ -60,6 +60,8 @@ class ModalNewAppointmentForParents extends React.Component {
 		user: this.props.user,
 		loadingSchedule: false,
 		fileList: [],
+		loading: false,
+		dependents: [],
 	}
 	scrollElement = React.createRef();
 
@@ -128,8 +130,8 @@ class ModalNewAppointmentForParents extends React.Component {
 
 	componentDidMount() {
 		const { user } = this.state;
-		const { SkillSet, selectedDate } = this.props;
-		this.setState({ skillSet: SkillSet, selectedDate: moment(selectedDate) });
+		const { selectedDate } = this.props;
+		this.setState({ selectedDate: moment(selectedDate) });
 		if (user.role === 30) {
 			this.setState({
 				selectedProvider: user.providerInfo._id,
@@ -137,6 +139,21 @@ class ModalNewAppointmentForParents extends React.Component {
 				selectedProviderIndex: 0,
 			})
 		}
+		this.getDependentList();
+	}
+
+	getDependentList = () => {
+		this.setState({ loading: true });
+		request.post(getDefaultDataForAdmin, { isAppointment: true }).then(res => {
+			this.setState({ loading: false });
+			const { success, data } = res;
+			if (success) {
+				this.setState({ dependents: data });
+			}
+		}).catch(err => {
+			this.setState({ loading: false });
+			message.error(err.message);
+		})
 	}
 
 	searchProvider(searchKey, address, selectedSkillSet, dependentId) {
@@ -180,8 +197,7 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	createAppointment = (data) => {
-		const { fileList, selectedTimeIndex, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, standardRate } = this.state;
-		const { listDependents } = this.props;
+		const { dependents, fileList, selectedTimeIndex, selectedDate, selectedSkillSet, address, selectedDependent, selectedProvider, arrTime, notes, listProvider, selectedProviderIndex, standardRate } = this.state;
 		const appointmentType = data?.isEvaluation ? EVALUATION : this.state.appointmentType;
 
 		if (selectedProvider == undefined) {
@@ -197,7 +213,7 @@ class ModalNewAppointmentForParents extends React.Component {
 
 		const { years, months, date } = selectedDate.toObject();
 		const hour = arrTime?.[selectedTimeIndex]?.value.clone().set({ years, months, date });
-		const dependent = listDependents?.find(d => d._id === selectedDependent);
+		const dependent = dependents?.find(d => d._id === selectedDependent);
 		const subsidies = dependent?.subsidy?.filter(s => s.skillSet === selectedSkillSet && s.status === 5 && selectedProvider === s.selectedProviderFromAdmin)?.sort((a, b) => new Date(a.approvalDate) > new Date(b.approvalDate) ? -1 : 1);
 
 		const postData = {
@@ -261,7 +277,7 @@ class ModalNewAppointmentForParents extends React.Component {
 	};
 
 	onSelectDate = (newValue) => {
-		const { listDependents } = this.props;
+		const { dependents } = this.props;
 		this.setState({ selectedDate: newValue, selectedTimeIndex: -1 });
 		if (newValue?.isSameOrAfter(new Date())) {
 			const { selectedProviderIndex, listProvider, appointmentType, selectedDependent } = this.state;
@@ -275,7 +291,7 @@ class ModalNewAppointmentForParents extends React.Component {
 					time.value = moment(time.value).set({ years, months, date });
 
 					let flag = true;
-					listDependents?.find(dependent => dependent._id === selectedDependent)?.appointments?.filter(appointment => appointment.status === 0)?.forEach(appointment => {
+					dependents?.find(dependent => dependent._id === selectedDependent)?.appointments?.filter(appointment => appointment.status === 0)?.forEach(appointment => {
 						if (time.value.isSame(moment(appointment.date))) {
 							flag = false;
 						}
@@ -309,12 +325,11 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	onChooseProvider = (providerIndex) => {
-		const { listProvider, selectedDate, selectedDependent, selectedSkillSet } = this.state;
-		const { listDependents } = this.props;
+		const { dependents, listProvider, selectedDate, selectedDependent, selectedSkillSet } = this.state;
 		const appointments = listProvider[providerIndex]?.appointments ?? [];
 
 		const flagAppointments = appointments?.filter(a => a?.dependent === selectedDependent && a?.flagStatus === 1);
-		const declinedProvider = listDependents?.find(d => d?._id === selectedDependent)?.declinedProviders?.find(p => p.provider === listProvider[providerIndex]?._id);
+		const declinedProvider = dependents?.find(d => d?._id === selectedDependent)?.declinedProviders?.find(p => p.provider === listProvider[providerIndex]?._id);
 
 		if (declinedProvider) {
 			message.error('The provider declined your request');
@@ -386,7 +401,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			time.value = moment(time.value).set({ years, months, date });
 
 			let flag = true;
-			listDependents?.find(dependent => dependent._id === selectedDependent)?.appointments?.filter(appointment => appointment.status === 0)?.forEach(appointment => {
+			dependents?.find(dependent => dependent._id === selectedDependent)?.appointments?.filter(appointment => appointment.status === 0)?.forEach(appointment => {
 				if (time.value.isSame(moment(appointment.date))) {
 					flag = false;
 				}
@@ -407,7 +422,7 @@ class ModalNewAppointmentForParents extends React.Component {
 		let subsidizedRate = 0;
 
 		if (selectedDependent) {
-			const currentGrade = listDependents?.find(dependent => dependent?._id === selectedDependent)?.currentGrade;
+			const currentGrade = dependents?.find(dependent => dependent?._id === selectedDependent)?.currentGrade;
 
 			if (['Pre-Nursery', 'Nursery', 'Kindergarten', 'Pre-1A'].includes(currentGrade)) {
 				standardRate = listProvider[providerIndex]?.academicLevel?.find(level => [currentGrade, 'Early Education'].includes(level.level))?.rate;
@@ -427,7 +442,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			}
 
 			if (selectedSkillSet) {
-				const dependent = listDependents?.find(d => d._id === selectedDependent);
+				const dependent = dependents?.find(d => d._id === selectedDependent);
 				const subsidies = dependent?.subsidy?.filter(s => s.skillSet === selectedSkillSet && s.status === ADMINAPPROVED && s.selectedProviderFromAdmin === listProvider[providerIndex]._id)?.sort((a, b) => new Date(a.approvalDate) > new Date(b.approvalDate) ? -1 : 1);
 				if (subsidies?.length) {
 					const totalSessions = subsidies[0]?.numberOfSessions || 0;
@@ -486,12 +501,11 @@ class ModalNewAppointmentForParents extends React.Component {
 	}
 
 	handleSelectDependent = (dependentId) => {
-		const { listDependents } = this.props;
-		const { searchKey, user } = this.state;
+		const { dependents, searchKey, user } = this.state;
 		this.setState({
 			selectedDependent: dependentId,
-			skillSet: user.role === 30 ? listDependents?.find(dependent => dependent._id === dependentId)?.services?.filter(s => user.providerInfo?.skillSet?.find(skill => skill?._id === s?._id)) : listDependents?.find(dependent => dependent._id === dependentId)?.services,
-			addressOptions: listDependents?.find(dependent => dependent._id === dependentId)?.school?.name ? [DEPENDENTHOME, PROVIDEROFFICE, listDependents?.find(dependent => dependent._id === dependentId)?.school?.name] : [DEPENDENTHOME, PROVIDEROFFICE],
+			skillSet: user.role === 30 ? dependents?.find(dependent => dependent._id === dependentId)?.services?.filter(s => user.providerInfo?.skillSet?.find(skill => skill?._id === s?._id)) : dependents?.find(dependent => dependent._id === dependentId)?.services,
+			addressOptions: dependents?.find(dependent => dependent._id === dependentId)?.school?.name ? [DEPENDENTHOME, PROVIDEROFFICE, dependents?.find(dependent => dependent._id === dependentId)?.school?.name] : [DEPENDENTHOME, PROVIDEROFFICE],
 			subsidyAvailable: false,
 			isSubsidyOnly: false,
 			appointmentType: APPOINTMENT,
@@ -587,8 +601,9 @@ class ModalNewAppointmentForParents extends React.Component {
 			user,
 			loadingSchedule,
 			subsidyAvailable,
+			loading,
+			dependents,
 		} = this.state;
-		const { listDependents } = this.props;
 		const props = {
 			name: 'file',
 			action: url + "clients/upload_document",
@@ -613,7 +628,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			onSubmit: this.createAppointment,
 			onCancel: this.onCloseModalScreening,
 			provider: listProvider[selectedProviderIndex],
-			dependent: listDependents?.find(dependent => dependent._id == selectedDependent),
+			dependent: dependents?.find(dependent => dependent._id == selectedDependent),
 			notes: notes,
 		}
 		const modalConfirmProps = {
@@ -626,322 +641,326 @@ class ModalNewAppointmentForParents extends React.Component {
 		return (
 			<Modal {...modalProps}>
 				<div className='new-appointment'>
-					<Form onFinish={() => appointmentType === SCREEN ? this.onOpenModalScreening() : this.createAppointment()} layout='vertical' ref={ref => this.form = ref}>
-						<div className='flex gap-5 items-center'>
-							<p className='font-30 mb-10'>{(appointmentType === APPOINTMENT || appointmentType === SUBSIDY) && intl.formatMessage(messages.newAppointment)}{appointmentType === EVALUATION && intl.formatMessage(messages.newEvaluation)}{appointmentType === SCREEN && intl.formatMessage(messages.newScreening)}</p>
-							{appointmentType === EVALUATION && selectedProviderIndex > -1 && (
-								<div className='font-20'>
-									<div>{Durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
-									<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
-								</div>
-							)}
-						</div>
-						<div className='flex flex-row items-center mb-10'>
-							<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}<sup>*</sup></p>
-							{subsidyAvailable && (
-								<div className='flex flex-row items-center ml-20 gap-5'>
-									<p className='mb-0'>Number of Sessions: {restSessions}</p>
-									<div className='flex items-center gap-2'>
-										<Switch size="small" checked={isSubsidyOnly} onChange={v => this.setState({ isSubsidyOnly: v, appointmentType: v ? SUBSIDY : APPOINTMENT })} />
-										<p className='mb-0'>{intl.formatMessage(messages.subsidyOnly)}</p>
+					{loading ? (
+						<div className='text-center'>...loading</div>
+					) : (
+						<Form onFinish={() => appointmentType === SCREEN ? this.onOpenModalScreening() : this.createAppointment()} layout='vertical' ref={ref => this.form = ref}>
+							<div className='flex gap-5 items-center'>
+								<p className='font-30 mb-10'>{(appointmentType === APPOINTMENT || appointmentType === SUBSIDY) && intl.formatMessage(messages.newAppointment)}{appointmentType === EVALUATION && intl.formatMessage(messages.newEvaluation)}{appointmentType === SCREEN && intl.formatMessage(messages.newScreening)}</p>
+								{appointmentType === EVALUATION && selectedProviderIndex > -1 && (
+									<div className='font-20'>
+										<div>{Durations?.find(a => a.value == listProvider[selectedProviderIndex]?.separateEvaluationDuration)?.label} evaluation</div>
+										<div>Rate: ${listProvider[selectedProviderIndex]?.separateEvaluationRate}</div>
 									</div>
-								</div>
-							)}
-						</div>
-						<Row gutter={20}>
-							<Col xs={24} sm={24} md={8} className='select-small'>
-								<Form.Item
-									name="dependent"
-									label={intl.formatMessage(msgCreateAccount.dependent)}
-									rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.dependent) }]}
-								>
-									<Select
-										showSearch
-										optionFilterProp="children"
-										filterOption={(input, option) => option.children?.join('')?.toLowerCase()?.includes(input.toLowerCase())}
-										filterSort={(optionA, optionB) => optionA.children?.join('').toLowerCase().localeCompare(optionB.children?.join('').toLowerCase())}
-										onChange={value => this.handleSelectDependent(value)}
-										placeholder={intl.formatMessage(msgCreateAccount.dependent)}
-									>
-										{listDependents?.map((dependent, index) => (
-											<Select.Option key={index} value={dependent._id}>{dependent.firstName} {dependent.lastName}</Select.Option>
-										))}
-									</Select>
-								</Form.Item>
-							</Col>
-							<Col xs={24} sm={24} md={8} className='select-small'>
-								<Form.Item
-									name="skill"
-									label={intl.formatMessage(msgCreateAccount.services)}
-									rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.servicesRequired) }]}
-								>
-									<Select
-										showSearch
-										optionFilterProp="children"
-										filterOption={(input, option) => option.children?.toLowerCase()?.includes(input?.toLowerCase())}
-										filterSort={(optionA, optionB) => optionA.children?.toLowerCase()?.localeCompare(optionB.children?.toLowerCase())}
-										onChange={v => this.handleSelectSkill(v)}
-										placeholder={intl.formatMessage(msgCreateAccount.services)}
-									>
-										{skillSet?.map((skill, index) => (
-											<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
-										))}
-									</Select>
-								</Form.Item>
-							</Col>
-							<Col xs={24} sm={24} md={8} className='select-small'>
-								<Form.Item
-									name="address"
-									label={intl.formatMessage(msgCreateAccount.location)}
-									rules={[{ required: [EVALUATION, APPOINTMENT, SUBSIDY].includes(appointmentType), message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.location) }]}
-								>
-									<Select
-										showSearch
-										optionFilterProp="children"
-										filterOption={(input, option) => option.children?.toLowerCase()?.includes(input?.toLowerCase())}
-										filterSort={(optionA, optionB) => optionA.children?.toLowerCase()?.localeCompare(optionB.children?.toLowerCase())}
-										onChange={v => this.handleChangeAddress(v)}
-										placeholder={intl.formatMessage(msgCreateAccount.location)}
-									>
-										{addressOptions?.map((address, index) => (
-											<Select.Option key={index} value={address}>{address}</Select.Option>
-										))}
-									</Select>
-								</Form.Item>
-							</Col>
-						</Row>
-						<Row gutter={14}>
-							<Col xs={24} sm={24} md={12}>
-								<Form.Item name="notes" label={intl.formatMessage(msgCreateAccount.notes)}>
-									<Input.TextArea rows={3} onChange={e => this.handleChangeNote(e.target.value)} placeholder='Additional information you’d like to share with the provider' />
-								</Form.Item>
-							</Col>
-							<Col xs={24} sm={24} md={12}>
-								<Form.Item name="additionalDocuments" label={intl.formatMessage(messages.additionalDocuments)}>
-									<Upload {...props}>
-										<Button size='small' type='primary' className='btn-upload'>
-											{intl.formatMessage(messages.upload).toUpperCase()} <BiUpload size={16} />
-										</Button>
-									</Upload>
-								</Form.Item>
-							</Col>
-						</Row>
-						{user.role === 30 ? null : (
-							<div className='choose-doctor'>
-								<p className='font-16 mt-10'>{intl.formatMessage(messages.selectProvider)}<sup>*</sup></p>
-								<div className='doctor-content'>
-									<Row>
-										<Col xs={24} sm={24} md={8} className='select-small'>
-											<Input
-												name='SearchProvider'
-												onChange={e => this.handleSearchProvider(e.target.value)}
-												placeholder={intl.formatMessage(messages.searchProvider)}
-												suffix={<BiSearch size={17} />}
-											/>
-										</Col>
-									</Row>
-									<div className='doctor-list' onWheel={(e) => this.scrollElement.current.scrollLeft += e.deltaY / 2} ref={this.scrollElement}>
-										{loadingSearchProvider ? <Spin spinning={loadingSearchProvider} size='large' className='p-10' /> : listProvider?.length > 0 ? listProvider?.map((provider, index) => (
-											<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
-												<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
-												<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
-												{selectedProvider === provider._id ? (
-													<BsCheck size={12} className='selected-doctor' />
-												) : null}
-												{user.role === 100 && provider.isPrivateForHmgh ? (
-													<MdAdminPanelSettings size={12} className='selected-private-provider' />
-												) : null}
-											</div>
-										)) : "No matching providers found. Please update the options to find an available provider."}
-									</div>
-									{providerErrorMessage.length > 0 && (<p className='text-left text-red mr-5'>{providerErrorMessage}</p>)}
-								</div>
+								)}
 							</div>
-						)}
-						<Row gutter={10}>
-							<Col xs={24} sm={24} md={10}>
-								<div className='provider-profile'>
-									<div className='flex flex-row items-center'>
-										<p className='font-16 font-700'>
-											{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}
-											{!!listProvider[selectedProviderIndex]?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
-											{user.role > 3 && (listProvider[selectedProviderIndex]?.isPrivateForHmgh || listProvider[selectedProviderIndex]?.manualSchedule?.find(a => a.isPrivate && a.location === address && selectedDate?.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })))) ? <FaCalendarAlt size={16} className="text-green500" /> : null}
-										</p>
-										<p className='font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent === selectedDependent && a.type === SCREEN && a.status === CLOSED) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
-									</div>
-									<div className='flex'>
-										<div className='flex-1'>
-											{listProvider[selectedProviderIndex]?.contactNumber?.map((phone, index) => (
-												<p key={index} className='font-12'>{phone.phoneNumber}</p>
-											))}
-											{listProvider[selectedProviderIndex]?.contactEmail?.map((email, index) => (
-												<p key={index} className='font-12'>{email.email}</p>
-											))}
-											{listProvider[selectedProviderIndex]?.serviceAddress && (
-												<p className='font-12'>{listProvider[selectedProviderIndex].serviceAddress}</p>
-											)}
-										</div>
-										<div className='flex-1 font-12'>
-											{standardRate ? <p>{intl.formatMessage(msgCreateAccount.rate)}: ${standardRate}</p> : ''}
-											{(subsidizedRate && subsidizedRate != standardRate) ? <p>{intl.formatMessage(messages.subsidizedRate)}: ${subsidizedRate}</p> : ''}
-											{cancellationFee ? <p>{intl.formatMessage(msgCreateAccount.cancellationFee)}: ${cancellationFee}</p> : ''}
+							<div className='flex flex-row items-center mb-10'>
+								<p className='font-16 mb-0'>{intl.formatMessage(messages.selectOptions)}<sup>*</sup></p>
+								{subsidyAvailable && (
+									<div className='flex flex-row items-center ml-20 gap-5'>
+										<p className='mb-0'>Number of Sessions: {restSessions}</p>
+										<div className='flex items-center gap-2'>
+											<Switch size="small" checked={isSubsidyOnly} onChange={v => this.setState({ isSubsidyOnly: v, appointmentType: v ? SUBSIDY : APPOINTMENT })} />
+											<p className='mb-0'>{intl.formatMessage(messages.subsidyOnly)}</p>
 										</div>
 									</div>
-									<div className='flex mt-10'>
-										<div className='flex-1'>
-											<p className='text-bold'>{intl.formatMessage(msgCreateAccount.services)}</p>
-											{listProvider[selectedProviderIndex]?.skillSet?.map((skill, index) => (
-												<p key={index} className='font-12'>{skill.name}</p>
+								)}
+							</div>
+							<Row gutter={20}>
+								<Col xs={24} sm={24} md={8} className='select-small'>
+									<Form.Item
+										name="dependent"
+										label={intl.formatMessage(msgCreateAccount.dependent)}
+										rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.dependent) }]}
+									>
+										<Select
+											showSearch
+											optionFilterProp="children"
+											filterOption={(input, option) => option.children?.join('')?.toLowerCase()?.includes(input.toLowerCase())}
+											filterSort={(optionA, optionB) => optionA.children?.join('').toLowerCase().localeCompare(optionB.children?.join('').toLowerCase())}
+											onChange={value => this.handleSelectDependent(value)}
+											placeholder={intl.formatMessage(msgCreateAccount.dependent)}
+										>
+											{dependents?.map((dependent, index) => (
+												<Select.Option key={index} value={dependent._id}>{dependent.firstName} {dependent.lastName}</Select.Option>
 											))}
-										</div>
-										<div className='flex-1'>
-											<p className='text-bold'>{intl.formatMessage(messages.gradeLevels)}</p>
-											{listProvider[selectedProviderIndex]?.academicLevel?.map((level, i) => (
-												<p className='font-12' key={i}>{level.level}</p>
+										</Select>
+									</Form.Item>
+								</Col>
+								<Col xs={24} sm={24} md={8} className='select-small'>
+									<Form.Item
+										name="skill"
+										label={intl.formatMessage(msgCreateAccount.services)}
+										rules={[{ required: true, message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.servicesRequired) }]}
+									>
+										<Select
+											showSearch
+											optionFilterProp="children"
+											filterOption={(input, option) => option.children?.toLowerCase()?.includes(input?.toLowerCase())}
+											filterSort={(optionA, optionB) => optionA.children?.toLowerCase()?.localeCompare(optionB.children?.toLowerCase())}
+											onChange={v => this.handleSelectSkill(v)}
+											placeholder={intl.formatMessage(msgCreateAccount.services)}
+										>
+											{skillSet?.map((skill, index) => (
+												<Select.Option key={index} value={skill._id}>{skill.name}</Select.Option>
 											))}
-										</div>
-									</div>
-									<p className='text-bold mt-10'>{intl.formatMessage(messages.profile)}</p>
-									<div className='profile-text'>
-										<Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-											{listProvider[selectedProviderIndex]?.publicProfile}
-										</Paragraph>
-									</div>
-								</div>
-							</Col>
-							<Col xs={24} sm={24} md={14}>
-								<div className='px-20'>
-									<p className='font-700'>{intl.formatMessage(msgCreateAccount.selectDateTime)}<sup>*</sup></p>
-									<div className='calendar'>
-										<Row gutter={15}>
-											<Col xs={24} sm={24} md={12}>
-												<Calendar
-													fullscreen={false}
-													value={selectedDate}
-													dateCellRender={date => {
-														if (selectedProviderIndex > -1 && user.role > 3) {
-															const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek === date.day() && time.location === address && time.isPrivate);
-															if (availableTime) {
-																const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
-																const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 });
-																if (date.isBetween(availableFromDate, availableToDate) && !listProvider[selectedProviderIndex]?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() === date.year() && moment(blackoutDate).month() === date.month() && moment(blackoutDate).date() === date.date())) {
-																	return (<div className='absolute top-0 left-0 h-100 w-100 border border-1 border-warning rounded-2'></div>)
-																}
-															}
-														}
-													}}
-													onSelect={this.onSelectDate}
-													disabledDate={(date) => {
-														if (date.set({ hours: 0, minutes: 0, seconds: 0 }).isBefore(moment())) {
-															return true;
-														}
-
-														if (date.isAfter(moment()) && date.day() === 6) {
-															return true;
-														}
-
-														if (selectedProviderIndex > -1) {
-															const range = listProvider[selectedProviderIndex]?.manualSchedule?.find(d => d.dayInWeek === date.day() && d.location === address && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
-															if (range) {
-																if (user.role < 100 && range.isPrivate) {
-																	return true;
-																}
-															} else {
-																return true;
-															}
-															if (listProvider[selectedProviderIndex]?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() === date.year() && moment(blackoutDate).month() === date.month() && moment(blackoutDate).date() === date.date())) {
-																return true;
-															}
-
-															if (listProvider[selectedProviderIndex]?.durationValue) {
-																if (date.isSameOrAfter(moment().add(listProvider[selectedProviderIndex]?.durationValue, listProvider[selectedProviderIndex]?.durationType).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }))) {
-																	return true;
-																}
-															} else {
-																if (date.isSameOrAfter(moment().add(15, 'years').set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }))) {
-																	return true;
-																}
-															}
-														}
-
-														return false;
-													}}
-													headerRender={() => (
-														<div style={{ marginBottom: 10 }}>
-															<Row gutter={8} justify="space-between" align="middle">
-																<Col>
-																	<p className='font-12 mb-0'>{selectedDate?.format('MMMM YYYY')}</p>
-																</Col>
-																<Col>
-																	<Button
-																		type='text'
-																		className='mr-10 left-btn'
-																		icon={<BiChevronLeft size={25} />}
-																		onClick={this.prevMonth}
-																	/>
-																	<Button
-																		type='text'
-																		className='right-btn'
-																		icon={<BiChevronRight size={25} />}
-																		onClick={this.nextMonth}
-																	/>
-																</Col>
-															</Row>
-														</div>
-													)}
+										</Select>
+									</Form.Item>
+								</Col>
+								<Col xs={24} sm={24} md={8} className='select-small'>
+									<Form.Item
+										name="address"
+										label={intl.formatMessage(msgCreateAccount.location)}
+										rules={[{ required: [EVALUATION, APPOINTMENT, SUBSIDY].includes(appointmentType), message: intl.formatMessage(messages.pleaseSelect) + ' ' + intl.formatMessage(msgCreateAccount.location) }]}
+									>
+										<Select
+											showSearch
+											optionFilterProp="children"
+											filterOption={(input, option) => option.children?.toLowerCase()?.includes(input?.toLowerCase())}
+											filterSort={(optionA, optionB) => optionA.children?.toLowerCase()?.localeCompare(optionB.children?.toLowerCase())}
+											onChange={v => this.handleChangeAddress(v)}
+											placeholder={intl.formatMessage(msgCreateAccount.location)}
+										>
+											{addressOptions?.map((address, index) => (
+												<Select.Option key={index} value={address}>{address}</Select.Option>
+											))}
+										</Select>
+									</Form.Item>
+								</Col>
+							</Row>
+							<Row gutter={14}>
+								<Col xs={24} sm={24} md={12}>
+									<Form.Item name="notes" label={intl.formatMessage(msgCreateAccount.notes)}>
+										<Input.TextArea rows={3} onChange={e => this.handleChangeNote(e.target.value)} placeholder='Additional information you’d like to share with the provider' />
+									</Form.Item>
+								</Col>
+								<Col xs={24} sm={24} md={12}>
+									<Form.Item name="additionalDocuments" label={intl.formatMessage(messages.additionalDocuments)}>
+										<Upload {...props}>
+											<Button size='small' type='primary' className='btn-upload'>
+												{intl.formatMessage(messages.upload).toUpperCase()} <BiUpload size={16} />
+											</Button>
+										</Upload>
+									</Form.Item>
+								</Col>
+							</Row>
+							{user.role === 30 ? null : (
+								<div className='choose-doctor'>
+									<p className='font-16 mt-10'>{intl.formatMessage(messages.selectProvider)}<sup>*</sup></p>
+									<div className='doctor-content'>
+										<Row>
+											<Col xs={24} sm={24} md={8} className='select-small'>
+												<Input
+													name='SearchProvider'
+													onChange={e => this.handleSearchProvider(e.target.value)}
+													placeholder={intl.formatMessage(messages.searchProvider)}
+													suffix={<BiSearch size={17} />}
 												/>
 											</Col>
-											<Col xs={24} sm={24} md={12}>
-												<div className='grid grid-columns-2 gap-2'>
-													{arrTime?.map((time, index) => (
-														<div key={index}>
-															<div className={`${selectedTimeIndex === index ? 'active' : ''} ${time.active ? 'time-available' : 'time-not-available'} ${listProvider[selectedProviderIndex]?.manualSchedule?.find(a => a.dayInWeek === selectedDate.day() && a.location === address && a.isPrivate && selectedDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })) && (time.value?.isBetween(moment(time.value).clone().set({ hours: a.openHour, minutes: a.openMin }), moment(time.value).clone().set({ hours: a.closeHour, minutes: a.closeMin })) || time.value?.isSame(moment(time.value).set({ hours: a.openHour, minutes: a.openMin })))) ? 'border border-1 border-warning' : ''}`} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
-																<p className='font-12 mb-0 flex items-center justify-center gap-1'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
-															</div>
-														</div>
-													))}
-												</div>
-											</Col>
 										</Row>
+										<div className='doctor-list' onWheel={(e) => this.scrollElement.current.scrollLeft += e.deltaY / 2} ref={this.scrollElement}>
+											{loadingSearchProvider ? <Spin spinning={loadingSearchProvider} size='large' className='p-10' /> : listProvider?.length > 0 ? listProvider?.map((provider, index) => (
+												<div key={index} className='doctor-item' onClick={() => this.onChooseProvider(index)}>
+													<Avatar shape="square" size="large" src='../images/doctor_ex2.jpeg' />
+													<p className='font-12 text-center'>{`${provider.firstName ?? ''} ${provider.lastName ?? ''}`}</p>
+													{selectedProvider === provider._id ? (
+														<BsCheck size={12} className='selected-doctor' />
+													) : null}
+													{user.role === 100 && provider.isPrivateForHmgh ? (
+														<MdAdminPanelSettings size={12} className='selected-private-provider' />
+													) : null}
+												</div>
+											)) : "No matching providers found. Please update the options to find an available provider."}
+										</div>
+										{providerErrorMessage.length > 0 && (<p className='text-left text-red mr-5'>{providerErrorMessage}</p>)}
 									</div>
 								</div>
-							</Col>
-						</Row>
-						{visibleModalScreening && <ModalNewScreening {...modalScreeningProps} />}
-						{visibleModalConfirm && <ModalConfirm {...modalConfirmProps} />}
-						{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
-						<Row className='justify-end gap-2 mt-10'>
-							<Button key="back" onClick={this.props.onCancel}>
-								{intl.formatMessage(messages.goBack).toUpperCase()}
-							</Button>
-							{user.role === PROVIDER && (appointmentType === APPOINTMENT || appointmentType === SUBSIDY) && listProvider[selectedProviderIndex]?.isSeparateEvaluationRate ? (
-								<Dropdown.Button
-									loading={loadingSchedule}
-									icon={<DownOutlined />}
-									type='primary'
-									htmlType='submit'
-									style={{ width: 'auto' }}
-									placement='topRight'
-									trigger='click'
-									menu={{
-										items: [
-											{
-												label: intl.formatMessage(messages.bookYourEvaluation),
-												key: '1',
-												onClick: () => this.createAppointment({ isEvaluation: true }),
-											},
-										]
-									}}
-								>
-									{intl.formatMessage(messages.bookYourSession)}
-								</Dropdown.Button>
-							) : (
-								<Button key="submit" type="primary" htmlType='submit' loading={loadingSchedule}>
-									{intl.formatMessage(appointmentType === 1 ? messages.bookYourScreening : appointmentType === 2 ? messages.bookYourEvaluation : messages.bookYourSession)?.toUpperCase()}
-								</Button>
 							)}
-						</Row>
-					</Form>
+							<Row gutter={10}>
+								<Col xs={24} sm={24} md={10}>
+									<div className='provider-profile'>
+										<div className='flex flex-row items-center'>
+											<p className='font-16 font-700'>
+												{`${listProvider[selectedProviderIndex]?.firstName ?? ''} ${listProvider[selectedProviderIndex]?.lastName ?? ''}`}
+												{!!listProvider[selectedProviderIndex]?.academicLevel?.length ? <FaHandHoldingUsd size={16} className='mx-10 text-green500' /> : null}
+												{user.role > 3 && (listProvider[selectedProviderIndex]?.isPrivateForHmgh || listProvider[selectedProviderIndex]?.manualSchedule?.find(a => a.isPrivate && a.location === address && selectedDate?.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })))) ? <FaCalendarAlt size={16} className="text-green500" /> : null}
+											</p>
+											<p className='font-700 ml-auto text-primary'>{listProvider[selectedProviderIndex]?.isNewClientScreening ? listProvider[selectedProviderIndex]?.appointments?.find(a => a.dependent === selectedDependent && a.type === SCREEN && a.status === CLOSED) ? intl.formatMessage(messages.screenCompleted) : intl.formatMessage(messages.screeningRequired) : ''}</p>
+										</div>
+										<div className='flex'>
+											<div className='flex-1'>
+												{listProvider[selectedProviderIndex]?.contactNumber?.map((phone, index) => (
+													<p key={index} className='font-12'>{phone.phoneNumber}</p>
+												))}
+												{listProvider[selectedProviderIndex]?.contactEmail?.map((email, index) => (
+													<p key={index} className='font-12'>{email.email}</p>
+												))}
+												{listProvider[selectedProviderIndex]?.serviceAddress && (
+													<p className='font-12'>{listProvider[selectedProviderIndex].serviceAddress}</p>
+												)}
+											</div>
+											<div className='flex-1 font-12'>
+												{standardRate ? <p>{intl.formatMessage(msgCreateAccount.rate)}: ${standardRate}</p> : ''}
+												{(subsidizedRate && subsidizedRate != standardRate) ? <p>{intl.formatMessage(messages.subsidizedRate)}: ${subsidizedRate}</p> : ''}
+												{cancellationFee ? <p>{intl.formatMessage(msgCreateAccount.cancellationFee)}: ${cancellationFee}</p> : ''}
+											</div>
+										</div>
+										<div className='flex mt-10'>
+											<div className='flex-1'>
+												<p className='text-bold'>{intl.formatMessage(msgCreateAccount.services)}</p>
+												{listProvider[selectedProviderIndex]?.skillSet?.map((skill, index) => (
+													<p key={index} className='font-12'>{skill.name}</p>
+												))}
+											</div>
+											<div className='flex-1'>
+												<p className='text-bold'>{intl.formatMessage(messages.gradeLevels)}</p>
+												{listProvider[selectedProviderIndex]?.academicLevel?.map((level, i) => (
+													<p className='font-12' key={i}>{level.level}</p>
+												))}
+											</div>
+										</div>
+										<p className='text-bold mt-10'>{intl.formatMessage(messages.profile)}</p>
+										<div className='profile-text'>
+											<Paragraph className='font-12 mb-0' ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
+												{listProvider[selectedProviderIndex]?.publicProfile}
+											</Paragraph>
+										</div>
+									</div>
+								</Col>
+								<Col xs={24} sm={24} md={14}>
+									<div className='px-20'>
+										<p className='font-700'>{intl.formatMessage(msgCreateAccount.selectDateTime)}<sup>*</sup></p>
+										<div className='calendar'>
+											<Row gutter={15}>
+												<Col xs={24} sm={24} md={12}>
+													<Calendar
+														fullscreen={false}
+														value={selectedDate}
+														dateCellRender={date => {
+															if (selectedProviderIndex > -1 && user.role > 3) {
+																const availableTime = listProvider[selectedProviderIndex]?.manualSchedule?.find(time => time.dayInWeek === date.day() && time.location === address && time.isPrivate);
+																if (availableTime) {
+																	const availableFromDate = moment().set({ years: availableTime.fromYear, months: availableTime.fromMonth, dates: availableTime.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+																	const availableToDate = moment().set({ years: availableTime.toYear, months: availableTime.toMonth, dates: availableTime.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 });
+																	if (date.isBetween(availableFromDate, availableToDate) && !listProvider[selectedProviderIndex]?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() === date.year() && moment(blackoutDate).month() === date.month() && moment(blackoutDate).date() === date.date())) {
+																		return (<div className='absolute top-0 left-0 h-100 w-100 border border-1 border-warning rounded-2'></div>)
+																	}
+																}
+															}
+														}}
+														onSelect={this.onSelectDate}
+														disabledDate={(date) => {
+															if (date.set({ hours: 0, minutes: 0, seconds: 0 }).isBefore(moment())) {
+																return true;
+															}
+
+															if (date.isAfter(moment()) && date.day() === 6) {
+																return true;
+															}
+
+															if (selectedProviderIndex > -1) {
+																const range = listProvider[selectedProviderIndex]?.manualSchedule?.find(d => d.dayInWeek === date.day() && d.location === address && date.isBetween(moment().set({ years: d.fromYear, months: d.fromMonth, dates: d.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: d.toYear, months: d.toMonth, dates: d.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+																if (range) {
+																	if (user.role < 100 && range.isPrivate) {
+																		return true;
+																	}
+																} else {
+																	return true;
+																}
+																if (listProvider[selectedProviderIndex]?.blackoutDates?.find(blackoutDate => moment(blackoutDate).year() === date.year() && moment(blackoutDate).month() === date.month() && moment(blackoutDate).date() === date.date())) {
+																	return true;
+																}
+
+																if (listProvider[selectedProviderIndex]?.durationValue) {
+																	if (date.isSameOrAfter(moment().add(listProvider[selectedProviderIndex]?.durationValue, listProvider[selectedProviderIndex]?.durationType).set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }))) {
+																		return true;
+																	}
+																} else {
+																	if (date.isSameOrAfter(moment().add(15, 'years').set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }))) {
+																		return true;
+																	}
+																}
+															}
+
+															return false;
+														}}
+														headerRender={() => (
+															<div style={{ marginBottom: 10 }}>
+																<Row gutter={8} justify="space-between" align="middle">
+																	<Col>
+																		<p className='font-12 mb-0'>{selectedDate?.format('MMMM YYYY')}</p>
+																	</Col>
+																	<Col>
+																		<Button
+																			type='text'
+																			className='mr-10 left-btn'
+																			icon={<BiChevronLeft size={25} />}
+																			onClick={this.prevMonth}
+																		/>
+																		<Button
+																			type='text'
+																			className='right-btn'
+																			icon={<BiChevronRight size={25} />}
+																			onClick={this.nextMonth}
+																		/>
+																	</Col>
+																</Row>
+															</div>
+														)}
+													/>
+												</Col>
+												<Col xs={24} sm={24} md={12}>
+													<div className='grid grid-columns-2 gap-2'>
+														{arrTime?.map((time, index) => (
+															<div key={index}>
+																<div className={`${selectedTimeIndex === index ? 'active' : ''} ${time.active ? 'time-available' : 'time-not-available'} ${listProvider[selectedProviderIndex]?.manualSchedule?.find(a => a.dayInWeek === selectedDate.day() && a.location === address && a.isPrivate && selectedDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })) && (time.value?.isBetween(moment(time.value).clone().set({ hours: a.openHour, minutes: a.openMin }), moment(time.value).clone().set({ hours: a.closeHour, minutes: a.closeMin })) || time.value?.isSame(moment(time.value).set({ hours: a.openHour, minutes: a.openMin })))) ? 'border border-1 border-warning' : ''}`} onClick={() => time.active ? this.onSelectTime(index) : this.onSelectTime(-1)}>
+																	<p className='font-12 mb-0 flex items-center justify-center gap-1'><GoPrimitiveDot className={`${time.active ? 'active' : 'inactive'}`} size={15} />{moment(time.value)?.format('hh:mm a')}</p>
+																</div>
+															</div>
+														))}
+													</div>
+												</Col>
+											</Row>
+										</div>
+									</div>
+								</Col>
+							</Row>
+							{visibleModalScreening && <ModalNewScreening {...modalScreeningProps} />}
+							{visibleModalConfirm && <ModalConfirm {...modalConfirmProps} />}
+							{errorMessage.length > 0 && (<p className='text-right text-red mr-5'>{errorMessage}</p>)}
+							<Row className='justify-end gap-2 mt-10'>
+								<Button key="back" onClick={this.props.onCancel}>
+									{intl.formatMessage(messages.goBack).toUpperCase()}
+								</Button>
+								{user.role === PROVIDER && (appointmentType === APPOINTMENT || appointmentType === SUBSIDY) && listProvider[selectedProviderIndex]?.isSeparateEvaluationRate ? (
+									<Dropdown.Button
+										loading={loadingSchedule}
+										icon={<DownOutlined />}
+										type='primary'
+										htmlType='submit'
+										style={{ width: 'auto' }}
+										placement='topRight'
+										trigger='click'
+										menu={{
+											items: [
+												{
+													label: intl.formatMessage(messages.bookYourEvaluation),
+													key: '1',
+													onClick: () => this.createAppointment({ isEvaluation: true }),
+												},
+											]
+										}}
+									>
+										{intl.formatMessage(messages.bookYourSession)}
+									</Dropdown.Button>
+								) : (
+									<Button key="submit" type="primary" htmlType='submit' loading={loadingSchedule}>
+										{intl.formatMessage(appointmentType === 1 ? messages.bookYourScreening : appointmentType === 2 ? messages.bookYourEvaluation : messages.bookYourSession)?.toUpperCase()}
+									</Button>
+								)}
+							</Row>
+						</Form>
+					)}
 				</div>
 			</Modal >
 		);
@@ -949,6 +968,7 @@ class ModalNewAppointmentForParents extends React.Component {
 };
 
 const mapStateToProps = state => ({
+	skillSet: state.auth.skillSet,
 	user: state.auth.user,
 	appointments: state.appointments.dataAppointments,
 	appointmentsInMonth: state.appointments.dataAppointmentsMonth,
