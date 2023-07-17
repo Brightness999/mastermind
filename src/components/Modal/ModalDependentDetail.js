@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Input, Divider, Card, Button, message, Row, Col, Space, Table } from 'antd';
+import { Modal, Input, Divider, Card, Button, message, Row, Col, Space, Table, Popconfirm } from 'antd';
 import intl from 'react-intl-universal';
 import moment from 'moment';
 import { connect } from 'react-redux';
@@ -8,10 +8,12 @@ import { CloseOutlined } from '@ant-design/icons';
 
 import messages from './messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
-import { createPrivateNote, deletePrivateNote, setFlagBalance, updateInvoice, updatePrivateNote } from 'utils/api/apiList';
+import { acceptDependent, appealDependent, createPrivateNote, declineDependent, deletePrivateNote, getDependent, setFlagBalance, updatePrivateNote } from 'utils/api/apiList';
 import request from 'utils/api/request';
 import ModalNewSubsidyRequest from './ModalNewSubsidyRequest';
 import ModalBalance from './ModalBalance';
+import ModalSelectProvider from './ModalSelectProvider';
+import ModalCreateNote from './ModalCreateNote';
 import { APPOINTMENT, BALANCE, CLOSED, CONSULTATION, EVALUATION, PENDING, SUBSIDY } from 'routes/constant';
 import './style/index.less';
 import '../../assets/styles/login.less';
@@ -27,6 +29,24 @@ class ModalDependentDetail extends React.Component {
 			visibleNewSubsidy: false,
 			visibleBalance: false,
 			isUpdated: false,
+			visibleSelectProvider: false,
+			visibleModalMessage: false,
+			selectedProviderId: undefined,
+		}
+	}
+
+	componentDidMount() {
+		const { dependent } = this.props;
+
+		if (dependent?._id) {
+			request.post(getDependent, { dependentId: dependent?._id }).then(res => {
+				const { success, data } = res;
+				if (success) {
+					this.setState({ dependent: data });
+				}
+			}).catch(err => {
+				message.error(err.message);
+			})
 		}
 	}
 
@@ -245,8 +265,79 @@ class ModalDependentDetail extends React.Component {
 		}).catch(err => message.error(err.message));
 	}
 
+	handleDeclineDependent = () => {
+		const { user } = this.props;
+		const { dependent } = this.state;
+		const data = {
+			dependentId: dependent?._id,
+			providerId: user?.providerInfo?._id,
+		}
+
+		request.post(declineDependent, data).then(result => {
+			const { success, data } = result;
+			if (success) {
+				this.setState({ dependent: { ...dependent, declinedProviders: data.declinedProviders } });
+			}
+		}).catch(error => {
+			message.error(error.message);
+		})
+	}
+
+	handleAcceptDependent = () => {
+		const { user } = this.props;
+		const { dependent } = this.state;
+		const data = {
+			dependentId: dependent?._id,
+			providerId: user?.providerInfo?._id,
+		}
+
+		request.post(acceptDependent, data).then(result => {
+			if (result.success) {
+				this.setState({ dependent: { ...dependent, declinedProviders: dependent?.declinedProviders?.filter(p => p.provider?._id != user.providerInfo?._id) } })
+			}
+		}).catch(error => {
+			message.error(error.message);
+		})
+	}
+
+	handleAppealDependent = (msg) => {
+		this.closeModalMessage();
+		const { dependent, selectedProviderId } = this.state;
+		const data = {
+			dependentId: dependent?._id,
+			providerId: selectedProviderId,
+			message: msg,
+		}
+
+		request.post(appealDependent, data).then(result => {
+			if (result.success) {
+				message.success('Your request has been submitted. Please allow up to 24 hours for the provider to review this.');
+				this.setState({ dependent: { ...dependent, declinedProviders: dependent.declinedProviders?.map(p => p.provider?._id === selectedProviderId ? ({ provider: p.provider, isAppeal: true }) : p) } });
+				console.log(selectedProviderId, this.state.dependent.declinedProviders?.find(p => p.provider?._id === selectedProviderId), this.state.dependent.declinedProviders?.map(p => p.provider?._id === selectedProviderId ? ({ provider: p.provider, isAppeal: true }) : p))
+			}
+		}).catch(error => {
+			message.error(error.message);
+		})
+	}
+
+	openModalSelectProvider = () => {
+		this.setState({ visibleSelectProvider: true });
+	}
+
+	closeModalSelectProvider = () => {
+		this.setState({ visibleSelectProvider: false, selectedProviderId: undefined });
+	}
+
+	submitModalSelectProvider = (data) => {
+		this.setState({ selectedProviderId: data.provider, visibleSelectProvider: false, visibleModalMessage: true });
+	}
+
+	closeModalMessage = () => {
+		this.setState({ visibleModalMessage: false });
+	}
+
 	render() {
-		const { dependent, selectedNoteId, isNew, isUpdated, visibleBalance, visibleNewSubsidy } = this.state;
+		const { dependent, selectedNoteId, isNew, isUpdated, visibleBalance, visibleNewSubsidy, visibleSelectProvider, visibleModalMessage } = this.state;
 		const { user } = this.props;
 		const modalProps = {
 			className: 'modal-dependent',
@@ -286,22 +377,66 @@ class ModalDependentDetail extends React.Component {
 			dependent,
 		}
 
+		const modalSelectProviderProps = {
+			visible: visibleSelectProvider,
+			onSubmit: this.submitModalSelectProvider,
+			onCancel: this.closeModalSelectProvider,
+			providers: dependent.declinedProviders?.filter(p => !p.isAppeal),
+		}
+
+		const modalMessageProps = {
+			visible: visibleModalMessage,
+			title: 'Message',
+			onSubmit: this.handleAppealDependent,
+			onCancel: this.closeModalMessage,
+		}
+
 		let unpaidInvoices = dependent?.invoices?.filter(a => !a.isPaid && a.type === 1);
 		if (user.role === 30) {
 			unpaidInvoices = unpaidInvoices?.filter(a => a.provider === user.providerInfo?._id);
 		}
+		console.log(dependent)
 
 		return (
 			<Modal {...modalProps}>
 				<div className='flex justify-between bg-primary text-white header flex-row items-center gap-2'>
 					<div className='flex-1 flex items-center gap-2'>
 						<div>
-							<b className='font-20'>NAME: {`${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`}</b>
+							<b className='font-20'>NAME: {`${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`}{((user?.role === 30 && dependent?.declinedProviders?.find(p => p.provider === user?.providerInfo?._id)) || ((user?.role === 3 || user?.role > 900) && dependent?.declinedProviders?.length)) ? '(Rejected)' : ''}</b>
 							{dependent.isRemoved ? "(Graduated)" : null}
 						</div>
-						{(user?.role === 3 || user?.role > 900) ? <Button type='primary' size='small' onClick={() => this.onOpenModalNewSubsidy()}>REQUEST SUBSIDY</Button> : null}
-						{user?.role != 3 ? <Button type='primary' size='small' onClick={() => this.onAddComment()}>ADD COMMENT</Button> : null}
-						{((user?.role === 30 || user?.role > 900) && unpaidInvoices?.length) ? <Button type='primary' size='small' onClick={() => this.onShowModalBalance(dependent)}>FLAG DEPENDENT</Button> : null}
+						{(user?.role === 3 || user?.role > 900) ? <Button type='primary' size='small' onClick={this.onOpenModalNewSubsidy}>REQUEST SUBSIDY</Button> : null}
+						{user?.role != 3 ? <Button type='primary' size='small' onClick={this.onAddComment}>ADD COMMENT</Button> : null}
+						{((user?.role === 30 || user?.role > 900) && unpaidInvoices?.length) ? <Button type='primary' size='small' onClick={this.onShowModalBalance}>FLAG DEPENDENT</Button> : null}
+						{user?.role === 30 ? dependent?.declinedProviders?.find(p => p.provider?._id === user?.providerInfo?._id && p.isAppeal) ? (
+							<Popconfirm
+								title="Are you sure to accept this student?"
+								onConfirm={this.handleAcceptDependent}
+								okText="Yes"
+								cancelText="No"
+							>
+								<Button type='primary' size='small'>ACCEPT</Button>
+							</Popconfirm>
+						) : dependent?.declinedProviders?.find(p => p.provider === user?.providerInfo?._id) ? null : (
+							<Popconfirm
+								title="Are you sure to decline this student?"
+								onConfirm={this.handleDeclineDependent}
+								okText="Yes"
+								cancelText="No"
+							>
+								<Button type='primary' size='small'>DECLINE</Button>
+							</Popconfirm>
+						) : null}
+						{((user?.role === 3 || user?.role > 900) && dependent?.declinedProviders?.filter(p => !p.isAppeal)?.length) ? (
+							<Popconfirm
+								title="Are you sure to appeal to a provider?"
+								onConfirm={this.openModalSelectProvider}
+								okText="Yes"
+								cancelText="No"
+							>
+								<Button type='primary' size='small'>APPEAL</Button>
+							</Popconfirm>
+						) : null}
 					</div>
 					<CloseOutlined onClick={this.props.onCancel} />
 				</div>
@@ -419,6 +554,8 @@ class ModalDependentDetail extends React.Component {
 				</Card>
 				{visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
 				{visibleBalance && <ModalBalance {...modalBalanceProps} />}
+				{visibleSelectProvider && <ModalSelectProvider {...modalSelectProviderProps} />}
+				{visibleModalMessage && <ModalCreateNote {...modalMessageProps} />}
 			</Modal>
 		);
 	}

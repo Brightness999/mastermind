@@ -45,12 +45,12 @@ class ModalProcessAppointment extends React.Component {
           <div className='flex gap-2 btn-footer'>
             {event?.type === EVALUATION ? (
               <>
-                <Button onClick={() => this.props.onCancel()}>{intl.formatMessage(messages.cancel)}</Button>
+                <Button onClick={() => this.props.onDecline(note, publicFeedback)}>{intl.formatMessage(messages.decline)} {intl.formatMessage(msgCreateAccount.dependent)}</Button>
                 <Button type='primary' onClick={() => this.props.onConfirm(note, publicFeedback)}>{intl.formatMessage(msgCreateAccount.confirm)}</Button>
               </>
             ) : (
               <>
-                {event?.type != CONSULTATION ? <Button type='primary' block onClick={() => this.props.onDecline(note, publicFeedback)}>{intl.formatMessage(messages.decline)}</Button> : null}
+                {event?.type != CONSULTATION ? <Button type='primary' block onClick={() => event?.type === SCREEN ? this.props.onDeclineDependent(note, publicFeedback) : this.props.onDecline(note, publicFeedback)}>{intl.formatMessage(messages.decline)} {event?.type === SCREEN ? intl.formatMessage(msgCreateAccount.dependent) : ''}</Button> : null}
                 {(event?.type === SCREEN && event?.provider?.isSeparateEvaluationRate) ? <Button type='primary' block onClick={() => this.props.onSubmit([], false, note, publicFeedback)}>{intl.formatMessage(messages.toEvaluation)}</Button> : null}
                 {event?.type === SCREEN ? <Button type='primary' block onClick={() => this.props.onSubmit([], true, note, publicFeedback)}>{intl.formatMessage(messages.toStandardSession)}</Button> : null}
                 {event?.type === CONSULTATION ? <Button type='primary' block onClick={() => this.props.onConfirmNoShow(note, publicFeedback)}>{intl.formatMessage(msgDrawer.markAsNoShow)}</Button> : null}

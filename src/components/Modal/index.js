@@ -25,6 +25,7 @@ import ModalCancelForAdmin from './ModalCancelForAdmin';
 import ModalSchoolDetail from './ModalSchoolDetail';
 import ModalPay from './ModalPay';
 import ModalProviderDetail from './ModalProviderDetail';
+import ModalSelectProvider from './ModalSelectProvider';
 
 export {
   ModalCreateDone,
@@ -54,4 +55,5 @@ export {
   ModalSchoolDetail,
   ModalPay,
   ModalProviderDetail,
+  ModalSelectProvider,
 }

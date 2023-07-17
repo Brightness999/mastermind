@@ -151,10 +151,25 @@ class MainHeader extends Component {
           this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
           this.showNotificationForAppointmentUpdate(data.data);
           break;
+        case "decline_dependent": case "accept_dependent":
+          this.props.setCountOfUnreadNotifications(this.props.countOfUnreadNotifications + 1);
+          this.showNotificationDeclineDependent(data.data);
+          break;
         case 'meeting_link': this.props.setMeetingLink(data.data); break;
         default: break;
       }
     })
+  }
+
+  showNotificationDeclineDependent(message) {
+    notification.close('receive-notification');
+    notification.open({
+      key: 'receive-notification',
+      type: 'info',
+      duration: 10,
+      description: message,
+      onClick: () => notification.destroy(),
+    });
   }
 
   showNotificationForAppointmentUpdate(data) {

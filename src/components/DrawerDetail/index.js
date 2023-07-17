@@ -19,7 +19,7 @@ import msgDashboard from 'routes/User/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import request, { encryptParam } from 'utils/api/request';
 import { setAppointments, setAppointmentsInMonth, getInvoiceList } from 'src/redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from 'utils/api/apiList';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, declineDependent, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from 'utils/api/apiList';
 import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from 'routes/constant';
 import './style/index.less';
 
@@ -334,6 +334,31 @@ class DrawerDetail extends Component {
         items: this.state.items,
       }
       request.post(declineAppointmentForProvider, data).then(result => {
+        if (result.success) {
+          this.setState({ errorMessage: '' });
+          this.updateAppointments(result.data);
+        } else {
+          this.setState({ errorMessage: result.data });
+        }
+      }).catch(error => {
+        this.setState({ errorMessage: error.message });
+      })
+    }
+  }
+
+  handleDeclineDependent = (note, publicFeedback) => {
+    this.setState({ visibleProcess: false, visibleInvoice: false });
+    const { event } = this.props;
+
+    if (event?._id) {
+      const data = {
+        appointmentId: event._id,
+        dependentId: event.dependent?._id,
+        providerId: event.provider?._id,
+        publicFeedback: publicFeedback ? publicFeedback : this.state.publicFeedback,
+        note: note,
+      }
+      request.post(declineDependent, data).then(result => {
         if (result.success) {
           this.setState({ errorMessage: '' });
           this.updateAppointments(result.data);
@@ -850,6 +875,7 @@ class DrawerDetail extends Component {
     };
     const modalProcessProps = {
       visible: visibleProcess,
+      onDeclineDependent: this.handleDeclineDependent,
       onDecline: this.handleDecline,
       onSubmit: this.handleMarkAsClosed,
       onConfirm: this.confirmModalProcess,
