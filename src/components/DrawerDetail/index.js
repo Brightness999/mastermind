@@ -1019,11 +1019,11 @@ class DrawerDetail extends Component {
           {event?.flagStatus === ACTIVE && event?.flagType === NOSHOW && (
             <div className='text-center'><MdOutlineEventBusy color="#ff0000" size={32} /></div>
           )}
-          {event?.flagStatus !== ACTIVE && event?.type === CONSULTATION && event?.status === PENDING && event?.consultant?._id && event?.consultant?._id !== auth.user?.consultantInfo?._id && (
+          {event?.flagStatus !== ACTIVE && (userRole === 100 || userRole > 900) && event?.type === CONSULTATION && event?.status === PENDING && event?.consultant?._id && event?.consultant?._id !== auth.user?.consultantInfo?._id && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.claimed)}]</div>
           )}
-          {event?.flagStatus !== ACTIVE && event?.type === CONSULTATION && event?.status === PENDING && !event?.consultant?._id && (
-            <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.unclaimed)}]</div>
+          {event?.flagStatus !== ACTIVE && (userRole === 100 || userRole > 900) && event?.type === CONSULTATION && event?.status === PENDING && !event?.consultant?._id && (
+            <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(msgDashboard.pending)}]</div>
           )}
           {event?.flagStatus !== ACTIVE && event?.status === CLOSED && (
             <div className='event-status text-consultation font-20 text-center'>[{intl.formatMessage(messages.accepted)}]</div>
@@ -1069,7 +1069,7 @@ class DrawerDetail extends Component {
             <div className='detail-item flex'>
               <p className='font-18 font-700 title'>{intl.formatMessage(messages.with)}</p>
               <div className='flex flex-row flex-1'>
-                <div className='font-18'>{event?.consultantName || ''}</div>
+                <div className='font-18'>{event?.consultantName || 'Consultant'}</div>
               </div>
             </div>
           ) : (
