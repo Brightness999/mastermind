@@ -556,7 +556,7 @@ class ModalSubsidyProgress extends React.Component {
 			)
 		}
 
-		if (isNotAdmin || (!isNotAdmin && referral?.status != -1)) {
+		if (!isNotAdmin && referral?.status != -1) {
 			return;
 		}
 
@@ -864,7 +864,7 @@ class ModalSubsidyProgress extends React.Component {
 			]
 		}
 
-		if ((subsidy?.status === 3 && user?.role > 900 && [-1, -3, 2].includes(referral?.status)) || subsidy?.status === 5) {
+		if (user?.role > 900 && ((subsidy?.status === 3 && [-1, -3, 2].includes(referral?.status)) || subsidy?.status === 5)) {
 			return [
 				<Button key="back" type='link' onClick={this.props.onCancel}>
 					{intl.formatMessage(messages.goBack).toUpperCase()}
