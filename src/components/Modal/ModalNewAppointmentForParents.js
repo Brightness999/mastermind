@@ -95,7 +95,8 @@ class ModalNewAppointmentForParents extends React.Component {
 					ranges = provider?.manualSchedule?.filter(a => a.dayInWeek == date.day() && a.location == address && date.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
 				}
 				if (!!ranges?.length) {
-					let timeArr = ranges?.map(a => ([a.openHour, a.closeHour]))?.reduce((a, b) => {
+					const blackoutTime = provider?.blackoutTimes?.find(t => t.year === date.year() && t.month === date.month() && t.date === date.date());
+					let timeArr = ranges?.map(a => ([a.openHour, a.closeHour]))?.sort((a, b) => a[0] > b[0] ? 1 : -1)?.reduce((a, b) => {
 						if (!a?.length) a.push(b);
 						else if (a?.find(c => (c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1]))) {
 							a = a.map(c => {
@@ -114,10 +115,20 @@ class ModalNewAppointmentForParents extends React.Component {
 					timeArr?.sort((a, b) => a?.[0] - b?.[0]).forEach(a => {
 						let startTime = moment(date).set({ hours: a?.[0], minutes: 0, seconds: 0, milliseconds: 0 });
 						for (let i = 0; i < (a?.[1] - a?.[0]) * 60 / duration; i++) {
-							arrTime.push({
-								value: startTime.clone().add(duration * i, 'minutes'),
-								active: startTime.clone().add(duration * i, 'minutes').isAfter(moment()),
-							});
+							if (blackoutTime) {
+								const { year, month, date, openHour, openMin, closeHour, closeMin } = blackoutTime;
+								if (!startTime.clone().add(duration * i, 'minutes').isBetween(moment().clone().set({ year, month, date, hour: openHour, minute: openMin }), moment().clone().set({ year, month, date, hour: closeHour, minute: closeMin }))) {
+									arrTime.push({
+										value: startTime.clone().add(duration * i, 'minutes'),
+										active: startTime.clone().add(duration * i, 'minutes').isAfter(moment()),
+									});
+								}
+							} else {
+								arrTime.push({
+									value: startTime.clone().add(duration * i, 'minutes'),
+									active: startTime.clone().add(duration * i, 'minutes').isAfter(moment()),
+								});
+							}
 						}
 					})
 					return arrTime;
