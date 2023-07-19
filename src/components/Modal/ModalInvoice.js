@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Popover, Input, message, Col, InputNumber } from 'antd';
+import { Modal, Button, Popover, Input, message, InputNumber } from 'antd';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -111,7 +111,7 @@ class ModalInvoice extends React.Component {
 				isPaid: event.flagInvoice?.isPaid,
 				invoiceId: event.flagInvoice?._id,
 				minimumPayment: event.flagInvoice?.minimumPayment || 0,
-				paidAmount: invoice.paidAmount || 0,
+				paidAmount: event.flagInvoice?.paidAmount || 0,
 			});
 		} else {
 			const initItems = [{
