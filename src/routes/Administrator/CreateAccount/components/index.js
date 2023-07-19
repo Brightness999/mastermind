@@ -22,7 +22,6 @@ import InfoAdmin from 'routes/Sign/CreateAccount/components/Admin/info_admin';
 import InfoConsultant from 'routes/Sign/CreateAccount/components/Consultant/info_consultant';
 import ConsultantAvailability from 'routes/Sign/CreateAccount/components/Consultant/info_availability';
 import InfoNotificationSetting from 'routes/Profile/ChangeProfile/components/info_notification';
-import './index.less';
 import '../../../../assets/styles/login.less';
 
 export default class extends React.Component {

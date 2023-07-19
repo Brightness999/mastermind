@@ -124,3 +124,36 @@
 .approved-list tr.drop-over-upward td {
     border-top: 2px dashed #1677ff !important;
 }
+
+.disable-date {
+    position: relative;
+    background: gray;
+    color: black;
+    padding: 2px;
+    text-align: right;
+    z-index: 1;
+}
+
+.unavailable-date {
+    position: relative;
+    background: rgb(204, 243, 146);
+    color: black;
+    padding: 2px;
+    text-align: right;
+    z-index: 1;
+    opacity: .6;
+}
+
+.fc-popover.fc-more-popover.unavailable-date {
+    opacity: 1;
+}
+
+.disable-time {
+    cursor: default !important;
+    background: repeating-linear-gradient(-45deg, #e6e6e6, #d9d9d9 8px, #000 8px, transparent 8px);
+    height: 100%;
+}
+
+.fc .fc-timegrid-slot {
+    height: 5em;
+}

@@ -20,6 +20,7 @@ export const getDataForCreatingUser = 'users/get_data_for_creating_user'
 export const setNotificationTime = 'users/set_notification_time'
 export const closeNotification = 'users/close_notification'
 export const getUserNotifications = 'users/get_user_notifications'
+export const setBlackoutTimes = 'users/set_blackout_times'
 
 export const getAppointmentsForAdmin = 'admin/get_appointments'
 export const getAppointmentsInMonthForAdmin = 'admin/get_appointments_in_month'

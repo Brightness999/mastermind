@@ -26,6 +26,8 @@ import ModalSchoolDetail from './ModalSchoolDetail';
 import ModalPay from './ModalPay';
 import ModalProviderDetail from './ModalProviderDetail';
 import ModalSelectProvider from './ModalSelectProvider';
+import ModalDateOptions from './ModalDateOptions';
+import ModalSelectTime from './ModalSelectTime';
 
 export {
   ModalCreateDone,
@@ -56,4 +58,6 @@ export {
   ModalPay,
   ModalProviderDetail,
   ModalSelectProvider,
+  ModalDateOptions,
+  ModalSelectTime,
 }

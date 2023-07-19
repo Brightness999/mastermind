@@ -361,8 +361,12 @@ class SchedulingCenter extends React.Component {
     this.getMyAppointments(this.state.userRole);
   }
 
-  handleClickDate = (date) => {
-    this.setState({ visibleNewAppoint: true, selectedDate: moment(date.date) });
+  handleClickDate = (data) => {
+    if (data.date < new Date() || data.date.getDay() === 6) {
+      return;
+    } else {
+      this.setState({ visibleNewAppoint: true, selectedDate: moment(data.date) });
+    }
   }
 
   handleEventDragStop = (data) => {

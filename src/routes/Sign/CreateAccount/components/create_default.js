@@ -12,7 +12,6 @@ import { setRegisterData } from 'src/redux/features/registerSlice';
 import { setGeneralData } from 'src/redux/features/authSlice';
 import { checkEmailRegistered, getDataForCreatingUser } from 'utils/api/apiList';
 import request from 'utils/api/request';
-import './index.less';
 
 const notCheck = 0;
 const valid = 1;

@@ -99,7 +99,7 @@ export const getAppointmentsMonthData = createAsyncThunk(
 				}
 				appoint.allDay = false;
 				appoint.start = new Date(appoint.date);
-				appoint.end = new Date(appoint.date);
+				appoint.end = new Date(appoint.date).setMinutes(new Date(appoint.date).getMinutes() + appoint.duration * 1);
 				appoint.editable = appoint.status === PENDING && moment(appoint.date).isAfter(moment()) ? true : false;
 			});
 			return result.data;

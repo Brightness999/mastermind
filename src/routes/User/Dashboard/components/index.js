@@ -19,7 +19,7 @@ import { BiChevronLeft, BiChevronRight, BiExpand } from 'react-icons/bi';
 import { GoPrimitiveDot } from 'react-icons/go';
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
 
-import { ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote, ModalPayment, ModalInvoice, ModalPay } from 'components/Modal';
+import { ModalNewAppointmentForParents, ModalSubsidyProgress, ModalReferralService, ModalNewSubsidyRequest, ModalFlagExpand, ModalConfirm, ModalSessionsNeedToClose, ModalCreateNote, ModalPayment, ModalInvoice, ModalPay, ModalDateOptions, ModalSelectTime } from 'components/Modal';
 import DrawerDetail from 'components/DrawerDetail';
 import messages from '../messages';
 import messagesCreateAccount from 'routes/Sign/CreateAccount/messages';
@@ -30,9 +30,9 @@ import request, { decryptParam, encryptParam } from 'utils/api/request'
 import { store } from 'src/redux/store';
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
-import { setAcademicLevels, setCityConnections, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet } from 'src/redux/features/authSlice';
+import { setAcademicLevels, setCityConnections, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, setUser } from 'src/redux/features/authSlice';
 import { changeTime, getAppointmentsData, getAppointmentsMonthData, getInvoiceList, getSubsidyRequests, setInvoiceList, setAppointments, setAppointmentsInMonth } from 'src/redux/features/appointmentsSlice'
-import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance, updateInvoice } from 'utils/api/apiList';
+import { checkNotificationForClient, checkNotificationForConsultant, checkNotificationForProvider, clearFlag, closeNotification, getDefaultDataForAdmin, payInvoice, requestClearance, setBlackoutTimes, updateConsultantInfo, updateInvoice, updateMyProviderProfile } from 'utils/api/apiList';
 import Subsidiaries from './school';
 import PageLoading from 'components/Loading/PageLoading';
 import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, MethodType, NOFLAG, NOSHOW, PARENT, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from 'routes/constant';
@@ -91,6 +91,8 @@ class Dashboard extends React.Component {
       totalPayment: 0,
       minimumPayment: 0,
       paidAmount: 0,
+      visibleDateOptions: false,
+      visibleSelectTime: false,
     };
     this.calendarRef = React.createRef();
     this.scrollElement = React.createRef();
@@ -197,7 +199,7 @@ class Dashboard extends React.Component {
     this.props.getSubsidyRequests({ role: user.role });
     this.props.getInvoiceList({ role: user.role });
     const notifications = setInterval(() => {
-      if (user.role === 3) {
+      if (user.role === PARENT) {
         request.post(checkNotificationForClient).then(res => {
           const { success, data } = res;
           if (success) {
@@ -237,7 +239,7 @@ class Dashboard extends React.Component {
           }
         })
       }
-      if (user.role === 30) {
+      if (user.role === PROVIDER) {
         request.post(checkNotificationForProvider).then(res => {
           const { success, data } = res;
           if (success) {
@@ -276,7 +278,7 @@ class Dashboard extends React.Component {
           }
         })
       }
-      if (user.role === 100) {
+      if (user.role === CONSULTANT) {
         request.post(checkNotificationForConsultant).then(res => {
           const { success, data } = res;
           if (success) {
@@ -503,8 +505,24 @@ class Dashboard extends React.Component {
     this.props.changeTime(data)
   }
 
-  handleClickDate = (date) => {
-    this.setState({ visibleNewAppoint: true, selectedDate: moment(date.date) });
+  handleClickDate = (data) => {
+    const { user } = this.props;
+    const blackoutDates = user?.providerInfo?.blackoutDates || user?.consultantInfo?.blackoutDates;
+    if (data.date < new Date()) {
+      return;
+    } else if (user?.role === PROVIDER && data.date.getDay() === 6) {
+      return;
+    } else {
+      if (user?.role === PARENT) {
+        this.setState({ visibleNewAppoint: true, selectedDate: moment(data.date) });
+      } else {
+        if ((user?.role === PROVIDER || user?.role === CONSULTANT) && blackoutDates?.find(date => moment(date).year() === data.date.getFullYear() && moment(date).month() === data.date.getMonth() && moment(date).date() === data.date.getDate())) {
+          this.setState({ visibleSelectTime: true, selectedDate: data.date });
+        } else {
+          this.setState({ visibleDateOptions: true, selectedDate: data.date });
+        }
+      }
+    }
   }
 
   handleEventDrop = (data) => {
@@ -601,7 +619,8 @@ class Dashboard extends React.Component {
     const calendar = this.calendarRef.current;
     const month = calendar?._calendarApi.getDate().getMonth() + 1;
     const year = calendar?._calendarApi.getDate().getFullYear();
-    const { selectedSkills, selectedProviders, SkillSet, selectedLocations, selectedEventTypes } = this.state;
+    const { user } = this.props;
+    const { selectedSkills, selectedProviders, SkillSet, selectedLocations, selectedEventTypes, isMonth } = this.state;
     let skills = [];
     selectedSkills?.forEach(skill => skills.push(SkillSet.find(s => s.name == skill)?._id));
     const dataFetchAppointMonth = {
@@ -617,7 +636,91 @@ class Dashboard extends React.Component {
       }
     };
     const appointmentsInMonth = await this.props.getAppointmentsMonthData(dataFetchAppointMonth);
-    this.setState({ calendarEvents: appointmentsInMonth?.payload ?? [] });
+    if (isMonth) {
+      this.setState({ calendarEvents: appointmentsInMonth?.payload ?? [] });
+    } else {
+      let newEvents = [];
+      const startDate = calendar._calendarApi.view.activeStart;
+      const blackoutDates = user?.providerInfo?.blackoutDates || user?.consultantInfo?.blackoutDates;
+      const blackoutTimes = user?.providerInfo?.blackoutTimes || user?.consultantInfo?.blackoutTimes;
+
+      for (let k = 0; k < 7; k++) {
+        const manualSchedule = user?.providerInfo?.manualSchedule || user?.consultantInfo?.manualSchedule;
+        const newDate = moment(startDate.toString()).clone().add(k * 1, 'days');
+        if (!((user?.role === PROVIDER || user?.role === CONSULTANT) && blackoutDates?.find(date => moment(date).year() === newDate.year() && moment(date).month() === newDate.month() && moment(date).date() === newDate.date()))) {
+          const ranges = manualSchedule?.filter(a => a.dayInWeek == k && newDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+          if (!!ranges?.length) {
+            const additionalTime = blackoutTimes?.find(t => t.year === newDate.year() && t.month === newDate.month() && t.date === newDate.date());
+
+            let timeArr = ranges.map(a => ([a.openHour, a.closeHour]))?.sort((a, b) => a[0] > b[0] ? 1 : -1)?.reduce((a, b) => {
+              if (!a?.length) a.push(b);
+              else if (a?.find(c => (c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1]))) {
+                a = a.map(c => {
+                  if ((c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1])) {
+                    return [Math.min(...c, ...b), Math.max(...c, ...b)];
+                  } else {
+                    return c;
+                  }
+                })
+              } else {
+                a.push(b);
+              }
+              return a;
+            }, []);
+
+            let result = [];
+            let newTimeArr = [];
+            timeArr?.forEach((range, i) => {
+              if (i === 0) {
+                if (range[0] != 0) {
+                  newTimeArr.push([0, range[0]]);
+                }
+              } else {
+                newTimeArr.push([timeArr[i - 1][1], range[0]]);
+              }
+              if (i === timeArr?.length - 1) {
+                newTimeArr.push([range[1], 24]);
+              }
+            })
+            if (additionalTime) {
+              newTimeArr = [...newTimeArr, [additionalTime.openHour, additionalTime.closeHour]].sort((a, b) => a[0] > b[0] ? 1 : -1)?.reduce((a, b) => {
+                if (!a?.length) {
+                  a.push(b);
+                } else if (a?.find(c => (c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1]))) {
+                  a = a.map(c => {
+                    if ((c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1])) {
+                      return [Math.min(...c, ...b), Math.max(...c, ...b)];
+                    } else {
+                      return c;
+                    }
+                  })
+                } else {
+                  a.push(b);
+                }
+                return a;
+              }, []);
+            }
+            newTimeArr?.forEach((range) => {
+              result.push({
+                title: 'disable-time',
+                start: newDate.clone().hour(range[0]).toISOString(),
+                end: newDate.clone().hour(range[1]).toISOString(),
+                className: 'disable-time',
+              })
+            })
+            newEvents.push(...result);
+          } else {
+            newEvents.push({
+              title: 'disable-time',
+              start: newDate.set({ hours: 0 }).toISOString(),
+              end: newDate.set({ hours: 24 }).toISOString(),
+              className: 'disable-time',
+            })
+          }
+        }
+      }
+      this.setState({ calendarEvents: [...(appointmentsInMonth?.payload ?? []), ...newEvents] })
+    }
   }
 
   handleSelectProvider = (name) => {
@@ -879,6 +982,134 @@ class Dashboard extends React.Component {
     this.setState({ visiblePay: false, returnUrl: '', totalPayment: 0, minimumPayment: 0, paidAmount: 0 });
   }
 
+  closeModalDateOptions = () => {
+    this.setState({ visibleDateOptions: false, selectedDate: undefined });
+  }
+
+  submitModalDateOptions = (data) => {
+    this.setState({ visibleDateOptions: false });
+    if (data.option === 'appointment') {
+      this.setState({ visibleNewAppoint: true });
+      return;
+    }
+    if (data.option === 'datetime') {
+      this.setState({ visibleSelectTime: true });
+      return;
+    }
+  }
+
+  addBlackoutDate = () => {
+    const { selectedDate } = this.state;
+    const { user } = this.props;
+
+    if (selectedDate) {
+      if (user.role === PROVIDER) {
+        request.post(updateMyProviderProfile, {
+          _id: user.providerInfo?._id,
+          blackoutDates: [...(user.providerInfo.blackoutDates || []), selectedDate?.toString()],
+          blackoutTimes: user.providerInfo.blackoutTimes?.filter(t => !(t?.year === selectedDate.getFullYear() && t?.month === selectedDate.getMonth() && t?.date === selectedDate.getDate()))
+        }).then(res => {
+          this.closeModalSelectTime();
+          const { success, data } = res;
+          if (success) {
+            let newUser = { ...user, providerInfo: data };
+            this.props.setUser(newUser);
+          }
+        }).catch(() => {
+          message.error('Something went wrong. Please try again.');
+          this.closeModalSelectTime();
+        })
+        return;
+      }
+
+      if (user.role === CONSULTANT) {
+        request.post(updateConsultantInfo, {
+          _id: user.consultantInfo?._id,
+          blackoutDates: [...(user.consultantInfo.blackoutDates || []), selectedDate?.toString()],
+          blackoutTimes: user.consultantInfo.blackoutTimes?.filter(t => !(t?.year === selectedDate.getFullYear() && t?.month === selectedDate.getMonth() && t?.date === selectedDate.getDate()))
+        }).then(res => {
+          this.closeModalSelectTime();
+          const { success, data } = res;
+          if (success) {
+            let newUser = { ...user, consultantInfo: data };
+            this.props.setUser(newUser);
+          }
+        }).catch(() => {
+          message.error('Something went wrong. Please try again.');
+          this.closeModalSelectTime();
+        })
+        return;
+      }
+    }
+  }
+
+  closeModalSelectTime = () => {
+    this.setState({ visibleSelectTime: false });
+  }
+
+  submitModalSelectTime = (data) => {
+    if (data.isFullDay) {
+      this.addBlackoutDate();
+      return;
+    }
+
+    const { selectedDate } = this.state;
+    const { user } = this.props;
+    const blackoutDates = user?.providerInfo?.blackoutDates || user?.consultantInfo?.blackoutDates;
+
+    if (!selectedDate) {
+      message.warn("Please select date.");
+      return;
+    }
+
+    let blackoutTime = {
+      year: selectedDate.getFullYear(),
+      month: selectedDate.getMonth(),
+      date: selectedDate.getDate(),
+    }
+    if (data.from_time) {
+      blackoutTime.openHour = data.from_time.hours();
+      blackoutTime.openMin = data.from_time.minutes();
+    } else {
+      blackoutTime.openHour = 0;
+      blackoutTime.openMin = 0;
+    }
+
+    if (data.to_time) {
+      blackoutTime.closeHour = data.to_time.hours();
+      blackoutTime.closeMin = data.to_time.minutes();
+    } else {
+      blackoutTime.closeHour = 23;
+      blackoutTime.closeMin = 59;
+    }
+
+    if (!data.from_time && !data.to_time) {
+      blackoutTime.isRemove = true;
+    }
+
+    const newBlackoutDates = blackoutDates?.filter(d => !(moment(d).year() === selectedDate.getFullYear() && moment(d).month() === selectedDate.getMonth() && moment(d).date() === selectedDate.getDate()));
+
+    request.post(setBlackoutTimes, { blackoutTime, blackoutDates: newBlackoutDates }).then(res => {
+      this.closeModalSelectTime();
+      const { success, data } = res;
+      if (success) {
+        if (user.role === PROVIDER) {
+          let newUser = { ...user, providerInfo: data };
+          this.props.setUser(newUser);
+          return;
+        }
+        if (user.role === CONSULTANT) {
+          let newUser = { ...user, consultantInfo: data };
+          this.props.setUser(newUser);
+          return;
+        }
+      }
+    }).catch(() => {
+      this.closeModalSelectTime();
+      message.error('Something went wrong. Please try again.');
+    })
+  }
+
   render() {
     const {
       isFilter,
@@ -920,8 +1151,10 @@ class Dashboard extends React.Component {
       totalPayment,
       minimumPayment,
       paidAmount,
+      visibleDateOptions,
+      visibleSelectTime,
     } = this.state;
-    const { invoices } = this.props;
+    const { invoices, user } = this.props;
 
     const btnMonthToWeek = (
       <div role='button' className='btn-type' onClick={this.handleMonthToWeek}>
@@ -1053,6 +1286,19 @@ class Dashboard extends React.Component {
       returnUrl, totalPayment, minimumPayment, paidAmount,
     }
 
+    const modalDateOptionsprops = {
+      visible: visibleDateOptions,
+      onSubmit: this.submitModalDateOptions,
+      onCancel: this.closeModalDateOptions,
+    }
+
+    const modalSelectTimeProps = {
+      visible: visibleSelectTime,
+      onSubmit: this.submitModalSelectTime,
+      onCancel: this.closeModalSelectTime,
+      selectedDate,
+    }
+
     if (userRole == 60) {
       return <Subsidiaries socket={this.socket} subsidyId={subsidyId} />
     } else {
@@ -1094,12 +1340,12 @@ class Dashboard extends React.Component {
                     onClick={() => this.scrollTrans(42)}
                   />
                 </div>
-                <div className={`btn-appointment ${userRole === 100 && 'd-none'}`}>
+                <div className={`btn-appointment ${userRole === CONSULTANT && 'd-none'}`}>
                   <Button
                     type='primary'
                     block
                     icon={<FaCalendarAlt size={19} />}
-                    onClick={() => (userRole == 3 || userRole == 30) && this.onShowModalNewAppoint()}
+                    onClick={() => (userRole === PARENT || userRole == PROVIDER) && this.onShowModalNewAppoint()}
                   >
                     {intl.formatMessage(messages.makeAppointment)}
                   </Button>
@@ -1116,7 +1362,7 @@ class Dashboard extends React.Component {
                       <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.services)}</p>
                       <Checkbox.Group options={SkillSet.map(skill => skill.name)} value={selectedSkills} onChange={v => this.handleSelectSkills(v)} />
                     </Col>
-                    {userRole != 30 && (
+                    {userRole != PROVIDER && (
                       <Col xs={12} sm={12} md={6} className='select-small'>
                         <p className='font-16 font-700 mb-5'>{intl.formatMessage(messagesCreateAccount.provider)}</p>
                         <Select
@@ -1187,17 +1433,119 @@ class Dashboard extends React.Component {
                   eventColor='transparent'
                   eventDisplay='block'
                   editable={true}
-                  selectable={true}
+                  selectable={false}
                   selectMirror={true}
                   dayMaxEvents={true}
                   weekends={calendarWeekends}
                   events={calendarEvents}
                   eventContent={(info) => renderEventContent(info, listAppointmentsRecent)}
-                  eventClick={this.onShowDrawerDetail}
+                  eventClick={data => data.event.title !== 'disable-time' && this.onShowDrawerDetail(data)}
                   dateClick={this.handleClickDate}
                   eventResize={(info) => info.revert()}
                   eventDrop={this.handleEventDrop}
                   height="calc(100vh - 165px)"
+                  dayCellClassNames={(data) => {
+                    const blackoutDates = user?.providerInfo?.blackoutDates || user?.consultantInfo?.blackoutDates;
+                    if ((userRole === PROVIDER || userRole === CONSULTANT) && blackoutDates?.find(date => moment(date).year() === data.date.getFullYear() && moment(date).month() === data.date.getMonth() && moment(date).date() === data.date.getDate())) {
+                      return 'disable-date';
+                    }
+                    if (userRole === PROVIDER && data.dow === 6) {
+                      return 'unavailable-date';
+                    }
+                    if (data.date < Date.now()) {
+                      return 'unavailable-date';
+                    }
+                  }}
+                  dayCellDidMount={data => {
+                    if (!data.dayNumberText && data.dow === 0 && data.el.className.includes('timegrid')) {
+                      let newEvents = [];
+                      const startDate = data.date;
+                      const blackoutDates = user?.providerInfo?.blackoutDates || user?.consultantInfo?.blackoutDates;
+                      const blackoutTimes = user?.providerInfo?.blackoutTimes || user?.consultantInfo?.blackoutTimes;
+
+                      for (let k = 0; k < 7; k++) {
+                        const manualSchedule = user?.providerInfo?.manualSchedule || user?.consultantInfo?.manualSchedule;
+                        const newDate = moment(startDate.toString()).clone().add(k * 1, 'days');
+                        if (!((userRole === PROVIDER || userRole === CONSULTANT) && blackoutDates?.find(date => moment(date).year() === newDate.year() && moment(date).month() === newDate.month() && moment(date).date() === newDate.date()))) {
+                          const ranges = manualSchedule?.filter(a => a.dayInWeek == k && newDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })));
+
+                          if (!!ranges?.length) {
+                            const additionalTime = blackoutTimes?.find(t => t.year === newDate.year() && t.month === newDate.month() && t.date === newDate.date());
+                            let timeArr = ranges.map(a => ([a.openHour, a.closeHour]))?.sort((a, b) => a[0] > b[0] ? 1 : -1)?.reduce((a, b) => {
+                              if (!a?.length) {
+                                a.push(b);
+                              } else if (a?.find(c => (c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1]))) {
+                                a = a.map(c => {
+                                  if ((c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1])) {
+                                    return [Math.min(...c, ...b), Math.max(...c, ...b)];
+                                  } else {
+                                    return c;
+                                  }
+                                })
+                              } else {
+                                a.push(b);
+                              }
+                              return a;
+                            }, []);
+
+                            let result = [];
+                            let newTimeArr = [];
+                            timeArr?.forEach((range, i) => {
+                              if (i === 0) {
+                                if (range[0] != 0) {
+                                  newTimeArr.push([0, range[0]]);
+                                }
+                              } else {
+                                newTimeArr.push([timeArr[i - 1][1], range[0]]);
+                              }
+                              if (i === timeArr?.length - 1) {
+                                newTimeArr.push([range[1], 24]);
+                              }
+                            })
+                            if (additionalTime) {
+                              newTimeArr = [...newTimeArr, [additionalTime.openHour, additionalTime.closeHour]].sort((a, b) => a[0] > b[0] ? 1 : -1)?.reduce((a, b) => {
+                                if (!a?.length) {
+                                  a.push(b);
+                                } else if (a?.find(c => (c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1]))) {
+                                  a = a.map(c => {
+                                    if ((c[0] <= b[0] && c[1] >= b[0]) || (c[0] <= b[1] && c[1] >= b[1])) {
+                                      return [Math.min(...c, ...b), Math.max(...c, ...b)];
+                                    } else {
+                                      return c;
+                                    }
+                                  })
+                                } else {
+                                  a.push(b);
+                                }
+                                return a;
+                              }, []);
+                            }
+                            newTimeArr?.forEach((range) => {
+                              result.push({
+                                title: 'disable-time',
+                                start: newDate.clone().hour(range[0]).toISOString(),
+                                end: newDate.clone().hour(range[1]).toISOString(),
+                                className: 'disable-time',
+                              })
+                            })
+                            newEvents.push(...result);
+                          } else {
+                            newEvents.push({
+                              title: 'disable-time',
+                              start: newDate.clone().set({ hours: 0 }).toISOString(),
+                              end: newDate.clone().set({ hours: 24 }).toISOString(),
+                              className: 'disable-time',
+                            })
+                          }
+                        }
+                      }
+                      this.setState({ calendarEvents: [...calendarEvents, ...newEvents] })
+                    }
+
+                    if (data.dayNumberText === '1' && data.el.className.includes('daygrid')) {
+                      this.setState({ calendarEvents: calendarEvents?.filter(a => a.title != 'disable-time') });
+                    }
+                  }}
                 />
               </div>
             </section>
@@ -1267,7 +1615,7 @@ class Dashboard extends React.Component {
                             <div className='flex justify-between items-center flex-1'>
                               <div className='flex-1'>
                                 <div className='font-11'>{appointment.skillSet?.name}</div>
-                                <div className='font-09'>{userRole === 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
+                                <div className='font-09'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
                               </div>
                               <div className='flex-1'>
                                 <div className='font-11'>{intl.formatMessage(messages.phoneCall)}</div>
@@ -1287,7 +1635,7 @@ class Dashboard extends React.Component {
                             <div className='flex justify-between items-center flex-1'>
                               <div className='flex-1'>
                                 <div className='font-11'>{appointment.skillSet?.name}</div>
-                                <div className='font-09'>{userRole === 30 ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
+                                <div className='font-09'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
                               </div>
                               <div className='flex-1'>
                                 <div className='font-11'>{intl.formatMessage(messages.phoneCall)}</div>
@@ -1413,13 +1761,13 @@ class Dashboard extends React.Component {
                       </Tabs.TabPane>
                     </Tabs>
                   </Panel>
-                  {(userRole === 3) ? (
+                  {(userRole === PARENT) ? (
                     <Panel
                       key="6"
                       header={intl.formatMessage(messages.subsidiaries)}
                       extra={(
                         <div className='flex flex-row justify-between'>
-                          {userRole === 3 && (
+                          {userRole === PARENT && (
                             <Button type='primary' size='small' onClick={this.onShowModalNewSubsidy}>
                               {intl.formatMessage(messages.requestNewSubsidy).toUpperCase()}
                             </Button>
@@ -1449,6 +1797,8 @@ class Dashboard extends React.Component {
           {visiblePayment && <ModalPayment {...modalPaymentProps} />}
           {visibleInvoice && <ModalInvoice {...modalInvoiceProps} />}
           {visiblePay && <ModalPay {...modalPayProps} />}
+          {visibleDateOptions && <ModalDateOptions {...modalDateOptionsprops} />}
+          {visibleSelectTime && <ModalSelectTime {...modalSelectTimeProps} />}
           <PageLoading loading={loading} isBackground={true} />
         </div>
       );
@@ -1463,22 +1813,26 @@ function renderEventContent(eventInfo, appointments) {
   const status = event?.status;
   const eventType = type === SCREEN ? 'Screening' : type === EVALUATION ? 'Evaluation' : type === CONSULTATION ? 'Consultation' : 'Session';
 
-  return (
-    <div className={`flex flex-col p-3 relative rounded-2 relative text-white bg-${[DECLINED, CANCELLED, NOSHOW].includes(status) ? 'cancelled' : eventType.toLowerCase()}`}>
-      <div className="flex flex-col">
-        <div className={`text-bold flex items-center ${[DECLINED, CANCELLED, NOSHOW].includes(status) && 'text-cancelled'}`} title={event?.skillSet?.name}>{[DECLINED, CANCELLED, NOSHOW].includes(status) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}<div className='text-ellipsis'>{event?.skillSet?.name}</div></div>
-        <div className='text-ellipsis' title={moment(eventInfo.event.start).format('hh:mm a')}>{moment(eventInfo.event.start).format('hh:mm a')}</div>
-        <div className='text-ellipsis' title={`Dependent: ${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
-        {(user.role === 30 || user.role === 100) ? null : <div className='text-ellipsis' title={`${eventType} with ${eventInfo.event.title}`}>{eventType} with {eventInfo.event.title}</div>}
+  if (eventInfo.event.title === 'disable-time') {
+    return null;
+  } else {
+    return (
+      <div style={{ height: '100%' }} className={`flex flex-col p-3 relative rounded-2 relative text-white bg-${[DECLINED, CANCELLED, NOSHOW].includes(status) ? 'cancelled' : eventType.toLowerCase()}`}>
+        <div className="flex flex-col">
+          <div className={`text-bold flex items-center ${[DECLINED, CANCELLED, NOSHOW].includes(status) && 'text-cancelled'}`} title={event?.skillSet?.name}>{[DECLINED, CANCELLED, NOSHOW].includes(status) && <GoPrimitiveDot className={`text-${eventType.toLowerCase()}`} size={16} />}<div className='text-ellipsis'>{event?.skillSet?.name}</div></div>
+          <div className='text-ellipsis' title={moment(eventInfo.event.start).format('hh:mm a')}>{moment(eventInfo.event.start).format('hh:mm a')}</div>
+          <div className='text-ellipsis' title={`Dependent: ${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}>Dependent: {`${event?.dependent?.firstName ?? ''} ${event?.dependent?.lastName ?? ''}`}</div>
+          {(user.role === PROVIDER || user.role === CONSULTANT) ? null : <div className='text-ellipsis' title={`${eventType} with ${eventInfo.event.title}`}>{eventType} with {eventInfo.event.title}</div>}
+        </div>
+        {type === CONSULTATION ? event?.consultant ? <AiFillStar color="#ffff00" size={20} className="flag-icons" /> : <AiOutlineStar color="#ffff00" size={20} className="flag-icons" /> : null}
+        {type === SUBSIDY && <FaHandHoldingUsd size={20} className='text-green500 mr-5' />}
+        {event?.flagStatus === ACTIVE && event?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
+        {status === PENDING && event?.flagStatus === NOFLAG && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
+        {event?.flagStatus === ACTIVE && event?.flagType === NOSHOW && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
+        {status === PENDING && event?.flagStatus === NOFLAG && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagType === NOSHOW && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
       </div>
-      {type === CONSULTATION ? event?.consultant ? <AiFillStar color="#ffff00" size={20} className="flag-icons" /> : <AiOutlineStar color="#ffff00" size={20} className="flag-icons" /> : null}
-      {type === SUBSIDY && <FaHandHoldingUsd size={20} className='text-green500 mr-5' />}
-      {event?.flagStatus === ACTIVE && event?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
-      {status === PENDING && event?.flagStatus === NOFLAG && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagType === BALANCE && <MdOutlineRequestQuote color="#ff0000" size={20} className="flag-icons" />}
-      {event?.flagStatus === ACTIVE && event?.flagType === NOSHOW && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
-      {status === PENDING && event?.flagStatus === NOFLAG && appointments?.find(a => a.dependent?._id === event?.dependent?._id && a.provider?._id === event?.provider?._id && a.flagStatus === ACTIVE)?.flagType === NOSHOW && <MdOutlineEventBusy color="#ff0000" size={20} className="flag-icons" />}
-    </div>
-  )
+    )
+  }
 }
 
 const mapStateToProps = state => ({
@@ -1488,4 +1842,4 @@ const mapStateToProps = state => ({
   user: state.auth.user,
 })
 
-export default compose(connect(mapStateToProps, { setAcademicLevels, setCityConnections, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, getInvoiceList, setInvoiceList, setAppointments, setAppointmentsInMonth }))(Dashboard);
+export default compose(connect(mapStateToProps, { setAcademicLevels, setCityConnections, setConsultants, setDependents, setDurations, setLocations, setMeetingLink, setProviders, setSkillSet, changeTime, getAppointmentsData, getAppointmentsMonthData, getSubsidyRequests, getInvoiceList, setInvoiceList, setAppointments, setAppointmentsInMonth, setUser }))(Dashboard);

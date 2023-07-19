@@ -20,8 +20,7 @@ import InfoSchool from './School/info_school';
 import SchoolAvailability from './School/school_availability';
 import InfoNotificationSetting from 'routes/Profile/ChangeProfile/components/info_notification';
 import { routerLinks } from "routes/constant";
-import './index.less';
-import 'assets/styles/login.less';
+import '../../../../assets/styles/login.less';
 
 export default class extends React.Component {
   constructor(props) {
