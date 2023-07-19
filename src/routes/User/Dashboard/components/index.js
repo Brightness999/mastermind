@@ -204,37 +204,7 @@ class Dashboard extends React.Component {
           const { success, data } = res;
           if (success) {
             data?.forEach(appointment => {
-              let duration = appointment.provider?.duration ?? 30;
-              if (appointment.type === EVALUATION) {
-                duration = appointment.provider?.separateEvaluateDuration;
-              }
-              const key = `open${Date.now()}`;
-              const btn = (
-                <Button type="primary" size='middle' onClick={() => {
-                  notification.close(key);
-                  this.handleCloseNotification(appointment._id);
-                }}>
-                  Confirm
-                </Button>
-              );
-              const description = (
-                <div>
-                  <p className='font-15 text-bold'>{appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === CONSULTATION ? intl.formatMessage(msgModal.consultation) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</p>
-                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.what)}: </span>{appointment?.skillSet?.name ?? ''}</p>
-                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.who)}: </span>{appointment?.dependent?.firstName ?? ''} {appointment?.dependent?.lastName ?? ''}</p>
-                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.with)}: </span>{appointment?.type === CONSULTATION ? intl.formatMessage(msgModal.consultant) : `${appointment?.provider?.firstName ?? ''} ${appointment?.provider?.lastName ?? ''}`}</p>
-                  <p className='font-15 nobr'><span className='text-bold'>{intl.formatMessage(msgDrawer.when)}: </span>{moment(appointment?.date).format('MM/DD/YYYY hh:mm a')} - {moment(appointment?.date).clone().add(duration, 'minutes').format('hh:mm a')}</p>
-                  {appointment?.type === CONSULTATION ? appointment?.phoneNumber ? <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.phonenumber)}: </span>{appointment?.phoneNumber ?? ''}</p> : <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.meeting)}: </span>{appointment?.meetingLink ?? ''}</p> : <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.where)}: </span>{appointment?.location ?? ''}</p>}
-                </div>
-              )
-              notification.open({
-                message: "",
-                description,
-                btn,
-                key,
-                duration: 10,
-                placement: 'top',
-              });
+              this.createNotification(appointment);
             })
           }
         })
@@ -244,36 +214,7 @@ class Dashboard extends React.Component {
           const { success, data } = res;
           if (success) {
             data?.forEach(appointment => {
-              let duration = appointment.provider?.duration;
-              if (appointment.type === EVALUATION) {
-                duration = appointment.provider?.separateEvaluateDuration;
-              }
-              const key = `open${Date.now()}`;
-              const btn = (
-                <Button type="primary" size="middle" onClick={() => {
-                  notification.close(key);
-                  this.handleCloseNotification(appointment._id);
-                }}>
-                  Confirm
-                </Button>
-              );
-              const description = (
-                <div>
-                  <p className='font-15 text-bold'>{appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</p>
-                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.what)}: </span>{appointment?.skillSet?.name ?? ''}</p>
-                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.who)}: </span>{appointment?.dependent?.firstName ?? ''} {appointment?.dependent?.lastName ?? ''}</p>
-                  <p className='font-15 nobr'><span className='text-bold'>{intl.formatMessage(msgDrawer.when)}: </span>{moment(appointment?.date).format('MM/DD/YYYY hh:mm a')} - {moment(appointment?.date).clone().add(duration, 'minutes').format('hh:mm a')}</p>
-                  <p className='font-15'><span className='text-bold'>{appointment?.type === EVALUATION ? intl.formatMessage(msgDrawer.phonenumber) : intl.formatMessage(msgDrawer.where)}: </span>{appointment?.type === EVALUATION ? appointment.phoneNumber ?? '' : appointment?.location ?? ''}</p>
-                </div>
-              )
-              notification.open({
-                message: '',
-                description,
-                btn,
-                key,
-                duration: 0,
-                placement: 'top',
-              });
+              this.createNotification(appointment);
             })
           }
         })
@@ -283,33 +224,7 @@ class Dashboard extends React.Component {
           const { success, data } = res;
           if (success) {
             data?.forEach(appointment => {
-              let duration = 30;
-              const key = `open${Date.now()}`;
-              const btn = (
-                <Button type="primary" size="middle" onClick={() => {
-                  notification.close(key);
-                  this.handleCloseNotification(appointment._id);
-                }}>
-                  Confirm
-                </Button>
-              );
-              const description = (
-                <div>
-                  <p className='font-15 text-bold'>{intl.formatMessage(msgModal.consultation)}</p>
-                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.what)}: </span>{appointment?.skillSet?.name ?? ''}</p>
-                  <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.who)}: </span>{appointment?.dependent?.firstName ?? ''} {appointment?.dependent?.lastName ?? ''}</p>
-                  <p className='font-15 nobr'><span className='text-bold'>{intl.formatMessage(msgDrawer.when)}: </span>{moment(appointment?.date).format('MM/DD/YYYY hh:mm a')} - {moment(appointment?.date).clone().add(duration, 'minutes').format('hh:mm a')}</p>
-                  <p className='font-15'><span className='text-bold'>{appointment?.meetingLink ? intl.formatMessage(msgDrawer.meeting) : intl.formatMessage(msgDrawer.phonenumber)}: </span>{appointment?.meetingLink ? appointment?.meetingLink ?? '' : appointment?.phoneNumber ?? ''}</p>
-                </div>
-              )
-              notification.open({
-                message: '',
-                description,
-                btn,
-                key,
-                duration: 0,
-                placement: 'top',
-              });
+              this.createNotification(appointment);
             })
           }
         })
@@ -332,6 +247,45 @@ class Dashboard extends React.Component {
     if (this.state.intervalId) {
       clearInterval(this.state.intervalId);
     }
+  }
+
+  createNotification = (appointment) => {
+    let duration = appointment.provider?.duration || 30;
+    if (appointment.type === EVALUATION) {
+      duration = appointment.provider?.separateEvaluateDuration;
+    }
+
+    const key = `open${Date.now()}`;
+    const btn = (
+      <Button type="primary" size="middle" onClick={() => {
+        notification.close(key);
+        this.handleCloseNotification(appointment._id);
+      }}>
+        Confirm
+      </Button>
+    );
+    const description = (
+      <div>
+        <p className='font-15 text-bold'>{appointment?.type === EVALUATION ? intl.formatMessage(msgModal.evaluation) : appointment?.type === APPOINTMENT ? intl.formatMessage(msgModal.standardSession) : appointment?.type === CONSULTATION ? intl.formatMessage(msgModal.consultation) : appointment?.type === SUBSIDY ? intl.formatMessage(msgModal.subsidizedSession) : ''}</p>
+        <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.what)}: </span>{appointment?.skillSet?.name ?? ''}</p>
+        <p className='font-15'><span className='text-bold'>{intl.formatMessage(msgDrawer.who)}: </span>{appointment?.dependent?.firstName ?? ''} {appointment?.dependent?.lastName ?? ''}</p>
+        <p className='font-15 nobr'><span className='text-bold'>{intl.formatMessage(msgDrawer.when)}: </span>{moment(appointment?.date).format('MM/DD/YYYY hh:mm a')} - {moment(appointment?.date).clone().add(duration, 'minutes').format('hh:mm a')}</p>
+        {appointment?.type === CONSULTATION ? appointment?.phoneNumber ? (
+          <p className='font-15'>
+            <span className='text-bold'>{intl.formatMessage(msgDrawer.phonenumber)}: </span>{appointment?.phoneNumber ?? ''}
+          </p>
+        ) : (
+          <p className='font-15'>
+            <span className='text-bold'>{intl.formatMessage(msgDrawer.meeting)}: </span>{appointment?.meetingLink ?? ''}
+          </p>
+        ) : (
+          <p className='font-15'>
+            <span className='text-bold'>{intl.formatMessage(msgDrawer.where)}: </span>{appointment?.location ?? ''}
+          </p>
+        )}
+      </div>
+    )
+    notification.open({ message: '', description, btn, key, duration: 0, placement: 'top' });
   }
 
   displayTime = (value) => {
