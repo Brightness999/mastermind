@@ -1,5 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import { Grid, Box } from '@mui/material';
+import { Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 import '../styles.less';
 
 const NavigationBar = lazy(() => import('./navigationBar'));
@@ -8,7 +10,7 @@ const SecondSection = lazy(() => import('./secondSection'));
 const ThirdSection = lazy(() => import('./thirdSection'));
 const FourthSection = lazy(() => import('./fourthSection'));
 
-const renderLoader = () => <p>Loading</p>;
+const renderLoader = () => <Spin className='home-loading' indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />;
 
 const Home = () => {
   return (
