@@ -252,12 +252,19 @@ class ModalReferralService extends React.Component {
 							let consultant_length = 0; let appointment_length = 0;
 							consultants.forEach(consultant => {
 								const availableTime = consultant.manualSchedule.find(s => s.dayInWeek == dayInWeek);
+								const blackoutTimes = consultant.blackoutTimes;
 								const fromDate = moment().set({ years: availableTime?.fromYear, months: availableTime?.fromMonth, date: availableTime?.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
 								const toDate = moment().set({ years: availableTime?.toYear, months: availableTime?.toMonth, date: availableTime?.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 999 });
 								const openTime = moment().set({ years, months, date, hours: availableTime?.openHour, minutes: availableTime?.openMin, seconds: 0, milliseconds: 0 });
 								const closeTime = moment().set({ years, months, date, hours: availableTime?.closeHour, minutes: availableTime?.closeMin, seconds: 0, milliseconds: 0 });
 								if (newValue.isBetween(fromDate, toDate) && (time.value.isSameOrAfter(openTime) && time.value.isSameOrBefore(closeTime))) {
-									consultant_length++;
+									if (blackoutTimes) {
+										if (!blackoutTimes?.find(t => t.year === time.value.year() && t.month === time.value.month() && t.date === time.value.date() && time.value.hour() >= t.openHour && time.value.hour() <= t.closeHour)) {
+											consultant_length++;
+										}
+									} else {
+										consultant_length++;
+									}
 								}
 							})
 							appointments.forEach(appointment => {
