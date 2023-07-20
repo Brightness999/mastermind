@@ -63,11 +63,11 @@ class ModalSelectTime extends React.Component {
 
 	handleSelectTime = (value, type) => {
 		if (value?.split(' ')?.length === 2 && (value.split(' ')?.[1] === 'am' || value.split(' ')?.[1] === 'pm')) {
-			const selectedHour = value.split(' ')?.[0]?.split(':')?.[0] * 1;
-			const selectedMin = value.split(' ')?.[0]?.split(':')?.[1] * 1;
+			const selectedHour = value.split(' ')?.[0]?.split(':')?.[0];
+			const selectedMin = value.split(' ')?.[0]?.split(':')?.[1];
 			const timePeriod = value.split(' ')?.[1];
-			if (selectedHour > 0 && selectedHour < 13 && selectedMin >= 0 && selectedMin < 60) {
-				value = moment().set({ hours: timePeriod?.toLowerCase() === 'pm' ? selectedHour + 12 : selectedHour, minutes: selectedMin, seconds: 0, milliseconds: 0 });
+			if (selectedHour > 0 && selectedHour < 13 && selectedHour?.length === 2 && selectedMin >= 0 && selectedMin < 60 && selectedMin?.length === 2) {
+				value = moment().set({ hours: timePeriod?.toLowerCase() === 'pm' ? selectedHour * 1 + 12 : selectedHour * 1, minutes: selectedMin * 1, seconds: 0, milliseconds: 0 });
 				this.form?.setFieldValue(type, value)
 			}
 		}
@@ -97,7 +97,7 @@ class ModalSelectTime extends React.Component {
 							<Form.Item name="from_time" label="From">
 								<TimePicker
 									use12Hours
-									format="h:mm a"
+									format="hh:mm a"
 									popupClassName='timepicker'
 									placeholder={intl.formatMessage(msgCreateAccount.from)}
 									className='w-100'
@@ -137,7 +137,7 @@ class ModalSelectTime extends React.Component {
 							<Form.Item name="to_time" label="To">
 								<TimePicker
 									use12Hours
-									format="h:mm a"
+									format="hh:mm a"
 									popupClassName='timepicker'
 									className='w-100'
 									placeholder={intl.formatMessage(msgCreateAccount.to)}
