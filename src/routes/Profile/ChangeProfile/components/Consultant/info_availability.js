@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Form, Button, Segmented, TimePicker, message, DatePicker, Checkbox } from 'antd';
+import { Row, Col, Form, Button, Segmented, TimePicker, message, DatePicker, Checkbox, Input } from 'antd';
 import { BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
@@ -361,6 +361,34 @@ class ConsultantAvailability extends Component {
 		})
 	}
 
+	handleSelectDateTime = (time, type, day, index) => {
+		const dayTime = this.form?.getFieldValue(day);
+		this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, [type]: time }) : d));
+	}
+
+	handleInputTime = (value, type, day, index) => {
+		if (value?.split(' ')?.length === 2 && (value.split(' ')?.[1] === 'am' || value.split(' ')?.[1] === 'pm')) {
+			const selectedHour = value.split(' ')?.[0]?.split(':')?.[0];
+			const selectedMin = value.split(' ')?.[0]?.split(':')?.[1];
+			const timePeriod = value.split(' ')?.[1];
+			if (selectedHour > 0 && selectedHour < 13 && selectedHour?.length === 2 && selectedMin >= 0 && selectedMin < 60 && selectedMin?.length === 2) {
+				value = moment().set({ hours: timePeriod?.toLowerCase() === 'pm' ? selectedHour * 1 + 12 : selectedHour * 1, minutes: selectedMin * 1, seconds: 0, milliseconds: 0 });
+				this.handleSelectDateTime(value, type, day, index);
+			}
+		}
+	}
+
+	handleInputDate = (value, type, day, index) => {
+		if (value) {
+			const dateArr = value.split('/');
+			if (dateArr.length === 3 && dateArr[0].length === 2 && dateArr[1].length === 2 && dateArr[2].length === 4) {
+				if (moment(value).isValid()) {
+					this.handleSelectDateTime(moment(value), type, day, index);
+				}
+			}
+		}
+	}
+
 	render() {
 		const { currentSelectedDay, loading, isLegalHolidays, isJewishHolidays } = this.state;
 
@@ -391,6 +419,27 @@ class ConsultantAvailability extends Component {
 																	<DatePicker
 																		format="MM/DD/YYYY"
 																		placeholder={intl.formatMessage(messages.from)}
+																		inputRender={(props) => (
+																			<Input
+																				aria-required={props['aria-required']}
+																				aria-describedby={props['aria-describedby']}
+																				aria-invalid={props['aria-invalid']}
+																				autoComplete={props.autoComplete}
+																				autoFocus={props.autoFocus}
+																				disabled={props.disabled}
+																				id={props.id}
+																				onBlur={props.onBlur}
+																				onChange={(e) => { props.onChange(e); this.handleInputDate(e.target.value, "from_date", day, index) }}
+																				onFocus={props.onFocus}
+																				onKeyDown={props.onKeyDown}
+																				onMouseDown={props.onMouseDown}
+																				placeholder={props.placeholder}
+																				readOnly={props.readOnly}
+																				value={props.value}
+																				title={props.title}
+																				size={props.size}
+																			/>
+																		)}
 																	/>
 																</Form.Item>
 															</Col>
@@ -399,6 +448,27 @@ class ConsultantAvailability extends Component {
 																	<DatePicker
 																		format="MM/DD/YYYY"
 																		placeholder={intl.formatMessage(messages.to)}
+																		inputRender={(props) => (
+																			<Input
+																				aria-required={props['aria-required']}
+																				aria-describedby={props['aria-describedby']}
+																				aria-invalid={props['aria-invalid']}
+																				autoComplete={props.autoComplete}
+																				autoFocus={props.autoFocus}
+																				disabled={props.disabled}
+																				id={props.id}
+																				onBlur={props.onBlur}
+																				onChange={(e) => { props.onChange(e); this.handleInputDate(e.target.value, "to_date", day, index) }}
+																				onFocus={props.onFocus}
+																				onKeyDown={props.onKeyDown}
+																				onMouseDown={props.onMouseDown}
+																				placeholder={props.placeholder}
+																				readOnly={props.readOnly}
+																				value={props.value}
+																				title={props.title}
+																				size={props.size}
+																			/>
+																		)}
 																	/>
 																</Form.Item>
 																<BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day) }} />
@@ -408,28 +478,68 @@ class ConsultantAvailability extends Component {
 															<Col xs={24} sm={24} md={12}>
 																<Form.Item name={[field.name, "from_time"]}>
 																	<TimePicker
-																		onSelect={(time) => {
-																			const dayTime = this.form?.getFieldValue(day);
-																			this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, from_time: time }) : d));
-																		}}
 																		use12Hours
-																		format="h:mm a"
+																		format="hh:mm a"
 																		popupClassName='timepicker'
 																		placeholder={intl.formatMessage(messages.from)}
+																		inputRender={props => (
+																			<Input
+																				aria-required={props['aria-required']}
+																				aria-describedby={props['aria-describedby']}
+																				aria-invalid={props['aria-invalid']}
+																				autoFocus={props.autoFocus}
+																				disabled={props.disabled}
+																				id={props.id}
+																				onBlur={props.onBlur}
+																				onChange={(e) => {
+																					props.onChange(e);
+																					this.handleInputTime(e.target.value, 'from_time', day, index);
+																				}}
+																				onFocus={props.onFocus}
+																				onKeyDown={props.onKeyDown}
+																				onMouseDown={props.onMouseDown}
+																				placeholder={props.placeholder}
+																				readOnly={props.readOnly}
+																				size={props.size}
+																				value={props.value}
+																				title={props.title}
+																			/>
+																		)}
+																		onSelect={(time) => this.handleSelectTime(time, 'from_time', day, index)}
 																	/>
 																</Form.Item>
 															</Col>
 															<Col xs={24} sm={24} md={12} className='item-remove'>
 																<Form.Item name={[field.name, "to_time"]}>
 																	<TimePicker
-																		onSelect={(time) => {
-																			const dayTime = this.form?.getFieldValue(day);
-																			this.form?.setFieldValue(day, dayTime?.map((d, i) => i === index ? ({ ...d, to_time: time }) : d));
-																		}}
 																		use12Hours
-																		format="h:mm a"
+																		format="hh:mm a"
 																		popupClassName='timepicker'
 																		placeholder={intl.formatMessage(messages.to)}
+																		inputRender={props => (
+																			<Input
+																				aria-required={props['aria-required']}
+																				aria-describedby={props['aria-describedby']}
+																				aria-invalid={props['aria-invalid']}
+																				autoFocus={props.autoFocus}
+																				disabled={props.disabled}
+																				id={props.id}
+																				onBlur={props.onBlur}
+																				onChange={(e) => {
+																					props.onChange(e);
+																					this.handleInputTime(e.target.value, 'to_time', day, index);
+																				}}
+																				onFocus={props.onFocus}
+																				onKeyDown={props.onKeyDown}
+																				onMouseDown={props.onMouseDown}
+																				placeholder={props.placeholder}
+																				readOnly={props.readOnly}
+																				size={props.size}
+																				value={props.value}
+																				title={props.title}
+																			/>
+																		)}
+																		onSelect={(time) => this.handleSelectTime(time, 'to_time', day, index)}
 																	/>
 																</Form.Item>
 																<BsDashCircle size={16} className='text-red icon-remove' onClick={() => { remove(field.name); this.handleRemoveRange(day) }} />

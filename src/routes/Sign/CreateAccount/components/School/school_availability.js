@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Form, Button, Segmented, TimePicker, message, Checkbox } from 'antd';
+import { Row, Col, Form, Button, Segmented, TimePicker, message, Checkbox, Input } from 'antd';
 import moment from 'moment';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
@@ -354,6 +354,18 @@ class SchoolAvailability extends React.Component {
 		})
 	}
 
+	handleInputTime = (index, value, type) => {
+		if (value?.split(' ')?.length === 2 && (value.split(' ')?.[1] === 'am' || value.split(' ')?.[1] === 'pm')) {
+			const selectedHour = value.split(' ')?.[0]?.split(':')?.[0];
+			const selectedMin = value.split(' ')?.[0]?.split(':')?.[1];
+			const timePeriod = value.split(' ')?.[1];
+			if (selectedHour > 0 && selectedHour < 13 && selectedHour?.length === 2 && selectedMin >= 0 && selectedMin < 60 && selectedMin?.length === 2) {
+				value = moment().set({ hours: timePeriod?.toLowerCase() === 'pm' ? selectedHour * 1 + 12 : selectedHour * 1, minutes: selectedMin * 1, seconds: 0, milliseconds: 0 });
+				this.onSelectTimeForSesssion(index, value, type);
+			}
+		}
+	}
+
 	render() {
 		const { dayIsSelected, sessionsInSchool, sessionsAfterSchool, isLegalHolidays, isJewishHolidays } = this.state;
 
@@ -377,26 +389,70 @@ class SchoolAvailability extends React.Component {
 									<Row gutter={14}>
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
-												onSelect={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
-												onChange={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
-												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'inOpen')}
 												use12Hours
-												format="h:mm a"
+												format="hh:mm a"
 												placeholder={intl.formatMessage(messages.from)}
 												popupClassName="timepicker"
+												inputRender={props => (
+													<Input
+														aria-required={props['aria-required']}
+														aria-describedby={props['aria-describedby']}
+														aria-invalid={props['aria-invalid']}
+														autoFocus={props.autoFocus}
+														disabled={props.disabled}
+														id={props.id}
+														onBlur={props.onBlur}
+														onChange={(e) => {
+															props.onChange(e);
+															this.handleInputTime(index, e.target.value, 'inOpen');
+														}}
+														onFocus={props.onFocus}
+														onKeyDown={props.onKeyDown}
+														onMouseDown={props.onMouseDown}
+														placeholder={props.placeholder}
+														readOnly={props.readOnly}
+														size={props.size}
+														value={props.value}
+														title={props.title}
+													/>
+												)}
+												onSelect={v => this.onSelectTimeForSesssion(index, v, 'inOpen')}
+												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'inOpen')}
 												value={this.valueForAvailabilityScheduleForOpenHour(sessionsInSchool, index)}
 											/>
 										</Col>
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
-												onSelect={v => this.onSelectTimeForSesssion(index, v, 'inClose')}
-												onChange={v => this.onSelectTimeForSesssion(index, v, 'inClose')}
-												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'inClose')}
-												value={this.valueForAvailabilityScheduleForCloseHour(sessionsInSchool, index)}
 												use12Hours
-												format="h:mm a"
+												format="hh:mm a"
 												popupClassName="timepicker"
 												placeholder={intl.formatMessage(messages.to)}
+												inputRender={props => (
+													<Input
+														aria-required={props['aria-required']}
+														aria-describedby={props['aria-describedby']}
+														aria-invalid={props['aria-invalid']}
+														autoFocus={props.autoFocus}
+														disabled={props.disabled}
+														id={props.id}
+														onBlur={props.onBlur}
+														onChange={(e) => {
+															props.onChange(e);
+															this.handleInputTime(index, e.target.value, 'inClose');
+														}}
+														onFocus={props.onFocus}
+														onKeyDown={props.onKeyDown}
+														onMouseDown={props.onMouseDown}
+														placeholder={props.placeholder}
+														readOnly={props.readOnly}
+														size={props.size}
+														value={props.value}
+														title={props.title}
+													/>
+												)}
+												onSelect={v => this.onSelectTimeForSesssion(index, v, 'inClose')}
+												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'inClose')}
+												value={this.valueForAvailabilityScheduleForCloseHour(sessionsInSchool, index)}
 											/>
 										</Col>
 									</Row>
@@ -404,26 +460,70 @@ class SchoolAvailability extends React.Component {
 									<Row gutter={14}>
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
-												onSelect={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')}
-												onChange={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')}
-												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'afterOpen')}
 												use12Hours
-												value={this.valueForAvailabilityScheduleForOpenHour(sessionsAfterSchool, index)}
-												format="h:mm a"
+												format="hh:mm a"
 												popupClassName="timepicker"
 												placeholder={intl.formatMessage(messages.from)}
+												inputRender={props => (
+													<Input
+														aria-required={props['aria-required']}
+														aria-describedby={props['aria-describedby']}
+														aria-invalid={props['aria-invalid']}
+														autoFocus={props.autoFocus}
+														disabled={props.disabled}
+														id={props.id}
+														onBlur={props.onBlur}
+														onChange={(e) => {
+															props.onChange(e);
+															this.handleInputTime(index, e.target.value, 'afterOpen');
+														}}
+														onFocus={props.onFocus}
+														onKeyDown={props.onKeyDown}
+														onMouseDown={props.onMouseDown}
+														placeholder={props.placeholder}
+														readOnly={props.readOnly}
+														size={props.size}
+														value={props.value}
+														title={props.title}
+													/>
+												)}
+												onSelect={v => this.onSelectTimeForSesssion(index, v, 'afterOpen')}
+												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'afterOpen')}
+												value={this.valueForAvailabilityScheduleForOpenHour(sessionsAfterSchool, index)}
 											/>
 										</Col>
 										<Col xs={24} sm={24} md={12}>
 											<TimePicker
-												onSelect={v => this.onSelectTimeForSesssion(index, v, 'afterClose')}
-												onChange={v => this.onSelectTimeForSesssion(index, v, 'afterClose')}
-												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'afterClose')}
 												use12Hours
-												value={this.valueForAvailabilityScheduleForCloseHour(sessionsAfterSchool, index)}
-												format="h:mm a"
+												format="hh:mm a"
 												popupClassName="timepicker"
 												placeholder={intl.formatMessage(messages.to)}
+												inputRender={props => (
+													<Input
+														aria-required={props['aria-required']}
+														aria-describedby={props['aria-describedby']}
+														aria-invalid={props['aria-invalid']}
+														autoFocus={props.autoFocus}
+														disabled={props.disabled}
+														id={props.id}
+														onBlur={props.onBlur}
+														onChange={(e) => {
+															props.onChange(e);
+															this.handleInputTime(index, e.target.value, 'afterClose');
+														}}
+														onFocus={props.onFocus}
+														onKeyDown={props.onKeyDown}
+														onMouseDown={props.onMouseDown}
+														placeholder={props.placeholder}
+														readOnly={props.readOnly}
+														size={props.size}
+														value={props.value}
+														title={props.title}
+													/>
+												)}
+												onSelect={v => this.onSelectTimeForSesssion(index, v, 'afterClose')}
+												onClick={(e) => (e.target.nodeName == 'path' || e.target.nodeName == 'svg') && this.onSelectTimeForSesssion(index, undefined, 'afterClose')}
+												value={this.valueForAvailabilityScheduleForCloseHour(sessionsAfterSchool, index)}
 											/>
 										</Col>
 									</Row>
