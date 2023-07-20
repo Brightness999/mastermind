@@ -359,7 +359,7 @@ class InfoAvailability extends React.Component {
 		const { legalHolidays, jewishHolidays } = this.state;
 
 		document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-			const name = [...legalHolidays ?? [], ...jewishHolidays ?? []]?.find(a => a.end.date == el.innerText)?.summary;
+			const name = [...legalHolidays ?? [], ...jewishHolidays ?? []]?.find(a => moment(new Date(a?.end?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary;
 			if (name) {
 				if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 					el.nextElementSibling.innerText = name;

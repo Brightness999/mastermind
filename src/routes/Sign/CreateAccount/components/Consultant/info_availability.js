@@ -48,7 +48,7 @@ class ConsultantAvailability extends Component {
       await this.updateBlackoutDates(registerData?.step2?.blackoutDates?.map(date => new Date(date)));
       document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
         let name = document.createElement("div");
-        name.textContent = holidays?.find(a => moment(new Date(a?.end?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary ?? '';
+        name.textContent = holidays?.find(a => moment(new Date(a?.end?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary ?? '';
         el.after(name);
       })
 
@@ -118,7 +118,7 @@ class ConsultantAvailability extends Component {
     }
 
     this.props.setRegisterData({ ...newRegisterData });
-		this.props.onContinue();
+    this.props.onContinue();
   };
 
   onSelectDay = e => {
@@ -135,7 +135,7 @@ class ConsultantAvailability extends Component {
     day_week.map((newDay) => {
       if (newDay != dayForCopy) {
         if (this.form?.getFieldValue(newDay)) {
-					const newRanges = this.form.getFieldValue(newDay)?.filter(a => !(!a.from_date && !a.to_date && !a.from_time && !a.to_time));
+          const newRanges = this.form.getFieldValue(newDay)?.filter(a => !(!a.from_date && !a.to_date && !a.from_time && !a.to_time));
           this.form?.setFieldValue(newDay, [...newRanges, arrToCopy[index]]);
         } else {
           this.form?.setFieldValue(newDay, [arrToCopy[index]]);
@@ -211,7 +211,7 @@ class ConsultantAvailability extends Component {
     }
 
     document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-      const name = holidays?.find(a => moment(new Date(a?.end?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
+      const name = holidays?.find(a => moment(new Date(a?.end?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary;
       if (name) {
         if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
           el.nextElementSibling.innerText = name;
@@ -260,7 +260,7 @@ class ConsultantAvailability extends Component {
     }
 
     document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-      const name = holidays?.find(a => moment(new Date(a?.end?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
+      const name = holidays?.find(a => moment(new Date(a?.end?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary;
       if (name) {
         if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
           el.nextElementSibling.innerText = name;
@@ -291,7 +291,7 @@ class ConsultantAvailability extends Component {
     const { legalHolidays, jewishHolidays } = this.state;
 
     document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-      const name = [...legalHolidays ?? [], ...jewishHolidays ?? []]?.find(a => a.end.date == el.innerText)?.summary;
+      const name = [...legalHolidays ?? [], ...jewishHolidays ?? []]?.find(a => moment(new Date(a?.end?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary;
       if (name) {
         if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
           el.nextElementSibling.innerText = name;
