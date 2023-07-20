@@ -1,10 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import moment from 'moment';
+import { message } from 'antd';
 
 import request from 'src/utils/api/request'
 import { changeTimeAppointForAdmin, changeTimeAppointForParent, changeTimeAppointForProvider, getAdminSubsidyRequests, getAppointmentsForAdmin, getAppointmentsForConsultant, getAppointmentsForParent, getAppointmentsForProvider, getAppointmentsInMonthForAdmin, getAppointmentsInMonthForConsultant, getAppointmentsInMonthForParent, getAppointmentsInMonthForProvider, getInvoices, getParentSubsidyRequests, getProviderSubsidyRequests, getSchoolSubsidyRequests } from 'src/utils/api/apiList';
 import { ADMIN, CONSULTANT, CONSULTATION, PARENT, PENDING, PROVIDER, SCHOOL, SUPERADMIN } from 'src/routes/constant';
-import { message } from 'antd';
 
 const initialState = {
 	dataAppointments: [],
@@ -99,7 +99,7 @@ export const getAppointmentsMonthData = createAsyncThunk(
 				}
 				appoint.allDay = false;
 				appoint.start = new Date(appoint.date);
-				appoint.end = new Date(appoint.date).setMinutes(new Date(appoint.date).getMinutes() + appoint.duration * 1);
+				appoint.end = new Date(appoint.date).setMinutes(new Date(appoint.date).getMinutes() + (appoint.duration || 30) * 1);
 				appoint.editable = appoint.status === PENDING && moment(appoint.date).isAfter(moment()) ? true : false;
 			});
 			return result.data;
