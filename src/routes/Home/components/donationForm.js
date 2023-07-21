@@ -6,9 +6,9 @@ import toast, { Toaster } from 'react-hot-toast';
 
 import Header from './header';
 import SubHeader from './subHeader';
-import { PAYPAL_CLIENT_ID } from '../../../utils/index';
-import request from '../../../utils/api/request';
-import { monthlyCustomAmount, donationReceipt } from '../../../utils/api/apiList';
+import { PAYPAL_INFO } from 'utils/index';
+import request from 'utils/api/request';
+import { monthlyCustomAmount, donationReceipt, createPlan } from 'utils/api/apiList';
 
 const StyledBoxTan = styled(Box)({
   backgroundColor: "#FBF2D4",
@@ -35,11 +35,23 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
     }
   };
 
-  const createSubscription = (data, actions) => {
-    return actions.subscription.create({
-      plan_id: packageSelected.planId,
-      quantity: sponsoredChildren || 1
-    });
+  const createSubscription = async (data, actions) => {
+    if (packageSelected.planId) {
+      return actions.subscription.create({
+        plan_id: packageSelected.planId,
+        quantity: sponsoredChildren || 1
+      });
+    } else {
+      const response = await request.post(createPlan, { amount: paymentAmount / sponsoredChildren });
+      if (response.success) {
+        return actions.subscription.create({
+          plan_id: response.data.id,
+          quantity: sponsoredChildren || 1
+        });
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    }
   }
 
   const createOrder = (data, actions) => {
@@ -134,7 +146,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
       <Box display={frequency === 'once' ? 'block' : 'none'}>
         <PayPalScriptProvider
           options={{
-            "client-id": PAYPAL_CLIENT_ID.clientId,
+            "client-id": PAYPAL_INFO.clientId,
             components: "buttons",
             "data-namespace": "paypalOrder"
           }}
@@ -158,7 +170,7 @@ const DonationForm = ({ paymentAmount, frequency, sponsoredChildren, packageSele
       <Box display={frequency === 'monthly' ? 'block' : 'none'}>
         <PayPalScriptProvider
           options={{
-            "client-id": PAYPAL_CLIENT_ID.clientId,
+            "client-id": PAYPAL_INFO.clientId,
             components: "buttons",
             intent: "subscription",
             vault: true,

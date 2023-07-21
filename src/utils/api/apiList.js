@@ -119,3 +119,4 @@ export const appealDependent = 'clients/appeal_dependent'
 
 export const monthlyCustomAmount = 'donations/monthly_custom_amount'
 export const donationReceipt = 'donations/donation_receipt'
+export const createPlan = 'donations/create_plan'

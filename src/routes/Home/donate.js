@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Checkbox, Grid, Box, ButtonGroup, Typography, Chip, Switch, FormControlLabel, TextField, InputAdornment } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Grid, Box, ButtonGroup, Typography, Chip, Switch, FormControlLabel, TextField, InputAdornment } from '@mui/material';
 import { ReactComponent as ManFilled } from './images/man_filled.svg';
 import { ReactComponent as ManUnfilled } from './images/man_unfilled.svg';
 import { styled } from '@mui/material/styles';
@@ -7,19 +7,16 @@ import { BsBook } from 'react-icons/bs';
 import { SlSpeech } from 'react-icons/sl';
 import { CiBasketball } from 'react-icons/ci';
 import { AiOutlineEye } from 'react-icons/ai';
-import { BiCaretUp, BiCaretDown, BiCaretLeft, BiCaretRight } from 'react-icons/bi';
+import { BiCaretUp, BiCaretDown } from 'react-icons/bi';
 import NavigationBar from './components/navigationBar';
 import FirstDonateSection from './components/firstDonateSection';
 import DonationForm from './components/donationForm';
-import { useEffect } from 'react';
-
 
 const StyledBoxGreen = styled(Box)({
   fontFamily: "ProximaNova",
   fontWeight: "700px",
   width: "279px",
   height: "220px",
-  // backgroundColor: "#B5E6D3",
   border: "thin solid #35735C",
   borderRadius: "7px",
   display: "flex",
@@ -58,48 +55,49 @@ const StyledSwitch = styled(Switch)({
 })
 
 const Donate = () => {
-  const [donateMonthly, setDonateMonthly] = useState(true)
-  const [sponsoredChildren, setSponsoredChildren] = useState(donateMonthly ? 12 : 1)
-
   const package_plans = [
     {
       name: 'Specialized Tutoring Plan',
       amount: 600,
       sessions: 8,
-      planId: 'P-93K62384A78529137MOWRNIA',
+      planId: 'P-1M580609XD9766844MS5MFRY',
       icon: <BsBook size="36px" />
     },
     {
       name: 'Speech Therapy Plan',
       amount: 280,
       sessions: 8,
-      planId: 'P-90X28329VS5128505MOWRTKQ',
+      planId: 'P-7C907100Y0009390HMS5MF2A',
       icon: <SlSpeech size="36px" />
     },
     {
       name: 'Occupational Therapy Plan',
       amount: 320,
       sessions: 4,
-      planId: 'P-68T89259UE970873HMOWRXQQ',
+      planId: 'P-4W365141N6088254XMS5MGAA',
       icon: <CiBasketball size="36px" />
     },
     {
       name: 'Vision Therapy',
       amount: 320,
       sessions: 4,
-      planId: 'P-8MA84179XW564704LMO2OMCI',
+      planId: 'P-9R274401NG876681NMS5MGIQ',
       icon: <AiOutlineEye size="36px" />
     },
     {
       name: 'Custom'
     }
   ]
+  const [donateMonthly, setDonateMonthly] = useState(true)
+  const [sponsoredChildren, setSponsoredChildren] = useState(donateMonthly ? 12 : 1)
   const [packageSelected, setPackageSelected] = useState(package_plans[0])
   const [amount, setAmount] = useState(packageSelected.amount * sponsoredChildren);
+  const [customValue, setCustomValue] = useState(0);
 
   useEffect(() => {
     if (packageSelected?.amount) setAmount(packageSelected.amount * sponsoredChildren)
-  }, [packageSelected, sponsoredChildren])
+    else setAmount(customValue * sponsoredChildren)
+  }, [packageSelected, sponsoredChildren, customValue])
 
   const onManClick = (index) => {
     setSponsoredChildren(index + 1)
@@ -144,37 +142,6 @@ const Donate = () => {
           }}>
             Select your package:
           </Typography>
-          {/* <Radio.Group>
-            <Radio.Button value="220" style={{ height: '500px' }}>
-              <Box>
-                <BsBook size="36px" />
-                <Typography>
-                  Homework / Tutoring
-                  <br/>
-                  8 Sessions
-                </Typography>
-                <Chip label="$220" />
-              </Box>
-            </Radio.Button>
-            <Radio.Button value="400">
-              <SlSpeech size="36px" />
-              <Typography>
-                Speech Therapy
-                <br/>
-                8 Sessions
-              </Typography>
-              <Chip label="$400" />
-            </Radio.Button>
-            <Radio.Button value="650">
-              <CiBasketball size="36px" />
-              <Typography>
-                Occupational Therapy
-                <br/>
-                8 Sessions
-              </Typography>
-              <Chip label="$650" />
-            </Radio.Button>
-          </Radio.Group> */}
           <Box style={{
             display: "flex",
             flexFlow: "wrap",
@@ -193,7 +160,7 @@ const Donate = () => {
                   <>
                     <TextField
                       type="number"
-                      onChange={(e) => setAmount(e.target.value)}
+                      onChange={(e) => donateMonthly ? setCustomValue(e.target.value) : setAmount(e.target.value)}
                       variant="outlined"
                       InputProps={{
                         startAdornment: <InputAdornment position="start">$</InputAdornment>,
@@ -297,18 +264,6 @@ const Donate = () => {
             </Box>
           </Box>
         </Grid>
-        {/* <Grid item xs={12} style={{
-          padding: "50px",
-          display: "flex",
-          alignItems: "top",
-          justifyContent: "space-between",     
-          width: "75%",
-          minWidth: "1000px",
-          maxWidth: "1440px",
-          margin: "auto"
-        }}>
-          <DonationForm paymentAmount={amount} frequency={donateMonthly ? "monthly" : "once"} sponsoredChildren={sponsoredChildren} packageSelected={packageSelected} />
-        </Grid> */}
         <Grid item xs={12} style={{
           padding: "50px",
           display: "flex",
@@ -319,7 +274,6 @@ const Donate = () => {
           maxWidth: "1440px",
           margin: "auto",
         }}>
-
         </Grid>
         <Grid item xs={12} style={{
           backgroundColor: "#FBF2D4",
@@ -339,7 +293,6 @@ const Donate = () => {
           }}>
             {"Help Me Get Help is a project of the Association for Torah Advancement (AFTA). AFTA is a nonprofit organization. All donations are tax deductible."}
           </Box>
-
         </Grid>
       </Grid>
     </Box>
