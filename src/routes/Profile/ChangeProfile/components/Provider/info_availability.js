@@ -50,7 +50,7 @@ class InfoAvailability extends Component {
 	async componentDidMount() {
 		this.setState({ loading: true });
 		this.loadSchools();
-		const holidays = [];
+		const holidays = await this.getHolidays();
 		if (window.location.pathname?.includes('changeuserprofile')) {
 			request.post(getUserProfile, { id: this.props.auth.selectedUser?._id }).then(async result => {
 				this.setState({ loading: false });
