@@ -98,7 +98,7 @@ class ModalSchoolDetail extends React.Component {
 			const holidays = [...legalHolidays, ...jewishHolidays];
 			await this.updateBlackoutDates();
 			document.querySelectorAll('#datepanel ul li span')?.forEach(el => {
-				const name = holidays?.find(a => moment(new Date(a?.start?.date).toString()).format('YYYY-MM-DD') == el.innerText)?.summary;
+				const name = holidays?.find(a => moment(new Date(a?.end?.date).toString()).format('YYYY-MM-DD') === el.innerText)?.summary;
 				if (name) {
 					if (el.nextElementSibling.nodeName.toLowerCase() == 'div') {
 						el.nextElementSibling.innerText = name;
