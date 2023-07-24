@@ -556,7 +556,6 @@ class ClaimedConsultationRequest extends React.Component {
       visible: visibleDrawer,
       onClose: this.onCloseDrawerDetail,
       event: selectedConsultation,
-      listAppointmentsRecent: this.props.appointments,
       socket: this.props.socket,
     };
 

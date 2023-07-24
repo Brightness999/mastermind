@@ -137,7 +137,7 @@ class ModalCurrentAppointment extends React.Component {
 			duration: event?.type === EVALUATION ? event?.provider?.separateEvaluationDuration : event?.provider?.duration,
 			cancellationFee: event.provider.cancellationFee,
 		});
-		this.form?.setFieldsValue({ dependent: event?.dependent?._id, skill: event?.skillSet?._id, address: event?.location });
+		this.form?.setFieldsValue({ dependent: event?.dependent?._id, skill: event?.skillSet?._id, address: event?.location, notes: event?.notes });
 		this.onSelectDate(moment(event?.date));
 	}
 
@@ -260,7 +260,7 @@ class ModalCurrentAppointment extends React.Component {
 				} else {
 					message.success('Successfully Rescheduled');
 				}
-				this.props.onSubmit();
+				this.props.onSubmit(data);
 			} else {
 				this.setState({ errorMessage: result.data });
 			}

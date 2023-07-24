@@ -19,8 +19,8 @@ import msgDashboard from 'routes/User/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import request, { encryptParam } from 'utils/api/request';
 import { setAppointments, setAppointmentsInMonth, getInvoiceList } from 'src/redux/features/appointmentsSlice';
-import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, declineDependent, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from 'utils/api/apiList';
-import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from 'routes/constant';
+import { acceptDeclinedScreening, appealRequest, cancelAppointmentForParent, claimConsultation, clearFlag, closeAppointmentAsNoshow, closeAppointmentForProvider, declineAppointmentForProvider, declineDependent, getAppointmentDetail, leaveFeedbackForProvider, removeConsultation, requestClearance, requestFeedbackForClient, rescheduleAppointmentForParent, setFlag, setFlagBalance, setNotificationTime, switchConsultation, updateAppointmentNotesForParent, updateInvoice, updateNoshowFlag } from 'utils/api/apiList';
+import { ACTIVE, ADMIN, APPOINTMENT, BALANCE, CANCEL, CANCELLED, CLOSED, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, NOFLAG, NOSHOW, PARENT, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY, SUPERADMIN } from 'routes/constant';
 import './style/index.less';
 
 const { Paragraph } = Typography;
@@ -29,65 +29,60 @@ class DrawerDetail extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isProviderHover: false,
-      isDependentHover: false,
-      visibleCancel: false,
-      visibleCurrent: false,
-      errorMessage: '',
-      isShowEditNotes: false,
-      notes: this.props.event?.notes,
-      visibleInvoice: false,
-      publicFeedback: this.props.event?.publicFeedback ?? '',
-      isLeftFeedback: !!this.props.event?.publicFeedback,
-      isShowFeedback: false,
-      userRole: this.props.auth.user?.role,
-      visibleProcess: false,
-      visibleCurrentReferral: false,
-      visibleNoShow: false,
-      visibleBalance: false,
-      note: '',
-      items: [],
-      visibleModalMessage: false,
-      visibleCurrentScreen: false,
-      visibleCreateNote: false,
-      notificationTime: 1440,
-      visiblePayment: false,
-      paymentDescription: '',
-      visibleCancelForAdmin: false,
       cancellationType: '',
+      errorMessage: '',
+      event: this.props.event,
+      isDependentHover: false,
       isFeeToParent: false,
-      visiblePay: false,
+      isLeftFeedback: !!this.props.event?.publicFeedback,
+      isProviderHover: false,
+      isShowEditNotes: false,
+      isShowFeedback: false,
+      items: [],
+      minimumPayment: 0,
+      note: '',
+      notes: this.props.event?.notes,
+      notificationTime: 1440,
+      paidAmount: 0,
+      paymentDescription: '',
+      publicFeedback: this.props.event?.publicFeedback ?? '',
       returnUrl: '',
       totalPayment: 0,
-      minimumPayment: 0,
-      paidAmount: 0,
+      userRole: this.props.auth.user?.role,
+      visibleBalance: false,
+      visibleCancel: false,
+      visibleCancelForAdmin: false,
+      visibleCreateNote: false,
+      visibleCurrent: false,
+      visibleCurrentReferral: false,
+      visibleCurrentScreen: false,
+      visibleInvoice: false,
+      visibleModalMessage: false,
+      visibleNoShow: false,
+      visiblePay: false,
+      visiblePayment: false,
+      visibleProcess: false,
     };
   }
 
   componentDidMount() {
     const { userRole } = this.state;
     const { event } = this.props;
-
-    if (userRole === 3) {
-      this.setState({ notificationTime: event?.parentNotificationTime });
-    }
-
-    if (userRole === 30) {
-      this.setState({ notificationTime: event?.providerNotificationTime });
-    }
-
-    if (userRole === 100) {
-      this.setState({ notificationTime: event?.consultantNotificationTime });
-    }
+    this.setState({ notificationTime: userRole === PARENT ? event?.parentNotificationTime : userRole === PROVIDER ? event?.providerNotificationTime : userRole === CONSULTANT ? event?.consultantNotificationTime : 1440 });
+    this.getAppointment();
   }
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.event?.notes != this.props.event?.notes) {
-      this.setState({ notes: this.props.event?.notes });
-    }
-    if (prevProps.event?.publicFeedback != this.props.event?.publicFeedback) {
-      this.setState({ publicFeedback: this.props.event?.publicFeedback, isLeftFeedback: !!this.props.event?.publicFeedback });
-    }
+  getAppointment = () => {
+    const { event } = this.props;
+    request.post(getAppointmentDetail, { appointmentId: event?._id }).then(res => {
+      const { success, data } = res;
+      if (success) {
+        message.destroy();
+        this.setState({ event: data });
+      } else {
+        message.warn('Something went wrong with getting appointment detail.')
+      }
+    }).catch(() => message.warn('Something went wrong with getting appointment detail.'))
   }
 
   handleProviderHoverChange = (visible) => {
@@ -103,7 +98,8 @@ class DrawerDetail extends Component {
   }
 
   openModalCancel = () => {
-    const { event, auth } = this.props;
+    const { auth } = this.props;
+    const { event } = this.state;
 
     if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && [PARENT, ADMIN, SUPERADMIN].includes(auth.user.role) && moment(event.date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
       const desc = <span>A fee <span className='text-bold'>${event.provider.cancellationFee}</span> must be paid to cancel.</span>
@@ -126,7 +122,7 @@ class DrawerDetail extends Component {
   }
 
   handleConfirmCancel = () => {
-    const { event } = this.props;
+    const { event } = this.state;
     const { isFeeToParent } = this.state;
     this.setState({ visibleCancel: false }, () => {
       if (event?._id) {
@@ -159,21 +155,23 @@ class DrawerDetail extends Component {
     });
   }
 
-  submitModalCurrent = () => {
+  submitModalCurrent = (data) => {
     this.setState({ visibleCurrent: false });
+    this.updateAppointments(data);
   }
 
-  submitModalCurrentReferral = () => {
+  submitModalCurrentReferral = (data) => {
     this.setState({ visibleCurrentReferral: false });
+    this.updateAppointments(data);
   }
 
   closeModalCurrent = () => {
-    const { event } = this.props;
+    const { event } = this.state;
     event?.type === SCREEN ? this.setState({ visibleCurrentScreen: false }) : event?.type === CONSULTATION ? this.setState({ visibleCurrentReferral: false }) : this.setState({ visibleCurrent: false });
   }
 
   openModalCurrent = () => {
-    const { event } = this.props;
+    const { event } = this.state;
     const { user } = this.props.auth;
 
     if ([EVALUATION, APPOINTMENT, SUBSIDY].includes(event.type) && [PARENT, ADMIN, SUPERADMIN].includes(user.role) && moment(event.date).subtract(event.provider?.cancellationWindow, 'h').isBefore(moment()) && event.provider?.cancellationFee && !event.isCancellationFeePaid) {
@@ -245,7 +243,7 @@ class DrawerDetail extends Component {
   }
 
   handleUpdateNotes = () => {
-    const { event } = this.props;
+    const { event } = this.state;
     if (event?._id) {
       const data = { appointmentId: event._id, notes: this.state.notes };
       request.post(updateAppointmentNotesForParent, data).then(res => {
@@ -273,7 +271,7 @@ class DrawerDetail extends Component {
 
   handleMarkAsClosed = (items, skipEvaluation, note, publicFeedback) => {
     this.setState({ visibleProcess: false, visibleInvoice: false });
-    const { event } = this.props;
+    const { event } = this.state;
 
     if (event?._id) {
       const data = {
@@ -301,7 +299,7 @@ class DrawerDetail extends Component {
 
   handleMarkAsNoShow = (note, publicFeedback) => {
     this.setState({ visibleProcess: false, visibleInvoice: false });
-    const { event } = this.props;
+    const { event } = this.state;
 
     if (event?._id) {
       const data = {
@@ -324,7 +322,7 @@ class DrawerDetail extends Component {
 
   handleDecline = (note, publicFeedback) => {
     this.setState({ visibleProcess: false, visibleInvoice: false });
-    const { event } = this.props;
+    const { event } = this.state;
 
     if (event?._id) {
       const data = {
@@ -348,7 +346,7 @@ class DrawerDetail extends Component {
 
   handleDeclineDependent = (note, publicFeedback) => {
     this.setState({ visibleProcess: false, visibleInvoice: false });
-    const { event } = this.props;
+    const { event } = this.state;
 
     if (event?._id) {
       const data = {
@@ -372,7 +370,7 @@ class DrawerDetail extends Component {
   }
 
   confirmModalProcess = (note, publicFeedback) => {
-    const { event } = this.props;
+    const { event } = this.state;
 
     if (event?.type == EVALUATION) {
       this.setState({ visibleProcess: false, visibleInvoice: true, note: note, publicFeedback: publicFeedback });
@@ -397,7 +395,8 @@ class DrawerDetail extends Component {
 
   handleUpdateInvoice = (items) => {
     this.closeModalInvoice();
-    const { event, auth } = this.props;
+    const { auth } = this.props;
+    const { event } = this.state;
 
     if (event?._id) {
       let postData = {
@@ -457,8 +456,9 @@ class DrawerDetail extends Component {
   }
 
   handleRequestFeedback = () => {
-    const { provider, type, dependent } = this.props.event;
+    const { provider, type, dependent } = this.state.event;
     const data = { providerId: provider?._id, dependentId: dependent?._id, type };
+
     request.post(requestFeedbackForClient, data).then(result => {
       if (result.success) {
         message.success('The request has been sent successfully.');
@@ -471,15 +471,24 @@ class DrawerDetail extends Component {
   }
 
   updateAppointments(data, isSwitch) {
-    const { event, appointments, appointmentsMonth } = this.props;
-    const newAppointments = JSON.parse(JSON.stringify(appointments))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+    const { listAppointmentsRecent, appointmentsMonth } = this.props;
+    const { event } = this.state;
+    const newAppointments = JSON.parse(JSON.stringify(listAppointmentsRecent))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent, consultantName: a.consultantName }) : a);
+    this.setState({ notes: this.state.event.notes });
+    this.setState({ publicFeedback: this.state.event.publicFeedback, isLeftFeedback: !!this.state.event.publicFeedback });
+    this.setState({
+      event: { ...data, parent: event.parent, consultantName: event.consultantName },
+      notes: data.notes,
+      publicFeedback: data.publicFeedback,
+      isLeftFeedback: !!data.publicFeedback,
+    });
     this.props.setAppointments(newAppointments);
 
     if (isSwitch) {
       const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.filter(a => a._id != event._id);
       this.props.setAppointmentsInMonth(newAppointmentsInMonth);
     } else {
-      const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent }) : a);
+      const newAppointmentsInMonth = JSON.parse(JSON.stringify(appointmentsMonth))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent, consultantName: a.consultantName }) : a);
       this.props.setAppointmentsInMonth(newAppointmentsInMonth);
     }
   }
@@ -501,7 +510,9 @@ class DrawerDetail extends Component {
   };
 
   onSubmitFlagNoShow = (values) => {
-    const { event, auth } = this.props;
+    const { auth } = this.props;
+    const { event } = this.state;
+
     const { penalty, program, notes, invoiceId, balance, feeOption } = values;
     const data = {
       _id: event?._id,
@@ -548,7 +559,8 @@ class DrawerDetail extends Component {
 
   onSubmitFlagBalance = (values) => {
     const { notes } = values;
-    const { auth, listAppointmentsRecent, event } = this.props;
+    const { auth, listAppointmentsRecent } = this.props;
+    const { event } = this.state;
     const providerIds = Object.keys(values).filter(a => a.includes('invoiceId')).map(a => a.split("-")[1]);
     let bulkData = [];
 
@@ -662,8 +674,7 @@ class DrawerDetail extends Component {
   }
 
   handleClearFlag = () => {
-    const { event } = this.props;
-    request.post(clearFlag, { invoiceId: event?.flagInvoice?._id }).then(result => {
+    request.post(clearFlag, { invoiceId: this.props.event?.flagInvoice?._id }).then(result => {
       const { success, data } = result;
       if (success) {
         message.success('Cleared successfully');
@@ -709,7 +720,8 @@ class DrawerDetail extends Component {
   }
 
   handleTag = () => {
-    const { auth, event, listAppointmentsRecent } = this.props;
+    const { auth, listAppointmentsRecent } = this.props;
+    const { event } = this.state;
 
     if (listAppointmentsRecent?.find(a => a?.consultant?._id === auth.user?.consultantInfo?._id && a.date === event?.date)) {
       message.warning("You already scheduled at this event time.");
@@ -802,7 +814,8 @@ class DrawerDetail extends Component {
       minimumPayment,
       paidAmount,
     } = this.state;
-    const { event, listAppointmentsRecent, auth } = this.props;
+    const { listAppointmentsRecent, auth } = this.props;
+    const { event } = this.state;
     const dependent = { ...event?.dependent, appointments: listAppointmentsRecent?.filter(a => a.dependent?._id === event?.dependent?._id) };
     const appointmentDate = moment(event?.date);
     const consultants = auth.consultants?.filter(consultant => consultant?._id !== auth.user?._id && !listAppointmentsRecent?.find(a => a?.consultant?._id === consultant?.consultantInfo?._id && a.date === event?.date) && consultant?.consultantInfo?.manualSchedule?.find(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })) && appointmentDate.isBetween(appointmentDate.clone().set({ hours: a.openHour, minutes: a.openMin }), appointmentDate.clone().set({ hours: a.closeHour, minutes: a.closeMin }))));
@@ -956,6 +969,7 @@ class DrawerDetail extends Component {
       onCancel: this.closeModalpay,
       returnUrl, totalPayment, minimumPayment, paidAmount,
     };
+    console.log(event)
 
     const contentConfirm = (
       <div className='confirm-content'>
@@ -1437,7 +1451,7 @@ class DrawerDetail extends Component {
 }
 
 const mapStateToProps = state => ({
-  appointments: state.appointments.dataAppointments,
+  listAppointmentsRecent: state.appointments.dataAppointments,
   appointmentsMonth: state.appointments.dataAppointmentsMonth,
   auth: state.auth,
 });
