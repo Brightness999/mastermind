@@ -202,89 +202,91 @@ class InfoReview extends Component {
 											<div key={index}>{listSchools?.find(s => s._id == school)?.name}</div>
 										))}
 									</div>
-									<div className='item-flex'>
-										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.sunday)}</p>
-										{registerData?.availability?.Sunday?.map((data, index) => {
-											return (data.from_time && data.to_time && data.location) ? (
-												<React.Fragment key={index}>
-													<div className='flex gap-5'>
-														{(data.from_date || data.to_date) ? <div>{`${data.from_date ? data.from_date?.format('MM/DD/YYYY') : ''}`} - {`${data.to_date ? data.to_date.format('MM/DD/YYYY') : ''}`}</div> : null}
-														<div>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
-													</div>
-													<div>{data.location}</div>
-												</React.Fragment>
-											) : null
-										})}
-									</div>
-									<div className='item-flex'>
-										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.monday)}</p>
-										{registerData?.availability?.Monday?.map((data, index) => {
-											return (data.from_time && data.to_time && data.location) ? (
-												<React.Fragment key={index}>
-													<div className='flex gap-5'>
-														{(data.from_date || data.to_date) ? <div>{`${data.from_date ? data.from_date?.format('MM/DD/YYYY') : ''}`} - {`${data.to_date ? data.to_date.format('MM/DD/YYYY') : ''}`}</div> : null}
-														<div>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
-													</div>
-													<div>{data.location}</div>
-												</React.Fragment>
-											) : null
-										})}
-									</div>
-									<div className='item-flex'>
-										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.tuesday)}</p>
-										{registerData?.availability?.Tuesday?.map((data, index) => {
-											return (data.from_time && data.to_time && data.location) ? (
-												<React.Fragment key={index}>
-													<div className='flex gap-5'>
-														{(data.from_date || data.to_date) ? <div>{`${data.from_date ? data.from_date?.format('MM/DD/YYYY') : ''}`} - {`${data.to_date ? data.to_date.format('MM/DD/YYYY') : ''}`}</div> : null}
-														<div>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
-													</div>
-													<div>{data.location}</div>
-												</React.Fragment>
-											) : null
-										})}
-									</div>
-									<div className='item-flex'>
-										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.wednesday)}</p>
-										{registerData?.availability?.Wednesday?.map((data, index) => {
-											return (data.from_time && data.to_time && data.location) ? (
-												<React.Fragment key={index}>
-													<div className='flex gap-5'>
-														{(data.from_date || data.to_date) ? <div>{`${data.from_date ? data.from_date?.format('MM/DD/YYYY') : ''}`} - {`${data.to_date ? data.to_date.format('MM/DD/YYYY') : ''}`}</div> : null}
-														<div>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
-													</div>
-													<div>{data.location}</div>
-												</React.Fragment>
-											) : null
-										})}
-									</div>
-									<div className='item-flex'>
-										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.thursday)}</p>
-										{registerData?.availability?.Thursday?.map((data, index) => {
-											return (data.from_time && data.to_time && data.location) ? (
-												<React.Fragment key={index}>
-													<div className='flex gap-5'>
-														{(data.from_date || data.to_date) ? <div>{`${data.from_date ? data.from_date?.format('MM/DD/YYYY') : ''}`} - {`${data.to_date ? data.to_date.format('MM/DD/YYYY') : ''}`}</div> : null}
-														<div>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
-													</div>
-													<div>{data.location}</div>
-												</React.Fragment>
-											) : null
-										})}
-									</div>
-									<div className='item-flex'>
-										<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.friday)}</p>
-										{registerData?.availability?.Friday?.map((data, index) => {
-											return (data.from_time && data.to_time && data.location) ? (
-												<React.Fragment key={index}>
-													<div className='flex gap-5'>
-														{(data.from_date || data.to_date) ? <div>{`${data.from_date ? data.from_date?.format('MM/DD/YYYY') : ''}`} - {`${data.to_date ? data.to_date.format('MM/DD/YYYY') : ''}`}</div> : null}
-														<div>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
-													</div>
-													<div>{data.location}</div>
-												</React.Fragment>
-											) : null
-										})}
+									<div style={{ height: 300, overflowY: 'auto', border: 'solid 1px', padding: 10 }}>
+										<div className='item-flex'>
+											<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.sunday)}</p>
+											{registerData?.availability?.Sunday?.map((data, index) => {
+												return (data.from_time && data.to_time && data.location) ? (
+													<React.Fragment key={index}>
+														<div className='flex gap-5'>
+															{(data.from_date || data.to_date) ? <div>{`${data.from_date ? data.from_date?.format('MM/DD/YYYY') : ''}`} - {`${data.to_date ? data.to_date.format('MM/DD/YYYY') : ''}`}</div> : null}
+															<div>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
+														</div>
+														<div>{data.location}</div>
+													</React.Fragment>
+												) : null
+											})}
+										</div>
+										<div className='item-flex'>
+											<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.monday)}</p>
+											{registerData?.availability?.Monday?.map((data, index) => {
+												return (data.from_time && data.to_time && data.location) ? (
+													<React.Fragment key={index}>
+														<div className='flex gap-5'>
+															{(data.from_date || data.to_date) ? <div>{`${data.from_date ? data.from_date?.format('MM/DD/YYYY') : ''}`} - {`${data.to_date ? data.to_date.format('MM/DD/YYYY') : ''}`}</div> : null}
+															<div>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
+														</div>
+														<div>{data.location}</div>
+													</React.Fragment>
+												) : null
+											})}
+										</div>
+										<div className='item-flex'>
+											<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.tuesday)}</p>
+											{registerData?.availability?.Tuesday?.map((data, index) => {
+												return (data.from_time && data.to_time && data.location) ? (
+													<React.Fragment key={index}>
+														<div className='flex gap-5'>
+															{(data.from_date || data.to_date) ? <div>{`${data.from_date ? data.from_date?.format('MM/DD/YYYY') : ''}`} - {`${data.to_date ? data.to_date.format('MM/DD/YYYY') : ''}`}</div> : null}
+															<div>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
+														</div>
+														<div>{data.location}</div>
+													</React.Fragment>
+												) : null
+											})}
+										</div>
+										<div className='item-flex'>
+											<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.wednesday)}</p>
+											{registerData?.availability?.Wednesday?.map((data, index) => {
+												return (data.from_time && data.to_time && data.location) ? (
+													<React.Fragment key={index}>
+														<div className='flex gap-5'>
+															{(data.from_date || data.to_date) ? <div>{`${data.from_date ? data.from_date?.format('MM/DD/YYYY') : ''}`} - {`${data.to_date ? data.to_date.format('MM/DD/YYYY') : ''}`}</div> : null}
+															<div>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
+														</div>
+														<div>{data.location}</div>
+													</React.Fragment>
+												) : null
+											})}
+										</div>
+										<div className='item-flex'>
+											<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.thursday)}</p>
+											{registerData?.availability?.Thursday?.map((data, index) => {
+												return (data.from_time && data.to_time && data.location) ? (
+													<React.Fragment key={index}>
+														<div className='flex gap-5'>
+															{(data.from_date || data.to_date) ? <div>{`${data.from_date ? data.from_date?.format('MM/DD/YYYY') : ''}`} - {`${data.to_date ? data.to_date.format('MM/DD/YYYY') : ''}`}</div> : null}
+															<div>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
+														</div>
+														<div>{data.location}</div>
+													</React.Fragment>
+												) : null
+											})}
+										</div>
+										<div className='item-flex'>
+											<p className='font-14 font-700 mb-5'>{intl.formatMessage(messages.friday)}</p>
+											{registerData?.availability?.Friday?.map((data, index) => {
+												return (data.from_time && data.to_time && data.location) ? (
+													<React.Fragment key={index}>
+														<div className='flex gap-5'>
+															{(data.from_date || data.to_date) ? <div>{`${data.from_date ? data.from_date?.format('MM/DD/YYYY') : ''}`} - {`${data.to_date ? data.to_date.format('MM/DD/YYYY') : ''}`}</div> : null}
+															<div>{`${this.displayHourMin(data.from_time.hour())}:${this.displayHourMin(data.from_time.minute())}`} - {`${this.displayHourMin(data.to_time.hour())}:${this.displayHourMin(data.to_time.minute())}`}</div>
+														</div>
+														<div>{data.location}</div>
+													</React.Fragment>
+												) : null
+											})}
+										</div>
 									</div>
 								</div>
 								<div className='mt-10'>
@@ -317,104 +319,106 @@ class InfoReview extends Component {
 							</Col>
 							<Col xs={24} sm={24} md={12} xl={6} >
 								<p className='font-18 font-700 mb-10 text-center'>{intl.formatMessage(messages.notificationSetting)}</p>
-								<table className='notification-settings w-100 table-fixed'>
-									<thead>
-										<tr>
-											<th></th>
-											<th>Email</th>
-											<th>Text</th>
-											<th>Push</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td colSpan={4} className="bg-pastel">
-												<div className='header'>Sessions</div>
-											</td>
-										</tr>
-										<tr>
-											<td>New Session</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isNewSessionEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isNewSessionText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isNewSessionPush} disabled /></div></td>
-										</tr>
-										<tr>
-											<td>Reschedule Session</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isRescheduleSessionEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isRescheduleSessionText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isRescheduleSessionPush} disabled /></div></td>
-										</tr>
-										<tr>
-											<td>Close Session</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCloseSessionEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCloseSessionText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCloseSessionPush} disabled /></div></td>
-										</tr>
-										<tr>
-											<td>Cancel Session</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCancelSessionEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCancelSessionText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCancelSessionPush} disabled /></div></td>
-										</tr>
-										<tr>
-											<td>Session reminder</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderPush} disabled /></div></td>
-										</tr>
-										<tr>
-											<td colSpan={4} className="bg-pastel">
-												<div className='header'>Flag</div>
-											</td>
-										</tr>
-										<tr>
-											<td>Flag Created</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagCreatedEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagCreatedText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagCreatedPush} disabled /></div></td>
-										</tr>
-										<tr>
-											<td>Flag Cleared</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedPush} disabled /></div></td>
-										</tr>
-										<tr>
-											<td colSpan={4} className="bg-pastel">
-												<div className='header'>Invoice</div>
-											</td>
-										</tr>
-										<tr>
-											<td>Invoice Updated</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoiceUpdatedEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoiceUpdatedText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoiceUpdatedPush} disabled /></div></td>
-										</tr>
-										<tr>
-											<td>Invoice Paid</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidPush} disabled /></div></td>
-										</tr>
-										<tr>
-											<td colSpan={4} className="bg-pastel">
-												<div className='header'>Dependent</div>
-											</td>
-										</tr>
-										<tr>
-											<td>Dependent Declined</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedPush} disabled /></div></td>
-										</tr>
-										<tr>
-											<td>Dependent Accpted</td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedEmail} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedText} disabled /></div></td>
-											<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedPush} disabled /></div></td>
-										</tr>
-									</tbody>
-								</table>
+								<div style={{ height: 600, overflowY: 'auto', border: 'solid 1px', padding: 10 }}>
+									<table className='notification-settings w-100 table-fixed'>
+										<thead>
+											<tr>
+												<th></th>
+												<th>Email</th>
+												<th>Text</th>
+												<th>Push</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td colSpan={4} className="bg-pastel">
+													<div className='header'>Sessions</div>
+												</td>
+											</tr>
+											<tr>
+												<td>New Session</td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isNewSessionEmail} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isNewSessionText} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isNewSessionPush} disabled /></div></td>
+											</tr>
+											<tr>
+												<td>Reschedule Session</td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isRescheduleSessionEmail} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isRescheduleSessionText} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isRescheduleSessionPush} disabled /></div></td>
+											</tr>
+											<tr>
+												<td>Close Session</td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCloseSessionEmail} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCloseSessionText} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCloseSessionPush} disabled /></div></td>
+											</tr>
+											<tr>
+												<td>Cancel Session</td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCancelSessionEmail} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCancelSessionText} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCancelSessionPush} disabled /></div></td>
+											</tr>
+											<tr>
+												<td>Session reminder</td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderEmail} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderText} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderPush} disabled /></div></td>
+											</tr>
+											<tr>
+												<td colSpan={4} className="bg-pastel">
+													<div className='header'>Flag</div>
+												</td>
+											</tr>
+											<tr>
+												<td>Flag Created</td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagCreatedEmail} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagCreatedText} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagCreatedPush} disabled /></div></td>
+											</tr>
+											<tr>
+												<td>Flag Cleared</td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedEmail} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedText} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedPush} disabled /></div></td>
+											</tr>
+											<tr>
+												<td colSpan={4} className="bg-pastel">
+													<div className='header'>Invoice</div>
+												</td>
+											</tr>
+											<tr>
+												<td>Invoice Updated</td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoiceUpdatedEmail} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoiceUpdatedText} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoiceUpdatedPush} disabled /></div></td>
+											</tr>
+											<tr>
+												<td>Invoice Paid</td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidEmail} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidText} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidPush} disabled /></div></td>
+											</tr>
+											<tr>
+												<td colSpan={4} className="bg-pastel">
+													<div className='header'>Dependent</div>
+												</td>
+											</tr>
+											<tr>
+												<td>Dependent Declined</td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedEmail} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedText} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedPush} disabled /></div></td>
+											</tr>
+											<tr>
+												<td>Dependent Accpted</td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedEmail} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedText} disabled /></div></td>
+												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedPush} disabled /></div></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
 							</Col>
 						</Row>
 						<div className="form-btn continue-btn" >

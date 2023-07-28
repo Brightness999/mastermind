@@ -78,6 +78,8 @@ class ReviewAccount extends Component {
 								<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.address)}</p>
 								<p>Street Address : {registerData?.parentInfo?.address}</p>
 							</div>
+						</Col>
+						<Col xs={24} sm={24} md={12}>
 							<p className='font-18 font-700 mb-10'>{intl.formatMessage(messages.dependentsInfo)}</p>
 							{registerData?.studentInfos?.map((item, index) => (
 								<div key={index}>
@@ -105,124 +107,124 @@ class ReviewAccount extends Component {
 								</div>
 							))}
 						</Col>
-						<Col xs={24} sm={24} md={12}>
-							<p className='font-18 font-700 mb-10 text-center'>{intl.formatMessage(messages.notificationSetting)}</p>
-							<table className='notification-settings w-100 table-fixed'>
-								<thead>
-									<tr>
-										<th></th>
-										<th>Email</th>
-										<th>Text</th>
-										<th>Push</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td colSpan={4} className="bg-pastel">
-											<div className='header'>Sessions</div>
-										</td>
-									</tr>
-									<tr>
-										<td>New Session</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isNewSessionEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isNewSessionText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isNewSessionPush} disabled /></div></td>
-									</tr>
-									<tr>
-										<td>Reschedule Session</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isRescheduleSessionEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isRescheduleSessionText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isRescheduleSessionPush} disabled /></div></td>
-									</tr>
-									<tr>
-										<td>Close Session</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCloseSessionEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCloseSessionText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCloseSessionPush} disabled /></div></td>
-									</tr>
-									<tr>
-										<td>Cancel Session</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCancelSessionEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCancelSessionText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCancelSessionPush} disabled /></div></td>
-									</tr>
-									<tr>
-										<td>Session reminder</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderPush} disabled /></div></td>
-									</tr>
-									<tr>
-										<td colSpan={4} className="bg-pastel">
-											<div className='header'>Subsidy</div>
-										</td>
-									</tr>
-									<tr>
-										<td>Subsidy Create</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyCreateEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyCreateText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyCreatePush} disabled /></div></td>
-									</tr>
-									<tr>
-										<td>Subsidy Update</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyUpdateEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyUpdateText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyUpdatePush} disabled /></div></td>
-									</tr>
-									<tr>
-										<td colSpan={4} className="bg-pastel">
-											<div className='header'>Flag</div>
-										</td>
-									</tr>
-									<tr>
-										<td>Flag Created</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagCreatedEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagCreatedText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagCreatedPush} disabled /></div></td>
-									</tr>
-									<tr>
-										<td>Flag Cleared</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedPush} disabled /></div></td>
-									</tr>
-									<tr>
-										<td colSpan={4} className="bg-pastel">
-											<div className='header'>Invoice</div>
-										</td>
-									</tr>
-									<tr>
-										<td>Invoice Updated</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoiceUpdatedEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoiceUpdatedText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoiceUpdatedPush} disabled /></div></td>
-									</tr>
-									<tr>
-										<td>Invoice Paid</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidPush} disabled /></div></td>
-									</tr>
-									<tr>
-										<td colSpan={4} className="bg-pastel">
-											<div className='header'>Dependent</div>
-										</td>
-									</tr>
-									<tr>
-										<td>Dependent Declined</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedPush} disabled /></div></td>
-									</tr>
-									<tr>
-										<td>Dependent Accpted</td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedEmail} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedText} disabled /></div></td>
-										<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedPush} disabled /></div></td>
-									</tr>
-								</tbody>
-							</table>
-						</Col>
+					</Row>
+					<Row>
+						<p className='font-18 font-700 mb-10 text-center'>{intl.formatMessage(messages.notificationSetting)}</p>
+						<table className='notification-settings w-100 table-fixed'>
+							<thead>
+								<tr>
+									<th></th>
+									<th>Email</th>
+									<th>Text</th>
+									<th>Push</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td colSpan={4} className="bg-pastel">
+										<div className='header'>Sessions</div>
+									</td>
+								</tr>
+								<tr>
+									<td>New Session</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isNewSessionEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isNewSessionText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isNewSessionPush} disabled /></div></td>
+								</tr>
+								<tr>
+									<td>Reschedule Session</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isRescheduleSessionEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isRescheduleSessionText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isRescheduleSessionPush} disabled /></div></td>
+								</tr>
+								<tr>
+									<td>Close Session</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCloseSessionEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCloseSessionText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCloseSessionPush} disabled /></div></td>
+								</tr>
+								<tr>
+									<td>Cancel Session</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCancelSessionEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCancelSessionText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isCancelSessionPush} disabled /></div></td>
+								</tr>
+								<tr>
+									<td>Session reminder</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderPush} disabled /></div></td>
+								</tr>
+								<tr>
+									<td colSpan={4} className="bg-pastel">
+										<div className='header'>Subsidy</div>
+									</td>
+								</tr>
+								<tr>
+									<td>Subsidy Create</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyCreateEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyCreateText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyCreatePush} disabled /></div></td>
+								</tr>
+								<tr>
+									<td>Subsidy Update</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyUpdateEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyUpdateText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSubsidyUpdatePush} disabled /></div></td>
+								</tr>
+								<tr>
+									<td colSpan={4} className="bg-pastel">
+										<div className='header'>Flag</div>
+									</td>
+								</tr>
+								<tr>
+									<td>Flag Created</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagCreatedEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagCreatedText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagCreatedPush} disabled /></div></td>
+								</tr>
+								<tr>
+									<td>Flag Cleared</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedPush} disabled /></div></td>
+								</tr>
+								<tr>
+									<td colSpan={4} className="bg-pastel">
+										<div className='header'>Invoice</div>
+									</td>
+								</tr>
+								<tr>
+									<td>Invoice Updated</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoiceUpdatedEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoiceUpdatedText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoiceUpdatedPush} disabled /></div></td>
+								</tr>
+								<tr>
+									<td>Invoice Paid</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidPush} disabled /></div></td>
+								</tr>
+								<tr>
+									<td colSpan={4} className="bg-pastel">
+										<div className='header'>Dependent</div>
+									</td>
+								</tr>
+								<tr>
+									<td>Dependent Declined</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentDeclinedPush} disabled /></div></td>
+								</tr>
+								<tr>
+									<td>Dependent Accpted</td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedEmail} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedText} disabled /></div></td>
+									<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isDependentAcceptedPush} disabled /></div></td>
+								</tr>
+							</tbody>
+						</table>
 					</Row>
 					<div className="form-btn continue-btn" >
 						<Button
