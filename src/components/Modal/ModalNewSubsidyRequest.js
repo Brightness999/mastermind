@@ -265,7 +265,6 @@ class ModalNewSubsidyRequest extends React.Component {
 							<Form.Item
 								name="documents"
 								className='upload-document'
-								rules={[{ required: true }]}
 							>
 								<div className='input-download flex flex-row justify-between'>
 									<div className='div-document'>
