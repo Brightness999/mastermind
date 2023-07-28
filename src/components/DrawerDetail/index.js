@@ -385,7 +385,12 @@ class DrawerDetail extends Component {
     if (items.isEdit) {
       this.handleUpdateInvoice(items);
     } else {
-      this.setState({ visibleInvoice: false, visibleProcess: true, items: items });
+      const { event, note, publicFeedback } = this.state;
+      if (event?.type === EVALUATION) {
+        this.handleMarkAsClosed(items, false, note, publicFeedback);
+      } else {
+        this.setState({ visibleInvoice: false, visibleProcess: true, items: items });
+      }
     }
   }
 
