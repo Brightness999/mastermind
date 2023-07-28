@@ -15,7 +15,7 @@ import msgDrawer from 'components/DrawerDetail/messages';
 import request, { encryptParam } from 'src/utils/api/request';
 import { clearFlag, requestClearance, updateInvoice } from 'src/utils/api/apiList';
 import { getInvoiceList, setInvoiceList } from 'src/redux/features/appointmentsSlice';
-import { InvoiceType } from 'src/routes/constant';
+import { InvoiceType, NOSHOW } from 'src/routes/constant';
 
 class Outstanding extends React.Component {
   constructor(props) {
@@ -296,7 +296,7 @@ class Outstanding extends React.Component {
         title: intl.formatMessage(messages.action), key: 'action', align: 'center', fixed: 'right',
         render: invoice => invoice.isPaid ? (invoice.method === 2 && invoice.paidAmount < invoice.totalPayment) ? (
           <Button type='link' onClick={() => this.openModalPay(`${window.location.href}?s=${encryptParam('true')}&i=${encryptParam(invoice?._id)}`, invoice?.paidAmount, invoice?.totalPayment, invoice?.minimumPayment)}>
-            <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
+            <span className='text-primary text-underline'>{intl.formatMessage(msgModal.paynow)}</span>
           </Button>
         ) : null : (
           <div>
@@ -305,24 +305,28 @@ class Outstanding extends React.Component {
                 <span className='text-primary text-underline'>{intl.formatMessage(msgModal.paynow)}</span>
               </Button>
             ) : null}
-            <Popconfirm
-              title="Are you sure to send clearnace request?"
-              onConfirm={() => this.onOpenModalCreateNote(invoice)}
-              okText="Yes"
-              cancelText="No"
-              placement='left'
-            >
-              <Button type='link' className='px-5'><span className='text-primary text-underline'>{intl.formatMessage(msgDrawer.requestClearance)}</span></Button>
-            </Popconfirm>
-            <Popconfirm
-              title="Are you sure to clear this flag?"
-              onConfirm={() => this.handleClearFlag(invoice)}
-              okText="Yes"
-              cancelText="No"
-              placement='left'
-            >
-              <Button type='link' className='px-5'><span className='text-primary text-underline'>{intl.formatMessage(msgDrawer.clearFlag)}</span></Button>
-            </Popconfirm>
+            {[InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(invoice.type) ? (
+              <>
+                <Popconfirm
+                  title="Are you sure to send clearnace request?"
+                  onConfirm={() => this.onOpenModalCreateNote(invoice)}
+                  okText="Yes"
+                  cancelText="No"
+                  placement='left'
+                >
+                  <Button type='link' className='px-5'><span className='text-primary text-underline'>{intl.formatMessage(msgDrawer.requestClearance)}</span></Button>
+                </Popconfirm>
+                <Popconfirm
+                  title="Are you sure to clear this flag?"
+                  onConfirm={() => this.handleClearFlag(invoice)}
+                  okText="Yes"
+                  cancelText="No"
+                  placement='left'
+                >
+                  <Button type='link' className='px-5'><span className='text-primary text-underline'>{intl.formatMessage(msgDrawer.clearFlag)}</span></Button>
+                </Popconfirm>
+              </>
+            ) : null}
           </div >
         ),
       },

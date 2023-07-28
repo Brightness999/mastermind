@@ -313,7 +313,7 @@ class OutstandingList extends React.Component {
                 <span className='text-primary'>{intl.formatMessage(msgModal.paynow)}</span>
               </Button>
             ) : null}
-            {auth.user?.role === PARENT ? (
+            {(auth.user?.role === PARENT && [InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(invoice.type)) ? (
               <Popconfirm
                 title="Are you sure to send clearnace request?"
                 onConfirm={() => this.onOpenModalCreateNote(invoice)}
@@ -324,7 +324,7 @@ class OutstandingList extends React.Component {
                 <Button type='link' className='px-5'><span className='text-primary'>Request clearance</span></Button>
               </Popconfirm>
             ) : null}
-            {([4, 5].includes(invoice.type) && auth.user?.role === PROVIDER) ? (
+            {([InvoiceType.NOSHOW, InvoiceType.BALANCE].includes(invoice.type) && auth.user?.role === PROVIDER) ? (
               <Popconfirm
                 title="Are you sure to clear this flag?"
                 onConfirm={() => this.handleClearFlag(invoice)}
