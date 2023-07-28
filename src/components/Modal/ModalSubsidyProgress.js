@@ -556,7 +556,7 @@ class ModalSubsidyProgress extends React.Component {
 			)
 		}
 
-		if (!isNotAdmin && referral?.status != -1) {
+		if (referral?.status != -1) {
 			return;
 		}
 
