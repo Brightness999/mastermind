@@ -33,7 +33,7 @@ import { clearFlag, getDefaultDataForAdmin, payInvoice, requestClearance, sendEm
 import PanelAppointment from './PanelAppointment';
 import PanelSubsidiaries from './PanelSubsidiaries';
 import PageLoading from 'components/Loading/PageLoading';
-import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTANT, CONSULTATION, DECLINED, EVALUATION, InvoiceType, MethodType, NOFLAG, NOSHOW, PENDING, PROVIDER, RESCHEDULE, SCREEN, SUBSIDY } from 'routes/constant';
+import { ACTIVE, APPOINTMENT, BALANCE, CANCELLED, CONSULTATION, DECLINED, EVALUATION, InvoiceType, MethodType, NOFLAG, NOSHOW, PENDING, RESCHEDULE, SCREEN, SUBSIDY } from 'routes/constant';
 import './index.less';
 
 const { Panel } = Collapse;
@@ -813,9 +813,7 @@ class SchedulingCenter extends React.Component {
 
     const btnFilter = (
       <div className='header-left flex flex-row' onClick={this.onShowFilter}>
-        {userRole != CONSULTANT && (
-          <p className='font-15 inline-flex items-center'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
-        )}
+        <p className='font-15 inline-flex items-center'>{intl.formatMessage(messages.filterOptions)} {isFilter ? <BsX size={30} /> : <BsFilter size={25} />}</p>
       </div>
     );
 
@@ -1125,7 +1123,7 @@ class SchedulingCenter extends React.Component {
                         <div className='flex justify-between items-center flex-1'>
                           <div className='flex-1'>
                             <div className='font-11'>{appointment.skillSet?.name}</div>
-                            <div className='font-09'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
+                            <div className='font-09'>{`${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
                           </div>
                           <div className='flex-1'>
                             <div className='font-11'>{intl.formatMessage(messages.phoneCall)}</div>
@@ -1145,7 +1143,7 @@ class SchedulingCenter extends React.Component {
                         <div className='flex justify-between items-center flex-1'>
                           <div className='flex-1'>
                             <div className='font-11'>{appointment.skillSet?.name}</div>
-                            <div className='font-09'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
+                            <div className='font-09'>{`${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
                           </div>
                           <div className='flex-1'>
                             <div className='font-11'>{intl.formatMessage(messages.phoneCall)}</div>
@@ -1167,14 +1165,17 @@ class SchedulingCenter extends React.Component {
                       <div key={index} className={`list-item padding-item gap-2 ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='flex justify-between items-center flex-1'>
-                          <div>
-                            <div className='font-11'>{appointment.skillSet?.name}</div>
-                            <div className='font-09'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
+                          <div className='flex-1'>
+                            <div className='font-11'>{`${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}`}</div>
+                            <div className='font-09'>{`${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
                           </div>
-                          <div className='font-11'>{appointment.location}</div>
-                          <div>
-                            <div className='font-12'>{moment(appointment.date).format('hh:mm a')}</div>
-                            <div className='font-12 font-700 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
+                          <div className='flex-1'>
+                            <div className='font-11'>{appointment.skillSet?.name}</div>
+                            <div className='font-09'>{appointment.location}</div>
+                          </div>
+                          <div className='flex-1'>
+                            <div className='font-12'>{moment(appointment.date).format("hh:mm a")}</div>
+                            <div className='font-12 font-700'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
                           </div>
                         </div>
                       </div>
@@ -1185,14 +1186,17 @@ class SchedulingCenter extends React.Component {
                       <div key={index} className={`list-item padding-item gap-2 ${[DECLINED, CANCELLED, NOSHOW].includes(appointment.status) ? 'line-through' : ''}`} onClick={() => this.onShowDrawerDetail(appointment._id)}>
                         <Avatar size={24} icon={<FaUser size={12} />} />
                         <div className='flex justify-between items-center flex-1'>
-                          <div>
-                            <div className='font-11'>{appointment.skillSet?.name}</div>
-                            <div className='font-09'>{userRole === PROVIDER ? `${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}` : `${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
+                          <div className='flex-1'>
+                            <div className='font-11'>{`${appointment.dependent?.firstName ?? ''} ${appointment.dependent?.lastName ?? ''}`}</div>
+                            <div className='font-09'>{`${appointment.provider?.firstName ?? ''} ${appointment.provider?.lastName ?? ''}`}</div>
                           </div>
-                          <div className='font-11'>{appointment.location}</div>
-                          <div>
-                            <div className='font-12'>{moment(appointment.date).format('hh:mm a')}</div>
-                            <div className='font-12 font-700 whitespace-nowrap'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
+                          <div className='flex-1'>
+                            <div className='font-11'>{appointment.skillSet?.name}</div>
+                            <div className='font-09'>{appointment.location}</div>
+                          </div>
+                          <div className='flex-1'>
+                            <div className='font-12'>{moment(appointment.date).format("hh:mm a")}</div>
+                            <div className='font-12 font-700'>{moment(appointment.date).format('MM/DD/YYYY')}</div>
                           </div>
                         </div>
                       </div>
