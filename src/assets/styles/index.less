@@ -612,11 +612,11 @@ select:-webkit-autofill:focus {
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: #637099;
+    background-color: #551B8B;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: #637099;
+    background-color: #792bc2;
   }
 
   ::-webkit-scrollbar-track {
@@ -1882,7 +1882,7 @@ ol {
     .ant-collapse {
       background-color: transparent;
       height: 100%;
-      overflow-y: scroll;
+      overflow-y: auto;
       border: none;
 
       &-item {
@@ -2299,7 +2299,7 @@ table.notification-settings {
 }
 
 .overflow-y-scroll {
-  overflow-y: scroll !important;
+  overflow-y: auto !important;
 }
 
 .overflow-x-hidden {
@@ -2328,7 +2328,8 @@ table.notification-settings {
       padding: 5px 12px;
       margin-right: 0px;
 
-      &:hover, &.ant-checkbox-wrapper-checked {
+      &:hover,
+      &.ant-checkbox-wrapper-checked {
         color: white;
         background-color: @primary-color-dark;
         border-color: @primary-color-dark;

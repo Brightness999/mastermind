@@ -133,7 +133,7 @@ class ModalNewSubsidyRequest extends React.Component {
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
 			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
-			footer: []
+			footer: null,
 		};
 		const props = {
 			name: 'file',

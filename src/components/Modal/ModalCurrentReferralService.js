@@ -271,7 +271,7 @@ class ModalCurrentReferralService extends React.Component {
 			onOk: this.props.onSubmit,
 			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
 			width: 900,
-			footer: []
+			footer: null,
 		};
 		const props = {
 			name: 'file',

@@ -632,7 +632,7 @@ class ModalNewAppointmentForParents extends React.Component {
 			onOk: this.props.onSubmit,
 			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
 			width: 1000,
-			footer: []
+			footer: null,
 		};
 		const modalScreeningProps = {
 			visible: visibleModalScreening,

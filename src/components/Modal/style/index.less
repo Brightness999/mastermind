@@ -72,7 +72,7 @@
 .modal-scroll {
   height: 60vh;
   width: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
@@ -379,43 +379,27 @@
 }
 
 .modal-dependent {
-  padding-bottom: 0px;
-  top: 10%;
+  padding-bottom: 0px !important;
+  top: 10% !important;
 
   .ant-modal-body {
     padding: 0px;
-    overflow-y: scroll;
-    height: 80vh;
+    max-height: 80vh;
     display: flex;
     flex-direction: column;
 
     .header {
       padding: 15px 20px 15px 40px;
-
-      .ant-btn-primary {
-        color: #fff;
-        font-weight: 400;
-        font-size: 14px;
-        background-color: #138332;
-        border-color: #138332;
-        -webkit-box-shadow: none;
-        box-shadow: none;
-
-        &:hover {
-          background-color: #126529;
-          border-color: #126529;
-        }
-      }
-
-      .ant-btn-sm {
-        font-size: 11px !important;
-        padding: 6px 10px;
-        height: auto !important;
-      }
     }
 
     .ant-card {
       flex: 1;
+      overflow-y: auto;
+
+      &::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
 
       .ant-card-body {
         padding: 20px 40px;
@@ -491,6 +475,28 @@
               color: @white;
             }
           }
+        }
+      }
+    }
+
+    .footer-buttons {
+      padding: 10px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+
+      .ant-btn-primary {
+        color: #fff;
+        font-weight: 400;
+        font-size: 14px;
+        background-color: #138332;
+        border-color: #138332;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+
+        &:hover {
+          background-color: #126529;
+          border-color: #126529;
         }
       }
     }
@@ -709,4 +715,11 @@
       height: 30px;
     }
   }
+}
+
+.ant-modal {
+  top: 10% !important;
+  max-height: 80vh !important;
+  overflow-y: auto;
+  padding-bottom: 0px !important;
 }

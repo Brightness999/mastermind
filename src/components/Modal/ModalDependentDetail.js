@@ -36,6 +36,10 @@ class ModalDependentDetail extends React.Component {
 	}
 
 	componentDidMount() {
+		this.getDependentDetail();
+	}
+
+	getDependentDetail = () => {
 		const { dependent } = this.props;
 
 		if (dependent?._id) {
@@ -404,38 +408,6 @@ class ModalDependentDetail extends React.Component {
 							<b className='font-20'>NAME: {`${dependent?.firstName ?? ''} ${dependent?.lastName ?? ''}`}{((user?.role === 30 && dependent?.declinedProviders?.find(p => p.provider === user?.providerInfo?._id)) || ((user?.role === 3 || user?.role > 900) && dependent?.declinedProviders?.length)) ? '(Rejected)' : ''}</b>
 							{dependent.isRemoved ? "(Graduated)" : null}
 						</div>
-						{(user?.role === 3 || user?.role > 900) ? <Button type='primary' size='small' onClick={this.onOpenModalNewSubsidy}>REQUEST SUBSIDY</Button> : null}
-						{user?.role != 3 ? <Button type='primary' size='small' onClick={this.onAddComment}>ADD COMMENT</Button> : null}
-						{((user?.role === 30 || user?.role > 900) && unpaidInvoices?.length) ? <Button type='primary' size='small' onClick={this.onShowModalBalance}>FLAG DEPENDENT</Button> : null}
-						{user?.role === 30 ? dependent?.declinedProviders?.find(p => p.provider?._id === user?.providerInfo?._id && p.isAppeal) ? (
-							<Popconfirm
-								title="Are you sure to accept this student?"
-								onConfirm={this.handleAcceptDependent}
-								okText="Yes"
-								cancelText="No"
-							>
-								<Button type='primary' size='small'>ACCEPT</Button>
-							</Popconfirm>
-						) : dependent?.declinedProviders?.find(p => p.provider === user?.providerInfo?._id) ? null : (
-							<Popconfirm
-								title="Are you sure to decline this student?"
-								onConfirm={this.handleDeclineDependent}
-								okText="Yes"
-								cancelText="No"
-							>
-								<Button type='primary' size='small'>DECLINE</Button>
-							</Popconfirm>
-						) : null}
-						{((user?.role === 3 || user?.role > 900) && dependent?.declinedProviders?.filter(p => !p.isAppeal)?.length) ? (
-							<Popconfirm
-								title="Are you sure to appeal to a provider?"
-								onConfirm={this.openModalSelectProvider}
-								okText="Yes"
-								cancelText="No"
-							>
-								<Button type='primary' size='small'>APPEAL</Button>
-							</Popconfirm>
-						) : null}
 					</div>
 					<CloseOutlined onClick={() => this.props.onCancel(isUpdated)} />
 				</div>
@@ -551,6 +523,40 @@ class ModalDependentDetail extends React.Component {
 						</Col>
 					</Row>
 				</Card>
+				<div className='footer-buttons'>
+					{(user?.role === 3 || user?.role > 900) ? <Button type='primary' onClick={this.onOpenModalNewSubsidy}>REQUEST SUBSIDY</Button> : null}
+					{user?.role != 3 ? <Button type='primary' onClick={this.onAddComment}>ADD COMMENT</Button> : null}
+					{((user?.role === 30 || user?.role > 900) && unpaidInvoices?.length) ? <Button type='primary' onClick={this.onShowModalBalance}>FLAG DEPENDENT</Button> : null}
+					{user?.role === 30 ? dependent?.declinedProviders?.find(p => p.provider?._id === user?.providerInfo?._id && p.isAppeal) ? (
+						<Popconfirm
+							title="Are you sure to accept this student?"
+							onConfirm={this.handleAcceptDependent}
+							okText="Yes"
+							cancelText="No"
+						>
+							<Button type='primary'>ACCEPT</Button>
+						</Popconfirm>
+					) : dependent?.declinedProviders?.find(p => p.provider === user?.providerInfo?._id) ? null : (
+						<Popconfirm
+							title="Are you sure to decline this student?"
+							onConfirm={this.handleDeclineDependent}
+							okText="Yes"
+							cancelText="No"
+						>
+							<Button type='primary'>DECLINE</Button>
+						</Popconfirm>
+					) : null}
+					{((user?.role === 3 || user?.role > 900) && dependent?.declinedProviders?.filter(p => !p.isAppeal)?.length) ? (
+						<Popconfirm
+							title="Are you sure to appeal to a provider?"
+							onConfirm={this.openModalSelectProvider}
+							okText="Yes"
+							cancelText="No"
+						>
+							<Button type='primary'>APPEAL</Button>
+						</Popconfirm>
+					) : null}
+				</div>
 				{visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
 				{visibleBalance && <ModalBalance {...modalBalanceProps} />}
 				{visibleSelectProvider && <ModalSelectProvider {...modalSelectProviderProps} />}
