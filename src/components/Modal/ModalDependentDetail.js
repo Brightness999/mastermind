@@ -395,7 +395,6 @@ class ModalDependentDetail extends React.Component {
 		if (user.role === 30) {
 			unpaidInvoices = unpaidInvoices?.filter(a => a.provider === user.providerInfo?._id);
 		}
-		console.log(dependent)
 
 		return (
 			<Modal {...modalProps}>
@@ -456,7 +455,7 @@ class ModalDependentDetail extends React.Component {
 										</div>
 										<div className='flex-1'>
 											<div><b>Member Since:</b> {moment(dependent?.createdAt).format('MM/DD/YYYY')}</div>
-											<div><b>Last Activity Date:</b> {dependent?.appointments?.length ? moment(dependent?.appointments?.filter(a => a.status === -1)?.sort((a, b) => moment(a.date) > moment(b.date) ? -1 : 1)?.[0]?.date).format('MM/DD/YYYY') : ''}</div>
+											<div><b>Last Activity Date:</b> {dependent?.appointments?.filter(a => a.status === -1)?.length ? moment(dependent?.appointments?.filter(a => a.status === -1)?.sort((a, b) => moment(a.updatedAt) > moment(b.updatedAt) ? -1 : 1)?.[0]?.date).format('MM/DD/YYYY') : ''}</div>
 											<div><b>Total Sessions:</b> {dependent?.appointments?.filter(d => [2, 3, 5].includes(d.type) && d.status == -1 && d.flagStatus != 1)?.length ?? 0}</div>
 											<div><b>Total Consultations:</b> {dependent?.appointments?.filter(d => d.type === 4 && d.status == -1 && d.flagStatus != 1)?.length ?? 0}</div>
 										</div>
