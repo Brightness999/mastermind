@@ -241,8 +241,8 @@ class ModalInvoice extends React.Component {
 			title: (<div className='font-20'>{(invoice?.type === 1 || event?.sessionInvoice?.type === 1) ? 'Session Invoice' : (invoice?.type === 2 || event?.cancelInvoice?.type === 2) ? 'Reschedule Invoice' : (invoice?.type === 3 || event?.cancelInvoice?.type === 3) ? 'Cancel Invoice' : (invoice?.type === 4 || event?.flagInovice?.type === 4) ? 'No show Invoice' : (invoice?.type === 5 || event?.flagInvoice?.type === 5) ? 'Past due Invoice' : 'Invoice'}</div>),
 			open: this.props.visible,
 			onOk: this.props.onSubmit,
-			onCancel: this.props.onCancel,
-			closable: false,
+			onCancel: (e) => e.target.className !== 'ant-modal-wrap' && this.props.onCancel(),
+			closable: true,
 			width: 1100,
 			footer: null,
 		};

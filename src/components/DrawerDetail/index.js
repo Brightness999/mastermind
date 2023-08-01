@@ -974,7 +974,6 @@ class DrawerDetail extends Component {
       onCancel: this.closeModalpay,
       returnUrl, totalPayment, minimumPayment, paidAmount,
     };
-    console.log(event)
 
     const contentConfirm = (
       <div className='confirm-content'>

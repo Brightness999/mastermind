@@ -317,7 +317,6 @@ class ModalDependentDetail extends React.Component {
 			if (result.success) {
 				message.success('Your request has been submitted. Please allow up to 24 hours for the provider to review this.');
 				this.setState({ dependent: { ...dependent, declinedProviders: dependent.declinedProviders?.map(p => p.provider?._id === selectedProviderId ? ({ provider: p.provider, isAppeal: true }) : p) } });
-				console.log(selectedProviderId, this.state.dependent.declinedProviders?.find(p => p.provider?._id === selectedProviderId), this.state.dependent.declinedProviders?.map(p => p.provider?._id === selectedProviderId ? ({ provider: p.provider, isAppeal: true }) : p))
 			}
 		}).catch(error => {
 			message.error(error.message);

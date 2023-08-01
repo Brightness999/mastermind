@@ -369,12 +369,67 @@
 
 .modal-provider-detail,
 .modal-school-detail {
+  .ant-tabs>.ant-tabs-nav .ant-tabs-nav-list {
+    overflow-x: auto !important;
+  }
+
   .ant-modal-body {
     padding: 15px 30px;
+    max-height: calc(80vh - 113px);
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
   }
 
   .rmdp-day-picker {
     pointer-events: none;
+  }
+}
+
+.modal-note,
+.modal-payment {
+  .ant-modal-body {
+    max-height: calc(80vh - 113px);
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+  }
+}
+
+.modal-invoice,
+.modal-new-subsidy,
+.modal-sessions-need-to-close,
+.modal-flag-expand,
+.modal-cancel,
+.modal-subsidy-progress,
+.modal-school-approve {
+  .ant-modal-body {
+    padding: 15px 30px;
+    max-height: calc(80vh - 60px);
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+  }
+}
+
+.modal-new,
+.modal-current,
+.modal-referral-service,
+.modal-balance,
+.modal-no-show {
+  .ant-modal-body {
+    max-height: 80vh;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
   }
 }
 

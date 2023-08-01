@@ -28,7 +28,6 @@ class InvoiceList extends React.Component {
 
   componentDidMount() {
     const { auth, invoices } = this.props;
-    console.log(invoices)
     const params = new URLSearchParams(window.location.search);
     const success = decryptParam(params.get('s')?.replaceAll(' ', '+') || '');
     const invoiceId = decryptParam(params.get('i')?.replaceAll(' ', '+') || '');

@@ -116,7 +116,6 @@ class ConsultantAvailability extends Component {
       blackoutDates: values?.blackoutDates?.map(d => d.toString()),
       ...registerData.consultantInfo
     }
-    console.log(newRegisterData)
 
     this.props.setRegisterData({ ...newRegisterData });
     this.props.onContinue();
