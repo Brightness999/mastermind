@@ -331,7 +331,7 @@ class InfoReview extends Component {
 										</thead>
 										<tbody>
 											<tr>
-												<td colSpan={4} className="bg-pastel">
+												<td colSpan={4} className="bg-primary text-white">
 													<div className='header'>Sessions</div>
 												</td>
 											</tr>
@@ -366,7 +366,7 @@ class InfoReview extends Component {
 												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isSessionReminderPush} disabled /></div></td>
 											</tr>
 											<tr>
-												<td colSpan={4} className="bg-pastel">
+												<td colSpan={4} className="bg-primary text-white">
 													<div className='header'>Flag</div>
 												</td>
 											</tr>
@@ -383,7 +383,7 @@ class InfoReview extends Component {
 												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isFlagClearedPush} disabled /></div></td>
 											</tr>
 											<tr>
-												<td colSpan={4} className="bg-pastel">
+												<td colSpan={4} className="bg-primary text-white">
 													<div className='header'>Invoice</div>
 												</td>
 											</tr>
@@ -400,7 +400,7 @@ class InfoReview extends Component {
 												<td><div className='text-center'><Switch checked={registerData?.notificationSetting?.isInvoicePaidPush} disabled /></div></td>
 											</tr>
 											<tr>
-												<td colSpan={4} className="bg-pastel">
+												<td colSpan={4} className="bg-primary text-white">
 													<div className='header'>Dependent</div>
 												</td>
 											</tr>

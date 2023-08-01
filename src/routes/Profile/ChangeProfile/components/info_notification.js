@@ -354,7 +354,7 @@ class InfoNotification extends React.Component {
 								</thead>
 								<tbody>
 									<tr>
-										<td colSpan={4} className="bg-pastel">
+										<td colSpan={4} className="bg-primary text-white">
 											<div className='header'>Sessions</div>
 										</td>
 									</tr>
@@ -391,7 +391,7 @@ class InfoNotification extends React.Component {
 									{(user?.role === 3 || user?.role === 60 || registerData?.role === 3 || registerData?.role === 60) && (
 										<>
 											<tr>
-												<td colSpan={4} className="bg-pastel">
+												<td colSpan={4} className="bg-primary text-white">
 													<div className='header'>Subsidy</div>
 												</td>
 											</tr>
@@ -412,7 +412,7 @@ class InfoNotification extends React.Component {
 									{(user?.role === 3 || user?.role === 30 || registerData?.role === 3 || registerData?.role === 30) && (
 										<>
 											<tr>
-												<td colSpan={4} className="bg-pastel">
+												<td colSpan={4} className="bg-primary text-white">
 													<div className='header'>Flag</div>
 												</td>
 											</tr>
@@ -429,7 +429,7 @@ class InfoNotification extends React.Component {
 												<td><div className='text-center'><Switch checked={isFlagClearedPush} onChange={v => this.setState({ isFlagClearedPush: v })} /></div></td>
 											</tr>
 											<tr>
-												<td colSpan={4} className="bg-pastel">
+												<td colSpan={4} className="bg-primary text-white">
 													<div className='header'>Invoice</div>
 												</td>
 											</tr>
@@ -446,7 +446,7 @@ class InfoNotification extends React.Component {
 												<td><div className='text-center'><Switch checked={isInvoicePaidPush} onChange={v => this.setState({ isInvoicePaidPush: v })} /></div></td>
 											</tr>
 											<tr>
-												<td colSpan={4} className="bg-pastel">
+												<td colSpan={4} className="bg-primary text-white">
 													<div className='header'>Dependent</div>
 												</td>
 											</tr>
