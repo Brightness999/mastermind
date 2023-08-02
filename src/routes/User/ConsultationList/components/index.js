@@ -10,6 +10,7 @@ import msgDrawer from 'components/DrawerDetail/messages';
 import { socketUrl } from 'utils/api/baseUrl';
 import Unclaimed from './unclaimed';
 import Claimed from './claimed';
+import Cancelled from './cancelled';
 
 class ConsultationRequest extends React.Component {
   constructor(props) {
@@ -40,6 +41,11 @@ class ConsultationRequest extends React.Component {
         key: '1',
         label: <span className="font-16">{intl.formatMessage(msgDrawer.claimed)}</span>,
         children: <Claimed socket={this.socket} />,
+      },
+      {
+        key: '2',
+        label: <span className="font-16">{intl.formatMessage(msgDrawer.cancelled)}</span>,
+        children: <Cancelled socket={this.socket} />,
       },
     ]
 

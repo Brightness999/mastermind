@@ -145,6 +145,7 @@ class DrawerDetail extends Component {
           if (result.success) {
             this.setState({ errorMessage: '', isFeeToParent: false });
             this.updateAppointments(result.data);
+            this.props.onSubmit && this.props.onSubmit();
           } else {
             this.setState({ errorMessage: result.data, isFeeToParent: false });
           }
@@ -288,6 +289,7 @@ class DrawerDetail extends Component {
         if (result.success) {
           this.setState({ errorMessage: '' });
           this.updateAppointments(result.data);
+          this.props.onSubmit && this.props.onSubmit();
         } else {
           this.setState({ errorMessage: result.data });
         }
@@ -311,6 +313,7 @@ class DrawerDetail extends Component {
         if (result.success) {
           this.setState({ errorMessage: '' });
           this.updateAppointments(result.data);
+          this.props.onSubmit && this.props.onSubmit();
         } else {
           this.setState({ errorMessage: result.data });
         }
@@ -744,6 +747,7 @@ class DrawerDetail extends Component {
               } else {
                 message.success("Claimed successfully");
                 this.updateAppointments(res.data);
+                this.props.onSubmit && this.props.onSubmit();
               }
             }
           })
@@ -760,6 +764,7 @@ class DrawerDetail extends Component {
         if (res.success) {
           this.setState({ errorMessage: '' });
           this.updateAppointments(res.data, true);
+          this.props.onSubmit && this.props.onSubmit();
           message.success("Switched successfully");
         }
       })
@@ -772,6 +777,7 @@ class DrawerDetail extends Component {
         if (res.success) {
           this.setState({ errorMessage: '' });
           this.updateAppointments(res.data);
+          this.props.onSubmit && this.props.onSubmit();
           message.success("Removed successfully");
         }
       })

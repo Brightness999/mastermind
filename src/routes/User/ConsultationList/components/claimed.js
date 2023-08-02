@@ -203,6 +203,10 @@ class ClaimedConsultationRequest extends React.Component {
     this.setState({ selectedConsultation: {}, visibleDrawer: false });
   };
 
+  onSubmitDrawerDetail = () => {
+    this.getConsultations();
+  };
+
   render() {
     const { pageNumber, pageSize, searchConsultantName, searchDependentName, selectedGrades, selectedSchools, selectedServices, totalSize, consultationList, skillSet, loading, csvData, selectedConsultation, visibleProcess, visibleDrawer } = this.state;
     const { auth, appointments } = this.props;
@@ -517,6 +521,7 @@ class ClaimedConsultationRequest extends React.Component {
     };
     const drawerDetailProps = {
       visible: visibleDrawer,
+      onSubmit: this.onSubmitDrawerDetail,
       onClose: this.onCloseDrawerDetail,
       event: selectedConsultation,
       socket: this.props.socket,
