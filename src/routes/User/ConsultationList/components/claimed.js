@@ -14,7 +14,7 @@ import request from 'utils/api/request';
 import { closeAppointmentAsNoshow, closeAppointmentForProvider, getConsultationList, removeConsultation, switchConsultation } from 'utils/api/apiList';
 import PageLoading from 'components/Loading/PageLoading';
 import { CANCELLED, CLOSED, CONSULTATION, DECLINED, NOSHOW, PENDING } from 'routes/constant';
-import { ModalCurrentReferralService, ModalProcessAppointment } from 'components/Modal';
+import { ModalProcessAppointment } from 'components/Modal';
 import DrawerDetail from 'components/DrawerDetail';
 import 'components/DrawerDetail/style/index.less';
 
@@ -35,7 +35,6 @@ class ClaimedConsultationRequest extends React.Component {
       selectedSchools: [],
       selectedServices: [],
       visibleProcess: false,
-      visibleCurrentReferral: false,
       selectedConsultation: {},
       visibleDrawer: false,
     };
@@ -178,31 +177,6 @@ class ClaimedConsultationRequest extends React.Component {
     }
   }
 
-  openModalCurrent = (consultation) => {
-    this.setState({ visibleCurrentReferral: true, selectedConsultation: consultation });
-  }
-
-  closeModalCurrent = () => {
-    this.setState({ visibleCurrentReferral: false, selectedConsultation: {} });
-  }
-
-  submitModalCurrent = (data) => {
-    this.setState({
-      consultationList: this.state.consultationList?.map(consultation => {
-        if (this.state.selectedConsultation._id === consultation?._id) {
-          consultation.date = data.date;
-          consultation.phoneNumber = data.phoneNumber;
-          consultation.meetingLink = data.meetingLink;
-          consultation.notes = data.note;
-          return consultation;
-        } else {
-          return consultation;
-        }
-      })
-    })
-    this.closeModalCurrent();
-  }
-
   handleSwitchTag = (consultationId, consultantId) => {
     request.post(switchConsultation, { appointmentId: consultationId, consultantId }).then(res => {
       if (res.success) {
@@ -230,7 +204,7 @@ class ClaimedConsultationRequest extends React.Component {
   };
 
   render() {
-    const { pageNumber, pageSize, searchConsultantName, searchDependentName, selectedGrades, selectedSchools, selectedServices, totalSize, consultationList, skillSet, loading, csvData, selectedConsultation, visibleCurrentReferral, visibleProcess, visibleDrawer } = this.state;
+    const { pageNumber, pageSize, searchConsultantName, searchDependentName, selectedGrades, selectedSchools, selectedServices, totalSize, consultationList, skillSet, loading, csvData, selectedConsultation, visibleProcess, visibleDrawer } = this.state;
     const { auth, appointments } = this.props;
     const grades = JSON.parse(JSON.stringify(auth.academicLevels ?? []))?.slice(6)?.map(level => ({ label: level, value: level }));
     const schools = JSON.parse(JSON.stringify(auth.schools ?? []))?.map(school => ({ label: school.schoolInfo?.name, value: school.schoolInfo?._id })) || [];
@@ -487,21 +461,16 @@ class ClaimedConsultationRequest extends React.Component {
         render: (status) => status === PENDING ? 'Pending' : status === CLOSED ? 'Closed' : status === DECLINED ? 'Declined' : status === CANCELLED ? 'Canceled' : status === NOSHOW ? 'No Show' : ''
       },
       {
-        title: 'Action', key: 'action', fixed: 'right', width: 240,
+        title: 'Action', key: 'action', align: 'center', fixed: 'right', width: 240,
         render: (consultation) => {
           const appointmentDate = moment(consultation?.date);
           const consultants = auth.consultants?.filter(consultant => consultant?._id != consultation?.consultant?._id && !appointments?.find(a => a?.consultant?._id === consultant?.consultantInfo?._id && a.date === consultation?.date) && consultant?.consultantInfo?.manualSchedule?.find(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 999 })) && appointmentDate.isBetween(appointmentDate.clone().set({ hours: a.openHour, minutes: a.openMin }), appointmentDate.clone().set({ hours: a.closeHour, minutes: a.closeMin }))));
 
           return (
-            <div className='grid grid-columns-2 gap-2'>
+            <div className='flex gap-1'>
               {(consultation?.status === PENDING && consultation?.consultant?.consultantInfo?._id && (consultation?.consultant?.consultantInfo?._id === auth.user?.consultantInfo?._id || auth.user?.role > 900)) && (
                 <span className='text-primary cursor text-underline' onClick={() => this.openModalProcess(consultation)}>
                   {intl.formatMessage(msgDrawer.markClosed)}
-                </span>
-              )}
-              {consultation?.status === PENDING && (moment().isBefore(moment(consultation?.date)) && (auth.user?.role > 900 || (auth.user?.role === 100 && consultation?.consultant?.consultantInfo?._id && consultation?.consultant?.consultantInfo?._id === auth.user?.consultantInfo?._id))) && (
-                <span className='text-primary cursor text-underline' onClick={() => this.openModalCurrent(consultation)}>
-                  {intl.formatMessage(msgDrawer.reschedule)}
                 </span>
               )}
               {(consultation?.status === PENDING && moment().isBefore(moment(consultation?.date)) && consultation?.type === CONSULTATION && consultation?.consultant?.consultantInfo?._id && (consultation?.consultant?.consultantInfo?._id === auth.user?.consultantInfo?._id || auth.user?.role > 900)) && (
@@ -546,12 +515,6 @@ class ClaimedConsultationRequest extends React.Component {
       onCancel: this.closeModalProcess,
       event: selectedConsultation,
     };
-    const modalCurrentReferralProps = {
-      visible: visibleCurrentReferral,
-      onSubmit: this.submitModalCurrent,
-      onCancel: this.closeModalCurrent,
-      event: selectedConsultation,
-    }
     const drawerDetailProps = {
       visible: visibleDrawer,
       onClose: this.onCloseDrawerDetail,
@@ -582,7 +545,6 @@ class ClaimedConsultationRequest extends React.Component {
           <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
         </Space>
         {visibleProcess && <ModalProcessAppointment {...modalProcessProps} />}
-        {visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
         {visibleDrawer && <DrawerDetail {...drawerDetailProps} />}
         <PageLoading loading={loading} isBackground={true} />
       </div>
