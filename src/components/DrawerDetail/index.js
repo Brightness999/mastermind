@@ -1276,7 +1276,7 @@ class DrawerDetail extends Component {
               )}
             </div>
             <Row gutter={15} className='list-btn-detail'>
-              {event?.type === CONSULTATION && event?.status === PENDING && moment().isBefore(moment(event?.date)) && !event?.consultant?._id && userRole === 100 && auth.user?.consultantInfo?.manualSchedule?.find(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })) && appointmentDate.isBetween(appointmentDate.clone().set({ hours: a.openHour, minutes: a.openMin }), appointmentDate.clone().set({ hours: a.closeHour, minutes: a.closeMin }))) && (
+              {event?.type === CONSULTATION && event?.status === PENDING && moment().isBefore(moment(event?.date)) && !event?.consultant?._id && userRole === 100 && auth.user?.consultantInfo?.manualSchedule?.find(a => a.dayInWeek === appointmentDate.day() && appointmentDate.isBetween(moment().set({ years: a.fromYear, months: a.fromMonth, dates: a.fromDate, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }), moment().set({ years: a.toYear, months: a.toMonth, dates: a.toDate, hours: 23, minutes: 59, seconds: 59, milliseconds: 0 })) && appointmentDate.isBetween(appointmentDate.clone().set({ hours: a.openHour, minutes: (a.openMin || 0) - 1 }), appointmentDate.clone().set({ hours: a.closeHour, minutes: (a.closeMin || 0) * 1 + 1 }))) && (
                 <Col span={12}>
                   <Popconfirm
                     title="Are you sure to tag this consultation?"
