@@ -11,6 +11,7 @@ import { activateUser, getSchools } from 'utils/api/apiList';
 import PageLoading from 'components/Loading/PageLoading';
 import { setSelectedUser } from 'src/redux/features/authSlice';
 import { store } from 'src/redux/store';
+import './index.less';
 
 export default class extends React.Component {
 	constructor(props) {
@@ -476,7 +477,7 @@ export default class extends React.Component {
 					<Divider />
 				</div>
 				<Space direction='vertical' className='flex'>
-					<Table bordered size='middle' pagination={false} dataSource={schools} columns={columns} scroll={{ x: true }} onRow={(school) => ({
+					<Table bordered size='middle' pagination={false} dataSource={schools} columns={columns} head scroll={{ x: 1200, y: 'calc(100vh - 260px)' }} onRow={(school) => ({
 						onClick: (e) => e.target.className.includes('ant-table-cell') && this.openModalSchoolDetail(school),
 						onDoubleClick: (e) => e.target.className.includes('ant-table-cell') && this.openModalSchoolDetail(school),
 					})} />

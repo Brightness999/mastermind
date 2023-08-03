@@ -19,6 +19,7 @@ import PageLoading from 'components/Loading/PageLoading';
 import { getInvoiceList, setInvoiceList } from 'src/redux/features/appointmentsSlice';
 import { ModalInvoice, ModalPay } from 'components/Modal';
 import { socketUrl } from 'utils/api/baseUrl';
+import './index.less';
 
 class FlagList extends React.Component {
   constructor(props) {

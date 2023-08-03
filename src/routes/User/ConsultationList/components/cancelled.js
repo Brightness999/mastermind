@@ -371,7 +371,7 @@ class CancelledConsultationRequest extends React.Component {
     };
 
     return (
-      <div>
+      <div className='pb-10'>
         <CSVLink onClick={this.exportToExcel} data={csvData} headers={csvHeaders} filename="Consultation Requests">
           <Button type='primary' className='inline-flex items-center gap-2 mb-10' icon={<FaFileDownload size={24} />}>
             Download CSV

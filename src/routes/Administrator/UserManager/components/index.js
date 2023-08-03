@@ -14,6 +14,7 @@ import { activateUser, getUsers } from 'utils/api/apiList';
 import { removeRegisterData } from 'src/redux/features/registerSlice';
 import { setSelectedUser } from 'src/redux/features/authSlice';
 import PageLoading from 'components/Loading/PageLoading';
+import './index.less';
 
 class UserManager extends React.Component {
 	constructor(props) {
@@ -384,7 +385,7 @@ class UserManager extends React.Component {
 					<Button type='primary' onClick={() => this.handleNewUser()}>Create New User</Button>
 				</div>
 				<Space direction='vertical' className='flex'>
-					<Table bordered size='middle' pagination={false} dataSource={users} columns={columns} scroll={{ x: 1000 }} />
+					<Table bordered size='middle' pagination={false} dataSource={users} columns={columns} scroll={{ x: 1000, y: 'calc(100vh - 310px)' }} />
 					<Pagination current={pageNumber} total={totalSize} pageSize={pageSize} pageSizeOptions={true} onChange={this.handleChangePagination} />
 				</Space>
 				{visibleInputCode && <ModalInputCode {...modalInputCodeProps} />}

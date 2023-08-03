@@ -11,6 +11,7 @@ import { socketUrl } from 'utils/api/baseUrl';
 import Unclaimed from './unclaimed';
 import Claimed from './claimed';
 import Cancelled from './cancelled';
+import './index.less';
 
 class ConsultationRequest extends React.Component {
   constructor(props) {

@@ -17,6 +17,7 @@ import Outstanding from './outstanding';
 import { MethodType } from 'routes/constant';
 import ParentSubsidyList from './parentSubsidy';
 import ParentSubsidyPaidList from './parentSubsidyPaid';
+import './index.less';
 
 class InvoiceList extends React.Component {
   constructor(props) {

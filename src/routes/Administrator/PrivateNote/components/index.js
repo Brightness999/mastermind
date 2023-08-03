@@ -432,7 +432,7 @@ class PrivateNote extends React.Component {
               }
             }}
             pagination={false}
-            scroll={{ x: true }}
+            scroll={{ x: 1600, y: 'calc(100vh - 290px)' }}
           />
           <Pagination current={pageNumber} total={totalSize} pageSize={pageSize} onChange={this.handleChangePagination} />
         </Space>

@@ -1,4 +1,14 @@
 // Page style
 @import '../../../../assets/styles/variables.less';
+
 .statistics-page {
+  .ant-table-container {
+    .ant-table-body {
+      overflow-y: auto !important;
+
+      &::-webkit-scrollbar {
+        width: 8px;
+      }
+    }
+  }
 }
