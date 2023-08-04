@@ -412,7 +412,7 @@ class ModalSchoolDetail extends React.Component {
 								<Checkbox checked={isJewishHolidays} onChange={(e) => this.handleChangeJewishHolidays(e.target.checked)}>Jewish Holidays</Checkbox>
 							</div>
 						</div>
-						<Form.Item name="blackoutDates" className='events-none'>
+						<Form.Item name="blackoutDates">
 							<MultiDatePicker.Calendar
 								multiple
 								sort
