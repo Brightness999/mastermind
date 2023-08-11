@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Divider, Steps, Row, Col, Select, Input, message, Popconfirm } from 'antd';
+import { Modal, Button, Divider, Steps, Row, Col, Select, Input, message, Popconfirm, Checkbox } from 'antd';
 import { FaRegCalendarAlt } from 'react-icons/fa';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
@@ -42,6 +42,7 @@ class ModalSubsidyProgress extends React.Component {
 		totalPayment: undefined,
 		subsidizedRate: undefined,
 		visibleAppeal: false,
+		isOther: false,
 	}
 
 	componentDidMount = () => {
@@ -164,9 +165,9 @@ class ModalSubsidyProgress extends React.Component {
 		request.post(acceptSubsidyRequest, {
 			subsidyId: subsidy._id,
 			student: subsidy?.student?._id,
-			selectedProvider,
+			selectedProvider: selectedProvider === 'other' ? undefined : selectedProvider,
 			decisionExplanation,
-			otherProvider,
+			otherProvider: selectedProvider === 'other' ? otherProvider : undefined,
 		}).then(result => {
 			message.success('Approved successfully');
 			const { success, data } = result;
@@ -419,7 +420,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	renderSchoolInfo = (subsidy) => {
-		const { decisionExplanation, selectedProvider, providers, otherProvider } = this.state;
+		const { decisionExplanation, selectedProvider, providers, otherProvider, isOther } = this.state;
 		const { user } = this.props.auth;
 
 		if (user?.role === 3 && subsidy.status === 0) {
@@ -448,12 +449,14 @@ class ModalSubsidyProgress extends React.Component {
 									{providers?.filter(provider => provider?.skillSet?.find(skill => skill?._id === subsidy?.skillSet?._id))?.map((provider) => (
 										<Select.Option key={provider._id} value={provider._id}>{`${provider.firstName} ${provider.lastName}` || provider.referredToAs}</Select.Option>
 									))}
+									<Select.Option key='other' value='other'>Other</Select.Option>
 								</Select>
 							</div>
-							<p className='font-700 mb-10'>{intl.formatMessage(messages.otherProvider)}</p>
-							<div className='select-md'>
-								<Input name='OtherProvider' value={otherProvider} onChange={e => this.setState({ otherProvider: e.target.value, selectedProvider: undefined })} disabled={user.role === 3} placeholder={intl.formatMessage(messages.otherProvider)} />
-							</div>
+							{selectedProvider === 'other' ? (
+								<div className='select-md'>
+									<Input value={otherProvider} onChange={e => this.setState({ otherProvider: e.target.value })} disabled={user.role === 3} placeholder="Type other provider" />
+								</div>
+							) : null}
 						</Col >
 						<Col xs={24} sm={24} md={16}>
 							<p className='font-700 mb-10'>{intl.formatMessage(messages.decisionExplanation)}</p>
