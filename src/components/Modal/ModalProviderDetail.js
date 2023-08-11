@@ -870,6 +870,8 @@ class ModalSchoolDetail extends React.Component {
 			},
 		]
 
+		auth.user.role === 3 && items.splice(4, 1);
+
 		return (
 			<Modal {...modalProps}>
 				<Tabs

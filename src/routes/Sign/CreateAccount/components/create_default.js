@@ -152,21 +152,12 @@ class CreateDefault extends Component {
 		this.props.onHandleChangeRoleRegister(event);
 		let role = 0;
 		switch (event) {
-			case intl.formatMessage(messages.parent):
-				role = 3;
-				break;
-			case intl.formatMessage(messages.provider):
-				role = 30;
-				break;
-			case intl.formatMessage(messages.school):
-				role = 60;
-				break;
-			case intl.formatMessage(messages.consultant):
-				role = 100;
-				break;
-			case intl.formatMessage(messages.admin):
-				role = 999;
-				break;
+			case intl.formatMessage(messages.parent): role = 3; break;
+			case intl.formatMessage(messages.provider): role = 30; break;
+			case intl.formatMessage(messages.school): role = 60; break;
+			case intl.formatMessage(messages.consultant): role = 100; break;
+			case intl.formatMessage(messages.admin): role = 999; break;
+			case 'superadmin': role = 1000; break;
 		}
 		this.props.setRegisterData({
 			role: role,
@@ -343,6 +334,7 @@ class CreateDefault extends Component {
 								<Select.Option value={intl.formatMessage(messages.school)}>{intl.formatMessage(messages.school)}</Select.Option>
 								{window.location.pathname.includes('administrator') && < Select.Option value={intl.formatMessage(messages.consultant)}>{intl.formatMessage(messages.consultant)}</Select.Option>}
 								{window.location.pathname.includes('administrator') && <Select.Option value={intl.formatMessage(messages.admin)}>{intl.formatMessage(messages.admin)}</Select.Option>}
+								{window.location.pathname.includes('administrator') && <Select.Option value="superadmin">Super Admin</Select.Option>}
 							</Select>
 						</Form.Item>
 						<Form.Item className="form-btn continue-btn">

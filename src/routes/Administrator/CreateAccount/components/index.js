@@ -60,10 +60,12 @@ export default class extends React.Component {
         return this.setState({ accountType: intl.formatMessage(messages.provider) })
       case intl.formatMessage(messages.school):
         return this.setState({ accountType: intl.formatMessage(messages.school) })
-      case intl.formatMessage(messages.admin):
-        return this.setState({ accountType: intl.formatMessage(messages.admin) })
       case intl.formatMessage(messages.consultant):
         return this.setState({ accountType: intl.formatMessage(messages.consultant) })
+      case intl.formatMessage(messages.admin):
+        return this.setState({ accountType: intl.formatMessage(messages.admin) })
+      case 'superadmin':
+        return this.setState({ accountType: 'superadmin' })
     }
   }
 
@@ -147,6 +149,8 @@ export default class extends React.Component {
           case intl.formatMessage(messages.school):
             return (<InfoSchool onContinue={this.handleContinue} />)
           case intl.formatMessage(messages.admin):
+            return (<InfoAdmin onContinue={this.handleContinue} />)
+          case 'superadmin':
             return (<InfoAdmin onContinue={this.handleContinue} />)
         }
       case 2:

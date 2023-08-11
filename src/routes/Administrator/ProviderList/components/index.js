@@ -517,7 +517,7 @@ export default class extends React.Component {
 		return (
 			<div className="full-layout page providerlist-page">
 				<div className='div-title-admin'>
-					<p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.providerList)}</p>
+					<p className={`font-16 font-500 ${store.getState().auth.user.role === 3 ? 'p-0' : ''}`}>{intl.formatMessage(mgsSidebar.providerList)}</p>
 					<Divider />
 				</div>
 				<Space direction='vertical' className='flex'>

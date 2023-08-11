@@ -41,6 +41,7 @@ class ModalSubsidyProgress extends React.Component {
 		visibleDeclineExplanation: false,
 		totalPayment: undefined,
 		subsidizedRate: undefined,
+		visibleAppeal: false,
 	}
 
 	componentDidMount = () => {
@@ -64,7 +65,7 @@ class ModalSubsidyProgress extends React.Component {
 			} else {
 				this.props.onCancel();
 			}
-		}).catch(err => {
+		}).catch(() => {
 			this.props.onCancel();
 		})
 	}
@@ -117,7 +118,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	declineSubsidy = (declineExplanation) => {
-		if (declineExplanation?.trim()?.length) {
+		if (declineExplanation) {
 			this.onCloseModalDeclineExplanation();
 			const { subsidy } = this.state;
 			request.post(denySubsidyRequest, { subsidyId: subsidy._id, declineExplanation }).then(result => {
@@ -208,18 +209,23 @@ class ModalSubsidyProgress extends React.Component {
 		})
 	}
 
-	appealSubsidy = (subsidy) => {
-		const postData = { subsidyId: subsidy._id };
-		request.post(appealSubsidy, postData).then(result => {
-			message.success('Your appeal has been sent successfully');
-			const { success, data } = result;
-			if (success) {
-				this.updateSubsidiaries(subsidy, data);
-				this.props.onSubmit();
-			}
-		}).catch(err => {
-			message.error(err.message);
-		})
+	appealSubsidy = (msg) => {
+		if (msg) {
+			const { subsidy } = this.state;
+			const postData = { subsidyId: subsidy._id, appealMessage: msg };
+			request.post(appealSubsidy, postData).then(result => {
+				message.success('Your appeal has been sent successfully');
+				const { success, data } = result;
+				if (success) {
+					this.updateSubsidiaries(subsidy, data);
+					this.props.onSubmit();
+				}
+			}).catch(err => {
+				message.error(err.message);
+			})
+		} else {
+			message.warn("Please fill in the appeal message.");
+		}
 	}
 
 	denyAppeal = (subsidy) => {
@@ -331,6 +337,14 @@ class ModalSubsidyProgress extends React.Component {
 
 	onCloseModalDeclineExplanation = () => {
 		this.setState({ visibleDeclineExplanation: false });
+	};
+
+	onShowModalAppeal = () => {
+		this.setState({ visibleAppeal: true });
+	};
+
+	onCloseModalAppeal = () => {
+		this.setState({ visibleAppeal: false });
 	};
 
 	handleSelectProvider = (providerId) => {
@@ -452,10 +466,18 @@ class ModalSubsidyProgress extends React.Component {
 						</Col>
 					</Row >
 				) : subsidy.status === 2 ? (
-					<>
-						<p className='font-700 mb-10'>{intl.formatMessage(messages.declineExplanation)}:</p>
-						<p className='mb-0'>{subsidy.declineExplanation}</p>
-					</>
+					<div className='flex gap-2'>
+						<div className='flex-1'>
+							<p className='font-700 mb-10'>{intl.formatMessage(messages.declineExplanation)}:</p>
+							<p className='mb-0'>{subsidy.declineExplanation}</p>
+						</div>
+						{(subsidy?.isAppeal && subsidy?.appealMessage) ? (
+							<div className='flex-1'>
+								<p className='font-700 mb-10'>{intl.formatMessage(messages.appeal)}:</p>
+								<p className='mb-0'>{subsidy.appealMessage}</p>
+							</div>
+						) : null}
+					</div>
 				) : (
 					<Row gutter={15}>
 						<Col xs={24} sm={24} md={8}>
@@ -482,7 +504,7 @@ class ModalSubsidyProgress extends React.Component {
 		)
 	}
 
-	renderConsulation = (subsidy) => {
+	renderConsultation = (subsidy) => {
 		const { referral } = this.state;
 
 		if ([3, 5].includes(subsidy.status)) {
@@ -524,13 +546,17 @@ class ModalSubsidyProgress extends React.Component {
 							) : null}
 						</Col>
 						<Col xs={24} sm={24} md={12}>
-							<div className='flex flex-row items-center'>
-								{[0, -2].includes(referral?.status) ? (
+							<div className='flex flex-row items-center gap-2'>
+								{[0, -2, 2].includes(referral?.status) ? (
 									<a className='text-primary' onClick={this.onShowModalCurrentReferral}>
 										<FaRegCalendarAlt /> {intl.formatMessage(msgDrawer.reschedule)}
 									</a>
-								) : referral?.status === -1 ? <span className='font-16'>{intl.formatMessage(msgDrawer.closed)}</span>
-									: <span className='font-16'>{intl.formatMessage(msgDashboard.declined)}</span>}
+								) : null}
+								{referral?.status === -1 ? <span className='font-16'>{intl.formatMessage(msgDrawer.closed)}</span>
+									: referral?.status === -2 ? <span className='font-16'>{intl.formatMessage(msgDrawer.cancelled)}</span>
+										: referral?.status === -3 ? <span className='font-16'>{intl.formatMessage(msgDashboard.declined)}</span>
+											: referral?.status === 2 ? <span className='font-16'>Missed appointment on {moment(referral.date).format('MM/DD/YYYY')}</span>
+												: ''}
 							</div>
 						</Col>
 					</div>
@@ -550,8 +576,18 @@ class ModalSubsidyProgress extends React.Component {
 		if (subsidy.status === 4) {
 			return (
 				<div className='subsidy-detail'>
-					<p className='font-700 mb-10'>{intl.formatMessage(messages.declineExplanation)}:</p>
-					<p className='mb-0'>{subsidy.declineExplanation}</p>
+					<div className='flex gap-2'>
+						<div className='flex-1'>
+							<p className='font-700 mb-10'>{intl.formatMessage(messages.declineExplanation)}:</p>
+							<p className='mb-0'>{subsidy.declineExplanation}</p>
+						</div>
+						{(subsidy?.isAppeal && subsidy?.appealMessage) ? (
+							<div className='flex-1'>
+								<p className='font-700 mb-10'>{intl.formatMessage(messages.appeal)}:</p>
+								<p className='mb-0'>{subsidy.appealMessage}</p>
+							</div>
+						) : null}
+					</div>
 				</div >
 			)
 		}
@@ -649,7 +685,7 @@ class ModalSubsidyProgress extends React.Component {
 			<div className="steps-content mt-1">
 				{this.renderStudentParentInfo(subsidy)}
 				{subsidy.school && this.renderSchoolInfo(subsidy)}
-				{this.renderConsulation(subsidy)}
+				{this.renderConsultation(subsidy)}
 				{this.renderDecision(subsidy)}
 			</div>
 		)
@@ -809,7 +845,7 @@ class ModalSubsidyProgress extends React.Component {
 					key="submit"
 					icon={<AiFillWarning size={24} />}
 					title="Are you sure to appeal?"
-					onConfirm={() => this.appealSubsidy(subsidy)}
+					onConfirm={() => this.onShowModalAppeal()}
 					okText="Yes"
 					cancelText="No"
 				>
@@ -900,7 +936,7 @@ class ModalSubsidyProgress extends React.Component {
 	}
 
 	render() {
-		const { subsidy, visibleReferralService, visibleCurrentReferral, referral, visibleDeclineExplanation } = this.state;
+		const { subsidy, visibleReferralService, visibleCurrentReferral, referral, visibleDeclineExplanation, visibleAppeal } = this.state;
 		const modalProps = {
 			className: 'modal-subsidy-progress',
 			title: "",
@@ -929,6 +965,12 @@ class ModalSubsidyProgress extends React.Component {
 			onCancel: this.onCloseModalDeclineExplanation,
 			title: intl.formatMessage(messages.declineExplanation),
 		}
+		const modalAppealProps = {
+			visible: visibleAppeal,
+			onSubmit: this.appealSubsidy,
+			onCancel: this.onCloseModalAppeal,
+			title: intl.formatMessage(messages.appeal),
+		}
 
 		return (
 			<Modal {...modalProps}>
@@ -938,8 +980,8 @@ class ModalSubsidyProgress extends React.Component {
 					</div>
 					{subsidy.status != 0 && (
 						<div className='absolute right-0 top-0'>
-							{[1, 3, 5].includes(subsidy.status) && <p className='text-green500 font-24 font-700 ml-auto'>{(subsidy?.status === 1) ? intl.formatMessage(msgCreateAccount.school) : intl.formatMessage(msgCreateAccount.admin)} {subsidy?.status === 3 ? intl.formatMessage(msgDashboard.preApproved) : intl.formatMessage(msgDashboard.approved)}</p>}
-							{[2, 4].includes(subsidy.status) && <p className='text-red font-24 font-700 ml-auto'>{(subsidy?.status === 2) ? intl.formatMessage(msgCreateAccount.school) : intl.formatMessage(msgCreateAccount.admin)} {intl.formatMessage(msgDashboard.declined)}</p>}
+							{[1, 3, 5].includes(subsidy.status) && <p className='text-green500 font-24 font-700 ml-auto mr-10'>{(subsidy?.status === 1) ? intl.formatMessage(msgCreateAccount.school) : intl.formatMessage(msgCreateAccount.admin)} {subsidy?.status === 3 ? intl.formatMessage(msgDashboard.preApproved) : intl.formatMessage(msgDashboard.approved)}</p>}
+							{[2, 4].includes(subsidy.status) && <p className='text-red font-24 font-700 ml-auto mr-10'>{(subsidy?.status === 2) ? intl.formatMessage(msgCreateAccount.school) : intl.formatMessage(msgCreateAccount.admin)} {intl.formatMessage(msgDashboard.declined)}</p>}
 						</div>
 					)}
 				</div>
@@ -955,6 +997,7 @@ class ModalSubsidyProgress extends React.Component {
 				{visibleReferralService && <ModalReferralService {...modalReferralServiceProps} />}
 				{visibleCurrentReferral && <ModalCurrentReferralService {...modalCurrentReferralProps} />}
 				{visibleDeclineExplanation && <ModalCreateNote {...modalDeclineExplanationProps} />}
+				{visibleAppeal && <ModalCreateNote {...modalAppealProps} />}
 				{this.renderSubsidyData(subsidy)}
 			</Modal>
 		);

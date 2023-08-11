@@ -148,7 +148,7 @@ const AdminPreApproved = (props) => {
       render: (subsidy) => subsidy?.note,
     },
     {
-      title: <span className="font-16">{intl.formatMessage(msgCreateAccount.provider)}</span>,
+      title: <span className="font-16">Suggested Provider</span>,
       key: 'provider',
       align: 'center',
       sorter: (a, b) => {

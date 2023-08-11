@@ -32,11 +32,10 @@ instance.interceptors.request.use(
 					content: 'Your session has expired.',
 					className: 'popup-session-expired',
 					duration: 1,
-				}).then(() => {
-					store.dispatch(initializeAuth());
-					store.dispatch(initializeAppointments());
-					helper.history.push(routerLinks.Home);
 				})
+				store.dispatch(initializeAuth());
+				store.dispatch(initializeAppointments());
+				helper.history.push(routerLinks.Home);
 			} else {
 				delete instance.defaults.headers.common.Authorization;
 			}

@@ -20,11 +20,10 @@ class AdminInfo extends React.Component {
 
   componentDidMount() {
     const { user } = this.props;
-    const { registerData } = this.props.register;
 
-    this.form?.setFieldsValue(registerData);
-    if (!registerData?.adminEmail) {
-      this.form?.setFieldValue('adminEmail', registerData?.email);
+    this.form?.setFieldsValue(this.props.registerData);
+    if (!this.props.registerData.adminEmail) {
+      this.form?.setFieldValue('adminEmail', this.props.registerData.email);
     }
     request.post(getCityConnections, { id: user?._id, role: user?.role }).then(result => {
       const { success, data } = result;
@@ -39,8 +38,22 @@ class AdminInfo extends React.Component {
   }
 
   onFinish = (values) => {
-    const { registerData } = this.props.register;
-    request.post(userSignUp, { ...values, email: registerData.email, password: registerData.password, username: registerData.username, role: registerData.role }).then(result => {
+    const { email, password, username, role } = this.props.registerData;
+    const { fullName, phoneNumber, adminEmail, adminCommunity } = values;
+    const { cityConnections } = this.state;
+    const useData = {
+      email,
+      password,
+      username,
+      role,
+      fullName,
+      phoneNumber,
+      adminEmail,
+      adminCommunity: role === 999 ? adminCommunity : cityConnections?.map(c => c._id),
+      isActive: role === 999 ? 0 : 1,
+    };
+
+    request.post(userSignUp, useData).then(result => {
       if (result.success) {
         message.success("Successfully created!");
         this.props.removeRegisterData();
@@ -53,6 +66,7 @@ class AdminInfo extends React.Component {
 
   render() {
     const { cityConnections } = this.state;
+    const { role } = this.props.registerData;
 
     return (
       <Row justify="center" className="row-form">
@@ -89,24 +103,26 @@ class AdminInfo extends React.Component {
             >
               <Input placeholder={intl.formatMessage(messages.phoneNumber)} onChange={() => this.props.setRegisterData(this.form?.getFieldsValue())} />
             </Form.Item>
-            <Form.Item
-              name="adminCommunity"
-              label={intl.formatMessage(messages.cityConnections)}
-              rules={[{ required: true }]}
-            >
-              <Select
-                placeholder={intl.formatMessage(messages.cityConnections)}
-                showSearch
-                optionFilterProp="children"
-                mode="multiple"
-                filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
-                onChange={() => this.props.setRegisterData(this.form?.getFieldsValue())}
+            {role === 999 ? (
+              <Form.Item
+                name="adminCommunity"
+                label={intl.formatMessage(messages.cityConnections)}
+                rules={[{ required: true }]}
               >
-                {cityConnections?.map((value, index) => (
-                  <Select.Option key={index} value={value._id}>{value.name}</Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
+                <Select
+                  placeholder={intl.formatMessage(messages.cityConnections)}
+                  showSearch
+                  optionFilterProp="children"
+                  mode="multiple"
+                  filterOption={(input, option) => option.children?.toLowerCase().includes(input.toLowerCase())}
+                  onChange={() => this.props.setRegisterData(this.form?.getFieldsValue())}
+                >
+                  {cityConnections?.map((value, index) => (
+                    <Select.Option key={index} value={value._id}>{value.name}</Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            ) : null}
             <Form.Item
               name="adminEmail"
               label={intl.formatMessage(messages.contactEmail)}
@@ -139,7 +155,9 @@ class AdminInfo extends React.Component {
   }
 }
 
-
-const mapStateToProps = state => ({ register: state.register, user: state.auth.user });
+const mapStateToProps = state => ({
+  registerData: state.register.registerData,
+  user: state.auth.user,
+});
 
 export default compose(connect(mapStateToProps, { removeRegisterData, setRegisterData }))(AdminInfo);

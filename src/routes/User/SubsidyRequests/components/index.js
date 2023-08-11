@@ -10,7 +10,7 @@ import messages from 'routes/User/Dashboard/messages';
 import msgCreateAccount from 'routes/Sign/CreateAccount/messages';
 import mgsSidebar from 'components/SideBar/messages';
 import { getSubsidyRequests, setSubsidyRequests } from "src/redux/features/appointmentsSlice";
-import { ModalSubsidyProgress } from 'components/Modal';
+import { ModalNewSubsidyRequest, ModalSubsidyProgress } from 'components/Modal';
 
 const SubsidyRequests = (props) => {
   const { user, skillSet, academicLevels, schools } = props.auth;
@@ -18,6 +18,7 @@ const SubsidyRequests = (props) => {
   const grades = JSON.parse(JSON.stringify(academicLevels ?? []))?.slice(6)?.map(level => ({ text: level, value: level }));
   const schoolInfos = JSON.parse(JSON.stringify(schools ?? []))?.map(s => s?.schoolInfo)?.map(school => { school['text'] = school.name, school['value'] = school._id; return school; });
   const [visibleSubsidy, setVisibleSubsidy] = useState(false);
+  const [visibleNewSubsidy, setVisibleNewSubsidy] = useState(false);
   const [selectedSubsidyId, setSelectedSubsidyId] = useState(undefined);
   const [requests, setRequests] = useState(props.listSubsidy);
   const searchInput = createRef(null);
@@ -163,7 +164,7 @@ const SubsidyRequests = (props) => {
         { text: 'Admin Approved', value: 5 },
       ],
       onFilter: (value, record) => record.status === value,
-      render: (subsidy) => subsidy?.status === 0 ? 'Pending' : subsidy?.status === 1 ? 'School Approved' : subsidy?.status === 2 ? 'School Declined' : subsidy?.status === 3 ? 'Admin Pre-Approved' : subsidy?.status === 4 ? 'Admin Declined' : subsidy?.status === 5 ? 'Admin Approved' : '',
+      render: (subsidy) => subsidy?.status === 0 ? 'Pending' : subsidy?.status === 1 ? 'School Approved' : subsidy?.status === 2 ? subsidy?.isAppeal === 1 ? 'School Appealed' : 'School Declined' : subsidy?.status === 3 ? 'Admin Pre-Approved' : subsidy?.status === 4 ? subsidy?.isAppeal === 1 ? 'Admin Appealed' : 'Admin Declined' : subsidy?.status === 5 ? 'Admin Approved' : '',
     },
     {
       title: <span className="font-16">{intl.formatMessage(msgCreateAccount.provider)}</span>,
@@ -350,6 +351,19 @@ const SubsidyRequests = (props) => {
     setSelectedSubsidyId(undefined);
   };
 
+  const onShowModalNewSubsidy = () => {
+    setVisibleNewSubsidy(true);
+  }
+
+  const onCloseModalNewSubsidy = () => {
+    setVisibleNewSubsidy(false);
+  };
+
+  const onSubmitModalNewSubsidy = () => {
+    onCloseModalNewSubsidy();
+    props.getSubsidyRequests({ role: user.role });
+  };
+
   useEffect(() => {
     setRequests(props.listSubsidy);
   }, [props.listSubsidy]);
@@ -365,11 +379,20 @@ const SubsidyRequests = (props) => {
     subsidyId: selectedSubsidyId,
   }
 
+  const modalNewSubsidyProps = {
+    visible: visibleNewSubsidy,
+    onSubmit: onSubmitModalNewSubsidy,
+    onCancel: onCloseModalNewSubsidy,
+  };
+
   return (
     <div className="full-layout page subsidymanager-page">
       <div className='div-title-admin'>
         <div className='font-16 font-500'>{intl.formatMessage(mgsSidebar.subsidyManager)}</div>
         <Divider />
+      </div>
+      <div className='mb-20'>
+        <Button type='primary' onClick={onShowModalNewSubsidy}>+ Create New Subsidy Request</Button>
       </div>
       <Table
         bordered
@@ -384,6 +407,7 @@ const SubsidyRequests = (props) => {
         className='mt-1 pb-10'
       />
       {visibleSubsidy && <ModalSubsidyProgress {...modalSubsidyProps} />}
+      {visibleNewSubsidy && <ModalNewSubsidyRequest {...modalNewSubsidyProps} />}
     </div>
   )
 }

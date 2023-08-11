@@ -31,7 +31,7 @@ class ModalCreateNote extends React.Component {
         <Button key="back" onClick={this.props.onCancel}>
           {intl.formatMessage(messages.cancel)}
         </Button>,
-        <Button key="submit" type="primary" onClick={() => this.props.onSubmit(note)} className="px-20">
+        <Button key="submit" type="primary" onClick={() => this.props.onSubmit(note?.trim())} className="px-20">
           {intl.formatMessage(msgForgotPass.send)}
         </Button>
       ]

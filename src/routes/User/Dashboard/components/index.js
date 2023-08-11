@@ -250,12 +250,13 @@ class Dashboard extends React.Component {
   }
 
   createNotification = (appointment) => {
+    notification.destroy(`notification-${appointment.id}`);
     let duration = appointment.provider?.duration || 30;
     if (appointment.type === EVALUATION) {
       duration = appointment.provider?.separateEvaluateDuration;
     }
 
-    const key = `open${Date.now()}`;
+    const key = `notification-${appointment.id}`;
     const btn = (
       <Button type="primary" size="middle" onClick={() => {
         notification.close(key);
@@ -285,7 +286,7 @@ class Dashboard extends React.Component {
         )}
       </div>
     )
-    notification.open({ message: '', description, btn, key, duration: 0, placement: 'top' });
+    notification.open({ message: '', description, btn, key, duration: 30, placement: 'top' });
   }
 
   displayTime = (value) => {

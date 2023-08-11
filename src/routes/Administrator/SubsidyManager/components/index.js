@@ -70,7 +70,7 @@ const SubsidyManager = (props) => {
     } else if (v === '2') {
       setRequests(props.listSubsidy?.filter(s => s.status == v && s.isAppeal < 1));
     } else if (v === '3') {
-      setRequests(props.listSubsidy?.filter(s => s.status == v && [PENDING, CANCELLED, undefined].includes(s.consultation?.status)));
+      setRequests(props.listSubsidy?.filter(s => s.status == v && ![CLOSED, DECLINED].includes(s.consultation?.status)));
     } else if (v === '4') {
       setRequests(props.listSubsidy?.filter(s => s.status == v && s.isAppeal < 1));
     } else if (v === '6') {
@@ -78,7 +78,7 @@ const SubsidyManager = (props) => {
     } else if (v === '7') {
       setRequests(props.listSubsidy?.filter(s => s.status == 4 && s.isAppeal === 1));
     } else if (v === '8') {
-      setRequests(props.listSubsidy?.filter(s => s.status == 3 && [CLOSED, DECLINED, NOSHOW].includes(s.consultation?.status)));
+      setRequests(props.listSubsidy?.filter(s => s.status == 3 && [CLOSED, DECLINED].includes(s.consultation?.status)));
     }
     setStatus(v);
   }

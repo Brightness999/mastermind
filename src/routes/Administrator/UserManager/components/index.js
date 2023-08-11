@@ -381,8 +381,8 @@ class UserManager extends React.Component {
 					<p className='font-16 font-500'>{intl.formatMessage(mgsSidebar.userManager)}</p>
 					<Divider />
 				</div>
-				<div className='text-right mb-20'>
-					<Button type='primary' onClick={() => this.handleNewUser()}>Create New User</Button>
+				<div className='mb-20'>
+					<Button type='primary' onClick={() => this.handleNewUser()}>+ Create New User</Button>
 				</div>
 				<Space direction='vertical' className='flex'>
 					<Table bordered size='middle' pagination={false} dataSource={users} columns={columns} scroll={{ x: 1000, y: 'calc(100vh - 310px)' }} />
