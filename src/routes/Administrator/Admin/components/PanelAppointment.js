@@ -194,8 +194,8 @@ class PanelAppointment extends React.Component {
     if (event?._id) {
       const updateData = {
         appointmentId: event._id,
-        publicFeedback: publicFeedback,
-        note: note,
+        publicFeedback: publicFeedback?.trim(),
+        note: note?.trim(),
         items: items?.items,
         invoiceNumber: items?.invoiceNumber,
         invoiceId: items?.invoiceId,
@@ -222,8 +222,8 @@ class PanelAppointment extends React.Component {
     if (event?._id) {
       const postData = {
         appointmentId: event._id,
-        publicFeedback: publicFeedback,
-        note: note,
+        publicFeedback: publicFeedback?.trim(),
+        note: note?.trim(),
         items: items,
       }
 
@@ -378,8 +378,8 @@ class PanelAppointment extends React.Component {
     if (event?._id) {
       const postData = {
         appointmentId: event._id,
-        publicFeedback: publicFeedback,
-        note: note,
+        publicFeedback: publicFeedback?.trim(),
+        note: note?.trim(),
       }
 
       request.post(leaveFeedbackForProvider, postData).then(result => {

@@ -118,7 +118,7 @@ class DrawerDetail extends Component {
   }
 
   handleChangeFeedback = feedback => {
-    this.setState({ publicFeedback: feedback });
+    this.setState({ publicFeedback: feedback?.trim() });
   }
 
   handleConfirmCancel = () => {
@@ -277,13 +277,13 @@ class DrawerDetail extends Component {
     if (event?._id) {
       const data = {
         appointmentId: event._id,
-        publicFeedback: publicFeedback ? publicFeedback : this.state.publicFeedback,
+        publicFeedback: publicFeedback ? publicFeedback?.trim() : this.state.publicFeedback?.trim(),
         skipEvaluation: skipEvaluation,
         items: items?.items,
         invoiceNumber: items?.invoiceNumber,
         invoiceId: items?.invoiceId,
         totalPayment: items?.totalPayment,
-        note: note,
+        note: note?.trim(),
       }
       request.post(closeAppointmentForProvider, data).then(result => {
         if (result.success) {
@@ -306,8 +306,8 @@ class DrawerDetail extends Component {
     if (event?._id) {
       const data = {
         appointmentId: event._id,
-        publicFeedback: publicFeedback ? publicFeedback : this.state.publicFeedback,
-        note: note,
+        publicFeedback: publicFeedback ? publicFeedback?.trim() : this.state.publicFeedback?.trim(),
+        note: note?.trim(),
       }
       request.post(closeAppointmentAsNoshow, data).then(result => {
         if (result.success) {
@@ -330,8 +330,8 @@ class DrawerDetail extends Component {
     if (event?._id) {
       const data = {
         appointmentId: event._id,
-        publicFeedback: publicFeedback ? publicFeedback : this.state.publicFeedback,
-        note: note,
+        publicFeedback: publicFeedback ? publicFeedback?.trim() : this.state.publicFeedback?.trim(),
+        note: note?.trim(),
         items: this.state.items,
       }
       request.post(declineAppointmentForProvider, data).then(result => {
@@ -356,8 +356,8 @@ class DrawerDetail extends Component {
         appointmentId: event._id,
         dependentId: event.dependent?._id,
         providerId: event.provider?._id,
-        publicFeedback: publicFeedback ? publicFeedback : this.state.publicFeedback,
-        note: note,
+        publicFeedback: publicFeedback ? publicFeedback?.trim() : this.state.publicFeedback?.trim(),
+        note: note?.trim(),
       }
       request.post(declineDependent, data).then(result => {
         if (result.success) {
@@ -376,7 +376,7 @@ class DrawerDetail extends Component {
     const { event } = this.state;
 
     if (event?.type == EVALUATION) {
-      this.setState({ visibleProcess: false, visibleInvoice: true, note: note, publicFeedback: publicFeedback });
+      this.setState({ visibleProcess: false, visibleInvoice: true, note: note?.trim(), publicFeedback: publicFeedback?.trim() });
     } else if (event?.type == CONSULTATION) {
       this.handleMarkAsClosed(undefined, false, note, publicFeedback);
     } else {
@@ -449,7 +449,7 @@ class DrawerDetail extends Component {
   handleLeaveFeedback = () => {
     const data = {
       appointmentId: this.props.event._id,
-      publicFeedback: this.state.publicFeedback,
+      publicFeedback: this.state.publicFeedback?.trim(),
     }
     request.post(leaveFeedbackForProvider, data).then(result => {
       if (result.success) {
@@ -483,11 +483,11 @@ class DrawerDetail extends Component {
     const { event } = this.state;
     const newAppointments = JSON.parse(JSON.stringify(listAppointmentsRecent))?.map(a => a._id === event._id ? ({ ...data, parent: a.parent, consultantName: a.consultantName }) : a);
     this.setState({ notes: this.state.event.notes });
-    this.setState({ publicFeedback: this.state.event.publicFeedback, isLeftFeedback: !!this.state.event.publicFeedback });
+    this.setState({ publicFeedback: this.state.event.publicFeedback?.trim(), isLeftFeedback: !!this.state.event.publicFeedback });
     this.setState({
       event: { ...data, parent: event.parent, consultantName: event.consultantName },
-      notes: data.notes,
-      publicFeedback: data.publicFeedback,
+      notes: data.notes?.trim(),
+      publicFeedback: data.publicFeedback?.trim(),
       isLeftFeedback: !!data.publicFeedback,
     });
     this.props.setAppointments(newAppointments);

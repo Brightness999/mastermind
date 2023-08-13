@@ -119,8 +119,8 @@ class ClaimedConsultationRequest extends React.Component {
     if (selectedConsultation?._id) {
       const data = {
         appointmentId: selectedConsultation._id,
-        publicFeedback: publicFeedback,
-        note: note,
+        publicFeedback: publicFeedback?.trim(),
+        note: note?.trim(),
       }
       request.post(closeAppointmentForProvider, data).then(result => {
         if (result.success) {

@@ -49,8 +49,8 @@ class ModalSessionsNeedToClose extends React.Component {
 		if (event?._id) {
 			const data = {
 				appointmentId: event._id,
-				publicFeedback: publicFeedback,
-				note: note,
+				publicFeedback: publicFeedback?.trim(),
+				note: note?.trim(),
 				items: items?.items,
 				invoiceNumber: items?.invoiceNumber,
 				invoiceId: items?.invoiceId,
@@ -78,8 +78,8 @@ class ModalSessionsNeedToClose extends React.Component {
 		if (event?._id) {
 			const data = {
 				appointmentId: event._id,
-				publicFeedback: publicFeedback,
-				note: note,
+				publicFeedback: publicFeedback?.trim(),
+				note: note?.trim(),
 				items: items,
 			}
 
