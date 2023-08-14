@@ -1,0 +1,92 @@
+// Page style
+@import '../../../../assets/styles/variables.less';
+
+.report-page {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+
+  .report-type {
+    display: flex;
+    gap: 8px;
+    padding-bottom: 20px;
+  }
+
+  .report-filters {
+    display: flex;
+    gap: 8px;
+    padding: 20px 0px;
+
+    .filter {
+      flex: 1;
+
+      .options {
+        height: 160px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        padding-top: 10px;
+        user-select: none;
+
+        label {
+          margin-left: 0px;
+        }
+
+        .ant-checkbox-inner {
+          border-color: #551B8B;
+        }
+
+        .ant-checkbox-checked {
+          .ant-checkbox-inner {
+            background-color: #551B8B;
+          }
+
+          &::after {
+            border-color: #551B8B;
+          }
+        }
+
+        &::-webkit-scrollbar {
+          width: 8px;
+        }
+      }
+    }
+  }
+
+  .ant-btn-primary.download {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    color: #fff;
+    font-weight: 400;
+    font-size: 14px;
+    background-color: #551B8B;
+    border-color: #551B8B;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+
+    &:hover {
+      background-color: #451473;
+      border-color: #551B8B;
+    }
+  }
+
+  .ant-btn-sm {
+    border-radius: 2px;
+    text-align: center;
+    color: #fff;
+    font-weight: 400;
+    font-size: 12px !important;
+    background-color: #551B8B;
+    border-color: #551B8B;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+
+    &:hover {
+      background-color: #451473;
+      border-color: #551B8B;
+    }
+  }
+}

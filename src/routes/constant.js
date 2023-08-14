@@ -18,6 +18,7 @@ export const routerLinks = {
   Statistics: '/administrator/statistics',
   Private: '/administrator/privatenote',
   Invoices: '/administrator/invoicelist',
+  Report: '/administrator/report',
   Changeprofile: '/account/changeprofile',
   Notification: '/account/notifications',
   PrivateNote: '/account/privatenote',
@@ -132,4 +133,12 @@ export const Durations = [
   { label: '3 hrs', value: 180 },
   { label: '3.5 hrs', value: 210 },
   { label: '4 hrs', value: 240 },
+];
+
+export const ReportTypes = [
+  { label: 'Payments per Provider', value: 1 },
+  { label: 'Payments per Student', value: 2 },
+  { label: 'Subsidized Sessions', value: 3 },
+  { label: 'Donations', value: 4 },
+  { label: 'Notes', value: 5 },
 ];

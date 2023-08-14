@@ -29,6 +29,10 @@ export default {
     id: `${scope}.consultationRequests`,
     defaultMessage: 'Consultation Requests',
   },
+  report: {
+    id: `${scope}.report`,
+    defaultMessage: 'Report',
+  },
   subsidyManager: {
     id: `${scope}.subsidyManager`,
     defaultMessage: 'Subsidy Requests',

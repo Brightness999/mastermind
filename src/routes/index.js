@@ -35,6 +35,7 @@ import SubsidyRequests from './User/SubsidyRequests';
 import Invoices from './Administrator/Invoice';
 import ProviderList from './Administrator/ProviderList';
 import Providers from './User/Providers';
+import Report from './Administrator/Report';
 
 const routesConfig = app => [
   {
@@ -72,6 +73,7 @@ const routesConfig = app => [
       Statistics(app),
       Invoices(app),
       ProviderList(app),
+      Report(app),
     ]
   },
   {

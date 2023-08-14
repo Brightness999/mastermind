@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Menu } from 'antd';
+import { Menu, message } from 'antd';
 import { FaUsers, FaFileInvoice, FaRegChartBar, FaFlag, FaSchool, FaChild, FaFileInvoiceDollar, FaUserMd } from 'react-icons/fa';
 import { AiOutlineSchedule } from 'react-icons/ai';
 import { IoSettingsSharp } from 'react-icons/io5';
@@ -15,6 +15,7 @@ import msgMainHeader from 'components/MainHeader/messages';
 import { routerLinks } from 'routes/constant';
 import { socketUrl, socketUrlJSFile } from 'utils/api/baseUrl';
 import './style/index.less';
+import { TbReportAnalytics } from 'react-icons/tb';
 
 class SideBar extends Component {
   constructor(props) {
@@ -102,6 +103,11 @@ class SideBar extends Component {
         label: <Link to={routerLinks.Invoices} onClick={() => this.handleClickLink(intl.formatMessage(msgMainHeader.invoiceList))}>{intl.formatMessage(msgMainHeader.invoiceList)}</Link>,
         key: routerLinks.Invoices,
         icon: <FaFileInvoiceDollar size={20} />
+      },
+      {
+        label: <Link to={routerLinks.Report} onClick={() => this.handleClickLink(intl.formatMessage(messages.report))}>{intl.formatMessage(messages.report)}</Link>,
+        key: routerLinks.Report,
+        icon: <TbReportAnalytics size={20} />
       },
       {
         label: <Link to={routerLinks.SystemSetting} onClick={() => this.handleClickLink(intl.formatMessage(messages.systemSetting))}>{intl.formatMessage(messages.systemSetting)}</Link>,

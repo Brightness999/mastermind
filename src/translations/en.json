@@ -409,6 +409,7 @@
   
   "components.sidebar.userManager": "User Manager",
   "components.sidebar.editUser": "Edit User",
+  "components.sidebar.report": "Report",
   "components.sidebar.subsidyManager": "Subsidy Requests",
   "components.sidebar.systemSetting": "System Setting",
   "components.sidebar.statistics": "Statistics",
